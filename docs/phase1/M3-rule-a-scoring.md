@@ -54,8 +54,8 @@
 | 编号 | 需求 |
 |---|---|
 | FR-M3-01 | 技术字段按规格第 9.2 节；200 日均线不足的日子 `entry_pass = false` 且 `null_reason = insufficient_history` |
-| FR-M3-02 | 分段线性插值（M-10）、缺项重配权（M-11）；`requirements/m3_interp_points.json` 的全部曲线和用例必须命中 |
-| FR-M3-03 | 四本账、综合排名分；`requirements/m3_books_synthetic.json` 三只合成股票的全部字段必须命中 |
+| FR-M3-02 | 分段线性插值（M-10）、缺项重配权（M-11）；`golden/m3_interp_points.json` 的全部曲线和用例必须命中 |
+| FR-M3-03 | 四本账、综合排名分；`golden/m3_books_synthetic.json` 三只合成股票的全部字段必须命中 |
 | FR-M3-04 | M-07 财报过期 → 三本账为空；M-08 拆股疑似 → 估值账为空 |
 | FR-M3-05 | 红线 M-13 至 M-18；"排除"类（M-13、M-14、M-15）阻止入场；"不追高"（M-18）记录供 M4 阻止新开和加仓；"只观察"（M-16）和"等价格"（M-17）只是标签 |
 | FR-M3-06 | 分层 M-20 至 M-23；质量或成长为空时 `tier = NULL`（不能交易） |
@@ -78,8 +78,8 @@
 
 | 测试名 | 标记 | 断言 | 夹具 |
 |---|---|---|---|
-| `test_interp_points` | blocking | 全部曲线用例命中（容差 1e-6） | `requirements/m3_interp_points.json` |
-| `test_books_synthetic` | blocking | 三只合成股票的派生字段、四本账、子项、排名分、红线、层级、确定性、资格分、`fund_bad`、跑道、M-31、`entry_pass` 全部命中 | `requirements/m3_books_synthetic.json` |
+| `test_interp_points` | blocking | 全部曲线用例命中（容差 1e-6） | `golden/m3_interp_points.json` |
+| `test_books_synthetic` | blocking | 三只合成股票的派生字段、四本账、子项、排名分、红线、层级、确定性、资格分、`fund_bad`、跑道、M-31、`entry_pass` 全部命中 | `golden/m3_books_synthetic.json` |
 | `test_red_line_boundaries` | blocking | `rsi = 80`、`dev50 = 15` 不触发 M-18；`rsi = 80.01` 且 `dev50 = 15.01` 触发；M-13 三个条件缺一不触发 | 合成 |
 | `test_tier_reassess_only_on_filing` | blocking | 无新财报时 `vol60` 变化不改层级；新财报生效当日重估 | 合成序列 |
 | `test_m31_m32` | blocking | M-31 只对进攻层且成长 ≥ 70 生效、上限 65；M-32 烧钱保护 | 合成 |
