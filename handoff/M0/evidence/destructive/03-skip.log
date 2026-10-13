@@ -1,0 +1,3 @@
+
+no tests ran in 0.12s
+ERROR: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-2/test_probe.py:2: FR-M0-05: developer-added skip/xfail: test_probe

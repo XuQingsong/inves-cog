@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________________________ test_probe __________________________________
+
+    def test_probe():
+>       validate_frozen(Path('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/frozen'), Path('/Users/xuqingsong/workspace/inves-cog/tests/harness/CHANGELOG.md'))
+
+/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-4/test_probe.py:4:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+directory = PosixPath('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/frozen')
+changelog = PosixPath('/Users/xuqingsong/workspace/inves-cog/tests/harness/CHANGELOG.md')
+changelog_prefix = 'tests/fixtures/phase1/'
+
+    def validate_frozen(directory, changelog, *, changelog_prefix='tests/fixtures/phase1/'):
+        directory, changelog = Path(directory), Path(changelog)
+        rows = read_manifest(directory, 'FR-M0-08')
+        ignored = {'MANIFEST.sha256'}
+        if changelog.parent == directory:
+            ignored.add(changelog.name)
+        present = {str(p.relative_to(directory)) for p in directory.rglob('*') if p.is_file()}
+        if present - ignored != set(rows):
+            raise AssertionError(f'{directory}:1: FR-M0-08: frozen file-set mismatch')
+        log = changelog.read_text()
+        for name, registered_hash in rows.items():
+            p = directory / name
+            actual = hashlib.sha256(p.read_bytes()).hexdigest()
+            if actual != registered_hash:
+>               raise AssertionError(f'{p}:1: FR-M0-08: frozen hash mismatch; update manifest and CHANGELOG')
+E               AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/frozen/harness/sample.json:1: FR-M0-08: frozen hash mismatch; update manifest and CHANGELOG
+
+tests/harness/tools/golden.py:67: AssertionError
+=========================== short test summary info ============================
+FAILED ::test_probe - AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt8...
+1 failed in 0.13s

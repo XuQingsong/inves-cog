@@ -26,6 +26,10 @@ def test_harness_no_network(tmp_path):
         assert result.returncode == 1, output(result)
         assert 'FR-M0-03' in output(result)
         assert 'test_probe.py:' in output(result)
+    result = run_probe(tmp_path, 'import socket\ndef test_bar_window_to_20et():\n'
+                       '    try:\n        socket.getaddrinfo("example.com", 80)\n'
+                       '    except Exception:\n        pass\n    assert False\n')
+    assert result.returncode == 1 and 'FR-M0-03' in output(result)
     result = run_probe(tmp_path, 'import pytest\n@pytest.mark.phase1_live\n'
                        'def test_probe(clock):\n    assert clock.__class__.__name__ == "SystemClock"\n',
                        arguments=('-m', 'phase1_live'),

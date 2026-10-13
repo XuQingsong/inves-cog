@@ -1,0 +1,1080 @@
+[
+  {
+    "test": "test_amd_entry_2026_01_12",
+    "module": "M4",
+    "marker": "replay",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_amplification_features",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_anomaly_contract",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_anomaly_live_smoke",
+    "module": "M7",
+    "marker": "live",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_app_rank_jump",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_auto_cluster_suggestion",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_bar_window_from_04et",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_bar_window_to_20et",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_beta_share_bounds",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_blocking_duration",
+    "module": "M0",
+    "marker": "CI",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_books_synthetic",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_candidate_edges_not_used",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_candidate_validation",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_case_attribution",
+    "module": "M8",
+    "marker": "cases",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_case_cadence",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_case_detection",
+    "module": "M7",
+    "marker": "cases",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_case_no_news_unexplained",
+    "module": "M8",
+    "marker": "cases",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_change_decomposition_sums",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_clean_env_bootstrap",
+    "module": "M0",
+    "marker": "CI",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_companyfacts_lag",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_consensus_derived_pit",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_consensus_import_idempotent",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_cooldown_m58",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_data_quality_gates",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_disposition_states",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_divergence_labels",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_earnings_fallback_flag",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_earnings_reaction_day",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_evidence_scores",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_extractor_fixed_toggles",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_f01_values",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_f02_shadow_hysteresis",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_f02_values",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_factor_shadow_no_orders",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_factor_versioning",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_fill_timing_and_cost",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_fin_state_pit",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_five_dims_rules",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_foreign_filers_not_tradable",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_form4_parse_code_p",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_frozen_fixtures_changelog",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_fundamentals_live_smoke",
+    "module": "M2",
+    "marker": "live",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_graph_draft_requires_citation",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_gross_margin_derived",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_growth_valuation_v11",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_harness_no_network",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_health_contract",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_implied_growth_no_solution",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_implied_magnitude_rules",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_import_firewall",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_industry_basis_na",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_info_fields_extraction",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_info_item_contract",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_ingest_live_smoke",
+    "module": "M1",
+    "marker": "live",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_injected_clock_only",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_insufficient_history_null",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_interp_points",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_legacy_matches_muse_state",
+    "module": "M2",
+    "marker": "replay",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_lifecycle_transitions",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_llm_extraction_failure_degrades",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_llm_models_allowed",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_m31_m32",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_markers_registered",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_market_confirmation_four_conditions",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_market_pages_no_trading_fields",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_marketstate_flags",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_marketstate_live_smoke",
+    "module": "M6",
+    "marker": "live",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_marketstate_price_only",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_membership_asof",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_merge_and_layer",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_milestones_consistency",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_miss_sample_frame",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_multi_day_cumulative",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_news_dedupe_and_times",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_ni_tag_fallback",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_no_news_dependency",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_no_tracker_stops_in_rule_a",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_oneliner_grounded",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_order_reason_tokens",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_orders_only_from_engine",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_overlay_contract",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_overlay_cooling_rules",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_overlay_cooling_skip_and_cancel",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_overlay_missing_marked",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_overlay_only_tightens",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_page_json_contracts",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_pages_no_recompute",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_panic_gate_scope",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_paper_labels",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_paper_live_smoke",
+    "module": "M4",
+    "marker": "live",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_path_a_total_shock",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_path_b_relative",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_path_c_factor",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_pending_registry",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_pending_review_over_25pct",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_pit_filed_date",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_plan_json_contract",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_plan_unpublished_low_coverage",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_position_panel",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_post_close_null_when_no_trade",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_post_session_null_when_missing",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_precursor_snapshot_daily",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_premarket_review_scope",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_q4_derived_from_annual",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_red_line_boundaries",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_reports_contents",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_requirements_golden_unchanged",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_residual_exact_linear",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_residual_leave_one_out",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_residual_window_excludes_today",
+    "module": "M6",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_retrieval_recovers_low_rank_item",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_revenue_tag_gap",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_rule_set_a_locked",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_s10_eligibility_shadow",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_schema_roles_migration",
+    "module": "M0",
+    "marker": "blocking",
+    "pending": false,
+    "defined": true
+  },
+  {
+    "test": "test_scores_match_muse",
+    "module": "M3",
+    "marker": "replay",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_search_budget",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_second_hit",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_segment_extraction",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_segment_mapping_pending",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_segment_recast",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_sell_priority",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_shadow_rules_no_orders",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_shadow_signals_no_orders",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_single_factor_substitution",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_source_level_mapping",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_split_suspect_valuation_null",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_stale_books_are_null",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_stale_fundamentals_code",
+    "module": "M2",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_system_log_counts_match",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_systemic_event_tag_requires_level12",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_tier_reassess_only_on_filing",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_time_alignment_late_news",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_timeline_records_no_action",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_tracks_and_deadline",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_trading_without_valuation",
+    "module": "M5",
+    "marker": "replay",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_trends_unavailable_marked",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_type_candidates_prelim",
+    "module": "M7",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_type_switch_needs_two_periods",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_unconnected_shown",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_unexplained_recheck_5d",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_v18_constants",
+    "module": "M3",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_v18_replay",
+    "module": "M4",
+    "marker": "replay",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_ignores_price",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_label",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_live_smoke",
+    "module": "M5",
+    "marker": "live",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_monotone_and_stable",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_position_panel",
+    "module": "M10",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_schema_revoke",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_valuation_synthetic",
+    "module": "M5",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_verified_not_from_market_evidence",
+    "module": "M8",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_vix_missing_not_panic",
+    "module": "M4",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_wide_universe_rules",
+    "module": "M1",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  },
+  {
+    "test": "test_x1_once_per_event",
+    "module": "M9",
+    "marker": "blocking",
+    "pending": true,
+    "defined": false
+  }
+]

@@ -1,0 +1,11 @@
+FE                                                                       [100%]
+==================================== ERRORS ====================================
+_______________________ ERROR at teardown of test_probe ________________________
+/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-0/test_probe.py:3: FR-M0-03: forbidden socket/DNS operation create_connection
+=================================== FAILURES ===================================
+__________________________________ test_probe __________________________________
+/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-0/test_probe.py:3: FR-M0-03: forbidden socket/DNS operation create_connection
+=========================== short test summary info ============================
+ERROR ::test_probe - /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-c...
+FAILED ::test_probe - /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-...
+1 failed, 1 error in 0.15s

@@ -12,6 +12,7 @@ def test_clean_env_bootstrap():
     assert record['pgvector_version']
     assert record['migrations'] == ['phase1_m0_0001_schemas_roles.sql']
     assert record['temporary_database'] is True
+    assert record['clean_container'] is True
 
 
 def test_blocking_duration():

@@ -1,0 +1,24 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________________________ test_probe __________________________________
+
+    def test_probe():
+>       scan_models(Path('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/bad_model.py'))
+
+/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-6/test_probe.py:4:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/harness/tools/checks.py:215: in scan_models
+    fail(path, line_no, 'I37/FR-M0-10', f'non-whitelisted model {match.group()}')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = PosixPath('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/bad_model.py')
+line = 1, rule = 'I37/FR-M0-10', reason = 'non-whitelisted model glm-5.2'
+
+    def fail(path, line, rule, reason):
+>       raise AssertionError(f'{path}:{line}: {rule}: {reason}')
+E       AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/bad_model.py:1: I37/FR-M0-10: non-whitelisted model glm-5.2
+
+tests/harness/tools/checks.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED ::test_probe - AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt8...
+1 failed in 0.13s
