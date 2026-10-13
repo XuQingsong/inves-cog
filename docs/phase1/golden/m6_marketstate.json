@@ -1,0 +1,71 @@
+{
+  "spec": "11.3",
+  "cases": [
+    {
+      "input": {
+        "spy_5d_pct": -6.0,
+        "vix_pctile_252": 50,
+        "down_share_5d_pct": 75
+      },
+      "expected": {
+        "shock_flag": true,
+        "l1_state": "危机"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -6.0,
+        "vix_pctile_252": 50,
+        "down_share_5d_pct": 65
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "警戒"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -2.0,
+        "vix_pctile_252": 85,
+        "down_share_5d_pct": 72
+      },
+      "expected": {
+        "shock_flag": true,
+        "l1_state": "危机"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -3.0,
+        "vix_pctile_252": 40,
+        "down_share_5d_pct": 30
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "警戒"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -1.0,
+        "vix_pctile_252": 69.9,
+        "down_share_5d_pct": 59.9
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "正常"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -5.0,
+        "vix_pctile_252": 79.9,
+        "down_share_5d_pct": 70
+      },
+      "expected": {
+        "shock_flag": true,
+        "l1_state": "危机"
+      }
+    }
+  ]
+}

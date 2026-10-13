@@ -1,0 +1,148 @@
+{
+  "spec": "10.3 B1/B2, 13.7",
+  "f01_growth_adjusted_valuation": [
+    {
+      "id": "AMD-like",
+      "input": {
+        "ps": 25.6,
+        "rev_growth": 51.5,
+        "pe": 173.0,
+        "eps_growth": 120.0,
+        "prev_eps_ttm": 2.0,
+        "prev_net_margin_pct": 8.0,
+        "fcf_yield": 0.5
+      },
+      "expected": {
+        "psg": 0.497087,
+        "psg_score": 52.262136,
+        "eps_adj_pe_score": 12.2,
+        "fcf_yield_score": 22.0,
+        "f01_score": 34.191068,
+        "note": "有效估值分 = min(65, max(原估值分, f01_score))，原估值分 > 65 时保留原值"
+      }
+    },
+    {
+      "id": "GEV-like",
+      "input": {
+        "ps": 6.8,
+        "rev_growth": 22.0,
+        "pe": 42.9,
+        "eps_growth": 120.0,
+        "prev_eps_ttm": 4.0,
+        "prev_net_margin_pct": 4.0,
+        "fcf_yield": 2.4
+      },
+      "expected": {
+        "psg": 0.309091,
+        "psg_score": 69.181818,
+        "eps_adj_pe_score": 75.68,
+        "fcf_yield_score": 50.2,
+        "f01_score": 67.334909,
+        "note": "有效估值分 = min(65, max(原估值分, f01_score))，原估值分 > 65 时保留原值"
+      }
+    },
+    {
+      "id": "GEV-like-thin-base",
+      "input": {
+        "ps": 6.8,
+        "rev_growth": 22.0,
+        "pe": 42.9,
+        "eps_growth": 120.0,
+        "prev_eps_ttm": 4.0,
+        "prev_net_margin_pct": 2.0,
+        "fcf_yield": 2.4
+      },
+      "expected": {
+        "psg": 0.309091,
+        "psg_score": 69.181818,
+        "eps_adj_pe_score": null,
+        "fcf_yield_score": 50.2,
+        "f01_score": 63.758442,
+        "note": "有效估值分 = min(65, max(原估值分, f01_score))，原估值分 > 65 时保留原值"
+      }
+    },
+    {
+      "id": "BE-like-loss",
+      "input": {
+        "ps": 40.4,
+        "rev_growth": 57.0,
+        "pe": null,
+        "eps_growth": null,
+        "prev_eps_ttm": -1.0,
+        "prev_net_margin_pct": -5.0,
+        "fcf_yield": -0.6
+      },
+      "expected": {
+        "psg": 0.708772,
+        "psg_score": 37.473684,
+        "eps_adj_pe_score": null,
+        "fcf_yield_score": 8.4,
+        "f01_score": 29.166917,
+        "note": "有效估值分 = min(65, max(原估值分, f01_score))，原估值分 > 65 时保留原值"
+      }
+    }
+  ],
+  "f02_inflection_quality": [
+    {
+      "id": "inflection-positive",
+      "input": {
+        "gm_change_pp": 3.0,
+        "fcf_margin_change_pp": 8.0,
+        "ni_ttm_positive": true
+      },
+      "expected": {
+        "f02_score": 75.466667,
+        "effective_quality_rule": "max(原质量分, min(60, f02_score))"
+      }
+    },
+    {
+      "id": "inflection-loss",
+      "input": {
+        "gm_change_pp": 1.0,
+        "fcf_margin_change_pp": 12.0,
+        "ni_ttm_positive": false
+      },
+      "expected": {
+        "f02_score": 64.0
+      }
+    }
+  ],
+  "f02_hysteresis": {
+    "id": "b2-hysteresis",
+    "rules": "入场时 B2 适用；持有期间保持，直到 成长<70 / 连续两期加速度<0 且毛利率变化<0 / 原始质量>=50",
+    "sequence": [
+      {
+        "day": 1,
+        "event": "entry",
+        "growth": 86,
+        "raw_quality": 35,
+        "b2_active": true,
+        "expected_action": "buy"
+      },
+      {
+        "day": 20,
+        "event": "daily",
+        "growth": 79,
+        "raw_quality": 35,
+        "b2_active": true,
+        "expected_action": "none（成长 79 ≥ 70，B2 保持，M-50 不触发）"
+      },
+      {
+        "day": 60,
+        "event": "filing",
+        "growth": 68,
+        "raw_quality": 36,
+        "b2_active": false,
+        "expected_action": "B2 退出程序：次日开盘减 1/2（不清仓）"
+      },
+      {
+        "day": 120,
+        "event": "filing",
+        "growth": 66,
+        "raw_quality": 38,
+        "b2_active": false,
+        "expected_action": "M-50：清仓（原始质量 38 < 45）"
+      }
+    ]
+  }
+}

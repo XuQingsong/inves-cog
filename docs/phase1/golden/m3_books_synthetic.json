@@ -1,0 +1,230 @@
+{
+  "spec": "9.2–9.8",
+  "stocks": [
+    {
+      "id": "SYN-DEF",
+      "note": "防守层候选，四本账全过",
+      "input": {
+        "fields": {
+          "price": 150.0,
+          "eps_ttm": 6.25,
+          "shares": 1000000000.0,
+          "rev_ttm": 23000000000.0,
+          "ni_ttm": 6250000000.0,
+          "fcf_ttm": 5060000000.0,
+          "gross_margin": 45.0,
+          "roe": 30.0,
+          "fcf_margin": 22.0,
+          "fcf_conversion": 0.81,
+          "net_debt_fcf": 0.5,
+          "rev_growth": 8.0,
+          "rev_q_yoy": 9.0,
+          "rev_accel_pp": 1.0,
+          "eps_growth": 12.0,
+          "gross_margin_change_pp": 0.5,
+          "current_ratio": 1.4,
+          "cash": 10000000000.0
+        },
+        "tech": {
+          "price_vs_ma200": 6.0,
+          "ma50_vs_ma200": 3.0,
+          "ma200_slope20": 0.6,
+          "mom3": 5.0,
+          "mom6": 12.0,
+          "vol_ratio": 1.1,
+          "up_share": 54.0,
+          "dev50": 2.0,
+          "rsi": 58.0,
+          "vol20": 22.0,
+          "drawdown252": -5.0,
+          "vol60": 24.0
+        }
+      },
+      "expected": {
+        "derived": {
+          "pe": 24.0,
+          "peg": 3.0,
+          "mktcap": 150000000000.0,
+          "ps": 6.521739,
+          "fcf_yield": 3.373333
+        },
+        "books": {
+          "quality": 87.825,
+          "growth": 59.766667,
+          "valuation": 50.506087,
+          "timing": 72.704167,
+          "timing_subitems": {
+            "trend": 75.833333,
+            "momentum": 63.0,
+            "volume": 67.25,
+            "position": 76.166667,
+            "risk": 82.416667
+          }
+        },
+        "rank_score": 66.730168,
+        "red_lines": [],
+        "tier": "defense",
+        "certainty_points": 0,
+        "certainty": "low",
+        "hold_score": 72,
+        "hold_ok": true,
+        "fund_bad": false,
+        "runway_ok": true,
+        "m31_adjusted_valuation": null,
+        "m32_ok": true,
+        "entry_pass": true
+      }
+    },
+    {
+      "id": "SYN-ATK",
+      "note": "进攻层高成长高 PE，靠 M-31 才能接近门槛；dev50 恰好 15（M-18 不触发，严格大于）",
+      "input": {
+        "fields": {
+          "price": 608.0,
+          "eps_ttm": 3.5145,
+          "shares": 1620000000.0,
+          "rev_ttm": 38500000000.0,
+          "ni_ttm": 5690000000.0,
+          "fcf_ttm": 4620000000.0,
+          "gross_margin": 50.0,
+          "roe": 6.0,
+          "fcf_margin": 12.0,
+          "fcf_conversion": 0.81,
+          "net_debt_fcf": -0.5,
+          "rev_growth": 51.5,
+          "rev_q_yoy": 55.0,
+          "rev_accel_pp": 4.0,
+          "eps_growth": 120.0,
+          "gross_margin_change_pp": 1.5,
+          "current_ratio": 2.3,
+          "cash": 6000000000.0
+        },
+        "tech": {
+          "price_vs_ma200": 25.0,
+          "ma50_vs_ma200": 15.0,
+          "ma200_slope20": 2.5,
+          "mom3": 30.0,
+          "mom6": 90.0,
+          "vol_ratio": 1.3,
+          "up_share": 58.0,
+          "dev50": 15.0,
+          "rsi": 70.0,
+          "vol20": 55.0,
+          "drawdown252": -8.0,
+          "vol60": 58.0
+        }
+      },
+      "expected": {
+        "derived": {
+          "pe": 172.997581,
+          "peg": 3.359176,
+          "mktcap": 984960000000.0,
+          "ps": 25.583377,
+          "fcf_yield": 0.469055
+        },
+        "books": {
+          "quality": 74.075,
+          "growth": 86.82,
+          "valuation": 12.062297,
+          "timing": 73.3875,
+          "timing_subitems": {
+            "trend": 90.0,
+            "momentum": 88.0,
+            "volume": 76.333333,
+            "position": 35.0,
+            "risk": 58.375
+          }
+        },
+        "rank_score": 62.593637,
+        "red_lines": [],
+        "tier": "attack",
+        "certainty_points": 6,
+        "certainty": "high",
+        "hold_score": 85,
+        "hold_ok": true,
+        "fund_bad": false,
+        "runway_ok": true,
+        "m31_adjusted_valuation": 24.228964,
+        "m32_ok": true,
+        "entry_pass": false
+      }
+    },
+    {
+      "id": "SYN-DEAD",
+      "note": "趋势破位 + 营收与 EPS 同时下滑（M-13、M-15）",
+      "input": {
+        "fields": {
+          "price": 40.0,
+          "eps_ttm": 2.0,
+          "shares": 500000000.0,
+          "rev_ttm": 10000000000.0,
+          "ni_ttm": 1000000000.0,
+          "fcf_ttm": 800000000.0,
+          "gross_margin": 30.0,
+          "roe": 12.0,
+          "fcf_margin": 8.0,
+          "fcf_conversion": 0.8,
+          "net_debt_fcf": 2.0,
+          "rev_growth": -8.0,
+          "rev_q_yoy": -10.0,
+          "rev_accel_pp": -6.0,
+          "eps_growth": -25.0,
+          "gross_margin_change_pp": -2.5,
+          "current_ratio": 1.2,
+          "cash": 2000000000.0
+        },
+        "tech": {
+          "price_vs_ma200": -8.0,
+          "ma50_vs_ma200": -4.0,
+          "ma200_slope20": -0.8,
+          "mom3": -12.0,
+          "mom6": -15.0,
+          "vol_ratio": 0.9,
+          "up_share": 44.0,
+          "dev50": -5.0,
+          "rsi": 38.0,
+          "vol20": 35.0,
+          "drawdown252": -30.0,
+          "vol60": 34.0
+        }
+      },
+      "expected": {
+        "derived": {
+          "pe": 20.0,
+          "peg": null,
+          "mktcap": 20000000000.0,
+          "ps": 2.0,
+          "fcf_yield": 4.0
+        },
+        "books": {
+          "quality": 66.333333,
+          "growth": 17.640476,
+          "valuation": 73.333333,
+          "timing": 38.8,
+          "timing_subitems": {
+            "trend": 26.309524,
+            "momentum": 23.0,
+            "volume": 42.5,
+            "position": 64.333333,
+            "risk": 57.5
+          }
+        },
+        "rank_score": 47.439821,
+        "red_lines": [
+          "M-13",
+          "M-15"
+        ],
+        "tier": "normal",
+        "certainty_points": -1,
+        "certainty": "low",
+        "hold_score": 54,
+        "hold_ok": false,
+        "fund_bad": false,
+        "runway_ok": true,
+        "m31_adjusted_valuation": null,
+        "m32_ok": true,
+        "entry_pass": false
+      }
+    }
+  ]
+}

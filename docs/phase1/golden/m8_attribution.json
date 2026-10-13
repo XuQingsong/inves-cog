@@ -1,0 +1,299 @@
+{
+  "spec": "6.6, 6.7",
+  "implied_magnitude": [
+    {
+      "id": "toshiba-hdd",
+      "note": "WDC/STX HDD 分部收入作暴露",
+      "input": {
+        "delta_mktcap": -12000000000.0,
+        "pe": 12.0,
+        "channels": [
+          {
+            "channel": "供给/价格",
+            "exposure_usd": 8000000000.0,
+            "source_level": 2,
+            "incremental_margin": 0.3
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": -1000000000.0,
+        "channels": [
+          {
+            "channel": "供给/价格",
+            "delta_e_evt": 600000000.0
+          }
+        ],
+        "sum_delta_e_evt": 600000000.0,
+        "R": 1.6667,
+        "verdict": "部分相容",
+        "partial_missing": false
+      }
+    },
+    {
+      "id": "openai-direct",
+      "note": "只看直接收入渠道",
+      "input": {
+        "delta_mktcap": -800000000000.0,
+        "pe": 32.0,
+        "channels": [
+          {
+            "channel": "直接收入",
+            "exposure_usd": 10000000000.0,
+            "source_level": 4,
+            "incremental_margin": 0.3
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": -25000000000.0,
+        "channels": [
+          {
+            "channel": "直接收入",
+            "delta_e_evt": 300000000.0
+          }
+        ],
+        "sum_delta_e_evt": 300000000.0,
+        "R": 83.3333,
+        "verdict": "不相容",
+        "partial_missing": false
+      }
+    },
+    {
+      "id": "openai-backlog-single",
+      "note": "单家对手方的积压渠道",
+      "input": {
+        "delta_mktcap": -60000000000.0,
+        "pe": 30.0,
+        "channels": [
+          {
+            "channel": "订单/积压",
+            "exposure_usd": 150000000000.0,
+            "source_level": 4,
+            "years_to_realize": 5,
+            "incremental_margin": 0.3
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": -2000000000.0,
+        "channels": [
+          {
+            "channel": "订单/积压",
+            "delta_e_evt": 900000000.0
+          }
+        ],
+        "sum_delta_e_evt": 900000000.0,
+        "R": 2.2222,
+        "verdict": "部分相容",
+        "partial_missing": false
+      }
+    },
+    {
+      "id": "missing-exposure",
+      "note": "缺美元暴露 → 无法检验，不得记为不相容",
+      "input": {
+        "delta_mktcap": -50000000000.0,
+        "pe": 25.0,
+        "channels": [
+          {
+            "channel": "订单/积压",
+            "exposure_usd": null,
+            "source_level": 4,
+            "years_to_realize": 5,
+            "incremental_margin": 0.3
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": -2000000000.0,
+        "channels": [
+          {
+            "channel": "订单/积压",
+            "delta_e_evt": null
+          }
+        ],
+        "sum_delta_e_evt": 0.0,
+        "R": null,
+        "verdict": "无法检验",
+        "partial_missing": false
+      }
+    },
+    {
+      "id": "multiple-only",
+      "note": "只有估值倍数渠道 → 当期盈利渠道为 0 → 不相容",
+      "input": {
+        "delta_mktcap": 90000000000.0,
+        "pe": 30.0,
+        "channels": [
+          {
+            "channel": "估值倍数"
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": 3000000000.0,
+        "channels": [
+          {
+            "channel": "估值倍数",
+            "delta_e_evt": 0.0
+          }
+        ],
+        "sum_delta_e_evt": 0.0,
+        "R": "inf",
+        "verdict": "不相容",
+        "partial_missing": false
+      }
+    },
+    {
+      "id": "partial-missing-compatible",
+      "note": "部分渠道缺暴露，但已知渠道已能解释 → 相容",
+      "input": {
+        "delta_mktcap": -10000000000.0,
+        "pe": 20.0,
+        "channels": [
+          {
+            "channel": "直接收入",
+            "exposure_usd": 4000000000.0,
+            "source_level": 2,
+            "incremental_margin": 0.5
+          },
+          {
+            "channel": "融资/对手方",
+            "exposure_usd": null,
+            "source_level": 2
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": -500000000.0,
+        "channels": [
+          {
+            "channel": "直接收入",
+            "delta_e_evt": 500000000.0
+          },
+          {
+            "channel": "融资/对手方",
+            "delta_e_evt": null
+          }
+        ],
+        "sum_delta_e_evt": 500000000.0,
+        "R": 1.0,
+        "verdict": "相容",
+        "partial_missing": true
+      }
+    },
+    {
+      "id": "partial-missing",
+      "note": "部分渠道缺暴露：已知渠道 R > 1.5 → 无法检验；已知渠道 R ≤ 1.5 → 相容",
+      "input": {
+        "delta_mktcap": -30000000000.0,
+        "pe": 20.0,
+        "channels": [
+          {
+            "channel": "直接收入",
+            "exposure_usd": 4000000000.0,
+            "source_level": 2,
+            "incremental_margin": 0.25
+          },
+          {
+            "channel": "融资/对手方",
+            "exposure_usd": null,
+            "source_level": 2
+          }
+        ]
+      },
+      "expected": {
+        "delta_e_mkt": -1500000000.0,
+        "channels": [
+          {
+            "channel": "直接收入",
+            "delta_e_evt": 250000000.0
+          },
+          {
+            "channel": "融资/对手方",
+            "delta_e_evt": null
+          }
+        ],
+        "sum_delta_e_evt": 250000000.0,
+        "R": null,
+        "verdict": "无法检验",
+        "partial_missing": true
+      }
+    }
+  ],
+  "evidence_scores": [
+    {
+      "id": "meta-muse-cpu",
+      "components": {
+        "time": 1.0,
+        "gradient": 0.8,
+        "specificity": 0.9,
+        "narrative": 1.0,
+        "magnitude": 0.2,
+        "alternatives": 0.67
+      },
+      "expected": {
+        "total": 0.7755,
+        "confidence": "高",
+        "enters_hypothesis": true
+      }
+    },
+    {
+      "id": "late-news",
+      "components": {
+        "time": 0.0,
+        "gradient": 0.5,
+        "specificity": 0.4,
+        "narrative": 0.4,
+        "magnitude": null,
+        "alternatives": 1.0
+      },
+      "expected": {
+        "total": 0.435294,
+        "confidence": "低",
+        "enters_hypothesis": false
+      }
+    },
+    {
+      "id": "toshiba",
+      "components": {
+        "time": 1.0,
+        "gradient": 0.9,
+        "specificity": 1.0,
+        "narrative": 0.6,
+        "magnitude": 0.6,
+        "alternatives": 1.0
+      },
+      "expected": {
+        "total": 0.86,
+        "confidence": "高",
+        "enters_hypothesis": true
+      }
+    },
+    {
+      "id": "null-gradient",
+      "components": {
+        "time": 0.7,
+        "gradient": null,
+        "specificity": null,
+        "narrative": 0.2,
+        "magnitude": 0.2,
+        "alternatives": 0.5
+      },
+      "expected": {
+        "total": 0.423077,
+        "confidence": "低",
+        "enters_hypothesis": false
+      }
+    }
+  ],
+  "weights": {
+    "time": 20,
+    "gradient": 20,
+    "specificity": 15,
+    "narrative": 15,
+    "magnitude": 15,
+    "alternatives": 15
+  }
+}

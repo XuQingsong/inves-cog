@@ -1,0 +1,65 @@
+{
+  "spec": "4.5 D2, 4.8",
+  "q4_derivation": {
+    "fy_total": 400.0,
+    "q1": 90.0,
+    "q2": 100.0,
+    "q3": 95.0,
+    "expected_q4": 115.0,
+    "note": "流量类字段；任一季缺失则 Q4 为 null 且健康码 q4_missing"
+  },
+  "segment_sum_tolerance": [
+    {
+      "segments": [
+        52.0,
+        30.0,
+        18.5
+      ],
+      "eliminations": -0.5,
+      "consolidated": 100.0,
+      "expected_pass": true
+    },
+    {
+      "segments": [
+        52.0,
+        30.0,
+        16.0
+      ],
+      "eliminations": 0.0,
+      "consolidated": 100.0,
+      "expected_pass": false,
+      "note": "差 2% > 1%"
+    }
+  ],
+  "consensus_derived": {
+    "snapshots": [
+      {
+        "as_of": "2026-10-08",
+        "eps_cy": 4.0
+      },
+      {
+        "as_of": "2026-10-15",
+        "eps_cy": 4.1
+      },
+      {
+        "as_of": "2026-11-07",
+        "eps_cy": 4.2
+      }
+    ],
+    "expected": [
+      {
+        "as_of": "2026-10-15",
+        "chg_7d_pct": 2.5,
+        "chg_30d_pct": null,
+        "chg_30d_status": "不足 30 天"
+      },
+      {
+        "as_of": "2026-11-07",
+        "chg_7d_pct": null,
+        "chg_7d_status": "无 7 天前快照",
+        "chg_30d_pct": 5.0
+      }
+    ],
+    "rule": "N 日变化 = 当日值 ÷ 恰好 N 个自然日前（含）最近一个快照值 − 1；该快照距目标日超过 3 天视为缺失；首个快照之前的窗口标'不足 N 天'"
+  }
+}

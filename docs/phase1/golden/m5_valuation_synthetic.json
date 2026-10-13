@@ -1,0 +1,328 @@
+{
+  "spec": "8.4–8.5, 8.8, 8.12",
+  "cases": [
+    {
+      "id": "stable",
+      "type": "稳定",
+      "input": {
+        "eps_ttm": 6.0,
+        "eps_ntm": 6.6,
+        "pe_p25": 22,
+        "pe_p50": 26,
+        "pe_p75": 30,
+        "fcf_per_share": 6.0,
+        "price": 170.0
+      },
+      "expected": {
+        "E": 6.3,
+        "pe_method": [
+          124.74,
+          163.8,
+          198.45
+        ],
+        "fcf_method": [
+          100.0,
+          133.333333,
+          171.428571
+        ],
+        "bear": 117.318,
+        "neutral": 154.66,
+        "bull": 190.343571,
+        "p": 0.721419,
+        "p_label": "偏高",
+        "method_divergence_pct": 22.85,
+        "confidence_downgrade_divergence": false,
+        "note": "两法分歧 = |PE 法中性 − 现金流法中性| ÷ 两者较小值"
+      }
+    },
+    {
+      "id": "growth-nvda",
+      "type": "成长",
+      "input": {
+        "eps_ntm": 6.0,
+        "consensus_next_year_eps_growth": 35.0,
+        "rev_cagr_3y": 80.0,
+        "pe_p90": null,
+        "price": 180.0
+      },
+      "expected": {
+        "g": 35.0,
+        "bear": {
+          "growth": 17.5,
+          "eps3": 8.673152,
+          "exit_pe": 17.25,
+          "value": 112.405618
+        },
+        "neutral": {
+          "growth": 35.0,
+          "eps3": 12.015844,
+          "exit_pe": 22.5,
+          "value": 203.122828
+        },
+        "bull": {
+          "growth": 43.75,
+          "eps3": 13.960876,
+          "exit_pe": 25.125,
+          "value": 263.536455
+        },
+        "p": 0.447257,
+        "p_label": "中性",
+        "implied_growth": 31.163,
+        "delta_g": -3.837,
+        "delta_g_label": "与一致预期相当",
+        "implied_exceeds_cap": false
+      }
+    },
+    {
+      "id": "growth-amd",
+      "type": "成长",
+      "input": {
+        "eps_ntm": 7.0,
+        "consensus_next_year_eps_growth": 65.0,
+        "rev_cagr_3y": 62.0,
+        "pe_p90": null,
+        "price": 608.0
+      },
+      "expected": {
+        "g": 60.0,
+        "bear": {
+          "growth": 30.0,
+          "eps3": 12.819625,
+          "exit_pe": 21.0,
+          "value": 202.263054
+        },
+        "neutral": {
+          "growth": 60.0,
+          "eps3": 21.112,
+          "exit_pe": 30.0,
+          "value": 475.852742
+        },
+        "bull": {
+          "growth": 75.0,
+          "eps3": 26.318359,
+          "exit_pe": 34.5,
+          "value": 682.181366
+        },
+        "p": 0.845429,
+        "p_label": "偏高",
+        "implied_growth": 70.041,
+        "delta_g": 10.041,
+        "delta_g_label": "现价隐含增速高于一致预期",
+        "implied_exceeds_cap": true
+      }
+    },
+    {
+      "id": "growth-p90-cap",
+      "type": "成长",
+      "input": {
+        "eps_ntm": 6.0,
+        "consensus_next_year_eps_growth": 35.0,
+        "rev_cagr_3y": 80.0,
+        "pe_p90": 20.0,
+        "price": 180.0
+      },
+      "expected": {
+        "g": 35.0,
+        "bear": {
+          "growth": 17.5,
+          "eps3": 8.673152,
+          "exit_pe": 17.25,
+          "value": 112.405618
+        },
+        "neutral": {
+          "growth": 35.0,
+          "eps3": 12.015844,
+          "exit_pe": 20.0,
+          "value": 180.553625
+        },
+        "bull": {
+          "growth": 43.75,
+          "eps3": 13.960876,
+          "exit_pe": 20.0,
+          "value": 209.780262
+        },
+        "p": 0.694168,
+        "p_label": "偏高",
+        "implied_growth": 34.826,
+        "delta_g": -0.174,
+        "delta_g_label": "与一致预期相当",
+        "implied_exceeds_cap": false
+      }
+    },
+    {
+      "id": "cyclical-wdc",
+      "type": "周期",
+      "input": {
+        "normal_net_margin": 0.12,
+        "normal_revenue": 10000000000.0,
+        "rev_cagr_10y_pct": 5.0,
+        "diluted_shares": 350000000.0,
+        "subindustry": "存储",
+        "price": 70.0,
+        "ttm_net_margin": 0.2
+      },
+      "expected": {
+        "normal_eps": 3.428571,
+        "bear": 26.228571,
+        "neutral": 44.571429,
+        "bull": 67.028571,
+        "p": 1.072829,
+        "p_label": "高于乐观",
+        "cycle_position_pp": 8.0,
+        "price_after_drop": 55.0,
+        "p_after_drop": 0.705182
+      }
+    },
+    {
+      "id": "unprofitable-growth",
+      "type": "未盈利成长",
+      "input": {
+        "rev_ntm_consensus": 2000000000.0,
+        "rev_growth": 50.0,
+        "gross_margin": 56.0,
+        "net_debt": 1000000000.0,
+        "diluted_shares": 100000000.0,
+        "cash": 1200000000.0,
+        "fcf_ttm": -500000000.0,
+        "price": 120.0
+      },
+      "expected": {
+        "gm_multiplier": 0.8,
+        "ev": [
+          9600000000.0,
+          16000000000.0,
+          24000000000.0
+        ],
+        "bear": 81.904762,
+        "neutral": 150.0,
+        "bull": 230.0,
+        "runway_years": 2.4,
+        "runway_haircut": false,
+        "confidence_max": "中",
+        "p": 0.257235
+      }
+    },
+    {
+      "id": "financial-bank",
+      "type": "金融",
+      "input": {
+        "rote_5y_avg": 15.0,
+        "tbv_per_share": 100.0,
+        "price": 160.0
+      },
+      "expected": {
+        "bear": 114.285714,
+        "neutral": 183.333333,
+        "bull": 216.666667,
+        "p": 0.446512
+      }
+    }
+  ],
+  "valuation_position_panel": [
+    {
+      "ticker": "AMD",
+      "input": {
+        "weight_pct": 3.0,
+        "price": 608.0,
+        "bear": 202.26,
+        "p": 0.85,
+        "delta_g": 10.0,
+        "confidence": "中",
+        "type": "成长"
+      },
+      "expected": {
+        "downside_pct": 66.7336,
+        "valuation_at_risk_pct": 2.002,
+        "shadow_vt1": false,
+        "shadow_vt2": false,
+        "shadow_suggested_weight_pct": 1.2,
+        "flag_yellow": true,
+        "greyed": false
+      }
+    },
+    {
+      "ticker": "META",
+      "input": {
+        "weight_pct": 9.5,
+        "price": 760.0,
+        "bear": 608.0,
+        "p": 0.46,
+        "delta_g": null,
+        "confidence": "高",
+        "type": "成长"
+      },
+      "expected": {
+        "downside_pct": 20.0,
+        "valuation_at_risk_pct": 1.9,
+        "shadow_vt1": false,
+        "shadow_vt2": false,
+        "shadow_suggested_weight_pct": 9.5,
+        "flag_yellow": false,
+        "greyed": false
+      }
+    },
+    {
+      "ticker": "MU",
+      "input": {
+        "weight_pct": 6.0,
+        "price": 1050.0,
+        "bear": 588.0,
+        "p": 1.14,
+        "delta_g": null,
+        "confidence": "高",
+        "type": "周期"
+      },
+      "expected": {
+        "downside_pct": 44.0,
+        "valuation_at_risk_pct": 2.64,
+        "shadow_vt1": false,
+        "shadow_vt2": true,
+        "shadow_suggested_weight_pct": 0.0,
+        "flag_yellow": true,
+        "greyed": false
+      }
+    },
+    {
+      "ticker": "LITE",
+      "input": {
+        "weight_pct": 2.0,
+        "price": 1103.0,
+        "bear": 300.0,
+        "p": 1.6,
+        "delta_g": 31.0,
+        "confidence": "中",
+        "type": "成长"
+      },
+      "expected": {
+        "downside_pct": 72.8015,
+        "valuation_at_risk_pct": 1.456,
+        "shadow_vt1": true,
+        "shadow_vt2": true,
+        "shadow_suggested_weight_pct": 0.0,
+        "flag_yellow": true,
+        "greyed": false
+      }
+    },
+    {
+      "ticker": "LOWCONF",
+      "input": {
+        "weight_pct": 4.0,
+        "price": 50.0,
+        "bear": 30.0,
+        "p": 1.5,
+        "delta_g": null,
+        "confidence": "低",
+        "type": "稳定"
+      },
+      "expected": {
+        "downside_pct": 40.0,
+        "valuation_at_risk_pct": 1.6,
+        "shadow_vt1": false,
+        "shadow_vt2": false,
+        "shadow_suggested_weight_pct": 0.0,
+        "flag_yellow": false,
+        "greyed": true
+      }
+    }
+  ]
+}

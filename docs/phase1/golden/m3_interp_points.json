@@ -1,0 +1,2539 @@
+{
+  "spec": "9.3 M-10, 9.4; 10.3 B1/B2 曲线",
+  "curves": [
+    {
+      "curve": "quality.gross_margin",
+      "breakpoints": [
+        [
+          5,
+          5
+        ],
+        [
+          15,
+          30
+        ],
+        [
+          25,
+          50
+        ],
+        [
+          40,
+          75
+        ],
+        [
+          60,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": 4,
+          "expected": 5.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 5,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 15,
+          "expected": 30.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 25,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 40,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 60,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10.0,
+          "expected": 17.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 20.0,
+          "expected": 40.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 32.5,
+          "expected": 62.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 50.0,
+          "expected": 85.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 61,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "quality.roe",
+      "breakpoints": [
+        [
+          -10,
+          0
+        ],
+        [
+          0,
+          25
+        ],
+        [
+          5,
+          45
+        ],
+        [
+          15,
+          75
+        ],
+        [
+          25,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": -11,
+          "expected": 0.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -10,
+          "expected": 0.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 15,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 25,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -5.0,
+          "expected": 12.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 35.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 10.0,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 20.0,
+          "expected": 85.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 26,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "quality.fcf_margin",
+      "breakpoints": [
+        [
+          -10,
+          0
+        ],
+        [
+          0,
+          30
+        ],
+        [
+          5,
+          55
+        ],
+        [
+          10,
+          75
+        ],
+        [
+          20,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": -11,
+          "expected": 0.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -10,
+          "expected": 0.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 30.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 20,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -5.0,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 42.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 7.5,
+          "expected": 65.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 15.0,
+          "expected": 85.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 21,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "quality.fcf_conversion",
+      "breakpoints": [
+        [
+          -0.5,
+          0
+        ],
+        [
+          0,
+          30
+        ],
+        [
+          0.5,
+          60
+        ],
+        [
+          1.0,
+          85
+        ],
+        [
+          1.5,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": -1.5,
+          "expected": 0.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -0.5,
+          "expected": 0.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 30.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.5,
+          "expected": 60.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -0.25,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.25,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.75,
+          "expected": 72.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.25,
+          "expected": 90.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "quality.net_debt_fcf",
+      "breakpoints": [
+        [
+          -1,
+          100
+        ],
+        [
+          0,
+          95
+        ],
+        [
+          1,
+          85
+        ],
+        [
+          3,
+          60
+        ],
+        [
+          5,
+          30
+        ],
+        [
+          8,
+          5
+        ]
+      ],
+      "cases": [
+        {
+          "x": -2,
+          "expected": 100.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -1,
+          "expected": 100.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 3,
+          "expected": 60.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 30.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 8,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -0.5,
+          "expected": 97.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.5,
+          "expected": 90.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.0,
+          "expected": 72.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 4.0,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 6.5,
+          "expected": 17.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 9,
+          "expected": 5.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "growth.rev_growth",
+      "breakpoints": [
+        [
+          -15,
+          0
+        ],
+        [
+          -5,
+          15
+        ],
+        [
+          0,
+          35
+        ],
+        [
+          5,
+          50
+        ],
+        [
+          10,
+          65
+        ],
+        [
+          20,
+          82
+        ],
+        [
+          35,
+          95
+        ],
+        [
+          60,
+          100
+        ]
+      ],
+      "cases": [
+        {
+          "x": -16,
+          "expected": 0.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -15,
+          "expected": 0.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -5,
+          "expected": 15.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 35.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 65.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 20,
+          "expected": 82.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 35,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 60,
+          "expected": 100.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -10.0,
+          "expected": 7.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -2.5,
+          "expected": 25.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 42.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 7.5,
+          "expected": 57.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 15.0,
+          "expected": 73.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 27.5,
+          "expected": 88.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 47.5,
+          "expected": 97.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 61,
+          "expected": 100.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "growth.rev_accel_pp",
+      "breakpoints": [
+        [
+          -20,
+          5
+        ],
+        [
+          -10,
+          25
+        ],
+        [
+          -3,
+          45
+        ],
+        [
+          0,
+          55
+        ],
+        [
+          5,
+          70
+        ],
+        [
+          15,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -21,
+          "expected": 5.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -20,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -10,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -3,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 15,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -15.0,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -6.5,
+          "expected": 35.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -1.5,
+          "expected": 50.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 62.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 10.0,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 16,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "growth.eps_growth",
+      "breakpoints": [
+        [
+          -30,
+          0
+        ],
+        [
+          -10,
+          20
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          25,
+          80
+        ],
+        [
+          50,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": -31,
+          "expected": 0.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -30,
+          "expected": 0.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -10,
+          "expected": 20.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 40.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 60.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 25,
+          "expected": 80.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 50,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -20.0,
+          "expected": 10.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -5.0,
+          "expected": 30.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 5.0,
+          "expected": 50.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 17.5,
+          "expected": 70.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 37.5,
+          "expected": 87.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 51,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "growth.gross_margin_change_pp",
+      "breakpoints": [
+        [
+          -5,
+          10
+        ],
+        [
+          -2,
+          35
+        ],
+        [
+          0,
+          55
+        ],
+        [
+          2,
+          75
+        ],
+        [
+          5,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": -6,
+          "expected": 10.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -5,
+          "expected": 10.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -2,
+          "expected": 35.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 2,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -3.5,
+          "expected": 22.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -1.0,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 65.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 3.5,
+          "expected": 85.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 6,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "valuation.pe",
+      "breakpoints": [
+        [
+          8,
+          98
+        ],
+        [
+          12,
+          90
+        ],
+        [
+          20,
+          72
+        ],
+        [
+          30,
+          52
+        ],
+        [
+          50,
+          28
+        ],
+        [
+          80,
+          10
+        ],
+        [
+          120,
+          3
+        ]
+      ],
+      "cases": [
+        {
+          "x": 7,
+          "expected": 98.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 8,
+          "expected": 98.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 12,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 20,
+          "expected": 72.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 30,
+          "expected": 52.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 50,
+          "expected": 28.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 80,
+          "expected": 10.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 120,
+          "expected": 3.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10.0,
+          "expected": 94.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 16.0,
+          "expected": 81.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 25.0,
+          "expected": 62.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 40.0,
+          "expected": 40.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 65.0,
+          "expected": 19.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 100.0,
+          "expected": 6.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 121,
+          "expected": 3.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "valuation.peg",
+      "breakpoints": [
+        [
+          0.5,
+          95
+        ],
+        [
+          1.0,
+          78
+        ],
+        [
+          1.5,
+          58
+        ],
+        [
+          2.5,
+          32
+        ],
+        [
+          4.0,
+          12
+        ]
+      ],
+      "cases": [
+        {
+          "x": -0.5,
+          "expected": 95.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 0.5,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 78.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 58.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 32.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 4.0,
+          "expected": 12.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.75,
+          "expected": 86.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.25,
+          "expected": 68.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.0,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 3.25,
+          "expected": 22.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 5.0,
+          "expected": 12.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "valuation.ps",
+      "breakpoints": [
+        [
+          0.5,
+          98
+        ],
+        [
+          1,
+          90
+        ],
+        [
+          3,
+          72
+        ],
+        [
+          6,
+          50
+        ],
+        [
+          10,
+          28
+        ],
+        [
+          20,
+          8
+        ]
+      ],
+      "cases": [
+        {
+          "x": -0.5,
+          "expected": 98.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 0.5,
+          "expected": 98.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 3,
+          "expected": 72.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 6,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 28.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 20,
+          "expected": 8.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.75,
+          "expected": 94.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.0,
+          "expected": 81.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 4.5,
+          "expected": 61.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 8.0,
+          "expected": 39.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 15.0,
+          "expected": 18.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 21,
+          "expected": 8.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "valuation.fcf_yield",
+      "breakpoints": [
+        [
+          -2,
+          0
+        ],
+        [
+          0,
+          12
+        ],
+        [
+          1,
+          32
+        ],
+        [
+          3,
+          58
+        ],
+        [
+          5,
+          78
+        ],
+        [
+          8,
+          95
+        ]
+      ],
+      "cases": [
+        {
+          "x": -3,
+          "expected": 0.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -2,
+          "expected": 0.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 12.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1,
+          "expected": 32.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 3,
+          "expected": 58.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 78.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 8,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -1.0,
+          "expected": 6.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.5,
+          "expected": 22.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.0,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 4.0,
+          "expected": 68.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 6.5,
+          "expected": 86.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 9,
+          "expected": 95.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.price_vs_ma200",
+      "breakpoints": [
+        [
+          -15,
+          5
+        ],
+        [
+          -5,
+          30
+        ],
+        [
+          0,
+          55
+        ],
+        [
+          5,
+          75
+        ],
+        [
+          15,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -16,
+          "expected": 5.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -15,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -5,
+          "expected": 30.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 15,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -10.0,
+          "expected": 17.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -2.5,
+          "expected": 42.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 65.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 10.0,
+          "expected": 82.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 16,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.ma50_vs_ma200",
+      "breakpoints": [
+        [
+          -10,
+          5
+        ],
+        [
+          -3,
+          30
+        ],
+        [
+          0,
+          55
+        ],
+        [
+          3,
+          75
+        ],
+        [
+          10,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -11,
+          "expected": 5.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -10,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -3,
+          "expected": 30.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 3,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -6.5,
+          "expected": 17.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -1.5,
+          "expected": 42.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 65.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 6.5,
+          "expected": 82.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 11,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.ma200_slope20",
+      "breakpoints": [
+        [
+          -2,
+          10
+        ],
+        [
+          -0.5,
+          35
+        ],
+        [
+          0,
+          55
+        ],
+        [
+          0.5,
+          75
+        ],
+        [
+          2,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -3,
+          "expected": 10.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -2,
+          "expected": 10.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -0.5,
+          "expected": 35.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.5,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 2,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -1.25,
+          "expected": 22.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -0.25,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.25,
+          "expected": 65.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.25,
+          "expected": 82.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 3,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.mom3",
+      "breakpoints": [
+        [
+          -20,
+          5
+        ],
+        [
+          -10,
+          25
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          10,
+          70
+        ],
+        [
+          25,
+          85
+        ],
+        [
+          50,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -21,
+          "expected": 5.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -20,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -10,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 25,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 50,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -15.0,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -5.0,
+          "expected": 37.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 5.0,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 17.5,
+          "expected": 77.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 37.5,
+          "expected": 87.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 51,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.mom6",
+      "breakpoints": [
+        [
+          -30,
+          5
+        ],
+        [
+          -15,
+          25
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          15,
+          70
+        ],
+        [
+          40,
+          85
+        ],
+        [
+          80,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -31,
+          "expected": 5.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -30,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -15,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 15,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 40,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 80,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -22.5,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -7.5,
+          "expected": 37.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 7.5,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 27.5,
+          "expected": 77.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 60.0,
+          "expected": 87.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 81,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.vol_ratio",
+      "breakpoints": [
+        [
+          0.5,
+          25
+        ],
+        [
+          0.8,
+          45
+        ],
+        [
+          1.0,
+          60
+        ],
+        [
+          1.2,
+          75
+        ],
+        [
+          1.8,
+          85
+        ]
+      ],
+      "cases": [
+        {
+          "x": -0.5,
+          "expected": 25.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 0.5,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.8,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 60.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.2,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.8,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.65,
+          "expected": 35.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.9,
+          "expected": 52.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.1,
+          "expected": 67.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.8,
+          "expected": 85.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.up_share",
+      "breakpoints": [
+        [
+          35,
+          10
+        ],
+        [
+          45,
+          35
+        ],
+        [
+          50,
+          55
+        ],
+        [
+          55,
+          70
+        ],
+        [
+          65,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": 34,
+          "expected": 10.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 35,
+          "expected": 10.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 45,
+          "expected": 35.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 50,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 55,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 65,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 40.0,
+          "expected": 22.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 47.5,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 52.5,
+          "expected": 62.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 60.0,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 66,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.dev50",
+      "breakpoints": [
+        [
+          -15,
+          25
+        ],
+        [
+          -8,
+          45
+        ],
+        [
+          -3,
+          75
+        ],
+        [
+          0,
+          85
+        ],
+        [
+          3,
+          80
+        ],
+        [
+          8,
+          55
+        ],
+        [
+          15,
+          25
+        ],
+        [
+          25,
+          5
+        ]
+      ],
+      "cases": [
+        {
+          "x": -16,
+          "expected": 25.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -15,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -8,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -3,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 3,
+          "expected": 80.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 8,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 15,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 25,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -11.5,
+          "expected": 35.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -5.5,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -1.5,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 82.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 5.5,
+          "expected": 67.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 11.5,
+          "expected": 40.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 20.0,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 26,
+          "expected": 5.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.rsi",
+      "breakpoints": [
+        [
+          20,
+          35
+        ],
+        [
+          30,
+          55
+        ],
+        [
+          45,
+          75
+        ],
+        [
+          60,
+          70
+        ],
+        [
+          70,
+          45
+        ],
+        [
+          80,
+          18
+        ],
+        [
+          90,
+          5
+        ]
+      ],
+      "cases": [
+        {
+          "x": 19,
+          "expected": 35.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 20,
+          "expected": 35.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 30,
+          "expected": 55.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 45,
+          "expected": 75.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 60,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 70,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 80,
+          "expected": 18.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 90,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 25.0,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 37.5,
+          "expected": 65.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 52.5,
+          "expected": 72.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 65.0,
+          "expected": 57.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 75.0,
+          "expected": 31.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 85.0,
+          "expected": 11.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 91,
+          "expected": 5.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.vol20",
+      "breakpoints": [
+        [
+          20,
+          90
+        ],
+        [
+          35,
+          70
+        ],
+        [
+          50,
+          50
+        ],
+        [
+          70,
+          25
+        ],
+        [
+          100,
+          5
+        ]
+      ],
+      "cases": [
+        {
+          "x": 19,
+          "expected": 90.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 20,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 35,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 50,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 70,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 100,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 27.5,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 42.5,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 60.0,
+          "expected": 37.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 85.0,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 101,
+          "expected": 5.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "timing.drawdown252",
+      "breakpoints": [
+        [
+          -60,
+          20
+        ],
+        [
+          -40,
+          35
+        ],
+        [
+          -25,
+          50
+        ],
+        [
+          -10,
+          70
+        ],
+        [
+          0,
+          85
+        ]
+      ],
+      "cases": [
+        {
+          "x": -61,
+          "expected": 20.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -60,
+          "expected": 20.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -40,
+          "expected": 35.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -25,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -10,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -50.0,
+          "expected": 27.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -32.5,
+          "expected": 42.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": -17.5,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": -5.0,
+          "expected": 77.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1,
+          "expected": 85.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "aplus.psg",
+      "breakpoints": [
+        [
+          0.1,
+          95
+        ],
+        [
+          0.2,
+          82
+        ],
+        [
+          0.3,
+          70
+        ],
+        [
+          0.5,
+          52
+        ],
+        [
+          0.7,
+          38
+        ],
+        [
+          1.0,
+          20
+        ],
+        [
+          1.5,
+          5
+        ]
+      ],
+      "cases": [
+        {
+          "x": -0.9,
+          "expected": 95.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 0.1,
+          "expected": 95.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.2,
+          "expected": 82.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.3,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.5,
+          "expected": 52.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.7,
+          "expected": 38.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 20.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.15000000000000002,
+          "expected": 88.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.25,
+          "expected": 76.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.4,
+          "expected": 61.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.6,
+          "expected": 45.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 0.85,
+          "expected": 29.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.25,
+          "expected": 12.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 5.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "aplus.eps_adj_pe",
+      "breakpoints": [
+        [
+          0.5,
+          90
+        ],
+        [
+          1.0,
+          70
+        ],
+        [
+          1.5,
+          50
+        ],
+        [
+          2.5,
+          25
+        ],
+        [
+          4.0,
+          5
+        ]
+      ],
+      "cases": [
+        {
+          "x": -0.5,
+          "expected": 90.0,
+          "kind": "below_min"
+        },
+        {
+          "x": 0.5,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 1.5,
+          "expected": 50.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 25.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 4.0,
+          "expected": 5.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0.75,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.25,
+          "expected": 60.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.0,
+          "expected": 37.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 3.25,
+          "expected": 15.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 5.0,
+          "expected": 5.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "aplus.gm_change_pp",
+      "breakpoints": [
+        [
+          -2,
+          20
+        ],
+        [
+          0,
+          45
+        ],
+        [
+          2,
+          65
+        ],
+        [
+          5,
+          85
+        ]
+      ],
+      "cases": [
+        {
+          "x": -3,
+          "expected": 20.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -2,
+          "expected": 20.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 2,
+          "expected": 65.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 85.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -1.0,
+          "expected": 32.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 1.0,
+          "expected": 55.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 3.5,
+          "expected": 75.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 6,
+          "expected": 85.0,
+          "kind": "above_max"
+        }
+      ]
+    },
+    {
+      "curve": "aplus.fcf_margin_change_pp",
+      "breakpoints": [
+        [
+          -5,
+          20
+        ],
+        [
+          0,
+          45
+        ],
+        [
+          5,
+          70
+        ],
+        [
+          10,
+          90
+        ]
+      ],
+      "cases": [
+        {
+          "x": -6,
+          "expected": 20.0,
+          "kind": "below_min"
+        },
+        {
+          "x": -5,
+          "expected": 20.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 0,
+          "expected": 45.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 5,
+          "expected": 70.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": 10,
+          "expected": 90.0,
+          "kind": "breakpoint"
+        },
+        {
+          "x": -2.5,
+          "expected": 32.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 2.5,
+          "expected": 57.5,
+          "kind": "midpoint"
+        },
+        {
+          "x": 7.5,
+          "expected": 80.0,
+          "kind": "midpoint"
+        },
+        {
+          "x": 11,
+          "expected": 90.0,
+          "kind": "above_max"
+        }
+      ]
+    }
+  ]
+}
