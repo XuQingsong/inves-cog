@@ -2,6 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import subprocess
 
 import pytest
 
@@ -15,6 +16,8 @@ def test_harness_no_network(tmp_path):
     assert NetworkGuard
     attempts = (
         'socket.create_connection(("example.com", 80))',
+        'socket.create_connection(("127.0.0.1", 1))',
+        'socket.create_connection(("::1", 1))',
         'socket.getaddrinfo("example.com", 80)',
         'requests.get("https://example.com", timeout=1)',
     )
@@ -39,6 +42,40 @@ def test_harness_no_network(tmp_path):
         result = run_probe(tmp_path, 'def test_probe():\n    assert True\n',
                            arguments=('-m', 'phase1_live'), environment=env)
         assert result.returncode != 0 and 'FR-M0-03' in output(result)
+    # The same offline guard must allow asyncio and in-process ASGI requests.
+    from tests.harness.tools.probes import LOCAL_COMMUNICATION_PROBES
+    failures = []
+    for label, code in LOCAL_COMMUNICATION_PROBES.items():
+        try:
+            result = run_probe(tmp_path, code, arguments=('-s',))
+            if result.returncode:
+                failures.append(f'{label}: {output(result)}')
+        except subprocess.TimeoutExpired:
+            failures.append(f'{label}: TIMEOUT after 30 seconds')
+    assert not failures, '\n'.join(failures)
+    result = run_probe(tmp_path, '''import socket, tempfile
+def test_probe():
+    # macOS limits AF_UNIX paths to 104 bytes; pytest's nested temp path is longer.
+    with tempfile.TemporaryDirectory(dir='/tmp', prefix='m0-') as directory:
+        address = directory + '/local.sock'
+        with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as client:
+            server.bind(address)
+            server.listen(1)
+            client.connect(address)
+            peer, _ = server.accept()
+            with peer:
+                client.sendall(b'ok')
+                assert peer.recv(2) == b'ok'
+''')
+    assert result.returncode == 0, output(result)
+    for family in ('AF_INET', 'AF_INET6'):
+        for method in ('connect', 'connect_ex', 'send', 'sendall', 'sendto', 'sendmsg', 'listen'):
+            code = (f'import socket\ndef test_probe():\n'
+                    f'    with socket.socket(socket.{family}) as sock:\n'
+                    f'        if hasattr(sock, {method!r}):\n'
+                    f'            sock.{method}()\n')
+            result = run_probe(tmp_path, code)
+            assert result.returncode == 1 and 'FR-M0-03' in output(result), output(result)
 
 
 def test_injected_clock_only(tmp_path):
@@ -54,13 +91,32 @@ def test_injected_clock_only(tmp_path):
     with pytest.raises(ValueError):
         FrozenClock(datetime(2026, 1, 1))
     assert load_params(ROOT / 'config/params/p-2026.10').params_version == 'p-2026.10'
-    for source in ('from datetime import datetime\nx=datetime.now()',
-                   'from datetime import datetime as dt\nx=dt.utcnow()',
-                   'import time as t\nx=t.time()'):
+    sources = (
+        'from datetime import datetime\nx=datetime.now()',
+        'from datetime import datetime as dt\nx=dt.utcnow()',
+        'from datetime import date as d\nx=d.today()',
+        'import time as t\nx=t.time()',
+        'from datetime import datetime\nx=datetime.today()',
+        'import datetime as dt\nx=dt.datetime.today()',
+        'import time as t\nx=t.time_ns()',
+        'from time import time_ns as ns\nf=ns',
+        'import pandas as pd\nx=pd.Timestamp.now()',
+        'from pandas import Timestamp as TS\nx=TS.today()',
+        'import pandas\nx=pandas.Timestamp.utcnow()',
+        'from datetime import datetime\nf=datetime.now',
+        'import datetime as dt\nf=dt.datetime.now; f()',
+        'import pandas as pd\nf=pd.Timestamp.today',
+        'import numpy as np\nx=np.datetime64("now")',
+        'from numpy import datetime64 as dt64\nx=dt64("today")',
+    )
+    for source in sources:
         p = tmp_path / 'trading.py'
         p.write_text(source)
         with pytest.raises(AssertionError, match='FR-M0-04'):
             scan_clock(p)
+    p.write_text('import time as t\nx=t.monotonic(); y=t.perf_counter()\n'
+                 'import numpy as np\nx=np.datetime64("2026-10-13")\n')
+    scan_clock(p)
 
 
 def test_pending_registry(tmp_path):
@@ -104,22 +160,37 @@ def test_milestones_consistency(tmp_path):
 
 
 def test_requirements_golden_unchanged(tmp_path):
-    from tests.harness.tools.golden import load_golden, validate_golden
+    from tests.harness.tools.golden import load_golden, read_manifest, validate_golden
     real = ROOT / 'docs/phase1/golden'
-    original = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in real.iterdir()}
-    assert len(validate_golden(real)) == 8
-    assert isinstance(load_golden('m3_interp_points.json'), dict)
+    original = {str(p.relative_to(real)): hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in real.rglob('*') if p.is_file()}
+    rows = read_manifest(real, 'FR-M0-07')
+    assert validate_golden(real) == rows
+    for name in rows:
+        value = load_golden(name)
+        assert value == (json.loads((real / name).read_text()) if Path(name).suffix == '.json'
+                         else (real / name).read_bytes())
     copied = tmp_path / 'golden'
     shutil.copytree(real, copied)
-    p = copied / 'm3_interp_points.json'
+    name = next(iter(rows))
+    p = copied / name
     p.write_bytes(p.read_bytes() + b' ')
     with pytest.raises(AssertionError, match='FR-M0-07'):
         validate_golden(copied)
-    p.write_bytes((real / p.name).read_bytes())
+    p.write_bytes((real / name).read_bytes())
     (copied / 'extra.json').write_text('{}')
     with pytest.raises(AssertionError, match='FR-M0-07'):
         validate_golden(copied)
-    assert original == {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in real.iterdir()}
+    (copied / 'extra.json').unlink()
+    extra = copied / 'additional.bin'
+    extra.write_bytes(b'\x00\xffadditional golden\n')
+    digest = hashlib.sha256(extra.read_bytes()).hexdigest()
+    manifest = copied / 'MANIFEST.sha256'
+    manifest.write_text(manifest.read_text().rstrip('\n') + f'\n{digest}  {extra.name}\n')
+    assert validate_golden(copied) == rows | {extra.name: digest}
+    assert load_golden(extra.name, copied) == extra.read_bytes()
+    assert original == {str(p.relative_to(real)): hashlib.sha256(p.read_bytes()).hexdigest()
+                        for p in real.rglob('*') if p.is_file()}
     assert (ROOT / '.github/CODEOWNERS').read_text().strip() == 'docs/** @XuQingsong'
 
 
@@ -183,6 +254,24 @@ def test_llm_models_allowed(tmp_path):
         p.write_text('model=' + repr(prefix.upper() + '-999') + '\n')
         with pytest.raises(AssertionError, match='I37'):
             scan_models(p)
+    directory = tmp_path / 'repository'
+    for name in ('Dockerfile.x', 'scripts/Dockerfile.harness', 'Makefile', '.env', '.env.test',
+                 'config/a.txt', 'config/a.ini', 'config/a.cfg', 'src/a.md',
+                 'tests/a.data', '.github/workflows/a.yaml', 'docker-compose.test.yml'):
+        p = directory / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text('model=' + 'glm' + '-999' + '\n')
+        with pytest.raises(AssertionError, match='I37') as error:
+            scan_models(directory)
+        assert str(p) + ':1:' in str(error.value)
+        p.unlink()
+    (directory / 'config/binary.bin').write_bytes(b'\x00\xff' + b'glm' + b'-999')
+    recording = directory / 'tests/recordings/a.json'
+    recording.parent.mkdir(parents=True)
+    recording.write_text(json.dumps({'response': 'glm' + '-999'}))
+    (directory / '.env').write_text('MODEL=glm-5.3\n')
+    (directory / 'config/allowed.txt').write_text('MODEL=deepseek-v4.1-flash\n')
+    scan_models(directory)
 
 
 def test_schema_roles_migration(tmp_path):

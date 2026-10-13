@@ -47,7 +47,8 @@ def load_golden(name, directory=None):
     rows = validate_golden(directory)
     if name not in rows:
         raise AssertionError(f'{directory / name}:1: FR-M0-07: unregistered golden')
-    return json.loads((directory / name).read_text())
+    path = directory / name
+    return json.loads(path.read_text()) if path.suffix == '.json' else path.read_bytes()
 
 
 def validate_frozen(directory, changelog, *, changelog_prefix='tests/fixtures/phase1/'):
