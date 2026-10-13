@@ -1,0 +1,203 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+___________________________ test_harness_no_network ____________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_harness_no_network0')
+
+    def test_harness_no_network(tmp_path):
+>       from tests.harness.tools.network import NetworkGuard
+E       ModuleNotFoundError: No module named 'tests.harness.tools.network'
+
+tests/harness/test_m0.py:14: ModuleNotFoundError
+___________________________ test_injected_clock_only ___________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_injected_clock_only0')
+
+    def test_injected_clock_only(tmp_path):
+        from datetime import datetime, timezone
+>       from inves_cog.clock import FrozenClock
+E       ModuleNotFoundError: No module named 'inves_cog'
+
+tests/harness/test_m0.py:42: ModuleNotFoundError
+____________________________ test_pending_registry _____________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_pending_registry0')
+
+    def test_pending_registry(tmp_path):
+>       from tests.harness.tools.checks import requirement_tests, validate_registry
+E       ModuleNotFoundError: No module named 'tests.harness.tools.checks'
+
+tests/harness/test_m0.py:63: ModuleNotFoundError
+_________________________ test_milestones_consistency __________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_milestones_consistency0')
+
+    def test_milestones_consistency(tmp_path):
+>       from tests.harness.tools.checks import validate_registry
+E       ModuleNotFoundError: No module named 'tests.harness.tools.checks'
+
+tests/harness/test_m0.py:89: ModuleNotFoundError
+______________________ test_requirements_golden_unchanged ______________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_requirements_golden_uncha0')
+
+    def test_requirements_golden_unchanged(tmp_path):
+>       from tests.harness.tools.golden import load_golden, validate_golden
+E       ModuleNotFoundError: No module named 'tests.harness.tools.golden'
+
+tests/harness/test_m0.py:103: ModuleNotFoundError
+________________________ test_frozen_fixtures_changelog ________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_frozen_fixtures_changelog0')
+
+    def test_frozen_fixtures_changelog(tmp_path):
+>       from tests.harness.tools.golden import validate_frozen
+E       ModuleNotFoundError: No module named 'tests.harness.tools.golden'
+
+tests/harness/test_m0.py:123: ModuleNotFoundError
+_____________________________ test_import_firewall _____________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_import_firewall0')
+
+    def test_import_firewall(tmp_path):
+>       from tests.harness.tools.checks import scan_imports
+E       ModuleNotFoundError: No module named 'tests.harness.tools.checks'
+
+tests/harness/test_m0.py:142: ModuleNotFoundError
+___________________________ test_llm_models_allowed ____________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_llm_models_allowed0')
+
+    def test_llm_models_allowed(tmp_path):
+>       from inves_cog.llm.registry import Registry
+E       ModuleNotFoundError: No module named 'inves_cog'
+
+tests/harness/test_m0.py:166: ModuleNotFoundError
+_________________________ test_schema_roles_migration __________________________
+
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_schema_roles_migration0')
+
+    def test_schema_roles_migration(tmp_path):
+>       from tests.harness.tools.permissions import PermissionMatrix, assert_no_select, assert_no_write
+E       ModuleNotFoundError: No module named 'tests.harness.tools.permissions'
+
+tests/harness/test_m0.py:185: ModuleNotFoundError
+___________________________ test_markers_registered ____________________________
+
+pytestconfig = <_pytest.config.Config object at 0x10a2a93a0>
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-0/test_markers_registered0')
+
+    def test_markers_registered(pytestconfig, tmp_path):
+        import tomllib
+>       config = tomllib.loads((ROOT / 'pyproject.toml').read_text())['tool']['pytest']['ini_options']
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/harness/test_m0.py:205:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = PosixPath('/Users/xuqingsong/workspace/inves-cog/pyproject.toml')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/xuqingsong/workspace/inves-cog/pyproject.toml'
+
+../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1013: FileNotFoundError
+___________________________ test_clean_env_bootstrap ___________________________
+
+    def test_clean_env_bootstrap():
+>       record = json.loads((ROOT / '.harness/bootstrap.json').read_text())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/harness/test_m0_ci.py:6:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = PosixPath('/Users/xuqingsong/workspace/inves-cog/.harness/bootstrap.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/xuqingsong/workspace/inves-cog/.harness/bootstrap.json'
+
+../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1013: FileNotFoundError
+____________________________ test_blocking_duration ____________________________
+
+    def test_blocking_duration():
+>       record = json.loads((ROOT / '.harness/blocking.json').read_text())
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/harness/test_m0_ci.py:18:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = PosixPath('/Users/xuqingsong/workspace/inves-cog/.harness/blocking.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/xuqingsong/workspace/inves-cog/.harness/blocking.json'
+
+../../.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1013: FileNotFoundError
+=============================== warnings summary ===============================
+tests/harness/test_m0.py:10
+  /Users/xuqingsong/workspace/inves-cog/tests/harness/test_m0.py:10: PytestUnknownMarkWarning: Unknown pytest.mark.phase1_blocking - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.phase1_blocking
+
+../../Documents/Codex/2026-10-13/new-chat-2/work/m0-tools/_pytest/cacheprovider.py:469
+  /Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-tools/_pytest/cacheprovider.py:469: PytestCacheWarning: could not create cache path /Users/xuqingsong/workspace/inves-cog/.pytest_cache/v/cache/nodeids: [Errno 1] Operation not permitted: '/Users/xuqingsong/workspace/inves-cog/pytest-cache-files-hjb5agr0'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../../Documents/Codex/2026-10-13/new-chat-2/work/m0-tools/_pytest/cacheprovider.py:423
+  /Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-tools/_pytest/cacheprovider.py:423: PytestCacheWarning: could not create cache path /Users/xuqingsong/workspace/inves-cog/.pytest_cache/v/cache/lastfailed: [Errno 1] Operation not permitted: '/Users/xuqingsong/workspace/inves-cog/pytest-cache-files-5a85kik2'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/harness/test_m0.py::test_harness_no_network - ModuleNotFoundErro...
+FAILED tests/harness/test_m0.py::test_injected_clock_only - ModuleNotFoundErr...
+FAILED tests/harness/test_m0.py::test_pending_registry - ModuleNotFoundError:...
+FAILED tests/harness/test_m0.py::test_milestones_consistency - ModuleNotFound...
+FAILED tests/harness/test_m0.py::test_requirements_golden_unchanged - ModuleN...
+FAILED tests/harness/test_m0.py::test_frozen_fixtures_changelog - ModuleNotFo...
+FAILED tests/harness/test_m0.py::test_import_firewall - ModuleNotFoundError: ...
+FAILED tests/harness/test_m0.py::test_llm_models_allowed - ModuleNotFoundErro...
+FAILED tests/harness/test_m0.py::test_schema_roles_migration - ModuleNotFound...
+FAILED tests/harness/test_m0.py::test_markers_registered - FileNotFoundError:...
+FAILED tests/harness/test_m0_ci.py::test_clean_env_bootstrap - FileNotFoundEr...
+FAILED tests/harness/test_m0_ci.py::test_blocking_duration - FileNotFoundErro...
+12 failed, 3 warnings in 0.09s
