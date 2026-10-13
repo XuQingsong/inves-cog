@@ -13,9 +13,12 @@ class NetworkGuard:
         self.events = []
         self.originals = []
 
-    def _wrapper(self, original, operation):
+    def _wrapper(self, original, operation, *, socket_method=False):
         def checked(*args, **kwargs):
-            if self.allowed:
+            # AF_UNIX carries only local IPC, including asyncio's self-pipe.
+            # Module helpers (DNS/create_connection) remain blocked offline.
+            local = socket_method and args and args[0].family == socket.AF_UNIX
+            if self.allowed or local:
                 return original(*args, **kwargs)
             frames = inspect.stack()[1:]
             frame = next((f for f in frames if f.filename.rsplit('/', 1)[-1].startswith('test_')), None)
@@ -37,7 +40,8 @@ class NetworkGuard:
                 if hasattr(owner, name):
                     original = getattr(owner, name)
                     self.originals.append((owner, name, original))
-                    setattr(owner, name, self._wrapper(original, name))
+                    setattr(owner, name, self._wrapper(original, name,
+                                                       socket_method=owner is socket.socket))
 
     def restore(self):
         for owner, name, original in reversed(self.originals):

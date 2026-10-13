@@ -53,17 +53,19 @@ def test_harness_no_network(tmp_path):
         except subprocess.TimeoutExpired:
             failures.append(f'{label}: TIMEOUT after 30 seconds')
     assert not failures, '\n'.join(failures)
-    result = run_probe(tmp_path, '''import socket
-def test_probe(tmp_path):
-    address = str(tmp_path / 'local.sock')
-    with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as client:
-        server.bind(address)
-        server.listen(1)
-        client.connect(address)
-        peer, _ = server.accept()
-        with peer:
-            client.sendall(b'ok')
-            assert peer.recv(2) == b'ok'
+    result = run_probe(tmp_path, '''import socket, tempfile
+def test_probe():
+    # macOS limits AF_UNIX paths to 104 bytes; pytest's nested temp path is longer.
+    with tempfile.TemporaryDirectory(dir='/tmp', prefix='m0-') as directory:
+        address = directory + '/local.sock'
+        with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as client:
+            server.bind(address)
+            server.listen(1)
+            client.connect(address)
+            peer, _ = server.accept()
+            with peer:
+                client.sendall(b'ok')
+                assert peer.recv(2) == b'ok'
 ''')
     assert result.returncode == 0, output(result)
     for family in ('AF_INET', 'AF_INET6'):

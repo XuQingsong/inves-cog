@@ -182,13 +182,25 @@ def scan_clock(root):
             elif isinstance(n, ast.ImportFrom) and not n.level:
                 aliases.update({a.asname or a.name: (n.module or '') + '.' + a.name for a in n.names})
         for n in ast.walk(tree):
-            if not isinstance(n, ast.Call):
+            if isinstance(n, ast.Call):
+                reference = n.func
+            elif isinstance(n, (ast.Attribute, ast.Name)) and isinstance(n.ctx, ast.Load):
+                reference = n
+            else:
                 continue
-            name = ast.unparse(n.func)
+            name = ast.unparse(reference)
             first, *rest = name.split('.')
             resolved = '.'.join([aliases.get(first, first), *rest])
-            if resolved in {'datetime.now', 'datetime.utcnow', 'datetime.datetime.now',
-                            'datetime.datetime.utcnow', 'date.today', 'datetime.date.today', 'time.time'}:
+            forbidden = {
+                'datetime.now', 'datetime.utcnow', 'datetime.today',
+                'datetime.datetime.now', 'datetime.datetime.utcnow', 'datetime.datetime.today',
+                'date.today', 'datetime.date.today', 'time.time', 'time.time_ns',
+                'pandas.Timestamp.now', 'pandas.Timestamp.today', 'pandas.Timestamp.utcnow',
+            }
+            numpy_current = (isinstance(n, ast.Call) and resolved == 'numpy.datetime64'
+                             and n.args and isinstance(n.args[0], ast.Constant)
+                             and n.args[0].value in ('now', 'today'))
+            if resolved in forbidden or numpy_current:
                 fail(path, n.lineno, 'FR-M0-04', f'system time {name}; inject Clock')
 
 
@@ -201,15 +213,24 @@ def scan_models(root):
         files = []
         for name in ('src', 'config', 'tests', 'scripts', '.github'):
             for p in (root / name).rglob('*'):
-                if not p.is_file() or p.suffix not in {'.py', '.yaml', '.yml', '.sh', '.json', '.jsonl', '.toml'}:
+                if not p.is_file():
                     continue
                 if '__pycache__' in p.parts:
                     continue
                 if 'recordings' in p.parts and p.suffix in {'.json', '.jsonl'}:
                     continue
                 files.append(p)
+        for pattern in ('Makefile', 'Dockerfile*', 'docker-compose*.yml', '.env*'):
+            files.extend(p for p in root.glob(pattern) if p.is_file())
     for path in files:
-        for line_no, line in enumerate(path.read_text().splitlines(), 1):
+        raw = path.read_bytes()
+        if b'\x00' in raw:
+            continue
+        try:
+            text = raw.decode('utf-8')
+        except UnicodeDecodeError:
+            continue
+        for line_no, line in enumerate(text.splitlines(), 1):
             for match in MODEL_PATTERN.finditer(line):
                 if match.group() not in ALLOWED_MODELS:
                     fail(path, line_no, 'I37/FR-M0-10', f'non-whitelisted model {match.group()}')
