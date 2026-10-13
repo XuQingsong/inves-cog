@@ -39,7 +39,7 @@
 | AC-M0-01 | 干净环境 `pytest -m phase1_blocking` 全绿，耗时 ≤ 180 秒 | H | 是 |
 | AC-M0-02 | 第 7 节 9 项破坏性自测都产生红灯，错误信息指明文件和规则 | E | 是 |
 | AC-M0-03 | `pending.txt` 的条目与 README §5 和 M1–M10 第 7 节的测试清单逐一对应，模块字段正确 | E | 是 |
-| AC-M0-04 | 需求方在本地改动 golden 的一个字节，测试变红；`CODEOWNERS` 已生效 | E | 是 |
+| AC-M0-04 | 需求方在本地改动 golden 的一个字节，测试变红；开发提供的临时副本破坏性自测为红灯；`.github/CODEOWNERS` 内容为 `docs/** @XuQingsong`。（GitHub 分支保护是否开启属于用户的前置条件 R1，不计入本条判定） | E | 是 |
 | AC-M0-05 | 扫描范围内搜索不到 LLM 白名单以外的模型名；代码中搜索不到 `stock_pm` 和 Muse 模块的导入 | H + E | 是 |
 | AC-M0-07 | 需求方在一台干净机器上执行 `make phase1-test` 一次跑通 | D | 是 |
 | AC-M0-06 | CI 在 PR 上自动运行 `phase1_blocking`，每晚任务存在 | E | 否 |

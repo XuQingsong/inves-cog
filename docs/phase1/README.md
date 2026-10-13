@@ -215,9 +215,9 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 ## 4. Harness 总则
 
-- 层与标记：`phase1_blocking`（H0 静态门禁 + H1 纯函数，每次提交跑，3 分钟内跑完）、`phase1_replay`（v18 回放，每晚跑，改 `trading` 时也要跑）、`phase1_cases`（案例回放，改 `perception` 时跑）、`phase1_live`（真实数据冒烟，只在验收和每日任务里跑，不进 CI）。
+- 层与标记：`phase1_blocking`（H0 静态门禁 + H1 纯函数，每次提交跑，3 分钟内跑完）、`phase1_replay`（v18 回放，每晚跑，改 `trading` 时也要跑）、`phase1_cases`（案例回放，改 `perception` 时跑）、`phase1_live`（真实数据冒烟，只在验收和每日任务里跑，不进 CI；只有显式 `-m phase1_live` 且 `INVES_COG_LIVE=1` 时允许联网）。
 - 测试里任何网络访问即失败；时间只能来自注入的时钟。
-- `tests/harness/pending.txt`：每行 `测试名 | 模块 | 原因`。被 skip / xfail 但不在文件里 → 失败；模块已写进 `milestones.txt` 但文件里还有它的测试 → 失败。
+- `tests/harness/pending.txt`：每行 `测试名 | 模块 | 原因`。被 skip / xfail 但不在文件里 → 失败；模块已写进 `milestones.txt` 但文件里还有它的测试 → 失败；尚未开发的模块允许只登记测试名；已存在的 pending 测试自动按 `xfail(strict=True)` 运行，一旦通过即失败，提醒从 pending 删除（详见 M0 FR-M0-05）。
 - `tests/harness/milestones.txt`：已通过验收的模块编号。**只有验收报告结论为"通过"或"有条件通过"后才能写入**。
 - `tests/harness/CHANGELOG.md`：冻结输入的每一次改动都写一条：文件、旧哈希、新哈希、原因、规格编号或 Q&A 编号。
 - 每个模块文档的第 7 节列出该模块的全部测试名；测试名就是验收时复跑的清单，不能改名。
