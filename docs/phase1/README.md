@@ -80,12 +80,13 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 - 业务日期 `trade_date` = 美东交易日。
 - 时段划分（美东时间）：盘前 `pre` = [04:00, 09:30)；盘中 `intraday` = [09:30, 收盘)；盘后 `post` = [收盘, 20:00]；收盘一般为 16:00，半日市为 13:00。休市日发生的事件记 `closed`，归入下一个交易日。
 - 夏令时切换（2026-11-01）由日历库处理，代码里不得手写 ±4 / ±5 小时。
+- **日内截止时间**（v1.4 起）：所有定时任务和截止时间都以**美东时间**配置。文档里写的北京时间，是按美东**夏令时**换算的（北京 = 美东 + 12 小时）；美东**冬令时**期间（北京 = 美东 + 13 小时），文档里的北京时间**整体顺延 1 小时**。例如“北京 09:15”在冬令时就是北京 10:15，两者都是美东 21:15。早间链：M1 行情补齐 美东 20:45（北京 08:45）→ M6 价格结构 20:55（08:55）→ M7 判定 21:00（09:00）→ 异常清单 21:15（09:15）。原因：分钟线采到美东 20:00 才结束，行情源最多延迟 15 分钟。
 
 ### 3.2 时钟
 
 - 业务代码只能通过 `inves_cog.clock.Clock` 取时间（`now_utc()`、`today_trade_date()`）。
 - 生产用 `SystemClock`，测试用 `FrozenClock`。
-- `src/inves_cog/` 下除 `clock.py` 外出现 `datetime.now(`、`datetime.utcnow(`、`date.today(`、`time.time(` 即失败（M0 的门禁）。
+- `src/inves_cog/` 下除 `clock.py` 外读系统时间即失败（M0 的门禁，完整清单见 M0 v3 FR-M0-04：含 `datetime.today`、`time.time_ns`、`pandas.Timestamp.now` 等及其属性引用）。
 
 ### 3.3 单位与数值
 
@@ -125,6 +126,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 | 角色 | 可读 | 不可读（迁移脚本必须显式 REVOKE） |
 |---|---|---|
+| `role_ingest` | `graph`（只读：监控实体、实体和分部映射所需的节点；v1.4 起） | `trading`、`valuation_v1`、`perception`、`perception_shadow`、`factor_shadow`、`overlay`、`marketstate` |
 | `role_trading` | `ingest`、`fundamentals`、`marketstate`、`overlay` | `valuation_v1`、`perception`、`perception_shadow`、`factor_shadow`、`graph` |
 | `role_marketstate` | `ingest`、`graph`（只读篮子定义） | `perception`、`valuation_v1`、`perception_shadow`、`factor_shadow` |
 | `role_valuation` | `ingest`、`fundamentals`、`graph`、`trading`（只读） | —— |
@@ -264,7 +266,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 | 目标 | 整体验收方式 | 通过标准 |
 |---|---|---|
-| A1 感知股价异常 | 连续 5 个交易日真实运行；加东芝、OpenAI、Meta Muse、DeepSeek 四个案例回放 | 每天 08:30（北京）前产出异常清单；四个案例的异常全部被发现，层次和篮子与模块 M7 的期望一致 |
+| A1 感知股价异常 | 连续 5 个交易日真实运行；加东芝、OpenAI、Meta Muse、DeepSeek 四个案例回放 | 每天北京 09:15 前产出异常清单（夏令时；冬令时 10:15，见 §3.1）；四个案例的异常全部被发现，层次和篮子与模块 M7 的期望一致 |
 | A2 自主建立连接 | 同上四个案例 | 无需人工发起；正确候选进入前 3；每个候选都能追溯到信息 id |
 | A3 基础分析 | 抽查 5 个真实异常的解释报告 | 报告字段齐全：冲击分解、影响范围、隐含幅度、跟踪清单 |
 | A4 稳定估值 | 连续 5 个交易日 | 没有财报和一致预期变化的标的，三档价值日变化为 0 |
@@ -327,5 +329,5 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | R7 | Muse 沙箱 `quant` 库的数据：一致预期快照（2026-10-08 起）、Form 4 内部人事件、VIX 历史。这些数据不在 Muse 仓库里，只在 `quant` 库中，由 Muse 方长期保存，不会丢失。**由开发 agent 向 Muse 方申请导出文件**（pg_dump 或 CSV，附表结构和导出时间），用本项目自己的导入脚本入库；导出文件放在仓库之外，不进 `docs/`。开发不直接连接 `quant` 库（任务书 §4.4 第 1 条） | 开发（向 Muse 申请） | M1（Form 4、VIX）、M2（一致预期） |
 | R3 | ~~三个案例的日期~~ **已确定**：东芝 2026-10-02、OpenAI 2026-10-08、Meta Muse 2026-09-21（详见 M7 第 7.1 节） | —— | M7、M8 的案例夹具 |
 | R4 | `deepseek-v4.1-flash` 和 `glm-5.3` 的接入方式（服务商、接口地址），以环境变量提供 | 用户 | M0、M1、M8 |
-| R5 | Alpaca、Tavily、Exa、Google CSE、SEC 访问身份、Alpha Vantage、DashScope 的账号和 key（以环境变量提供） | 用户 / 开发 | M1 |
+| R5 | Alpaca（需要 SIP 历史数据权限）、Tavily、Exa、Google CSE、SEC 访问身份（`SEC_USER_AGENT`）、Alpha Vantage、DashScope、FRED 的账号和 key（以环境变量提供） | 用户 / 开发 | M1、M2 |
 | R6 | 部署机器（本项目独立部署）的 CPU / 内存 / 磁盘 | 用户 / 开发 | M1（广域日线、向量库） |

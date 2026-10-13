@@ -70,7 +70,7 @@
 | 编号 | 需求 |
 |---|---|
 | FR-M9-10 | 登记表初始化 F-01–F-08（规格第 13.7 节），状态"影子计算"；改定义必须新增版本，旧版本的每日记录保留 |
-| FR-M9-11 | F-01 成长调整估值分：按规格第 10.3 节 B1；有效估值分 = min(65, max(原估值分, F-01))，原估值分 > 65 时保留原值；适用条件不满足时 `value = NULL`；替换：把规则 A 的估值账（含 M-31）换成有效估值分，重算该股当日 M-33。`requirements/m9_factor_shadow.json` 的 `f01_growth_adjusted_valuation` 全部命中 |
+| FR-M9-11 | F-01 成长调整估值分：按规格第 10.3 节 B1；有效估值分 = min(65, max(原估值分, F-01))，原估值分 > 65 时保留原值；适用条件不满足时 `value = NULL`；替换：把规则 A 的估值账（含 M-31）换成有效估值分，重算该股当日 M-33。`golden/m9_factor_shadow.json` 的 `f01_growth_adjusted_valuation` 全部命中 |
 | FR-M9-12 | F-02 拐点质量分：按 B2；有效质量分 = max(原质量分, min(60, F-02))；替换：质量账换成有效质量分，重算 M-33。持有滞回影子：对规则 A 的持仓按 `f02_hysteresis` 的状态机逐日记录"若 B2 生效，今天会怎样" |
 | FR-M9-13 | F-03 一致预期修订：成长与预期账加一项"当年 EPS 共识 30 日变化 %"，曲线 −10→10、−3→35、0→55、3→75、10→95，权重 15，其余四项权重按比例缩到 85 |
 | FR-M9-14 | F-04 主营分部利润率改善：核心分部（最近 4 季收入最大的分部）的分部利润率同比变化（pp），曲线 −5→10、−2→35、0→55、2→75、5→95；加入质量账，权重 15，其余按比例缩到 85；单一分部或无分部时 `NULL` |
@@ -98,7 +98,7 @@
 | `test_shadow_signals_no_orders` | blocking | I32 | 合成 + 迁移 |
 | `test_factor_shadow_no_orders` | blocking | I35 | 合成 + 迁移 |
 | `test_x1_once_per_event` | blocking | X1 同一持仓同一事件只记一次 | 合成 |
-| `test_f01_values` | blocking | `f01_growth_adjusted_valuation` 全部用例 | `requirements/m9_factor_shadow.json` |
+| `test_f01_values` | blocking | `f01_growth_adjusted_valuation` 全部用例 | `golden/m9_factor_shadow.json` |
 | `test_f02_values` | blocking | `f02_inflection_quality` 全部用例 | 同上 |
 | `test_f02_shadow_hysteresis` | blocking | `f02_hysteresis` 的状态序列 | 同上 |
 | `test_single_factor_substitution` | blocking | 只替换一个账本，其余沿用规则 A 当日结果；生成 N9 | 合成 |

@@ -50,14 +50,14 @@
 | 编号 | 需求 |
 |---|---|
 | FR-M5-01 | 类型判定按规格第 8.2 节的顺序；连续两期满足新类型才切换；人工指定留痕 |
-| FR-M5-02 | 五种算法按规格第 8.4 节；`requirements/m5_valuation_synthetic.json` 全部用例命中 |
+| FR-M5-02 | 五种算法按规格第 8.4 节；`golden/m5_valuation_synthetic.json` 全部用例命中 |
 | FR-M5-03 | 顺序约束、p、显示档位、Δg 和档位文字按第 8.5 节；隐含增速用二分法在 g ∈ [−50, 200] 内反解，区间内无解时为 `NULL` 并标"无法反解" |
 | FR-M5-04 | 倍数分位：过去 10 年每日 TTM PE（EPS > 0 的日子），去掉最高和最低各 2.5%，用线性插值取分位；不足 5 年用 L2 板块成员 P50 的中位数，置信度降一档 |
 | FR-M5-05 | 更新触发和"待复核"按第 8.6 节；一致预期失效时退回 TTM 口径并标注 |
 | FR-M5-06 | 置信度按第 8.6 节逐条降档；未盈利成长类最高为"中" |
 | FR-M5-07 | 变化分解：按"类型 / 方法 → 一致预期输入 → 财报输入 → 倍数分位"的顺序逐项替换新值并记录中性值的增量；类型或方法变化时全部增量计入"类型 / 方法"；各项之和等于中性值总变化 |
 | FR-M5-08 | 影子规则 V-T1、V-T2、V1、V2、V3 按第 8.8 节逐日计算并记录，不产生任何订单 |
-| FR-M5-09 | 估值—仓位对照按第 8.12 节；`requirements/m5_valuation_synthetic.json` 的 `valuation_position_panel` 全部命中 |
+| FR-M5-09 | 估值—仓位对照按第 8.12 节；`golden/m5_valuation_synthetic.json` 的 `valuation_position_panel` 全部命中 |
 | FR-M5-10 | 每个对外输出（JSON、页面数据）都带固定句子"估值参考 v1，不参与仓位"（I21） |
 | FR-M5-11 | 权限：`role_trading` 对 `valuation_v1` 无 SELECT（I20）；交易模块不导入估值模块（I01 已在 M0） |
 | FR-M5-12 | 每天收盘后（北京 10:30 那一轮）运行；写 `job_runs` |
@@ -75,7 +75,7 @@
 
 | 测试名 | 标记 | 断言 | 夹具 |
 |---|---|---|---|
-| `test_valuation_synthetic` | blocking | 五种类型的全部用例（三档、p、档位、隐含增速、Δg、P90 封顶） | `requirements/m5_valuation_synthetic.json` |
+| `test_valuation_synthetic` | blocking | 五种类型的全部用例（三档、p、档位、隐含增速、Δg、P90 封顶） | `golden/m5_valuation_synthetic.json` |
 | `test_growth_valuation_v11` | blocking | I27 | 同上 `growth-nvda` |
 | `test_valuation_ignores_price` | blocking | I17 | 合成 |
 | `test_valuation_monotone_and_stable` | blocking | I18 | 合成 |
@@ -86,7 +86,7 @@
 | `test_change_decomposition_sums` | blocking | 各项之和等于总变化；类型变化时全部计入类型项 | 合成 |
 | `test_pending_review_over_25pct` | blocking | 无新财报时变化 26% → 待复核 | 合成 |
 | `test_implied_growth_no_solution` | blocking | 无解 → `NULL` + 标注 | 合成 |
-| `test_position_panel` | blocking | 对照面板全部用例 | `requirements/m5_valuation_synthetic.json` |
+| `test_position_panel` | blocking | 对照面板全部用例 | `golden/m5_valuation_synthetic.json` |
 | `test_shadow_rules_no_orders` | blocking | 影子规则只写 `valuation_v1.shadow_rules` | 合成 |
 | `test_valuation_live_smoke` | live | 59 只都有行或原因 | 真实 |
 
