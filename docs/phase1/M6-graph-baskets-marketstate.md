@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v1 |
+| 文档版本 | v2（早间截止时间顺延，见 README §3.1） |
 | 规格章节 | 3.1、3.5、6.11、11.3 |
 | 依赖 | M1（行情、全量库）、M2（10-K 原文、分部） |
 | 关闭的不变量 | 无（为 M7、M8、M9 提供基础） |
@@ -83,8 +83,8 @@
 | FR-M6-11 | 盘后时段：`ret_post = post_close ÷ close − 1`；因子用 SPY 和篮子成员的同时段收益；β 沿用日收益的估计；`post_close` 为空时该行 `NULL` |
 | FR-M6-12 | 5 日剩余：`resid_5d` = 最近 5 个交易日剩余之和；`resid_5d_z = resid_5d ÷ (σ × √5)`；`beta_share_5d = 1 − |resid_5d| ÷ |5 日总收益|`，限制在 [0, 1]；5 日总收益绝对值 < 0.5% 时为 `NULL` |
 | FR-M6-13 | 篮子：L2 篮子等权收益对 `f_m` 回归；L3 篮子对 (`f_m`, 所属 L2 的 `f_s`) 回归；同样 120 日窗口；输出 `resid_z`、同号成员比例、成员剩余的标准差 |
-| FR-M6-14 | 市场：`vix_pctile_252` = 当日 VIX 在过去 252 个交易日（不含当日）收盘中的百分位秩（≤ 当日值的比例 × 100）；`down_share_5d_pct` = 标的池 + 广域集合中 5 日收益 < 0 的比例；`shock_flag`、`l1_state` 按 `requirements/m6_marketstate.json` 的规则（规格第 11.3 节加本文：警戒 = SPY 5 日 ≤ −3% 或 VIX 分位 ≥ 70 或 5 日下跌比例 ≥ 60%） |
-| FR-M6-15 | 每天北京 08:10 完成（M1 之后、M7 之前）；写 `job_runs` |
+| FR-M6-14 | 市场：`vix_pctile_252` = 当日 VIX 在过去 252 个交易日（不含当日）收盘中的百分位秩（≤ 当日值的比例 × 100）；`down_share_5d_pct` = 标的池 + 广域集合中 5 日收益 < 0 的比例；`shock_flag`、`l1_state` 按 `golden/m6_marketstate.json` 的规则（规格第 11.3 节加本文：警戒 = SPY 5 日 ≤ −3% 或 VIX 分位 ≥ 70 或 5 日下跌比例 ≥ 60%） |
+| FR-M6-15 | 每天北京 08:55 完成（美东 20:55；冬令时北京 09:55，见 README §3.1）（M1 之后、M7 之前）；写 `job_runs` |
 
 ## 6. 异常与降级
 
@@ -98,7 +98,7 @@
 
 | 测试名 | 标记 | 断言 | 夹具 |
 |---|---|---|---|
-| `test_marketstate_flags` | blocking | `shock_flag`、`l1_state` 全部用例（含边界 −5.0、79.9、70） | `requirements/m6_marketstate.json` |
+| `test_marketstate_flags` | blocking | `shock_flag`、`l1_state` 全部用例（含边界 −5.0、79.9、70） | `golden/m6_marketstate.json` |
 | `test_residual_exact_linear` | blocking | 合成数据：个股收益 = 0.001 + 1.2·f_m + 0.5·f_s + 0.8·f_t（无噪声）→ β 估计误差 < 1e-9，当日剩余 = 0 | 合成 |
 | `test_residual_leave_one_out` | blocking | 篮子收益不含本股：把本股收益放大 10 倍，篮子因子不变 | 合成 |
 | `test_residual_window_excludes_today` | blocking | 改当日收益不影响 β | 合成 |
