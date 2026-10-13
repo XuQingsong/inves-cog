@@ -1,0 +1,642 @@
+[
+  {
+    "role": "role_ingest",
+    "schema": "ingest",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_trading",
+    "schema": "ingest",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "ingest",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "ingest",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "ingest",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "ingest",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "ingest",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "ingest",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "fundamentals",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_trading",
+    "schema": "fundamentals",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "fundamentals",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "fundamentals",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "fundamentals",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "fundamentals",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "fundamentals",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "fundamentals",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "marketstate",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "marketstate",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "marketstate",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_valuation",
+    "schema": "marketstate",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "marketstate",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "marketstate",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "marketstate",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "marketstate",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "graph",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "graph",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "graph",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "graph",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "graph",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_overlay",
+    "schema": "graph",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "graph",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "graph",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "trading",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "trading",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "trading",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "trading",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "trading",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "trading",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "trading",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "trading",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "valuation_v1",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "valuation_v1",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "valuation_v1",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "valuation_v1",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_perception",
+    "schema": "valuation_v1",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "valuation_v1",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "valuation_v1",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "valuation_v1",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "perception",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "perception",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "perception",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "perception",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "perception",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_overlay",
+    "schema": "perception",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "perception",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "perception",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "perception_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "perception_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "perception_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "perception_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "perception_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "perception_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "perception_shadow",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_web",
+    "schema": "perception_shadow",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "factor_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "factor_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "factor_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "factor_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "factor_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "factor_shadow",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_shadow",
+    "schema": "factor_shadow",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_web",
+    "schema": "factor_shadow",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_ingest",
+    "schema": "overlay",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_trading",
+    "schema": "overlay",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_marketstate",
+    "schema": "overlay",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_valuation",
+    "schema": "overlay",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_perception",
+    "schema": "overlay",
+    "select": false,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_overlay",
+    "schema": "overlay",
+    "select": true,
+    "insert": true,
+    "update": true,
+    "delete": true
+  },
+  {
+    "role": "role_shadow",
+    "schema": "overlay",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  },
+  {
+    "role": "role_web",
+    "schema": "overlay",
+    "select": true,
+    "insert": false,
+    "update": false,
+    "delete": false
+  }
+]
