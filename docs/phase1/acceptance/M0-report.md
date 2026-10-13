@@ -61,3 +61,34 @@ RD-01 和 RD-02 的根源在需求方：v2 只写了"任何 socket 连接"和 4 
 2. 需求方在 `tests/harness/milestones.txt` 写入 `M0` 并提交。
 3. 原 M0 开发 agent 按 M0 v3 第 10 节完成 `[M0-v3]` 补丁，需求方按 AC-M0-08 至 AC-M0-10 验收。
 4. T01、T02 可以立即在合并后的 main 上开工。
+
+---
+
+## 5. v3 补丁验收（PR #2「[M0-v3] 提交验收」）
+
+```
+文档版本：v3（第 10 节）    被验收提交：90b4429（PR #2）    验收人：需求方    日期：2026-10-13
+```
+
+**结论：通过。** PR #2 可以合并（用 merge commit，保留历史）。
+
+| 项 | 环境与命令 | 结果 |
+|---|---|---|
+| 干净检出 | 从 `origin/phase1/m0-v3-patch` 新建 worktree，并把 main 上的 `milestones.txt`（已含 M0）检出到 worktree，模拟合并后的状态 | —— |
+| 依赖 | `uv sync --frozen --python 3.11 --group dev`（新增 `httpx==0.28.1`） | 成功 |
+| CI | GitHub API 查询 `90b4429` | `phase1-blocking` success（[运行记录](https://github.com/XuQingsong/inves-cog/actions/runs/38394127811/job/115284931423)）；PR mergeable_state = clean |
+| 改动范围 | `git diff --name-only origin/main...origin/phase1/m0-v3-patch` | 只改了 `tests/harness/`、`pyproject.toml`、`uv.lock` 和 `handoff/M0/self-test-v3.md`；`docs/`、`pending.txt`、`milestones.txt` 都没动 |
+
+| AC | 判定 | 证据 |
+|---|---|---|
+| AC-M0-08 | 通过 | 在模拟合并后的状态下，blocking 10 passed，9.52 秒；M0 已写入 milestones，12 个测试都存在。第 7 节标 v3 的断言逐条核对，全部存在：127.0.0.1 和 ::1 的连接被拦截；3 个本地通信探针加 AF_UNIX 的 bind/listen/accept 都放行；AF_INET 和 AF_INET6 的 7 种方法都被拦截；时钟负例 16 个，`monotonic`、`perf_counter` 不报错；golden 新增文件并同步 MANIFEST 后校验通过；模型名负例覆盖 12 类文件，二进制文件、录音文件、白名单内的名字都不误报 |
+| AC-M0-09 | 通过 | 需求方**自己写的**探针，不用开发的 `probes.py`：`socketpair` 收发、asyncio `call_soon_threadsafe`、FastAPI `TestClient` 请求本地路由，3 个都通过，总耗时 0.29 秒，其中 TestClient 0.017 秒（修复前进程卡死、60 秒超时）。`socket.create_connection(("127.0.0.1", 1))` 仍然报 `FR-M0-03: forbidden socket/DNS operation create_connection` |
+| AC-M0-10 | 通过 | 需求方亲手复跑 9 项破坏性自测，全部变红：FR-M0-03、FR-M0-04、FR-M0-05、FR-M0-07、FR-M0-08、I01 ×3、I37。第 7 项改用 `gemini-pro` 构造负例 |
+
+补充复核（RD 的原始复现场景）：
+
+- RD-02：初验时漏掉的 4 种写法（属性引用、`datetime.today()`、`time.time_ns()`、`pd.Timestamp.now()`）现在都会报错；`time.monotonic()` 不报错。
+- RD-03：测试里已经没有写死的文件个数。
+- RD-04：在真实仓库的 `scripts/Dockerfile.harness` 里加一个非白名单模型名，blocking 变红（I37）。
+
+RD-01 至 RD-04 全部关闭。PR #2 合并后，M0 不再有遗留项。
