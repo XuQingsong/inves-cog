@@ -323,7 +323,8 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | # | 事项 | 谁 | 影响 |
 |---|---|---|---|
 | R1 | 主分支保护：`docs/**` 需要 CODEOWNERS（需求方）审核 | 用户 | 标准答案和需求文档防篡改 |
-| R2 | 开发需要 Muse 仓库 `aacea04` 的**只读**访问（v18 标准答案、旧提取器、规则 A 源码细节；只作参照，不拷贝代码） | 用户 | M2、M3、M4 |
+| R2 | ~~Muse 仓库访问~~ **已解决**：`https://github.com/XuQingsong/muse.git` 是公开仓库，`main` 即 `aacea04`；v18 标准答案在 `code/paper_trade_v18full_trades.json`（只作参照，不拷贝代码） | —— | M2、M3、M4 |
+| R7 | Muse 沙箱 `quant` 库的数据导出：一致预期快照（2026-10-08 起，**无法重新获取**）、Form 4 内部人事件、VIX 历史。这些数据不在 Muse 仓库里，只在 `quant` 库中 | 用户 | M1（Form 4、VIX）、M2（一致预期） |
 | R3 | ~~三个案例的日期~~ **已确定**：东芝 2026-10-02、OpenAI 2026-10-08、Meta Muse 2026-09-21（详见 M7 第 7.1 节） | —— | M7、M8 的案例夹具 |
 | R4 | `deepseek-v4.1-flash` 和 `glm-5.3` 的接入方式（服务商、接口地址），以环境变量提供 | 用户 | M0、M1、M8 |
 | R5 | Alpaca、Tavily、Exa、Google CSE、SEC 访问身份、Alpha Vantage、DashScope 的账号和 key（以环境变量提供） | 用户 / 开发 | M1 |
