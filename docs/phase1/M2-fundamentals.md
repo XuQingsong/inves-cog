@@ -62,7 +62,7 @@
 
 **`fundamentals.consensus_derived`**：`as_of, ticker, chg_7d_pct / chg_30d_pct / chg_90d_pct（EPS 当年、次年，营收当年）, breadth_7d, breadth_30d, dispersion, surprise_last4, window_status jsonb`
 
-**`fundamentals.profile`**（F3，每日每只一份 JSON）：主营业务、季度财报趋势、一致预期、定性锚（Brain 有基线时为链接，不复制内容）、基本面变化记录。
+**`fundamentals.profile`**（F3，每日每只一份 JSON）：主营业务、季度财报趋势、一致预期、基本面变化记录。
 
 **`fundamentals.health`**（数据健康页 JSON 的来源）：`ticker, latest_period_end, latest_filed, latest_8k_202, health_codes, can_score(bool), can_trade(bool), reason`
 
@@ -70,7 +70,7 @@
 
 | 编号 | 需求 |
 |---|---|
-| FR-M2-01 | `legacy` 提取器逐行移植 Muse `screen_asof_2026_01_01.py:pit_fundamentals` 与 `paper_trade_2026.py:compute_books` 的取数部分；同一输入下与 Muse 输出逐字段一致 |
+| FR-M2-01 | `legacy` 提取器：在本项目内重写，逻辑与 Muse `screen_asof_2026_01_01.py:pit_fundamentals`、`paper_trade_2026.py:compute_books` 的取数部分一致（参照源码，不导入、不拷贝）；同一输入下与 Muse 冻结输出逐字段一致 |
 | FR-M2-02 | `fixed` 提取器 = `legacy` + D1（营收标签清单加入 `RevenueFromContractWithCustomerIncludingAssessedTax`，同一期间多标签取最新申报）+ D2（流量类字段第四季 = 全年 − 前三季）+ D3（submissions 已有、facts 3 天内仍无该期 → 解析该申报的 XBRL 实例）+ D4（毛利 = 营收 − 营业成本，标 `gross_margin_derived`）+ D5（净利润兜底标签 `NetIncomeLossAvailableToCommonStockholdersBasic`、`ProfitLoss`，标 `ni_tag_fallback`）；每项可单独开关 |
 | FR-M2-03 | D2 的任一季缺失 → 第四季为 `NULL`，健康码 `q4_missing` |
 | FR-M2-04 | 健康码按规格第 4.6 节；`stale_fundamentals` = 最新营收期间结束日距 `as_of` 超过 180 天；`revenue_tag_gap` = 修复关闭时只存在新营收标签；`companyfacts_lag` = submissions 有新 10-Q / 10-K、facts 没有 |

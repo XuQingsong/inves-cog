@@ -1,7 +1,9 @@
 # 第一阶段开发文档 · 总览
 
-> 依据：[`../system-spec.md`](../system-spec.md)（统一规格 v1.2）。公式、规则、参数以规格为准；范围、接口、测试、验收以本目录为准。
-> 代码落点：`XuQingsong/stock-pm`。纸面研究，不下单。
+> 依据：[`../system-spec.md`](../system-spec.md)（统一规格 v1.3）。公式、规则、参数以规格为准；范围、接口、测试、验收以本目录为准。
+> 这是一个**独立项目**：代码、测试、配置、迁移全部写在本仓库 `XuQingsong/inves-cog`（`src/inves_cog/`、`tests/`、`config/`、`migrations/`），不导入、不调用 stock-pm 或 Muse 的代码，不读写它们的数据库。纸面研究，不下单。
+>
+> **分工**：需求方只负责需求文档和验收，不写代码；开发由开发者完成。开发不修改 `docs/` 下的任何文件，对需求的疑问通过开工复述单和 Q&A 提给需求方。
 
 本目录做三件事：
 
@@ -15,7 +17,7 @@
 
 | 模块 | 名称 | 主要内容 | 规格章节 | 依赖 | 关闭的不变量 |
 |---|---|---|---|---|---|
-| [M0](M0-harness.md) | 工程骨架与 Harness | 目录、断网、注入时钟、pending / milestones、标准答案校验、导入防火墙、LLM 分档、权限矩阵骨架、CI | 16.3–16.5 | —— | I01、I26、I37 |
+| [M0](M0-harness.md) | 工程骨架与 Harness | 项目骨架与工程基线、断网、注入时钟、pending / milestones、标准答案校验、导入防火墙、LLM 分档、权限矩阵骨架、CI | 16.3–16.5 | —— | I01、I37 |
 | [M1](M1-market-info-ingest.md) | 行情与信息采集 | 分钟线（04:00–20:00）、日线、广域集合、新闻、SEC 8-K / Form 4、`earnings_events`、榜单、搜索趋势、官网、空头和期权统计、全量库、数据源健康 | 4.1–4.3 | M0 | I22、I28（数据部分） |
 | [M2](M2-fundamentals.md) | 财报与基本面档案 | companyfacts、`legacy` / `fixed` 提取器、D1–D7、一致预期快照与导入、F1 分部、F2 衍生指标、F3 档案、数据健康页 | 4.4–4.6、4.8 | M0 | I10、I11、I12、I33、I34 |
 | [M3](M3-rule-a-scoring.md) | 规则 A 打分 | 技术字段、四本账、红线、分层、确定性、资格分、入场判定（不写订单） | 9.1–9.8 | M1、M2 | I02、I03、I04、I08、I09、I13 |
@@ -23,7 +25,7 @@
 | [M5](M5-valuation.md) | 估值 v1.1 与估值—仓位对照 | 类型判定、五种算法、p、隐含增速、置信度、变化分解、影子 V-T1 / V-T2 / V1–V3、估值—仓位对照 | 8 | M2、M4（只读） | I17–I21、I27 |
 | [M6](M6-graph-baskets-marketstate.md) | 图谱、篮子与价格结构层 | 实体与关系（含美元暴露）、种子起草与审核、篮子、监控实体、`marketstate` | 3.5、6.11、11.3 | M1、M2 | —— |
 | [M7](M7-anomaly-detection.md) | 异常感知 | 三条路径与多日累积、数据质量核对、聚类归层、资金放大特征、异常类型候选、异常对象 | 5 | M6 | —— |
-| [M8](M8-attribution-tracking.md) | 建连归因与三轨跟踪 | 回捞、说法抽取、候选生成、证据打分、按渠道的隐含幅度、市场确认、二次命中、联动事件与生命周期、三轨、背离标签、系统性事件标签、冲击分解、Brain 触发 | 6、7 | M7 | I23、I30 |
+| [M8](M8-attribution-tracking.md) | 建连归因与三轨跟踪 | 回捞、说法抽取、候选生成、证据打分、按渠道的隐含幅度、市场确认、二次命中、联动事件与生命周期、三轨、背离标签、系统性事件标签、冲击分解 | 6、7 | M7 | I23、I30 |
 | [M9](M9-overlay-shadow-factors.md) | 覆盖层、影子信号与因子候选池 | 覆盖层生成与投递、X1–X4、因子候选池 F-01–F-08 | 11.1–11.4、13.7 | M4、M5、M8 | I24、I32、I35 |
 | [M10](M10-pages-review.md) | 页面、处置卡与复盘 | 页面与 JSON 接口、处置卡、系统日志、决策时间线、案例库与打标、漏检周报、先兆快照、周报月报 | 12、13 | 全部 | I25、I36 |
 
@@ -79,9 +81,9 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 ### 3.2 时钟
 
-- 业务代码只能通过 `stock_pm.clock.Clock` 取时间（`now_utc()`、`today_trade_date()`）。
+- 业务代码只能通过 `inves_cog.clock.Clock` 取时间（`now_utc()`、`today_trade_date()`）。
 - 生产用 `SystemClock`，测试用 `FrozenClock`。
-- `ingest`、`fundamentals`、`marketstate`、`trading`、`valuation_v1`、`perception`、`shadow`、`overlay` 里出现 `datetime.now(`、`datetime.utcnow(`、`date.today(`、`time.time(` 即失败（M0 的门禁）。
+- `src/inves_cog/` 下除 `clock.py` 外出现 `datetime.now(`、`datetime.utcnow(`、`date.today(`、`time.time(` 即失败（M0 的门禁）。
 
 ### 3.3 单位与数值
 
@@ -99,7 +101,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 ### 3.5 参数与配置
 
-- 所有阈值和参数集中在 `config/params/p-YYYY.MM.yaml`，带版本号；代码通过 `stock_pm.params` 读取，**不得在业务代码里硬编码阈值**。
+- 所有阈值和参数集中在 `config/params/p-YYYY.MM.yaml`，带版本号；代码通过 `inves_cog.params` 读取，**不得在业务代码里硬编码阈值**。
 - 规则 A 的 v18 常量另存 `config/params/rule_a_v18.yaml`，由 I03 校验。
 - 每一条决策记录（订单、跳过、覆盖层、异常、估值行、影子记录）都带 `params_version`。
 - 密钥只从环境变量读取，不进仓库、不进测试、不进日志。
@@ -133,16 +135,16 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 | 包 | 允许依赖 | 禁止依赖 |
 |---|---|---|
-| `stock_pm.ingest`（含 `ingest.fundamentals`） | 现有 `external`、`llm`、数据库 | 其余新包 |
-| `stock_pm.marketstate` | `ingest`（只读行情）、`graph` 的只读篮子定义 | `perception`、`valuation_v1`、`brain`、`llm`、`shadow` |
-| `stock_pm.trading` | `ingest`、`marketstate`、`overlay`（只读标记） | `valuation_v1`、`brain`、`perception`、`shadow`、`llm` |
-| `stock_pm.valuation_v1` | `ingest`、`trading`（只读快照） | 写订单；被 `trading` 引用 |
-| `stock_pm.perception`（含 `perception.graph`） | `ingest`、`marketstate`、`llm`、`brain`（只调用 `runtime.run_brain_update`） | 写订单 |
-| `stock_pm.shadow` | 全部只读 | 写订单；被 `trading` 引用 |
-| `stock_pm.overlay` | `perception`（只读结论） | `trading` 的写接口 |
-| `stock_pm.web` | 全部只读 | 任何写接口 |
+| `inves_cog.ingest`（含 `ingest.fundamentals`） | `llm`、`clock`、`params`、数据库、本项目内的外部接口客户端 | 其余业务包 |
+| `inves_cog.marketstate` | `ingest`（只读行情）、`perception.graph` 的只读篮子定义 | `perception` 的其他子包、`valuation_v1`、`llm`、`shadow` |
+| `inves_cog.trading` | `ingest`、`marketstate`、`overlay`（只读标记） | `valuation_v1`、`perception`、`shadow`、`llm` |
+| `inves_cog.valuation_v1` | `ingest`、`trading`（只读快照） | 写订单；被 `trading` 引用 |
+| `inves_cog.perception`（含 `perception.graph`） | `ingest`、`marketstate`、`llm` | 写订单 |
+| `inves_cog.shadow` | 全部只读 | 写订单；被 `trading` 引用 |
+| `inves_cog.overlay` | `perception`（只读结论） | `trading` 的写接口 |
+| `inves_cog.web` | 全部只读 | 任何写接口 |
 
-`stock_pm.shadow` 是对规格第 16.2 节的细化：X1–X4 和因子候选池放在这个独立的包里，而不是 `perception`，因为它们要读交易和估值的结果，单独成包才能用权限矩阵隔离。
+任何包都**不得**导入 stock-pm 或 Muse 的代码（M0 门禁）。X1–X4 和因子候选池放在独立的 `shadow` 包里，因为它们要读交易和估值的结果，单独成包才能用权限矩阵隔离。
 
 ### 3.8 LLM 任务分档（I37）
 
@@ -151,7 +153,6 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | 任务名 | 档位 | 模型 | 使用模块 |
 |---|---|---|---|
 | `anomaly_candidates` | 困难 | `glm-5.3` | M8 |
-| `brain_incremental` | 困难 | `glm-5.3` | M8（调用现有 Brain） |
 | `graph_seed_draft` | 困难 | `glm-5.3` | M6 |
 | `exposure_draft` | 困难 | `glm-5.3` | M6 |
 | `segment_mapping_draft` | 困难 | `glm-5.3` | M2 |
@@ -163,7 +164,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | `summary_oneliner` | 其他 | `deepseek-v4.1-flash` | M10 |
 
 - 困难档超时 900 秒，失败标"待分析"，**不降级**；其他档超时 120 秒，重试 2 次后标"抽取失败"。
-- stock-pm 现有代码里的其他模型名（`glm-5.2`、`GLM-5.3-Flash`、`STRONG_MODEL_*`、`BENCHMARK_MODELS` 等）在 M0 里统一迁移或移除，见 M0 的 FR-M0-10。
+- 本仓库代码和配置里不得出现其他模型名（M0 的 FR-M0-10）。
 - 测试里只能用录音回放（按任务名 + 输入哈希索引），不能真调模型。
 - 向量嵌入（DashScope）不是对话 LLM，不在本表里。
 
@@ -175,7 +176,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 | 类别 | 来源 | 谁能改 |
 |---|---|---|
-| 需求方标准答案 | 本仓库 [`golden/`](golden/)，按规格公式算出；`golden/MANIFEST.sha256` 为校验值 | **只有需求方**。开发认为它错了，提给需求方；需求方在本仓库修正并重新发布 |
+| 需求方标准答案 | [`golden/`](golden/)，按规格公式算出；`golden/MANIFEST.sha256` 为校验值 | **只有需求方**。开发认为它错了，提给需求方；需求方修正并重新发布 |
 | v18 标准答案 | Muse `aacea04` 的 `paper_trade_v18full_trades.json` | 不能改 |
 | 冻结输入 | 开发用旧提取器或真实行情生成（v18 输入、案例行情和新闻） | 生成一次后冻结；改动必须写 `tests/harness/CHANGELOG.md` |
 
@@ -192,10 +193,19 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | `m8_attribution.json` | 按渠道的隐含幅度（含"无法检验"和部分缺失）；证据总分与置信度 | M8 |
 | `m9_factor_shadow.json` | F-01、F-02 的数值；F-02 持有滞回的状态序列 | M9 |
 
-- 需求方标准答案原样拷进 stock-pm 的 `tests/fixtures/phase1/requirements/`，连同 `MANIFEST.sha256`；M0 的 `test_requirements_golden_unchanged` 校验哈希。
+- 测试**直接读取** `docs/phase1/golden/`，不拷贝；M0 的 `test_requirements_golden_unchanged` 校验每个文件与 `MANIFEST.sha256` 一致。
+- 防篡改有两道：（1）`CODEOWNERS` 把 `docs/**` 指定给需求方，主分支开启"需要 CODEOWNERS 审核"的保护（用户在 GitHub 设置）；（2）验收时需求方用自己保存的参考脚本重新生成标准答案并比对哈希，不一致则该模块直接不通过。
 - 需求方标准答案只覆盖**规格明确规定的公式**；规格让位给 Muse 源码的细节（§3.9）如果与标准答案冲突，开发在开工复述里提出，由需求方修正标准答案。
 
-### 3.11 任务运行记录
+### 3.11 工程基线
+
+- Python ≥ 3.11；`pyproject.toml` 管理依赖，依赖版本锁定（`uv.lock` 或等价的锁文件）；测试框架 pytest。
+- 数据库 PostgreSQL ≥ 15 + pgvector；库名 `inves_cog`。
+- 测试需要数据库时，用临时数据库（docker compose 服务或测试容器），不连任何共享或生产库。
+- **一条命令复跑**：`make phase1-test` 在干净机器上（只装 Docker 和 Python）完成建环境、迁移、跑 `phase1_blocking`；`make phase1-replay`、`make phase1-cases` 同理。需求方验收就用这几条命令。
+- Web 框架由开发选择，开工复述里说明；页面必须有 JSON 接口（M10）。
+
+### 3.12 任务运行记录
 
 每个定时任务每次运行写一行 `ingest.job_runs`：任务名、`trade_date`、开始和结束时间、状态（`ok` / `degraded` / `failed`）、处理条数、错误摘要、`params_version`。页面和验收都以这张表为准，不以日志文件为准。
 
@@ -234,7 +244,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | I23 | 异常契约、冲击分解 | M8 |
 | I24 | 覆盖层只收紧 | M9 |
 | I25 | 案例 T+1 / T+5 / T+20 | M10 |
-| I26 | Brain 估值禁用键不变 | M0 |
+| I26 | （已删除） | —— |
 | I28 | 财报反应日（数据部分） | M1 |
 | I29、I31 | B2 滞回、S10 | 第二阶段（A+）；第一阶段 M9 只测影子值 |
 | I30 | 隐含幅度规则 | M8 |
@@ -310,9 +320,9 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 
 | # | 事项 | 谁 | 影响 |
 |---|---|---|---|
-| R1 | 需求方需要 `XuQingsong/stock-pm` 的只读访问权限（用于验收复跑） | 用户 | 全部模块的验收 |
-| R2 | 开发需要 Muse 仓库 `aacea04` 的访问权限（v18 标准答案、旧提取器、规则 A 源码细节） | 用户 | M2、M3、M4 |
+| R1 | 主分支保护：`docs/**` 需要 CODEOWNERS（需求方）审核 | 用户 | 标准答案和需求文档防篡改 |
+| R2 | 开发需要 Muse 仓库 `aacea04` 的**只读**访问（v18 标准答案、旧提取器、规则 A 源码细节；只作参照，不拷贝代码） | 用户 | M2、M3、M4 |
 | R3 | OpenAI ARR 传闻、Meta Muse 登顶、东芝扩产三个事件的日期（美东） | 用户 | M7、M8 的案例夹具 |
 | R4 | `deepseek-v4.1-flash` 和 `glm-5.3` 的接入方式（服务商、接口地址），以环境变量提供 | 用户 | M0、M1、M8 |
-| R5 | 生产环境 Tavily / Exa / Google CSE / SEC 访问身份 / Alpha Vantage 的配置状态 | 用户 | M1 |
-| R6 | 服务器 CPU / 内存 / 磁盘 | 用户 | M1（广域日线、向量库） |
+| R5 | Alpaca、Tavily、Exa、Google CSE、SEC 访问身份、Alpha Vantage、DashScope 的账号和 key（以环境变量提供） | 用户 / 开发 | M1 |
+| R6 | 部署机器（本项目独立部署）的 CPU / 内存 / 磁盘 | 用户 / 开发 | M1（广域日线、向量库） |
