@@ -55,7 +55,7 @@ src/inves_cog/clock.py                       # Clock、SystemClock、FrozenClock
 src/inves_cog/params.py                      # 读取 config/params/*.yaml，暴露 params_version
 src/inves_cog/llm/registry.py                # 任务名 → 档位 → 模型
 config/llm_tasks.yaml
-config/params/p-2026.10.yaml                 # 先放规格第 17 节的初始值
+config/params/p-2026.10/m0.yaml              # 参数目录（各模块各自加文件）；加载器合并整个目录
 config/params/rule_a_v18.yaml                # 规则 A 常量（I03 用）
 migrations/phase1_0001_schemas_roles.sql     # README §3.6 的 schema 和角色
 .github/workflows/phase1.yml
