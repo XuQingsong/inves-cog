@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________________________ test_probe __________________________________
+
+    def test_probe():
+>       scan_imports(Path('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/import-0'))
+
+/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-5/test_probe.py:4:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/harness/tools/checks.py:162: in scan_imports
+    fail(path, line, 'I01/FR-M0-09', f'{origin} may not import {target}')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = PosixPath('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/import-0/src/inves_cog/trading/bad_valuation.py')
+line = 1, rule = 'I01/FR-M0-09'
+reason = 'trading may not import inves_cog.valuation_v1'
+
+    def fail(path, line, rule, reason):
+>       raise AssertionError(f'{path}:{line}: {rule}: {reason}')
+E       AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/import-0/src/inves_cog/trading/bad_valuation.py:1: I01/FR-M0-09: trading may not import inves_cog.valuation_v1
+
+tests/harness/tools/checks.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED ::test_probe - AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt8...
+1 failed in 0.13s

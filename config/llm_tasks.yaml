@@ -1,0 +1,61 @@
+tasks:
+  anomaly_candidates:
+    tier: difficult
+    model: glm-5.3
+    timeout_seconds: 900
+    retries: 0
+    failure_status: 待分析
+  graph_seed_draft:
+    tier: difficult
+    model: glm-5.3
+    timeout_seconds: 900
+    retries: 0
+    failure_status: 待分析
+  exposure_draft:
+    tier: difficult
+    model: glm-5.3
+    timeout_seconds: 900
+    retries: 0
+    failure_status: 待分析
+  segment_mapping_draft:
+    tier: difficult
+    model: glm-5.3
+    timeout_seconds: 900
+    retries: 0
+    failure_status: 待分析
+  entity_tagging:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 2
+    failure_status: 抽取失败
+  info_fields_extraction:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 2
+    failure_status: 抽取失败
+  dedupe_assist:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 2
+    failure_status: 抽取失败
+  claim_extraction:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 2
+    failure_status: 抽取失败
+  systemic_event_tag:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 2
+    failure_status: 抽取失败
+  summary_oneliner:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 2
+    failure_status: 抽取失败

@@ -1,0 +1,59 @@
+{
+  "checks": [
+    {
+      "case": "01-network",
+      "expected_rule": "FR-M0-03",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "02-clock",
+      "expected_rule": "FR-M0-04",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "03-skip",
+      "expected_rule": "FR-M0-05",
+      "exit_code": 4,
+      "red": true
+    },
+    {
+      "case": "04-golden",
+      "expected_rule": "FR-M0-07",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "05-frozen",
+      "expected_rule": "FR-M0-08",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "06-valuation-import",
+      "expected_rule": "I01",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "07-model",
+      "expected_rule": "I37",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "08-marketstate-import",
+      "expected_rule": "I01",
+      "exit_code": 1,
+      "red": true
+    },
+    {
+      "case": "09-external-import",
+      "expected_rule": "I01",
+      "exit_code": 1,
+      "red": true
+    }
+  ],
+  "real_golden_unchanged": true
+}

@@ -1,0 +1,86 @@
+name: Phase 1 Harness
+on:
+  pull_request:
+  push:
+    branches: [main, 'phase1/**']
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase1-blocking:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build clean Python and Docker CLI container
+        run: docker build -t inves-cog-harness -f scripts/Dockerfile.harness .
+      - name: Clean container make phase1-test and CI assertions
+        run: |
+          set -o pipefail
+          docker run --rm -v "$PWD:$PWD" -w "$PWD" -v /var/run/docker.sock:/var/run/docker.sock -e CI=true inves-cog-harness sh -c 'make phase1-test && .venv/bin/python -m pytest tests/harness/test_m0_ci.py -q --junitxml=.harness/m0-ci.xml && .venv/bin/python scripts/m0_selfcheck.py' 2>&1 | tee .harness-clean.log
+      - name: Publish result summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path('.harness/blocking.json')
+          message = '阻塞检查未完成'
+          if p.exists():
+              r = json.loads(p.read_text())
+              message = f"blocking: {r['status']}; {r['collected']} tests; {r['duration_seconds']:.3f}s"
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+              out.write(message + '\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m0-clean-environment-evidence
+          include-hidden-files: true
+          path: |
+            .harness-clean.log
+            .harness/*.json
+            .harness/*.xml
+            .harness/destructive/
+
+  phase1-nightly:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [replay, cases]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t inves-cog-harness -f scripts/Dockerfile.harness .
+      - name: Run nightly suite
+        run: docker run --rm -v "$PWD:$PWD" -w "$PWD" -v /var/run/docker.sock:/var/run/docker.sock -e CI=true inves-cog-harness make phase1-${{ matrix.suite }}
+      - name: Distinguish empty suites from passes
+        if: always()
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path('.harness') / (os.environ['SUITE'] + '.json')
+          if p.exists():
+              r = json.loads(p.read_text())
+              label = '无测试（待实现）' if r['status'] == 'no_tests' else r['status']
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+                  out.write(f"{os.environ['SUITE']}: {label}; pending: {r['pending']}\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase1-${{ matrix.suite }}-evidence
+          include-hidden-files: true
+          path: |
+            .harness/*.json
+            .harness/*.xml

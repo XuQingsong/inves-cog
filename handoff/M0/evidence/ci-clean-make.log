@@ -1,0 +1,501 @@
+python3 scripts/phase1.py phase1_blocking
+Collecting uv==0.13.0
+  Downloading uv-0.13.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+Downloading uv-0.13.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (17.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 17.9/17.9 MB 143.9 MB/s eta 0:00:00
+Installing collected packages: uv
+Successfully installed uv-0.13.0
+
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: python -m pip install --upgrade pip
+Using CPython 3.11.17 interpreter at: /usr/local/bin/python3.11
+Creating virtual environment at: .venv
+   Building inves-cog @ file:///home/runner/work/inves-cog/inves-cog
+Downloading numpy (16.1MiB)
+Downloading pydantic-core (2.1MiB)
+Downloading pygments (1.2MiB)
+Downloading pandas (10.6MiB)
+ Downloaded pydantic-core
+ Downloaded pygments
+ Downloaded numpy
+ Downloaded pandas
+      Built inves-cog @ file:///home/runner/work/inves-cog/inves-cog
+Prepared 31 packages in 564ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 31 packages in 458ms
+ + annotated-doc==0.0.5
+ + annotated-types==0.8.0
+ + anyio==4.15.1
+ + certifi==2026.7.22
+ + charset-normalizer==3.5.2
+ + exchange-calendars==4.13.2
+ + fastapi==0.143.0
+ + idna==3.20
+ + iniconfig==2.3.1
+ + inves-cog==0.1.0 (from file:///home/runner/work/inves-cog/inves-cog)
+ + korean-lunar-calendar==0.4.0
+ + numpy==2.4.6
+ + opentelemetry-api==1.45.1
+ + packaging==26.3
+ + pandas==3.0.6
+ + pluggy==1.6.0
+ + pydantic==2.14.1
+ + pydantic-core==2.50.1
+ + pygments==2.21.0
+ + pyluach==2.3.0
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + requests==2.34.2
+ + six==1.17.0
+ + starlette==1.8.0
+ + toolz==1.2.0
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + tzdata==2026.5
+ + urllib3==2.8.0
+ database Pulling
+ 774043ccc8cc Pulling fs layer
+ f2455d5db1ca Pulling fs layer
+ 8445317dd84f Pulling fs layer
+ 2dd9b1a67dcf Pulling fs layer
+ e0d7eb465374 Pulling fs layer
+ 1a60cdc4b8b6 Pulling fs layer
+ 00ea30b13a58 Pulling fs layer
+ 708679827647 Pulling fs layer
+ 3e13d544cd35 Pulling fs layer
+ 639aa37fe549 Pulling fs layer
+ b3e09271b721 Pulling fs layer
+ aae3fa55f377 Pulling fs layer
+ 50a212ffc5a1 Pulling fs layer
+ e9cc823db10f Pulling fs layer
+ 003442b28249 Pulling fs layer
+ 2ede25b7c579 Pulling fs layer
+ 3e13d544cd35 Waiting
+ 639aa37fe549 Waiting
+ b3e09271b721 Waiting
+ aae3fa55f377 Waiting
+ 50a212ffc5a1 Waiting
+ e9cc823db10f Waiting
+ 2ede25b7c579 Waiting
+ 003442b28249 Waiting
+ 1a60cdc4b8b6 Waiting
+ 00ea30b13a58 Waiting
+ 708679827647 Waiting
+ 2dd9b1a67dcf Waiting
+ e0d7eb465374 Waiting
+ f2455d5db1ca Downloading [==================================================>]  1.167kB/1.167kB
+ f2455d5db1ca Verifying Checksum
+ f2455d5db1ca Download complete
+ 8445317dd84f Downloading [>                                                  ]  48.55kB/4.534MB
+ 774043ccc8cc Downloading [>                                                  ]  294.3kB/28.24MB
+ 2dd9b1a67dcf Downloading [>                                                  ]  15.79kB/1.25MB
+ 8445317dd84f Verifying Checksum
+ 8445317dd84f Download complete
+ 2dd9b1a67dcf Verifying Checksum
+ 2dd9b1a67dcf Download complete
+ e0d7eb465374 Downloading [>                                                  ]  81.32kB/8.066MB
+ 1a60cdc4b8b6 Downloading [>                                                  ]  15.79kB/1.196MB
+ 1a60cdc4b8b6 Verifying Checksum
+ 1a60cdc4b8b6 Download complete
+ e0d7eb465374 Download complete
+ 774043ccc8cc Download complete
+ 00ea30b13a58 Downloading [==================================================>]     116B/116B
+ 00ea30b13a58 Verifying Checksum
+ 00ea30b13a58 Download complete
+ 708679827647 Downloading [==================================================>]  3.143kB/3.143kB
+ 708679827647 Verifying Checksum
+ 708679827647 Download complete
+ 774043ccc8cc Extracting [>                                                  ]  294.9kB/28.24MB
+ 639aa37fe549 Downloading [=================>                                 ]    3.5kB/10.02kB
+ 639aa37fe549 Downloading [==================================================>]  10.02kB/10.02kB
+ 3e13d544cd35 Downloading [>                                                  ]  530.9kB/111.8MB
+ 639aa37fe549 Download complete
+ b3e09271b721 Downloading [==================================================>]     128B/128B
+ b3e09271b721 Verifying Checksum
+ b3e09271b721 Download complete
+ aae3fa55f377 Downloading [==================================================>]     167B/167B
+ aae3fa55f377 Download complete
+ 50a212ffc5a1 Downloading [============================>                      ]  3.501kB/6.106kB
+ 50a212ffc5a1 Downloading [==================================================>]  6.106kB/6.106kB
+ 50a212ffc5a1 Verifying Checksum
+ 50a212ffc5a1 Download complete
+ e9cc823db10f Downloading [==================================================>]     185B/185B
+ e9cc823db10f Verifying Checksum
+ e9cc823db10f Download complete
+ 003442b28249 Downloading [=>                                                 ]  3.499kB/132.9kB
+ 003442b28249 Downloading [==================================================>]  132.9kB/132.9kB
+ 003442b28249 Verifying Checksum
+ 003442b28249 Download complete
+ 774043ccc8cc Extracting [======>                                            ]  3.539MB/28.24MB
+ 2ede25b7c579 Downloading [>                                                  ]  48.55kB/3.703MB
+ 3e13d544cd35 Downloading [=========>                                         ]  21.61MB/111.8MB
+ 2ede25b7c579 Verifying Checksum
+ 2ede25b7c579 Download complete
+ 774043ccc8cc Extracting [==============>                                    ]  8.258MB/28.24MB
+ 3e13d544cd35 Downloading [================>                                  ]  37.46MB/111.8MB
+ 774043ccc8cc Extracting [=================>                                 ]  10.03MB/28.24MB
+ 3e13d544cd35 Downloading [==============================>                    ]  67.74MB/111.8MB
+ 774043ccc8cc Extracting [========================>                          ]  13.57MB/28.24MB
+ 3e13d544cd35 Downloading [============================================>      ]  100.1MB/111.8MB
+ 3e13d544cd35 Verifying Checksum
+ 3e13d544cd35 Download complete
+ 774043ccc8cc Extracting [======================================>            ]  21.53MB/28.24MB
+ 774043ccc8cc Extracting [==========================================>        ]  23.89MB/28.24MB
+ 774043ccc8cc Extracting [===============================================>   ]  26.84MB/28.24MB
+ 774043ccc8cc Extracting [================================================>  ]  27.43MB/28.24MB
+ 774043ccc8cc Extracting [==================================================>]  28.24MB/28.24MB
+ 774043ccc8cc Pull complete
+ f2455d5db1ca Extracting [==================================================>]  1.167kB/1.167kB
+ f2455d5db1ca Extracting [==================================================>]  1.167kB/1.167kB
+ f2455d5db1ca Pull complete
+ 8445317dd84f Extracting [>                                                  ]  65.54kB/4.534MB
+ 8445317dd84f Extracting [==================================================>]  4.534MB/4.534MB
+ 8445317dd84f Pull complete
+ 2dd9b1a67dcf Extracting [=>                                                 ]  32.77kB/1.25MB
+ 2dd9b1a67dcf Extracting [==================================================>]   1.25MB/1.25MB
+ 2dd9b1a67dcf Pull complete
+ e0d7eb465374 Extracting [>                                                  ]   98.3kB/8.066MB
+ e0d7eb465374 Extracting [========================>                          ]  3.932MB/8.066MB
+ e0d7eb465374 Extracting [=====================================>             ]  6.095MB/8.066MB
+ e0d7eb465374 Extracting [==================================================>]  8.066MB/8.066MB
+ e0d7eb465374 Pull complete
+ 1a60cdc4b8b6 Extracting [=>                                                 ]  32.77kB/1.196MB
+ 1a60cdc4b8b6 Extracting [==================================================>]  1.196MB/1.196MB
+ 1a60cdc4b8b6 Extracting [==================================================>]  1.196MB/1.196MB
+ 1a60cdc4b8b6 Pull complete
+ 00ea30b13a58 Extracting [==================================================>]     116B/116B
+ 00ea30b13a58 Extracting [==================================================>]     116B/116B
+ 00ea30b13a58 Pull complete
+ 708679827647 Extracting [==================================================>]  3.143kB/3.143kB
+ 708679827647 Extracting [==================================================>]  3.143kB/3.143kB
+ 708679827647 Pull complete
+ 3e13d544cd35 Extracting [>                                                  ]  557.1kB/111.8MB
+ 3e13d544cd35 Extracting [===>                                               ]  7.799MB/111.8MB
+ 3e13d544cd35 Extracting [====>                                              ]  11.14MB/111.8MB
+ 3e13d544cd35 Extracting [======>                                            ]  15.04MB/111.8MB
+ 3e13d544cd35 Extracting [========>                                          ]  20.05MB/111.8MB
+ 3e13d544cd35 Extracting [===========>                                       ]  26.18MB/111.8MB
+ 3e13d544cd35 Extracting [===============>                                   ]  35.65MB/111.8MB
+ 3e13d544cd35 Extracting [===================>                               ]  44.56MB/111.8MB
+ 3e13d544cd35 Extracting [=======================>                           ]  52.92MB/111.8MB
+ 3e13d544cd35 Extracting [=========================>                         ]  57.93MB/111.8MB
+ 3e13d544cd35 Extracting [=============================>                     ]  65.18MB/111.8MB
+ 3e13d544cd35 Extracting [=================================>                 ]  75.76MB/111.8MB
+ 3e13d544cd35 Extracting [=====================================>             ]  84.12MB/111.8MB
+ 3e13d544cd35 Extracting [=========================================>         ]  93.03MB/111.8MB
+ 3e13d544cd35 Extracting [===========================================>       ]  96.37MB/111.8MB
+ 3e13d544cd35 Extracting [============================================>      ]  100.3MB/111.8MB
+ 3e13d544cd35 Extracting [==============================================>    ]  104.2MB/111.8MB
+ 3e13d544cd35 Extracting [===============================================>   ]  106.4MB/111.8MB
+ 3e13d544cd35 Extracting [================================================>  ]  108.1MB/111.8MB
+ 3e13d544cd35 Extracting [=================================================> ]  110.3MB/111.8MB
+ 3e13d544cd35 Extracting [==================================================>]  111.8MB/111.8MB
+ 3e13d544cd35 Pull complete
+ 639aa37fe549 Extracting [==================================================>]  10.02kB/10.02kB
+ 639aa37fe549 Extracting [==================================================>]  10.02kB/10.02kB
+ 639aa37fe549 Pull complete
+ b3e09271b721 Extracting [==================================================>]     128B/128B
+ b3e09271b721 Extracting [==================================================>]     128B/128B
+ b3e09271b721 Pull complete
+ aae3fa55f377 Extracting [==================================================>]     167B/167B
+ aae3fa55f377 Extracting [==================================================>]     167B/167B
+ aae3fa55f377 Pull complete
+ 50a212ffc5a1 Extracting [==================================================>]  6.106kB/6.106kB
+ 50a212ffc5a1 Extracting [==================================================>]  6.106kB/6.106kB
+ 50a212ffc5a1 Pull complete
+ e9cc823db10f Extracting [==================================================>]     185B/185B
+ e9cc823db10f Extracting [==================================================>]     185B/185B
+ e9cc823db10f Pull complete
+ 003442b28249 Extracting [============>                                      ]  32.77kB/132.9kB
+ 003442b28249 Extracting [==================================================>]  132.9kB/132.9kB
+ 003442b28249 Extracting [==================================================>]  132.9kB/132.9kB
+ 003442b28249 Pull complete
+ 2ede25b7c579 Extracting [>                                                  ]  65.54kB/3.703MB
+ 2ede25b7c579 Extracting [==================================================>]  3.703MB/3.703MB
+ 2ede25b7c579 Pull complete
+ database Pulled
+ Network inves-cog-test-fdcd3706c582_test_database  Creating
+ Network inves-cog-test-fdcd3706c582_test_database  Created
+ Container inves-cog-test-fdcd3706c582-database-1  Creating
+ Container inves-cog-test-fdcd3706c582-database-1  Created
+ Container inves-cog-test-fdcd3706c582-database-1  Starting
+ Container inves-cog-test-fdcd3706c582-database-1  Started
+ Container inves-cog-test-fdcd3706c582-database-1  Waiting
+ Container inves-cog-test-fdcd3706c582-database-1  Healthy
+BEGIN
+SET
+CREATE EXTENSION
+REVOKE
+ALTER DEFAULT PRIVILEGES
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+DO
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+CREATE SCHEMA
+REVOKE
+REVOKE
+REVOKE
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+COMMIT
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+============================= test session starts ==============================
+platform linux -- Python 3.11.17, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/runner/work/inves-cog/inves-cog
+configfile: pyproject.toml
+testpaths: tests
+collected 12 items / 2 deselected / 10 selected
+
+tests/harness/test_m0.py ..........                                      [100%]
+
+- generated xml file: /home/runner/work/inves-cog/inves-cog/.harness/phase1_blocking.xml -
+======================= 10 passed, 2 deselected in 3.54s =======================
+ Container inves-cog-test-fdcd3706c582-database-1  Stopping
+ Container inves-cog-test-fdcd3706c582-database-1  Stopped
+ Container inves-cog-test-fdcd3706c582-database-1  Removing
+ Container inves-cog-test-fdcd3706c582-database-1  Removed
+ Network inves-cog-test-fdcd3706c582_test_database  Removing
+ Network inves-cog-test-fdcd3706c582_test_database  Removed
+..                                                                       [100%]
+2 passed in 0.03s
+01-network: exit=1; FR-M0-03; red=True
+02-clock: exit=1; FR-M0-04; red=True
+03-skip: exit=4; FR-M0-05; red=True
+04-golden: exit=1; FR-M0-07; red=True
+05-frozen: exit=1; FR-M0-08; red=True
+06-valuation-import: exit=1; I01; red=True
+07-model: exit=1; I37; red=True
+08-marketstate-import: exit=1; I01; red=True
+09-external-import: exit=1; I01; red=True

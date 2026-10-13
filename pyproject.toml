@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "inves-cog"
+version = "0.1.0"
+description = "Independent market research and paper trading system"
+requires-python = ">=3.11,<3.12"
+dependencies = ["fastapi>=0.115,<1", "PyYAML>=6,<7", "exchange-calendars>=4.5,<5"]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "requests>=2,<3"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/inves_cog"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = "--strict-markers --strict-config -ra"
+xfail_strict = true
+markers = [
+  "phase1_blocking: H0 static gates and H1 offline deterministic tests",
+  "phase1_replay: frozen v18 replay",
+  "phase1_cases: frozen cases and recorded LLM responses",
+  "phase1_live: explicit opt-in real-source smoke tests; excluded from CI",
+]

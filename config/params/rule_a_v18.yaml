@@ -1,0 +1,7 @@
+rule_set: A
+a_plus_enabled: false
+tiers:
+  defensive: {cap: 0.12, first_lot: 0.50, budget: 0.30, budget_buffer: 1.25, max_positions: 4}
+  normal: {cap: 0.12, first_lot: 0.40, budget: 0.30, budget_buffer: 1.25, max_positions: 6}
+  aggressive: {cap: 0.08, first_lot: 0.30, budget: 0.40, budget_buffer: 1.25, max_positions: 6}
+max_positions: 12

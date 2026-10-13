@@ -1,0 +1,19 @@
+services:
+  database:
+    image: pgvector/pgvector:0.8.7-pg16
+    environment:
+      POSTGRES_USER: inves_cog_admin
+      POSTGRES_DB: inves_cog
+      # Only an ephemeral internal test network; no ports exposed to the host.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inves_cog_admin -d inves_cog"]
+      interval: 1s
+      timeout: 5s
+      retries: 60
+    networks: [test_database]
+networks:
+  test_database:
+    internal: true

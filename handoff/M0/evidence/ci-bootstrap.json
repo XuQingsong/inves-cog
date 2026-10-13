@@ -1,0 +1,13 @@
+{
+  "database": "inves_cog",
+  "database_user": "inves_cog_admin",
+  "postgres_version": "160015",
+  "pgvector_version": "0.8.7",
+  "migrations": [
+    "phase1_m0_0001_schemas_roles.sql"
+  ],
+  "temporary_database": true,
+  "clean_container": true,
+  "python_version": "3.11.17",
+  "lock_frozen": true
+}

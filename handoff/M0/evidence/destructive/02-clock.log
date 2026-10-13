@@ -1,0 +1,24 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________________________ test_probe __________________________________
+
+    def test_probe():
+>       scan_clock(Path('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/src/inves_cog/trading/bad_time.py'))
+
+/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/probe-1/test_probe.py:4:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests/harness/tools/checks.py:192: in scan_clock
+    fail(path, n.lineno, 'FR-M0-04', f'system time {name}; inject Clock')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = PosixPath('/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/src/inves_cog/trading/bad_time.py')
+line = 2, rule = 'FR-M0-04', reason = 'system time datetime.now; inject Clock'
+
+    def fail(path, line, rule, reason):
+>       raise AssertionError(f'{path}:{line}: {rule}: {reason}')
+E       AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/inves-cog-m0-2tbo310q/src/inves_cog/trading/bad_time.py:2: FR-M0-04: system time datetime.now; inject Clock
+
+tests/harness/tools/checks.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED ::test_probe - AssertionError: /var/folders/9m/q9r8d9sx1xd6l5fv95m4kt8...
+1 failed in 0.13s
