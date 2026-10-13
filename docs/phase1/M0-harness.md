@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v2（答复开工复述 K01–K08） |
+| 文档版本 | v3（M0 验收后补丁：需求缺陷 RD-01–RD-04，见第 10 节） |
 | 规格章节 | 16.2–16.6；本目录 README 第 3、4 节 |
 | 依赖 | 无 |
 | 关闭的不变量 | I01、I37 |
@@ -30,9 +30,9 @@
 
 **边界澄清**：
 
-- "断网"指测试进程内所有 socket 连接（含 DNS 解析）都失败，不是只拦 HTTP 库。
+- "断网"指测试进程内所有 socket 连接（含 DNS 解析）都失败，不是只拦 HTTP 库。**v3 补充**：网络指 `AF_INET`、`AF_INET6` 套接字（含回环地址 `127.0.0.1` / `::1`）和 DNS 解析；进程内的本地通信（`AF_UNIX` 套接字，包括 `socket.socketpair()`、asyncio 事件循环的自唤醒管道）**不算网络，必须放行**。否则 asyncio 和 FastAPI `TestClient` 会被误拦，甚至卡死。
 - 时钟门禁扫整个 `src/inves_cog/`（`clock.py` 除外）。
-- LLM 白名单门禁扫 `src/`、`config/`、`tests/`（录音文件除外）、部署脚本；`docs/` 不扫（归档文档里有历史模型名）。
+- LLM 白名单门禁扫 `src/`、`config/`、`tests/`（录音文件除外）、部署脚本；`docs/` 不扫（归档文档里有历史模型名）。**v3 补充**：扫描范围内的**全部文本文件**都扫，不按扩展名挑选（`Dockerfile*`、`Makefile`、`.env*`、`.ini`、`.cfg`、`.txt`、`.md` 等都算）；部署脚本包括 `scripts/`、`.github/`、仓库根目录的 `Makefile`、`docker-compose*.yml`、`Dockerfile*`；二进制文件跳过。
 
 ## 3. 输入
 
@@ -68,10 +68,10 @@ migrations/phase1_m0_0001_schemas_roles.sql  # README §3.6 的 schema、角色�
 | FR-M0-01 | 建立第 4 节列出的目录和文件；新包只有 `__init__.py` 和必要的接口占位 |
 | FR-M0-02 | 注册标记 `phase1_blocking`、`phase1_replay`、`phase1_cases`、`phase1_live`；未注册的标记报错 |
 | FR-M0-03 | 断网：`tests/` 下所有测试运行时，任何 socket 连接和 DNS 解析都抛错并使测试失败（即使业务代码捕获了异常，测试也要失败）。唯一例外：`phase1_live` 标记的测试，且只在显式执行 `pytest -m phase1_live` 并设置环境变量 `INVES_COG_LIVE=1` 时放开网络；live 测试永远不进 CI 和 `phase1_blocking`，时间仍经注入的 `Clock`（live 运行注入 `SystemClock`） |
-| FR-M0-04 | 时钟门禁：扫描 `src/inves_cog/`，出现 `datetime.now(`、`datetime.utcnow(`、`date.today(`、`time.time(` 即失败；`clock.py` 本身除外 |
+| FR-M0-04 | 时钟门禁：扫描 `src/inves_cog/`，出现 `datetime.now(`、`datetime.utcnow(`、`date.today(`、`time.time(` 即失败；`clock.py` 本身除外。**v3 扩充**：同样拦截 `datetime.today`、`datetime.datetime.today`、`time.time_ns`、`pandas.Timestamp.now / today / utcnow`、`numpy.datetime64("now" / "today")`；并且不仅拦调用，**取属性引用也拦**（如 `f = datetime.now`），别名导入照常解析。`time.monotonic`、`time.perf_counter` 只用于计时，允许 |
 | FR-M0-05 | `pending.txt`：格式 `测试名 \| 模块 \| 原因`。规则：（1）测试被 skip / xfail 但不在文件中 → 失败；（2）文件中的测试其模块已在 `milestones.txt` → 失败；（3）重复行、模块编号不合法、格式错误 → 失败；（4）**测试名在代码里还不存在是允许的**（该模块尚未开发），但模块写入 `milestones.txt` 时它的全部测试必须存在；（5）**棘轮**：文件中登记、且代码里已存在的测试，由 `conftest` 自动标为 `xfail(strict=True)`——它一旦通过就变成失败，提示"已转绿，请从 pending 删除"；开发不得手工给它们加 skip / xfail |
 | FR-M0-06 | 初始 `pending.txt` = M1–M10 文档第 7 节列出的全部测试名（共 142 个），模块字段与文档一致。README §5 的第一阶段不变量测试都已包含在这些清单里；**不登记** I26（已删除）和 I29、I31（第二阶段，`test_b2_hysteresis`、`test_s10_price_structure_review`）。M0 自己的 12 个测试不进 pending（本任务必须全部转绿）。另提供一个检查：pending 的测试集合 + M0 测试集合 = 各模块文档第 7 节测试集合的并集，双向相等 |
-| FR-M0-07 | 需求方标准答案：测试直接读取 `docs/phase1/golden/`，校验每个文件的 sha256 与 `MANIFEST.sha256` 一致，且目录里没有清单之外的文件；各模块测试通过同一个加载函数读取，不得另存副本 |
+| FR-M0-07 | 需求方标准答案：测试直接读取 `docs/phase1/golden/`，校验每个文件的 sha256 与 `MANIFEST.sha256` 一致，且目录里没有清单之外的文件；各模块测试通过同一个加载函数读取，不得另存副本。**v3 补充**：测试不得写死 golden 文件的个数或文件名清单，文件集合一律以 `MANIFEST.sha256` 为准。需求方以后会为其他模块增加 golden 文件并同步更新清单，这不能让 M0 的测试变红。`load_golden` 按扩展名解析：`.json` 返回对象，其余类型返回 `bytes` |
 | FR-M0-08 | 冻结输入：`tests/fixtures/phase1/` 下的文件登记在 `tests/fixtures/phase1/MANIFEST.sha256`；哈希变化而 `CHANGELOG.md` 没有包含该文件路径和新哈希的条目 → 失败 |
 | FR-M0-09 | 导入防火墙（I01）：基于 AST 的导入图，按 README §3.7 的允许 / 禁止表判定；包括 `from x import y`、相对导入和 `importlib.import_module("字面量")`；任何位置导入 `stock_pm` 或 Muse 的模块名（`paper_trade_*`、`paper_tracker`、`factor_framework*`、`screen_asof_*`）即失败 |
 | FR-M0-10 | LLM：`config/llm_tasks.yaml` 与 README §3.8 的表完全一致（10 个任务）；`registry` 只能返回 `glm-5.3` 或 `deepseek-v4.1-flash`；按第 2 节的扫描范围做**白名单式**检查：用正则匹配形如模型名的字符串（前缀至少包括 `glm`、`gpt`、`claude`、`qwen`、`gemini`、`deepseek`、`llama`、`mistral`，不区分大小写），凡不在白名单 {`glm-5.3`, `deepseek-v4.1-flash`} 中的一律失败；这样项目里不需要出现任何禁止模型名的清单。负例在扫描范围之外的临时文件里构造，用同一个扫描器验证红灯；所有 LLM 调用都经 `registry` |
@@ -87,14 +87,14 @@ migrations/phase1_m0_0001_schemas_roles.sql  # README §3.6 的 schema、角色�
 
 | 测试名 | 标记 | 断言 | 对应 |
 |---|---|---|---|
-| `test_harness_no_network` | blocking | 测试内发起 socket 连接、DNS 解析、`requests.get` 都失败 | FR-M0-03 |
-| `test_injected_clock_only` | blocking | 扫描结果为空；对一个含 `datetime.now(` 的临时文件能报错 | FR-M0-04 |
+| `test_harness_no_network` | blocking | 测试内发起 socket 连接、DNS 解析、`requests.get` 都失败；**v3**：连 `127.0.0.1` 也失败；`socket.socketpair()` 收发、asyncio `call_soon_threadsafe`、FastAPI `TestClient` 请求一个本地路由都通过，且每个探针在 30 秒内结束（超时算失败） | FR-M0-03 |
+| `test_injected_clock_only` | blocking | 扫描结果为空；对一个含 `datetime.now(` 的临时文件能报错；**v3**：FR-M0-04 扩充清单里的每一项各有一个负例（含属性引用 `f = datetime.now` 和别名导入），`time.monotonic()` 不报错 | FR-M0-04 |
 | `test_pending_registry` | blocking | FR-M0-05 的三条规则 | FR-M0-05、06 |
 | `test_milestones_consistency` | blocking | `milestones.txt` 中每个模块在 `pending.txt` 中没有残留 | FR-M0-05 |
-| `test_requirements_golden_unchanged` | blocking | FR-M0-07 | FR-M0-07 |
+| `test_requirements_golden_unchanged` | blocking | FR-M0-07；**v3**：在临时副本里新增一个文件并同步写入它的 `MANIFEST.sha256` 行，校验通过（证明没有写死文件个数） | FR-M0-07 |
 | `test_frozen_fixtures_changelog` | blocking | FR-M0-08 | FR-M0-08 |
 | `test_import_firewall` | blocking | I01 | FR-M0-09 |
-| `test_llm_models_allowed` | blocking | I37 | FR-M0-10 |
+| `test_llm_models_allowed` | blocking | I37；**v3**：在临时目录里按真实目录结构构造 `Dockerfile.x`、`Makefile`、`.env`、`config/a.txt` 四个负例，扫描器以目录模式扫描时每个都变红 | FR-M0-10 |
 | `test_schema_roles_migration` | blocking | 迁移脚本含全部 schema、角色、REVOKE | FR-M0-11 |
 | `test_clean_env_bootstrap` | CI | 干净容器里 `make phase1-test` 通过 | FR-M0-13 |
 | `test_markers_registered` | blocking | 四个标记已注册 | FR-M0-02 |
@@ -139,3 +139,29 @@ migrations/phase1_m0_0001_schemas_roles.sql  # README §3.6 的 schema、角色�
 | Q-M0-9（K07） | 未列明的权限怎么处理？ | 默认拒绝，见 FR-M0-11 v2；迁移由 `inves_cog_admin` 执行并设置默认权限 |
 | Q-M0-10（K08） | `phase1_live` 能否联网？ | 能，但只在显式执行 `-m phase1_live` 且 `INVES_COG_LIVE=1` 时；永不进 CI；时间仍经注入的 `Clock`。M0 自身不发起任何真实请求 |
 | Q-M0-11 | 工程选型？ | 确认：uv + `uv.lock`、Python 3.11、FastAPI（M0 只登记依赖和空 `web` 包）、docker compose 提供 PostgreSQL + pgvector 测试库 |
+
+## 10. v3 补丁（M0 验收后的需求缺陷）
+
+M0 v2 已按原条款验收通过（见 [`acceptance/M0-report.md`](acceptance/M0-report.md)）。验收时需求方发现下面 4 个问题。它们是 v2 文档没写清或没覆盖的地方，按 README §2 第 2 条记为需求缺陷，**不计入 M0 v2 的判定**，在 v3 里补成要求，由一个补丁任务完成。
+
+| RD | 现象（需求方复现） | v3 改动 | 影响谁 |
+|---|---|---|---|
+| RD-01 | 断网门禁把 `send` / `sendall` 也拦了，`AF_UNIX` 也算在内：`socket.socketpair()` 收发会变红；asyncio `call_soon_threadsafe` 变红；FastAPI `TestClient` **整个进程卡死**（60 秒超时） | 第 2 节"边界澄清"、`test_harness_no_network` | M1（异步采集）、M10（页面测试），以及所有用 asyncio 的模块 |
+| RD-02 | 时钟门禁漏掉 `datetime.today()`、`time.time_ns()`、`pandas.Timestamp.now()`、属性引用 `f = datetime.now` | FR-M0-04、`test_injected_clock_only` | 全部模块 |
+| RD-03 | `test_requirements_golden_unchanged` 写死 golden 文件个数为 8，需求方以后增加 golden 文件时 M0 测试会变红；`load_golden` 只能读 JSON | FR-M0-07、`test_requirements_golden_unchanged` | 需求方新增 golden 时，所有 PR |
+| RD-04 | 模型名扫描只看 `.py/.yaml/.yml/.sh/.json/.jsonl/.toml`，`scripts/Dockerfile.harness`、`Makefile`、`.env` 等不扫 | 第 2 节"边界澄清"、`test_llm_models_allowed` | 部署脚本 |
+
+**补丁任务的规则**：
+
+- 分支 `phase1/m0-v3-patch`，PR 标题 `[M0-v3] 提交验收`；只改 `tests/harness/`、`pyproject.toml` 和 `uv.lock`（为 `TestClient` 增加锁定版本的测试依赖，放在 `dev` 组）。
+- M0 的测试名不变，仍是 12 个；v3 只扩充断言（第 7 节标 **v3** 的部分）。不改 `pending.txt`，不改 `milestones.txt`。
+- 先提交按 v3 断言会变红的测试，再修实现；自测报告追加到 `handoff/M0/self-test-v3.md`，附 RD-01 的 TestClient 探针在修复前后的输出。
+- **期限**：在 T01 或 T02 中任何一个提交验收之前合并。T10 的页面测试依赖 RD-01，必须在补丁合并之后才开工。
+
+**补丁验收条款**：
+
+| AC | 判定标准 | 类型 | 对应 | 阻塞 |
+|---|---|---|---|---|
+| AC-M0-08 | 干净环境 `make phase1-test` 全绿；第 7 节标 v3 的断言全部存在并通过 | H | RD-01–04 | 是 |
+| AC-M0-09 | 需求方在本地复跑 RD-01 的三个探针（socketpair、asyncio、TestClient）全部 30 秒内通过；`socket.create_connection(("127.0.0.1", 1))` 仍按 FR-M0-03 变红 | E | RD-01 | 是 |
+| AC-M0-10 | 原有 9 项破坏性自测仍全部红灯 | E | FR-M0-03–10 | 是 |
