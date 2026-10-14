@@ -38,3 +38,26 @@ Q-M1-15 的唯一 M0 例外目前仅覆盖旧迁移中的 graph 只读授权和 
 ## 需求方答复（2026-10-14）
 
 用户明确答复“授权在 M1 PR 修这两处”，将 M0 例外扩大至上述两项测试。按建议只改负例输入和完整迁移清单断言；测试名、门禁逻辑与真实 milestones 不变。已据此恢复开发。
+
+## K15：pending 棘轮自测也依赖真实 M1 尚在 pending
+
+`tests/harness/test_m0.py:test_pending_registry` 的子进程探针固定使用 `test_bar_window_to_20et`，直接读真实 pending。M1 的 14 项 blocking 实测通过后删除其登记，该探针的 `assert False` 不再自动 xfail，旧断言却仍期望退出码 0。完整离线门禁在 `5163684` 上因此失败（实际 1、期望 0）。
+
+建议只为此探针传入临时 pending 和临时 milestones：显式登记该探针，验证失败自动 xfail、通过严格 XPASS 失败；不依赖真实模块是否关闭，不把已绿测试重新塞回真实 pending，也不改棘轮实现。此前授权只覆盖里程碑负例，未覆盖本函数，请确认补充授权。
+
+## K16：模型名扫描误伤真实官网 URL
+
+`config/monitored_entities.yaml` 必须起草 DeepSeek 的官方 URL。`tests/harness/tools/checks.py:236` 当前把 `https://www.deepseek.com/` 中的 `deepseek.com` 识别为模型名并拒绝；它是域名，没有调用其他模型。
+
+完整门禁输出：
+
+```text
+FAILED tests/harness/test_m0.py::test_pending_registry
+FAILED tests/harness/test_m0.py::test_llm_models_allowed
+AssertionError: config/monitored_entities.yaml:30: I37/FR-M0-10: non-whitelisted model deepseek.com
+2 failed, 22 passed, 3 deselected
+```
+
+建议精确区分 URL 中的品牌域名和模型 token；保留所有文本扫描及两个对话模型白名单，验证合法官网不误伤、非法模型值仍拒绝、URL 里的真实非法模型 token 仍拒绝。需要授权修改 `tests/harness/tools/checks.py` 的识别逻辑，并在原 `test_llm_models_allowed` 增加正反断言；不删除官网、不拆字符串躲扫描、不增加模型白名单。
+
+K15/K16 发布后按任务书暂停 M1 后续实现，等待答复。M1 自身 14 项 blocking 已绿，但完整门禁仍红；核心提交不作为提交验收。
