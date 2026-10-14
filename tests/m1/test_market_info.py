@@ -303,6 +303,13 @@ def test_app_rank_jump():
 
 
 def test_trends_unavailable_marked():
+    from inves_cog.ingest.live import validate_smoke
+    bars={'daily_codes':73}
+    validate_smoke(bars,{'processed_count':1},{'Fixture':{'status':'ok'}},required_sources={'Fixture'})
+    with pytest.raises(RuntimeError): validate_smoke(bars,{'processed_count':1},{},required_sources={'Fixture'})
+    with pytest.raises(RuntimeError): validate_smoke({'daily_codes':72}, {'processed_count':1},{'Fixture':{}},required_sources={'Fixture'})
+    with pytest.raises(RuntimeError): validate_smoke(bars,{'processed_count':0},{'Fixture':{}},required_sources={'Fixture'})
+
     from inves_cog.ingest.signals import trend_event, collect_trends
     from inves_cog.ingest.jobs import HealthBook
     health = HealthBook(clock=frozen())
