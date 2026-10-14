@@ -243,7 +243,26 @@ def test_earnings_fallback_flag():
     assert earnings_fallback('AAPL', {'reportDate': '2026-10-30', 'session': 'post'}, clock=frozen())['reaction_day'] == date(2026, 11, 2)
 
 
-def test_form4_parse_code_p():
+def test_form4_parse_code_p(tmp_path):
+    import gzip, hashlib
+    from inves_cog.ingest.history import read_exports, form4_record
+    body=b'ticker,filed,txn_date,code,shares,price,owner,is_officer,is_director\nAAPL,2026-10-07,2026-10-06,P,100,10.5,Fixture,t,f\n'
+    archive=tmp_path/'insider.csv.gz'; archive.write_bytes(gzip.compress(body))
+    manifest={'tables':[{'table':'data.insider_transactions','file':archive.name,
+        'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'rows':1}]}
+    (tmp_path/'manifest.json').write_text(json.dumps(manifest))
+    records=list(read_exports(tmp_path)); assert len(records)==1
+    row=form4_record(records[0],clock=frozen())
+    assert row['transaction_code']=='P' and row['is_officer'] is True
+    assert row['filed_at'] is None and row['accession'] is None
+    assert row['raw']['filed']=='2026-10-07' and 'visibility_time_unknown' in row['raw']['import_flags']
+    assert row['event_id']==form4_record(records[0],clock=frozen())['event_id']
+    manifest['tables'][0]['rows']=2; (tmp_path/'manifest.json').write_text(json.dumps(manifest))
+    with pytest.raises(ValueError,match='row count'): list(read_exports(tmp_path))
+    manifest['tables'][0]['rows']=1; manifest['tables'][0]['file']='../outside.csv.gz'
+    (tmp_path/'manifest.json').write_text(json.dumps(manifest))
+    with pytest.raises(ValueError,match='filename'): list(read_exports(tmp_path))
+
     from inves_cog.ingest.sec import parse_form4
     text = (FIXTURES / 'm1/form4_synthetic.xml').read_text()
     rows = parse_form4(text, accession='fixture-form4', filed_at=instant('2026-10-28T15:00:00Z'))
@@ -406,6 +425,22 @@ def test_info_fields_extraction():
 
 
 def test_llm_extraction_failure_degrades():
+    from inves_cog.ingest.health import extraction_counts, create_app
+    from fastapi.testclient import TestClient
+    assert extraction_counts([{'flags':['embedding_failed']},{'flags':[]}]) == {
+        'total':2,'embedding_failed':1,'entity_tagging_failed':0,
+        'embedding_failure_rate':.5,'entity_tagging_failure_rate':0.0}
+    assert extraction_counts([])['embedding_failure_rate'] is None
+    from contextlib import contextmanager
+    class Connection:
+        def execute(self,sql,*args): return self
+        def fetchall(self): return [{'flags':['embedding_failed','entity_tagging_failed']}]
+    @contextmanager
+    def connection(): yield Connection()
+    with TestClient(create_app(connection)) as probe:
+        result=probe.get('/health/extraction')
+        assert result.status_code==200 and result.json()['embedding_failed']==1
+
     from inves_cog.ingest.info import enrich, make_item, InfoStore
     from inves_cog.llm.client import Client, LLMUnavailable
     item = make_item('news', 'Reuters', 'failure', headline='Fixture failure', body='Retain all information', clock=frozen())
