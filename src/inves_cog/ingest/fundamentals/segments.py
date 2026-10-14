@@ -8,7 +8,7 @@ import math
 from pathlib import Path
 import re
 
-PARSE_CONTRACT='operating-aux-income-v2'
+PARSE_CONTRACT='operating-aux-income-v3'
 
 REVENUE=['RevenueFromContractWithCustomerExcludingAssessedTax','RevenueFromContractWithCustomerIncludingAssessedTax','Revenues','SalesRevenueNet']
 
@@ -110,7 +110,7 @@ def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=
             revenue_fact=min(revenues,key=lambda f:REVENUE.index(f.qname.localName)) if revenues else None
             profits=[f for f in facts if f.qname.localName=='OperatingIncomeLoss']
             if not profits: profits=[f for f in facts if f.qname.localName=='SegmentProfitLoss']
-            if not profits: profits=[f for f in facts if re.search(r'(?:Profit|Income)',f.qname.localName) and not re.search(r'(?:Tax|Comprehensive|PerShare)',f.qname.localName)]
+            if not profits: profits=[f for f in facts if re.search(r'(?:Profit|Income)',f.qname.localName) and not re.search(r'(?:Tax|Interest|Comprehensive|PerShare)',f.qname.localName)]
             if not revenues and not profits: continue
             profit_fact=profits[0] if len(profits)==1 else None
             revenue=numeric(revenue_fact) if revenue_fact is not None else None
