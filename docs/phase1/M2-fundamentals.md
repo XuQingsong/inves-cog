@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v2（答复开工复述 K01–K12；新增 D8；`shares` 口径修正） |
+| 文档版本 | v3（写入开发中用户答复 K13、K14；外币换算合同；AC-M2-06 改为可用历史验证） |
 | 规格章节 | 4.4、4.5、4.6、4.8、9.2（财报字段） |
 | 依赖 | M0；SEC submissions 来自 M1 |
 | 关闭的不变量 | I10、I11、I12、I33、I34 |
@@ -128,7 +128,7 @@
 | AC-M2-03 | 健康页 59 行全部有健康码；`can_score = false` 的都有原因；不存在"可交易但财报字段为空"的行 | E | D6 | 是 |
 | AC-M2-04 | 54 只可交易标的里，≥ 90% 有分部数据或标为 `single_segment`；有分部的分部收入之和与合并营收相差 ≤ 1% | E | 主营业务盈利 | 是 |
 | AC-M2-05 | 需求方抽 5 只（含 AMD、WDC），分部收入、分部利润与 10-Q 原文一致 | E | 主营业务盈利 | 是 |
-| AC-M2-06 | 一致预期连续 5 个交易日覆盖 59 只；Muse 历史已导入；F2 的窗口状态正确 | E | 分析师一致预期 | 是 |
+| AC-M2-06 | Muse 历史已导入（行数、哈希与导出 manifest 一致，重复导入不增行）；F2 在导入的历史上窗口状态正确（需求方抽 5 只、3 个日期复算）；本项目自己的**每一次**真实采集都覆盖 59 只，至少 2 次（v3：一致预期没有历史接口，不能回放；不再要求连续 5 个交易日） | E | 分析师一致预期 | 是 |
 | AC-M2-07 | 59 份 F3 档案生成，三个区块都有数据或写明缺失原因 | E | 基本面档案 | 是 |
 | AC-M2-08 | 分部映射草稿已生成并进入审核队列，用户可以按板块批量确认 | D | Q7 | 否 |
 
@@ -151,3 +151,5 @@
 | Q-M2-13（K10） | 外国申报人的年度口径、IFRS 标签、历史起点、新增字段 | 外国申报人在 `fixed` 下按年度口径：`rev_ttm` = 最近一个财年，`rev_growth` = 财年同比，`eps_ttm` = 财年 EPS；只有季度才有意义的字段（`rev_q_yoy`、`rev_accel_pp`）为 `NULL`；健康码 `annual_basis`。`fixed` 支持的 IFRS 标签：`ifrs-full:Revenue`；净利润 `ProfitLossAttributableToOwnersOfParent` > `ProfitLoss`；`GrossProfit`；`CashFlowsFromUsedInOperatingActivities`；`PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities`；`DilutedEarningsLossPerShare`；`EquityAttributableToOwnersOfParent`；`CashAndCashEquivalents`。`legacy` 保持 Muse 原行为。`fin_state` 从 2015-01-01 起建。新增字段 `op_margin_ttm`、`fcf_margin_change_pp` 两套提取器都要算，不参与 Muse 对照，各有单独的测试用例 |
 | Q-M2-14（K11） | 读图谱的权限；共享的运行表、LLM 客户端、SEC 客户端由谁建？审核队列的合同？ | 见 M1 v2 的 Q-M1-14 和 Q-M1-15：`role_ingest` 可以只读 `graph`；`job_runs` / `source_health` 的建表、`inves_cog/llm/client.py`、`inves_cog/ingest/sec_client.py` 都由 M1 建，本模块只按接口使用。T01 还没合并时，本模块用实现同一接口的测试替身开发，**不得**自建同名表或第二个客户端。审核：本模块提供 `list_pending_mappings(sector)` 和 `confirm_mappings(ids, reviewer, decision)` 两个函数，以及对应的 JSON；板块取自 `config/universe.yaml`。页面和批量确认按钮在 M10 |
 | Q-M2-15（K12） | XBRL 解析库、taxonomy 离线包、检查点合同 | 批准 **Arelle**（`arelle-release`），版本锁进 `uv.lock`。测试用手写的小实例和本地桩 schema，**不下载** taxonomy；生产环境允许 Arelle 从 SEC / FASB 下载 taxonomy，存进本地缓存目录。中期检查点按复述单第 5 节的合同，夹具数据和真实数据要分别标明 |
+| Q-M2-16（K13） | M0 干净环境断言写死迁移只有一个 | 已由 M1 的 PR 修正（M1 Q-M1-17）。M2 在 M1 合并后基于 main 重跑 CI |
+| Q-M2-17（K14） | 非美元财报怎么换成美元？ | **用户答复**：用 FRED，缺汇率时**不得写 `NULL` 了事**，必须查清是哪一项、为什么缺。**合同**：（1）序列：EUR = `DEXUSEU`（每欧元多少美元），TWD = `DEXTAUS`、KRW = `DEXKOUS`（每美元多少本币），统一换成"每单位本币多少美元"再相乘。（2）可见性：只用 `realtime_start ≤ as_of` 的观测，按 FRED / ALFRED 的版本取，不用当前修订值改写历史；期间里有已存在但当时还没发布的观测（H.10 每周发布一次），整笔换算暂停。（3）流量（营收、利润、现金流）和 EPS：用该期间内有报价日的日均汇率；TTM 由换算后的单季相加。（4）余额（现金、债务、权益）：用期末汇率，取期末日当天或之前**最近一个有效报价，最多往前 7 个自然日**（需求方定），实际用的报价日要记录下来。（5）股数不换算；同币种的比率用原币计算。（6）缺口：抛出 `FXGap`，写明币种、序列、目标字段、期间、版本日和原因；该字段**不写入**换算值，原币原始值和证据保留；缺口清单写进健康 JSON，原因要能区分"未配置 key""尚未发布""区间内无报价""报价无效""不支持的币种"。（7）其他财报字段中文档明确允许的 `NULL` 不受本条影响 |

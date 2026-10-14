@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v2（答复开工复述 K01–K12；早间截止时间顺延） |
+| 文档版本 | v3（写入开发中用户答复 K13–K17；更正 Q-M1-8；AC-M1-02 改用历史回放） |
 | 规格章节 | 3.2、4.1、4.2、4.3、4.7、5.5（数据部分） |
 | 依赖 | M0；监控实体清单来自 M6（M6 完成前用 `config/monitored_entities.yaml` 的人工初版） |
 | 关闭的不变量 | I22、I28（数据部分） |
@@ -154,7 +154,7 @@
 | AC | 判定标准 | 类型 | 对应需求 | 阻塞 |
 |---|---|---|---|---|
 | AC-M1-01 | 第 7 节 blocking 测试全绿 | H | FR-M1-01–16 | 是 |
-| AC-M1-02 | 连续 5 个交易日：73 个代码日线覆盖 100%（Alpaca 不提供的代码按 Q-M1-5 单列，不计入分母）；**常规时段**分钟线覆盖率合计 ≥ 99%，单个代码 ≥ 95%（定义见 Q-M1-5）；盘前、盘后的采集任务全部分页取完、状态为 `ok`；每天美东 20:45 前完成（北京 08:45，冬令时 09:45） | E | 感知异常（以天为单位） | 是 |
+| AC-M1-02 | **覆盖**（v3 改为历史回放）：用正式采集任务回补验收日之前最近 5 个交易日，73 个代码日线覆盖 100%（Alpaca 不提供的代码按 Q-M1-5 单列，不计入分母）；**常规时段**分钟线覆盖率合计 ≥ 99%，单个代码 ≥ 95%（定义见 Q-M1-5）；盘前、盘后的采集任务全部分页取完、状态为 `ok`。**时效**：至少 1 次由调度器按时触发的真实运行，在美东 20:45 前完成；同时，5 个回放日每天的采集耗时都不超过 25 分钟（20:20 开始可以在 20:45 前完成） | E | 感知异常（以天为单位） | 是 |
 | AC-M1-03 | 广域集合入选数在 800–2,000 之间，排除原因有统计 | E | 发现池外异常 | 是 |
 | AC-M1-04 | 需求方抽 10 条新闻，`published_at` 与原文误差 ≤ 1 分钟；抽 5 条转载，`source_root` 归并正确 | E | 源头时间准确 | 是 |
 | AC-M1-05 | 需求方抽 10 次 59 只标的的历史财报发布，`earnings_events.reaction_day` 与 SEC 原始接收时间推算一致 | E | 财报反应日 | 是 |
@@ -173,7 +173,7 @@
 | Q-M1-5（K01） | 分钟线覆盖率怎么算？用哪个 feed？Alpaca 取不到的代码怎么办？ | **分母只算常规时段**：每个代码每天的常规时段分钟数（390；半日市 210）。分子是实际存下的常规时段分钟 bar 数。盘前、盘后没有成交的分钟本来就不会有 bar，所以不计覆盖率，只要求任务把 04:00–20:00 的分页全部取完（`next_page_token` 为空），状态为 `ok`。**不得补造空 bar**。feed 必须是 `sip`；如果 R5 只给 IEX，健康页显示 `degraded: feed=iex`，AC-M1-02 判不通过，由用户决定是否升级套餐，不得静默改用 IEX。Basic 套餐的历史 SIP 不含最近 15 分钟，所以当日任务从美东 20:20 开始，20:45 前完成。Alpaca 取不到的代码（例如 SKHY）留在标的池里，标 `no_bar`；自测报告单列，不换数据源，是否从标的池删除由需求方决定 |
 | Q-M1-6（K02） | 普通股怎么识别？多类别股、ADR、股本新鲜度？ | 候选 = Alpaca `active` 的 `us_equity`，交易所为 NYSE、NASDAQ、NYSE American、NYSE Arca、Cboe BZX。CIK 用 SEC `company_tickers_exchange.json` 映射，映射不到记 `no_cik`。**证券类型**用三类证据按顺序判定，并把命中的证据写进 `exclude_reason` 的备注：（1）Alpaca 资产属性；（2）代码后缀（如 `.WS`、`.U`、`.R`、`-P` / `.PR`）；（3）名称关键词（ETF、Fund、Trust、Notes、Preferred、Depositary、ADR、ADS 等）。命中任一类即 `non_common`。同一发行人的多个普通股类别（如 GOOGL / GOOG）都可以入选，市值 = 发行人总股本 × 本类别价格，并标 `multi_class_approx`。股本取最近两个季度的 frames（`CY{年}Q{季}I`）；两期都没有这家公司，记 `no_shares`，不改用其他标签或数据源 |
 | Q-M1-7（K03） | ADV20 窗口不足、缺价格、每日检查和恢复、复权因子方向？ | ADV20 必须有完整的 20 个交易日、每天都有价格和成交量，否则记 `insufficient_history`；当日没有价格记 `no_price`；缺的值不补。**市值只在每月第一个交易日判定**，用当天收盘价。**成交额每日检查**：当月成员某天 ADV20 跌破门槛，当天剔除（`below_adv`）；被剔除的股票只在下一个月度重算时重新判定是否恢复。`adj_factor` 只反映拆股，不含分红：拆股调整价 = 原始价 × `adj_factor`；最新一天的因子为 1，发生新拆股后重算历史各日 |
-| Q-M1-8（K04） | Atom 只有最新 100 条，怎么保证全市场？submissions 原始表？ | Atom 每 10 分钟轮询一次，作为增量来源；次日用 EDGAR 每日索引（`Archives/edgar/daily-index/` 的 `form.idx`）补齐前一天全部 8-K。补进来的条目 `first_seen_at` 记补齐的时间，`published_at` 记索引里的申报日，并标 `published_at_date_only`。submissions 原始记录写进 `ingest.sec_filings`（第 4 节），覆盖 59 只、2015-01-01 起的全部申报。**注意 SEC 的一个已知现象**：submissions JSON 里的 `acceptanceDateTime` 虽然带 `Z` 后缀，实际是美东时间。开发必须用申报索引页上的 "Accepted" 时间核对至少 3 个真实样例（冻结为夹具，其中一个是盘后发布的财报），确认后按美东时间解析，再转成 UTC 存储。核对结果写进自测报告 |
+| Q-M1-8（K04） | Atom 只有最新 100 条，怎么保证全市场？submissions 原始表？ | Atom 每 10 分钟轮询一次，作为增量来源；次日用 EDGAR 每日索引（`Archives/edgar/daily-index/` 的 `form.idx`）补齐前一天全部 8-K。补进来的条目 `first_seen_at` 记补齐的时间，`published_at` 记索引里的申报日，并标 `published_at_date_only`。submissions 原始记录写进 `ingest.sec_filings`（第 4 节），覆盖 59 只、2015-01-01 起的全部申报。**接收时间的权威来源（v3 更正）**：以申报索引页（`…-index.html`）上的 "Accepted" 为准，它是美东当地时间，按 `America/New_York` 转换成 UTC 后存入 `accepted_at`。submissions JSON 里的 `acceptanceDateTime` 只作为证据原样保存，**不得**用来生成 `accepted_at`。v2 曾写"`acceptanceDateTime` 实际是美东时间"，这是需求方的错误：三个真实样例与索引页相差 8 或 10 小时，见 Q-M1-20。索引页取不到或格式异常时，保留原始申报记录，并记下 URL、错误类别、HTTP 状态和待重试状态；**不生成**未经核实的 `reaction_day` |
 | Q-M1-9（K05） | Alpha Vantage 兜底没有精确时间；golden 的 `closed_day` 和文档的 `closed` 不一致？ | 兜底源有"盘前 / 盘后"字段时，按该字段确定 `session` 和 `reaction_day`。只有日期时，`session` 和 `reaction_day` 都为 `NULL`，标 `earnings_event_fallback` 和 `earnings_time_unknown`，依赖反应日的规则当期不触发。兜底只用于未来的预定发布；历史缺口记 `earnings_event_missing`。之后 submissions 出现对应的 8-K 时，用 SEC 数据替换兜底行，旧行保留在历史里。**枚举统一为 `closed`**，需求方已修正 golden（`m1_earnings_sessions.json` 和 MANIFEST 已更新） |
 | Q-M1-10（K06） | `source_root` 的算法？更新稿怎么处理？ | 采用复述单第 3 节的 B 方案。格式：有上游原生 id 时为 `{提供方}:{原生id}`，否则为 `sha256:{规范化正文的哈希}`。规范化只做 HTML 去标签、Unicode NFKC、空白合并；**不删**数字、标点、否定词和引语。不按标题相似、同股票、同主题或 LLM 判断合并。同一 `info_id` 的更新稿写进 `ingest.info_item_versions`，不算新条目、不算新根 |
 | Q-M1-11（K07） | FINRA 和 CBOE 的接口和粒度？要不要专表？ | FINRA 用复述单里的 `consolidatedShortInterest` 数据集。开发先用真实响应核对它是否覆盖 NYSE / Nasdaq 上市的标的；覆盖的才用，不覆盖就把该源标 `未接通`。不得用日度做空成交量顶替空头持仓。空头占比的分母用 frames 的流通股本，字段名写明 `si_pct_shares_outstanding`（不是自由流通股）。CBOE 只存市场级统计。两者都进专表（第 4 节），同时写 `info_items`。单股期权数据第一阶段为 `NULL` |
@@ -182,3 +182,9 @@
 | Q-M1-14（K10） | `info_items` 缺字段；摘要谁做；嵌入模型和维度？ | 字段按第 4 节 v2 补齐。`summary` 用规则截取，不是 M10 的 `summary_oneliner`。90 天后清空正文的前提是 `summary` 已有值。嵌入用 DashScope `text-embedding-v3`，1024 维（R5 给出其他模型时由需求方改文档），输入为标题加正文前 2,000 字，不切分。**共享 LLM 客户端由本模块建**：`inves_cog/llm/client.py` 提供 `call(task: str, payload: dict) -> dict`，内部经 `registry` 选模型。录音按 `tests/fixtures/phase1/recordings/{task}/{payload 规范 JSON 的 sha256}.json` 存取。M2、M6、M8 用同一个接口，不另写客户端 |
 | Q-M1-15（K11） | 读图谱的权限？`job_runs` / `source_health` 谁建？ | 采用 B 方案。需求方已在 README §3.6（v1.4）给 `role_ingest` 加上 `graph` 只读权限。**授权本模块**在自己的 PR 里同步修改 `migrations/phase1_m0_0001_schemas_roles.sql` 中这一处授权，并修改 `tests/harness/tools/permissions.py` 的 `READS`，这是第一阶段唯一允许改 M0 文件的例外，其他内容不动。M6 建成后，从 `graph.monitored_entities` 读取监控实体，读取方式只用 SQL，不导入 M6 的代码。`ingest.job_runs` 和 `ingest.source_health` 的建表放在本模块的第一个迁移 `phase1_m1_0001_*`，字段按 README §3.12 和本文第 4 节；M2 只往里写自己的行。**SEC 共享客户端也由本模块建**（`inves_cog/ingest/sec_client.py`）：进程内限频 5 次/秒，`User-Agent` 读环境变量 `SEC_USER_AGENT`（R5）；M1 和 M2 的 SEC 任务排程不重叠，合计不超过 5 次/秒 |
 | Q-M1-16（K12） | 健康状态的优先级、"一天"的口径、重试和超时参数？ | 状态优先级：`未接通` > `unavailable` > `degraded` > `ok`。`未接通` = 没有配置（缺 key 或环境变量），或该源已确认不可用（例如 pytrends 被封）。`degraded` = 连续 2 次运行失败。`unavailable` = 最近一次成功距今超过 24 个自然小时，且最近 2 次运行都失败。News 也按这条规则判定，不单独处理。运行成功 1 次即恢复为 `ok`。每个 HTTP 请求遇到 429、5xx 或超时最多重试 3 次，指数退避，单次等待不超过 60 秒；401、403 和格式错误不重试。单个任务超时 30 分钟。复述单里的限频参数（Alpaca ≤ 120 次/分、SEC 5 次/秒共享、Trends 请求间隔 ≥ 10 秒、官网同域间隔 ≥ 2 秒、FINRA 60 次/分、FRED ≤ 30 次/分）全部批准，写进 `config/params/p-2026.10/m1.yaml` |
+| Q-M1-17（K13、K14） | M0 的两处测试与后续模块冲突：里程碑负例依赖 M1 尚未开发；干净环境断言写死迁移只有一个 | **用户答复**：授权在 M1 PR 里修这两处。`test_milestones_consistency` 的"模块关闭但测试缺失"负例改用临时仓库副本；`test_m0_ci.py` 改为断言迁移清单与 `migrations/` 下实际的 SQL 文件一致，且包含 M0 迁移。测试名、门禁逻辑和真实 milestones 不变 |
+| Q-M1-18（K15） | `test_pending_registry` 的棘轮探针读的是真实 pending | **用户答复**：授权只改该探针的输入，改用临时 pending 和只含 M0 的临时 milestones；棘轮实现不变 |
+| Q-M1-19（K16） | 模型名扫描把官网域名 `deepseek.com` 误判为模型名 | **用户答复**：授权修改 `tests/harness/tools/checks.py` 的识别逻辑：HTTP(S) 主机名里只由字母组成的品牌域名不算模型名；URL 路径、查询参数里的模型名，以及带版本号的 token 仍然拦截。原 `test_llm_models_allowed` 里同时补充正例和负例；白名单不变 |
+| Q-M1-20（K17） | 三个真实样例显示 `acceptanceDateTime` 并不是美东时间，与 v2 的 Q-M1-8 冲突 | **用户答复**：采用索引页 Accepted。已写入 Q-M1-8（v3）。三个冻结样例：`tests/fixtures/phase1/m1/sec_acceptance_conflict.json` |
+| Q-M1-21 | R4 怎么接？ | **已解决（用户提供）**：两个对话模型都通过阿里云 Token Plan 的 OpenAI 兼容接口（`token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`）接入，模型名仍只有 `glm-5.3` 和 `deepseek-v4.1-flash`，经 `registry` 选择 |
+| Q-M1-22 | 嵌入接口不通（Token Plan 返回 404，`DASHSCOPE_API_KEY` 返回 401） | 嵌入只影响 AC-M1-08（**非阻塞**），不挡 M1 验收；未接通期间 `embedding = NULL`，健康页显示"未接通"。排查办法见 M1 验收报告 |
