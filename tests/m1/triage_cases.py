@@ -172,3 +172,18 @@ def assert_news_triage(root, clock):
     stored = dict(results[0], embedding=json.dumps([0.1] * 1024))
     assert Repository(connection).apply_enrichment(stored)
     assert connection.values[1] == stored["embedding"]
+
+    # Empty bodies have NULL roots. The same already-enriched info_id still
+    # reuses its result; a distinct NULL-root article must not borrow it.
+    empty = item("empty", "Apple headline only", tickers=["AAPL"])
+    empty["body"] = None
+    empty["summary"] = None
+    empty["source_root"] = None
+    recording("entity_tagging", {"headline": empty["headline"], "body": ""}, {"entities": []})
+    recording("info_fields_extraction", {"headline": empty["headline"], "body": ""}, {"is_guidance": False})
+    cached = engine().process([empty])[0]
+    before = len(usage)
+    assert engine().process([cached])[0]["extraction_status"] == "ok"
+    assert len(usage) == before
+    engine().process([dict(empty, info_id="news:Fixture:other-empty")])
+    assert len(usage) == before + 2
