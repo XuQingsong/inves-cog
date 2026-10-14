@@ -147,9 +147,10 @@ def test_news_dedupe_and_times():
 
 
 def test_earnings_reaction_day():
-    from inves_cog.ingest.sec import earnings_event, parse_acceptance_et
+    from inves_cog.ingest.sec import earnings_event, parse_acceptance_et, accepted_from_index, collect_submissions
+    from inves_cog.ingest.http import SourceError
     for case in load_golden('m1_earnings_sessions.json')['cases']:
-        accepted = parse_acceptance_et(case['accepted_at_et'] + 'Z')
+        accepted = parse_acceptance_et(case['accepted_at_et'])
         assert accepted == instant(case['accepted_at_utc'])
         event = earnings_event({'ticker': 'AAPL', 'accession': 'fixture', 'form': '8-K', 'items': ['2.02'], 'accepted_at': accepted}, closes={}, clock=frozen())
         assert event['session'] == case['session']
@@ -160,7 +161,33 @@ def test_earnings_reaction_day():
     assert verified['complete'] and len(verified['samples']) == 3
     assert any(row['session_from_index'] == 'post' for row in verified['samples'])
     for sample in verified['samples']:
-        assert parse_acceptance_et(sample['submissions_acceptanceDateTime']) == instant(sample['accepted_at_utc_from_index']), sample['accession']
+        html = f'<div class="infoHead">Accepted</div><div class="info">{sample["index_accepted_et"]}</div>'
+        assert accepted_from_index(html) == instant(sample['accepted_at_utc_from_index']), sample['accession']
+        with pytest.raises(ValueError):
+            parse_acceptance_et(sample['submissions_acceptanceDateTime'])
+    with pytest.raises(SourceError, match='Accepted'):
+        accepted_from_index('<div>No acceptance field</div>')
+    sample = verified['samples'][0]
+    class RecordedSEC:
+        def submissions(self, cik):
+            return {'cik': cik, 'filings': {'recent': {
+                'accessionNumber': [sample['accession'], '0000320193-26-000017'],
+                'form': ['8-K', '8-K'], 'items': ['2.02,9.01', '2.02'],
+                'filingDate': ['2026-07-30', '2026-07-29'],
+                'acceptanceDateTime': [sample['submissions_acceptanceDateTime'], sample['submissions_acceptanceDateTime']]}}}
+        def get(self, url):
+            if sample['accession'] in url:
+                return f'<div class="infoHead">Accepted</div><div class="info">{sample["index_accepted_et"]}</div>'
+            raise SourceError('Recorded index unavailable', status_code=503)
+    rows = collect_submissions(RecordedSEC(), cik='0000320193', ticker='AAPL', clock=frozen())
+    assert rows[0]['accepted_at'] == instant(sample['accepted_at_utc_from_index'])
+    assert rows[0]['raw']['acceptanceDateTime'] == sample['submissions_acceptanceDateTime']
+    assert rows[0]['raw']['accepted_index_source']['verified'] is True
+    assert rows[1]['accepted_at'] is None
+    assert rows[1]['raw']['accepted_index_source']['verified'] is False
+    assert rows[1]['raw']['accepted_index_source']['http_status'] == 503
+    with pytest.raises(SourceError, match='acceptance'):
+        earnings_event(rows[1], closes={}, clock=frozen())
 
 
 def test_earnings_fallback_flag():
