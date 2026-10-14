@@ -159,7 +159,20 @@ def test_extractor_fixed_toggles():
     assert extract().values['net_debt'] == 10
 
 
-def test_segment_extraction():
+def test_segment_extraction(tmp_path):
+    import shutil
+    from inves_cog.ingest.fundamentals.segments import parse_segments
+    for path in (FIXTURES/'xbrl').iterdir(): shutil.copyfile(path,tmp_path/path.name)
+    instance=tmp_path/'instance.xml'
+    instance.write_text(instance.read_text().replace('iso4217:USD','iso4217:EUR'))
+    class Rates:
+        def convert(self,value,**kwargs): return value*2,{'currency':kwargs['currency'],'factor':2}
+    foreign=parse_segments(instance,ticker='ASML',accession='foreign-fixture',filed=date(2026,8,1),fx=Rates())
+    business=[row for row in foreign if row['axis']=='business']
+    assert sum(row['revenue'] for row in business)==204
+    assert all('segment_sum_mismatch' not in row['health_codes'] for row in business)
+    assert sorted(row['share_pct'] for row in business)==[50,52]
+
     from inves_cog.ingest.fundamentals.segments import parse_segments, segment_sum_ok
     for case in load_golden('m2_fundamentals.json')['segment_sum_tolerance']:
         assert segment_sum_ok(case['segments'], case['eliminations'], case['consolidated']) == case['expected_pass']
@@ -205,6 +218,12 @@ def test_segment_mapping_pending():
     queue.confirm_mappings([draft['id']], reviewer='fixture-reviewer', decision='已确认')
     assert queue.list_pending_mappings('chips') == []
     assert draft['segment_std'] == ['datacenter'] and draft['reviewed_at'].tzinfo is not None
+    shared=MappingQueue(llm=RecordedLLM(),clock=FrozenClock(datetime(2026,10,13,tzinfo=timezone.utc)),sectors={})
+    accepted=shared.draft('AMD','ClientMember',graph_nodes=[{'entity_id':'datacenter','name':'Data center'}])
+    assert accepted['graph_node_ids']==['datacenter']
+    empty=MappingQueue(llm=RecordedLLM(),clock=FrozenClock(datetime(2026,10,13,tzinfo=timezone.utc)),sectors={})
+    with pytest.raises(ValueError): empty.draft('AMD','Other',graph_nodes=[])
+
 
 
 def test_consensus_derived_pit():
