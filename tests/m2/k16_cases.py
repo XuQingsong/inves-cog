@@ -39,6 +39,36 @@ def assert_k16_cases(root):
     assert corporate['revenue'] is None and corporate['segment_profit']==3
     assert corporate['evidence']['sum_included'] is False
     assert all('segment_sum_mismatch' not in row['health_codes'] for row in rows)
+    # The approved company member is limited to the actual GEV namespace and
+    # ticker. A third dimension does not contaminate its valid sibling.
+    folder,document=build('gev')
+    for schema in ['company.xsd','us-gaap.xsd']:
+        p=folder/schema
+        text=p.read_text().replace('http://example.invalid/us-gaap','http://fasb.org/us-gaap/2026').replace('http://example.invalid/company','http://www.gevernova.com/20260630')
+        if schema=='company.xsd':
+            text=text.replace('</xs:schema>','<xs:element name="OperatingSegmentsExcludingIntersegmentEliminationMember" type="xs:string"/><xs:import namespace="http://fasb.org/srt/2026" schemaLocation="srt.xsd"/></xs:schema>')
+        else:text=text.replace('</xs:schema>','<xs:element name="OperatingSegmentsMember" type="xs:string"/><xs:element name="SubsegmentsAxis" type="xs:string"/></xs:schema>')
+        p.write_text(text)
+    (folder/'srt.xsd').write_text('<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://fasb.org/srt/2026"><xs:element name="ConsolidationItemsAxis" type="xs:string"/></xs:schema>')
+    xml=etree.tostring(document).decode().replace('http://example.invalid/us-gaap','http://fasb.org/us-gaap/2026').replace('http://example.invalid/company','http://www.gevernova.com/20260630').replace('<xbrli:xbrl ','<xbrli:xbrl xmlns:srt="http://fasb.org/srt/2026" ')
+    document=etree.fromstring(xml.encode())
+    for identity in ['client','datacenter']:
+        context=document.find(f"x:context[@id='{identity}']",ns)
+        segment=context.find('x:entity/x:segment',ns)
+        auxiliary=etree.SubElement(segment,'{'+ns['d']+'}explicitMember',dimension='srt:ConsolidationItemsAxis')
+        auxiliary.text='fixture:OperatingSegmentsExcludingIntersegmentEliminationMember'
+    (folder/'instance.xml').write_bytes(etree.tostring(document))
+    def gev_rows(ticker='GEV'):
+        return parse_segments(folder/'instance.xml',ticker=ticker,accession='gev-handwritten',filed=date(2026,8,1))
+    assert {r['segment_raw'] for r in gev_rows() if r['axis']=='business'}=={'ClientMember','DataCenterMember'}
+    assert not [r for r in gev_rows('AMD') if r['axis']=='business']
+    changed=etree.fromstring(etree.tostring(document))
+    client=changed.find("x:context[@id='client']/x:entity/x:segment",ns)
+    third=etree.SubElement(client,'{'+ns['d']+'}explicitMember',dimension='us-gaap:SubsegmentsAxis');third.text='fixture:ProductMember'
+    (folder/'instance.xml').write_bytes(etree.tostring(changed))
+    assert {r['segment_raw'] for r in gev_rows() if r['axis']=='business'}=={'DataCenterMember'}
+    (folder/'instance.xml').write_bytes(etree.tostring(document).replace(b'http://www.gevernova.com/20260630',b'http://example.invalid/impostor'))
+    assert not [r for r in gev_rows() if r['axis']=='business']
     fact(document,'corporate','RevenueFromContractWithCustomerExcludingAssessedTax',None)
     assert any('segment_sum_mismatch' in row['health_codes'] for row in parsed(folder,document))
     # Definition relationships prove the subtotal; no name or value matching.
