@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from tests.harness.tools.testing import ROOT
 
 
@@ -10,7 +11,9 @@ def test_clean_env_bootstrap():
     assert record['database_user'] == 'inves_cog_admin'
     assert int(record['postgres_version']) >= 150000
     assert record['pgvector_version']
-    assert record['migrations'] == ['phase1_m0_0001_schemas_roles.sql']
+    expected = sorted(path.name for path in (ROOT / 'migrations').glob('*.sql'))
+    assert 'phase1_m0_0001_schemas_roles.sql' in expected
+    assert record['migrations'] == expected
     assert record['temporary_database'] is True
     assert record['clean_container'] is True
 

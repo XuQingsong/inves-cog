@@ -146,17 +146,28 @@ def test_pending_registry(tmp_path):
 
 
 def test_milestones_consistency(tmp_path):
-    from tests.harness.tools.checks import validate_registry
+    from tests.harness.tools.checks import validate_registry, requirement_tests
     validate_registry(ROOT)
+    # Isolated data makes both negatives independent of actual module progress.
+    copied = tmp_path / 'registry'
+    shutil.copytree(ROOT / 'docs/phase1', copied / 'docs/phase1')
+    required = requirement_tests(copied)
     closed = tmp_path / 'milestones.txt'
     closed.write_text('M1\n')
-    with pytest.raises(AssertionError, match='FR-M0-05'):
-        validate_registry(ROOT, milestones_path=closed)
     pending = tmp_path / 'pending.txt'
-    pending.write_text('\n'.join(line for line in (ROOT / 'tests/harness/pending.txt').read_text().splitlines()
-                                 if '| M1 |' not in line) + '\n')
+    pending.write_text(''.join(f'{name} | {module} | fixture pending\n'
+                               for name, module in required.items() if module != 'M0'))
     with pytest.raises(AssertionError, match='FR-M0-05'):
-        validate_registry(ROOT, pending_path=pending, milestones_path=closed)
+        validate_registry(copied, pending_path=pending, milestones_path=closed)
+    pending.write_text(''.join(f'{name} | {module} | fixture pending\n'
+                               for name, module in required.items() if module not in {'M0', 'M1'}))
+    with pytest.raises(AssertionError, match='FR-M0-05'):
+        validate_registry(copied, pending_path=pending, milestones_path=closed)
+    tests = copied / 'tests'
+    tests.mkdir()
+    (tests / 'test_complete.py').write_text(''.join(f'def {name}(): pass\n'
+                                                  for name, module in required.items() if module in {'M0', 'M1'}))
+    validate_registry(copied, pending_path=pending, milestones_path=closed)
 
 
 def test_requirements_golden_unchanged(tmp_path):
