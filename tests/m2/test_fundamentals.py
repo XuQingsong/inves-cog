@@ -258,6 +258,16 @@ def test_consensus_import_idempotent(tmp_path):
 
 def test_health_contract():
     from inves_cog.ingest.fundamentals.fx import FXBook, FXGap
+    from inves_cog.ingest.fundamentals.fx import fetch_fred_rates
+    seen = []
+    class FRED:
+        def get(self,url,params):
+            if url.endswith('/series'): return {'realtime_end':'2026-01-06'}
+            seen.append(params)
+            assert params['output_type']==1
+            return {'count':1,'observations':[{'date':'2025-12-30','realtime_start':'2025-12-31','realtime_end':'9999-12-31','value':'1.2'}]}
+    rows = fetch_fred_rates(FRED(),key='fixture-not-a-key',currency='EUR',first=date(2025,12,29),last=date(2025,12,31),as_of=date(2026,1,6),clock=FrozenClock(datetime(2026,1,6,tzinfo=timezone.utc)))
+    assert rows[0]['realtime_start']=='2025-12-31' and seen
     rates = FXBook(json.loads((FIXTURES / 'fx_synthetic.json').read_text())['records'])
     value, evidence = rates.convert(100, currency='EUR', start=date(2025,12,29),
         end=date(2025,12,31), as_of=date(2026,1,6), field='revenue')
@@ -283,4 +293,26 @@ def test_health_contract():
     assert not health['can_score'] and health['reason'] and 'core_field_missing' in health['health_codes']
     book = ProfileBook(clock=FrozenClock(datetime(2026, 10, 13, tzinfo=timezone.utc)))
     profile = book.generate(good, segments=[], consensus=None, guidance=[])
+    book.generate(good,segments=[],consensus={'eps_cy':4,'fy_cy':'2026-12-31'},guidance=[])
+    boundary = book.generate(good,segments=[],consensus={'eps_cy':4.12,'fy_cy':'2026-12-31'},guidance=[])
+    assert not any(row['kind']=='一致预期变化' for row in boundary['changes'])
+    changed = book.generate(good,segments=[],consensus={'eps_cy':4.124,'fy_cy':'2026-12-31'},guidance=[])
+    assert sum(row['kind']=='一致预期变化' for row in changed['changes'])==1
+    from inves_cog.ingest.fundamentals.service import FinancialService,MemoryRepository
+    universe = yaml.safe_load((ROOT/'config/universe.yaml').read_text())['stocks']
+    memory = MemoryRepository()
+    for entity in universe:
+        memory.shared_filings[entity['ticker']]=[{'accession':'q8','form':'10-Q','filing_date':date(2026,8,1),'report_date':date(2026,6,30)}]
+    class SEC:
+        def companyfacts(self,cik): return input_facts()
+    service = FinancialService(clock=FrozenClock(datetime(2026,10,13,1,tzinfo=timezone.utc)),repository=memory,
+        sec=SEC(),llm=None,universe=universe,ciks={row['ticker']:'1' for row in universe})
+    assert service.collect_financials()['processed_count']==59
+    assert len(memory.health)==59 and len(memory.profiles)==59
+    for entity in universe:
+        health=memory.health[entity['ticker']]
+        if entity['foreign']: assert not health['can_trade']
+        if health['can_trade']:
+            state=memory.state_asof(entity['ticker'],ASOF,'fixed')
+            assert all(state.values[key] is not None for key in ('rev_ttm','eps_ttm','shares'))
     assert all(profile[key]['data'] is not None or profile[key]['reason'] for key in ('business', 'financials', 'consensus'))
