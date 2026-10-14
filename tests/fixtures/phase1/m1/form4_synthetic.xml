@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Handwritten synthetic input; not evidence of a real SEC filing. -->
+<ownershipDocument>
+ <documentType>4</documentType><issuer><issuerCik>0000000001</issuerCik><issuerTradingSymbol>FIXTURE</issuerTradingSymbol></issuer>
+ <reportingOwner><reportingOwnerId><rptOwnerName>Fixture Officer</rptOwnerName></reportingOwnerId><reportingOwnerRelationship><isOfficer>1</isOfficer></reportingOwnerRelationship></reportingOwner>
+ <nonDerivativeTable>
+  <nonDerivativeTransaction><transactionCoding><transactionCode>P</transactionCode></transactionCoding><transactionAmounts><transactionShares><value>100</value></transactionShares><transactionPricePerShare><value>10.5</value></transactionPricePerShare></transactionAmounts></nonDerivativeTransaction>
+  <nonDerivativeTransaction><transactionCoding><transactionCode>S</transactionCode></transactionCoding><transactionAmounts><transactionShares><value>20</value></transactionShares></transactionAmounts></nonDerivativeTransaction>
+ </nonDerivativeTable>
+ <derivativeTable><derivativeTransaction><transactionCoding><transactionCode>P</transactionCode></transactionCoding></derivativeTransaction></derivativeTable>
+</ownershipDocument>

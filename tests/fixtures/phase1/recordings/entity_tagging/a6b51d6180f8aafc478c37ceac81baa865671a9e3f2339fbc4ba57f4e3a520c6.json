@@ -1,0 +1,9 @@
+{
+  "task": "entity_tagging",
+  "payload_sha256": "a6b51d6180f8aafc478c37ceac81baa865671a9e3f2339fbc4ba57f4e3a520c6",
+  "result": {
+    "entities": [
+      "apple"
+    ]
+  }
+}

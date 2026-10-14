@@ -1,0 +1,8 @@
+{
+  "task": "entity_tagging",
+  "payload_sha256": "186a42f0828f600fddbdae7f3d88ab0839bb9d59505d4b3384729894df273ad8",
+  "error": {
+    "type": "timeout",
+    "message": "frozen fixture timeout"
+  }
+}

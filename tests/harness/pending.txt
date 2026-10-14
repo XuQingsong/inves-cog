@@ -12,7 +12,7 @@ test_source_level_mapping | M1 | 等待 M1 实现
 test_info_item_contract | M1 | 等待 M1 实现
 test_info_fields_extraction | M1 | 等待 M1 实现
 test_llm_extraction_failure_degrades | M1 | 等待 M1 实现
-test_ingest_live_smoke | M1 | 等待 R5
+test_ingest_live_smoke | M1 | 等待 R4/R5/R7
 test_revenue_tag_gap | M2 | 等待 M2 实现
 test_q4_derived_from_annual | M2 | 等待 M2 实现
 test_companyfacts_lag | M2 | 等待 M2 实现
