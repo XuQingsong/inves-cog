@@ -129,8 +129,13 @@ class Repository:
         exists = self.connection.execute("SELECT to_regclass('graph.entities') AS relation").fetchone()['relation']
         return [normalize_entity(row) for row in self.connection.execute('SELECT * FROM graph.entities').fetchall()] if exists else fallback
 
-    def last_runs(self):
-        return {r['task_name']:r['started_at'] for r in self.connection.execute('SELECT task_name,max(started_at) AS started_at FROM ingest.job_runs GROUP BY task_name').fetchall()}
+    def last_runs(self, *, trade_date=None):
+        sql='SELECT task_name,max(started_at) AS started_at FROM ingest.job_runs'
+        if trade_date is not None:
+            sql+=" WHERE task_name NOT IN ('bars_full','bars_prefill','wide_universe') OR trade_date=%s"
+        sql+=' GROUP BY task_name'
+        cursor=self.connection.execute(sql,(trade_date,)) if trade_date is not None else self.connection.execute(sql)
+        return {r['task_name']:r['started_at'] for r in cursor.fetchall()}
 
     def get_cursor(self,key):
         row=self.connection.execute('SELECT value FROM ingest.source_cursors WHERE cursor_key=%s',(key,)).fetchone()

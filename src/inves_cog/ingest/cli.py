@@ -34,7 +34,7 @@ def connect(values):
 def schedule_once(pipeline, runtime, *, names=None):
     if names is not None and set(names)-set(runtime.tasks):
         raise ValueError('Unknown scheduled task')
-    due=due_tasks(pipeline.clock,pipeline.repo.last_runs())
+    due=due_tasks(pipeline.clock,pipeline.repo.last_runs(trade_date=pipeline.clock.today_trade_date()))
     if names is not None:
         due=[name for name in due if name in names]
     return runtime.run(due) if due else {}
