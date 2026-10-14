@@ -20,7 +20,7 @@ def build(*, clock, values, connection):
     fred = FRED(clock=clock,key=values['FRED_API_KEY']) if values.get('FRED_API_KEY') else None
     sec = SECClient(user_agent=values['SEC_USER_AGENT']) if values.get('SEC_USER_AGENT') else None
     return Pipeline(clock=clock,repository=Repository(connection),values=values,
-                    llm=Client.from_environment(values),sec=sec,alpaca=alpaca,fred=fred)
+                    llm=Client.from_environment(values,clock=clock),sec=sec,alpaca=alpaca,fred=fred)
 
 
 def connect(values):

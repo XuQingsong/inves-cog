@@ -48,7 +48,8 @@ class JobRunner:
             if not configured:
                 raise SourceError('Required source configuration absent', confirmed_unavailable=True)
             from inves_cog.ingest.deadline import budget
-            with budget(self.timeout_seconds, self.monotonic):
+            from inves_cog.llm.usage import usage_context
+            with budget(self.timeout_seconds, self.monotonic), usage_context(job_task=task_name):
                 result = operation()
             duration = self.monotonic() - timer
             count = result.get('processed_count', 0)

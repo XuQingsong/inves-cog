@@ -75,8 +75,16 @@ class Repository:
         self.processed += 1
 
     def write_job(self, row):
-        fields = 'task_name trade_date started_at ended_at status processed_count error_summary params_version'.split()
+        fields = 'task_name trade_date started_at ended_at status processed_count error_summary params_version llm_input_tokens llm_output_tokens llm_usage_missing_calls'.split()
         with self.transaction():
+            stats = self.connection.execute("""SELECT
+                CASE WHEN count(*) FILTER (WHERE input_tokens IS NULL)>0 THEN NULL ELSE coalesce(sum(input_tokens),0) END AS input_tokens,
+                CASE WHEN count(*) FILTER (WHERE output_tokens IS NULL)>0 THEN NULL ELSE coalesce(sum(output_tokens),0) END AS output_tokens,
+                count(*) FILTER (WHERE input_tokens IS NULL OR output_tokens IS NULL) AS usage_missing_calls
+                FROM ingest.llm_calls WHERE (created_at AT TIME ZONE 'America/New_York')::date=%s
+                AND split_part(purpose,'|',1)=%s""", (row['trade_date'],row['task_name'])).fetchone()
+            row = dict(row,llm_input_tokens=stats['input_tokens'],llm_output_tokens=stats['output_tokens'],
+                       llm_usage_missing_calls=stats['usage_missing_calls'])
             self.connection.execute(f"INSERT INTO ingest.job_runs ({','.join(fields)}) VALUES ({','.join(['%s']*len(fields))})", [row[field] for field in fields])
 
     def write_health(self, row):

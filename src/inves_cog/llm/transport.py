@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 from inves_cog.ingest.http import HTTPClient, SourceError
 from inves_cog.llm.client import LLMUnavailable, canonical_payload
 from inves_cog.llm.registry import ALLOWED_MODELS
+from inves_cog.llm.usage import DialogueResult
 
 TASK_FORMATS = {
     'entity_tagging': 'Return entities as a JSON array of graph entity identifier strings.',
@@ -54,5 +55,7 @@ class OpenAICompatibleTransport:
             if not isinstance(result, dict):
                 raise ValueError('Expected a JSON object')
         except (KeyError, IndexError, TypeError, ValueError):
-            raise LLMUnavailable('Dialogue response lacks a valid JSON object') from None
-        return result
+            error = LLMUnavailable('Dialogue response lacks a valid JSON object')
+            error.usage = response.get('usage') if isinstance(response,dict) else None
+            raise error from None
+        return DialogueResult(result,response.get('usage'))
