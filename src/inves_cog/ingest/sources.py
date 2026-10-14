@@ -85,6 +85,6 @@ def website_change(url, previous, current, *, clock):
     import hashlib
     digest = hashlib.sha256(new.encode()).hexdigest()
     difference = '\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), fromfile='previous', tofile='current', lineterm=''))
-    return make_item('site_change', 'CompanyIR', url + ':' + digest, headline='Website content changed: ' + url,
+    return make_item('site_change', 'EntitySites', url + ':' + digest, headline='Website content changed: ' + url,
                      body=difference, url=url, clock=clock, published_at=None,
                      payload={'content_sha256': digest})

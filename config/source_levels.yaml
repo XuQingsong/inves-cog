@@ -1,6 +1,10 @@
 sources:
   SEC: 1
   CompanyIR: 1
+  EntitySites: 1
+  FederalReserveNews: 1
+  EIANews: 1
+  EIATodayInEnergy: 1
   Government: 1
   CentralBank: 1
   FRED: 1

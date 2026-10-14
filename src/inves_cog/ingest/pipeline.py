@@ -274,28 +274,50 @@ class Pipeline:
         return {'processed_count': len(rows), 'events': len(events)}
 
     def trends_task(self):
-        count, short = 0, []
+        count, short, failures = 0, [], []
         for entity in self.monitored:
             for keyword in entity.get('trends_keywords', []):
-                check(); payload = self.trends.get(keyword)
-                today = self.clock.now_utc().astimezone(NY).date()
-                valid = [r for r in payload['history'] if today-timedelta(days=90) <= r['date'] < today]
-                if len(valid) < 60: short.append(keyword + ': trend_window_short')
-                event = trend_event(keyword, payload['history'], payload['today'], clock=self.clock)
-                if event: self.info([event])
-                self.repo.set_cursor('trends:' + keyword, payload, self.clock.now_utc()); count += 1
-        return {'processed_count': count, 'note': '; '.join(short), 'status': 'degraded' if short else 'ok'}
+                try:
+                    check(); payload = self.trends.get(keyword)
+                    today = self.clock.now_utc().astimezone(NY).date()
+                    valid = [r for r in payload['history'] if today-timedelta(days=90) <= r['date'] < today]
+                    if len(valid) < 60: short.append(keyword + ': trend_window_short')
+                    event = trend_event(keyword, payload['history'], payload['today'], clock=self.clock)
+                    if event: self.info([event])
+                    self.repo.set_cursor('trends:' + keyword, payload, self.clock.now_utc()); count += 1
+                except Exception as exc:
+                    failures.append({'keyword': keyword, 'type': type(exc).__name__, 'message': str(exc)})
+        notes = short + [f"{f['keyword']}: {f['type']}: {f['message']}" for f in failures]
+        return {'processed_count': count, 'failures': failures, 'note': '; '.join(notes),
+                'status': 'degraded' if short or failures else 'ok'}
 
     def websites_task(self):
-        count = 0
+        count, failures = 0, []
+        health = HealthBook(clock=self.clock, rows=self.repo.health_rows(), persist=self.repo.write_health)
         for entity in self.monitored:
             for url in entity.get('urls', []):
-                check(); current = self.websites.get(url); previous = self.repo.latest_website(url)
-                if previous is not None:
-                    event = website_change(url, previous, current, clock=self.clock)
-                    if event: self.info([event])
-                self.repo.write('website_snapshots', {'url':url,'captured_at':self.clock.now_utc(),'body':current}); count += 1
-        return {'processed_count': count}
+                source = 'EntitySites:' + url
+                try:
+                    check(); current = self.websites.get(url); previous = self.repo.latest_website(url)
+                    event = website_change(url, previous or '', current, clock=self.clock)
+                    if event:
+                        if previous is None: event['flags'].append('site_baseline')
+                        self.info([event])
+                    self.repo.write('website_snapshots', {'url':url,'captured_at':self.clock.now_utc(),'body':current})
+                    count += 1
+                    health.record(source, success=True, count=1)
+                except Exception as exc:
+                    note = f'{type(exc).__name__}: {exc}'
+                    failures.append({'url': url, 'error': note})
+                    health.record(source, success=False, note=note, degraded=True,
+                                  confirmed_unavailable=getattr(exc, 'confirmed_unavailable', False))
+        return {'processed_count': count, 'failures': failures, 'status': 'degraded' if failures else 'ok',
+                'note': '; '.join(f"{f['url']}: {f['error']}" for f in failures)}
+
+    def rss_task(self, source):
+        from inves_cog.ingest.rss import PUBLIC_FEEDS, parse_rss
+        rows = parse_rss(HTTPClient().get(PUBLIC_FEEDS[source]), source=source, clock=self.clock)
+        return self.info(rows)
 
     def fred_task(self):
         fred, count = self.require(self.fred, 'FRED'), 0
@@ -337,10 +359,11 @@ class Pipeline:
             'wide_universe':('AlpacaWide',self.wide),'news_full':('AlpacaNews',self.news),'news_prefill':('AlpacaNews',self.news),
             'sec_submissions':('SEC',self.submissions),'sec_index':('SECDailyIndex',self.index),'sec_atom':('SECAtom',self.atom),
             'app_free':('AppStoreFree',lambda:self.apps('free')),'app_grossing':('AppStoreGrossing',lambda:self.apps('grossing')),
-            'trends':('GoogleTrends',self.trends_task),'websites':('CompanyIR',self.websites_task),'fred':('FRED',self.fred_task),
+            'trends':('GoogleTrends',self.trends_task),'websites':('EntitySites',self.websites_task),'fred':('FRED',self.fred_task),
             'finra':('FINRA',self.finra),'cboe':('CBOE',self.cboe)}
-        for source in ('FederalReserveNews','EIANews'):
-            health.record(source,success=False,configured=False,note='First phase excludes this source')
+        tasks.update({'fed_news': ('FederalReserveNews', lambda: self.rss_task('FederalReserveNews')),
+                      'eia_press': ('EIANews', lambda: self.rss_task('EIANews')),
+                      'eia_energy': ('EIATodayInEnergy', lambda: self.rss_task('EIATodayInEnergy'))})
         def guarded(operation):
             def execute():
                 before = self.repo.processed

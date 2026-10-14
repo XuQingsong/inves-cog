@@ -32,15 +32,18 @@ def trend_event(keyword, history, today_value, *, clock):
 
 
 def collect_trends(keywords, *, fetch, health, clock):
-    results = []
-    try:
-        for keyword in keywords:
+    results, failures, succeeded = [], [], 0
+    for keyword in keywords:
+        try:
             payload = fetch(keyword)
             item = trend_event(keyword, payload['history'], payload['today'], clock=clock)
             if item:
                 results.append(item)
-        health.record('GoogleTrends', success=True, count=len(results))
-    except Exception as exc:
-        health.record('GoogleTrends', success=False, confirmed_unavailable=True, note=str(exc))
-        return []
+            succeeded += 1
+        except Exception as exc:
+            failures.append((keyword, exc))
+    confirmed = bool(failures) and not succeeded and all(getattr(exc, 'confirmed_unavailable', False) for _, exc in failures)
+    note = '; '.join(f'{keyword}: {type(exc).__name__}: {exc}' for keyword, exc in failures) or None
+    health.record('GoogleTrends', success=bool(succeeded), count=len(results),
+                  confirmed_unavailable=confirmed, degraded=bool(failures), note=note)
     return results

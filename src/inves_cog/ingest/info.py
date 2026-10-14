@@ -39,13 +39,17 @@ def extraction_body(body):
     return normalized_body(visible)
 
 
-def source_root(body, *, provider=None, upstream_id=None):
+def source_root(body, *, headline=None, provider=None, upstream_id=None):
     if provider and upstream_id is not None:
         return f'{provider}:{upstream_id}'
     if body is None:
         return None
     normalized=normalized_body(body)
-    return 'sha256:' + hashlib.sha256(normalized.encode('utf-8')).hexdigest() if normalized else None
+    if not normalized:
+        return None
+    title = normalized_body(headline or '')
+    identity = title + '\n' + normalized if len(normalized) < 300 and title else normalized
+    return 'sha256:' + hashlib.sha256(identity.encode('utf-8')).hexdigest()
 
 
 def source_level(source, *, path=None):
@@ -62,7 +66,7 @@ def make_item(kind, source, native_id, *, headline, body, clock, published_at=No
             raise ValueError('published_at must carry a timezone')
         published_at = published_at.astimezone(timezone.utc)
     return {'info_id': f'{kind}:{source}:{native_id}', 'kind': kind, 'published_at': published_at,
-            'first_seen_at': clock.now_utc(), 'source': source, 'source_root': source_root(body, provider=upstream_provider, upstream_id=upstream_id),
+            'first_seen_at': clock.now_utc(), 'source': source, 'source_root': source_root(body, headline=headline, provider=upstream_provider, upstream_id=upstream_id),
             'source_level': source_level(source), 'headline': headline, 'body': body, 'summary': body[:500] if body is not None else None,
             'url': url, 'tickers': list(tickers), 'entities': [], 'embedding': None, 'extraction_status': 'pending',
             'flags': [] if published_at is not None else ['published_at_missing'], 'payload': payload or {},
@@ -100,6 +104,13 @@ class InfoStore:
                 row['body'] = None
 
 
+def record_extraction_error(result, task, exc):
+    detail = {'type': type(exc).__name__, 'message': str(exc)}
+    if exc.__cause__ is not None:
+        detail['cause'] = {'type': type(exc.__cause__).__name__, 'message': str(exc.__cause__)}
+    result.setdefault('extraction_source', {}).setdefault('errors', {})[task] = detail
+
+
 def enrich(item, *, llm, embed, entities, clock):
     result = deepcopy(item)
     prose=extraction_body(item['body'])
@@ -116,7 +127,8 @@ def enrich(item, *, llm, embed, entities, clock):
             raise ValueError('Invalid entity extraction shape')
         allowed = {e['entity_id'] for e in entities}
         result['entities'] = sorted(set(result['entities']) | {e for e in tags['entities'] if not allowed or e in allowed})
-    except Exception:
+    except Exception as exc:
+        record_extraction_error(result, 'entity_tagging', exc)
         failed = True
         result['flags'].append('entity_tagging_failed')
     if item['kind'] in {'news', 'sec_8k'}:
@@ -143,7 +155,8 @@ def enrich(item, *, llm, embed, entities, clock):
                 result['extraction_source']['published_at'] = 'llm'
                 result['flags'].remove('published_at_missing')
                 result['flags'].append('published_at_extracted')
-        except Exception:
+        except Exception as exc:
+            record_extraction_error(result, 'info_fields_extraction', exc)
             failed = True
             for key in ('is_guidance', 'guidance_direction', 'is_rating_change'):
                 result[key] = None
@@ -155,7 +168,8 @@ def enrich(item, *, llm, embed, entities, clock):
             if not isinstance(vector, list) or len(vector) != 1024 or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in vector):
                 raise ValueError('Invalid embedding dimension or value')
             result['embedding'] = vector
-        except Exception:
+        except Exception as exc:
+            record_extraction_error(result, 'embedding', exc)
             result['flags'].append('embedding_failed')
     else:
         result['flags'].append('embedding_failed')

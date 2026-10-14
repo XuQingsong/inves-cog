@@ -115,8 +115,8 @@ class Trends:
             data = client.interest_over_time()
         except Exception as exc:
             status = getattr(getattr(exc, 'response', None), 'status_code', None)
-            raise SourceError('Google Trends request failed', status_code=status,
-                              confirmed_unavailable=status in {401, 403, 429}) from exc
+            raise SourceError(f'Google Trends {keyword}: {type(exc).__name__}: {exc}', status_code=status,
+                              confirmed_unavailable=status in {401, 403}) from exc
         today, rows, value = self.clock.now_utc().astimezone(NY).date(), [], None
         for instant, row in data.iterrows():
             day, number = instant.date(), float(row[keyword])

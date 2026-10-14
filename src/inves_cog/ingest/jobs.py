@@ -21,7 +21,7 @@ class HealthBook:
             status = 'degraded' if degraded else 'ok'
         elif failures >= 2 and last_success is not None and now - last_success > timedelta(hours=24):
             status = 'unavailable'
-        elif failures >= 2:
+        elif degraded or failures >= 2:
             status = 'degraded'
         else:
             status = old.get('status', 'ok')

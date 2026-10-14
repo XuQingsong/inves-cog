@@ -6,7 +6,7 @@ entities:
     tickers: []
     app_ids: ['6448311069']
     trends_keywords: [OpenAI, ChatGPT]
-    urls: [https://openai.com/news/]
+    urls: [https://openai.com/news/rss.xml]
   - entity_id: anthropic
     name: Anthropic
     aliases: [Claude]

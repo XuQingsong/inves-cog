@@ -47,7 +47,7 @@ def due_tasks(clock, last_runs):
         due('sec_atom', interval=10)
     for name in ('app_free', 'app_grossing'):
         due(name, interval=60)
-    for name in ('trends', 'websites', 'fred', 'finra', 'cboe'):
+    for name in ('trends', 'websites', 'fred', 'finra', 'cboe', 'fed_news', 'eia_press', 'eia_energy'):
         due(name, after=1245)
     return output
 
