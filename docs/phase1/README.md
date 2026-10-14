@@ -328,6 +328,6 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | R2 | ~~Muse 仓库访问~~ **已解决**：`https://github.com/XuQingsong/muse.git` 是公开仓库，`main` 即 `aacea04`；v18 标准答案在 `code/paper_trade_v18full_trades.json`（只作参照，不拷贝代码） | —— | M2、M3、M4 |
 | R7 | Muse 沙箱 `quant` 库的数据：一致预期快照（2026-10-08 起）、Form 4 内部人事件、VIX 历史。这些数据不在 Muse 仓库里，只在 `quant` 库中，由 Muse 方长期保存，不会丢失。**由开发 agent 向 Muse 方申请导出文件**（pg_dump 或 CSV，附表结构和导出时间），用本项目自己的导入脚本入库；导出文件放在仓库之外，不进 `docs/`。开发不直接连接 `quant` 库（任务书 §4.4 第 1 条） | 开发（向 Muse 申请） | M1（Form 4、VIX）、M2（一致预期） |
 | R3 | ~~三个案例的日期~~ **已确定**：东芝 2026-10-02、OpenAI 2026-10-08、Meta Muse 2026-09-21（详见 M7 第 7.1 节） | —— | M7、M8 的案例夹具 |
-| R4 | `deepseek-v4.1-flash` 和 `glm-5.3` 的接入方式（服务商、接口地址），以环境变量提供 | 用户 | M0、M1、M8 |
+| R4 | ~~两个 LLM 的接入方式~~ **已解决**：阿里云 Token Plan 的 OpenAI 兼容接口（见 M1 Q-M1-21） | —— | M0、M1、M8 |
 | R5 | Alpaca（需要 SIP 历史数据权限）、Tavily、Exa、Google CSE、SEC 访问身份（`SEC_USER_AGENT`）、Alpha Vantage、DashScope、FRED 的账号和 key（以环境变量提供） | 用户 / 开发 | M1、M2 |
 | R6 | 部署机器（本项目独立部署）的 CPU / 内存 / 磁盘 | 用户 / 开发 | M1（广域日线、向量库） |
