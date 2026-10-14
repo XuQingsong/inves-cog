@@ -8,7 +8,7 @@ import math
 from pathlib import Path
 import re
 
-PARSE_CONTRACT='operating-aux-v1'
+PARSE_CONTRACT='operating-aux-income-v2'
 
 REVENUE=['RevenueFromContractWithCustomerExcludingAssessedTax','RevenueFromContractWithCustomerIncludingAssessedTax','Revenues','SalesRevenueNet']
 
@@ -111,6 +111,7 @@ def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=
             profits=[f for f in facts if f.qname.localName=='OperatingIncomeLoss']
             if not profits: profits=[f for f in facts if f.qname.localName=='SegmentProfitLoss']
             if not profits: profits=[f for f in facts if re.search(r'(?:Profit|Income)',f.qname.localName) and not re.search(r'(?:Tax|Comprehensive|PerShare)',f.qname.localName)]
+            if not revenues and not profits: continue
             profit_fact=profits[0] if len(profits)==1 else None
             revenue=numeric(revenue_fact) if revenue_fact is not None else None
             profit=numeric(profit_fact) if profit_fact is not None else None
