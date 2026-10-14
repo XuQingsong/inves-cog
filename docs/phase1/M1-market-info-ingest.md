@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v5（AC-M1-04 的转载抽样改为与数据源相符） |
+| 文档版本 | v6（新闻分级送 LLM、用量记录；加回美联储 / EIA 新闻稿；官网抓取规则；嵌入配置） |
 | 规格章节 | 3.2、4.1、4.2、4.3、4.7、5.5（数据部分） |
 | 依赖 | M0；监控实体清单来自 M6（M6 完成前用 `config/monitored_entities.yaml` 的人工初版） |
 | 关闭的不变量 | I22、I28（数据部分） |
@@ -110,12 +110,14 @@
 | FR-M1-09 | 信源等级：`config/source_levels.yaml` 映射来源 → 等级。一级：SEC、公司官网和 IR、政府和央行；二级：Reuters、Bloomberg、WSJ、FT、CNBC、AP 等一线媒体；三级：卖方和专业财经媒体；四级：聚合、转载、匿名信源、无法识别的来源（默认） |
 | FR-M1-10 | Google Trends：监控实体每日热度；接口失败时 `source_health.status = 未接通`，不写模拟值；热度 > 自身 90 日均值 3 倍写一条 `info_items`（`kind=trend`） |
 | FR-M1-11 | 官网变化：监控 URL 每日抓取，正文哈希变化时写 `info_items`（`kind=site_change`），`body` 存差异片段 |
-| FR-M1-12 | 实体标注：`deepseek-v4.1-flash` 的 `entity_tagging` 任务，输入标题和正文前 2,000 字，输出图谱实体 id 列表；规则先用代码 / 公司名词表匹配，LLM 只补充；失败重试 2 次后 `extraction_status=failed`，信息照常入库 |
+| FR-M1-12 | 实体标注：`deepseek-v4.1-flash` 的 `entity_tagging` 任务，输入标题和正文前 2,000 字，输出图谱实体 id 列表；规则先用代码 / 公司名词表匹配，LLM 只补充；失败重试 2 次后 `extraction_status=failed`，信息照常入库。**v6：不是每条都调用 LLM，按 FR-M1-18 分级处理** |
 | FR-M1-12b | 字段抽取：`info_fields_extraction`（`deepseek-v4.1-flash`）为 8-K 和新闻补充三个字段：`is_guidance`（是否含业绩指引及方向：上调 / 下调 / 维持）、`is_rating_change`（是否为分析师评级或目标价变动）、`published_at`（信源未给出时从正文抽取，并标 `published_at_extracted`）；抽取失败时字段为 `NULL` |
 | FR-M1-13 | 嵌入：DashScope 嵌入；失败时 `embedding=NULL` 并在健康页计数，不阻塞入库 |
 | FR-M1-14 | 数据源健康：每个数据源每次运行更新 `source_health`；连续 2 次失败为 `degraded`，连续 1 天失败为 `unavailable` |
 | FR-M1-15 | FINRA 空头、CBOE 期权统计入库并进全量库（`kind=short_interest` / `options_stats`） |
 | FR-M1-16 | 所有任务写 `ingest.job_runs`（README §3.11） |
+| FR-M1-17 | **LLM 用量记录**（v6）：每次 LLM 调用写一行 `ingest.llm_calls`：`call_id, task, model, purpose(分级层次或调用方模块), input_tokens, output_tokens, latency_ms, status, info_ids text[], created_at`。token 数取接口返回的 `usage`；接口没给时为 `NULL`，并标 `usage_missing`。`job_runs` 汇总每个任务的当日 token 总数。共享 LLM 客户端负责写这张表，M2、M6、M8 的调用都会自动记录 |
+| FR-M1-18 | **新闻分级送 LLM**（v6），目标是省 token、同时不漏重要新闻。**第 0 层，规则，全部条目，不调用 LLM**：接口给的代码、代码 / 公司名 / 别名 / 监控实体 / 产品词表匹配、信源等级、关键词标签（指引、评级、目标价、并购、产能、出口管制、关税、召回、诉讼、监管等）。**第 1 层，批量标题初筛**：第 0 层没有命中标的池（59 只）和监控实体的条目，每 25 条打包成一次 `entity_tagging` 调用，只送标题和正文前 200 字，输出每条的实体 id 和 `material`（是否涉及标的池、监控实体、篮子所在行业或宏观政策）。**第 2 层，完整处理**（实体标注 + 字段抽取，输入同 FR-M1-12）：满足任一条件——命中标的池或监控实体；8-K；信源等级 1；第 1 层判为 `material`。**第 3 层，按需处理**：其余条目不调用 LLM，但照常入库、照常做嵌入、可以被检索；M8 回捞命中时再按需处理（用同一个接口）。同一 `source_root` 只处理一次。**积压**：最近 30 天的条目按上述规则补处理；更早的只做第 0 层和嵌入，按需处理。**预算**：参数 `llm_daily_token_budget`（初始 150 万 token，按 `deepseek-v4.1-flash` 计），超出后第 2 层只处理命中标的池的条目，其余排队到次日，健康页显示 |
 
 ## 6. 异常与降级
 
@@ -161,6 +163,7 @@
 | AC-M1-06 | 断开一个数据源（例如改错 Trends 地址），健康页在下一次运行后显示"未接通"或"degraded"，其他源不受影响 | D | 数据断了能看见 | 是 |
 | AC-M1-07 | 全量库没有因为"不重要"而被丢弃的信息：采集计数 = 入库计数 + 去重计数 | E | 源头不被过滤 | 是 |
 | AC-M1-08 | 实体标注失败率 < 5%；嵌入失败率 < 2% | E | 回捞可用 | 否 |
+| AC-M1-09 | **分级效果**（v6）：用最近 7 个交易日的真实新闻跑一遍分级。（1）报告各层条数、每层 token 数和每日总 token 数，日均不超过预算；（2）需求方从第 3 层（未送 LLM）随机抽 30 条，其中不应有本应进入第 2 层的重要新闻；（3）冻结用例：东芝扩产（2026-10-02，东芝不在标的池里）和 OpenAI ARR（2026-10-08）的相关新闻必须进入第 2 层 | E | 不漏重要新闻、控制成本 | 是 |
 
 ## 9. 已决定的问题
 
@@ -178,7 +181,7 @@
 | Q-M1-10（K06） | `source_root` 的算法？更新稿怎么处理？ | 采用复述单第 3 节的 B 方案。格式：有上游原生 id 时为 `{提供方}:{原生id}`，否则为 `sha256:{规范化正文的哈希}`。规范化只做 HTML 去标签、Unicode NFKC、空白合并；**不删**数字、标点、否定词和引语。不按标题相似、同股票、同主题或 LLM 判断合并。同一 `info_id` 的更新稿写进 `ingest.info_item_versions`，不算新条目、不算新根 |
 | Q-M1-11（K07） | FINRA 和 CBOE 的接口和粒度？要不要专表？ | FINRA 用复述单里的 `consolidatedShortInterest` 数据集。开发先用真实响应核对它是否覆盖 NYSE / Nasdaq 上市的标的；覆盖的才用，不覆盖就把该源标 `未接通`。不得用日度做空成交量顶替空头持仓。空头占比的分母用 frames 的流通股本，字段名写明 `si_pct_shares_outstanding`（不是自由流通股）。CBOE 只存市场级统计。两者都进专表（第 4 节），同时写 `info_items`。单股期权数据第一阶段为 `NULL` |
 | Q-M1-12（K08） | 畅销榜源、监控清单、Trends 窗口、榜单跳升的基准？ | 畅销榜用复述单里 Apple 旧 RSS 的 `topgrossingapplications`；取不到就标 `未接通`，**不用付费榜替代**。监控清单 `config/monitored_entities.yaml` 由开发按规格第 4.1 节起草（OpenAI / ChatGPT、Anthropic / Claude、Google Gemini、DeepSeek、Meta AI / Muse 等），每个实体写明 `entity_id, name, aliases, tickers, app_ids, trends_keywords, urls`，需求方在 PR 里审核。Trends：美国范围，每个关键词单独查 `today 3-m`；均值 = 同一次请求里当天之前 90 个完整日的平均值，不含当天；有效天数不足 60 天不判定（标 `trend_window_short`）；全为 0 时不判定。榜单跳升和上一次小时快照比较；上次不在前 100 的，按第 101 名计算 |
-| Q-M1-13（K09） | FRED key、版本和发布时间？美联储 / EIA 新闻稿？ | FRED key 加入 R5 清单（README §8）。6 个 series 按复述单：CPIAUCSL、PAYEMS、DGS2、VIXCLS、DCOILWTICO、DTWEXBGS，保存原始单位。用 FRED 的 `realtime_start` 作为可见日期：`published_at` = `realtime_start`，并标 `published_at_date_only`。不用最新修订值改写历史，修订值另存新行。美联储和 EIA 新闻稿**第一阶段不做**，健康页显示 `未接通` |
+| Q-M1-13（K09） | FRED key、版本和发布时间？美联储 / EIA 新闻稿？ | FRED key 加入 R5 清单（README §8）。6 个 series 按复述单：CPIAUCSL、PAYEMS、DGS2、VIXCLS、DCOILWTICO、DTWEXBGS，保存原始单位。用 FRED 的 `realtime_start` 作为可见日期：`published_at` = `realtime_start`，并标 `published_at_date_only`。不用最新修订值改写历史，修订值另存新行。~~美联储和 EIA 新闻稿第一阶段不做~~（**v6 撤销**：这是需求方 v2 时为了缩小范围做的决定，没有实际障碍。两者都有公开 RSS，不需要 key，见 Q-M1-26） |
 | Q-M1-14（K10） | `info_items` 缺字段；摘要谁做；嵌入模型和维度？ | 字段按第 4 节 v2 补齐。`summary` 用规则截取，不是 M10 的 `summary_oneliner`。90 天后清空正文的前提是 `summary` 已有值。嵌入用 DashScope `text-embedding-v3`，1024 维（R5 给出其他模型时由需求方改文档），输入为标题加正文前 2,000 字，不切分。**共享 LLM 客户端由本模块建**：`inves_cog/llm/client.py` 提供 `call(task: str, payload: dict) -> dict`，内部经 `registry` 选模型。录音按 `tests/fixtures/phase1/recordings/{task}/{payload 规范 JSON 的 sha256}.json` 存取。M2、M6、M8 用同一个接口，不另写客户端 |
 | Q-M1-15（K11） | 读图谱的权限？`job_runs` / `source_health` 谁建？ | 采用 B 方案。需求方已在 README §3.6（v1.4）给 `role_ingest` 加上 `graph` 只读权限。**授权本模块**在自己的 PR 里同步修改 `migrations/phase1_m0_0001_schemas_roles.sql` 中这一处授权，并修改 `tests/harness/tools/permissions.py` 的 `READS`，这是第一阶段唯一允许改 M0 文件的例外，其他内容不动。M6 建成后，从 `graph.monitored_entities` 读取监控实体，读取方式只用 SQL，不导入 M6 的代码。`ingest.job_runs` 和 `ingest.source_health` 的建表放在本模块的第一个迁移 `phase1_m1_0001_*`，字段按 README §3.12 和本文第 4 节；M2 只往里写自己的行。**SEC 共享客户端也由本模块建**（`inves_cog/ingest/sec_client.py`）：进程内限频 5 次/秒，`User-Agent` 读环境变量 `SEC_USER_AGENT`（R5）；M1 和 M2 的 SEC 任务排程不重叠，合计不超过 5 次/秒 |
 | Q-M1-16（K12） | 健康状态的优先级、"一天"的口径、重试和超时参数？ | 状态优先级：`未接通` > `unavailable` > `degraded` > `ok`。`未接通` = 没有配置（缺 key 或环境变量），或该源已确认不可用（例如 pytrends 被封）。`degraded` = 连续 2 次运行失败。`unavailable` = 最近一次成功距今超过 24 个自然小时，且最近 2 次运行都失败。News 也按这条规则判定，不单独处理。运行成功 1 次即恢复为 `ok`。每个 HTTP 请求遇到 429、5xx 或超时最多重试 3 次，指数退避，单次等待不超过 60 秒；401、403 和格式错误不重试。单个任务超时 30 分钟。复述单里的限频参数（Alpaca ≤ 120 次/分、SEC 5 次/秒共享、Trends 请求间隔 ≥ 10 秒、官网同域间隔 ≥ 2 秒、FINRA 60 次/分、FRED ≤ 30 次/分）全部批准，写进 `config/params/p-2026.10/m1.yaml` |
@@ -192,3 +195,7 @@
 
 > 编号对照：开发的 `handoff/M1/questions.md` 里 K13–K18 对应本文 Q-M1-17、Q-M1-18、Q-M1-19（K16）、Q-M1-20（K17）、Q-M1-23（K18）。以本文编号为准。
 | Q-M1-24 | 生产库凑不出 5 条真实转载 | 需求方更正 AC-M1-04（v5）：全部现有同根组逐组核对，加 5 组冻结的真实转载审计样例。不得用合成稿件冒充真实转载 |
+| Q-M1-25 | 官网监控 403 | **需求方核实（2026-10-15）**：5 个监控站点里只有 OpenAI 的新闻页返回 403，原因是 Cloudflare 的 JS 人机验证，换 UA 也没用；它的 RSS `https://openai.com/news/rss.xml` 返回 200。Google AI 博客已改地址（301 跳转到 `blog.google/innovation-and-ai/technology/ai/`），Anthropic、DeepSeek、Meta 都正常。**规则**：（1）站点提供 RSS 的优先用 RSS，OpenAI 改用上述 RSS；（2）跟随重定向；（3）每个 URL 单独记录健康状态，一个站点失败不影响其他站点，也不把整个源判为失败（任务书 §4.6 第 6 条）；（4）`source_health` 里的源名从 `CompanyIR` 改为 `EntitySites` |
+| Q-M1-26 | 美联储 / EIA 新闻稿 | **加回第一阶段**：美联储 `https://www.federalreserve.gov/feeds/press_all.xml`；EIA `https://www.eia.gov/rss/press_rss.xml` 和 `https://www.eia.gov/rss/todayinenergy.xml`。需求方已核实三者都返回 200。入 `info_items`（`kind=news`，`source_level=1`），按 FR-M1-18 直接进入第 2 层 |
+| Q-M1-27 | 嵌入返回 401 | **需求方核实**：证据显示 `DASHSCOPE_API_KEY` 填的是 Token Plan 的 key，而且没有配置 `DASHSCOPE_BASE_URL`。这是配置错误，不是缺 key。改用用户提供的 DashScope key 和对应地址，先用 `GET {base}/models` 验证，再对全部条目做嵌入（嵌入不按 FR-M1-18 分级） |
+| Q-M1-28 | 生产库唯一的同根组是两篇不同的文章（Benzinga "Earnings Scheduled For October 5 / October 12"），正文都是同一段 163 字的模板，被正文哈希归成一根 | 需求方更正 Q-M1-10：没有上游原生 id 时，**规范化正文少于 300 个字符**的，哈希改用"规范化标题 + 规范化正文"；不少于 300 字符的，规则不变。这个误合并在 AC-M1-04 里算作归并错误 |

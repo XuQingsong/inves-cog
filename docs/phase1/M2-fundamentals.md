@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v5（Yahoo 被封 IP：AC-M2-06 的真实采集拆为单独条款） |
+| 文档版本 | v6（`q4_missing` 的判定范围；单季长度；新增 D9；一致预期改走 Yahoo 网页；核实财报事件关联） |
 | 规格章节 | 4.4、4.5、4.6、4.8、9.2（财报字段） |
 | 依赖 | M0；SEC submissions 来自 M1 |
 | 关闭的不变量 | I10、I11、I12、I33、I34 |
@@ -71,7 +71,7 @@
 | 编号 | 需求 |
 |---|---|
 | FR-M2-01 | `legacy` 提取器：在本项目内重写，逻辑与 Muse `screen_asof_2026_01_01.py:pit_fundamentals`、`paper_trade_2026.py:compute_books` 的取数部分一致（参照源码，不导入、不拷贝）；同一输入下与 Muse 冻结输出逐字段一致 |
-| FR-M2-02 | `fixed` 提取器 = `legacy` + D8（现金缺失时 `net_debt`、`net_debt_fcf` 为空，规格 4.5 v1.4）+ D1（营收标签清单加入 `RevenueFromContractWithCustomerIncludingAssessedTax`，同一期间多标签取最新申报）+ D2（流量类字段第四季 = 全年 − 前三季）+ D3（submissions 已有、facts 3 天内仍无该期 → 解析该申报的 XBRL 实例）+ D4（毛利 = 营收 − 营业成本，标 `gross_margin_derived`）+ D5（净利润兜底标签 `NetIncomeLossAvailableToCommonStockholdersBasic`、`ProfitLoss`，标 `ni_tag_fallback`）；每项可单独开关 |
+| FR-M2-02 | `fixed` 提取器 = `legacy` + D9（营收 / EPS 标签缺口，Q-M2-23）+ D8（现金缺失时 `net_debt`、`net_debt_fcf` 为空，规格 4.5 v1.4）+ D1（营收标签清单加入 `RevenueFromContractWithCustomerIncludingAssessedTax`，同一期间多标签取最新申报）+ D2（流量类字段第四季 = 全年 − 前三季）+ D3（submissions 已有、facts 3 天内仍无该期 → 解析该申报的 XBRL 实例）+ D4（毛利 = 营收 − 营业成本，标 `gross_margin_derived`）+ D5（净利润兜底标签 `NetIncomeLossAvailableToCommonStockholdersBasic`、`ProfitLoss`，标 `ni_tag_fallback`）；每项可单独开关 |
 | FR-M2-03 | D2 的任一季缺失 → 第四季为 `NULL`，健康码 `q4_missing` |
 | FR-M2-04 | 健康码按规格第 4.6 节；`stale_fundamentals` = 最新营收期间结束日距 `as_of` 超过 180 天；`revenue_tag_gap` = 修复关闭时只存在新营收标签；`companyfacts_lag` = submissions 有新 10-Q / 10-K、facts 没有 |
 | FR-M2-05 | D7：SIC 4911、4931、4991（发电、电力公用事业）标 `industry_basis_na`，正常打分 |
@@ -157,3 +157,8 @@
 | Q-M2-18（K15） | 分部收入 context 除主 axis 外还带 `srt:ConsolidationItemsAxis` | **用户答复**：只允许 `srt:ConsolidationItemsAxis = us-gaap:OperatingSegmentsMember` 这一种附加维度，其他混合维度仍然拒绝 |
 | Q-M2-19（K16） | 利润专用的抵销行、同轴汇总成员、GEV 的辅助成员 | **用户答复**：按申报原件判定。（1）原件里只有利润、没有营收元素的行（例如 NVDA 的 `CorporateNonSegmentMember`）不参与营收加总；该行保留，营收为 `NULL` 并写明原因，不填 0。（2）同一 axis 上的汇总成员（例如 UNH 的 TotalOptum、CAT 的 `ReportableSegmentAggregationBeforeOtherOperatingSegmentMember`）按同一申报的 calculation / definition 关系和分部表识别为汇总项或抵销项，按原件的权重计算；**不得**按名称猜测，也不得试组合凑 1%。（3）GEV 的 `srt:ConsolidationItemsAxis = gev:OperatingSegmentsExcludingIntersegmentEliminationMember` 单独放行，限定 ticker、namespace 和成员三者都匹配；带 `SubsegmentsAxis` 的三维 context 仍然拒绝。原件审计：`handoff/M2/k16-original-audit.json.gz` |
 | Q-M2-20 | Yahoo 返回 crumb 403、quoteSummary 429 | **需求方诊断（2026-10-15）**：部署机出口 IP 为腾讯云首尔（AS132203），对 Yahoo 的第一个请求就返回 429，包括通常不限流的 chart 接口。这是 IP 被封，不是频率问题，重试无效。M2 的代码不存在问题，所以把真实采集拆成非阻塞的 AC-M2-06b，期限为 M5 提交验收之前（M5 估值依赖一致预期）。解决途径由用户选择：（A）只给 Yahoo 请求配一个 Yahoo 不封的出口代理，代码只加 `YFINANCE_PROXY` 配置；（B）改用 Alpha Vantage 的 `EARNINGS_ESTIMATES` 接口（已有 key，需先实测字段和额度；每天 59 次调用会超出免费额度）。选定之前不换源，不伪造快照 |
+| Q-M2-21 | COST、LRCX 在旧版能打分，修复版反而不能（`q4_missing`） | **需求方核实（2026-10-15）**：`repair_flow` 会遍历 2009 年以来的每个财年、每个流量字段（包括营业成本这类辅助字段），只要任何一处推不出第四季，就给整只标 `q4_missing`。**规则**：`q4_missing` 只看**当前状态实际用到的季度**（最近 8 个季度），而且只看**打分用到的字段**：营收、净利润、经营现金流、资本开支、稀释 EPS，以及毛利（D4 推算时才看营业成本）。其他字段或更早的季度推不出时，只在 `field_sources` 里记录，不加健康码、不阻止打分 |
+| Q-M2-22 | 单季长度 80–100 天太窄 | COST 的第四财季是 16 周（约 112 天）。`fixed` 下单季长度放宽为 **80–120 天**；`legacy` 保持 80–100 天，与 Muse 一致 |
+| Q-M2-23 | JPM、V、XOM 两套提取器都取不到核心字段 | 新增 **D9**（只在 `fixed`，可单独开关，写进差异报告）。已知原因：JPM 的 `Revenues` 停在 2014 年，银行用的是 `RevenuesNetOfInterestExpense`，把它加进营收标签清单（排在现有标签之后）；V 的 EPS 只按股票类别披露（`StatementClassOfStockAxis`），取主要交易类别（V = A 类）的 EPS，类别在 `config/params/p-2026.10/m2.yaml` 里按 ticker 配置。XOM 的营收序列为什么不完整，请开发查申报原件，确定具体规则后同样放进 D9；规则写进 `m2.yaml`，在差异报告里说明，需求方验收时审核（按任务书 §4.6 属于"不停"，不必等答复） |
+| Q-M2-24 | 59 只里 49 只 `earnings_event_missing` | M2 分支跑这一轮时，大概率没有连上 M1 的 `ingest.earnings_events`。两边合并后重跑健康页；如果仍然大量缺失，逐只列出原因 |
+| Q-M2-25 | Yahoo 怎么采？（更正 Q-M2-20） | **需求方复测（2026-10-15 00:48 北京时间，距开发最后一次请求已 4 小时以上）**：`query1/query2.finance.yahoo.com` 的所有数据接口（chart、search、quoteSummary、getcrumb）第一个请求就返回 429；但网页 `finance.yahoo.com/quote/{T}/analysis/` 返回 200，页面里含 Earnings Estimate、Revenue Estimate、EPS Trend、EPS Revisions、分析师人数，还嵌着 `earningsTrend` 原始 JSON。开发之前每次诊断只发 5 个请求，每轮 59 只，可以基本排除"请求太频繁"；更像是 Yahoo 对这台云服务器 IP 的数据接口做了限制。**规则**：数据接口返回 429 时，改从同一个 Yahoo 分析页取同一套字段（优先解析嵌入的 JSON），两个页面之间间隔至少 5 秒，每天 59 次；`source` 记 `yahoo_page`，F2 把它和 `yfinance` 视为同一个来源。不用代理，不换供应商。AC-M2-06b 仍按原条款判定 |
