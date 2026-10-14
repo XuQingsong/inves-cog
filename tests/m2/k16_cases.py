@@ -139,6 +139,21 @@ def assert_k16_cases(root):
     assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
     calculation=folder/'calculation.xml';calculation.write_text(calculation.read_text().replace('http://www.xbrl.org/2003/arcrole/summation-item','https://xbrl.org/2023/arcrole/summation-item'))
     assert any(r['segment_raw']=='InsuranceServicesRevenue' for r in parsed(folder,document))
+    # A plain original reconciliation table may supply the net corporate
+    # revenue while XBRL only tags its insurance component and corporate profit.
+    next(e for e in document if e.tag.endswith('InsuranceServicesRevenue')).text='10'
+    gaap.write_text(gaap.read_text().replace('</xs:schema>','<xs:element name="CorporateNonSegmentMember" type="xs:string"/></xs:schema>'))
+    member_context(document,'corporate','us-gaap:CorporateNonSegmentMember','us-gaap:ConsolidationItemsAxis')
+    fact(document,'corporate','OperatingIncomeLoss',11)
+    plain='<table><tr><td></td><td>Three months ended June 30</td></tr><tr><td></td><td>2026</td></tr><tr><td>InsuranceServicesRevenue</td><td>10</td></tr><tr><td>Eliminations and other</td><td>(5)</td></tr><tr><td>CorporateNonSegmentMember revenue</td><td>5</td></tr></table>'
+    rows=parsed(folder,document,primary_html=plain)
+    assert next(r for r in rows if r['segment_raw']=='CorporateNonSegmentMember')['revenue'] is None
+    assert not [r for r in rows if r['segment_raw']=='InsuranceServicesRevenue']
+    assert next(r for r in rows if r['evidence'].get('revenue_disclosure')=='original_table')['revenue']==5
+    assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    # Incorrect header periods or an unanchored scale must not be accepted.
+    assert any('segment_sum_mismatch' in r['health_codes'] for r in parsed(folder,document,primary_html=plain.replace('June 30','March 31')))
+    assert any('segment_sum_mismatch' in r['health_codes'] for r in parsed(folder,document,primary_html=plain.replace('<td>10</td>','<td>3</td>')))
     # Explicit reconciliation already explains the amount; do not count a
     # dimensionless component a second time or hide a reported nil amount.
     fact(document,'eliminations','Revenues',5)
