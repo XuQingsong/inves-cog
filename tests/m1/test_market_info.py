@@ -422,6 +422,8 @@ def test_source_level_mapping():
 
 
 def test_info_item_contract(tmp_path):
+    from tests.m1.round2_cases import assert_site_isolation
+    assert_site_isolation(frozen())
     from inves_cog.ingest.pipeline import Pipeline
     from inves_cog.ingest.info import make_item
     calls=[]
