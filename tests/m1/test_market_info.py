@@ -292,9 +292,11 @@ def test_llm_extraction_failure_degrades():
     with pytest.raises(LLMUnavailable):
         client.call('entity_tagging', {})
     assert len(calls) == 3 and calls[0].timeout_seconds == 120
+    assert calls[0].task == 'entity_tagging'
     calls.clear()
     with pytest.raises(LLMUnavailable):
         client.call('segment_mapping_draft', {})
     assert len(calls) == 1 and calls[0].timeout_seconds == 900
+    assert calls[0].task == 'segment_mapping_draft'
 
 

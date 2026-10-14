@@ -1,0 +1,37 @@
+# Developer draft under Q-M1-12. Owner reviews identities, app IDs and URLs in PR.
+entities:
+  - entity_id: openai
+    name: OpenAI
+    aliases: [ChatGPT]
+    tickers: []
+    app_ids: ['6448311069']
+    trends_keywords: [OpenAI, ChatGPT]
+    urls: [https://openai.com/news/]
+  - entity_id: anthropic
+    name: Anthropic
+    aliases: [Claude]
+    tickers: []
+    app_ids: ['6473753684']
+    trends_keywords: [Anthropic, Claude]
+    urls: [https://www.anthropic.com/news]
+  - entity_id: google_gemini
+    name: Google Gemini
+    aliases: [Gemini]
+    tickers: [GOOGL]
+    app_ids: ['6477489729']
+    trends_keywords: [Google Gemini]
+    urls: [https://blog.google/technology/ai/]
+  - entity_id: deepseek
+    name: DeepSeek
+    aliases: []
+    tickers: []
+    app_ids: ['6737597349']
+    trends_keywords: [DeepSeek]
+    urls: [https://www.deepseek.com/]
+  - entity_id: meta_ai
+    name: Meta AI
+    aliases: [Muse]
+    tickers: [META]
+    app_ids: ['1558240027']
+    trends_keywords: [Meta AI, Muse]
+    urls: [https://ai.meta.com/blog/]

@@ -1,0 +1,179 @@
+"""Approved source endpoints behind injectable, bounded HTTP clients."""
+import csv
+from datetime import date, datetime, timedelta, timezone
+from io import StringIO
+import json
+import re
+from xml.etree import ElementTree
+
+from inves_cog.ingest.http import HTTPClient, RateLimiter, SourceError, require_mapping
+from inves_cog.ingest.info import make_item
+from inves_cog.ingest.market import NY, market_window, trading_day
+from inves_cog.ingest.sec import parse_acceptance_et
+from inves_cog.ingest.sources import fred_observations, parse_cboe
+
+
+def stamp(value):
+    result = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    if result.tzinfo is None:
+        raise SourceError('Source timestamp lacks timezone')
+    return result.astimezone(timezone.utc)
+
+
+class Alpaca:
+    def __init__(self, *, clock, key, secret, http=None):
+        if not key or not secret:
+            raise SourceError('Alpaca credentials absent: 等待 R5', confirmed_unavailable=True)
+        self.clock = clock
+        self.headers = {'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret}
+        self.http = http or HTTPClient(limiter=RateLimiter(120, 60))
+
+    def assets(self):
+        rows = self.http.get('https://api.alpaca.markets/v2/assets', params={'status': 'active', 'asset_class': 'us_equity'}, headers=self.headers)
+        if not isinstance(rows, list):
+            raise SourceError('Malformed Alpaca assets')
+        return [{**row, 'ticker': row['symbol'], 'asset_class': row.get('class')} for row in rows]
+
+    def daily_bars(self, tickers, first, last, *, feed='sip'):
+        params = {'symbols': ','.join(tickers), 'timeframe': '1Day', 'feed': feed, 'adjustment': 'raw',
+                  'start': datetime.combine(first, datetime.min.time(), NY).isoformat(),
+                  'end': datetime.combine(last + timedelta(days=1), datetime.min.time(), NY).isoformat(), 'limit': 10000}
+        seen_tokens, seen_rows, rows = set(), set(), []
+        while True:
+            data = require_mapping(self.http.get('https://data.alpaca.markets/v2/stocks/bars', params=dict(params), headers=self.headers))
+            if not isinstance(data.get('bars'), dict):
+                raise SourceError('Daily bars mapping missing')
+            for ticker, bars in data['bars'].items():
+                for bar in bars:
+                    day = stamp(bar['t']).astimezone(NY).date()
+                    if ticker not in tickers or not first <= day <= last or (ticker, day) in seen_rows:
+                        continue
+                    seen_rows.add((ticker, day))
+                    rows.append({'ticker': ticker, 'trade_date': day, 'open': bar.get('o'), 'high': bar.get('h'),
+                                 'low': bar.get('l'), 'close': bar.get('c'), 'volume': bar.get('v'),
+                                 'post_close': None, 'adj_factor': None, 'source': 'Alpaca'})
+            token = data.get('next_page_token')
+            if not token:
+                return rows
+            if token in seen_tokens:
+                raise SourceError('Repeated daily pagination token')
+            seen_tokens.add(token)
+            params['page_token'] = token
+
+    def news(self, *, first, last):
+        params = {'start': first.isoformat(), 'end': last.isoformat(), 'include_content': True, 'limit': 50, 'sort': 'asc'}
+        seen_tokens = set()
+        while True:
+            data = require_mapping(self.http.get('https://data.alpaca.markets/v1beta1/news', params=dict(params), headers=self.headers))
+            if not isinstance(data.get('news'), list):
+                raise SourceError('News list missing')
+            for record in data['news']:
+                item = make_item('news', record.get('source') or 'Alpaca', record['id'], headline=record['headline'],
+                                 body=record.get('content'), url=record.get('url'), tickers=record.get('symbols', []),
+                                 published_at=stamp(record['created_at']) if record.get('created_at') else None,
+                                 clock=self.clock, payload=record, upstream_provider=record.get('upstream_provider'), upstream_id=record.get('upstream_id'))
+                yield item
+            token = data.get('next_page_token')
+            if not token:
+                return
+            if token in seen_tokens:
+                raise SourceError('Repeated news pagination token')
+            seen_tokens.add(token)
+            params['page_token'] = token
+
+
+def sec_atom(client, *, clock):
+    xml = client.get('https://www.sec.gov/cgi-bin/browse-edgar', params={'action': 'getcurrent', 'type': '8-K', 'owner': 'include', 'count': 100, 'output': 'atom'})
+    root = ElementTree.fromstring(xml)
+    namespace = {'atom': 'http://www.w3.org/2005/Atom'}
+    rows = []
+    for entry in root.findall('atom:entry', namespace):
+        identifier = entry.findtext('atom:id', '', namespace)
+        match = re.search(r'\d{10}-\d{2}-\d{6}', identifier)
+        if not match:
+            raise SourceError('Atom accession missing')
+        links = entry.findall('atom:link', namespace)
+        url = links[0].attrib.get('href') if links else None
+        updated = entry.findtext('atom:updated', None, namespace)
+        rows.append(make_item('sec_8k', 'SEC', match.group(), headline=entry.findtext('atom:title', '', namespace),
+                              body=entry.findtext('atom:summary', None, namespace), url=url,
+                              published_at=stamp(updated) if updated else None, clock=clock,
+                              payload={'atom_id': identifier, 'updated': updated}))
+    return rows
+
+
+def sec_daily_index(client, day, *, clock):
+    quarter = (day.month - 1) // 3 + 1
+    url = f'https://www.sec.gov/Archives/edgar/daily-index/{day.year}/QTR{quarter}/form.{day:%Y%m%d}.idx'
+    text = client.get(url)
+    result = []
+    for line in text.splitlines():
+        match = re.match(r'^8-K\s+(.+?)\s+(\d+)\s+(\d{4}-\d{2}-\d{2})\s+(edgar/data/\S+)', line)
+        if not match:
+            continue
+        company, cik, filed, filename = match.groups()
+        accession = re.search(r'\d{10}-\d{2}-\d{6}', filename)
+        if accession is None:
+            raise SourceError('Daily-index accession absent')
+        item = make_item('sec_8k', 'SEC', accession.group(), headline=f'{company} 8-K', body=None,
+                         url='https://www.sec.gov/Archives/' + filename, clock=clock,
+                         published_at=datetime.combine(date.fromisoformat(filed), datetime.min.time(), timezone.utc),
+                         payload={'cik': cik, 'filing_date': filed, 'index_url': url})
+        item['flags'].append('published_at_date_only')
+        result.append(item)
+    return result
+
+
+def apple_chart(http, *, chart, clock):
+    if chart == 'free':
+        url = 'https://rss.marketingtools.apple.com/api/v2/us/apps/top-free/100/apps.json'
+        data = require_mapping(http.get(url))
+        values = data.get('feed', {}).get('results')
+        if not isinstance(values, list):
+            raise SourceError('Apple free chart unavailable', confirmed_unavailable=True)
+        return [{'ts_utc': clock.now_utc(), 'chart': chart, 'rank': index + 1, 'app_id': str(row['id']),
+                 'app_name': row.get('name'), 'developer': row.get('artistName')} for index, row in enumerate(values[:100])]
+    if chart != 'grossing':
+        raise ValueError('Unknown Apple chart')
+    data = require_mapping(http.get('https://itunes.apple.com/us/rss/topgrossingapplications/limit=100/json'))
+    values = data.get('feed', {}).get('entry')
+    if not isinstance(values, list):
+        raise SourceError('Apple grossing chart unavailable', confirmed_unavailable=True)
+    return [{'ts_utc': clock.now_utc(), 'chart': chart, 'rank': index + 1,
+             'app_id': str(row['id']['attributes']['im:id']), 'app_name': row.get('im:name', {}).get('label'),
+             'developer': row.get('im:artist', {}).get('label')} for index, row in enumerate(values[:100])]
+
+
+class FRED:
+    def __init__(self, *, key, clock, http=None):
+        if not key:
+            raise SourceError('FRED key absent: 等待 R5', confirmed_unavailable=True)
+        self.key, self.clock = key, clock
+        self.http = http or HTTPClient(limiter=RateLimiter(30, 60))
+
+    def collect(self, series_id):
+        params = {'api_key': self.key, 'file_type': 'json', 'series_id': series_id}
+        series = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series', params=params))
+        units = series['seriess'][0]['units']
+        # Preserve vintage records. Revisions are separate rows, never an overwrite.
+        data = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations', params={**params, 'realtime_start': '1776-07-04', 'realtime_end': self.clock.now_utc().date().isoformat(), 'output_type': 3}))
+        return fred_observations(series_id, data, units=units, clock=self.clock)
+
+
+def alpha_calendar(http, *, key):
+    if not key:
+        raise SourceError('Alpha Vantage key absent: 等待 R5', confirmed_unavailable=True)
+    text = http.get('https://www.alphavantage.co/query', params={'function': 'EARNINGS_CALENDAR', 'horizon': '3month', 'apikey': key})
+    if not isinstance(text, str) or 'reportDate' not in text.splitlines()[0]:
+        raise SourceError('Alpha Vantage calendar unavailable')
+    return list(csv.DictReader(StringIO(text)))
+
+
+def finra_short_interest(http, *, tickers):
+    data = http.request('POST', 'https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest',
+                        json={'limit': 5000, 'compareFilters': [{'compareType': 'IN', 'fieldName': 'symbolCode', 'fieldValue': list(tickers)}]})
+    if not isinstance(data, list):
+        raise SourceError('FINRA response format not a list', confirmed_unavailable=True)
+    if not any(str(row.get('issueExchange', '')).upper() in {'NYSE', 'NASDAQ', 'N', 'Q'} for row in data):
+        raise SourceError('FINRA dataset does not establish NYSE/Nasdaq coverage', confirmed_unavailable=True)
+    return data

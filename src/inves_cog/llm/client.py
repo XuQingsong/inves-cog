@@ -1,12 +1,18 @@
 """Registry-routed dialogue interface, with explicit recorded/offline operation."""
+from dataclasses import asdict, dataclass
 import hashlib
 import json
 from pathlib import Path
 from typing import Callable
 
-from inves_cog.llm.registry import Registry
+from inves_cog.llm.registry import Registry, TaskSpec
 
 ROOT = Path(__file__).resolve().parents[3]
+
+
+@dataclass(frozen=True)
+class CallSpec(TaskSpec):
+    task: str
 
 
 class LLMUnavailable(RuntimeError):
@@ -47,7 +53,7 @@ class Client:
             raise LLMUnavailable('Dialogue connection not configured: 等待 R4')
         for attempt in range(spec.retries + 1):
             try:
-                result = self.transport(spec, payload)
+                result = self.transport(CallSpec(**asdict(spec), task=task), payload)
                 if not isinstance(result, dict):
                     raise LLMUnavailable('Dialogue output must be a JSON object')
                 return result
