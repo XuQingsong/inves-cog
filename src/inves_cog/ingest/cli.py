@@ -14,7 +14,7 @@ def build(*, clock, values, connection):
     from inves_cog.ingest.sec_client import SECClient
     from inves_cog.llm.client import Client
     from inves_cog.ingest.pipeline import Pipeline
-    alpaca = Alpaca(clock=clock,key=values['APCA_API_KEY_ID'],secret=values['APCA_API_SECRET_KEY']) if values.get('APCA_API_KEY_ID') and values.get('APCA_API_SECRET_KEY') else None
+    alpaca = Alpaca(clock=clock,key=values['APCA_API_KEY_ID'],secret=values['APCA_API_SECRET_KEY'],assets_base_url=values.get('APCA_API_BASE_URL') or 'https://paper-api.alpaca.markets') if values.get('APCA_API_KEY_ID') and values.get('APCA_API_SECRET_KEY') else None
     fred = FRED(clock=clock,key=values['FRED_API_KEY']) if values.get('FRED_API_KEY') else None
     sec = SECClient(user_agent=values['SEC_USER_AGENT']) if values.get('SEC_USER_AGENT') else None
     return Pipeline(clock=clock,repository=Repository(connection),values=values,

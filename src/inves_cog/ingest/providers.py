@@ -21,15 +21,18 @@ def stamp(value):
 
 
 class Alpaca:
-    def __init__(self, *, clock, key, secret, http=None):
+    def __init__(self, *, clock, key, secret, http=None, assets_base_url='https://paper-api.alpaca.markets'):
         if not key or not secret:
             raise SourceError('Alpaca credentials absent: 等待 R5', confirmed_unavailable=True)
+        if assets_base_url not in {'https://paper-api.alpaca.markets','https://api.alpaca.markets'}:
+            raise ValueError('Official Alpaca asset endpoint required')
+        self.assets_base_url=assets_base_url
         self.clock = clock
         self.headers = {'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret}
         self.http = http or HTTPClient(limiter=RateLimiter(120, 60))
 
     def assets(self):
-        rows = self.http.get('https://api.alpaca.markets/v2/assets', params={'status': 'active', 'asset_class': 'us_equity'}, headers=self.headers)
+        rows = self.http.get(self.assets_base_url+'/v2/assets', params={'status': 'active', 'asset_class': 'us_equity'}, headers=self.headers)
         if not isinstance(rows, list):
             raise SourceError('Malformed Alpaca assets')
         return [{**row, 'ticker': row['symbol'], 'asset_class': row.get('class')} for row in rows]
