@@ -1,0 +1,247 @@
+"""M2 v2 deterministic contracts; no Muse implementation is executed."""
+from copy import deepcopy
+from datetime import date, datetime, timedelta, timezone
+import gzip
+import json
+from pathlib import Path
+
+import pytest
+import yaml
+
+from inves_cog.clock import FrozenClock
+from tests.harness.tools.golden import load_golden
+
+pytestmark = pytest.mark.phase1_blocking
+ROOT = Path(__file__).resolve().parents[2]
+FIXTURES = ROOT / 'tests/fixtures/phase1/m2'
+ASOF = date(2026, 10, 13)
+
+
+def input_facts():
+    return json.loads((FIXTURES / 'companyfacts_synthetic.json').read_text())
+
+
+def extract(data=None, *, extractor='fixed', switches=None, as_of=ASOF, sic=3571, foreign=False, filings=(), instance_facts=None):
+    from inves_cog.ingest.fundamentals.extractors import extract_state
+    return extract_state(data or input_facts(), ticker='FIXTURE', as_of=as_of, extractor=extractor, switches=switches, sic=sic, foreign=foreign, filings=filings, instance_facts=instance_facts)
+
+
+def test_revenue_tag_gap():
+    facts = input_facts()
+    gaap = facts['facts']['us-gaap']
+    gaap['RevenueFromContractWithCustomerIncludingAssessedTax'] = gaap.pop('RevenueFromContractWithCustomerExcludingAssessedTax')
+    legacy = extract(facts, extractor='legacy')
+    fixed = extract(facts)
+    assert 'revenue_tag_gap' in legacy.health_codes and legacy.values['rev_ttm'] is None
+    assert fixed.values['rev_ttm'] == 400 and 'revenue_tag_gap' not in fixed.health_codes
+    assert 'revenue_tag_gap' not in extract().health_codes
+    assert fixed.values['op_margin_ttm'] == pytest.approx(20)
+    assert fixed.values['fcf_margin_change_pp'] == pytest.approx(0)
+
+
+def test_q4_derived_from_annual():
+    from inves_cog.ingest.fundamentals.extractors import derive_quarters
+    case = load_golden('m2_fundamentals.json')['q4_derivation']
+    rows = derive_quarters(case['fy_total'], q1=case['q1'], q2=case['q2'], q3=case['q3'])
+    assert rows['q4'] == case['expected_q4'] and rows['sources']['q4'] == 'q4_derived'
+    assert derive_quarters(400, q1=90, q2=None, q3=95)['q4'] is None
+    assert 'q4_missing' in derive_quarters(400, q1=90, q2=None, q3=95)['health_codes']
+    cumulative = derive_quarters(400, q1=90, ytd6=190, ytd9=285)
+    assert [cumulative[k] for k in ('q1', 'q2', 'q3', 'q4')] == [90, 100, 95, 115]
+    assert cumulative['sources']['q2'] == 'ytd_derived'
+    facts = input_facts()
+    for name in ('RevenueFromContractWithCustomerExcludingAssessedTax', 'GrossProfit', 'OperatingIncomeLoss', 'NetIncomeLoss', 'NetCashProvidedByUsedInOperatingActivities', 'PaymentsToAcquirePropertyPlantAndEquipment'):
+        rows = facts['facts']['us-gaap'][name]['units']['USD']
+        rows[:] = [r for r in rows if r.get('fp') != 'Q4']
+    assert extract(facts).values['rev_ttm'] == 400
+    assert 'q4_derived' in str(extract(facts).field_sources)
+
+
+def test_companyfacts_lag():
+    filings = [{'accession': 'latest', 'form': '10-Q', 'filing_date': '2026-10-10', 'report_date': '2026-09-30'}]
+    plain = extract(filings=filings, as_of=date(2026, 10, 12))
+    assert 'companyfacts_lag' in plain.health_codes
+    parsed = input_facts()
+    for tag in parsed['facts']['us-gaap'].values():
+        for rows in tag['units'].values():
+            for row in rows:
+                row['accn'] = 'latest'
+    repaired = extract(filings=filings, instance_facts=parsed)
+    assert 'companyfacts_lag' not in repaired.health_codes
+    assert 'instance_parsed' in str(repaired.field_sources)
+    assert extract(filings=filings, instance_facts=parsed, as_of=date(2026, 10, 12)).values == plain.values
+    assert 'companyfacts_lag' not in extract(filings=[{'accession': 'q8', 'form': '10-Q', 'filing_date': '2026-08-01', 'report_date': '2026-06-30'}]).health_codes
+
+
+def test_stale_fundamentals_code():
+    period = date(2026, 6, 30)
+    assert 'stale_fundamentals' not in extract(as_of=period + timedelta(days=180)).health_codes
+    assert 'stale_fundamentals' in extract(as_of=period + timedelta(days=181)).health_codes
+
+
+def test_gross_margin_derived():
+    facts = input_facts()
+    facts['facts']['us-gaap'].pop('GrossProfit')
+    state = extract(facts)
+    assert state.values['gross_margin'] == pytest.approx(40)
+    assert 'gross_margin_derived' in state.health_codes
+    assert 'gross_margin_derived' not in extract().health_codes
+    assert extract(facts, switches={'D4': False}).values['gross_margin'] is None
+
+
+def test_ni_tag_fallback():
+    facts = input_facts()
+    gaap = facts['facts']['us-gaap']
+    gaap['NetIncomeLossAvailableToCommonStockholdersBasic'] = gaap.pop('NetIncomeLoss')
+    assert extract(facts).values['ni_ttm'] == 40
+    assert 'ni_tag_fallback' in extract(facts).health_codes
+    assert extract(facts, switches={'D5': False}).values['ni_ttm'] is None
+    assert 'ni_tag_fallback' not in extract().health_codes
+
+
+def test_industry_basis_na():
+    from inves_cog.ingest.fundamentals.health import health_row
+    state = extract(sic=4911)
+    health = health_row(state, foreign=False)
+    assert 'industry_basis_na' in state.health_codes and health['can_score']
+    assert 'industry_basis_na' not in extract(sic=3571).health_codes
+    assert not health_row(state, foreign=True)['can_trade']
+
+
+def test_fin_state_pit():
+    from inves_cog.ingest.fundamentals.state import StateStore
+    before, after = extract(), extract()
+    before.filed, after.filed = date(2026, 8, 1), date(2026, 10, 14)
+    before.accession, after.accession = 'old', 'new'
+    store = StateStore([after, before])
+    assert store.state_asof('FIXTURE', date(2026, 7, 31), 'fixed') is None
+    assert store.state_asof('FIXTURE', ASOF, 'fixed').accession == 'old'
+    assert store.state_asof('FIXTURE', date(2026, 10, 14), 'fixed').accession == 'new'
+    facts = input_facts()
+    for rows in facts['facts']['us-gaap']['RevenueFromContractWithCustomerExcludingAssessedTax']['units'].values():
+        rows.append({'start': '2026-04-01', 'end': '2026-06-30', 'filed': '2026-10-14', 'val': 99999, 'accn': 'future', 'form': '10-Q'})
+    assert extract(facts).values['rev_ttm'] == 400
+
+
+def test_extractor_fixed_toggles():
+    settings = yaml.safe_load((ROOT / 'config/params/p-2026.10/m2.yaml').read_text())['m2']
+    assert settings['repair_order'] == ['D3', 'D1', 'D2', 'D4', 'D5', 'D8']
+    base = input_facts()
+    base['facts']['us-gaap'].pop('CashAndCashEquivalentsAtCarryingValue')
+    plain = extract(base, switches={key: False for key in settings['repair_order']})
+    for switch, matrix in settings['impact_matrix'].items():
+        enabled = extract(base, switches={key: key == switch for key in settings['repair_order']})
+        allowed = set(matrix['direct']) | set(matrix['derived'])
+        for name, value in plain.values.items():
+            if name not in allowed:
+                assert enabled.values[name] == value, (switch, name)
+    legacy = extract(base, extractor='legacy')
+    fixed = extract(base)
+    assert legacy.values['net_debt'] == 30 and 'cash_missing_as_zero' in str(legacy.field_sources)
+    assert fixed.values['net_debt'] is None and fixed.values['net_debt_fcf'] is None
+    assert 'cash_missing' in str(fixed.field_sources)
+    assert extract().values['net_debt'] == 10
+
+
+def test_segment_extraction():
+    from inves_cog.ingest.fundamentals.segments import parse_segments, segment_sum_ok
+    for case in load_golden('m2_fundamentals.json')['segment_sum_tolerance']:
+        assert segment_sum_ok(case['segments'], case['eliminations'], case['consolidated']) == case['expected_pass']
+    rows = parse_segments(FIXTURES / 'xbrl/instance.xml', ticker='AMD', accession='fixture', filed=date(2026, 8, 1))
+    business = [row for row in rows if row['axis'] == 'business']
+    assert {row['segment_raw'] for row in business} == {'ClientMember', 'DataCenterMember'}
+    assert sum(row['revenue'] for row in business) == 102
+    assert next(row for row in rows if row['axis'] == 'elimination')['revenue'] == -2
+    assert next(row for row in rows if row['axis'] == 'product')['revenue'] == 999
+    assert all('segment_sum_mismatch' not in row['health_codes'] for row in business)
+    assert next(row for row in business if row['segment_raw'] == 'ClientMember')['segment_profit'] == 10
+
+
+def test_segment_recast():
+    from inves_cog.ingest.fundamentals.segments import apply_recast
+    previous = [{'segment_raw': 'A', 'revenue': 50, 'axis': 'business', 'recast_group': 'old', 'period_end': date(2025, 6, 30)}]
+    current = [{'segment_raw': 'B', 'revenue': 60, 'axis': 'business', 'period_end': date(2026, 6, 30)}]
+    changed = apply_recast(current, previous, comparative=[])
+    assert changed[0]['recast_group'] != 'old' and changed[0]['yoy_pct'] is None
+    assert 'segment_recast' in changed[0]['health_codes']
+    stable = apply_recast([dict(current[0], segment_raw='A')], previous, comparative=[dict(previous[0], revenue=50.5)])
+    assert stable[0]['recast_group'] == 'old' and stable[0]['yoy_pct'] == pytest.approx(20)
+    assert apply_recast([dict(current[0], segment_raw='A')], previous, comparative=[dict(previous[0], revenue=51)])[0]['yoy_pct'] is None
+
+
+def test_segment_mapping_pending():
+    from inves_cog.ingest.fundamentals.mapping import MappingQueue
+    class RecordedLLM:
+        def __init__(self):
+            self.calls = []
+        def call(self, task, payload):
+            self.calls.append((task, payload))
+            return json.loads((FIXTURES / 'mapping_recording.json').read_text())['result']
+    llm = RecordedLLM()
+    queue = MappingQueue(llm=llm, clock=FrozenClock(datetime(2026, 10, 13, tzinfo=timezone.utc)), sectors={'AMD': 'chips'})
+    draft = queue.draft('AMD', 'DataCenterMember', graph_nodes=[{'id': 'datacenter', 'name': 'Data center'}])
+    assert draft['status'] == '待审核' and draft['segment_std'] is None
+    assert queue.draft('AMD', 'DataCenterMember', graph_nodes=[])['id'] == draft['id'] and len(llm.calls) == 1
+    assert llm.calls[0][0] == 'segment_mapping_draft'
+    assert queue.list_pending_mappings('chips') == [draft]
+    with pytest.raises(ValueError):
+        queue.confirm_mappings([draft['id']], reviewer='', decision='已确认')
+    queue.confirm_mappings([draft['id']], reviewer='fixture-reviewer', decision='已确认')
+    assert queue.list_pending_mappings('chips') == []
+    assert draft['segment_std'] == ['datacenter'] and draft['reviewed_at'].tzinfo is not None
+
+
+def test_consensus_derived_pit():
+    from inves_cog.ingest.fundamentals.consensus import derive_consensus
+    case = load_golden('m2_fundamentals.json')['consensus_derived']
+    snapshots = [dict(row, ticker='FIXTURE', source='yfinance', fy_cy='2026-12-31', fy_ny='2027-12-31', captured_at=row['as_of'] + 'T01:00:00Z') for row in case['snapshots']]
+    for expected in case['expected']:
+        result = derive_consensus(snapshots, ticker='FIXTURE', as_of=date.fromisoformat(expected['as_of']))
+        for key, value in expected.items():
+            if key == 'as_of':
+                continue
+            actual = result['window_status'][key.removesuffix('_status')] if key.endswith('_status') else result[key]
+            assert actual == pytest.approx(value) if isinstance(value, float) else actual == value
+    rich = dict(snapshots[0], coverage=4, up_7d=3, down_7d=1, eps_high_cy=5, eps_low_cy=3, raw={'ago7': 999})
+    result = derive_consensus([rich], ticker='FIXTURE', as_of=date(2026, 10, 8))
+    assert result['breadth_7d'] == 0.5 and result['dispersion'] == 0.5
+    assert result['chg_7d_pct'] is None
+    zero = derive_consensus([dict(rich, coverage=0, eps_cy=0.001)], ticker='FIXTURE', as_of=date(2026, 10, 8))
+    assert zero['breadth_7d'] is None and zero['dispersion'] is None
+    future = dict(snapshots[0], captured_at='2026-10-09T01:00:00Z')
+    assert derive_consensus([future], ticker='FIXTURE', as_of=date(2026, 10, 8))['eps_cy'] is None
+    rolled = dict(snapshots[1], fy_cy='2027-12-31')
+    assert derive_consensus([snapshots[0], rolled], ticker='FIXTURE', as_of=date(2026, 10, 15))['window_status']['chg_7d_pct'] == '财年切换'
+
+
+def test_consensus_import_idempotent(tmp_path):
+    from inves_cog.ingest.fundamentals.consensus import ConsensusStore, import_muse_exports, read_copy_blocks
+    store = ConsensusStore()
+    folder = FIXTURES / 'muse_export_synthetic'
+    import_muse_exports(folder, store=store)
+    count = len(store.rows)
+    assert count > 0
+    import_muse_exports(folder, store=store)
+    assert len(store.rows) == count
+    row = next(iter(store.rows.values()))
+    assert row['source'] == 'muse_import' and row['as_of'] == date(2026, 10, 8)
+    assert row['captured_at'] is None and row['coverage'] is None and row['rev_cy'] is None
+    parsed = read_copy_blocks("CREATE TABLE forbidden ();\nCOPY data.estimates_trend (ticker, cur) FROM stdin;\nAAPL\t4.1\n\\.\nDROP DATABASE quant;\n")
+    assert parsed == {'data.estimates_trend': [{'ticker': 'AAPL', 'cur': '4.1'}]}
+    assert not list(tmp_path.iterdir())
+
+
+def test_health_contract():
+    from inves_cog.ingest.fundamentals.health import health_row
+    from inves_cog.ingest.fundamentals.profile import ProfileBook
+    good = extract()
+    row = health_row(good, foreign=False)
+    assert {'ticker', 'latest_period_end', 'latest_filed', 'latest_8k_202', 'health_codes', 'can_score', 'can_trade', 'reason'} <= row.keys()
+    assert row['can_score'] and row['can_trade']
+    missing = deepcopy(good)
+    missing.values['shares'] = None
+    health = health_row(missing, foreign=False)
+    assert not health['can_score'] and health['reason'] and 'core_field_missing' in health['health_codes']
+    book = ProfileBook(clock=FrozenClock(datetime(2026, 10, 13, tzinfo=timezone.utc)))
+    profile = book.generate(good, segments=[], consensus=None, guidance=[])
+    assert all(profile[key]['data'] is not None or profile[key]['reason'] for key in ('business', 'financials', 'consensus'))

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xbrli="http://www.xbrl.org/2003/instance" targetNamespace="http://www.xbrl.org/2003/instance" elementFormDefault="qualified">
+ <xs:element name="item" abstract="true"/>
+ <xs:simpleType name="monetaryItemType"><xs:restriction base="xs:decimal"/></xs:simpleType>
+ <xs:attribute name="periodType" type="xs:string"/>
+ <xs:attribute name="balance" type="xs:string"/>
+</xs:schema>

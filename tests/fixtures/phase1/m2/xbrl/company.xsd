@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xbrli="http://www.xbrl.org/2003/instance" targetNamespace="http://example.invalid/company" elementFormDefault="qualified">
+ <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="xbrli.xsd"/>
+ <xs:import namespace="http://example.invalid/us-gaap" schemaLocation="us-gaap.xsd"/>
+ <xs:element name="SegmentAdjustedProfit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/>
+ <xs:element name="ClientMember" type="xs:string"/>
+ <xs:element name="DataCenterMember" type="xs:string"/>
+ <xs:element name="ProductMember" type="xs:string"/>
+</xs:schema>
