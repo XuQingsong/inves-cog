@@ -82,3 +82,7 @@ R7 原始 30 份 companyfacts 和 90 份独立 legacy oracle 已在 `41814bc` �
 - [H.10 发布规则](https://www.federalreserve.gov/releases/h10/)
 
 需要配置的是接口接入身份；不是请需求方手工提供汇率数值。接通后由本项目拉取并登记可核对的原始观察与版本，输出逐字段缺口清单。未把普通财报缺失数补成 0，也未改写任何 Muse 输入/oracle。
+
+## K14 实现与真实核对完成
+
+FRED key 已配置，EUR/TWD/KRW 历史版本均实测成功，证据见 self-test.md 和 fx-real-verification.json。2026-07-04 的期末聚合记录实际报价日 2026-07-02，不生成当日报价。真实接口 output_type=3 是带 series/vintage 列的宽表，已测试先行改用 output_type=1，逐行保留 realtime_start。无可见有效报价时抛包含币种/字段/期间/版本日/原因的 FXGap，停止金额写入。原币原始事实保留；此探针不替代 ASML/TSM/SKHY 的真实完整财报转换验收。

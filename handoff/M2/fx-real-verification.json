@@ -1,0 +1,86 @@
+[
+  {
+    "currency": "EUR",
+    "rows": 2,
+    "probe_native_amount": 100,
+    "probe_usd_amount": 114.48,
+    "evidence": {
+      "original_currency": "EUR",
+      "original_value": 100,
+      "series": "DEXUSEU",
+      "direction": "USD/currency",
+      "method": "end_of_period",
+      "period_start": "2026-01-01",
+      "period_end": "2026-07-04",
+      "visible_as_of": "2026-07-07",
+      "effective_quote_date": "2026-07-02",
+      "factor": 1.1448,
+      "quotes": [
+        {
+          "observation_date": "2026-07-02",
+          "realtime_start": "2026-07-06",
+          "raw_rate": 1.1448,
+          "usd_per_currency": 1.1448
+        }
+      ],
+      "nonquoted_dates": []
+    },
+    "classification": "real FRED rates, synthetic probe amount; not issuer financials"
+  },
+  {
+    "currency": "TWD",
+    "rows": 2,
+    "probe_native_amount": 100,
+    "probe_usd_amount": 3.1387319522912747,
+    "evidence": {
+      "original_currency": "TWD",
+      "original_value": 100,
+      "series": "DEXTAUS",
+      "direction": "USD/currency",
+      "method": "end_of_period",
+      "period_start": "2026-01-01",
+      "period_end": "2026-07-04",
+      "visible_as_of": "2026-07-07",
+      "effective_quote_date": "2026-07-02",
+      "factor": 0.031387319522912745,
+      "quotes": [
+        {
+          "observation_date": "2026-07-02",
+          "realtime_start": "2026-07-06",
+          "raw_rate": 31.86,
+          "usd_per_currency": 0.031387319522912745
+        }
+      ],
+      "nonquoted_dates": []
+    },
+    "classification": "real FRED rates, synthetic probe amount; not issuer financials"
+  },
+  {
+    "currency": "KRW",
+    "rows": 2,
+    "probe_native_amount": 100,
+    "probe_usd_amount": 0.06501739215240077,
+    "evidence": {
+      "original_currency": "KRW",
+      "original_value": 100,
+      "series": "DEXKOUS",
+      "direction": "USD/currency",
+      "method": "end_of_period",
+      "period_start": "2026-01-01",
+      "period_end": "2026-07-04",
+      "visible_as_of": "2026-07-07",
+      "effective_quote_date": "2026-07-02",
+      "factor": 0.0006501739215240077,
+      "quotes": [
+        {
+          "observation_date": "2026-07-02",
+          "realtime_start": "2026-07-06",
+          "raw_rate": 1538.05,
+          "usd_per_currency": 0.0006501739215240077
+        }
+      ],
+      "nonquoted_dates": []
+    },
+    "classification": "real FRED rates, synthetic probe amount; not issuer financials"
+  }
+]

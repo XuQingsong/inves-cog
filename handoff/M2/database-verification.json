@@ -1,0 +1,15 @@
+{
+  "database_write": true,
+  "pit_lookup": true,
+  "health_can_trade": true,
+  "probe_rolled_back": true,
+  "first_import_rows": 180,
+  "second_import_rows": 180,
+  "imported": {
+    "snapshots": 180,
+    "earnings_history": 121,
+    "idempotent_key": "as_of,ticker,source"
+  },
+  "source_tickers": 30,
+  "source": "REAL offline Muse exports; no quant connection"
+}
