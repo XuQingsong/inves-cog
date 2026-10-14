@@ -31,6 +31,15 @@ def connect(values):
     return psycopg.connect(values['INVES_COG_DATABASE_URL'],row_factory=dict_row,autocommit=True)
 
 
+def schedule_once(pipeline, runtime, *, names=None):
+    if names is not None and set(names)-set(runtime.tasks):
+        raise ValueError('Unknown scheduled task')
+    due=due_tasks(pipeline.clock,pipeline.repo.last_runs())
+    if names is not None:
+        due=[name for name in due if name in names]
+    return runtime.run(due) if due else {}
+
+
 def main():
     parser = argparse.ArgumentParser(description='Independent market ingestion')
     parser.add_argument('action',choices=['run','schedule','health','enrich'])
@@ -62,17 +71,19 @@ def main():
                 log_path=Path(__file__).resolve().parents[3]/'.harness/enrichment.log'
                 log_path.parent.mkdir(parents=True,exist_ok=True)
                 with log_path.open('a') as log:
-                    worker=subprocess.Popen([sys.executable,'-m','inves_cog.ingest.cli','enrich'],stdout=log,stderr=log)
+                    needs_enrichment=args.tasks is None or bool(set(args.tasks)-{'bars_full','bars_prefill','wide_universe'})
+                    worker=subprocess.Popen([sys.executable,'-m','inves_cog.ingest.cli','enrich'],stdout=log,stderr=log) if needs_enrichment else None
                     try:
                         while True:
-                            if worker.poll() is not None: raise RuntimeError('Enrichment worker exited; inspect .harness/enrichment.log')
-                            tasks = due_tasks(clock,pipeline.repo.last_runs())
-                            if tasks: print(json_text(runtime.run(tasks)),flush=True)
+                            if worker is not None and worker.poll() is not None: raise RuntimeError('Enrichment worker exited; inspect .harness/enrichment.log')
+                            output=schedule_once(pipeline,runtime,names=args.tasks)
+                            if output: print(json_text(output),flush=True)
                             time.sleep(30)
                     finally:
-                        worker.terminate()
-                        try: worker.wait(timeout=5)
-                        except subprocess.TimeoutExpired: worker.kill();worker.wait()
+                        if worker is not None:
+                            worker.terminate()
+                            try: worker.wait(timeout=5)
+                            except subprocess.TimeoutExpired: worker.kill();worker.wait()
             else:
                 if not args.tasks: parser.error('run requires --tasks')
                 output = runtime.run(args.tasks)
