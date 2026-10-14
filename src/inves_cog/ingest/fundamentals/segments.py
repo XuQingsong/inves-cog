@@ -8,7 +8,7 @@ import math
 from pathlib import Path
 import re
 
-PARSE_CONTRACT='filing-relations-k16-v1'
+PARSE_CONTRACT='filing-relations-k16-v2'
 
 REVENUE=['RevenueFromContractWithCustomerExcludingAssessedTax','RevenueFromContractWithCustomerIncludingAssessedTax','Revenues','SalesRevenueNet']
 

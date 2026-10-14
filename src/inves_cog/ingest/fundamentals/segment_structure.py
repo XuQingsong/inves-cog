@@ -73,7 +73,13 @@ def calculation_components(model,total_fact,revenue_names):
     """Explicit non-core revenue children in the same original calculation."""
     from arelle import XbrlConst
     candidates=defaultdict(list)
-    for rel in model.relationshipSet(XbrlConst.summationItems).fromModelObject(total_fact.concept):
+    relations=model.relationshipSet(XbrlConst.summationItems).fromModelObject(total_fact.concept)
+    # A separate standard revenue child establishes the core component. Its
+    # siblings can be outside that core; decomposition children alone cannot.
+    core_roles={rel.linkrole for rel in relations if rel.toModelObject is not None
+        and rel.toModelObject.qname.localName in revenue_names}
+    for rel in relations:
+        if rel.linkrole not in core_roles:continue
         concept=rel.toModelObject
         if concept is None or not concept.isMonetary or concept.qname.localName in revenue_names:continue
         if not re.search(r'Revenue|Sales',concept.qname.localName):continue

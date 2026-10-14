@@ -313,7 +313,7 @@ def test_segment_mapping_pending():
     repo.mappings[draft['id']]=dict(draft)
     repo.segments=[{'ticker':'AMD','accession':'cached','filed':date(2026,10,1),
         'period_end':date(2026,6,30),'axis':'business','segment_raw':'DataCenterMember',
-        'segment_std':None,'health_codes':['segment_unmapped'],'evidence':{'parse_contract':'filing-relations-k16-v1'}}]
+        'segment_std':None,'health_codes':['segment_unmapped'],'evidence':{'parse_contract':'filing-relations-k16-v2'}}]
     repo.segments.append(dict(repo.segments[0],period_end=date(2025,6,30)))
     class CachedLoader:
         def segments(self,*args,**kwargs): raise AssertionError('Cached instance must not be parsed again')
@@ -335,7 +335,7 @@ def test_segment_mapping_pending():
             return [{'ticker':'AMD','accession':'cached','filed':date(2026,10,1),
                 'period_start':date(2026,4,1),'period_end':date(2026,6,30),'axis':'business',
                 'segment_raw':'DataCenterMember','revenue':52,'health_codes':[],
-                'evidence':{'parse_contract':'filing-relations-k16-v1'}}]
+                'evidence':{'parse_contract':'filing-relations-k16-v2'}}]
     repo.segments.append({**repo.segments[0],'segment_raw':'AssetsOnlyMember','evidence':{}})
     loader=RefreshLoader(); refreshed=service();refreshed.instance_loader=loader
     assert refreshed.collect_segments('AMD',filings)[0]['revenue']==52
