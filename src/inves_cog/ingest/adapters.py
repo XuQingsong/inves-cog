@@ -159,6 +159,7 @@ def cboe_statistics(http, day):
     parser=_Tables();parser.feed(html)
     categories={'SUM OF ALL PRODUCTS':'total','INDEX OPTIONS':'index',
         'EXCHANGE TRADED PRODUCTS':'etf','EQUITY OPTIONS':'equity'}
+    ratios={row[0].upper():optional_number(row[1]) for table in parser.tables for row in table if len(row)==2 and 'PUT/CALL RATIO' in row[0].upper()}
     output=[]
     for rows in parser.tables:
         heading=next((r[0] for r in rows if len(r)==1),None)
@@ -167,8 +168,11 @@ def cboe_statistics(http, day):
         if not heading or not volume or len(volume)<3: continue
         category=categories.get(heading.upper()) or re.sub(r'[^a-z0-9]+','_',heading.lower()).strip('_')
         call,put=optional_number(volume[1]),optional_number(volume[2])
+        ratio_name={'total':'TOTAL','index':'INDEX','equity':'EQUITY'}.get(category,heading.upper())+' PUT/CALL RATIO'
+        ratio=ratios.get(ratio_name)
+        if ratio is None: ratio=put/call if call and put is not None else None
         output.append({'trade_date':day,'category':category,'category_label':heading,'call_volume':call,
-            'put_volume':put,'put_call_ratio':put/call if call and put is not None else None,
+            'put_volume':put,'put_call_ratio':ratio,
             'open_interest':optional_number(interest[3]) if interest and len(interest)>3 else None,'source':'CBOE'})
     if not output: raise SourceError('CBOE daily market tables absent; no substitute produced')
     return output

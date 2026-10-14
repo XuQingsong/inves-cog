@@ -17,7 +17,8 @@ class CallSpec(TaskSpec):
 
 
 class LLMUnavailable(RuntimeError):
-    pass
+    def __init__(self,message,*,retryable=True):
+        super().__init__(message);self.retryable=retryable
 
 
 def canonical_payload(payload):
@@ -64,7 +65,7 @@ class Client:
                     raise LLMUnavailable('Dialogue output must be a JSON object')
                 return result
             except (LLMUnavailable, TimeoutError, ConnectionError) as exc:
-                if attempt == spec.retries:
+                if attempt == spec.retries or not getattr(exc,'retryable',True):
                     raise LLMUnavailable(f'{task}: {spec.failure_status}') from exc
         raise AssertionError('Unreachable dialogue state')
 

@@ -44,7 +44,8 @@ def source_root(body, *, provider=None, upstream_id=None):
         return f'{provider}:{upstream_id}'
     if body is None:
         return None
-    return 'sha256:' + hashlib.sha256(normalized_body(body).encode('utf-8')).hexdigest()
+    normalized=normalized_body(body)
+    return 'sha256:' + hashlib.sha256(normalized.encode('utf-8')).hexdigest() if normalized else None
 
 
 def source_level(source, *, path=None):

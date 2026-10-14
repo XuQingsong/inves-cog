@@ -47,7 +47,7 @@ class OpenAICompatibleTransport:
                     {'role': 'user', 'content': canonical_payload(payload)}],
                     'response_format': {'type': 'json_object'}, 'stream': False})
         except SourceError as exc:
-            raise LLMUnavailable(f'Dialogue HTTP request failed, status={exc.status_code}') from exc
+            raise LLMUnavailable(f'Dialogue HTTP request failed, status={exc.status_code}',retryable=exc.status_code is None or exc.status_code==429 or exc.status_code>=500) from exc
         try:
             content = response['choices'][0]['message']['content']
             result = json.loads(content)

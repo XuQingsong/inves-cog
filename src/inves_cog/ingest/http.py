@@ -98,7 +98,7 @@ class HTTPClient:
             if retryable and attempt < self.retries:
                 self.sleep(min(60, 2 ** attempt))
                 continue
-            raise SourceError(f'HTTP status {response.status_code}', status_code=response.status_code)
+            raise SourceError(f'HTTP status {response.status_code}', status_code=response.status_code, confirmed_unavailable=response.status_code in {401,403})
         raise AssertionError('Unreachable request state')
 
     def close(self):
