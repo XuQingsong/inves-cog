@@ -1,17 +1,21 @@
 # M2 自测报告
 
-模块：M2；文档：v2；实现提交：6a535481beb46f5ea7471a2ca48a2f5ee8850b31；日期：2026-10-14。
+模块：M2；文档：v2；实现提交：018d168814d5270d998105369d860e93fa450cd2；日期：2026-10-14。
 
 结论：业务实现与离线验证完成；真实覆盖证据尚未完成。本报告申请代码审查，不声称所有阻塞验收条款已经通过。
 
 ## 1. Harness
 
-- `.venv/bin/python -m pytest -m phase1_blocking --junitxml=handoff/M2/blocking.xml -q`：25 passed，4 deselected，7.41 秒。包含 M0 门禁和 M2 原名 15 项 blocking；没有 skip，pending 棘轮正常启用。
+- `.venv/bin/python -m pytest -m phase1_blocking --junitxml=handoff/M2/blocking.xml -q`：25 passed，4 deselected，6.950 秒。包含 M0 门禁和 M2 原名 15 项 blocking；没有 skip，pending 棘轮正常启用。
 - `.venv/bin/python -m pytest -m phase1_replay --junitxml=handoff/M2/replay.xml -q`：1 passed，28 deselected，6.07 秒。30 只 × 3 日期、90 组、2,255 字段，差异 0；[legacy-replay.json](legacy-replay.json)。输入及 oracle 哈希均核对，未修改冻结文件，未运行/导入/复制 Muse 代码。
 - [database-verification.json](database-verification.json)：独立 inves_cog 数据库实际写入及 PIT 查找通过；夹具行在外层事务回滚。真实 Muse CSV.gz 导入两次均为 180 行、30 只、121 份 earnings_history。只离线读 CSV/COPY，不连接 quant。
 - [fx-real-verification.json](fx-real-verification.json)：三币种真实 FRED 历史版本成功，2026-07-04 的有效报价日均为 2026-07-02；金额 100 仅为合成探针，不冒充公司财报。使用官方 output_type=1 的 real-time 行，避免将 output_type=3 的宽表误认成相同形状。
 - `git diff --check` 通过。docs/、golden、milestones 没有修改。
 - 本机未安装 Docker，因此没有将直接 pytest 称为 `make phase1-test` 的干净容器结果。M2 的旧 M0 基线还写死“只能有 M0 一个迁移”；该授权修复只在 M1 PR。M1 合并到 main 后，M2 必须合入并重新确认干净容器 CI。
+
+临时联合工作区使用 M1 7d566bc038b5c557988da7e4a215f00a9fd2df6e 与 M2 018d168814d5270d998105369d860e93fa450cd2，39 项 blocking 通过、0 skip，7.520 秒；[integration-blocking.xml](integration-blocking.xml)。联合 replay 1 项通过；[integration-replay.xml](integration-replay.xml)。临时合并未推送。最新修复覆盖 graph.entity_id 的真实字段契约、分部合计与收入/利润的美元换算，以及确认/驳回对当前期间已缓存分部的即时生效；比较期间不误作当前期间，行 ID 不变。两次修复均保留先失败测试、后实现历史。
+
+M2 最近干净环境 CI：[38532656679](https://github.com/XuQingsong/inves-cog/actions/runs/38532656679)。日志中 blocking 25 项通过；随后旧 M0 清单写死只有一个迁移而失败，该限定修复已授权放在 M1，不能在 M2 越权复制。
 
 ## 2. 不变量
 
