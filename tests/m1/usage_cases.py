@@ -41,6 +41,7 @@ def assert_usage_accounting(root, clock):
               'LLM_STANDARD_BASE_URL':'https://example.invalid/v1',
               'LLM_STANDARD_API_STYLE':'openai-compatible'}
     def send(*args, **kwargs):
+        assert kwargs['json']['enable_thinking'] is False
         return Response(200, {'choices':[{'message':{'content':'{"entities":[]}'}}],
                               'usage':{'prompt_tokens':7,'completion_tokens':2}})
     live_shape = Client(transport=OpenAICompatibleTransport(config, send=send),clock=clock,
