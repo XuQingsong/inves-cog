@@ -75,6 +75,14 @@ def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=
                     key=(start,end); old=consolidated.get(key)
                     if old is None or REVENUE.index(name)<REVENUE.index(old.qname.localName): consolidated[key]=fact
                 continue
+            if len(dims)==2:
+                business=[pair for pair in dims if pair[0].localName=='StatementBusinessSegmentsAxis']
+                auxiliary=[pair for pair in dims if pair[0].localName=='ConsolidationItemsAxis'
+                    and re.fullmatch(r'https?://fasb\.org/srt/\d{4}',pair[0].namespaceURI)
+                    and pair[1].isExplicit and pair[1].memberQname.localName=='OperatingSegmentsMember'
+                    and re.fullmatch(r'https?://fasb\.org/us-gaap/\d{4}',pair[1].memberQname.namespaceURI)]
+                if len(business)!=1 or len(auxiliary)!=1: continue
+                dims=business
             if len(dims)!=1: continue
             axis,dimension=dims[0]
             if not dimension.isExplicit: continue
