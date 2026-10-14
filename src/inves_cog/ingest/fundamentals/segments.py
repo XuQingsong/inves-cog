@@ -84,6 +84,16 @@ def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=
             member=dimension.memberQname
             if kind=='elimination' and member.localName not in {'IntersegmentEliminationMember','CorporateNonSegmentMember'}: continue
             grouped[(start,end,length,kind,member.localName,str(member))].append(fact)
+        def converted(fact,start,end,field):
+            value=numeric(fact) if fact is not None else None
+            currency=fact.unit.measures[0][0].localName if fact is not None and fact.unit is not None else None
+            if value is not None and currency and currency!='USD':
+                from inves_cog.ingest.fundamentals.fx import FXGap
+                if fx is None:
+                    raise FXGap(currency=currency,field=field,period=(start,end),as_of=filed,reason='FRED conversion provider not configured')
+                return fx.convert(value,currency=currency,start=start,end=end,as_of=filed,field=field)
+            return value,{}
+        totals={period:converted(fact,*period,'consolidated_revenue') for period,fact in consolidated.items()}
         output=[]
         for (start,end,length,axis,member,qname),facts in sorted(grouped.items()):
             revenues=[f for f in facts if f.qname.localName in REVENUE]
@@ -97,24 +107,20 @@ def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=
             currency=None
             if revenue_fact is not None and revenue_fact.unit is not None:
                 currency=revenue_fact.unit.measures[0][0].localName
-            fx_evidence={}
-            if currency and currency!='USD':
-                from inves_cog.ingest.fundamentals.fx import FXGap
-                if fx is None: raise FXGap(currency=currency,field='segment_revenue',period=(start,end),as_of=filed,reason='FRED conversion provider not configured')
-                revenue,fx_evidence=fx.convert(revenue,currency=currency,start=start,end=end,as_of=filed,field='segment_revenue')
-                if profit is not None: profit,_=fx.convert(profit,currency=currency,start=start,end=end,as_of=filed,field='segment_profit')
-            total=numeric(consolidated[(start,end)]) if (start,end) in consolidated else None
+            revenue,fx_evidence=converted(revenue_fact,start,end,'segment_revenue')
+            profit,profit_fx=converted(profit_fact,start,end,'segment_profit')
+            total,total_fx=totals.get((start,end),(None,{}))
             output.append({'ticker':ticker,'accession':accession,'filed':filed,'period_end':end,'period_start':start,
                 'period_len':length,'axis':axis,'segment_raw':member,'segment_qname':qname,'segment_std':None,
                 'revenue':revenue,'segment_profit':profit,'profit_basis':str(profit_fact.qname) if profit_fact is not None else None,
                 'margin_pct':profit/revenue*100 if profit is not None and revenue is not None and revenue>0 else None,
                 'yoy_pct':None,'share_pct':revenue/total*100 if revenue is not None and total is not None and total>0 else None,
                 'recast_group':None,'health_codes':['segment_unmapped'] if axis=='business' else [],
-                'evidence':{'currency':currency,'fx':fx_evidence,'profit_reason':'multiple_profit_elements' if len(profits)>1 else 'profit_element_missing' if not profits else None}})
+                'evidence':{'currency':currency,'fx':fx_evidence,'profit_fx':profit_fx,'consolidated_fx':total_fx,'profit_reason':'multiple_profit_elements' if len(profits)>1 else 'profit_element_missing' if not profits else None}})
         for key,total_fact in consolidated.items():
             rows=[r for r in output if (r['period_start'],r['period_end'])==key and r['axis'] in {'business','elimination'}]
             if not rows: continue
-            total=numeric(total_fact)
+            total,_=totals[key]
             if total is None or total<=0:
                 for row in rows: row['evidence']['sum_check_reason']='consolidated_revenue_nonpositive_or_missing'
             elif not segment_sum_ok([r['revenue'] for r in rows if r['axis']=='business'],[r['revenue'] for r in rows if r['axis']=='elimination'],total):

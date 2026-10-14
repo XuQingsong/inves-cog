@@ -9,6 +9,9 @@ class MappingQueue:
     def draft(self,ticker,segment_raw,*,graph_nodes):
         identifier=hashlib.sha256((ticker+'\0'+segment_raw).encode()).hexdigest()
         if identifier in self.rows: return self.rows[identifier]
+        graph_nodes=[{**row,'id':row.get('entity_id') or row.get('id')} for row in graph_nodes]
+        if any(not isinstance(row['id'],str) or not row['id'] for row in graph_nodes):
+            raise ValueError('Graph entity requires entity_id')
         result=self.llm.call('segment_mapping_draft',{'ticker':ticker,'segment_raw':segment_raw,'graph_nodes':graph_nodes})
         ids=result.get('graph_node_ids'); reason=result.get('reason')
         if not isinstance(ids,list) or not all(isinstance(value,str) for value in ids) or not isinstance(reason,str) or not reason:
