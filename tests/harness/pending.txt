@@ -1,4 +1,4 @@
-test_ingest_live_smoke | M1 | 等待全部源真实健康检查；CompanyIR 实测 403，规定 DashScope 嵌入普通 API key 未接通；R4 已验证、R7 已导入，59 只 SEC 元数据已采集
+test_ingest_live_smoke | M1 | 等待 R5（规定嵌入服务对现有 key 实测 401）；按用户约束不更换、不索要 key
 test_revenue_tag_gap | M2 | 等待 M2 实现
 test_q4_derived_from_annual | M2 | 等待 M2 实现
 test_companyfacts_lag | M2 | 等待 M2 实现

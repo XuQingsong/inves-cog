@@ -1,6 +1,0 @@
-{
-  "recomputed_tickers": 73,
-  "source": "stored real SIP minute bars",
-  "as_of": "2026-10-14T08:04:56.170547+00:00",
-  "reason": "per-ticker last positive-volume post-market bar; no substitution"
-}
