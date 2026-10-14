@@ -225,7 +225,7 @@ def test_source_level_mapping():
     assert len(universe['stocks']) == 59 and len(universe['etfs']) == 14
 
 
-def test_info_item_contract():
+def test_info_item_contract(tmp_path):
     from inves_cog.ingest.info import make_item, InfoStore, enrich
     from inves_cog.ingest.sources import fred_observations, parse_cboe, parse_finra, website_change
     item = make_item('news', 'unknown', '1', headline='Unimportant update', body='x' * 600, clock=frozen())
@@ -258,6 +258,33 @@ def test_info_item_contract():
     assert enriched['is_guidance'] is False and enriched['is_rating_change'] is False
     store = InfoStore()
     assert store.put(enriched) == 'inserted'
+    from inves_cog.ingest.settings import read_environment, source_configuration
+    configuration = tmp_path / 'credentials.env'
+    configuration.write_text('ALPACA_API_KEY_ID=fixture-key\n'
+                             'ALPACA_API_SECRET_KEY="fixture-secret"\n'
+                             'SEC_EDGAR_USER_AGENT="fixture contact@example.invalid"\n'
+                             'ALPACA_DATA_FEED=iex\n'
+                             'FRED_API_KEY=fixture-fred # local comment\n'
+                             'LLM_STANDARD_API_KEY="$(not-executed)"\n')
+    values = read_environment(configuration, environ={})
+    assert values['APCA_API_KEY_ID'] == 'fixture-key'
+    assert values['APCA_API_SECRET_KEY'] == 'fixture-secret'
+    assert values['SEC_USER_AGENT'] == 'fixture contact@example.invalid'
+    assert values['FRED_API_KEY'] == 'fixture-fred'
+    assert values['LLM_STANDARD_API_KEY'] == '$(not-executed)'
+    report = source_configuration(values)
+    assert report['Alpaca']['configured'] and report['Alpaca']['feed'] == 'sip'
+    assert report['SEC']['configured']
+    assert not report['DashScope']['configured']
+    assert report['DashScope']['missing'] == ['DASHSCOPE_API_KEY', 'DASHSCOPE_BASE_URL']
+    assert 'fixture-secret' not in json.dumps(report)
+    assert 'fixture-key' not in json.dumps(report)
+    configuration.write_text('APCA_API_KEY_ID=a\nALPACA_API_KEY_ID=b\n')
+    with pytest.raises(ValueError, match='conflicting.*APCA_API_KEY_ID'):
+        read_environment(configuration, environ={})
+    configuration.write_text('not an assignment\n')
+    with pytest.raises(ValueError, match='line 1'):
+        read_environment(configuration, environ={})
 
 
 def test_info_fields_extraction():
