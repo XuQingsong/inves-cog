@@ -59,6 +59,17 @@ def test_bar_window_to_20et():
         tasks={'bars_full':('Alpaca',lambda:{'processed_count':1})},trade_date=lambda:date(2026,10,13))
     runner.run(['bars_full'])
     assert jobs[0]['trade_date']==date(2026,10,13) and runner.runner.timeout_seconds==1500
+    from inves_cog.ingest.cli import schedule_once
+    class ScheduleRepo:
+        def last_runs(self):return {}
+    class ScheduledPipeline:
+        repo=ScheduleRepo();clock=frozen('2026-10-29T00:20:00Z')
+    class ScheduledRuntime:
+        tasks={'bars_full':None,'wide_universe':None}
+        def run(self,names):return names
+    assert schedule_once(ScheduledPipeline(),ScheduledRuntime(),names=['bars_full'])==['bars_full']
+    with pytest.raises(ValueError,match='Unknown'):
+        schedule_once(ScheduledPipeline(),ScheduledRuntime(),names=['wrong'])
     from inves_cog.ingest.market import MarketCollector, market_window, schedule_times
     from inves_cog.ingest.http import HTTPClient, Response
     from inves_cog.ingest.sec_client import SECClient
