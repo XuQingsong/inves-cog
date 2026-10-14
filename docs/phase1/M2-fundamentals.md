@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v3（写入开发中用户答复 K13、K14；外币换算合同；AC-M2-06 改为可用历史验证） |
+| 文档版本 | v4（写入用户答复 K15、K16：分部维度和汇总成员规则） |
 | 规格章节 | 4.4、4.5、4.6、4.8、9.2（财报字段） |
 | 依赖 | M0；SEC submissions 来自 M1 |
 | 关闭的不变量 | I10、I11、I12、I33、I34 |
@@ -153,3 +153,5 @@
 | Q-M2-15（K12） | XBRL 解析库、taxonomy 离线包、检查点合同 | 批准 **Arelle**（`arelle-release`），版本锁进 `uv.lock`。测试用手写的小实例和本地桩 schema，**不下载** taxonomy；生产环境允许 Arelle 从 SEC / FASB 下载 taxonomy，存进本地缓存目录。中期检查点按复述单第 5 节的合同，夹具数据和真实数据要分别标明 |
 | Q-M2-16（K13） | M0 干净环境断言写死迁移只有一个 | 已由 M1 的 PR 修正（M1 Q-M1-17）。M2 在 M1 合并后基于 main 重跑 CI |
 | Q-M2-17（K14） | 非美元财报怎么换成美元？ | **用户答复**：用 FRED，缺汇率时**不得写 `NULL` 了事**，必须查清是哪一项、为什么缺。**合同**：（1）序列：EUR = `DEXUSEU`（每欧元多少美元），TWD = `DEXTAUS`、KRW = `DEXKOUS`（每美元多少本币），统一换成"每单位本币多少美元"再相乘。（2）可见性：只用 `realtime_start ≤ as_of` 的观测，按 FRED / ALFRED 的版本取，不用当前修订值改写历史；期间里有已存在但当时还没发布的观测（H.10 每周发布一次），整笔换算暂停。（3）流量（营收、利润、现金流）和 EPS：用该期间内有报价日的日均汇率；TTM 由换算后的单季相加。（4）余额（现金、债务、权益）：用期末汇率，取期末日当天或之前**最近一个有效报价，最多往前 7 个自然日**（需求方定），实际用的报价日要记录下来。（5）股数不换算；同币种的比率用原币计算。（6）缺口：抛出 `FXGap`，写明币种、序列、目标字段、期间、版本日和原因；该字段**不写入**换算值，原币原始值和证据保留；缺口清单写进健康 JSON，原因要能区分"未配置 key""尚未发布""区间内无报价""报价无效""不支持的币种"。（7）其他财报字段中文档明确允许的 `NULL` 不受本条影响 |
+| Q-M2-18（K15） | 分部收入 context 除主 axis 外还带 `srt:ConsolidationItemsAxis` | **用户答复**：只允许 `srt:ConsolidationItemsAxis = us-gaap:OperatingSegmentsMember` 这一种附加维度，其他混合维度仍然拒绝 |
+| Q-M2-19（K16） | 利润专用的抵销行、同轴汇总成员、GEV 的辅助成员 | **用户答复**：按申报原件判定。（1）原件里只有利润、没有营收元素的行（例如 NVDA 的 `CorporateNonSegmentMember`）不参与营收加总；该行保留，营收为 `NULL` 并写明原因，不填 0。（2）同一 axis 上的汇总成员（例如 UNH 的 TotalOptum、CAT 的 `ReportableSegmentAggregationBeforeOtherOperatingSegmentMember`）按同一申报的 calculation / definition 关系和分部表识别为汇总项或抵销项，按原件的权重计算；**不得**按名称猜测，也不得试组合凑 1%。（3）GEV 的 `srt:ConsolidationItemsAxis = gev:OperatingSegmentsExcludingIntersegmentEliminationMember` 单独放行，限定 ticker、namespace 和成员三者都匹配；带 `SubsegmentsAxis` 的三维 context 仍然拒绝。原件审计：`handoff/M2/k16-original-audit.json.gz` |

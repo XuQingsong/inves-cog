@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v3（写入开发中用户答复 K13–K17；更正 Q-M1-8；AC-M1-02 改用历史回放） |
+| 文档版本 | v4（写入用户答复 K18：广域集合启动基线） |
 | 规格章节 | 3.2、4.1、4.2、4.3、4.7、5.5（数据部分） |
 | 依赖 | M0；监控实体清单来自 M6（M6 完成前用 `config/monitored_entities.yaml` 的人工初版） |
 | 关闭的不变量 | I22、I28（数据部分） |
@@ -188,3 +188,6 @@
 | Q-M1-20（K17） | 三个真实样例显示 `acceptanceDateTime` 并不是美东时间，与 v2 的 Q-M1-8 冲突 | **用户答复**：采用索引页 Accepted。已写入 Q-M1-8（v3）。三个冻结样例：`tests/fixtures/phase1/m1/sec_acceptance_conflict.json` |
 | Q-M1-21 | R4 怎么接？ | **已解决（用户提供）**：两个对话模型都通过阿里云 Token Plan 的 OpenAI 兼容接口（`token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1`）接入，模型名仍只有 `glm-5.3` 和 `deepseek-v4.1-flash`，经 `registry` 选择 |
 | Q-M1-22 | 嵌入接口不通（Token Plan 返回 404，`DASHSCOPE_API_KEY` 返回 401） | 嵌入只影响 AC-M1-08（**非阻塞**），不挡 M1 验收；未接通期间 `embedding = NULL`，健康页显示"未接通"。排查办法见 M1 验收报告 |
+| Q-M1-23（K18） | 首次上线不在月初，广域集合怎么建？ | **用户答复**：首次上线当天收盘后建一次 `startup_baseline`，按月度规则完整判定（市值和成交额两个条件都判定）；此后每月第一个交易日重算，其余交易日只做成交额剔除（Q-M1-7）。不得伪造"月初快照" |
+
+> 编号对照：开发的 `handoff/M1/questions.md` 里 K13–K18 对应本文 Q-M1-17、Q-M1-18、Q-M1-19（K16）、Q-M1-20（K17）、Q-M1-23（K18）。以本文编号为准。
