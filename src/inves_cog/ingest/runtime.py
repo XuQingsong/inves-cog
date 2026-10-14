@@ -53,8 +53,8 @@ def due_tasks(clock, last_runs):
 
 
 class Runtime:
-    def __init__(self, *, clock, health, persist_job, tasks, **runner_options):
-        self.clock, self.tasks = clock, tasks
+    def __init__(self, *, clock, health, persist_job, tasks, trade_date=None, **runner_options):
+        self.clock, self.tasks, self.trade_date = clock, tasks, trade_date
         self.runner = JobRunner(clock=clock, health=health, persist=persist_job, **runner_options)
 
     def run(self, names):
@@ -64,7 +64,7 @@ class Runtime:
         result = {}
         for name in names:
             source, operation = self.tasks[name]
-            seconds = 1800
+            seconds = 1500 if name == 'bars_full' else 1800
             if name in {'sec_submissions', 'sec_index'}:
                 local = self.clock.now_utc().astimezone(NY)
                 end = local.replace(hour=21, minute=15, second=0, microsecond=0)
@@ -73,5 +73,5 @@ class Runtime:
                     continue
                 seconds = min(seconds, (end - local).total_seconds())
             self.runner.timeout_seconds = seconds
-            result[name] = self.runner.run(name, source, operation)
+            result[name] = self.runner.run(name, source, operation, trade_date=self.trade_date() if self.trade_date else None)
         return result

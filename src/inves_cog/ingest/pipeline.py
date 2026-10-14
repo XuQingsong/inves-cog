@@ -23,6 +23,13 @@ from inves_cog.ingest.universe import build_universe, daily_liquidity
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def bar_run_mode(clock, day):
+    observed_day=clock.now_utc().astimezone(NY).date()
+    if day > observed_day:
+        raise ValueError('Cannot collect future trading day')
+    return 'historical_backfill' if day < observed_day else 'current_day'
+
+
 def select_membership(candidates, previous, adv, day, *, monthly):
     """K18: first observed close is a labelled baseline, never a backdated run."""
     if monthly or not previous:
@@ -92,6 +99,7 @@ class Pipeline:
         return report
 
     def bars(self, *, prefill=False):
+        mode=bar_run_mode(self.clock,self.day)
         if not trading_day(self.day):
             return {'processed_count': 0, 'note': 'XNYS closed'}
         alpaca = self.require(self.alpaca, 'Alpaca')
@@ -125,11 +133,12 @@ class Pipeline:
             self.repo.set_cursor('no_bar:' + ticker, {'day': self.day.isoformat(), 'reason': 'Alpaca SIP returned no daily bar'}, self.clock.now_utc())
         available_coverage = [result.coverage[t] for t in actual if result.coverage[t] is not None]
         coverage_ok = bool(available_coverage) and min(available_coverage) >= .95 and sum(available_coverage) / len(available_coverage) >= .99
-        late = self.clock.now_utc() > local_at(self.day, 20, 45)
+        late = mode == 'current_day' and self.clock.now_utc() > local_at(self.day, 20, 45)
         report = {'processed_count': len(result.rows) + len(daily), 'daily_codes': len(actual),
                   'requested_codes': len(self.codes), 'unavailable_codes': unavailable,
                   'coverage': result.coverage, 'exhausted': result.exhausted,
-                  'completed_at': self.clock.now_utc().isoformat(), 'deadline_met': not late,
+                  'completed_at': self.clock.now_utc().isoformat(), 'run_mode':mode,
+                  'deadline_met':not late if mode=='current_day' else None,
                   'status': 'ok' if coverage_ok and not split_gap and not late else 'degraded',
                   'note': split_gap or ('minute coverage below threshold' if not coverage_ok else 'past 20:45 ET deadline' if late else None)}
         self.repo.set_cursor('bars-report:' + self.day.isoformat(), report, self.clock.now_utc())
@@ -342,4 +351,4 @@ class Pipeline:
                     raise
             return execute
         tasks = {name:(source,guarded(operation)) for name,(source,operation) in tasks.items()}
-        return Runtime(clock=self.clock,health=health,persist_job=self.repo.write_job,tasks=tasks)
+        return Runtime(trade_date=lambda:self.day,clock=self.clock,health=health,persist_job=self.repo.write_job,tasks=tasks)
