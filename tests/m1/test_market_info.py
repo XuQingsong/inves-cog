@@ -156,6 +156,11 @@ def test_earnings_reaction_day():
         assert event['reaction_day'] == date.fromisoformat(case['reaction_day'])
     assert earnings_event({'form': '10-Q', 'items': ['2.02']}, closes={}, clock=frozen()) is None
     assert earnings_event({'form': '8-K', 'items': ['7.01']}, closes={}, clock=frozen()) is None
+    verified = json.loads((FIXTURES / 'm1/sec_acceptance_conflict.json').read_text())
+    assert verified['complete'] and len(verified['samples']) == 3
+    assert any(row['session_from_index'] == 'post' for row in verified['samples'])
+    for sample in verified['samples']:
+        assert parse_acceptance_et(sample['submissions_acceptanceDateTime']) == instant(sample['accepted_at_utc_from_index']), sample['accession']
 
 
 def test_earnings_fallback_flag():
