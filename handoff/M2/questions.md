@@ -1,4 +1,7 @@
-# M2 v2 开发中新问题（等待答复）
+# M2 需求答复与实源核对
+
+基线已合入 main e7db5a9（M2 v3）。K13、K14 已写入 Q-M2-16/17 并实施；下列旧段落是历史记录，不代表仍缺 key 或仍未实现。当前待决定项只有文末 K15。
+
 
 基线 main：4e217a0。已先提交失败测试：633d141a0e450c058b843c2d517b0821a50a19a9；17 个测试全部存在，15 个 blocking 首次全部失败；尚未提交实现。replay 保留“等待 R7（Muse 导出）”，live 保留“等待 R4/R5/R7”。
 
@@ -86,3 +89,16 @@ R7 原始 30 份 companyfacts 和 90 份独立 legacy oracle 已在 `41814bc` �
 ## K14 实现与真实核对完成
 
 FRED key 已配置，EUR/TWD/KRW 历史版本均实测成功，证据见 self-test.md 和 fx-real-verification.json。2026-07-04 的期末聚合记录实际报价日 2026-07-02，不生成当日报价。真实接口 output_type=3 是带 series/vintage 列的宽表，已测试先行改用 output_type=1，逐行保留 realtime_start。无可见有效报价时抛包含币种/字段/期间/版本日/原因的 FXGap，停止金额写入。原币原始事实保留；此探针不替代 ASML/TSM/SKHY 的真实完整财报转换验收。
+
+## K15：真实经营分部辅助轴与 Q-M2-11 单维度约束冲突
+
+已验证的原件：NVDA 10-Q，accession `0001045810-26-000075`，官方目录 https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/ 。原 XBRL 实例已下载到忽略缓存，没有修改原件、docs 或 golden。
+
+该实例 context `c-242`、`c-243` 只带以下两个明确维度：
+
+- `us-gaap:StatementBusinessSegmentsAxis`：分别为 `nvda:ComputeAndNetworkingSegmentMember`、`nvda:GraphicsSegmentMember`；
+- `srt:ConsolidationItemsAxis = us-gaap:OperatingSegmentsMember`（经营分部汇总层级，不是地域或产品轴）。
+
+原 `us-gaap:Revenues` 分别为 41,331,000,000 和 5,412,000,000，合计 46,743,000,000，与该期间经营分部汇总 context `c-244` 的营收一致。原 `OperatingIncomeLoss` 分别为 28,363,000,000、2,242,000,000。当前实现按“只带这一个维度”拒绝这两个 context，因此分部数字缺失，不能声称 AC-M2-04/05 已通过。这个问题与 key、模型或行情来源无关。
+
+需要需求方决定：是否仅将 `srt:ConsolidationItemsAxis = us-gaap:OperatingSegmentsMember` 加为业务分部 context 的辅助维度白名单？建议允许它与主业务分部轴共存，汇总 context 不作为额外分部相加；地域、产品、情景等其他附加维度仍拒绝。答复前不扩大维度规则。下一步按原测试名扩充“合法辅助维度放行、地域/产品混合仍拒绝”的失败断言再实现。
