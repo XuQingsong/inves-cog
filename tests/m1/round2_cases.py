@@ -43,25 +43,30 @@ def assert_trend_isolation(clock):
 
     from inves_cog.ingest.jobs import JobRunner
     from inves_cog.ingest.pipeline import Pipeline
+
     class Repository:
-        def set_cursor(self,*args):
+        def set_cursor(self, *args):
             pass
+
     class Trends:
-        def get(self,keyword):
+        def get(self, keyword):
             return fetch(keyword)
-    pipeline=Pipeline.__new__(Pipeline)
-    pipeline.clock=clock;pipeline.repo=Repository();pipeline.trends=Trends()
-    pipeline.monitored=[{'trends_keywords':['bad']}]
-    pipeline.info=lambda rows:None
-    health=HealthBook(clock=clock)
-    runner=JobRunner(clock=clock,health=health,persist=lambda row:None)
-    runner.run('trends','GoogleTrends',pipeline.trends_task)
-    assert health.rows['GoogleTrends']['status']=='degraded'
-    assert health.rows['GoogleTrends']['last_success_at'] is None
-    pipeline.monitored=[{'trends_keywords':['good','bad','also-good']}]
-    runner.run('trends','GoogleTrends',pipeline.trends_task)
-    assert health.rows['GoogleTrends']['last_success_at']==clock.now_utc()
-    assert health.rows['GoogleTrends']['items_last_run']==2
+
+    pipeline = Pipeline.__new__(Pipeline)
+    pipeline.clock = clock
+    pipeline.repo = Repository()
+    pipeline.trends = Trends()
+    pipeline.monitored = [{"trends_keywords": ["bad"]}]
+    pipeline.info = lambda rows: None
+    health = HealthBook(clock=clock)
+    runner = JobRunner(clock=clock, health=health, persist=lambda row: None)
+    runner.run("trends", "GoogleTrends", pipeline.trends_task)
+    assert health.rows["GoogleTrends"]["status"] == "degraded"
+    assert health.rows["GoogleTrends"]["last_success_at"] is None
+    pipeline.monitored = [{"trends_keywords": ["good", "bad", "also-good"]}]
+    runner.run("trends", "GoogleTrends", pipeline.trends_task)
+    assert health.rows["GoogleTrends"]["last_success_at"] == clock.now_utc()
+    assert health.rows["GoogleTrends"]["items_last_run"] == 2
 
 
 def assert_site_isolation(clock):
