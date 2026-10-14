@@ -463,6 +463,24 @@ def test_info_item_contract(tmp_path):
     fred.clock = frozen('2026-10-10T12:00:00Z')
     fred.collect('DGS2')
     assert all(request['realtime_end'] == '2026-10-10' for request in requests[1:])
+    requests=[]
+    from inves_cog.ingest.http import SourceError
+    class ManyVintages:
+        def get(self,url,params):
+            requests.append(dict(params))
+            if url.endswith('/series'): return {'realtime_end':'2026-10-13','seriess':[{'units':'Percent'}]}
+            if url.endswith('/vintagedates'): return {'count':4,'vintage_dates':['2026-10-01','2026-10-02','2026-10-03','2026-10-14']}
+            if params['output_type']==1: raise SourceError('too many vintage dates',status_code=400)
+            assert params['output_type']==3 and 'realtime_start' not in params
+            assert len(params['vintage_dates'].split(','))<=3
+            accepted=params['vintage_dates'].split(',')
+            values={'2026-10-01':'2.0','2026-10-02':'.','2026-10-03':'2.2'}
+            return {'count':1,'observations':[{'date':'2026-09-30',**{'DGS2_'+d.replace('-',''):values[d] for d in accepted}}]}
+    vintage=FRED(key='fixture',clock=frozen('2026-10-14T04:03:00Z'),http=ManyVintages())
+    vintage.vintage_batch_size=2
+    observations=vintage.collect('DGS2')
+    assert [r['realtime_start'] for r in observations]==[date(2026,10,1),date(2026,10,2),date(2026,10,3)]
+    assert [r['value'] for r in observations]==[2.0,None,2.2]
     configuration.write_text('APCA_API_KEY_ID=a\nALPACA_API_KEY_ID=b\n')
     with pytest.raises(ValueError, match='conflicting.*APCA_API_KEY_ID'):
         read_environment(configuration, environ={})
