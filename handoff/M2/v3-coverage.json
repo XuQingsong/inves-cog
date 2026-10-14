@@ -17,22 +17,7 @@
     "XOM",
     "CRWD"
   ],
-  "segment_mismatches": [
-    "NVDA",
-    "INTC",
-    "GOOGL",
-    "AAPL",
-    "UNH",
-    "XOM",
-    "CAT",
-    "GE",
-    "AMAT",
-    "QCOM",
-    "COHR",
-    "VRT",
-    "GEV",
-    "CEG"
-  ],
+  "segment_mismatches": [],
   "segment_job": {
     "processed_count": 59,
     "status": "ok",

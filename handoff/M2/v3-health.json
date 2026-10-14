@@ -18,22 +18,7 @@
       "XOM",
       "CRWD"
     ],
-    "segment_mismatches": [
-      "NVDA",
-      "INTC",
-      "GOOGL",
-      "AAPL",
-      "UNH",
-      "XOM",
-      "CAT",
-      "GE",
-      "AMAT",
-      "QCOM",
-      "COHR",
-      "VRT",
-      "GEV",
-      "CEG"
-    ],
+    "segment_mismatches": [],
     "segment_job": {
       "processed_count": 59,
       "status": "ok",
@@ -43,43 +28,28 @@
   },
   "rows": [
     {
-      "ticker": "INTC",
-      "latest_period_end": "2026-06-27",
-      "latest_filed": "2026-07-24",
+      "ticker": "NOK",
+      "latest_period_end": "2017-12-31",
+      "latest_filed": "2026-09-08",
       "latest_8k_202": null,
       "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
         "earnings_event_missing",
-        "segment_sum_mismatch",
-        "segment_unmapped"
+        "segment_missing",
+        "stale_fundamentals"
       ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
     },
     {
-      "ticker": "LITE",
-      "latest_period_end": "2026-06-27",
-      "latest_filed": "2026-08-17",
-      "latest_8k_202": null,
-      "health_codes": [
-        "earnings_event_missing",
-        "ni_tag_fallback",
-        "segment_unmapped"
-      ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
-    },
-    {
-      "ticker": "QCOM",
-      "latest_period_end": "2026-06-28",
+      "ticker": "MSFT",
+      "latest_period_end": "2026-06-30",
       "latest_filed": "2026-07-29",
       "latest_8k_202": null,
       "health_codes": [
         "earnings_event_missing",
-        "gross_margin_derived",
-        "ni_tag_fallback",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -87,18 +57,20 @@
       "reason": null
     },
     {
-      "ticker": "NVDA",
-      "latest_period_end": "2026-07-26",
-      "latest_filed": "2026-08-26",
+      "ticker": "ARM",
+      "latest_period_end": "2026-03-31",
+      "latest_filed": "2026-09-18",
       "latest_8k_202": null,
       "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
         "earnings_event_missing",
-        "segment_sum_mismatch",
-        "segment_unmapped"
+        "segment_missing",
+        "stale_fundamentals"
       ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
     },
     {
       "ticker": "AMD",
@@ -107,7 +79,6 @@
       "latest_8k_202": "2026-08-05 04:16:24+08:00",
       "health_codes": [
         "ni_tag_fallback",
-        "segment_recast",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -121,7 +92,6 @@
       "latest_8k_202": "2026-09-03 04:26:04+08:00",
       "health_codes": [
         "ni_tag_fallback",
-        "segment_recast",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -171,28 +141,26 @@
       "reason": "companyfacts_lag; core_field_missing; Missing core fields: rev_ttm, eps_ttm, shares; Foreign filer is excluded from trading"
     },
     {
-      "ticker": "NOK",
-      "latest_period_end": "2017-12-31",
-      "latest_filed": "2026-09-08",
+      "ticker": "INTC",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-07-24",
       "latest_8k_202": null,
       "health_codes": [
-        "annual_basis",
-        "companyfacts_lag",
         "earnings_event_missing",
-        "segment_missing",
-        "stale_fundamentals"
+        "segment_unmapped"
       ],
-      "can_score": false,
-      "can_trade": false,
-      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
     },
     {
-      "ticker": "MSFT",
-      "latest_period_end": "2026-06-30",
-      "latest_filed": "2026-07-29",
+      "ticker": "LITE",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-08-17",
       "latest_8k_202": null,
       "health_codes": [
         "earnings_event_missing",
+        "ni_tag_fallback",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -287,7 +255,6 @@
       "health_codes": [
         "earnings_event_missing",
         "gross_margin_derived",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -327,7 +294,6 @@
       "latest_filed": "2026-07-31",
       "latest_8k_202": "2026-07-31 04:30:28+08:00",
       "health_codes": [
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -399,7 +365,6 @@
         "earnings_event_missing",
         "gross_margin_derived",
         "ni_tag_fallback",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -429,7 +394,6 @@
       "health_codes": [
         "earnings_event_missing",
         "ni_tag_fallback",
-        "segment_recast",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -488,8 +452,7 @@
       "health_codes": [
         "core_field_missing",
         "earnings_event_missing",
-        "segment_missing",
-        "segment_sum_mismatch"
+        "segment_missing"
       ],
       "can_score": false,
       "can_trade": false,
@@ -517,7 +480,6 @@
       "health_codes": [
         "gross_margin_derived",
         "ni_tag_fallback",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -532,7 +494,6 @@
       "health_codes": [
         "earnings_event_missing",
         "gross_margin_derived",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -586,7 +547,6 @@
       "latest_filed": "2026-08-20",
       "latest_8k_202": "2026-08-14 04:03:36+08:00",
       "health_codes": [
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -638,20 +598,19 @@
       "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
     },
     {
-      "ticker": "ARM",
-      "latest_period_end": "2026-03-31",
-      "latest_filed": "2026-09-18",
+      "ticker": "QCOM",
+      "latest_period_end": "2026-06-28",
+      "latest_filed": "2026-07-29",
       "latest_8k_202": null,
       "health_codes": [
-        "annual_basis",
-        "companyfacts_lag",
         "earnings_event_missing",
-        "segment_missing",
-        "stale_fundamentals"
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_unmapped"
       ],
-      "can_score": false,
-      "can_trade": false,
-      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
     },
     {
       "ticker": "TSM",
@@ -703,7 +662,6 @@
         "earnings_event_missing",
         "gross_margin_derived",
         "ni_tag_fallback",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -718,8 +676,19 @@
       "health_codes": [
         "earnings_event_missing",
         "gross_margin_derived",
-        "segment_recast",
-        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "NVDA",
+      "latest_period_end": "2026-07-26",
+      "latest_filed": "2026-08-26",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -748,7 +717,6 @@
       "latest_8k_202": null,
       "health_codes": [
         "earnings_event_missing",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
@@ -762,7 +730,6 @@
       "latest_8k_202": "2026-08-06 18:52:23+08:00",
       "health_codes": [
         "ni_tag_fallback",
-        "segment_sum_mismatch",
         "segment_unmapped"
       ],
       "can_score": true,
