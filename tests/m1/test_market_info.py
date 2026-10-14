@@ -113,6 +113,17 @@ def test_post_close_null_when_no_trade():
 
 
 def test_wide_universe_rules():
+    from inves_cog.ingest.pipeline import select_membership
+    candidate={'ticker':'FIXTURE','status':'active','asset_class':'us_equity','exchange':'NASDAQ',
+        'name':'Fixture Common Stock','cik':'1','shares':200_000_000,'close':10,
+        'history':[{'close':10,'volume':2_000_000} for _ in range(20)]}
+    initial=select_membership([candidate],[],{'FIXTURE':20_000_000},date(2026,10,13),monthly=False)
+    assert initial[0]['included'] and 'startup_baseline' in initial[0]['notes']
+    removed=select_membership([candidate],initial,{'FIXTURE':1},date(2026,10,14),monthly=False)
+    assert not removed[0]['included']
+    assert not select_membership([candidate],removed,{'FIXTURE':30_000_000},date(2026,10,15),monthly=False)[0]['included']
+    refreshed=select_membership([candidate],removed,{'FIXTURE':30_000_000},date(2026,11,2),monthly=True)
+    assert refreshed[0]['included'] and 'startup_baseline' not in refreshed[0]['notes']
     from inves_cog.ingest.runtime import complete_adv20
     sessions = [date(2026, 1, 1) + timedelta(days=i) for i in range(20)]
     rows = [{'trade_date': day, 'close': 10, 'volume': 2_000_000} for day in sessions]
