@@ -221,6 +221,23 @@ def test_segment_mapping_pending():
     shared=MappingQueue(llm=RecordedLLM(),clock=FrozenClock(datetime(2026,10,13,tzinfo=timezone.utc)),sectors={})
     accepted=shared.draft('AMD','ClientMember',graph_nodes=[{'entity_id':'datacenter','name':'Data center'}])
     assert accepted['graph_node_ids']==['datacenter']
+    from inves_cog.ingest.fundamentals.service import FinancialService,MemoryRepository
+    repo=MemoryRepository()
+    repo.mappings[draft['id']]=dict(draft)
+    repo.segments=[{'ticker':'AMD','accession':'cached','filed':date(2026,10,1),
+        'period_end':date(2026,6,30),'axis':'business','segment_raw':'DataCenterMember',
+        'segment_std':None,'health_codes':['segment_unmapped']}]
+    class CachedLoader:
+        def segments(self,*args,**kwargs): raise AssertionError('Cached instance must not be parsed again')
+    def service(): return FinancialService(clock=FrozenClock(datetime(2026,10,13,tzinfo=timezone.utc)),
+        repository=repo,sec=None,llm=RecordedLLM(),universe=[{'ticker':'AMD','sector':'chips'}],ciks={'AMD':'1'},instance_loader=CachedLoader())
+    filings=[{'accession':'cached','filing_date':date(2026,10,1)}]
+    mapped=service().collect_segments('AMD',filings)
+    assert mapped[0]['segment_std']==['datacenter'] and 'segment_unmapped' not in mapped[0]['health_codes']
+    repo.mappings[draft['id']].update(status='驳回',segment_std=None,health_codes=['segment_unmapped'])
+    rejected=service().collect_segments('AMD',filings)
+    assert rejected[0]['segment_std'] is None and 'segment_unmapped' in rejected[0]['health_codes']
+
     empty=MappingQueue(llm=RecordedLLM(),clock=FrozenClock(datetime(2026,10,13,tzinfo=timezone.utc)),sectors={})
     with pytest.raises(ValueError): empty.draft('AMD','Other',graph_nodes=[])
 
