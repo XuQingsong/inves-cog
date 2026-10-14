@@ -76,6 +76,12 @@ def identity(value):
     return hashlib.sha256(json_text(value).encode()).hexdigest()
 
 
+def info_value(key, value):
+    if key in JSON_COLUMNS or key == "embedding" and value is not None and not isinstance(value, str):
+        return json_text(value)
+    return value
+
+
 def normalize_entity(row):
     if not isinstance(row.get("entity_id"), str) or not row["entity_id"] or not row.get("name"):
         raise ValueError("Graph entity requires entity_id and name")
@@ -166,12 +172,7 @@ class Repository:
         item = dict(item)
         item["summary"] = item["body"][:500] if item["body"] is not None else item.get("summary")
         fields = INFO_FIELDS
-        values = [
-            json_text(item.get(key))
-            if key in JSON_COLUMNS or key == "embedding" and item.get(key) is not None
-            else item.get(key)
-            for key in fields
-        ]
+        values = [info_value(key, item.get(key)) for key in fields]
         placeholders = [
             "%s::jsonb" if key in JSON_COLUMNS else "%s::vector" if key == "embedding" else "%s" for key in fields
         ]
@@ -396,10 +397,7 @@ class Repository:
             "is_rating_change",
             "extraction_source",
         ]
-        values = [
-            json_text(row[key]) if key in {"embedding", "extraction_source"} and row[key] is not None else row[key]
-            for key in fields
-        ]
+        values = [info_value(key, row[key]) for key in fields]
         assignments = [
             key + "=%s" + ("::vector" if key == "embedding" else "::jsonb" if key == "extraction_source" else "")
             for key in fields
