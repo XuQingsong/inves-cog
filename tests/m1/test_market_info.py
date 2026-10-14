@@ -109,6 +109,10 @@ def test_post_close_null_when_no_trade():
     assert post_close(bars, date(2026, 10, 28)) is None
     bars += [{'ts_utc': instant('2026-10-28T21:00:00Z'), 'close': 105, 'volume': 2}]
     assert post_close(bars, date(2026, 10, 28)) == 105
+    mixed=[{'ticker':'ONE','ts_utc':instant('2026-10-28T21:00:00Z'),'close':105,'volume':2},
+           {'ticker':'TWO','ts_utc':instant('2026-10-28T23:59:00Z'),'close':999,'volume':2}]
+    assert post_close(mixed,date(2026,10,28),ticker='ONE')==105
+    assert post_close(mixed,date(2026,10,28),ticker='MISSING') is None
     assert split_factors([date(2026, 10, 27), date(2026, 10, 28)], [{'date': date(2026, 10, 28), 'ratio': 2}]) == [0.5, 1.0]
 
 
