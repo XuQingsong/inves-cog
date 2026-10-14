@@ -1,0 +1,155 @@
+{
+  "classification": "actual approved public entity-site and Federal Reserve/EIA RSS collection",
+  "started_at_utc": "2026-10-14 17:26:24.944507+00:00",
+  "collection": {
+    "websites": {
+      "processed_count": 5,
+      "failures": [],
+      "status": "ok",
+      "note": ""
+    },
+    "fed_news": {
+      "processed_count": 20
+    },
+    "eia_press": {
+      "processed_count": 12
+    },
+    "eia_energy": {
+      "processed_count": 16
+    }
+  },
+  "one_broken_url": {
+    "websites": {
+      "processed_count": 4,
+      "failures": [
+        {
+          "url": "https://round2-invalid-site.example.invalid/rss.xml",
+          "error": "SourceError: HTTP transport failed after bounded retries"
+        }
+      ],
+      "status": "degraded",
+      "note": "https://round2-invalid-site.example.invalid/rss.xml: SourceError: HTTP transport failed after bounded retries"
+    }
+  },
+  "source_health": {
+    "EntitySites:https://openai.com/news/rss.xml": {
+      "source": "EntitySites:https://openai.com/news/rss.xml",
+      "last_success_at": "2026-10-15 01:26:32.696581+08:00",
+      "last_attempt_at": "2026-10-15 01:26:32.696581+08:00",
+      "status": "ok",
+      "latency_sec": null,
+      "items_last_run": 1,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FederalReserveNews": {
+      "source": "FederalReserveNews",
+      "last_success_at": "2026-10-15 01:26:45.828748+08:00",
+      "last_attempt_at": "2026-10-15 01:26:45.828748+08:00",
+      "status": "ok",
+      "latency_sec": 1.8891443749889731,
+      "items_last_run": 20,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EIANews": {
+      "source": "EIANews",
+      "last_success_at": "2026-10-15 01:26:48.060070+08:00",
+      "last_attempt_at": "2026-10-15 01:26:48.060070+08:00",
+      "status": "ok",
+      "latency_sec": 2.2307627499685623,
+      "items_last_run": 12,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EIATodayInEnergy": {
+      "source": "EIATodayInEnergy",
+      "last_success_at": "2026-10-15 01:26:50.171824+08:00",
+      "last_attempt_at": "2026-10-15 01:26:50.171824+08:00",
+      "status": "ok",
+      "latency_sec": 2.110941625025589,
+      "items_last_run": 16,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EntitySites:https://round2-invalid-site.example.invalid/rss.xml": {
+      "source": "EntitySites:https://round2-invalid-site.example.invalid/rss.xml",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-15 01:27:00.270510+08:00",
+      "status": "degraded",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "SourceError: HTTP transport failed after bounded retries",
+      "consecutive_failures": 1
+    },
+    "EntitySites:https://www.anthropic.com/news": {
+      "source": "EntitySites:https://www.anthropic.com/news",
+      "last_success_at": "2026-10-15 01:27:02.309023+08:00",
+      "last_attempt_at": "2026-10-15 01:27:02.309023+08:00",
+      "status": "ok",
+      "latency_sec": null,
+      "items_last_run": 1,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EntitySites:https://blog.google/technology/ai/": {
+      "source": "EntitySites:https://blog.google/technology/ai/",
+      "last_success_at": "2026-10-15 01:27:06.603740+08:00",
+      "last_attempt_at": "2026-10-15 01:27:06.603740+08:00",
+      "status": "ok",
+      "latency_sec": null,
+      "items_last_run": 1,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EntitySites:https://www.deepseek.com/": {
+      "source": "EntitySites:https://www.deepseek.com/",
+      "last_success_at": "2026-10-15 01:27:06.662388+08:00",
+      "last_attempt_at": "2026-10-15 01:27:06.662388+08:00",
+      "status": "ok",
+      "latency_sec": null,
+      "items_last_run": 1,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EntitySites:https://ai.meta.com/blog/": {
+      "source": "EntitySites:https://ai.meta.com/blog/",
+      "last_success_at": "2026-10-15 01:27:10.644505+08:00",
+      "last_attempt_at": "2026-10-15 01:27:10.644505+08:00",
+      "status": "ok",
+      "latency_sec": null,
+      "items_last_run": 1,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "EntitySites": {
+      "source": "EntitySites",
+      "last_success_at": "2026-10-15 01:27:10.644896+08:00",
+      "last_attempt_at": "2026-10-15 01:27:10.644896+08:00",
+      "status": "degraded",
+      "latency_sec": 20.472570332989562,
+      "items_last_run": 4,
+      "note": "https://round2-invalid-site.example.invalid/rss.xml: SourceError: HTTP transport failed after bounded retries",
+      "consecutive_failures": 0
+    }
+  },
+  "persisted_counts": [
+    {
+      "source": "EIANews",
+      "n": 12
+    },
+    {
+      "source": "EIATodayInEnergy",
+      "n": 16
+    },
+    {
+      "source": "EntitySites",
+      "n": 6
+    },
+    {
+      "source": "FederalReserveNews",
+      "n": 20
+    }
+  ],
+  "completed_at_utc": "2026-10-14 17:27:10.716193+00:00"
+}
