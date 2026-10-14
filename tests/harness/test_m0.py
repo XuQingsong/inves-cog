@@ -234,6 +234,14 @@ def test_frozen_fixtures_changelog(tmp_path):
 
 
 def test_import_firewall(tmp_path):
+    from tests.harness.tools.style import check_style
+    clean = tmp_path / 'clean.py'
+    clean.write_text('a = 1\nb = 2\n')
+    check_style(ROOT, paths=[clean])
+    clean.write_text('a=1;b=2\n')
+    with pytest.raises(AssertionError, match='RUFF'):
+        check_style(ROOT, paths=[clean])
+    check_style(ROOT)
     from tests.harness.tools.checks import scan_imports
     scan_imports(ROOT)
     negatives = (
