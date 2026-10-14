@@ -276,6 +276,14 @@ class NewsTriage:
                 meta.update(layer=3, reason="historical_rules_only")
             elif on_demand or self.primary(item):
                 meta.update(layer=2, reason="on_demand" if on_demand else "rule_hit")
+            elif original.get("extraction_source", {}).get("news_triage", {}).get("screened"):
+                screen = original["extraction_source"]["news_triage"]
+                meta.update(
+                    screened=True,
+                    material=screen["material"],
+                    layer=2 if screen["material"] else 3,
+                    reason="screening_cached",
+                )
             else:
                 meta.update(layer=1, reason="screening")
                 screening.append(item)
