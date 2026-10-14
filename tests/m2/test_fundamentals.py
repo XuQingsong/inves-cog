@@ -236,9 +236,10 @@ def test_consensus_import_idempotent(tmp_path):
     tables = {'earnings_estimate': {'0y': {'avg':4,'high':5,'low':3,'numberOfAnalysts':4}},
               'revenue_estimate': {'0y': {'avg':100}},
               'eps_revisions': {'0y': {'upLast7days':3,'downLast7days':1}},
-              'analyst_price_targets': {'mean':10,'median':9}, 'earnings_history': []}
+              'analyst_price_targets': {'mean':10,'median':9}, 'earnings_history': [{'quarter_date':'2026-06-30','epsActual':1.2,'epsEstimate':1,'surprisePercent':0.2}]}
     snapshot = snapshot_from_tables(tables,ticker='FIXTURE',clock=captured,fy_cy=date(2026,12,31),fy_ny=date(2027,12,31))
     assert snapshot['coverage']==4 and snapshot['rev_cy']==100 and snapshot['up_7d']==3
+    assert snapshot['raw']['earnings_history'][0]['surprise_pct']==20
     assert snapshot['as_of']==date(2026,10,13) and snapshot['captured_at']==captured.now_utc()
     from inves_cog.ingest.fundamentals.consensus import ConsensusStore, import_muse_exports, read_copy_blocks
     store = ConsensusStore()
@@ -294,12 +295,14 @@ def test_health_contract():
     book = ProfileBook(clock=FrozenClock(datetime(2026, 10, 13, tzinfo=timezone.utc)))
     profile = book.generate(good, segments=[], consensus=None, guidance=[])
     book.generate(good,segments=[],consensus={'eps_cy':4,'fy_cy':'2026-12-31'},guidance=[])
+    guide = book.generate(good,segments=[],consensus=None,guidance=[{'is_guidance':True,'info_id':'sec_8k:SEC:fixture-guidance','payload':{'items':'2.02,7.01'}}])
+    assert any(row['kind']=='业绩指引' for row in guide['changes'])
     boundary = book.generate(good,segments=[],consensus={'eps_cy':4.12,'fy_cy':'2026-12-31'},guidance=[])
     assert not any(row['kind']=='一致预期变化' for row in boundary['changes'])
     changed = book.generate(good,segments=[],consensus={'eps_cy':4.124,'fy_cy':'2026-12-31'},guidance=[])
     assert sum(row['kind']=='一致预期变化' for row in changed['changes'])==1
     from inves_cog.ingest.fundamentals.service import FinancialService,MemoryRepository
-    universe = yaml.safe_load((ROOT/'config/universe.yaml').read_text())['stocks']
+    universe = [{'ticker':f'F{i:02}','foreign':i>=54,'sector':'handwritten fixture'} for i in range(59)]
     memory = MemoryRepository()
     for entity in universe:
         memory.shared_filings[entity['ticker']]=[{'accession':'q8','form':'10-Q','filing_date':date(2026,8,1),'report_date':date(2026,6,30)}]
