@@ -113,6 +113,16 @@ def test_post_close_null_when_no_trade():
 
 
 def test_wide_universe_rules():
+    from inves_cog.ingest.providers import Alpaca
+    calls=[]
+    class Assets:
+        def get(self,url,**kwargs): calls.append(url);return []
+    Alpaca(clock=frozen(),key='fixture',secret='fixture',http=Assets()).assets()
+    assert calls[-1]=='https://paper-api.alpaca.markets/v2/assets'
+    Alpaca(clock=frozen(),key='fixture',secret='fixture',http=Assets(),assets_base_url='https://api.alpaca.markets').assets()
+    assert calls[-1]=='https://api.alpaca.markets/v2/assets'
+    with pytest.raises(ValueError): Alpaca(clock=frozen(),key='fixture',secret='fixture',assets_base_url='https://evil.invalid')
+
     from inves_cog.ingest.pipeline import select_membership
     candidate={'ticker':'FIXTURE','status':'active','asset_class':'us_equity','exchange':'NASDAQ',
         'name':'Fixture Common Stock','cik':'1','shares':200_000_000,'close':10,
