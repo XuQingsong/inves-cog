@@ -252,7 +252,13 @@ class NewsTriage:
             if root in representatives:
                 copies[item["info_id"]] = root
                 continue
-            previous = self.cached_root(root) if item["source_root"] else None
+            previous = (
+                original
+                if original["extraction_status"] == "ok" and "news_triage" in original["extraction_source"]
+                else None
+            )
+            if previous is None and item["source_root"]:
+                previous = self.cached_root(root)
             previous_meta = previous.get("extraction_source", {}).get("news_triage", {}) if previous else {}
             reusable = previous_meta.get("llm_full") or (
                 previous_meta.get("screened")
