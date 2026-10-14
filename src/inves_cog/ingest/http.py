@@ -44,10 +44,11 @@ class RateLimiter:
 
 class HTTPClient:
     def __init__(self, send: Callable | None = None, *, retries=3, timeout=30,
-                 sleep=time.sleep, limiter=None):
+                 sleep=time.sleep, limiter=None, pool=False):
         self.send = send
         self.retries, self.timeout, self.sleep = retries, timeout, sleep
         self.limiter = limiter
+        self.pool, self.session = pool, None
 
     def request(self, method, url, *, params=None, headers=None, json=None, limiter=None):
         from inves_cog.ingest.deadline import remaining
@@ -62,8 +63,12 @@ class HTTPClient:
             try:
                 if self.send is None:
                     import httpx
-                    result = httpx.request(method, url, params=params, headers=headers,
-                                           json=json, timeout=request_timeout, follow_redirects=True)
+                    if self.pool:
+                        if self.session is None: self.session=httpx.Client(follow_redirects=True)
+                        result=self.session.request(method,url,params=params,headers=headers,json=json,timeout=request_timeout)
+                    else:
+                        result = httpx.request(method, url, params=params, headers=headers,
+                                               json=json, timeout=request_timeout, follow_redirects=True)
                     try:
                         data = result.json()
                     except ValueError:
@@ -95,6 +100,10 @@ class HTTPClient:
                 continue
             raise SourceError(f'HTTP status {response.status_code}', status_code=response.status_code)
         raise AssertionError('Unreachable request state')
+
+    def close(self):
+        if self.session is not None:
+            self.session.close();self.session=None
 
     def get(self, url, **kwargs):
         return self.request('GET', url, **kwargs)

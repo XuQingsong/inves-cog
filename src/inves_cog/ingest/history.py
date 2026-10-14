@@ -53,6 +53,18 @@ def form4_record(record,*,clock):
         'price':number(raw.get('price')),'accession':None,'transaction_index':None,
         'source':'MuseExport','raw':raw}
 
+def history_item(record,*,clock):
+    from inves_cog.ingest.info import make_item
+    table,raw=record['table'],record['raw']
+    form4=table.endswith('insider_transactions')
+    gaps=['visibility_time_unknown','accession_missing'] if form4 else ['historical_vintage_unknown']
+    item=make_item('form4' if form4 else 'macro','MuseExport',identity(raw),
+        headline=(raw['ticker']+' historical Form 4 '+raw.get('code','')) if form4 else 'VIX historical observation '+raw['date'],
+        body=json_text(raw),clock=clock,tickers=[raw['ticker']] if form4 else [],payload={**record,'import_gaps':gaps})
+    item['flags'].extend(gaps)
+    return item
+
+
 def import_exports(directory,*,connection,clock):
     records=list(read_exports(directory))
     counts={name:{'source_rows':0,'inserted':0} for name in TABLES}
@@ -65,12 +77,13 @@ def import_exports(directory,*,connection,clock):
             inserted=connection.execute('INSERT INTO ingest.offline_history (source_table,record_id,raw,file_sha256,imported_at,gaps) VALUES (%s,%s,%s::jsonb,%s,%s,%s) ON CONFLICT (source_table,record_id) DO NOTHING RETURNING record_id',
                 (table,identity(raw),json_text(raw),record['file_sha256'],clock.now_utc(),gaps)).fetchone()
             counts[table]['inserted']+=inserted is not None
+            repo.put_info(history_item(record,clock=clock))
             if table.endswith('insider_transactions'):
                 repo.write('form4_events',form4_record(record,clock=clock))
         # No observation date is relabelled as FRED realtime_start.
         repo.set_cursor('r7-offline-import',{'tables':counts,'form4_gaps':['filed_at','accession'],
             'vix_gap':'No historical vintage supplied; retained in offline_history, excluded from PIT macro observations'},clock.now_utc())
-    return counts
+    return {**counts,'information_counts':repo.counts}
 
 def main():
     from inves_cog.clock import SystemClock

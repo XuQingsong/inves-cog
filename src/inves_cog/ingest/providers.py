@@ -29,7 +29,7 @@ class Alpaca:
         self.assets_base_url=assets_base_url
         self.clock = clock
         self.headers = {'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret}
-        self.http = http or HTTPClient(limiter=RateLimiter(120, 60))
+        self.http = http or HTTPClient(limiter=RateLimiter(120, 60),pool=True)
 
     def assets(self):
         rows = self.http.get(self.assets_base_url+'/v2/assets', params={'status': 'active', 'asset_class': 'us_equity'}, headers=self.headers)
