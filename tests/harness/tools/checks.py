@@ -18,6 +18,16 @@ MODEL_PATTERN = re.compile(
     r'(?i)(?<![\w-])(?:glm|gpt|claude|qwen|gemini|deepseek|llama|mistral)'
     r'(?:[-_.][a-z0-9]+|\d[a-z0-9]*)(?:[-_.][a-z0-9]+)*(?![\w-])'
 )
+URL_HOST_PATTERN = re.compile(r'''(?i)https?://(?P<host>[a-z0-9.-]+)(?=[:/?#\s'"<>]|$)''')
+
+
+def _brand_hostname(line, token):
+    # Only alphabetic brand/TLD tokens in an HTTP(S) hostname are domains.
+    # Versions and hyphenated model tokens, and URL paths/queries, still fail.
+    if not re.fullmatch(r'[a-z]+(?:\.[a-z]{2,}){1,2}', token.group(), re.I):
+        return False
+    return any(host.start('host') <= token.start() and token.end() <= host.end('host')
+               for host in URL_HOST_PATTERN.finditer(line))
 
 
 def fail(path, line, rule, reason):
@@ -232,5 +242,5 @@ def scan_models(root):
             continue
         for line_no, line in enumerate(text.splitlines(), 1):
             for match in MODEL_PATTERN.finditer(line):
-                if match.group() not in ALLOWED_MODELS:
+                if match.group() not in ALLOWED_MODELS and not _brand_hostname(line, match):
                     fail(path, line_no, 'I37/FR-M0-10', f'non-whitelisted model {match.group()}')
