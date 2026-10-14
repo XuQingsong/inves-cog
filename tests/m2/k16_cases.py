@@ -114,6 +114,8 @@ def assert_k16_cases(root):
     rows=parsed(folder,document,primary_html=table)
     assert next(r for r in rows if r['segment_raw']=='IntersegmentEliminationMember')['evidence']['revenue_sum_weight']==-1
     assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    spanning=table.replace('<td></td><td></td>','<td></td>').replace(cell('eliminations',2),cell('eliminations',2).replace('<td>','<td colspan="2">',1)).replace(cell('total',100),cell('total',100).replace('<td>','<td colspan="2">',1))
+    assert all('segment_sum_mismatch' not in r['health_codes'] for r in parsed(folder,document,primary_html=spanning))
     wrong_order=table.replace('Net Sales','Unrelated amount')
     assert any('segment_sum_mismatch' in r['health_codes'] for r in parsed(folder,document,primary_html=wrong_order))
 
@@ -135,6 +137,8 @@ def assert_k16_cases(root):
     assert component['axis']=='elimination' and component['revenue']==5
     assert component['evidence']['weight_source']['linkrole']==role
     assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    calculation=folder/'calculation.xml';calculation.write_text(calculation.read_text().replace('http://www.xbrl.org/2003/arcrole/summation-item','https://xbrl.org/2023/arcrole/summation-item'))
+    assert any(r['segment_raw']=='InsuranceServicesRevenue' for r in parsed(folder,document))
     # Explicit reconciliation already explains the amount; do not count a
     # dimensionless component a second time or hide a reported nil amount.
     fact(document,'eliminations','Revenues',5)
