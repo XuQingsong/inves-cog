@@ -159,7 +159,7 @@ def test_extractor_fixed_toggles():
     assert extract().values['net_debt'] == 10
 
 
-def test_segment_extraction(tmp_path):
+def test_segment_extraction(tmp_path,monkeypatch):
     import shutil
     from inves_cog.ingest.fundamentals.segments import parse_segments
     for path in (FIXTURES/'xbrl').iterdir(): shutil.copyfile(path,tmp_path/path.name)
@@ -241,6 +241,33 @@ def test_segment_extraction(tmp_path):
     metrics_rows=parse_segments(metrics/'instance.xml',ticker='AMD',accession='metrics-fixture',filed=date(2026,8,1))
     assert {r['segment_raw'] for r in metrics_rows if r['axis']=='business'}=={'ClientMember','DataCenterMember'}
     assert next(r for r in metrics_rows if r.get('segment_raw')=='DataCenterMember')['segment_profit']==15
+
+
+    # Reuse immutable taxonomy originals already cached; unseen versions still
+    # use the normal downloader, without an extra shared SEC client.
+    from types import SimpleNamespace
+    from arelle import Cntlr as controller_module
+    from inves_cog.ingest.fundamentals.segments import load_instance
+    cache=tmp_path/'taxonomy-cache';cache.mkdir();(cache/'cached.xsd').write_text('handwritten cache probe')
+    calls=[]
+    class WebCache:
+        def urlToCacheFilepath(self,url): return str(cache/('cached.xsd' if '/2026/' in url else 'unseen.xsd'))
+        def getfilename(self,url,*args,**kwargs):
+            calls.append(url)
+            assert '/2026/' not in url,'cached taxonomy should not need network refresh'
+            return str(cache/'unseen.xsd')
+    class Controller:
+        def __init__(self,**kwargs):
+            self.webCache=WebCache();self.modelManager=SimpleNamespace(load=self.load)
+        def load(self,path):
+            assert self.webCache.getfilename('https://fasb.org/taxonomy/2026/cached.xsd')==str(cache/'cached.xsd')
+            self.webCache.getfilename('https://fasb.org/taxonomy/2027/unseen.xsd')
+            return SimpleNamespace(modelDocument=object())
+        def close(self): pass
+    monkeypatch.setattr(controller_module,'Cntlr',Controller)
+    controller,model=load_instance(metrics/'instance.xml',offline=False,cache_dir=cache,fetch=lambda url:pytest.fail('no new SEC fetch'))
+    assert len(calls)==1 and '/2027/' in calls[0]
+    controller.close()
 
 
 def test_segment_recast():
