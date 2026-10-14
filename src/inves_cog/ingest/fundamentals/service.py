@@ -129,10 +129,15 @@ class FinancialService:
     def collect_segments(self,ticker,filings):
         existing=self.repo.segment_rows(ticker)
         if self.instance_loader is None:
-            return existing or [{'ticker':ticker,'axis':'evidence','health_codes':['segment_missing'],'reason':'XBRL instance not supplied'}]
+            return self.apply_mappings(ticker,existing) if existing else [{'ticker':ticker,'axis':'evidence','health_codes':['segment_missing'],'reason':'XBRL instance not supplied'}]
         latest=max(filings,key=lambda f:day(f['filing_date']),default=None)
         if latest is None: return existing
-        if any(r['accession']==latest['accession'] for r in existing): return [r for r in existing if r['accession']==latest['accession']]
+        if any(r['accession']==latest['accession'] for r in existing):
+            cached=[r for r in existing if r['accession']==latest['accession']]
+            last=max((r['period_end'] for r in cached if r.get('period_end')),default=None)
+            current=self.apply_mappings(ticker,[r for r in cached if r.get('period_end')==last] if last else cached)
+            self.repo.put_segments(current)
+            return current
         try:
             rows=self.instance_loader.segments(latest,ticker=ticker,fx=self.fx)
         except FXGap: raise
@@ -143,15 +148,26 @@ class FinancialService:
         comparative=[r for r in rows if r.get('period_end')!=latest_end]
         prior=[r for r in existing if any(c.get('period_end')==r.get('period_end') for c in comparative)]
         current=apply_recast(current,prior,comparative=comparative)
-        for row in current:
-            if row.get('axis')=='business' and self.llm is not None:
-                try:
-                    mapping=self.queue.draft(ticker,row['segment_raw'],graph_nodes=self.repo.graph_nodes())
-                    row['segment_std']=mapping['segment_std']
-                    if row['segment_std']: row['health_codes']=[c for c in row['health_codes'] if c!='segment_unmapped']
-                except Exception as exc: row.setdefault('evidence',{})['mapping_gap']=type(exc).__name__+': '+str(exc)
+        current=self.apply_mappings(ticker,current)
         self.repo.put_segments(current+comparative)
         return current
+
+    def apply_mappings(self,ticker,rows):
+        # Review may happen in a different process while this service stays alive.
+        self.queue.rows.update({row['id']:row for row in self.repo.mapping_rows()})
+        result=deepcopy(rows)
+        for row in result:
+            if row.get('axis')!='business': continue
+            row['segment_std']=None
+            try:
+                mapping=self.queue.draft(ticker,row['segment_raw'],graph_nodes=self.repo.graph_nodes())
+                row['segment_std']=mapping['graph_node_ids'] if mapping['status']=='已确认' else None
+            except Exception as exc:
+                row.setdefault('evidence',{})['mapping_gap']=type(exc).__name__+': '+str(exc)
+            codes=[code for code in row.get('health_codes',[]) if code!='segment_unmapped']
+            if row['segment_std'] is None: codes.append('segment_unmapped')
+            row['health_codes']=codes
+        return result
 
     def collect_consensus(self):
         if self.provider is None: raise RuntimeError('yfinance provider not configured')

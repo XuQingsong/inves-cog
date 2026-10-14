@@ -63,8 +63,8 @@ class Repository:
     def put_derived(self,row): self.write('consensus_derived',{**row,'values_extra':row})
     def put_segments(self,rows):
         for row in rows:
-            self.write('segments',{**row,'evidence':{**row.get('evidence',{}),'period_start':row.get('period_start'),'segment_qname':row.get('segment_qname')},
-                'row_id':hashlib.sha256(text({key:row.get(key) for key in ('ticker','accession','period_end','period_start','axis','segment_raw')}).encode()).hexdigest()})
+            self.write('segments',{**row,'evidence':{**row.get('evidence',{}),'period_start':row.get('period_start') or row.get('evidence',{}).get('period_start'),'segment_qname':row.get('segment_qname') or row.get('evidence',{}).get('segment_qname')},
+                'row_id':row.get('row_id') or hashlib.sha256(text({key:row.get(key) for key in ('ticker','accession','period_end','period_start','axis','segment_raw')}).encode()).hexdigest()})
     def segment_rows(self,ticker): return list(self.connection.execute('SELECT * FROM fundamentals.segments WHERE ticker=%s ORDER BY filed,period_end',(ticker,)).fetchall())
     def mapping_rows(self):
         rows=list(self.connection.execute('SELECT * FROM fundamentals.segment_mapping').fetchall())
