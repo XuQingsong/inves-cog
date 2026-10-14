@@ -14,20 +14,28 @@ class Embedding:
     def __init__(self, values, http=None):
         self.key, self.base = values.get("DASHSCOPE_API_KEY"), values.get("DASHSCOPE_BASE_URL", "")
         self.http = http or HTTPClient()
+        self.auth_failure = None
 
     def __call__(self, text, *, model, dimensions):
         if model != "text-embedding-v3" or dimensions != 1024:
             raise ValueError("Unsupported embedding contract")
+        if self.auth_failure is not None:
+            raise self.auth_failure
         if not self.key or urlparse(self.base).scheme != "https":
             raise SourceError("DashScope embedding endpoint/key missing: 等待 R5", confirmed_unavailable=True)
-        data = require_mapping(
-            self.http.request(
-                "POST",
-                self.base.rstrip("/") + "/embeddings",
-                headers={"Authorization": "Bearer " + self.key},
-                json={"model": model, "input": text, "dimensions": dimensions},
+        try:
+            data = require_mapping(
+                self.http.request(
+                    "POST",
+                    self.base.rstrip("/") + "/embeddings",
+                    headers={"Authorization": "Bearer " + self.key},
+                    json={"model": model, "input": text, "dimensions": dimensions},
+                )
             )
-        )
+        except SourceError as exc:
+            if exc.status_code in {401, 403}:
+                self.auth_failure = exc
+            raise
         try:
             return data["data"][0]["embedding"]
         except (KeyError, IndexError, TypeError):
