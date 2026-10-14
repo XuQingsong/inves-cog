@@ -279,13 +279,17 @@ def test_earnings_fallback_flag():
 
 def test_form4_parse_code_p(tmp_path):
     import gzip, hashlib
-    from inves_cog.ingest.history import read_exports, form4_record
+    from inves_cog.ingest.history import read_exports, form4_record, history_item
     body=b'ticker,filed,txn_date,code,shares,price,owner,is_officer,is_director\nAAPL,2026-10-07,2026-10-06,P,100,10.5,Fixture,t,f\n'
     archive=tmp_path/'insider.csv.gz'; archive.write_bytes(gzip.compress(body))
     manifest={'tables':[{'table':'data.insider_transactions','file':archive.name,
         'sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'rows':1}]}
     (tmp_path/'manifest.json').write_text(json.dumps(manifest))
     records=list(read_exports(tmp_path)); assert len(records)==1
+    archived=history_item(records[0],clock=frozen())
+    assert archived['kind']=='form4' and archived['published_at'] is None
+    assert {'published_at_missing','visibility_time_unknown','accession_missing'} <= set(archived['flags'])
+
     row=form4_record(records[0],clock=frozen())
     assert row['transaction_code']=='P' and row['is_officer'] is True
     assert row['filed_at'] is None and row['accession'] is None
