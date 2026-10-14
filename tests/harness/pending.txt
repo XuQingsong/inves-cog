@@ -1,4 +1,4 @@
-test_ingest_live_smoke | M1 | 等待 R4/R5/R7
+test_ingest_live_smoke | M1 | 等待 90 日新闻回补、全部源真实运行与 DashScope 嵌入接入；R4 已验证，R7 已导入
 test_revenue_tag_gap | M2 | 等待 M2 实现
 test_q4_derived_from_annual | M2 | 等待 M2 实现
 test_companyfacts_lag | M2 | 等待 M2 实现

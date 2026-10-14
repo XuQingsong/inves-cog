@@ -14,3 +14,5 @@
 2026-10-14 m1/sec_acceptance_conflict.json 9631c3b17cc7fcb48cf7241f677498c68bcf96498be8231814c9666aa1678d30 FR-M1-06/Q-M1-8: freeze three official SEC acceptance-time conflicts; preserve red assertion pending contract answer.
 
 2026-10-14 tests/fixtures/phase1/m1/sec_acceptance_conflict.json 9631c3b17cc7fcb48cf7241f677498c68bcf96498be8231814c9666aa1678d30 FR-M1-06/Q-M1-8: complete repository-relative frozen fixture path for official SEC comparison.
+
+- 2026-10-14 M1: freeze SEC official Form 4 accession 0001140361-26-039158 XML and index Accepted provenance; S transaction, 2399 shares, 332.01 USD, officer=true. Existing synthetic P input unchanged.

@@ -285,6 +285,12 @@ def test_form4_parse_code_p(tmp_path):
     assert rows[0]['shares'] == 100 and rows[0]['price'] == 10.5
     assert rows[0]['filed_at'] == instant('2026-10-28T15:00:00Z')
     assert rows[1]['price'] is None and rows[1]['transaction_code'] == 'S'
+    evidence=json.loads((FIXTURES/'m1/form4_official.json').read_text())
+    actual=parse_form4((FIXTURES/'m1/form4_official.xml').read_text(),accession=evidence['accession'],filed_at=instant(evidence['accepted_at']))
+    assert len(actual)==1 and actual[0]['transaction_code']=='S' and actual[0]['is_officer'] is True
+    assert actual[0]['shares']==2399 and actual[0]['price']==332.01
+    assert actual[0]['filed_at']==instant('2026-10-08T22:30:32Z')
+
 
 
 def test_app_rank_jump():

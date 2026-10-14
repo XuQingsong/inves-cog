@@ -98,7 +98,7 @@ class Pipeline:
             for row, factor in zip(rows, factors):
                 check()
                 row['adj_factor'] = factor if split_gap is None or row['trade_date'] == self.day else None
-                if row['trade_date'] == self.day: row['post_close'] = post_close(result.rows, self.day)
+                if row['trade_date'] == self.day: row['post_close'] = post_close(result.rows, self.day, ticker=ticker)
                 else: row['post_close'] = self.repo.post_close(ticker, row['trade_date'])
                 self.repo.write('bars_daily', row, update=('open', 'high', 'low', 'close', 'volume', 'post_close', 'adj_factor'))
         actual = {row['ticker'] for row in daily if row['trade_date'] == self.day}

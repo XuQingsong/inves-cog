@@ -59,8 +59,8 @@ def bar_session(stamp):
     return 'pre' if stamp < bounds[0] else 'intraday' if stamp < bounds[1] else 'post'
 
 
-def post_close(bars, day):
-    candidates = [row for row in bars if row['ts_utc'].astimezone(NY).date() == day
+def post_close(bars, day, *, ticker=None):
+    candidates = [row for row in bars if (ticker is None or row.get('ticker') == ticker) and row['ts_utc'].astimezone(NY).date() == day
                   and bar_session(row['ts_utc']) == 'post' and row.get('volume') is not None
                   and row['volume'] > 0 and row.get('close') is not None]
     return max(candidates, key=lambda row: row['ts_utc'])['close'] if candidates else None
