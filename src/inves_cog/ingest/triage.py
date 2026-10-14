@@ -2,6 +2,8 @@
 
 import math
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextvars import copy_context
 from copy import deepcopy
 from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -48,8 +50,10 @@ class NewsTriage:
         daily_budget=1_500_000,
         usage_today=None,
         cached_root=None,
+        workers=1,
     ):
         self.llm, self.embed, self.entities, self.clock = llm, embed, entities, clock
+        self.workers = workers
         self.monitored_ids, self.pool = set(monitored_ids), set(pool_tickers)
         self.daily_budget = daily_budget
         self.usage_today = usage_today or (lambda: {"tokens": 0, "missing": 0})
@@ -116,57 +120,65 @@ class NewsTriage:
         self.meta(item).update(reason=reason, retry_at=retry.astimezone(timezone.utc).isoformat())
         item["extraction_status"] = "pending"
 
+    def map_work(self, operation, values):
+        if self.workers == 1:
+            return [operation(value) for value in values]
+        with ThreadPoolExecutor(max_workers=self.workers) as executor:
+            futures = [executor.submit(copy_context().run, operation, value) for value in values]
+            return [future.result() for future in futures]
+
     def screen(self, items):
-        for start in range(0, len(items), 25):
-            batch = items[start : start + 25]
-            if self.over_budget():
-                for item in batch:
-                    self.defer(item, "daily_budget")
-                continue
-            payload = {
-                "items": [
-                    {
-                        "info_id": item["info_id"],
-                        "headline": item["headline"],
-                        "body": extraction_body(item["body"])[:200],
-                    }
-                    for item in batch
-                ],
-                "known_entities": self.context,
-                "industry_scope": INDUSTRIES,
-            }
-            try:
-                with usage_context(purpose="M1:layer1", info_ids=[item["info_id"] for item in batch]):
-                    reply = self.llm.call("entity_tagging", payload)
-                entries = reply.get("items")
-                if not isinstance(entries, list):
-                    raise ValueError("Screening reply requires an items array")
-                by_id = {entry["info_id"]: entry for entry in entries if isinstance(entry, dict) and "info_id" in entry}
-                if len(by_id) != len(entries):
-                    raise ValueError("Duplicate or malformed screening identifiers")
-            except Exception as exc:
-                for item in batch:
-                    record_extraction_error(item, "news_screening", exc)
-                    self.defer(item, "screening_failed")
-                continue
+        self.map_work(self.screen_batch, [items[start : start + 25] for start in range(0, len(items), 25)])
+
+    def screen_batch(self, batch):
+        if self.over_budget():
             for item in batch:
-                try:
-                    entry = by_id[item["info_id"]]
-                    if (
-                        not isinstance(entry.get("material"), bool)
-                        or not isinstance(entry.get("entities"), list)
-                        or not all(isinstance(e, str) for e in entry["entities"])
-                    ):
-                        raise ValueError("Invalid material/entity screening output")
-                    item["entities"] = sorted(set(item["entities"]) | (set(entry["entities"]) & self.entity_map.keys()))
-                    self.meta(item).update(
-                        screened=True,
-                        material=entry["material"],
-                        layer=2 if entry["material"] or self.primary(item) else 3,
-                    )
-                except Exception as exc:
-                    record_extraction_error(item, "news_screening", exc)
-                    self.defer(item, "screening_failed")
+                self.defer(item, "daily_budget")
+            return
+        payload = {
+            "items": [
+                {
+                    "info_id": item["info_id"],
+                    "headline": item["headline"],
+                    "body": extraction_body(item["body"])[:200],
+                }
+                for item in batch
+            ],
+            "known_entities": self.context,
+            "industry_scope": INDUSTRIES,
+        }
+        try:
+            with usage_context(purpose="M1:layer1", info_ids=[item["info_id"] for item in batch]):
+                reply = self.llm.call("entity_tagging", payload)
+            entries = reply.get("items")
+            if not isinstance(entries, list):
+                raise ValueError("Screening reply requires an items array")
+            by_id = {entry["info_id"]: entry for entry in entries if isinstance(entry, dict) and "info_id" in entry}
+            if len(by_id) != len(entries):
+                raise ValueError("Duplicate or malformed screening identifiers")
+        except Exception as exc:
+            for item in batch:
+                record_extraction_error(item, "news_screening", exc)
+                self.defer(item, "screening_failed")
+            return
+        for item in batch:
+            try:
+                entry = by_id[item["info_id"]]
+                if (
+                    not isinstance(entry.get("material"), bool)
+                    or not isinstance(entry.get("entities"), list)
+                    or not all(isinstance(e, str) for e in entry["entities"])
+                ):
+                    raise ValueError("Invalid material/entity screening output")
+                item["entities"] = sorted(set(item["entities"]) | (set(entry["entities"]) & self.entity_map.keys()))
+                self.meta(item).update(
+                    screened=True,
+                    material=entry["material"],
+                    layer=2 if entry["material"] or self.primary(item) else 3,
+                )
+            except Exception as exc:
+                record_extraction_error(item, "news_screening", exc)
+                self.defer(item, "screening_failed")
 
     def full(self, item):
         if self.over_budget() and not self.tracked(item):
@@ -219,7 +231,19 @@ class NewsTriage:
                 item["flags"].append(flag)
         return item
 
-    def process(self, items, *, on_demand=False):
+    def finish(self, item):
+        meta = self.meta(item)
+        try:
+            if not meta.get("retry_at") and not meta.get("reused_from"):
+                if meta["layer"] == 2:
+                    return self.full(item)
+                item["extraction_status"] = "ok"
+        except Exception as exc:
+            record_extraction_error(item, "news_processing", exc)
+            self.defer(item, "processing_failed")
+        return item
+
+    def process(self, items, *, on_demand=False, persist=None):
         planned, representatives, copies, screening = [], {}, {}, []
         for original in items:
             item = self.rules(original)
@@ -250,17 +274,22 @@ class NewsTriage:
                 meta.update(layer=1, reason="screening")
                 screening.append(item)
         self.screen(screening)
-        for root, item in representatives.items():
-            meta = self.meta(item)
-            if not meta.get("retry_at") and not meta.get("reused_from"):
-                if meta["layer"] == 2:
-                    item = self.full(item)
-                else:
-                    item["extraction_status"] = "ok"
-            representatives[root] = item
+        ordered = sorted(representatives.items(), key=lambda pair: self.tracked(pair[1]))
+        with ThreadPoolExecutor(max_workers=self.workers) as executor:
+            futures = {executor.submit(copy_context().run, self.finish, item): root for root, item in ordered}
+            for future in as_completed(futures):
+                root = futures[future]
+                result = self.embed_item(future.result())
+                representatives[root] = result
+                if persist is not None:
+                    persist(result)
         output = []
         for item in planned:
             root = item["source_root"] or item["info_id"]
             result = self.reuse(item, representatives[root]) if item["info_id"] in copies else representatives[root]
-            output.append(self.embed_item(result))
+            if item["info_id"] in copies:
+                result = self.embed_item(result)
+                if persist is not None:
+                    persist(result)
+            output.append(result)
         return output

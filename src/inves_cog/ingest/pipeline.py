@@ -96,6 +96,7 @@ class Pipeline:
             daily_budget=params["llm_daily_token_budget"],
             usage_today=lambda: self.repo.llm_usage(self.clock.now_utc()),
             cached_root=self.repo.enriched_root,
+            workers=4,
         )
         self.day_override = None
 

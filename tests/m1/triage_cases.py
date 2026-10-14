@@ -145,12 +145,13 @@ def assert_news_triage(root, clock):
 
     # Concurrent extraction must preserve the enclosing job accounting context.
     from inves_cog.llm.usage import usage_context
-    parallel = [item('parallel:'+str(n), 'Apple parallel fixture '+str(n)) for n in range(4)]
+
+    parallel = [item("parallel:" + str(n), "Apple parallel fixture " + str(n)) for n in range(4)]
     for row in parallel:
         full(row)
     before = len(usage)
-    with usage_context(job_task='parallel_probe'):
+    with usage_context(job_task="parallel_probe"):
         results = engine(workers=4).process(parallel)
-    assert len(usage)-before == 8
-    assert all(r['purpose']=='parallel_probe|M1:layer2' for r in usage[before:])
-    assert all(r['extraction_status']=='ok' for r in results)
+    assert len(usage) - before == 8
+    assert all(r["purpose"] == "parallel_probe|M1:layer2" for r in usage[before:])
+    assert all(r["extraction_status"] == "ok" for r in results)
