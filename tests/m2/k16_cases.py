@@ -81,6 +81,67 @@ def assert_k16_cases(root):
     assert elimination['revenue']==2 and elimination['evidence']['revenue_sum_weight']==-1
     assert all('segment_sum_mismatch' not in row['health_codes'] for row in rows)
 
+    # Real SEC originals include an XML encoding declaration. Its presence
+    # must not silently disable section/column or displayed-sign evidence.
+    encoded='<?xml version="1.0" encoding="UTF-8"?>'+html
+    rows=parsed(folder,document,primary_html=encoded)
+    assert next(r for r in rows if r['axis']=='elimination')['evidence']['revenue_sum_weight']==-1
+
+    # The same concept can occur in a separate internal-revenue section.
+    # Preserve that disclosure without subtracting it from external revenue.
+    folder,document=build('separate-section')
+    next(e for e in document if e.get('contextRef')=='total').text='102'
+    concept='us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
+    def cell(context,value):return f'<td><ix:nonFraction name="{concept}" contextRef="{context}">{value}</ix:nonFraction></td>'
+    table='<table><tr><td>Segment revenue:</td></tr><tr><td>Client</td>'+cell('client',52)+'</tr><tr><td>Datacenter</td>'+cell('datacenter',50)+'</tr><tr><td>Total</td>'+cell('total',102)+'</tr><tr><td>Intersegment revenue:</td></tr><tr><td>Elimination</td>'+cell('eliminations',-2)+'</tr></table>'
+    rows=parsed(folder,document,primary_html=table)
+    adjustment=next(r for r in rows if r['axis']=='elimination')
+    assert adjustment['revenue']==-2 and adjustment['evidence']['sum_included'] is False
+    assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    # An actual reported nil in the selected section is still unknown.
+    next(e for e in document if e.get('contextRef')=='eliminations').set('{http://www.w3.org/2001/XMLSchema-instance}nil','true')
+    same_section=table.replace('<tr><td>Intersegment revenue:</td></tr>','')
+    assert any('segment_sum_mismatch' in r['health_codes'] for r in parsed(folder,document,primary_html=same_section))
+
+    # Positive internal sales are subtracted only when the original ordered
+    # subtotal/intersegment/net rows establish the sign, never to fit numbers.
+    folder,document=build('gross-net')
+    gaap=folder/'us-gaap.xsd';gaap.write_text(gaap.read_text().replace('</xs:schema>','<xs:element name="OperatingSegmentsMember" type="xs:string"/></xs:schema>'))
+    member_context(document,'gross','us-gaap:OperatingSegmentsMember','us-gaap:ConsolidationItemsAxis')
+    fact(document,'gross','RevenueFromContractWithCustomerExcludingAssessedTax',102)
+    next(e for e in document if e.get('contextRef')=='eliminations').text='2'
+    table='<table><tr><td>Sales</td>'+cell('client',52)+cell('datacenter',50)+cell('gross',102)+'</tr><tr><td>Intersegment sales</td><td></td><td></td>'+cell('eliminations',2)+'</tr><tr><td>Net Sales</td><td></td><td></td>'+cell('total',100)+'</tr></table>'
+    rows=parsed(folder,document,primary_html=table)
+    assert next(r for r in rows if r['segment_raw']=='IntersegmentEliminationMember')['evidence']['revenue_sum_weight']==-1
+    assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    wrong_order=table.replace('Net Sales','Unrelated amount')
+    assert any('segment_sum_mismatch' in r['health_codes'] for r in parsed(folder,document,primary_html=wrong_order))
+
+    # A dimensionless revenue component is admitted by the filing's explicit
+    # calculation arc, rather than by subtracting the reported segment sum.
+    folder,document=build('calculation-component')
+    for e in list(document):
+        if e.get('contextRef')=='eliminations':document.remove(e)
+        elif e.tag.endswith('RevenueFromContractWithCustomerExcludingAssessedTax'):
+            e.tag='{http://example.invalid/us-gaap}Revenues'
+            if e.get('contextRef')=='total':e.text='107'
+    fact(document,'total','InsuranceServicesRevenue',5)
+    gaap=folder/'us-gaap.xsd';text=gaap.read_text().replace('</xs:schema>','<xs:element id="revenues" name="Revenues" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/><xs:element id="insurance" name="InsuranceServicesRevenue" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/></xs:schema>');gaap.write_text(text)
+    role='http://example.invalid/role/operations'
+    (folder/'calculation.xml').write_text(f'<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink"><link:calculationLink xlink:type="extended" xlink:role="{role}"><link:loc xlink:type="locator" xlink:href="us-gaap.xsd#revenues" xlink:label="revenues"/><link:loc xlink:type="locator" xlink:href="us-gaap.xsd#insurance" xlink:label="insurance"/><link:calculationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="revenues" xlink:to="insurance" weight="1"/></link:calculationLink></link:linkbase>')
+    schema=folder/'company.xsd';schema.write_text(schema.read_text().replace('</xs:schema>','<xs:annotation><xs:appinfo><link:linkbaseRef xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="calculation.xml"/></xs:appinfo></xs:annotation></xs:schema>'))
+    rows=parsed(folder,document)
+    component=next(r for r in rows if r['segment_raw']=='InsuranceServicesRevenue')
+    assert component['axis']=='elimination' and component['revenue']==5
+    assert component['evidence']['weight_source']['linkrole']==role
+    assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    # Explicit reconciliation already explains the amount; do not count a
+    # dimensionless component a second time or hide a reported nil amount.
+    fact(document,'eliminations','Revenues',5)
+    rows=parsed(folder,document)
+    assert not [r for r in rows if r['segment_raw']=='InsuranceServicesRevenue']
+    assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+
     # The approved company member is limited to the actual GEV namespace and
     # ticker. A third dimension does not contaminate its valid sibling.
     folder,document=build('gev')
