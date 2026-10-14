@@ -38,6 +38,14 @@ class FakeTime:
 
 
 def test_bar_window_to_20et():
+    from inves_cog.ingest.runtime import due_tasks
+    before = frozen('2026-10-28T00:19:00Z')
+    ready = frozen('2026-10-28T00:20:00Z')
+    assert 'bars_full' not in due_tasks(before, {})
+    assert 'bars_full' in due_tasks(ready, {})
+    assert 'bars_full' not in due_tasks(ready, {'bars_full': ready.now_utc()})
+    assert 'bars_prefill' in due_tasks(frozen('2026-10-28T12:00:00Z'), {})
+    assert 'sec_submissions' not in due_tasks(frozen('2026-10-28T01:16:00Z'), {})
     from inves_cog.ingest.market import MarketCollector, market_window, schedule_times
     from inves_cog.ingest.http import HTTPClient, Response
     from inves_cog.ingest.sec_client import SECClient
@@ -105,6 +113,13 @@ def test_post_close_null_when_no_trade():
 
 
 def test_wide_universe_rules():
+    from inves_cog.ingest.runtime import complete_adv20
+    sessions = [date(2026, 1, 1) + timedelta(days=i) for i in range(20)]
+    rows = [{'trade_date': day, 'close': 10, 'volume': 2_000_000} for day in sessions]
+    assert complete_adv20(rows, sessions) == 20_000_000
+    assert complete_adv20(rows[:-1], sessions) is None
+    assert complete_adv20(rows[:-1] + [rows[0]], sessions) is None
+    assert complete_adv20([dict(row, volume=None) for row in rows], sessions) is None
     from inves_cog.ingest.universe import build_universe, daily_liquidity
     candidates = json.loads((FIXTURES / 'm1/wide_candidates.json').read_text())
     rows = build_universe(candidates, date(2026, 10, 1))
@@ -122,6 +137,19 @@ def test_wide_universe_rules():
 
 
 def test_news_dedupe_and_times():
+    from inves_cog.ingest.runtime import Runtime
+    from inves_cog.ingest.jobs import HealthBook
+    from inves_cog.ingest.http import SourceError
+    jobs, health = [], HealthBook(clock=frozen())
+    def unavailable():
+        raise SourceError('confirmed missing source', confirmed_unavailable=True)
+    runtime = Runtime(clock=frozen(), health=health, persist_job=jobs.append,
+                      tasks={'bad': ('Broken', unavailable),
+                             'good': ('Healthy', lambda: {'processed_count': 2})})
+    output = runtime.run(['bad', 'good'])
+    assert output['bad']['status'] == 'failed' and output['good']['processed_count'] == 2
+    assert health.rows['Broken']['status'] == '未接通'
+    assert health.rows['Healthy']['status'] == 'ok' and len(jobs) == 2
     from inves_cog.ingest.info import InfoStore, make_item, source_root
     clock = frozen()
     store = InfoStore()
