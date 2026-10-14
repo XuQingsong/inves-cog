@@ -60,10 +60,15 @@ class FinancialService:
             from inves_cog.ingest.deadline import check
         except ImportError: return
         check()
+    def _checked_budget(self,processed):
+        try: self._budget()
+        except Exception as exc:
+            exc.processed_count=processed
+            raise
     def collect_financials(self):
         failures=[]; processed=0
         for entity in self.universe:
-            self._budget(); ticker=entity['ticker']; filings=self.repo.read_shared_filings(ticker)
+            self._checked_budget(processed); ticker=entity['ticker']; filings=self.repo.read_shared_filings(ticker)
             try:
                 cik=self.ciks.get(ticker)
                 if not cik: raise ValueError('SEC CIK missing for '+ticker)
@@ -175,7 +180,7 @@ class FinancialService:
         if self.provider is None: raise RuntimeError('yfinance provider not configured')
         failures=[];count=0
         for entity in self.universe:
-            self._budget(); ticker=entity['ticker']
+            self._checked_budget(count); ticker=entity['ticker']
             annual=[r for r in self.repo.read_shared_filings(ticker) if str(r['form']).removesuffix('/A') in {'10-K','20-F','40-F'} and day(r['filing_date'])<=self.as_of and r.get('report_date')]
             latest=max(annual,key=lambda r:day(r['filing_date']),default=None)
             years=fiscal_years(day(latest['report_date']) if latest else None)
