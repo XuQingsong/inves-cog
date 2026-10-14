@@ -233,9 +233,14 @@ def test_segment_extraction(tmp_path):
     context=deepcopy(document.find("x:context[@id='client']",ns));context.set('id','assets-only')
     context.find('.//d:explicitMember',ns).text='fixture:AssetsOnlyMember';document.append(context)
     fact=etree.SubElement(document,'{http://example.invalid/company}Assets',contextRef='assets-only',unitRef='usd',decimals='0');fact.text='123'
+    gaap=metrics/'us-gaap.xsd'
+    gaap.write_text(gaap.read_text().replace('</xs:schema>','<xs:element name="InterestIncomeExpenseNonoperatingNet" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/></xs:schema>'))
+    for context_id in ['datacenter','assets-only']:
+        interest=etree.SubElement(document,'{http://example.invalid/us-gaap}InterestIncomeExpenseNonoperatingNet',contextRef=context_id,unitRef='usd',decimals='0');interest.text='3'
     (metrics/'instance.xml').write_bytes(etree.tostring(document))
     metrics_rows=parse_segments(metrics/'instance.xml',ticker='AMD',accession='metrics-fixture',filed=date(2026,8,1))
     assert {r['segment_raw'] for r in metrics_rows if r['axis']=='business'}=={'ClientMember','DataCenterMember'}
+    assert next(r for r in metrics_rows if r.get('segment_raw')=='DataCenterMember')['segment_profit']==15
 
 
 def test_segment_recast():
