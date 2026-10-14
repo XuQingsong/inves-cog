@@ -1,5 +1,7 @@
 """SEC submissions, earnings-event calendar and non-derivative Form 4 parsing."""
 from datetime import date, datetime, timezone
+from html import unescape
+import re
 from xml.etree import ElementTree
 
 from inves_cog.ingest.market import NY, regular_bounds, next_trading_day, trading_day
@@ -7,11 +9,21 @@ from inves_cog.ingest.http import SourceError, require_mapping
 
 
 def parse_acceptance_et(value):
-    """Q-M1-8 contract: SEC wall time is Eastern despite its literal Z suffix."""
-    stamp = datetime.fromisoformat(value.removesuffix('Z'))
+    """Verified index Accepted wall time, never a submissions JSON timestamp."""
+    stamp = datetime.fromisoformat(value)
     if stamp.tzinfo is not None:
-        raise ValueError('Unexpected offset: SEC acceptance format needs verification')
+        raise ValueError('Index Accepted must be local Eastern time without a UTC suffix')
     return stamp.replace(tzinfo=NY).astimezone(timezone.utc)
+
+
+def accepted_from_index(html):
+    match = re.search(r'''<div[^>]*class=["']infoHead["'][^>]*>\s*Accepted\s*</div>\s*<div[^>]*class=["']info["'][^>]*>\s*([^<]+)''', html, re.I)
+    if match is None:
+        raise SourceError('Official filing index Accepted field missing')
+    try:
+        return parse_acceptance_et(unescape(match.group(1)).strip())
+    except (TypeError, ValueError):
+        raise SourceError('Official filing index Accepted field malformed') from None
 
 
 def earnings_event(filing, *, closes, clock):
@@ -71,7 +83,7 @@ def submissions_rows(data, *, ticker, clock):
         results.append({'ticker': ticker, 'cik': str(data.get('cik', '')), 'accession': accession,
                         'form': value('form'), 'filing_date': date.fromisoformat(filed),
                         'report_date': date.fromisoformat(value('reportDate')) if value('reportDate') else None,
-                        'accepted_at': parse_acceptance_et(accepted) if accepted else None,
+                        'accepted_at': None,
                         'items': [part.strip() for part in (value('items') or '').split(',') if part.strip()],
                         'primary_document': value('primaryDocument'), 'is_xbrl': bool(value('isXBRL')),
                         'is_inline_xbrl': bool(value('isInlineXBRL')), 'fetched_at': clock.now_utc(),
@@ -92,7 +104,22 @@ def collect_submissions(client, *, cik, ticker, clock):
         for row in submissions_rows(older, ticker=ticker, clock=clock):
             row['cik'] = str(cik)
             rows.append(row)
-    return list({row['accession']: row for row in rows}.values())
+    rows = list({row['accession']: row for row in rows}.values())
+    for row in rows:
+        if not re.fullmatch(r'\d{10}-\d{2}-\d{6}', row['accession']) or not str(cik).isdigit():
+            raise SourceError('Invalid SEC accession or CIK for filing index')
+        accession = row['accession']
+        url = f'https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession.replace("-", "")}/{accession}-index.html'
+        evidence = {'url': url, 'verified': False, 'checked_at_utc': clock.now_utc().isoformat()}
+        try:
+            row['accepted_at'] = accepted_from_index(client.get(url))
+            evidence.update(verified=True, accepted_at_utc=row['accepted_at'].isoformat())
+        except (SourceError, TypeError, ValueError) as exc:
+            # Keep the raw filing and a concrete retryable gap, with no event time.
+            evidence.update(error_type=type(exc).__name__, http_status=getattr(exc, 'status_code', None),
+                            gap='index_accepted_unavailable')
+        row['raw']['accepted_index_source'] = evidence
+    return rows
 
 
 def parse_form4(xml, *, accession, filed_at):
