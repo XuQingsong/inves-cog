@@ -360,10 +360,12 @@ def test_info_item_contract(tmp_path):
     from inves_cog.ingest.pipeline import Pipeline
     from inves_cog.ingest.info import make_item
     calls=[]
+    from inves_cog.llm.client import Client
+    recorded=Client(registry=ROOT/'config/llm_tasks.yaml',recordings=FIXTURES/'recordings')
     class LLM:
         def call(self,task,payload):
             calls.append(task)
-            return {'entities':[]} if task=='entity_tagging' else {'is_guidance':False,'is_rating_change':False}
+            return recorded.call(task,payload)
     class Queue:
         def __init__(self): self.rows={}; self.collected=0
         def info_signature(self,identifier):
@@ -374,7 +376,7 @@ def test_info_item_contract(tmp_path):
         def apply_enrichment(self,row): self.rows[row['info_id']]=row;return True
     pipeline=Pipeline.__new__(Pipeline);pipeline.repo=Queue();pipeline.clock=frozen()
     pipeline.llm=LLM();pipeline.embed=lambda *args,**kw:[.1]*1024;pipeline.entities=[]
-    raw=make_item('news','Fixture','queued',headline='Raw source',body='Preserved first',clock=frozen())
+    raw=make_item('news','Fixture','queued',headline='Apple raises guidance',body='AAPL raises guidance; a broker raises its rating. Published 2026-10-28T16:00:00Z.',clock=frozen())
     pipeline.info([raw]); assert not calls
     assert pipeline.repo.rows[raw['info_id']]['extraction_status']=='pending'
     result=pipeline.enrich_pending()
@@ -483,6 +485,9 @@ def test_llm_extraction_failure_degrades():
         'total':2,'embedding_failed':1,'entity_tagging_failed':0,
         'embedding_failure_rate':.5,'entity_tagging_failure_rate':0.0}
     assert extraction_counts([])['embedding_failure_rate'] is None
+    assert extraction_counts([{'flags':[],'extraction_status':'pending'}])['embedding_failure_rate'] is None
+    assert extraction_counts([{'flags':[],'extraction_status':'pending'},{'flags':['embedding_failed'],'extraction_status':'ok'}])['embedding_failure_rate']==1
+
     from contextlib import contextmanager
     class Connection:
         def execute(self,sql,*args): return self
