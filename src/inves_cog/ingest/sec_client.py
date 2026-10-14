@@ -21,7 +21,7 @@ class SECClient:
 
     def get(self, url, *, params=None):
         parsed = urlparse(url)
-        if parsed.scheme != 'https' or parsed.hostname not in {'data.sec.gov', 'www.sec.gov'}:
+        if parsed.scheme != 'https' or parsed.hostname not in {'data.sec.gov', 'www.sec.gov', 'xbrl.sec.gov'}:
             raise ValueError('SEC client accepts only official HTTPS SEC endpoints')
         # Acquire for each HTTP attempt, including retries.
         return self.http.get(url, params=params, limiter=self.budget,

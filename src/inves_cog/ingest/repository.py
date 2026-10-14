@@ -35,6 +35,21 @@ def identity(value):
     return hashlib.sha256(json_text(value).encode()).hexdigest()
 
 
+def normalize_entity(row):
+    if not isinstance(row.get('entity_id'),str) or not row['entity_id'] or not row.get('name'):
+        raise ValueError('Graph entity requires entity_id and name')
+    def values(name,legacy):
+        result=row.get(name,row.get(legacy,[])) or []
+        if not isinstance(result,list): raise ValueError('Entity channel values must be lists')
+        return result
+    channels=set(row['channels']) if row.get('channels') is not None else {'app','trend','site'}
+    tickers=row.get('tickers') or ([row['ticker']] if row.get('ticker') else [])
+    return {'entity_id':row['entity_id'],'name':row['name'],'aliases':row.get('aliases') or [],
+        'tickers':tickers,'app_ids':values('app_ids','app_store_ids') if 'app' in channels else [],
+        'trends_keywords':values('trends_keywords','trend_keywords') if 'trend' in channels else [],
+        'urls':values('urls','official_urls') if 'site' in channels else []}
+
+
 class Repository:
     def __init__(self, connection):
         self.connection = connection
@@ -95,7 +110,7 @@ class Repository:
 
     def monitored_entities(self, fallback):
         exists = self.connection.execute("SELECT to_regclass('graph.monitored_entities') AS relation").fetchone()['relation']
-        return list(self.connection.execute('SELECT * FROM graph.monitored_entities').fetchall()) if exists else fallback
+        return [normalize_entity(row) for row in self.connection.execute('SELECT e.*,m.channels FROM graph.monitored_entities AS m JOIN graph.entities AS e USING(entity_id)').fetchall()] if exists else fallback
 
     def health_rows(self):
         return {row['source']: dict(row) for row in self.connection.execute('SELECT * FROM ingest.source_health').fetchall()}
@@ -112,7 +127,7 @@ class Repository:
 
     def graph_entities(self, fallback):
         exists = self.connection.execute("SELECT to_regclass('graph.entities') AS relation").fetchone()['relation']
-        return list(self.connection.execute('SELECT * FROM graph.entities').fetchall()) if exists else fallback
+        return [normalize_entity(row) for row in self.connection.execute('SELECT * FROM graph.entities').fetchall()] if exists else fallback
 
     def last_runs(self):
         return {r['task_name']:r['started_at'] for r in self.connection.execute('SELECT task_name,max(started_at) AS started_at FROM ingest.job_runs GROUP BY task_name').fetchall()}

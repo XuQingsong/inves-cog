@@ -166,7 +166,7 @@ class FRED:
         while True:
             data = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations',
                 params={**params, 'realtime_start': '1776-07-04', 'realtime_end': visible,
-                        'output_type': 3, 'offset': offset, 'limit': 100000}))
+                        'output_type': 1, 'offset': offset, 'limit': 100000}))
             batch = data.get('observations')
             count = data.get('count')
             if not isinstance(batch, list) or not isinstance(count, int) or count < 0:
