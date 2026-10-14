@@ -1,0 +1,34 @@
+{
+  "checked_at_utc": "2026-10-14 12:11:23.663777+00:00",
+  "version": "0.2.66",
+  "isolated_cookie_cache": true,
+  "error_type": "YFRateLimitError",
+  "reason": "Too Many Requests. Rate limited. Try after a while.",
+  "http_requests": [
+    {
+      "url": "https://fc.yahoo.com",
+      "status": 404,
+      "retry_after": null
+    },
+    {
+      "url": "https://query1.finance.yahoo.com/v1/test/getcrumb",
+      "status": 403,
+      "retry_after": null
+    },
+    {
+      "url": "https://query2.finance.yahoo.com/v10/finance/quoteSummary/NVDA",
+      "status": 429,
+      "retry_after": null
+    },
+    {
+      "url": "https://query2.finance.yahoo.com/v1/test/getcrumb",
+      "status": 403,
+      "retry_after": null
+    },
+    {
+      "url": "https://query2.finance.yahoo.com/v10/finance/quoteSummary/NVDA",
+      "status": 429,
+      "retry_after": null
+    }
+  ]
+}

@@ -1,57 +1,54 @@
 # M2 自测报告
 
-模块：M2；文档：v2；实现提交：018d168814d5270d998105369d860e93fa450cd2；日期：2026-10-14。
+模块：M2；文档：v3（main e7db5a9）；代码提交：10a1e191ea805dc15b2389730d6e4fd5820be93c；日期：2026-10-14。
 
-结论：业务实现与离线验证完成；真实覆盖证据尚未完成。本报告申请代码审查，不声称所有阻塞验收条款已经通过。
+真实 59 行健康页、59 份档案、59 只修复差异和五份原文对照已附。分部合计及 Yahoo 的两次真实采集尚未满足全部阻塞条款，PR #4 保持草稿，不提前称为验收通过。
 
 ## 1. Harness
 
-- `.venv/bin/python -m pytest -m phase1_blocking --junitxml=handoff/M2/blocking.xml -q`：25 passed，4 deselected，6.950 秒。包含 M0 门禁和 M2 原名 15 项 blocking；没有 skip，pending 棘轮正常启用。
-- `.venv/bin/python -m pytest -m phase1_replay --junitxml=handoff/M2/replay.xml -q`：1 passed，28 deselected，6.07 秒。30 只 × 3 日期、90 组、2,255 字段，差异 0；[legacy-replay.json](legacy-replay.json)。输入及 oracle 哈希均核对，未修改冻结文件，未运行/导入/复制 Muse 代码。
-- [database-verification.json](database-verification.json)：独立 inves_cog 数据库实际写入及 PIT 查找通过；夹具行在外层事务回滚。真实 Muse CSV.gz 导入两次均为 180 行、30 只、121 份 earnings_history。只离线读 CSV/COPY，不连接 quant。
-- [fx-real-verification.json](fx-real-verification.json)：三币种真实 FRED 历史版本成功，2026-07-04 的有效报价日均为 2026-07-02；金额 100 仅为合成探针，不冒充公司财报。使用官方 output_type=1 的 real-time 行，避免将 output_type=3 的宽表误认成相同形状。
-- `git diff --check` 通过。docs/、golden、milestones 没有修改。
-- 本机未安装 Docker，因此没有将直接 pytest 称为 `make phase1-test` 的干净容器结果。M2 的旧 M0 基线还写死“只能有 M0 一个迁移”；该授权修复只在 M1 PR。M1 合并到 main 后，M2 必须合入并重新确认干净容器 CI。
+最终 blocking / replay 命令为 `PYTHONPATH=src .venv/bin/python -m pytest -q -m phase1_blocking --junitxml=handoff/M2/blocking-v3.xml` 及相同命令的 phase1_replay / replay-v3.xml。最终 **25 passed，0 failed，0 skipped，7.52 秒**；replay **1 passed，5.87 秒**。临时联合 **39 blocking passed，8.46 秒**，**1 replay passed，5.85 秒**；附 integration-blocking-v3.xml / integration-replay-v3.xml。受限进程曾禁止 AF_UNIX bind，原 M0 本地通信探针因此失败；没有改门禁或 skip，改在允许本地通信的正常环境复跑并保留最终结果。
 
-临时联合工作区使用 M1 7d566bc038b5c557988da7e4a215f00a9fd2df6e 与 M2 018d168814d5270d998105369d860e93fa450cd2，39 项 blocking 通过、0 skip，7.520 秒；[integration-blocking.xml](integration-blocking.xml)。联合 replay 1 项通过；[integration-replay.xml](integration-replay.xml)。临时合并未推送。最新修复覆盖 graph.entity_id 的真实字段契约、分部合计与收入/利润的美元换算，以及确认/驳回对当前期间已缓存分部的即时生效；比较期间不误作当前期间，行 ID 不变。两次修复均保留先失败测试、后实现历史。
-
-M2 最近干净环境 CI：[38532656679](https://github.com/XuQingsong/inves-cog/actions/runs/38532656679)。日志中 blocking 25 项通过；随后旧 M0 清单写死只有一个迁移而失败，该限定修复已授权放在 M1，不能在 M2 越权复制。
+独立 Muse 回放 30×3、90 组、2,255 字段差异 0，输入及 oracle 冻结哈希不动。七日期末 FX、FX 日期索引、预算部分完成计数、PIT 年报推财年、获准辅助维度、旧分部缓存刷新、资产/利息不冒充利润及 FASB 缓存复用均保留测试先行提交。没有修改 docs/、golden 或 milestones；本机无 Docker，不把直接 pytest 冒充干净容器 CI。
 
 ## 2. 不变量
 
-| 不变量 | 结果 | 测试 |
-|---|---|---|
-| I10 营收新标签 | 绿 | test_revenue_tag_gap：旧标签正常不误伤，新标签缺口与 D1 修复 |
-| I11 累计数推单季 | 绿 | test_q4_derived_from_annual：完整、缺季、6/9 月累计及标准答案 |
-| I12 companyfacts 滞后 | 绿 | test_companyfacts_lag：第 2/3 天边界、已有 accession 不误标、实例来源 |
-| I33 分部 | 绿 | test_segment_extraction / recast / mapping_pending：业务/产品/混合轴隔离、1% 边界、未确认禁用 |
-| I34 共识 PIT | 绿 | test_consensus_derived_pit：未来 capture、窗口不足、3 日容差、同财年、低/零分母 |
+| 不变量 | 测试 |
+|---|---|
+| I10 | test_revenue_tag_gap：标准/新增营收标签正反断言 |
+| I11 | test_q4_derived_from_annual：Q2/Q3/Q4 累计推单季及缺数 |
+| I12 | test_companyfacts_lag：三天边界、已有 accession、原件解析 |
+| I33 | test_segment_extraction / recast / mapping_pending：批准的精确辅助轴放行，其余混合维度拒绝，1% 容差、原件缓存与审核状态；真实合计缺口另列，离线绿不冒充实源全部正确 |
+| I34 | test_consensus_derived_pit：可见时点、同财年、窗口、低基数；实际历史复算见下表 |
 
 ## 3. pending 和 milestones
 
-删除已转绿的本模块 15 项 blocking 和 1 项 replay。只保留 `test_fundamentals_live_smoke`，真实剩余原因是 M1 共享基线尚未合入 main，以及 59 只真实申报/分部验证尚未完成；R4/R5 接入已配置，R7 导出已收到。没有删除其他模块的行，没有改 milestones。
+15 项 blocking 和 legacy replay 已移除，只保留原名 test_fundamentals_live_smoke。R4/R5/R7 不是笼统缺 key：真实待补为 M1 合并后的共享基线、分部合计及 Yahoo 成功响应。没有改其他模块行或 milestones。
 
-## 4. 验收自评
+## 4. 逐条验收自评
 
-| AC | 自评 | 证据 |
+| 条款 | 自评 | 证据 |
 |---|---|---|
-| AC-M2-01 | 离线与 legacy 回放通过；干净环境 CI 待 M1 基线合入后复跑 | blocking.xml、replay.xml、legacy-replay.json |
-| AC-M2-02 | 机制通过，59 只真实差异及 LITE/BE/COHR 真实可打分未证明 | checkpoint-data.json；D1–D5/D8 和影响矩阵测试 |
-| AC-M2-03 | 59 行手写输入链路通过；真实 59 行未证明 | test_health_contract；可交易行核心字段非空、外国标的不可交易 |
-| AC-M2-04 | 离线维度、抵销和容差通过；54 只真实覆盖率未证明 | test_segment_extraction；Arelle 本地桩 schema |
-| AC-M2-05 | 尚未证明真实原文抽查 | checkpoint.md 中 AMD/WDC 分部明确为夹具 |
-| AC-M2-06 | 真实 Muse 历史导入完成；59 只连续 5 交易日尚未形成 | database-verification.json；Muse 只有 30 只，不以此冒充 59 只 |
-| AC-M2-07 | 59 份夹具 F3 通过；真实 59 份未证明 | test_health_contract，三个区块有数据或明确原因，3% 严格边界和指引原始 items |
-| AC-M2-08 | 待审核/确认/驳回及板块过滤接口通过，页面属于 M10 | test_segment_mapping_pending；mapping.py |
+| AC-M2-01 | 本模块离线和独立回放通过；干净 CI 等 M1 修复基线合入 | blocking-v3.xml、replay-v3.xml、legacy-replay.json；M2 不越权复制 M1 的 M0 迁移清单修正 |
+| AC-M2-02 | 59 只真实差异已形成；LITE/BE/COHR 均可打分 | v3-differences.json.gz、v3-coverage.json：59 行，两套字段差异和健康码均附 |
+| AC-M2-03 | 真实 59 行通过健康一致性检查 | v3-health.json：不可打分但无原因 0 行，可交易但三个核心字段缺失 0 行；外国标的不可交易 |
+| AC-M2-04 | 存在覆盖达标，合计不全部达标 | v3-coverage.json：51/54 = 94.44% 有分部或 single_segment；缺 NOW/XOM/CRWD；14 家 segment_sum_mismatch 明确列出，未改阈值、未凑数消红 |
+| AC-M2-05 | 五只真实 10-Q 营收/利润对照均一致 | v3-segment-spot.json：AMD、WDC、NVDA、MSFT、COHR，原文 URL/sha256/显示金额/scale/context_ref 均附；独立读取 HTML inline facts，与实例数字逐条比，不用夹具冒充 |
+| AC-M2-06 | Muse 导入及 F2 历史通过；两次 59 只共识成功采集未通过 | 原 database-verification.json：两次导入均 180 行/30 只，哈希和幂等核对；v3-f2-history.json：5 只×3 日期 15 组窗口独立复算一致。真实两次共识均 59 次失败/0 成功；旧版及隔离最新版都实测 crumb 403、quoteSummary 429，不称为缺 key，不换源 |
+| AC-M2-07 | 59 份真实 F3 档案已生成 | v3-profiles.json.gz；三个区块都有数据或明确理由。共识缺当日快照如实标记，不把 Muse 的 30 只充作 59 只当日采集 |
+| AC-M2-08（非阻塞） | 审核队列接口/录音验证通过；实源草稿尚未生成 | M1 合并前按 Q-M2-14 用显式同接口替身；真实分部 mapping_gap 保留，不把替身称为 glm-5.3 真实映射 |
 
 ## 5. 边界与破坏性验证
 
-未来 filed/captured_at 不进入状态；未知 extractor 拒绝；单季缺失不补零；非 USD 无可见报价抛带币种、字段、期间、版本日和原因的 FXGap，停止金额写入；假日使用注明实际日期的期末聚合。图谱未知节点拒绝，空 reviewer 拒绝；未确认映射不可用于 segment_std；产品和混合轴不混入业务合计。已测合法标签、合法 180 天边界、正分母、1% 容差、严格 3% 不触发等“不误伤”方向。M2 文档没有另列破坏性自测清单，不虚构测试通过记录。
+未改测试名/标记，不使用 skip；测试无真实 key、网络或系统时间，LLM 用录音。七日含边界、跨年与八日过期，未来 filed/captured_at 排除，假日记录实际报价日。主轴加获准辅助轴可取数，地域/产品/仿造 namespace 与三维混合仍拒绝；资产和利息不会混作利润。空 reviewer/未知图谱节点拒绝，未确认映射不进入 segment_std。未知 taxonomy 版本正常下载，已存在原件复用；不是断网门禁放宽。
 
-## 6. 已知限制与依据
+## 6. 实源结果与偏差
 
-Q-M2-14：M1 合并前用注入的同接口替身；没有自建 SEC/LLM 客户端或 job_runs/source_health 表。生产入口在 M1 基线可用后解析同一个客户端。Q-M2-7 的独立 oracle 已收到，等待 R7 不再用于该回放。Q-M2-8/12：旧导出没有的营收、coverage、目标 FY 等字段保留 NULL 与原因；F2 不用供应商 agoN 反推历史。用户 K14 答复只针对 FX，金融字段缺汇率不以 NULL 掩盖问题；其他允许的缺字段按原合同处理。
+ASML 最初失败为本项目 FX 历史只导入 2009 年后，而源公司披露包含 2007 年金额。已用同一 FRED 源补入 2006 年起的 real-time 版本，重跑写入真实状态，没有以 NULL 隐藏 FX 缺口；v3-fx-history.json、v3-real-runs.json。外国 6-K 中部分原件无 XBRL 的历史缺口逐号保留。
 
-## 7. 需求问题
+原件 taxonomy 反复网络刷新曾使解析 50 只达到 30 分钟预算。真实原件缓存审计已完成 59 只，正式路径也补缓存复用和失败先行测试；不将缓存审计写成一次新的完整联网财报采集。原超时失败日志不改写。
 
-K14 的 FRED 方案已按用户答复实施并实测。K13 的共享基线问题已获得在 M1 修复的授权，等待 M1 合入；本模块没有越权改 M0。真实 5 日记录、59 只真实覆盖和分部原文仍为待验证事项，不列为已通过。
+仍遵守严格单业务维度与已批准辅助成员。当前 14 家合计异常包含同轴的汇总成员/子成员、利润专用抵销行、其他未批准的经营分部辅助成员；具体原件事实见 questions.md，不自行放宽或给 NULL 填 0。
+
+## 7. 新问题
+
+K15 精确辅助轴已获用户答复并实施。新 K16 的原件汇总/抵销规则及 GEV 辅助成员需答复；等待时不扩大维度或改变营收加总合同。Yahoo 当前路由的 403/429 是实测响应；不反复重试、换源或伪造快照。M1 验收合并后，M2 再按共享文件并集规则合入 main、重生成 uv.lock、复跑 CI。

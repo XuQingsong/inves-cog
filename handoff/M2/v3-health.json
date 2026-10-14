@@ -1,0 +1,879 @@
+{
+  "summary": {
+    "as_of": "2026-10-14",
+    "health_rows": 59,
+    "profile_rows": 59,
+    "difference_rows": 59,
+    "scorable_required": {
+      "LITE": true,
+      "BE": true,
+      "COHR": true
+    },
+    "unexplained_unscorable": [],
+    "tradable_core_missing": [],
+    "trading_universe": 54,
+    "segment_covered": 51,
+    "segment_missing": [
+      "NOW",
+      "XOM",
+      "CRWD"
+    ],
+    "segment_mismatches": [
+      "NVDA",
+      "INTC",
+      "GOOGL",
+      "AAPL",
+      "UNH",
+      "XOM",
+      "CAT",
+      "GE",
+      "AMAT",
+      "QCOM",
+      "COHR",
+      "VRT",
+      "GEV",
+      "CEG"
+    ],
+    "segment_job": {
+      "processed_count": 59,
+      "status": "ok",
+      "failures": []
+    },
+    "source_classification": "Actual SEC companyfacts and archived original XBRL; existing production extractors. Segment mapping remains disclosed pre-merge double."
+  },
+  "rows": [
+    {
+      "ticker": "INTC",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-07-24",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "LITE",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-08-17",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "ni_tag_fallback",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "QCOM",
+      "latest_period_end": "2026-06-28",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "NVDA",
+      "latest_period_end": "2026-07-26",
+      "latest_filed": "2026-08-26",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "AMD",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-08-05",
+      "latest_8k_202": "2026-08-05 04:16:24+08:00",
+      "health_codes": [
+        "ni_tag_fallback",
+        "segment_recast",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "AVGO",
+      "latest_period_end": "2026-08-02",
+      "latest_filed": "2026-09-10",
+      "latest_8k_202": "2026-09-03 04:26:04+08:00",
+      "health_codes": [
+        "ni_tag_fallback",
+        "segment_recast",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "MRVL",
+      "latest_period_end": "2026-08-01",
+      "latest_filed": "2026-08-28",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "MU",
+      "latest_period_end": "2026-09-03",
+      "latest_filed": "2026-10-09",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "SKHY",
+      "latest_period_end": null,
+      "latest_filed": "2026-10-14",
+      "latest_8k_202": null,
+      "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
+        "core_field_missing",
+        "earnings_event_missing",
+        "segment_missing"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; core_field_missing; Missing core fields: rev_ttm, eps_ttm, shares; Foreign filer is excluded from trading"
+    },
+    {
+      "ticker": "NOK",
+      "latest_period_end": "2017-12-31",
+      "latest_filed": "2026-09-08",
+      "latest_8k_202": null,
+      "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
+        "earnings_event_missing",
+        "segment_missing",
+        "stale_fundamentals"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
+    },
+    {
+      "ticker": "MSFT",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "ORCL",
+      "latest_period_end": "2026-08-31",
+      "latest_filed": "2026-09-11",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "CRM",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-08-27",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "NOW",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-23",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_missing"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "ADBE",
+      "latest_period_end": "2026-08-28",
+      "latest_filed": "2026-09-22",
+      "latest_8k_202": "2026-09-11 04:06:14+08:00",
+      "health_codes": [
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "PLTR",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-04",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "META",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-30",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "GOOGL",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-23",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "AMZN",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-31",
+      "latest_8k_202": "2026-07-31 04:06:23+08:00",
+      "health_codes": [
+        "gross_margin_derived",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "NFLX",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-17",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "AAPL",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-07-31",
+      "latest_8k_202": "2026-07-31 04:30:28+08:00",
+      "health_codes": [
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "TSLA",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-23",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "COST",
+      "latest_period_end": "2026-05-10",
+      "latest_filed": "2026-10-07",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "q4_missing",
+        "segment_unmapped"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "q4_missing"
+    },
+    {
+      "ticker": "WMT",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-08-28",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "HD",
+      "latest_period_end": "2026-08-02",
+      "latest_filed": "2026-08-25",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "UNH",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-10",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "LLY",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-05",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "JNJ",
+      "latest_period_end": "2026-06-28",
+      "latest_filed": "2026-07-23",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "ni_tag_fallback",
+        "segment_recast",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "JPM",
+      "latest_period_end": "2014-12-31",
+      "latest_filed": "2026-08-06",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "q4_missing",
+        "segment_unmapped",
+        "stale_fundamentals"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "q4_missing; stale_fundamentals"
+    },
+    {
+      "ticker": "V",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": null,
+      "health_codes": [
+        "core_field_missing",
+        "earnings_event_missing",
+        "ni_tag_fallback",
+        "single_segment"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "core_field_missing; Missing core fields: eps_ttm"
+    },
+    {
+      "ticker": "MA",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-30",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "ni_tag_fallback",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "XOM",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-03",
+      "latest_8k_202": null,
+      "health_codes": [
+        "core_field_missing",
+        "earnings_event_missing",
+        "segment_missing",
+        "segment_sum_mismatch"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "core_field_missing; Missing core fields: rev_ttm, eps_ttm"
+    },
+    {
+      "ticker": "CVX",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-06",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "CAT",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-05",
+      "latest_8k_202": "2026-08-04 18:31:44+08:00",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "GE",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-16",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "WDC",
+      "latest_period_end": "2026-07-03",
+      "latest_filed": "2026-08-14",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "STX",
+      "latest_period_end": "2026-07-03",
+      "latest_filed": "2026-08-04",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "SNDK",
+      "latest_period_end": "2026-07-03",
+      "latest_filed": "2026-08-17",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "AMAT",
+      "latest_period_end": "2026-07-26",
+      "latest_filed": "2026-08-20",
+      "latest_8k_202": "2026-08-14 04:03:36+08:00",
+      "health_codes": [
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "LRCX",
+      "latest_period_end": "2026-06-28",
+      "latest_filed": "2026-08-07",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "q4_missing",
+        "segment_unmapped"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "q4_missing"
+    },
+    {
+      "ticker": "KLAC",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-06",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "ASML",
+      "latest_period_end": "2025-12-31",
+      "latest_filed": "2026-10-14",
+      "latest_8k_202": null,
+      "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
+        "earnings_event_missing",
+        "segment_missing",
+        "stale_fundamentals"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
+    },
+    {
+      "ticker": "ARM",
+      "latest_period_end": "2026-03-31",
+      "latest_filed": "2026-09-18",
+      "latest_8k_202": null,
+      "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
+        "earnings_event_missing",
+        "segment_missing",
+        "stale_fundamentals"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
+    },
+    {
+      "ticker": "TSM",
+      "latest_period_end": "2024-12-31",
+      "latest_filed": "2026-10-08",
+      "latest_8k_202": null,
+      "health_codes": [
+        "annual_basis",
+        "companyfacts_lag",
+        "earnings_event_missing",
+        "segment_missing",
+        "stale_fundamentals"
+      ],
+      "can_score": false,
+      "can_trade": false,
+      "reason": "companyfacts_lag; stale_fundamentals; Foreign filer is excluded from trading"
+    },
+    {
+      "ticker": "ANET",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-05",
+      "latest_8k_202": "2026-08-05 04:06:44+08:00",
+      "health_codes": [
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "CIEN",
+      "latest_period_end": "2026-08-01",
+      "latest_filed": "2026-09-03",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "COHR",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-14",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "VRT",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "segment_recast",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "ETN",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-31",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "ni_tag_fallback",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "GEV",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-22",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "CEG",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-06",
+      "latest_8k_202": "2026-08-06 18:52:23+08:00",
+      "health_codes": [
+        "ni_tag_fallback",
+        "segment_sum_mismatch",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "BE",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": "2026-07-29 04:07:21+08:00",
+      "health_codes": [
+        "ni_tag_fallback",
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "DELL",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-09-08",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "SMCI",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-31",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "ni_tag_fallback",
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "CRWV",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-12",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "gross_margin_derived",
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "CRWD",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-08-27",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_missing"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "PANW",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-09-10",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "single_segment"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "FTNT",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-30",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    {
+      "ticker": "ZS",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-09-03",
+      "latest_8k_202": null,
+      "health_codes": [
+        "earnings_event_missing",
+        "segment_unmapped"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    }
+  ]
+}

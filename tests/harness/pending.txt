@@ -13,7 +13,7 @@ test_info_item_contract | M1 | 等待 M1 实现
 test_info_fields_extraction | M1 | 等待 M1 实现
 test_llm_extraction_failure_degrades | M1 | 等待 M1 实现
 test_ingest_live_smoke | M1 | 等待 R5
-test_fundamentals_live_smoke | M2 | 等待 M1 合并后的共享基线与 59 只真实申报/分部验证（R4/R5 已配置，R7 已收到）
+test_fundamentals_live_smoke | M2 | 等待 M1 共享基线合并、K16 分部合计规则及 Yahoo 真实成功响应（当前实测 403/429）；R4/R5 已配置、R7 已导入
 test_interp_points | M3 | 等待 M3 实现
 test_books_synthetic | M3 | 等待 M3 实现
 test_red_line_boundaries | M3 | 等待 M3 实现
