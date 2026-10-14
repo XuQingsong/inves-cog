@@ -21,7 +21,7 @@ test_gross_margin_derived | M2 | 等待 M2 实现
 test_ni_tag_fallback | M2 | 等待 M2 实现
 test_industry_basis_na | M2 | 等待 M2 实现
 test_fin_state_pit | M2 | 等待 M2 实现
-test_legacy_matches_muse_state | M2 | 等待 R7（Muse 导出）
+test_legacy_matches_muse_state | M2 | Waiting for M2 implementation; independent R7 inputs and oracle received
 test_extractor_fixed_toggles | M2 | 等待 M2 实现
 test_segment_extraction | M2 | 等待 M2 实现
 test_segment_recast | M2 | 等待 M2 实现
