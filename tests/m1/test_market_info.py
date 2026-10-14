@@ -250,6 +250,20 @@ def test_earnings_reaction_day():
 
 
 def test_earnings_fallback_flag():
+    from inves_cog.ingest.pipeline import Pipeline
+    calls=[]
+    class SEC:
+        def get(self,url):
+            calls.append(url)
+            return '8-K Fixture Corporation 1 2026-10-29 edgar/data/1/0000000001-26-000001.txt' if url.endswith('.idx') else 'Full filing: guidance raised.'
+    class Repo:
+        def info_signature(self,identifier): return ('Atom title','Atom metadata summary')
+    pipeline=Pipeline.__new__(Pipeline);pipeline.clock=frozen();pipeline.day_override=date(2026,10,30)
+    pipeline.sec=SEC();pipeline.repo=Repo(); captured=[]
+    pipeline.info=lambda items:captured.extend(items)
+    pipeline.index()
+    assert captured[0]['body']=='Full filing: guidance raised.' and any(url.endswith('.txt') for url in calls)
+
     from inves_cog.ingest.sec_client import SECClient
     from inves_cog.ingest.http import HTTPClient,Response
     client=SECClient(user_agent='fixture test@example.invalid',http=HTTPClient(lambda *a,**k:Response(200,'fixture schema')))
@@ -515,6 +529,9 @@ def test_info_fields_extraction():
     assert 'published_at_extracted' in result['flags'] and 'published_at_missing' not in result['flags']
     assert result['extraction_source']['is_guidance'] == 'llm'
     assert result['entities'] == ['apple']
+    wrapped=dict(item,body='<style>'+('irrelevant CSS '*500)+'</style><script>ignored code</script><p>'+item['body']+'</p>')
+    assert enrich(wrapped,llm=llm,embed=None,entities=[],clock=frozen())['is_guidance'] is True
+
 
 
 def test_llm_extraction_failure_degrades():
