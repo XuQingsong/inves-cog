@@ -427,6 +427,18 @@ def test_health_contract(monkeypatch):
         def companyfacts(self,cik): return input_facts()
     service = FinancialService(clock=FrozenClock(datetime(2026,10,13,1,tzinfo=timezone.utc)),repository=memory,
         sec=SEC(),llm=None,universe=universe,ciks={row['ticker']:'1' for row in universe})
+    partial=MemoryRepository()
+    partial.shared_filings={key:value for key,value in memory.shared_filings.items()}
+    class LimitedService(FinancialService):
+        def _budget(self):
+            if partial.health: raise RuntimeError('fixture task budget exhausted')
+    limited=LimitedService(clock=service.clock,repository=partial,sec=SEC(),llm=None,
+        universe=universe[:2],ciks=service.ciks)
+    with pytest.raises(RuntimeError,match='budget exhausted') as expired_run:
+        limited.collect_financials()
+    assert expired_run.value.processed_count==1
+    assert len(partial.health)==1 and len(partial.profiles)==1
+
     assert service.collect_financials()['processed_count']==59
     assert len(memory.health)==59 and len(memory.profiles)==59
     for entity in universe:
