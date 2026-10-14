@@ -70,7 +70,7 @@ def load_exports(folder):
     return tables
 
 
-def import_muse_exports(folder,*,store):
+def import_muse_exports(folder,*,store,annual_end_asof=None):
     tables=load_exports(folder); grouped={}
     def target(row):
         key=(day(row['snapshot_date']),row['ticker'])
@@ -90,6 +90,12 @@ def import_muse_exports(folder,*,store):
     for row in tables.get('earnings_history',[]):
         store.history[(row['ticker'],row['quarter_date'],row.get('first_seen'))]=row
     for row in grouped.values():
+        if annual_end_asof is not None:
+            from inves_cog.ingest.fundamentals.providers import fiscal_years
+            annual_end=annual_end_asof(row['ticker'],row['as_of'])
+            row['fy_cy'],row['fy_ny']=fiscal_years(annual_end)
+            row['raw']['fiscal_year_source']={'as_of':str(row['as_of']),'annual_period_end':str(annual_end) if annual_end else None,
+                'reason':None if annual_end else 'PIT annual filing unavailable'}
         row['raw']['earnings_history']=[r for r in store.history.values() if r['ticker']==row['ticker']]
         store.put(row)
     return {'snapshots':len(grouped),'earnings_history':len(store.history),'idempotent_key':'as_of,ticker,source'}

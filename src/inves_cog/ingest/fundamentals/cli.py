@@ -41,7 +41,7 @@ def build(*,clock,values,connection):
     def rates():
         count=0
         for currency in SERIES:
-            rows=fetch_fred_rates(http,key=values.get('FRED_API_KEY'),currency=currency,first=date(2009,1,1),
+            rows=fetch_fred_rates(http,key=values.get('FRED_API_KEY'),currency=currency,first=date(2006,1,1),
                                   last=service.as_of,as_of=service.as_of,clock=clock)
             repository.put_rates(rows); count+=len(rows)
         fx.rows=repository.rates()
@@ -87,7 +87,7 @@ def main():
         if args.action=='health': output=repository.health_rows()
         elif args.action=='import-muse':
             if args.folder is None: parser.error('--folder is required; files stay outside the repository')
-            store=ConsensusStore();output=import_muse_exports(args.folder,store=store)
+            store=ConsensusStore();output=import_muse_exports(args.folder,store=store,annual_end_asof=repository.annual_end_asof)
             for row in store.rows.values():repository.put_snapshot(row)
             output['database_snapshots']=connection.execute("SELECT count(*) AS n FROM fundamentals.consensus_snapshot WHERE source='muse_import'").fetchone()['n']
         else:

@@ -50,6 +50,9 @@ class Repository:
         if extractor not in {'legacy','fixed'}: raise ValueError('Unknown extractor')
         row=self.connection.execute('SELECT * FROM fundamentals.fin_state WHERE ticker=%s AND extractor=%s AND filed<=%s ORDER BY filed DESC LIMIT 1',(ticker,extractor,as_of_date)).fetchone()
         return state_from_row(row) if row else None
+    def annual_end_asof(self,ticker,as_of):
+        row=self.connection.execute("SELECT period_end FROM fundamentals.fin_state WHERE ticker=%s AND extractor='fixed' AND filed<=%s AND form IN ('10-K','10-K/A','20-F','20-F/A','40-F','40-F/A') AND period_end IS NOT NULL ORDER BY filed DESC LIMIT 1",(ticker,as_of)).fetchone()
+        return row['period_end'] if row else None
     def read_shared_filings(self,ticker):
         return list(self.connection.execute('SELECT * FROM ingest.sec_filings WHERE ticker=%s ORDER BY filing_date,accepted_at NULLS FIRST,accession',(ticker,)).fetchall())
     def bars_available(self,ticker,as_of):
