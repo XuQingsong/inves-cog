@@ -17,6 +17,21 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Freeze changed Python file list before entering the offline container
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          base = event.get('pull_request', {}).get('base', {}).get('sha') or event.get('before')
+          if not base or set(base) == {'0'}:
+              base = 'HEAD^'
+          names = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD'], text=True)
+          Path('.harness').mkdir(exist_ok=True)
+          Path('.harness/changed-python.json').write_text(json.dumps([n for n in names.splitlines() if n.endswith('.py')]))
+          PY
       - name: Build clean Python and Docker CLI container
         run: docker build -t inves-cog-harness -f scripts/Dockerfile.harness .
       - name: Clean container make phase1-test and CI assertions

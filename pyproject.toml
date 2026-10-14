@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8,<10", "requests>=2,<3"]
+dev = ["pytest>=8,<10", "requests>=2,<3", "ruff==0.14.14"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/inves_cog"]
@@ -33,3 +33,13 @@ markers = [
   "phase1_cases: frozen cases and recorded LLM responses",
   "phase1_live: explicit opt-in real-source smoke tests; excluded from CI",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "W", "I", "C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 25

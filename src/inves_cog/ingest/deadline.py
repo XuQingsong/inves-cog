@@ -1,9 +1,10 @@
 """Cooperative task budget shared by every HTTP request and item loop."""
+
+import time
 from contextlib import contextmanager
 from contextvars import ContextVar
-import time
 
-_budget = ContextVar('ingest_budget', default=None)
+_budget = ContextVar("ingest_budget", default=None)
 
 
 def remaining():
@@ -14,7 +15,8 @@ def remaining():
     seconds = deadline - timer()
     if seconds <= 0:
         from inves_cog.ingest.http import SourceError
-        raise SourceError('Task exceeded its 30-minute budget')
+
+        raise SourceError("Task exceeded its 30-minute budget")
     return seconds
 
 
