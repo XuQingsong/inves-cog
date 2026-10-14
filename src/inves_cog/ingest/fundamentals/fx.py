@@ -1,5 +1,6 @@
 """PIT FRED conversion with inspectable evidence and actionable exceptions."""
 from collections import defaultdict
+from bisect import bisect_left,bisect_right
 from datetime import date, timedelta
 import math
 
@@ -20,6 +21,14 @@ def as_date(value):
 class FXBook:
     def __init__(self,rows=()):
         self.rows=list(rows)
+        self._build_index()
+    def _build_index(self):
+        grouped=defaultdict(lambda:defaultdict(list))
+        for row in self.rows:
+            grouped[row.get('currency')][as_date(row['observation_date'])].append(row)
+        self._by_currency=dict(grouped)
+        self._dates={currency:sorted(values) for currency,values in grouped.items()}
+        self._index_token=(id(self.rows),len(self.rows))
     def convert(self,value,*,currency,start,end,as_of,field):
         if currency=='USD': return value,{'original_currency':'USD','method':'identity'}
         if currency not in SERIES: raise FXGap(currency=currency,field=field,period=(start,end),as_of=as_of,reason='unsupported FRED currency series')
@@ -27,10 +36,11 @@ class FXBook:
         # Q-M2-17: seven calendar days, including across a year boundary.
         first=as_date(start) if start else end-timedelta(days=7)
         visible={}; unpublished=set(); raw=[]
-        for original in self.rows:
-            if original.get('currency')!=currency: continue
+        if self._index_token!=(id(self.rows),len(self.rows)):self._build_index()
+        dates=self._dates.get(currency,[])
+        originals=[row for observed in dates[bisect_left(dates,first):bisect_right(dates,end)] for row in self._by_currency[currency][observed]]
+        for original in originals:
             observed,released=as_date(original['observation_date']),as_date(original['realtime_start'])
-            if not first<=observed<=end: continue
             raw.append(original)
             if released>as_of:
                 if original.get('value') is not None: unpublished.add(observed)
