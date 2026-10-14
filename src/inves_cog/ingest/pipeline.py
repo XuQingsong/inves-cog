@@ -23,6 +23,17 @@ from inves_cog.ingest.universe import build_universe, daily_liquidity
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def select_membership(candidates, previous, adv, day, *, monthly):
+    """K18: first observed close is a labelled baseline, never a backdated run."""
+    if monthly or not previous:
+        rows = build_universe(candidates, day)
+        if not monthly:
+            for row in rows:
+                row['notes'].append('startup_baseline')
+        return rows
+    return daily_liquidity(previous, adv, day)
+
+
 class Pipeline:
     def __init__(self, *, clock, repository, values, llm, sec, alpaca=None, fred=None,
                  embed=None, websites=None, trends=None):
@@ -145,16 +156,11 @@ class Pipeline:
         previous = self.repo.latest_wide()
         first_session = exchange(self.day.year).sessions_in_range(f'{self.day:%Y-%m}-01', str(self.day))[0].date()
         monthly = self.day == first_session
-        if monthly:
-            rows = build_universe(candidates, self.day)
-        elif previous:
-            rows = daily_liquidity(previous, adv, self.day)
-        else:
-            raise SourceError('No monthly membership baseline; run first-session reconstruction explicitly')
+        rows = select_membership(candidates, previous, adv, self.day, monthly=monthly)
         for row in rows:
             self.repo.write('wide_universe', row, update=('mktcap','adv20','included','exclude_reason','notes'))
         report = {'processed_count': len(rows), 'included': sum(r['included'] for r in rows),
-                  'exclusions': dict(Counter(r['exclude_reason'] for r in rows if not r['included'])), 'monthly': monthly}
+                  'exclusions': dict(Counter(r['exclude_reason'] for r in rows if not r['included'])), 'monthly': monthly, 'startup_baseline': not monthly and not previous}
         self.repo.set_cursor('wide-report:' + self.day.isoformat(), report, self.clock.now_utc())
         return report
 
