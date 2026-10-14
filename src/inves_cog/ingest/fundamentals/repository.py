@@ -68,6 +68,10 @@ class Repository:
         for row in rows:
             self.write('segments',{**row,'evidence':{**row.get('evidence',{}),'period_start':row.get('period_start') or row.get('evidence',{}).get('period_start'),'segment_qname':row.get('segment_qname') or row.get('evidence',{}).get('segment_qname')},
                 'row_id':row.get('row_id') or hashlib.sha256(text({key:row.get(key) for key in ('ticker','accession','period_end','period_start','axis','segment_raw')}).encode()).hexdigest()})
+    def replace_segments(self,ticker,accession,rows):
+        with self.transaction():
+            self.connection.execute('DELETE FROM fundamentals.segments WHERE ticker=%s AND accession=%s',(ticker,accession))
+            self.put_segments(rows)
     def segment_rows(self,ticker): return list(self.connection.execute('SELECT * FROM fundamentals.segments WHERE ticker=%s ORDER BY filed,period_end',(ticker,)).fetchall())
     def mapping_rows(self):
         rows=list(self.connection.execute('SELECT * FROM fundamentals.segment_mapping').fetchall())

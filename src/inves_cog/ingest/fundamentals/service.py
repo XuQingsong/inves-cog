@@ -36,6 +36,9 @@ class MemoryRepository(StateStore):
     def put_segments(self,rows):
         keys={(r['ticker'],r['accession'],r.get('period_end'),r.get('axis'),r.get('segment_raw')) for r in rows}
         self.segments=[r for r in self.segments if (r['ticker'],r['accession'],r.get('period_end'),r.get('axis'),r.get('segment_raw')) not in keys]+deepcopy(rows)
+    def replace_segments(self,ticker,accession,rows):
+        self.segments=[r for r in self.segments if (r['ticker'],r['accession'])!=(ticker,accession)]
+        self.put_segments(rows)
     def segment_rows(self,ticker): return [r for r in self.segments if r['ticker']==ticker]
     def mapping_rows(self): return list(self.mappings.values())
     def put_mapping(self,row): self.mappings[row['id']]=deepcopy(row)
@@ -156,7 +159,7 @@ class FinancialService:
         prior=[r for r in existing if any(c.get('period_end')==r.get('period_end') for c in comparative)]
         current=apply_recast(current,prior,comparative=comparative)
         current=self.apply_mappings(ticker,current)
-        self.repo.put_segments(current+comparative)
+        self.repo.replace_segments(ticker,latest['accession'],current+comparative)
         return current
 
     def apply_mappings(self,ticker,rows):
