@@ -243,6 +243,9 @@ def test_segment_extraction(tmp_path,monkeypatch):
     assert next(r for r in metrics_rows if r.get('segment_raw')=='DataCenterMember')['segment_profit']==15
 
 
+    from tests.m2.k16_cases import assert_k16_cases
+    assert_k16_cases(tmp_path/'k16')
+
     # Reuse immutable taxonomy originals already cached; unseen versions still
     # use the normal downloader, without an extra shared SEC client.
     from types import SimpleNamespace
