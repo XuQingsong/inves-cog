@@ -294,7 +294,7 @@ def test_consensus_import_idempotent(tmp_path):
     assert not list(tmp_path.iterdir())
 
 
-def test_health_contract():
+def test_health_contract(monkeypatch):
     from inves_cog.ingest.fundamentals.fx import FXBook, FXGap
     from inves_cog.ingest.fundamentals.fx import fetch_fred_rates
     seen = []
@@ -319,6 +319,19 @@ def test_health_contract():
         rates.convert(100,currency='EUR',start=date(2025,12,29),end=date(2025,12,31),as_of=date(2025,12,29),field='revenue')
     with pytest.raises(FXGap, match='unsupported'):
         rates.convert(100,currency='XXX',start=None,end=date(2025,12,31),as_of=date(2026,1,6),field='cash')
+    # Large history must not exhaust a bounded lookup budget for one balance.
+    from inves_cog.ingest.fundamentals import fx as fx_module
+    history=[{'currency':'EUR','observation_date':str(date(2009,1,1)+timedelta(days=i)),
+              'realtime_start':str(date(2009,1,1)+timedelta(days=i+1)),'value':1.2} for i in range(5000)]
+    indexed=FXBook(history); parses=[]; parse_day=fx_module.as_date
+    def bounded_date(value):
+        parses.append(value)
+        if len(parses)>60:raise RuntimeError('FX lookup exhausted processing budget')
+        return parse_day(value)
+    with monkeypatch.context() as patch:
+        patch.setattr(fx_module,'as_date',bounded_date)
+        end=date(2009,1,1)+timedelta(days=4999)
+        assert indexed.convert(100,currency='EUR',start=None,end=end,as_of=end+timedelta(days=2),field='cash')[0]==pytest.approx(120)
     # Q-M2-17(4): seven calendar days is inclusive, including year boundary.
     seven = FXBook([{'currency':'EUR','observation_date':'2025-12-25','realtime_start':'2025-12-26','value':1.2}])
     converted, quote = seven.convert(100,currency='EUR',start=None,end=date(2026,1,1),as_of=date(2026,1,6),field='cash')
