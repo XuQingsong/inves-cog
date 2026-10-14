@@ -1,0 +1,117 @@
+{
+  "news": [
+    {
+      "rows": 60509,
+      "earliest": "2026-06-22 17:46:09+08:00",
+      "latest": "2026-10-14 17:06:38+08:00",
+      "pending": 60499
+    }
+  ],
+  "macro": [
+    {
+      "series_id": "CPIAUCSL",
+      "versions": 3362,
+      "observation_dates": 956
+    },
+    {
+      "series_id": "DCOILWTICO",
+      "versions": 11470,
+      "observation_dates": 10634
+    },
+    {
+      "series_id": "DGS2",
+      "versions": 13147,
+      "observation_dates": 13139
+    },
+    {
+      "series_id": "DTWEXBGS",
+      "versions": 22097,
+      "observation_dates": 5420
+    },
+    {
+      "series_id": "PAYEMS",
+      "versions": 13691,
+      "observation_dates": 1053
+    },
+    {
+      "series_id": "VIXCLS",
+      "versions": 9617,
+      "observation_dates": 9595
+    }
+  ],
+  "health": [
+    {
+      "source": "Alpaca",
+      "status": "degraded",
+      "note": "past 20:45 ET deadline"
+    },
+    {
+      "source": "AlpacaNews",
+      "status": "ok",
+      "note": null
+    },
+    {
+      "source": "AppStoreFree",
+      "status": "ok",
+      "note": null
+    },
+    {
+      "source": "AppStoreGrossing",
+      "status": "ok",
+      "note": null
+    },
+    {
+      "source": "CBOE",
+      "status": "ok",
+      "note": null
+    },
+    {
+      "source": "CompanyIR",
+      "status": "未接通",
+      "note": "SourceError: HTTP status 403"
+    },
+    {
+      "source": "EIANews",
+      "status": "未接通",
+      "note": "First phase excludes this source"
+    },
+    {
+      "source": "FINRA",
+      "status": "ok",
+      "note": null
+    },
+    {
+      "source": "FRED",
+      "status": "ok",
+      "note": null
+    },
+    {
+      "source": "FederalReserveNews",
+      "status": "未接通",
+      "note": "First phase excludes this source"
+    },
+    {
+      "source": "GoogleTrends",
+      "status": "ok",
+      "note": ""
+    }
+  ],
+  "news_cursor": [
+    {
+      "cursor_key": "news",
+      "bootstrap_complete": true,
+      "start_date": null,
+      "end_date": null
+    }
+  ],
+  "tables": [
+    {
+      "table_schema": "fundamentals",
+      "tables": 8
+    },
+    {
+      "table_schema": "ingest",
+      "tables": 17
+    }
+  ]
+}

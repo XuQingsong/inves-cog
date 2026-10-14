@@ -1,0 +1,6 @@
+{
+  "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "status": 401,
+  "code": "invalid_api_key",
+  "reason": "Incorrect API key provided. For details, see: https://help.aliyun.com/zh/model-studio/error-code#apikey-error"
+}

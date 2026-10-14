@@ -1,0 +1,17 @@
+{
+  "processed_count": 13228,
+  "included": 1302,
+  "exclusions": {
+    "no_shares": 1810,
+    "non_common": 7791,
+    "no_cik": 138,
+    "below_mktcap": 2120,
+    "below_adv": 66,
+    "no_price": 1
+  },
+  "monthly": false,
+  "startup_baseline": true,
+  "classification": "real-source diagnostic using last completed close; transaction rolled back; no historical membership or on-time run asserted",
+  "observed_at": "2026-10-14T07:29:20.591960+00:00",
+  "close_date": "2026-10-13"
+}
