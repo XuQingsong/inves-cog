@@ -142,3 +142,15 @@ def assert_news_triage(root, clock):
     before = len(usage)
     assert engine().process([rows[-1]], on_demand=True)[0]["extraction_source"]["news_triage"]["layer"] == 2
     assert len(usage) - before == 2
+
+    # Concurrent extraction must preserve the enclosing job accounting context.
+    from inves_cog.llm.usage import usage_context
+    parallel = [item('parallel:'+str(n), 'Apple parallel fixture '+str(n)) for n in range(4)]
+    for row in parallel:
+        full(row)
+    before = len(usage)
+    with usage_context(job_task='parallel_probe'):
+        results = engine(workers=4).process(parallel)
+    assert len(usage)-before == 8
+    assert all(r['purpose']=='parallel_probe|M1:layer2' for r in usage[before:])
+    assert all(r['extraction_status']=='ok' for r in results)
