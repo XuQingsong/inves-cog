@@ -125,16 +125,25 @@ def test_pending_registry(tmp_path):
     required = requirement_tests(ROOT)
     assert set(rows) | defined == set(required)
     assert not any(module == 'M0' for module in rows.values())
-    source = (ROOT / 'tests/harness/pending.txt').read_text()
+    # Probe input stays pending even after the real module graduates.
+    source = ''.join(f'{name} | {module} | fixture pending\n'
+                     for name, module in required.items() if module != 'M0')
+    closed = tmp_path / 'milestones.txt'
+    closed.write_text('M0\n')
+    pending = tmp_path / 'probe-pending.txt'
+    pending.write_text(source)
+    validate_registry(ROOT, pending_path=pending, milestones_path=closed)
     for content in (source + source.splitlines()[0] + '\n',
                     source + 'broken line\n',
                     source + 'test_unknown | M99 | missing\n'):
         p = tmp_path / 'pending.txt'
         p.write_text(content)
         with pytest.raises(AssertionError, match='FR-M0-05'):
-            validate_registry(ROOT, pending_path=p)
+            validate_registry(ROOT, pending_path=p, milestones_path=closed)
     for body, status in (('assert False', 0), ('assert True', 1)):
-        result = run_probe(tmp_path, f'def test_bar_window_to_20et():\n    {body}\n')
+        result = run_probe(tmp_path, f'def test_bar_window_to_20et():\n    {body}\n',
+                           arguments=('--harness-pending', str(pending),
+                                      '--harness-milestones', str(closed)))
         assert result.returncode == status, output(result)
         assert ('xfailed' if status == 0 else '已转绿，请从 pending 删除') in output(result)
     for decoration in ('skip', 'xfail'):
@@ -259,7 +268,6 @@ def test_llm_models_allowed(tmp_path):
     assert registry.resolve('entity_tagging').retries == 2
     with pytest.raises(ValueError):
         registry.resolve('unknown')
-    scan_models(ROOT)
     for prefix in ('glm', 'gpt', 'claude', 'qwen', 'gemini', 'deepseek', 'llama', 'mistral'):
         p = tmp_path / 'negative.py'
         p.write_text('model=' + repr(prefix.upper() + '-999') + '\n')
@@ -282,7 +290,22 @@ def test_llm_models_allowed(tmp_path):
     recording.write_text(json.dumps({'response': 'glm' + '-999'}))
     (directory / '.env').write_text('MODEL=glm-5.3\n')
     (directory / 'config/allowed.txt').write_text('MODEL=deepseek-v4.1-flash\n')
+    website = directory / 'config/websites.txt'
+    website.write_text('https://www.deepseek.com/\nhttps://claude.ai/\n'
+                       'https://gemini.google.com:443/about\n')
     scan_models(directory)
+    illegal = 'deepseek' + '-chat'
+    for content in (f'MODEL={illegal}\n', f'https://deepseek.com/models/{illegal}\n',
+                    f'https://deepseek.com/?model={illegal}\n',
+                    f'https://{illegal}.example.com/\n',
+                    f'https://deepseek.com/#{illegal}\n',
+                    'MODEL=' + 'deepseek' + '.com\n'):
+        website.write_text(content)
+        with pytest.raises(AssertionError, match='I37'):
+            scan_models(directory)
+    website.write_text('https://www.deepseek.com/\n')
+    scan_models(directory)
+    scan_models(ROOT)
 
 
 def test_schema_roles_migration(tmp_path):

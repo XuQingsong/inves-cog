@@ -61,3 +61,11 @@ AssertionError: config/monitored_entities.yaml:30: I37/FR-M0-10: non-whitelisted
 建议精确区分 URL 中的品牌域名和模型 token；保留所有文本扫描及两个对话模型白名单，验证合法官网不误伤、非法模型值仍拒绝、URL 里的真实非法模型 token 仍拒绝。需要授权修改 `tests/harness/tools/checks.py` 的识别逻辑，并在原 `test_llm_models_allowed` 增加正反断言；不删除官网、不拆字符串躲扫描、不增加模型白名单。
 
 K15/K16 发布后按任务书暂停 M1 后续实现，等待答复。M1 自身 14 项 blocking 已绿，但完整门禁仍红；核心提交不作为提交验收。
+
+## K15/K16 需求方答复与测试先行（2026-10-14）
+
+用户明确答复“授权这三项限定修正”：仅修改 `test_pending_registry` 的临时输入、`checks.py` 的品牌域名识别，并扩充原 `test_llm_models_allowed` 的正反断言。两个模型白名单、测试名、真实 milestones 均不变。
+
+先提交扩充测试：pending 探针改为完整的合成登记和只含 M0 的临时 milestones，使其不依赖真实模块进度；品牌官网、端口 URL 为正例，模型字段及 URL 路径、查询参数、片段和模型型域名为负例。
+
+修复识别逻辑前，定向运行结果为 `1 failed, 1 passed`：pending 棘轮正反探针均成立；官网正例仍因 `non-whitelisted model deepseek.com` 失败。随后才修扫描实现。
