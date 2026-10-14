@@ -67,8 +67,6 @@ def source_configuration(values):
     for source, names in REQUIRED.items():
         missing = [name for name in names if not values.get(name)]
         issues = []
-        if source == 'DashScope' and values.get('DASHSCOPE_API_KEY', '').startswith('sk-sp-'):
-            issues.append('subscription_key_requires_ordinary_api_key')
         result[source] = {'configured': not missing and not issues, 'missing': missing, 'issues': issues}
     result['Alpaca']['feed'] = 'sip'
     return result

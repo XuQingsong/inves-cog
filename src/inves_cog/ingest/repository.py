@@ -39,6 +39,7 @@ class Repository:
     def __init__(self, connection):
         self.connection = connection
         self.counts = {'collected': 0, 'inserted': 0, 'deduped': 0}
+        self.processed = 0
 
     def transaction(self):
         return self.connection.transaction() if hasattr(self.connection, 'transaction') else nullcontext()
@@ -56,6 +57,7 @@ class Repository:
         sql = f"INSERT INTO ingest.{table} ({','.join(fields)}) VALUES ({','.join(placeholders)}) ON CONFLICT ({conflict}) {action}"
         with self.transaction():
             self.connection.execute(sql, values)
+        self.processed += 1
 
     def write_job(self, row):
         fields = 'task_name trade_date started_at ended_at status processed_count error_summary params_version'.split()
@@ -82,6 +84,7 @@ class Repository:
                     update_values = [values[fields.index(key)] for key in mutable]
                     assignments = [f"{key}={placeholders[fields.index(key)]}" for key in mutable]
                     self.connection.execute(f"UPDATE ingest.info_items SET {','.join(assignments)} WHERE info_id=%s", update_values + [item['info_id']])
+        self.processed += 1
         self.counts['collected'] += 1
         self.counts['inserted' if inserted is not None else 'deduped'] += 1
         return 'inserted' if inserted is not None else 'deduped'
@@ -96,3 +99,55 @@ class Repository:
 
     def health_rows(self):
         return {row['source']: dict(row) for row in self.connection.execute('SELECT * FROM ingest.source_health').fetchall()}
+
+
+    def count_duplicate(self):
+        self.processed += 1
+        self.counts['collected'] += 1
+        self.counts['deduped'] += 1
+
+    def info_signature(self, info_id):
+        row = self.connection.execute('SELECT headline,body FROM ingest.info_items WHERE info_id=%s', (info_id,)).fetchone()
+        return (row['headline'],row['body']) if row else None
+
+    def graph_entities(self, fallback):
+        exists = self.connection.execute("SELECT to_regclass('graph.entities') AS relation").fetchone()['relation']
+        return list(self.connection.execute('SELECT * FROM graph.entities').fetchall()) if exists else fallback
+
+    def last_runs(self):
+        return {r['task_name']:r['started_at'] for r in self.connection.execute('SELECT task_name,max(started_at) AS started_at FROM ingest.job_runs GROUP BY task_name').fetchall()}
+
+    def get_cursor(self,key):
+        row=self.connection.execute('SELECT value FROM ingest.source_cursors WHERE cursor_key=%s',(key,)).fetchone()
+        return row['value'] if row else None
+
+    def set_cursor(self,key,value,stamp):
+        with self.transaction():
+            self.connection.execute('INSERT INTO ingest.source_cursors (cursor_key,value,updated_at) VALUES (%s,%s::jsonb,%s) ON CONFLICT (cursor_key) DO UPDATE SET value=EXCLUDED.value,updated_at=EXCLUDED.updated_at',(key,json_text(value),stamp))
+
+    def first_bar_date(self):
+        return self.connection.execute('SELECT min(trade_date) AS day FROM ingest.bars_daily').fetchone()['day']
+
+    def post_close(self,ticker,day):
+        row=self.connection.execute('SELECT post_close FROM ingest.bars_daily WHERE ticker=%s AND trade_date=%s',(ticker,day)).fetchone()
+        return row['post_close'] if row else None
+
+    def closes(self,ticker):
+        return {r['trade_date']:r['close'] for r in self.connection.execute('SELECT trade_date,close FROM ingest.bars_daily WHERE ticker=%s AND close IS NOT NULL',(ticker,)).fetchall()}
+
+    def latest_wide(self):
+        return list(self.connection.execute('SELECT * FROM ingest.wide_universe WHERE trade_date=(SELECT max(trade_date) FROM ingest.wide_universe)').fetchall())
+
+    def filings(self,ticker):
+        return {r['accession']:dict(r) for r in self.connection.execute('SELECT * FROM ingest.sec_filings WHERE ticker=%s',(ticker,)).fetchall()}
+
+    def supersede_fallback(self,ticker,day,stamp):
+        with self.transaction():
+            self.connection.execute('UPDATE ingest.earnings_events SET superseded_at=%s WHERE ticker=%s AND fallback AND reported_date=%s AND superseded_at IS NULL',(stamp,ticker,day))
+
+    def latest_app_ranks(self,chart):
+        return {r['app_id']:r['rank'] for r in self.connection.execute('SELECT app_id,rank FROM ingest.app_rank_snapshots WHERE chart=%s AND ts_utc=(SELECT max(ts_utc) FROM ingest.app_rank_snapshots WHERE chart=%s)',(chart,chart)).fetchall()}
+
+    def latest_website(self,url):
+        row=self.connection.execute('SELECT body FROM ingest.website_snapshots WHERE url=%s ORDER BY captured_at DESC LIMIT 1',(url,)).fetchone()
+        return row['body'] if row else None

@@ -47,7 +47,9 @@ class JobRunner:
         try:
             if not configured:
                 raise SourceError('Required source configuration absent', confirmed_unavailable=True)
-            result = operation()
+            from inves_cog.ingest.deadline import budget
+            with budget(self.timeout_seconds, self.monotonic):
+                result = operation()
             duration = self.monotonic() - timer
             if duration > self.timeout_seconds:
                 raise SourceError('Task exceeded its 30-minute budget')
@@ -58,6 +60,7 @@ class JobRunner:
                                note=result.get('note'), degraded=degraded)
             return result
         except Exception as exc:
+            row['processed_count'] = getattr(exc, 'processed_count', 0)
             row['error_summary'] = f'{type(exc).__name__}: {exc}'
             self.health.record(source, success=False, count=row['processed_count'],
                                latency=self.monotonic() - timer, note=row['error_summary'], configured=configured,

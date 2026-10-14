@@ -57,7 +57,7 @@ def earnings_fallback(ticker, data, *, clock):
     reaction = None
     flags = ['earnings_event_fallback']
     if session is None:
-        flags.append('earnings_event_time_unknown')
+        flags.extend(['earnings_time_unknown', 'earnings_event_time_unknown'])
     else:
         reaction = day if session == 'pre' and trading_day(day) else next_trading_day(day)
     return {'ticker': ticker, 'accession': None, 'item': None, 'accepted_at': None, 'session': session,
@@ -91,7 +91,7 @@ def submissions_rows(data, *, ticker, clock):
     return results
 
 
-def collect_submissions(client, *, cik, ticker, clock):
+def collect_submissions(client, *, cik, ticker, clock, existing=None, persist=None, verify_limit=None):
     data = client.submissions(cik)
     rows = submissions_rows(data, ticker=ticker, clock=clock)
     for historical in data.get('filings', {}).get('files', []):
@@ -105,7 +105,25 @@ def collect_submissions(client, *, cik, ticker, clock):
             row['cik'] = str(cik)
             rows.append(row)
     rows = list({row['accession']: row for row in rows}.values())
+    existing, checked = existing or {}, 0
+    if persist:
+        for row in rows:
+            previous = existing.get(row['accession'])
+            if previous and previous['raw'].get('accepted_index_source', {}).get('verified'):
+                row['accepted_at'] = previous['accepted_at']
+                row['raw']['accepted_index_source'] = previous['raw']['accepted_index_source']
+            persist(row)
     for row in rows:
+        from inves_cog.ingest.deadline import check
+        check()
+        previous = existing.get(row['accession'])
+        if previous and previous['raw'].get('accepted_index_source', {}).get('verified'):
+            row['accepted_at'] = previous['accepted_at']
+            row['raw']['accepted_index_source'] = previous['raw']['accepted_index_source']
+            continue
+        if verify_limit is not None and checked >= verify_limit:
+            continue
+        checked += 1
         if not re.fullmatch(r'\d{10}-\d{2}-\d{6}', row['accession']) or not str(cik).isdigit():
             raise SourceError('Invalid SEC accession or CIK for filing index')
         accession = row['accession']
@@ -119,6 +137,7 @@ def collect_submissions(client, *, cik, ticker, clock):
             evidence.update(error_type=type(exc).__name__, http_status=getattr(exc, 'status_code', None),
                             gap='index_accepted_unavailable')
         row['raw']['accepted_index_source'] = evidence
+        if persist: persist(row)
     return rows
 
 

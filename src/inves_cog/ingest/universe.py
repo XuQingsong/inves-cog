@@ -2,7 +2,7 @@
 from copy import deepcopy
 import re
 
-EXCHANGES = {'NYSE', 'NASDAQ', 'NYSEAMERICAN', 'NYSEARCA', 'BATS', 'CBOEBZX'}
+EXCHANGES = {'NYSE', 'NASDAQ', 'NYSEAMERICAN', 'NYSEARCA', 'BATS', 'CBOEBZX', 'AMEX', 'ARCA', 'CBOE'}
 NON_COMMON = re.compile(r'\b(?:ETF|ETN|Fund|Trust|Notes|Preferred|Depositary|ADR|ADS|Warrants?|Units?|Rights?)\b', re.I)
 SUFFIX = re.compile(r'(?:\.WS|\.U|\.R|-P\w*|\.PR\w*)$', re.I)
 

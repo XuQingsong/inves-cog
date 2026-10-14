@@ -50,15 +50,20 @@ class HTTPClient:
         self.limiter = limiter
 
     def request(self, method, url, *, params=None, headers=None, json=None, limiter=None):
+        from inves_cog.ingest.deadline import remaining
         for attempt in range(self.retries + 1):
+            seconds = remaining()
+            request_timeout = min(self.timeout, seconds) if seconds is not None else self.timeout
             budget = limiter or self.limiter
             if budget:
                 budget.acquire()
+                seconds = remaining()
+                request_timeout = min(self.timeout, seconds) if seconds is not None else self.timeout
             try:
                 if self.send is None:
                     import httpx
                     result = httpx.request(method, url, params=params, headers=headers,
-                                           json=json, timeout=self.timeout)
+                                           json=json, timeout=request_timeout, follow_redirects=True)
                     try:
                         data = result.json()
                     except ValueError:
@@ -66,7 +71,7 @@ class HTTPClient:
                     response = Response(result.status_code, data, dict(result.headers))
                 else:
                     response = self.send(method, url, params=params, headers=headers,
-                                         json=json, timeout=self.timeout)
+                                         json=json, timeout=request_timeout)
             except (TimeoutError, ConnectionError) as exc:
                 if attempt == self.retries:
                     raise SourceError('HTTP transport failed after bounded retries') from exc
