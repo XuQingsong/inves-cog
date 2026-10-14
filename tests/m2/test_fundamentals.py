@@ -333,9 +333,11 @@ def test_segment_mapping_pending():
                 'period_start':date(2026,4,1),'period_end':date(2026,6,30),'axis':'business',
                 'segment_raw':'DataCenterMember','revenue':52,'health_codes':[],
                 'evidence':{'parse_contract':'operating-aux-income-v3'}}]
+    repo.segments.append({**repo.segments[0],'segment_raw':'AssetsOnlyMember','evidence':{}})
     loader=RefreshLoader(); refreshed=service();refreshed.instance_loader=loader
     assert refreshed.collect_segments('AMD',filings)[0]['revenue']==52
     assert loader.calls==1
+    assert {r['segment_raw'] for r in repo.segment_rows('AMD')}=={'DataCenterMember'}
     refreshed.collect_segments('AMD',filings)
     assert loader.calls==1
 
