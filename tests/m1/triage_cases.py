@@ -187,3 +187,15 @@ def assert_news_triage(root, clock):
     assert len(usage) == before
     engine().process([dict(empty, info_id="news:Fixture:other-empty")])
     assert len(usage) == before + 2
+
+    queued = dict(
+        unknown[0],
+        extraction_status="pending",
+        extraction_source={
+            "news_triage": {"layer": 2, "screened": True, "material": True, "llm_full": False, "reason": "daily_budget"}
+        },
+    )
+    before = len(usage)
+    resumed = engine().process([queued])[0]
+    assert resumed["extraction_status"] == "ok" and resumed["extraction_source"]["news_triage"]["layer"] == 2
+    assert len(usage) == before + 2
