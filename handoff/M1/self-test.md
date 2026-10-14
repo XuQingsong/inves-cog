@@ -1,6 +1,6 @@
 # M1 自测报告
 
-基线：main 3e9df18、M1 v6、T01-T02-round2；2026-10-15。最终实现 624e2cf，待本轮最终报告一起推送；PR #3 仍为草稿。docs、golden、真实 milestones 未修改。
+基线：main 3e9df18、M1 v6、T01-T02-round2；2026-10-15。最终缓存实现 624e2cf，证据随本报告推送；PR #3 仍为草稿。docs、golden、真实 milestones 未修改。
 
 ## 1. 阻塞测试和工程门禁
 
