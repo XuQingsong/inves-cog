@@ -162,6 +162,12 @@ def test_wide_universe_rules():
 
 
 def test_news_dedupe_and_times():
+    from inves_cog.ingest.jobs import JobRunner,HealthBook
+    ticks=iter([0,1901,1901]); ledger=[]
+    runner=JobRunner(clock=frozen(),health=HealthBook(clock=frozen()),persist=ledger.append,monotonic=lambda:next(ticks,1901))
+    result=runner.run('fixture_timeout','Fixture',lambda:{'processed_count':3})
+    assert result['status']=='failed' and ledger[0]['processed_count']==3
+
     from inves_cog.ingest.runtime import Runtime
     from inves_cog.ingest.jobs import HealthBook
     from inves_cog.ingest.http import SourceError
