@@ -576,7 +576,9 @@ def test_info_item_contract(tmp_path):
         read_environment(configuration, environ={})
 
 
-def test_info_fields_extraction():
+def test_info_fields_extraction(tmp_path):
+    from tests.m1.usage_cases import assert_usage_accounting
+    assert_usage_accounting(tmp_path/'usage-recordings',frozen())
     from inves_cog.ingest.info import enrich, make_item
     from inves_cog.llm.client import Client
     llm = Client(registry=ROOT / 'config/llm_tasks.yaml', recordings=FIXTURES / 'recordings')
