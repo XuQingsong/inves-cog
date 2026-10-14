@@ -232,6 +232,20 @@ def test_consensus_import_idempotent(tmp_path):
 
 
 def test_health_contract():
+    from inves_cog.ingest.fundamentals.fx import FXBook, FXGap
+    rates = FXBook(json.loads((FIXTURES / 'fx_synthetic.json').read_text())['records'])
+    value, evidence = rates.convert(100, currency='EUR', start=date(2025,12,29),
+        end=date(2025,12,31), as_of=date(2026,1,6), field='revenue')
+    assert value == pytest.approx(115)
+    assert evidence['original_currency'] == 'EUR' and evidence['quotes'][-1]['observation_date'] == '2025-12-30'
+    value, evidence = rates.convert(100, currency='EUR', start=None,
+        end=date(2025,12,31), as_of=date(2026,1,6), field='cash')
+    assert value == pytest.approx(120) and evidence['effective_quote_date'] == '2025-12-30'
+    assert rates.convert(320, currency='TWD', start=None, end=date(2025,12,31), as_of=date(2026,1,6),field='cash')[0] == 10
+    with pytest.raises(FXGap, match='EUR.*revenue.*2025-12-29'):
+        rates.convert(100,currency='EUR',start=date(2025,12,29),end=date(2025,12,31),as_of=date(2025,12,29),field='revenue')
+    with pytest.raises(FXGap, match='unsupported'):
+        rates.convert(100,currency='XXX',start=None,end=date(2025,12,31),as_of=date(2026,1,6),field='cash')
     from inves_cog.ingest.fundamentals.health import health_row
     from inves_cog.ingest.fundamentals.profile import ProfileBook
     good = extract()

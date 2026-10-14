@@ -1,0 +1,41 @@
+{
+  "synthetic": true,
+  "records": [
+    {
+      "currency": "EUR",
+      "observation_date": "2025-12-29",
+      "realtime_start": "2025-12-30",
+      "value": 1.1
+    },
+    {
+      "currency": "EUR",
+      "observation_date": "2025-12-30",
+      "realtime_start": "2025-12-31",
+      "value": 1.2
+    },
+    {
+      "currency": "EUR",
+      "observation_date": "2025-12-31",
+      "realtime_start": "2026-01-05",
+      "value": null
+    },
+    {
+      "currency": "EUR",
+      "observation_date": "2025-12-30",
+      "realtime_start": "2026-01-10",
+      "value": 1.9
+    },
+    {
+      "currency": "TWD",
+      "observation_date": "2025-12-30",
+      "realtime_start": "2025-12-31",
+      "value": 32
+    },
+    {
+      "currency": "KRW",
+      "observation_date": "2025-12-30",
+      "realtime_start": "2025-12-31",
+      "value": 1400
+    }
+  ]
+}
