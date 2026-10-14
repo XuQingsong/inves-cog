@@ -61,5 +61,14 @@ class InstanceLoader:
             return output
         finally: model.close();controller.close()
     def segments(self,filing,*,ticker,fx=None):
-        return parse_segments(self.path(filing),ticker=ticker,accession=filing['accession'],filed=filing['filing_date'],
-                              offline=self.offline,cache_dir=self.cache/'taxonomy',fx=fx,fetch=self.sec.get)
+        path=self.path(filing);primary=path.parent/'primary-original.html'
+        name=filing.get('primary_document')
+        if not primary.exists() and not self.offline and name:
+            if Path(name).name!=name:raise ValueError('Unsafe primary document')
+            base=f'https://www.sec.gov/Archives/edgar/data/{int(filing["cik"])}/{filing["accession"].replace("-", "")}/'
+            value=self.sec.get(base+name)
+            if not isinstance(value,str):raise ValueError('Non-text primary filing')
+            temporary=primary.with_suffix('.html.part');temporary.write_text(value);temporary.replace(primary)
+        return parse_segments(path,ticker=ticker,accession=filing['accession'],filed=filing['filing_date'],
+                              offline=self.offline,cache_dir=self.cache/'taxonomy',fx=fx,fetch=self.sec.get,
+                              primary_html=primary.read_bytes() if primary.exists() else None)
