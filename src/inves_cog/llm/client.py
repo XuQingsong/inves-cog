@@ -2,6 +2,7 @@
 from dataclasses import asdict, dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Callable
 
@@ -32,6 +33,11 @@ class Client:
             raise ValueError('Choose recorded mode or injected transport')
         self.recordings = Path(recordings) if recordings is not None else None
         self.transport = transport
+
+    @classmethod
+    def from_environment(cls, values=None, *, send=None):
+        from inves_cog.llm.transport import OpenAICompatibleTransport
+        return cls(transport=OpenAICompatibleTransport(os.environ if values is None else values, send=send))
 
     def call(self, task: str, payload: dict) -> dict:
         spec = self.registry.resolve(task)
@@ -73,5 +79,5 @@ def configure(client: Client):
 
 def call(task: str, payload: dict) -> dict:
     """Shared module-level interface. R4 supplies the real transport explicitly."""
-    client = _configured_client or Client()
+    client = _configured_client or Client.from_environment()
     return client.call(task, payload)

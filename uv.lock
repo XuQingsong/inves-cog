@@ -193,12 +193,12 @@ source = { editable = "." }
 dependencies = [
     { name = "exchange-calendars" },
     { name = "fastapi" },
+    { name = "httpx" },
     { name = "pyyaml" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "httpx" },
     { name = "pytest" },
     { name = "requests" },
 ]
@@ -207,12 +207,12 @@ dev = [
 requires-dist = [
     { name = "exchange-calendars", specifier = ">=4.5,<5" },
     { name = "fastapi", specifier = ">=0.115,<1" },
+    { name = "httpx", specifier = "==0.28.1" },
     { name = "pyyaml", specifier = ">=6,<7" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "httpx", specifier = "==0.28.1" },
     { name = "pytest", specifier = ">=8,<10" },
     { name = "requests", specifier = ">=2,<3" },
 ]

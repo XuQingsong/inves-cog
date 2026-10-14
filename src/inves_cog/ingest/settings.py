@@ -69,10 +69,6 @@ def source_configuration(values):
         issues = []
         if source == 'DashScope' and values.get('DASHSCOPE_API_KEY', '').startswith('sk-sp-'):
             issues.append('subscription_key_requires_ordinary_api_key')
-        if source.startswith('LLM_'):
-            prefix = 'LLM_HARD' if source == 'LLM_hard' else 'LLM_STANDARD'
-            if 'token-plan.' in values.get(prefix + '_BASE_URL', ''):
-                issues.append('interactive_subscription_endpoint_requires_backend_api_endpoint')
         result[source] = {'configured': not missing and not issues, 'missing': missing, 'issues': issues}
     result['Alpaca']['feed'] = 'sip'
     return result
