@@ -336,6 +336,21 @@ def test_consensus_import_idempotent(tmp_path):
     store = ConsensusStore()
     folder = FIXTURES / 'muse_export_synthetic'
     import_muse_exports(folder, store=store)
+    # Imported target years must use the snapshot's PIT annual filing.
+    resolved=ConsensusStore();lookups=[]
+    def annual_end(ticker,as_of):
+        lookups.append((ticker,as_of))
+        return date(2025,12,31)
+    import_muse_exports(folder,store=resolved,annual_end_asof=annual_end)
+    assert len(lookups)==len(resolved.rows)
+    for historical in resolved.rows.values():
+        assert historical['fy_cy']==date(2026,12,31) and historical['fy_ny']==date(2027,12,31)
+        assert historical['raw']['fiscal_year_source']['as_of']==historical['as_of'].isoformat()
+        assert historical['captured_at'] is None
+    unknown=ConsensusStore()
+    import_muse_exports(folder,store=unknown,annual_end_asof=lambda ticker,as_of:None)
+    assert all(row['fy_cy'] is None and row['raw']['fiscal_year_source']['reason']=='PIT annual filing unavailable' for row in unknown.rows.values())
+
     count = len(store.rows)
     assert count > 0
     import_muse_exports(folder, store=store)
