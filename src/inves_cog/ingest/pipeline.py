@@ -8,7 +8,7 @@ from inves_cog.ingest.adapters import (Embedding, Trends, Websites, alpaca_split
     cboe_statistics, cik_mapping, frames_shares)
 from inves_cog.ingest.deadline import check
 from inves_cog.ingest.http import HTTPClient, RateLimiter, SourceError
-from inves_cog.ingest.info import enrich, make_item
+from inves_cog.ingest.info import make_item
 from inves_cog.ingest.jobs import HealthBook
 from inves_cog.ingest.market import (MarketCollector, NY, exchange, local_at, post_close, split_factors, trading_day)
 from inves_cog.ingest.providers import (Alpaca, FRED, alpha_calendar, apple_chart,
@@ -19,6 +19,7 @@ from inves_cog.ingest.sec import collect_submissions, earnings_event, earnings_f
 from inves_cog.ingest.signals import rank_jumps, trend_event
 from inves_cog.ingest.sources import macro_items, parse_finra, website_change
 from inves_cog.ingest.universe import build_universe, daily_liquidity
+from inves_cog.ingest.triage import NewsTriage
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -54,6 +55,22 @@ class Pipeline:
         fallback = yaml.safe_load((ROOT / 'config/monitored_entities.yaml').read_text())['entities']
         self.monitored = self.repo.monitored_entities(fallback)
         self.entities = self.repo.graph_entities(self.monitored)
+        aliases = yaml.safe_load((ROOT / 'config/news_entities.yaml').read_text())['companies']
+        for ticker in self.stocks:
+            company = aliases[ticker]
+            existing = next((e for e in self.entities if ticker in e.get('tickers', [])
+                             and e['name'].casefold() == company['name'].casefold()),None)
+            if existing:
+                existing['aliases'] = sorted(set(existing.get('aliases', [])) | set(company['aliases']))
+            else:
+                self.entities.append({'entity_id':'ticker:'+ticker, 'tickers':[ticker], **company})
+        params = yaml.safe_load((ROOT / 'config/params/p-2026.10/m1.yaml').read_text())['m1']
+        self.triage = NewsTriage(llm=self.llm, embed=self.embed, entities=self.entities,
+                                monitored_ids={e['entity_id'] for e in self.monitored},
+                                pool_tickers=self.stocks, clock=self.clock,
+                                daily_budget=params['llm_daily_token_budget'],
+                                usage_today=lambda:self.repo.llm_usage(self.clock.now_utc()),
+                                cached_root=self.repo.enriched_root)
         self.day_override = None
 
     @property
@@ -82,21 +99,28 @@ class Pipeline:
     def enrich_pending(self, limit=32):
         counts = Counter()
         try:
-            for item in self.repo.pending_info(limit):
+            items = self.repo.pending_info(limit,as_of=self.clock.now_utc())
+            for result in self.triage.process(items):
                 check()
-                result=enrich(item,llm=self.llm,embed=self.embed,entities=self.entities,clock=self.clock)
                 if self.repo.apply_enrichment(result):
                     counts['processed_count'] += 1
                     counts['tagging_failed'] += 'entity_tagging_failed' in result['flags']
                     counts['embedding_failed'] += 'embedding_failed' in result['flags']
+                    counts['deferred'] += result['extraction_status'] == 'pending'
         except Exception as exc:
             exc.processed_count=counts['processed_count']
             raise
         counts.setdefault('processed_count',0)
         report=dict(counts)
-        report['status']='degraded' if counts['tagging_failed'] or counts['embedding_failed'] else 'ok'
-        report['note']=f"tagging_failed={counts['tagging_failed']}; embedding_failed={counts['embedding_failed']}"
+        report['status']='degraded' if counts['tagging_failed'] or counts['embedding_failed'] or counts['deferred'] else 'ok'
+        report['note']=f"tagging_failed={counts['tagging_failed']}; embedding_failed={counts['embedding_failed']}; deferred={counts['deferred']}"
         return report
+
+    def enrich_on_demand(self, items):
+        results = self.triage.process(items,on_demand=True)
+        for result in results:
+            self.repo.apply_enrichment(result)
+        return results
 
     def bars(self, *, prefill=False):
         mode=bar_run_mode(self.clock,self.day)

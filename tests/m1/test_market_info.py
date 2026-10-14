@@ -441,11 +441,14 @@ def test_info_item_contract(tmp_path):
             row=self.rows.get(identifier); return (row['headline'],row['body']) if row else None
         def put_info(self,row): self.rows[row['info_id']]=row;self.collected+=1
         def count_duplicate(self): self.collected+=1
-        def pending_info(self,limit): return [row for row in self.rows.values() if row['extraction_status']=='pending'][:limit]
+        def pending_info(self,limit,*,as_of): return [row for row in self.rows.values() if row['extraction_status']=='pending'][:limit]
         def apply_enrichment(self,row): self.rows[row['info_id']]=row;return True
     pipeline=Pipeline.__new__(Pipeline);pipeline.repo=Queue();pipeline.clock=frozen()
     pipeline.llm=LLM();pipeline.embed=lambda *args,**kw:[.1]*1024;pipeline.entities=[]
-    raw=make_item('news','Fixture','queued',headline='Apple raises guidance',body='AAPL raises guidance; a broker raises its rating. Published 2026-10-28T16:00:00Z.',clock=frozen())
+    from inves_cog.ingest.triage import NewsTriage
+    pipeline.triage=NewsTriage(llm=pipeline.llm,embed=pipeline.embed,entities=[],monitored_ids=set(),
+                               pool_tickers={'AAPL'},clock=pipeline.clock)
+    raw=make_item('news','Fixture','queued',headline='Apple raises guidance',body='AAPL raises guidance; a broker raises its rating. Published 2026-10-28T16:00:00Z.',tickers=['AAPL'],clock=frozen())
     pipeline.info([raw]); assert not calls
     assert pipeline.repo.rows[raw['info_id']]['extraction_status']=='pending'
     result=pipeline.enrich_pending()

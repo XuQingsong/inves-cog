@@ -181,11 +181,31 @@ class Repository:
         return row['body'] if row else None
 
 
-    def pending_info(self,limit=32):
-        return [dict(row) for row in self.connection.execute("SELECT * FROM ingest.info_items WHERE extraction_status='pending' ORDER BY first_seen_at,info_id LIMIT %s",(limit,)).fetchall()]
+    def pending_info(self,limit=32,*,as_of):
+        return [dict(row) for row in self.connection.execute("""SELECT * FROM ingest.info_items
+            WHERE extraction_status='pending'
+            AND coalesce((extraction_source->'news_triage'->>'retry_at')::timestamptz,first_seen_at)<=%s
+            ORDER BY first_seen_at,info_id LIMIT %s""",(as_of,limit)).fetchall()]
 
-    def has_pending_info(self):
-        return self.connection.execute("SELECT EXISTS(SELECT 1 FROM ingest.info_items WHERE extraction_status='pending') AS pending").fetchone()['pending']
+    def has_pending_info(self,*,as_of):
+        return self.connection.execute("""SELECT EXISTS(SELECT 1 FROM ingest.info_items
+            WHERE extraction_status='pending'
+            AND coalesce((extraction_source->'news_triage'->>'retry_at')::timestamptz,first_seen_at)<=%s) AS pending""",
+            (as_of,)).fetchone()['pending']
+
+    def llm_usage(self,as_of):
+        return dict(self.connection.execute("""SELECT
+            coalesce(sum(input_tokens+output_tokens),0) AS tokens,
+            count(*) FILTER (WHERE input_tokens IS NULL OR output_tokens IS NULL) AS missing
+            FROM ingest.llm_calls WHERE model='deepseek-v4.1-flash'
+            AND (created_at AT TIME ZONE 'America/New_York')::date=(%s AT TIME ZONE 'America/New_York')::date""",
+            (as_of,)).fetchone())
+
+    def enriched_root(self,root):
+        row = self.connection.execute("""SELECT * FROM ingest.info_items WHERE source_root=%s
+            AND extraction_status='ok' AND extraction_source ? 'news_triage'
+            ORDER BY first_seen_at,info_id LIMIT 1""",(root,)).fetchone()
+        return dict(row) if row else None
 
     def apply_enrichment(self,row):
         fields=['entities','embedding','extraction_status','flags','is_guidance','guidance_direction','is_rating_change','extraction_source']

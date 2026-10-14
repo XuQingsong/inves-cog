@@ -60,7 +60,7 @@ def main():
                 from inves_cog.ingest.jobs import HealthBook,JobRunner
                 runner=JobRunner(clock=clock,health=HealthBook(clock=clock,rows=pipeline.repo.health_rows(),persist=pipeline.repo.write_health),persist=pipeline.repo.write_job)
                 while True:
-                    if pipeline.repo.has_pending_info():
+                    if pipeline.repo.has_pending_info(as_of=clock.now_utc()):
                         output=runner.run('info_enrichment','InfoExtraction',pipeline.enrich_pending)
                         print(json_text(output),flush=True)
                     else: output={'processed_count':0,'note':'no pending information'}
