@@ -1,6 +1,6 @@
 """PIT FRED conversion with inspectable evidence and actionable exceptions."""
 from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 import math
 
 SERIES={'EUR':('DEXUSEU',False),'TWD':('DEXTAUS',True),'KRW':('DEXKOUS',True)}
@@ -24,9 +24,8 @@ class FXBook:
         if currency=='USD': return value,{'original_currency':'USD','method':'identity'}
         if currency not in SERIES: raise FXGap(currency=currency,field=field,period=(start,end),as_of=as_of,reason='unsupported FRED currency series')
         end,as_of=as_date(end),as_date(as_of)
-        # For balances this is an end-of-period aggregation over the fiscal
-        # year's observations. It is not a fabricated quote for the holiday.
-        first=as_date(start) if start else date(end.year,1,1)
+        # Q-M2-17: seven calendar days, including across a year boundary.
+        first=as_date(start) if start else end-timedelta(days=7)
         visible={}; unpublished=set(); raw=[]
         for original in self.rows:
             if original.get('currency')!=currency: continue
@@ -49,13 +48,15 @@ class FXBook:
             per_usd=1/rate if SERIES[currency][1] else rate
             quotes.append({'observation_date':observed.isoformat(),'realtime_start':str(row['realtime_start']),
                            'raw_rate':rate,'usd_per_currency':per_usd})
-        if not quotes: raise FXGap(currency=currency,field=field,period=(start,end),as_of=as_of,reason='no effective released quote in period; verify FRED response, release date and series')
+        if not quotes: raise FXGap(currency=currency,field=field,period=(start,end),as_of=as_of,reason='no effective released quote in period' if start else 'no effective released quote within 7 calendar days before period end')
         selected=quotes if start else quotes[-1:]
         factor=sum(r['usd_per_currency'] for r in selected)/len(selected)
         return value*factor,{'original_currency':currency,'original_value':value,'series':SERIES[currency][0],
             'direction':'USD/currency','method':'daily_mean' if start else 'end_of_period',
             'period_start':first.isoformat(),'period_end':end.isoformat(),'visible_as_of':as_of.isoformat(),
-            'effective_quote_date':selected[-1]['observation_date'],'factor':factor,'quotes':selected,
+            'effective_quote_date':selected[-1]['observation_date'],
+            'lookback_days':None if start else (end-as_date(selected[-1]['observation_date'])).days,
+            'factor':factor,'quotes':selected,
             'nonquoted_dates':[str(d) for d,r in sorted(visible.items()) if r.get('value') in (None,'.')]}
 
 
