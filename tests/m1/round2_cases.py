@@ -138,3 +138,32 @@ def assert_failure_reasons(result):
     assert errors["entity_tagging"]["type"] and errors["entity_tagging"]["message"]
     assert errors["info_fields_extraction"]["type"] and errors["info_fields_extraction"]["message"]
     assert errors["embedding"]["type"] == "ValueError"
+
+
+def assert_embedding_auth_isolation():
+    from inves_cog.ingest.adapters import Embedding
+    from inves_cog.ingest.http import HTTPClient, Response, SourceError
+
+    requests = []
+
+    def denied(*args, **kwargs):
+        requests.append(1)
+        return Response(401, {})
+
+    configuration = {"DASHSCOPE_API_KEY": "fixture-not-a-key", "DASHSCOPE_BASE_URL": "https://example.invalid/v1"}
+    adapter = Embedding(configuration, http=HTTPClient(denied, retries=0))
+    for text in ["first", "second"]:
+        try:
+            adapter(text, model="text-embedding-v3", dimensions=1024)
+        except SourceError as exc:
+            assert exc.status_code == 401
+        else:
+            raise AssertionError("authentication failure must remain visible")
+    assert len(requests) == 1
+    responses = iter([Response(503, {}), Response(200, {"data": [{"embedding": [0.1] * 1024}]})])
+    adapter = Embedding(configuration, http=HTTPClient(lambda *a, **k: next(responses), retries=0))
+    try:
+        adapter("transient", model="text-embedding-v3", dimensions=1024)
+    except SourceError:
+        pass
+    assert adapter("recovered", model="text-embedding-v3", dimensions=1024) == [0.1] * 1024
