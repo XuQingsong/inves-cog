@@ -250,7 +250,7 @@ class Pipeline:
         while previous.weekday() >= 5: previous -= timedelta(days=1)
         items = sec_daily_index(self.require(self.sec, 'SEC'), previous, clock=self.clock)
         for item in items:
-            if not self.repo.info_signature(item['info_id']): item['body'] = self.sec.get(item['url'])
+            item['body'] = self.sec.get(item['url'])
         return self.info(items)
 
     def apps(self, chart):
@@ -291,7 +291,10 @@ class Pipeline:
     def fred_task(self):
         fred, count = self.require(self.fred, 'FRED'), 0
         for series in yaml.safe_load((ROOT / 'config/params/p-2026.10/m1.yaml').read_text())['m1']['fred_series']:
-            for row in fred.collect(series):
+            try: observations=fred.collect(series)
+            except SourceError as exc:
+                raise SourceError(f'FRED {series}: {exc}',status_code=exc.status_code) from exc
+            for row in observations:
                 check(); self.repo.write('macro_observations', row)
                 self.info(macro_items([row], clock=self.clock)); count += 1
         return {'processed_count': count}

@@ -33,6 +33,12 @@ def normalized_body(body):
     return re.sub(r'\s+', ' ', unicodedata.normalize('NFKC', ''.join(parser.parts))).strip()
 
 
+def extraction_body(body):
+    """Visible prose for model input; source_root normalization is unchanged."""
+    visible=re.sub(r'<(script|style)\b[^>]*>.*?</\1\s*>','',body or '',flags=re.I|re.S)
+    return normalized_body(visible)
+
+
 def source_root(body, *, provider=None, upstream_id=None):
     if provider and upstream_id is not None:
         return f'{provider}:{upstream_id}'
@@ -95,10 +101,11 @@ class InfoStore:
 
 def enrich(item, *, llm, embed, entities, clock):
     result = deepcopy(item)
-    payload = {'headline': item['headline'], 'body': (item['body'] or '')[:2000]}
+    prose=extraction_body(item['body'])
+    payload = {'headline': item['headline'], 'body': prose[:2000]}
     failed = False
     for entity in entities:
-        haystack = (item['headline'] + ' ' + (item['body'] or '')).casefold()
+        haystack = (item['headline'] + ' ' + prose).casefold()
         terms = [entity['name'], *entity.get('aliases', [])]
         if set(entity.get('tickers', [])) & set(item['tickers']) or any(re.search(r'(?<!\w)' + re.escape(term.casefold()) + r'(?!\w)', haystack) for term in terms):
             result['entities'].append(entity['entity_id'])
@@ -143,7 +150,7 @@ def enrich(item, *, llm, embed, entities, clock):
     result['extraction_status'] = 'failed' if failed else 'ok'
     if embed is not None:
         try:
-            vector = embed(item['headline'] + '\n' + (item['body'] or '')[:2000], model='text-embedding-v3', dimensions=1024)
+            vector = embed(item['headline'] + '\n' + prose[:2000], model='text-embedding-v3', dimensions=1024)
             if not isinstance(vector, list) or len(vector) != 1024 or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in vector):
                 raise ValueError('Invalid embedding dimension or value')
             result['embedding'] = vector

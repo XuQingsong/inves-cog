@@ -42,7 +42,7 @@ def parse_finra(response, *, allowed_tickers, shares_by_ticker=None):
     shares_by_ticker = shares_by_ticker or {}
     for record in response:
         ticker = record.get('symbolCode')
-        exchange = str(record.get('issueExchange', '')).upper()
+        exchange = str(record.get('marketClassCode', record.get('issueExchange', ''))).upper()
         if ticker not in allowed_tickers or exchange not in {'NYSE', 'NASDAQ', 'N', 'Q'}:
             continue
         short = optional_number(record.get('currentShortPositionQuantity'))

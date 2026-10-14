@@ -417,6 +417,8 @@ def test_info_item_contract(tmp_path):
     class CBOE:
         def get(self,*args,**kw):
             return '<input value="2026-10-28"><table><tr><th colspan="4">SUM OF ALL PRODUCTS</th></tr><tr><th>Name</th><th>Call</th><th>Put</th><th>Total</th></tr><tr><td>VOLUME</td><td>100</td><td>50</td><td>150</td></tr><tr><td>OPEN INTEREST</td><td>200</td><td>100</td><td>300</td></tr></table>'
+    from inves_cog.ingest.http import SourceError
+    with pytest.raises(SourceError,match='date'): cboe_statistics(CBOE(),date(2026,10,29))
     statistics=cboe_statistics(CBOE(),date(2026,10,28))
     assert statistics[0]['category']=='total' and statistics[0]['call_volume']==100
     assert statistics[0]['put_call_ratio']==.5 and statistics[0]['open_interest']==300
@@ -429,6 +431,10 @@ def test_info_item_contract(tmp_path):
     listed=finra_short_interest(FINRA(),tickers=['AAPL'])
     assert parse_finra(listed,allowed_tickers={'AAPL'})[0]['days_to_cover']==5
     assert parse_finra([{'symbolCode':'AAPL','marketClassCode':'OTC'}],allowed_tickers={'AAPL'})==[]
+    class OTC:
+        def request(self,*args,**kw): return [{'symbolCode':'AAPL','marketClassCode':'OTC'}]
+    with pytest.raises(SourceError,match='coverage'): finra_short_interest(OTC(),tickers=['AAPL'])
+
     data = {'observations': [{'date': '2026-10-01', 'realtime_start': '2026-10-02', 'value': '.'}, {'date': '2026-10-01', 'realtime_start': '2026-10-03', 'value': '2.5'}]}
     observations = fred_observations('DGS2', data, units='Percent', clock=frozen())
     assert observations[0]['value'] is None and observations[1]['value'] == 2.5

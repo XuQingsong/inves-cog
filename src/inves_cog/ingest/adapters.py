@@ -147,26 +147,28 @@ class _Tables(HTMLParser):
 
 
 def cboe_statistics(http, day):
-    html = http.get('https://www.cboe.com/markets/us/options/market-statistics/daily', params={'dt': day.isoformat()})
-    if not isinstance(html, str): raise SourceError('CBOE daily response is not HTML')
-    parser = _Tables(); parser.feed(html)
-    categories = {'SUM OF ALL PRODUCTS': 'total', 'INDEX OPTIONS': 'index',
-                  'EXCHANGE TRADED PRODUCTS': 'etf', 'EQUITY OPTIONS': 'equity'}
-    # Categories are adjacent headings in the official HTML, not individual stock tables.
+    html=http.get('https://www.cboe.com/markets/us/options/market-statistics/daily',params={'dt':day.isoformat()})
+    if not isinstance(html,str): raise SourceError('CBOE daily response is not HTML')
     import re
-    output = []
-    for heading, category in categories.items():
-        match = re.search(re.escape(heading) + r'.*?(<table\b.*?</table>)', html, re.I | re.S)
-        if not match: continue
-        table = _Tables(); table.feed(match.group(1))
-        for rows in table.tables:
-            volume = next((r for r in rows if r and r[0].upper() == 'VOLUME'), None)
-            interest = next((r for r in rows if r and r[0].upper() == 'OPEN INTEREST'), None)
-            if volume and len(volume) >= 3:
-                call, put = optional_number(volume[1]), optional_number(volume[2])
-                output.append({'trade_date': day, 'category': category, 'call_volume': call,
-                    'put_volume': put, 'put_call_ratio': put / call if call and put is not None else None,
-                    'open_interest': optional_number(interest[3]) if interest and len(interest) > 3 else None,
-                    'source': 'CBOE'})
+    decoded=html.replace('\\"','"')
+    observed=re.search(r'["\']selectedDate["\']\s*:\s*["\'](\d{4}-\d{2}-\d{2})',decoded)
+    if observed is None:
+        observed=re.search(r'<input\b[^>]*value=["\'](\d{4}[/-]\d{2}[/-]\d{2})',html)
+    if observed is None or observed.group(1).replace('/','-')!=day.isoformat():
+        raise SourceError('CBOE statistics date missing or differs from requested date')
+    parser=_Tables();parser.feed(html)
+    categories={'SUM OF ALL PRODUCTS':'total','INDEX OPTIONS':'index',
+        'EXCHANGE TRADED PRODUCTS':'etf','EQUITY OPTIONS':'equity'}
+    output=[]
+    for rows in parser.tables:
+        heading=next((r[0] for r in rows if len(r)==1),None)
+        volume=next((r for r in rows if r and r[0].upper()=='VOLUME'),None)
+        interest=next((r for r in rows if r and r[0].upper()=='OPEN INTEREST'),None)
+        if not heading or not volume or len(volume)<3: continue
+        category=categories.get(heading.upper()) or re.sub(r'[^a-z0-9]+','_',heading.lower()).strip('_')
+        call,put=optional_number(volume[1]),optional_number(volume[2])
+        output.append({'trade_date':day,'category':category,'category_label':heading,'call_volume':call,
+            'put_volume':put,'put_call_ratio':put/call if call and put is not None else None,
+            'open_interest':optional_number(interest[3]) if interest and len(interest)>3 else None,'source':'CBOE'})
     if not output: raise SourceError('CBOE daily market tables absent; no substitute produced')
     return output

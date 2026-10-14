@@ -167,9 +167,14 @@ class FRED:
         visible = min(server_day, self.clock.now_utc().date()).isoformat()
         offset, rows, seen = 0, [], set()
         while True:
-            data = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations',
-                params={**params, 'realtime_start': '1776-07-04', 'realtime_end': visible,
-                        'output_type': 1, 'offset': offset, 'limit': 100000}))
+            try:
+                data = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations',
+                    params={**params, 'realtime_start': '1776-07-04', 'realtime_end': visible,
+                            'output_type': 1, 'offset': offset, 'limit': 100000}))
+            except SourceError as exc:
+                if offset == 0 and exc.status_code == 400:
+                    return self.collect_vintages(series_id,units,visible)
+                raise
             batch = data.get('observations')
             count = data.get('count')
             if not isinstance(batch, list) or not isinstance(count, int) or count < 0:
@@ -188,6 +193,49 @@ class FRED:
                 raise SourceError('FRED pagination ended before declared count')
 
 
+    def collect_vintages(self,series_id,units,visible):
+        """Bound each real-time range using official vintage dates.
+
+        Type 1 retains realtime_start. Later ranges overlap the preceding
+        vintage; rows clipped to that anchor are ignored, since the earlier
+        range already stored them. Old values never gain a fake release date.
+        """
+        base={'api_key':self.key,'file_type':'json','series_id':series_id}
+        vintages=[]; offset=0
+        while True:
+            data=require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/vintagedates',
+                params={**base,'realtime_end':visible,'offset':offset,'limit':1000,'sort_order':'asc'}))
+            batch=data.get('vintage_dates'); count=data.get('count')
+            if not isinstance(batch,list) or not isinstance(count,int): raise SourceError('Malformed FRED vintage-date pagination')
+            vintages.extend(day for day in batch if date.fromisoformat(day)<=date.fromisoformat(visible))
+            offset+=len(batch)
+            if offset>=count: break
+            if not batch: raise SourceError('FRED vintage dates ended before count')
+        vintages=sorted(set(vintages)); result=[]; seen=set()
+        if not vintages: raise SourceError('FRED supplied no visible historical vintage dates')
+        size=getattr(self,'vintage_batch_size',1000)
+        for start in range(0,len(vintages),size):
+            anchor=vintages[start-1] if start else None
+            first=anchor or '1776-07-04'; last=vintages[min(start+size,len(vintages))-1]
+            offset=0
+            while True:
+                data=require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations',
+                    params={**base,'realtime_start':first,'realtime_end':last,'output_type':1,'offset':offset,'limit':10000}))
+                batch=data.get('observations'); count=data.get('count')
+                if not isinstance(batch,list) or not isinstance(count,int): raise SourceError('Malformed FRED vintage observations')
+                for row in fred_observations(series_id,data,units=units,clock=self.clock):
+                    vintage=row['realtime_start'].isoformat()
+                    if anchor and vintage<=anchor: continue
+                    if vintage>last: raise SourceError('FRED observation version crosses requested range')
+                    key=(row['observation_date'],row['realtime_start'])
+                    if key in seen: raise SourceError('Repeated FRED vintage observation')
+                    seen.add(key);result.append(row)
+                offset+=len(batch)
+                if offset>=count: break
+                if not batch: raise SourceError('FRED vintage observations ended before count')
+        return result
+
+
 def alpha_calendar(http, *, key):
     if not key:
         raise SourceError('Alpha Vantage key absent: 等待 R5', confirmed_unavailable=True)
@@ -198,10 +246,17 @@ def alpha_calendar(http, *, key):
 
 
 def finra_short_interest(http, *, tickers):
-    data = http.request('POST', 'https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest',
-                        json={'limit': 5000, 'compareFilters': [{'compareType': 'IN', 'fieldName': 'symbolCode', 'fieldValue': list(tickers)}]})
-    if not isinstance(data, list):
-        raise SourceError('FINRA response format not a list', confirmed_unavailable=True)
-    if not any(str(row.get('issueExchange', '')).upper() in {'NYSE', 'NASDAQ', 'N', 'Q'} for row in data):
-        raise SourceError('FINRA dataset does not establish NYSE/Nasdaq coverage', confirmed_unavailable=True)
-    return data
+    rows=[]; offset=0; signatures=set()
+    while True:
+        batch=http.request('POST','https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest',
+            headers={'Accept':'application/json'},json={'limit':1000,'offset':offset,
+                'domainFilters':[{'fieldName':'symbolCode','values':list(tickers)}]})
+        if not isinstance(batch,list): raise SourceError('FINRA response format not a list',confirmed_unavailable=True)
+        if not batch: break
+        signature=json.dumps(batch,sort_keys=True)
+        if signature in signatures: raise SourceError('Repeated FINRA page')
+        signatures.add(signature);rows.extend(batch);offset+=len(batch)
+        if len(batch)<1000: break
+    if not any(str(row.get('marketClassCode',row.get('issueExchange',''))).upper() in {'NYSE','NASDAQ','N','Q'} for row in rows):
+        raise SourceError('FINRA dataset does not establish NYSE/Nasdaq coverage',confirmed_unavailable=True)
+    return rows
