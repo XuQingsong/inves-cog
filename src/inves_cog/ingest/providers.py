@@ -155,9 +155,34 @@ class FRED:
         params = {'api_key': self.key, 'file_type': 'json', 'series_id': series_id}
         series = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series', params=params))
         units = series['seriess'][0]['units']
-        # Preserve vintage records. Revisions are separate rows, never an overwrite.
-        data = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations', params={**params, 'realtime_start': '1776-07-04', 'realtime_end': self.clock.now_utc().date().isoformat(), 'output_type': 3}))
-        return fred_observations(series_id, data, units=units, clock=self.clock)
+        try:
+            server_day = date.fromisoformat(series['realtime_end'])
+        except (KeyError, TypeError, ValueError):
+            raise SourceError('FRED metadata lacks a valid server realtime_end') from None
+        # UTC can already be tomorrow at FRED. Use the reported API date rather
+        # than guessing its timezone, and never cross the injected as-of date.
+        visible = min(server_day, self.clock.now_utc().date()).isoformat()
+        offset, rows, seen = 0, [], set()
+        while True:
+            data = require_mapping(self.http.get('https://api.stlouisfed.org/fred/series/observations',
+                params={**params, 'realtime_start': '1776-07-04', 'realtime_end': visible,
+                        'output_type': 3, 'offset': offset, 'limit': 100000}))
+            batch = data.get('observations')
+            count = data.get('count')
+            if not isinstance(batch, list) or not isinstance(count, int) or count < 0:
+                raise SourceError('Malformed FRED observations pagination')
+            parsed = fred_observations(series_id, data, units=units, clock=self.clock)
+            for row in parsed:
+                key = (row['observation_date'], row['realtime_start'])
+                if key in seen:
+                    raise SourceError('FRED returned repeated vintage rows')
+                seen.add(key)
+                rows.append(row)
+            offset += len(batch)
+            if offset >= count:
+                return rows
+            if not batch:
+                raise SourceError('FRED pagination ended before declared count')
 
 
 def alpha_calendar(http, *, key):
