@@ -344,5 +344,41 @@ def test_llm_extraction_failure_degrades():
         client.call('segment_mapping_draft', {})
     assert len(calls) == 1 and calls[0].timeout_seconds == 900
     assert calls[0].task == 'segment_mapping_draft'
+    from inves_cog.ingest.settings import source_configuration
+    configuration = {}
+    for prefix in ('LLM_HARD', 'LLM_STANDARD'):
+        configuration.update({prefix + '_PROVIDER': 'aliyun',
+                              prefix + '_BASE_URL': 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
+                              prefix + '_API_STYLE': 'openai-compatible',
+                              prefix + '_API_KEY': 'fixture-not-a-key'})
+    assert source_configuration(configuration)['LLM_hard']['configured']
+    assert source_configuration(configuration)['LLM_standard']['configured']
+    from inves_cog.llm.transport import OpenAICompatibleTransport
+    from inves_cog.ingest.http import Response
+    recorded_payload = {'headline': 'Apple introduces a product', 'body': 'AAPL'}
+    recorded = llm.call('entity_tagging', recorded_payload)
+    requests = []
+    def recorded_response(method, url, **kwargs):
+        requests.append((method, url, kwargs))
+        return Response(200, {'choices': [{'message': {'content': json.dumps(recorded)}}]})
+    connected = Client(transport=OpenAICompatibleTransport(configuration, send=recorded_response))
+    assert connected.call('entity_tagging', recorded_payload) == recorded
+    assert connected.call('segment_mapping_draft', recorded_payload) == recorded
+    assert [row[2]['json']['model'] for row in requests] == ['deepseek-v4.1-flash', 'glm-5.3']
+    assert [row[2]['timeout'] for row in requests] == [120, 900]
+    assert all(row[1].endswith('/compatible-mode/v1/chat/completions') for row in requests)
+    assert all('fixture-not-a-key' not in json.dumps(row[2]['json']) for row in requests)
+    requests.clear()
+    def rate_limited(method, url, **kwargs):
+        requests.append((method, url, kwargs))
+        return Response(429, {'error': {'message': 'recorded rate limit'}})
+    connected = Client(transport=OpenAICompatibleTransport(configuration, send=rate_limited))
+    with pytest.raises(LLMUnavailable):
+        connected.call('entity_tagging', recorded_payload)
+    assert len(requests) == 3
+    requests.clear()
+    with pytest.raises(LLMUnavailable):
+        connected.call('segment_mapping_draft', recorded_payload)
+    assert len(requests) == 1
 
 
