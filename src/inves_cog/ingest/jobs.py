@@ -88,7 +88,9 @@ class JobRunner:
             degraded = result.get("status") == "degraded"
             row.update(status="degraded" if degraded else "ok", processed_count=count)
             self.health.record(
-                source, success=True, count=count, latency=duration, note=result.get("note"), degraded=degraded
+                source, success=result.get('source_success',True), count=count, latency=duration,
+                note=result.get("note"), degraded=degraded,
+                confirmed_unavailable=result.get('confirmed_unavailable',False),
             )
             return result
         except Exception as exc:

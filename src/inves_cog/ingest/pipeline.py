@@ -462,11 +462,14 @@ class Pipeline:
                     self.repo.set_cursor("trends:" + keyword, payload, self.clock.now_utc())
                     count += 1
                 except Exception as exc:
-                    failures.append({"keyword": keyword, "type": type(exc).__name__, "message": str(exc)})
+                    failures.append({"keyword": keyword, "type": type(exc).__name__, "message": str(exc),
+                                     'confirmed_unavailable':getattr(exc,'confirmed_unavailable',False)})
         notes = short + [f"{f['keyword']}: {f['type']}: {f['message']}" for f in failures]
         return {
             "processed_count": count,
             "failures": failures,
+            "source_success":count>0,
+            "confirmed_unavailable":count==0 and bool(failures) and all(f['confirmed_unavailable'] for f in failures),
             "note": "; ".join(notes),
             "status": "degraded" if short or failures else "ok",
         }
@@ -493,7 +496,8 @@ class Pipeline:
                     health.record(source, success=True, count=1)
                 except Exception as exc:
                     note = f"{type(exc).__name__}: {exc}"
-                    failures.append({"url": url, "error": note})
+                    failures.append({"url": url, "error": note,
+                                     'confirmed_unavailable':getattr(exc,'confirmed_unavailable',False)})
                     health.record(
                         source,
                         success=False,
@@ -504,6 +508,8 @@ class Pipeline:
         return {
             "processed_count": count,
             "failures": failures,
+            "source_success":count>0,
+            "confirmed_unavailable":count==0 and bool(failures) and all(f['confirmed_unavailable'] for f in failures),
             "status": "degraded" if failures else "ok",
             "note": "; ".join(f"{f['url']}: {f['error']}" for f in failures),
         }

@@ -41,8 +41,8 @@ def assert_trend_isolation(clock):
     assert health.rows["GoogleTrends"]["status"] == "degraded"
     assert "bad" in health.rows["GoogleTrends"]["note"] and "TimeoutError" in health.rows["GoogleTrends"]["note"]
 
-    from inves_cog.ingest.pipeline import Pipeline
     from inves_cog.ingest.jobs import JobRunner
+    from inves_cog.ingest.pipeline import Pipeline
     class Repository:
         def set_cursor(self,*args):
             pass
