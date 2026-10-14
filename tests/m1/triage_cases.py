@@ -155,3 +155,20 @@ def assert_news_triage(root, clock):
     assert len(usage) - before == 8
     assert all(r["purpose"] == "parallel_probe|M1:layer2" for r in usage[before:])
     assert all(r["extraction_status"] == "ok" for r in results)
+
+    # psycopg returns unregistered pgvector values as their textual form.
+    # Reprocessing must bind that value directly rather than JSON-quote it.
+    from inves_cog.ingest.repository import Repository
+
+    class Connection:
+        def execute(self, sql, values):
+            self.values = values
+            return self
+
+        def fetchone(self):
+            return {"info_id": results[0]["info_id"]}
+
+    connection = Connection()
+    stored = dict(results[0], embedding=json.dumps([0.1] * 1024))
+    assert Repository(connection).apply_enrichment(stored)
+    assert connection.values[1] == stored["embedding"]
