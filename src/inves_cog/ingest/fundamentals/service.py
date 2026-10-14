@@ -133,7 +133,9 @@ class FinancialService:
         latest=max(filings,key=lambda f:day(f['filing_date']),default=None)
         if latest is None: return existing
         cached=[r for r in existing if r['accession']==latest['accession']]
-        if cached and all(r.get('evidence',{}).get('parse_contract')==PARSE_CONTRACT for r in cached):
+        last=max((r['period_end'] for r in cached if r.get('period_end')),default=None)
+        current_cached=[r for r in cached if r.get('period_end')==last] if last else cached
+        if current_cached and all(r.get('evidence',{}).get('parse_contract')==PARSE_CONTRACT for r in current_cached):
             last=max((r['period_end'] for r in cached if r.get('period_end')),default=None)
             current=self.apply_mappings(ticker,[r for r in cached if r.get('period_end')==last] if last else cached)
             self.repo.put_segments(current)
