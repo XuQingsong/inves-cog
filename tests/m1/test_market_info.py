@@ -61,13 +61,18 @@ def test_bar_window_to_20et():
     assert jobs[0]['trade_date']==date(2026,10,13) and runner.runner.timeout_seconds==1500
     from inves_cog.ingest.cli import schedule_once
     class ScheduleRepo:
-        def last_runs(self):return {}
+        def __init__(self):self.rows=[(date(2026,10,27),instant('2026-10-29T00:15:00Z'))]
+        def last_runs(self,*,trade_date=None):
+            stamps=[stamp for day,stamp in self.rows if trade_date is None or day==trade_date]
+            return {'bars_full':max(stamps)} if stamps else {}
     class ScheduledPipeline:
         repo=ScheduleRepo();clock=frozen('2026-10-29T00:20:00Z')
     class ScheduledRuntime:
         tasks={'bars_full':None,'wide_universe':None}
         def run(self,names):return names
     assert schedule_once(ScheduledPipeline(),ScheduledRuntime(),names=['bars_full'])==['bars_full']
+    ScheduledPipeline.repo.rows.append((date(2026,10,28),instant('2026-10-29T00:20:00Z')))
+    assert schedule_once(ScheduledPipeline(),ScheduledRuntime(),names=['bars_full'])=={}
     with pytest.raises(ValueError,match='Unknown'):
         schedule_once(ScheduledPipeline(),ScheduledRuntime(),names=['wrong'])
     from inves_cog.ingest.market import MarketCollector, market_window, schedule_times
