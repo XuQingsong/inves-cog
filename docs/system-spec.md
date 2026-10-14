@@ -477,9 +477,10 @@ stock-pm 里有一些已经验证过的设计思路，本项目**借鉴思路、
 | D5 | BE 的 `NetIncomeLoss` 只到 2023 年 | 净利润标签兜底：`NetIncomeLossAvailableToCommonStockholdersBasic`、`ProfitLoss`，标 `ni_tag_fallback` | BE |
 | D6 | 财报过期时三本账静默置空，页面看不出原因 | 数据健康页（第 4.6 节） | 全部 |
 | D7 | 公用事业和发电类（CEG）的现金流结构被质量账误判 | 健康页标 `industry_basis_na`"行业口径不适用"；是否单设口径作为后续提案 | CEG |
+| D9 | 部分公司的营收 / EPS 用的是规则 A 标签清单以外的口径：银行用 `RevenuesNetOfInterestExpense`（JPM），多类别股只按类别披露 EPS（V） | `fixed` 下补充对应标签或按类别取主要交易类别；规则写进参数文件，`legacy` 不变 | JPM、V、XOM 等 |
 | D8 | Muse 在现金标签缺失时把现金当 0，`net_debt` 等于全部有息负债 | `fixed` 下现金缺失则 `net_debt`、`net_debt_fcf` 为空，`field_sources` 标 `cash_missing`；`legacy` 保持原行为 | 任何未报 `CashAndCashEquivalentsAtCarryingValue` 的公司 |
 
-**顺序**：先用旧提取器（`extractor=legacy`）复现 v18；再打开 D1–D5 和 D8（`extractor=fixed`），单独报告数据修复对 v18 结果的影响。修复后的结果**不得写进 v18 标准答案**。
+**顺序**：先用旧提取器（`extractor=legacy`）复现 v18；再打开 D1–D5、D8 和 D9（`extractor=fixed`），单独报告数据修复对 v18 结果的影响。修复后的结果**不得写进 v18 标准答案**。
 
 ### 4.6 数据健康页
 
