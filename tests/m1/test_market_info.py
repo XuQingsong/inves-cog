@@ -46,6 +46,19 @@ def test_bar_window_to_20et():
     assert 'bars_full' not in due_tasks(ready, {'bars_full': ready.now_utc()})
     assert 'bars_prefill' in due_tasks(frozen('2026-10-28T12:00:00Z'), {})
     assert 'sec_submissions' not in due_tasks(frozen('2026-10-28T01:16:00Z'), {})
+    # M1 v3: historical collection has no current-day deadline assertion.
+    from inves_cog.ingest.pipeline import bar_run_mode
+    assert bar_run_mode(frozen('2026-10-14T10:00:00Z'),date(2026,10,13)) == 'historical_backfill'
+    assert bar_run_mode(frozen('2026-10-15T00:46:00Z'),date(2026,10,14)) == 'current_day'
+    with pytest.raises(ValueError,match='future'):
+        bar_run_mode(frozen('2026-10-14T10:00:00Z'),date(2026,10,15))
+    from inves_cog.ingest.runtime import Runtime
+    from inves_cog.ingest.jobs import HealthBook
+    clock=frozen('2026-10-14T10:00:00Z'); jobs=[]
+    runner=Runtime(clock=clock,health=HealthBook(clock=clock),persist_job=jobs.append,
+        tasks={'bars_full':('Alpaca',lambda:{'processed_count':1})},trade_date=lambda:date(2026,10,13))
+    runner.run(['bars_full'])
+    assert jobs[0]['trade_date']==date(2026,10,13) and runner.runner.timeout_seconds==1500
     from inves_cog.ingest.market import MarketCollector, market_window, schedule_times
     from inves_cog.ingest.http import HTTPClient, Response
     from inves_cog.ingest.sec_client import SECClient
