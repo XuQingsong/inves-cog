@@ -132,11 +132,20 @@ def assert_k16_cases(root):
     role='http://example.invalid/role/operations'
     (folder/'calculation.xml').write_text(f'<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink"><link:calculationLink xlink:type="extended" xlink:role="{role}"><link:loc xlink:type="locator" xlink:href="us-gaap.xsd#revenues" xlink:label="revenues"/><link:loc xlink:type="locator" xlink:href="us-gaap.xsd#insurance" xlink:label="insurance"/><link:calculationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="revenues" xlink:to="insurance" weight="1"/></link:calculationLink></link:linkbase>')
     schema=folder/'company.xsd';schema.write_text(schema.read_text().replace('</xs:schema>','<xs:annotation><xs:appinfo><link:linkbaseRef xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="calculation.xml"/></xs:appinfo></xs:annotation></xs:schema>'))
+    calculation=folder/'calculation.xml';without_core=calculation.read_text()
+    gaap.write_text(gaap.read_text().replace('name="RevenueFromContractWithCustomerExcludingAssessedTax"','id="core" name="RevenueFromContractWithCustomerExcludingAssessedTax"'))
+    core_arc='<link:loc xlink:type="locator" xlink:href="us-gaap.xsd#core" xlink:label="core"/><link:calculationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="revenues" xlink:to="core" weight="1"/>'
+    calculation.write_text(without_core.replace('</link:calculationLink>',core_arc+'</link:calculationLink>'))
     rows=parsed(folder,document)
     component=next(r for r in rows if r['segment_raw']=='InsuranceServicesRevenue')
     assert component['axis']=='elimination' and component['revenue']==5
     assert component['evidence']['weight_source']['linkrole']==role
     assert all('segment_sum_mismatch' not in r['health_codes'] for r in rows)
+    # A calculation that only decomposes the same revenue concept is not an
+    # additional reconciliation. ORCL's category breakdown exposed this case.
+    with_core=calculation.read_text();calculation.write_text(without_core)
+    assert not [r for r in parsed(folder,document) if r['segment_raw']=='InsuranceServicesRevenue']
+    calculation.write_text(with_core)
     calculation=folder/'calculation.xml';calculation.write_text(calculation.read_text().replace('http://www.xbrl.org/2003/arcrole/summation-item','https://xbrl.org/2023/arcrole/summation-item'))
     assert any(r['segment_raw']=='InsuranceServicesRevenue' for r in parsed(folder,document))
     # A plain original reconciliation table may supply the net corporate
