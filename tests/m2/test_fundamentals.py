@@ -319,6 +319,19 @@ def test_health_contract():
         rates.convert(100,currency='EUR',start=date(2025,12,29),end=date(2025,12,31),as_of=date(2025,12,29),field='revenue')
     with pytest.raises(FXGap, match='unsupported'):
         rates.convert(100,currency='XXX',start=None,end=date(2025,12,31),as_of=date(2026,1,6),field='cash')
+    # Q-M2-17(4): seven calendar days is inclusive, including year boundary.
+    seven = FXBook([{'currency':'EUR','observation_date':'2025-12-25','realtime_start':'2025-12-26','value':1.2}])
+    converted, quote = seven.convert(100,currency='EUR',start=None,end=date(2026,1,1),as_of=date(2026,1,6),field='cash')
+    assert converted == pytest.approx(120) and quote['effective_quote_date']=='2025-12-25'
+    assert quote['lookback_days']==7
+    stale = FXBook([{'currency':'EUR','observation_date':'2025-12-23','realtime_start':'2025-12-24','value':1.2}])
+    with pytest.raises(FXGap,match='7.*calendar') as expired:
+        stale.convert(100,currency='EUR',start=None,end=date(2025,12,31),as_of=date(2026,1,6),field='cash')
+    assert expired.value.detail['field']=='cash' and expired.value.detail['series']=='DEXUSEU'
+    # Flow averaging is unchanged; a future quote cannot satisfy a balance.
+    assert stale.convert(100,currency='EUR',start=date(2025,12,1),end=date(2025,12,31),as_of=date(2026,1,6),field='revenue')[0]==pytest.approx(120)
+    same = FXBook([{'currency':'EUR','observation_date':'2025-12-31','realtime_start':'2026-01-02','value':1.3}])
+    assert same.convert(100,currency='EUR',start=None,end=date(2025,12,31),as_of=date(2026,1,6),field='cash')[1]['lookback_days']==0
     from inves_cog.ingest.fundamentals.health import health_row
     from inves_cog.ingest.fundamentals.profile import ProfileBook
     good = extract()
