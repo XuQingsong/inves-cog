@@ -64,6 +64,6 @@ K15、K16 均已获用户答复并实施；没有待答复的分部规则问题�
 
 ## 9. v5验收与合并顺序
 
-main d273b28已合入，Q-M2-18/19对应开发K15/K16，docs保持main原样。v5-consensus-failure.json为只读生产库检查，不发Yahoo请求：source_health为degraded，真实两次采集均59只失败，59只window_status有当日失败原因，consensus_snapshot只有180条muse_import，yfinance为0；未以历史导入冒充当天快照。
+main d273b28已合入，Q-M2-18/19对应开发K15/K16，docs保持main原样。v5-consensus-failure.json为只读生产库检查，不发Yahoo请求：source_health为degraded，note已补入Q-M2-20确认的出口封禁诊断（只更新note，原尝试时间/状态/计数不变，无新Yahoo请求）；真实两次采集均59只失败，59只window_status有当日失败原因，consensus_snapshot只有180条muse_import，yfinance为0；未以历史导入冒充当天快照。
 
 等待M1验收合并后，再合入新的main：pending各留本模块行，CHANGELOG和fixtures MANIFEST取并集，pyproject依赖取并集，uv.lock用uv lock重新生成。CI绿后把PR #4转正式「[M2] 提交验收」；当前M0迁移清单CI断言的修正只由M1带入，M2不越权复制。
