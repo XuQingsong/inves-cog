@@ -431,6 +431,11 @@ def test_info_item_contract(tmp_path):
     statistics=cboe_statistics(CBOE(),date(2026,10,28))
     assert statistics[0]['category']=='total' and statistics[0]['call_volume']==100
     assert statistics[0]['put_call_ratio']==.5 and statistics[0]['open_interest']==300
+    class Rounded(CBOE):
+        def get(self,*args,**kwargs):
+            return '<table><tr><td>TOTAL PUT/CALL RATIO</td><td>0.33</td></tr></table>'+super().get(*args,**kwargs).replace('<td>100</td>','<td>3</td>').replace('<td>50</td>','<td>1</td>')
+    assert cboe_statistics(Rounded(),date(2026,10,28))[0]['put_call_ratio']==.33
+
     from inves_cog.ingest.providers import finra_short_interest
     class FINRA:
         def request(self,method,url,*,json,headers):
@@ -602,6 +607,13 @@ def test_llm_extraction_failure_degrades():
                               prefix + '_API_KEY': 'fixture-not-a-key'})
     assert source_configuration(configuration)['LLM_hard']['configured']
     assert source_configuration(configuration)['LLM_standard']['configured']
+    attempts=[]
+    from inves_cog.ingest.http import Response
+    def denied(*args,**kwargs): attempts.append(1);return Response(401,{})
+    auth=Client.from_environment(configuration,send=denied)
+    with pytest.raises(LLMUnavailable): auth.call('entity_tagging',{})
+    assert len(attempts)==1
+
     from inves_cog.llm.transport import OpenAICompatibleTransport
     from inves_cog.ingest.http import Response
     recorded_payload = {'headline': 'Apple introduces a product', 'body': 'AAPL'}
