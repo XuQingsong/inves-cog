@@ -136,3 +136,5 @@
 | tests/fixtures/phase1/m2/muse/legacy_oracle/XOM_2026-05-01.json.gz | absent | 9a0299f0f8149b7f4f23c9d33866dd3dd3cd24fe8119f37bb27cf9bf4e857cf0 | External Muse R7 original legacy_oracle, independently generated at aacea04; input/output hash links verified | Q-M2-7; FR-M0-08 |
 | tests/fixtures/phase1/m2/muse/legacy_oracle/XOM_2026-10-07.json.gz | absent | 541230649a83d4ddc1de33bdaff3c9546ebb97d5e5acaade7b6a932cefcf3289 | External Muse R7 original legacy_oracle, independently generated at aacea04; input/output hash links verified | Q-M2-7; FR-M0-08 |
 | tests/fixtures/phase1/m2/muse/legacy_oracle/manifest.json | absent | cd8ddf67524a9ef9c60f43a61ac6a6c0fe56f6fc2abf8aafb471d26196aba847 | External Muse R7 original legacy_oracle, independently generated at aacea04; input/output hash links verified | Q-M2-7; FR-M0-08 |
+
+- 2026-10-14 M2 FRED FX synthetic fixture: tests/fixtures/phase1/m2/fx_synthetic.json SHA256 39b855ad925bd0194d724885729fe30271ae7fac740db92600a719e468547cbb; handwritten data only, tests holiday end-of-period aggregation, quote direction, unreleased/revised vintage exclusion and actionable missing-rate errors. Does not certify real FX coverage.

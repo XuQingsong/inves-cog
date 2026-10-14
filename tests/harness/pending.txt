@@ -13,11 +13,7 @@ test_info_item_contract | M1 | 等待 M1 实现
 test_info_fields_extraction | M1 | 等待 M1 实现
 test_llm_extraction_failure_degrades | M1 | 等待 M1 实现
 test_ingest_live_smoke | M1 | 等待 R5
-test_segment_mapping_pending | M2 | 等待 M2 实现
-test_consensus_derived_pit | M2 | 等待 M2 实现
-test_consensus_import_idempotent | M2 | 等待 M2 实现
-test_health_contract | M2 | 等待 M2 实现
-test_fundamentals_live_smoke | M2 | 等待 R4/R5/R7
+test_fundamentals_live_smoke | M2 | 等待 M1 合并后的共享基线与 59 只真实申报/分部验证（R4/R5 已配置，R7 已收到）
 test_interp_points | M3 | 等待 M3 实现
 test_books_synthetic | M3 | 等待 M3 实现
 test_red_line_boundaries | M3 | 等待 M3 实现

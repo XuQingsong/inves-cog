@@ -68,7 +68,7 @@ def fetch_fred_rates(http,*,key,currency,first,last,as_of,clock):
     rows=[]; offset=0; seen=set()
     while True:
         data=http.get('https://api.stlouisfed.org/fred/series/observations',params={**params,'observation_start':str(first),'observation_end':str(last),
-            'realtime_start':'1776-07-04','realtime_end':str(visible),'output_type':3,'offset':offset,'limit':100000})
+            'realtime_start':'1776-07-04','realtime_end':str(visible),'output_type':1,'offset':offset,'limit':100000})
         batch=data.get('observations'); count=data.get('count')
         if not isinstance(batch,list) or not isinstance(count,int): raise FXGap(currency=currency,field='source',period=(first,last),as_of=as_of,reason='malformed observations pagination')
         for row in batch:

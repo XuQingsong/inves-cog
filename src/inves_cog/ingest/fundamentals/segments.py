@@ -18,11 +18,25 @@ def segment_sum_ok(segments,eliminations,consolidated):
     return difference<=.01 or math.isclose(difference,.01,rel_tol=0,abs_tol=1e-12)
 
 
-def load_instance(path,*,offline=True,cache_dir=None):
+def load_instance(path,*,offline=True,cache_dir=None,fetch=None):
     from arelle.Cntlr import Cntlr
     controller=Cntlr(logFileName='logToBuffer',disable_persistent_config=True)
     controller.webCache.workOffline=offline
     if cache_dir is not None: controller.webCache.cacheDir=str(Path(cache_dir))
+    if fetch and not offline:
+        original=controller.webCache.getfilename
+        def cached(url,*args,**kwargs):
+            from urllib.parse import urlparse
+            parts=urlparse(url)
+            if parts.hostname in {'www.sec.gov','data.sec.gov','xbrl.sec.gov'}:
+                target=Path(controller.webCache.urlToCacheFilepath(url))
+                if not target.exists():
+                    value=fetch(url.replace('http://','https://',1))
+                    if not isinstance(value,str): raise ValueError('SEC taxonomy response is not text')
+                    target.parent.mkdir(parents=True,exist_ok=True);target.write_text(value)
+                return str(target)
+            return original(url,*args,**kwargs)
+        controller.webCache.getfilename=cached
     model=controller.modelManager.load(str(path))
     if model is None or model.modelDocument is None:
         controller.close(); raise ValueError('Arelle could not load the XBRL instance')
@@ -44,8 +58,8 @@ def numeric(fact):
     except (TypeError,ValueError): return None
 
 
-def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=None):
-    controller,model=load_instance(path,offline=offline,cache_dir=cache_dir)
+def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=None,fetch=None):
+    controller,model=load_instance(path,offline=offline,cache_dir=cache_dir,fetch=fetch)
     try:
         grouped=defaultdict(list); consolidated={}; single=False
         for fact in model.factsInInstance:

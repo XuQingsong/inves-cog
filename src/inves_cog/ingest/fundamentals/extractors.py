@@ -175,7 +175,7 @@ def shares(facts):
 
 
 def extract_state(companyfacts,*,ticker,as_of,extractor='fixed',switches=None,sic=None,foreign=False,
-                  filings=(),instance_facts=None,price=None,fx=None):
+                  filings=(),instance_facts=None,price=None,fx=None,available_as_of=None):
     if extractor not in {'legacy','fixed'}: raise ValueError('Unknown extractor')
     as_of=day(as_of); fixed=extractor=='fixed'; enabled={k:fixed for k in REPAIRS}
     if switches: enabled.update(switches)
@@ -186,7 +186,7 @@ def extract_state(companyfacts,*,ticker,as_of,extractor='fixed',switches=None,si
     accession_set={r.get('accn') for tax in data.get('facts',{}).values() for node in tax.values() for rows in node.get('units',{}).values() for r in rows if r.get('filed') and day(r['filed'])<=as_of}
     if latest and latest['accession'] not in accession_set:
         codes.append('companyfacts_lag')
-        if enabled['D3'] and as_of>=day(latest['filing_date'])+timedelta(days=3) and instance_facts:
+        if enabled['D3'] and day(available_as_of or as_of)>=day(latest['filing_date'])+timedelta(days=3) and instance_facts:
             matching=[r for tax in instance_facts.get('facts',{}).values() for node in tax.values() for rows in node.get('units',{}).values() for r in rows if r.get('accn')==latest['accession']]
             if matching:
                 for tax,nodes in instance_facts['facts'].items():
