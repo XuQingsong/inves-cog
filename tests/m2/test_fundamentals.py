@@ -186,6 +186,44 @@ def test_segment_extraction(tmp_path):
     assert next(row for row in business if row['segment_raw'] == 'ClientMember')['segment_profit'] == 10
 
 
+    # Authorized K15: an exact operating-segment auxiliary axis is valid;
+    # geography/product mixes and lookalike namespaces remain invalid.
+    from lxml import etree
+    folder=tmp_path/'auxiliary'; folder.mkdir()
+    for fixture in (FIXTURES/'xbrl').iterdir():
+        text=fixture.read_text().replace('http://example.invalid/us-gaap','http://fasb.org/us-gaap/2026')
+        if fixture.name=='company.xsd':
+            text=text.replace('</xs:schema>','<xs:import namespace="http://fasb.org/srt/2026" schemaLocation="srt.xsd"/></xs:schema>')
+        if fixture.name=='us-gaap.xsd':
+            text=text.replace('</xs:schema>','<xs:element name="OperatingSegmentsMember" type="xs:string"/></xs:schema>')
+        if fixture.name=='instance.xml':
+            text=text.replace('<xbrli:xbrl ','<xbrli:xbrl xmlns:srt="http://fasb.org/srt/2026" ')
+        (folder/fixture.name).write_text(text)
+    (folder/'srt.xsd').write_text('<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://fasb.org/srt/2026"><xs:element name="ConsolidationItemsAxis" type="xs:string"/><xs:element name="StatementGeographicalAxis" type="xs:string"/></xs:schema>')
+    baseline=(folder/'instance.xml').read_text()
+    ns={'x':'http://www.xbrl.org/2003/instance','d':'http://xbrl.org/2006/xbrldi'}
+    def auxiliary(axis,member,*,namespace='http://fasb.org/srt/2026',third=None):
+        document=etree.fromstring(baseline.replace('http://fasb.org/srt/2026',namespace).encode())
+        for context in document.findall('x:context',ns):
+            if context.get('id') not in {'client','datacenter'}: continue
+            segment=context.find('x:entity/x:segment',ns)
+            added=etree.SubElement(segment,'{'+ns['d']+'}explicitMember',dimension=axis); added.text=member
+            if third:
+                added=etree.SubElement(segment,'{'+ns['d']+'}explicitMember',dimension=third[0]);added.text=third[1]
+        (folder/'instance.xml').write_bytes(etree.tostring(document))
+        return [row for row in parse_segments(folder/'instance.xml',ticker='NVDA',accession='aux-fixture',filed=date(2026,8,1)) if row['axis']=='business']
+    accepted=auxiliary('srt:ConsolidationItemsAxis','us-gaap:OperatingSegmentsMember')
+    assert {row['segment_raw'] for row in accepted}=={'ClientMember','DataCenterMember'}
+    assert sum(row['revenue'] for row in accepted)==102
+    assert sorted(row['segment_profit'] for row in accepted)==[10,15]
+    assert all('segment_sum_mismatch' not in row['health_codes'] for row in accepted)
+    assert not auxiliary('srt:ConsolidationItemsAxis','us-gaap:IntersegmentEliminationMember')
+    assert not auxiliary('srt:StatementGeographicalAxis','fixture:ProductMember')
+    assert not auxiliary('us-gaap:ProductOrServiceAxis','fixture:ProductMember')
+    assert not auxiliary('srt:ConsolidationItemsAxis','us-gaap:OperatingSegmentsMember',namespace='http://example.invalid/impostor')
+    assert not auxiliary('srt:ConsolidationItemsAxis','us-gaap:OperatingSegmentsMember',third=('us-gaap:ProductOrServiceAxis','fixture:ProductMember'))
+
+
 def test_segment_recast():
     from inves_cog.ingest.fundamentals.segments import apply_recast
     previous = [{'segment_raw': 'A', 'revenue': 50, 'axis': 'business', 'recast_group': 'old', 'period_end': date(2025, 6, 30)}]
