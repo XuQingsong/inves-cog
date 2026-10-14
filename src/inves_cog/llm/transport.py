@@ -40,13 +40,16 @@ class OpenAICompatibleTransport:
                        f'Task: {spec.task}. ' + TASK_FORMATS.get(spec.task, 'Follow the output contract in the payload.'))
         # Client owns the approved task retry budget; no nested HTTP retries.
         http = HTTPClient(self.send, retries=0, timeout=spec.timeout_seconds)
+        request = {'model': spec.model, 'messages': [
+            {'role': 'system', 'content': instruction},
+            {'role': 'user', 'content': canonical_payload(payload)}],
+            'response_format': {'type': 'json_object'}, 'stream': False}
+        if spec.model == 'deepseek-v4.1-flash':
+            request['enable_thinking'] = False
         try:
             response = http.request('POST', base + '/chat/completions',
                 headers={'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'},
-                json={'model': spec.model, 'messages': [
-                    {'role': 'system', 'content': instruction},
-                    {'role': 'user', 'content': canonical_payload(payload)}],
-                    'response_format': {'type': 'json_object'}, 'stream': False})
+                json=request)
         except SourceError as exc:
             raise LLMUnavailable(f'Dialogue HTTP request failed, status={exc.status_code}',retryable=exc.status_code is None or exc.status_code==429 or exc.status_code>=500) from exc
         try:
