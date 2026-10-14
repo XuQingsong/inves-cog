@@ -191,6 +191,8 @@ def test_wide_universe_rules():
 
 
 def test_news_dedupe_and_times():
+    from tests.m1.round2_cases import assert_short_roots
+    assert_short_roots(frozen())
     from inves_cog.ingest.info import source_root
     assert source_root('') is None and source_root('<p> </p>') is None
     assert source_root('',provider='Reuters',upstream_id='wire')=='Reuters:wire'
@@ -361,6 +363,8 @@ def test_app_rank_jump():
 
 
 def test_trends_unavailable_marked():
+    from tests.m1.round2_cases import assert_trend_isolation
+    assert_trend_isolation(frozen())
     from inves_cog.ingest.live import validate_smoke
     bars={'daily_codes':73}
     validate_smoke(bars,{'processed_count':1},{'Fixture':{'status':'ok'}},required_sources={'Fixture'})
@@ -372,7 +376,8 @@ def test_trends_unavailable_marked():
     from inves_cog.ingest.jobs import HealthBook
     health = HealthBook(clock=frozen())
     def broken(*args):
-        raise ValueError('confirmed source unusable')
+        from inves_cog.ingest.http import SourceError
+        raise SourceError('confirmed source unusable', confirmed_unavailable=True)
     rows = collect_trends(['fixture'], fetch=broken, health=health, clock=frozen())
     assert rows == [] and health.rows['GoogleTrends']['status'] == '未接通'
     days = [{'date': date(2026, 10, 28) - timedelta(days=i), 'value': 10} for i in range(1, 91)]
@@ -394,6 +399,8 @@ def test_trends_unavailable_marked():
 
 
 def test_source_level_mapping():
+    from tests.m1.round2_cases import assert_public_rss
+    assert_public_rss(frozen())
     from inves_cog.ingest.repository import normalize_entity
     row = normalize_entity({'entity_id':'fixture','name':'Fixture','aliases':['F'],
         'ticker':'AAPL','app_store_ids':['app'],'trend_keywords':['Fixture'],'official_urls':['https://example.invalid']})
@@ -608,6 +615,8 @@ def test_llm_extraction_failure_degrades():
     item = make_item('news', 'Reuters', 'failure', headline='Fixture failure', body='Retain all information', clock=frozen())
     llm = Client(registry=ROOT / 'config/llm_tasks.yaml', recordings=FIXTURES / 'recordings')
     result = enrich(item, llm=llm, embed=lambda *a, **k: None, entities=[], clock=frozen())
+    from tests.m1.round2_cases import assert_failure_reasons
+    assert_failure_reasons(result)
     assert result['extraction_status'] == 'failed'
     assert result['is_guidance'] is None and result['is_rating_change'] is None
     assert result['embedding'] is None and 'embedding_failed' in result['flags']
