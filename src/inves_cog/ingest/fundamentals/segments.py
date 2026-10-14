@@ -8,6 +8,8 @@ import math
 from pathlib import Path
 import re
 
+PARSE_CONTRACT='operating-aux-v1'
+
 REVENUE=['RevenueFromContractWithCustomerExcludingAssessedTax','RevenueFromContractWithCustomerIncludingAssessedTax','Revenues','SalesRevenueNet']
 
 
@@ -139,6 +141,7 @@ def parse_segments(path,*,ticker,accession,filed,offline=True,cache_dir=None,fx=
                 'period_start':None,'period_len':None,'axis':'evidence','segment_raw':None,'segment_std':None,'revenue':None,
                 'segment_profit':None,'profit_basis':None,'margin_pct':None,'yoy_pct':None,'share_pct':None,'recast_group':None,
                 'health_codes':[code],'evidence':{'single_segment_count':1 if single else None}})
+        for row in output: row['evidence']['parse_contract']=PARSE_CONTRACT
         return output
     finally:
         model.close(); controller.close()

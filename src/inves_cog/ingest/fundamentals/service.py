@@ -12,7 +12,7 @@ from inves_cog.ingest.fundamentals.fx import FXGap
 from inves_cog.ingest.fundamentals.mapping import MappingQueue
 from inves_cog.ingest.fundamentals.profile import ProfileBook
 from inves_cog.ingest.fundamentals.providers import fiscal_years
-from inves_cog.ingest.fundamentals.segments import parse_segments,apply_recast
+from inves_cog.ingest.fundamentals.segments import parse_segments,apply_recast,PARSE_CONTRACT
 
 RELEVANT=('RevenueFromContractWithCustomerExcludingAssessedTax','Revenues','SalesRevenueNet','NetIncomeLoss',
           'EarningsPerShareDiluted','NetCashProvidedByUsedInOperatingActivities','PaymentsToAcquirePropertyPlantAndEquipment','GrossProfit')
@@ -132,8 +132,8 @@ class FinancialService:
             return self.apply_mappings(ticker,existing) if existing else [{'ticker':ticker,'axis':'evidence','health_codes':['segment_missing'],'reason':'XBRL instance not supplied'}]
         latest=max(filings,key=lambda f:day(f['filing_date']),default=None)
         if latest is None: return existing
-        if any(r['accession']==latest['accession'] for r in existing):
-            cached=[r for r in existing if r['accession']==latest['accession']]
+        cached=[r for r in existing if r['accession']==latest['accession']]
+        if cached and all(r.get('evidence',{}).get('parse_contract')==PARSE_CONTRACT for r in cached):
             last=max((r['period_end'] for r in cached if r.get('period_end')),default=None)
             current=self.apply_mappings(ticker,[r for r in cached if r.get('period_end')==last] if last else cached)
             self.repo.put_segments(current)
