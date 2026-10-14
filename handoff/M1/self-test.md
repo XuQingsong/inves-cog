@@ -9,7 +9,7 @@
 - 原名 14 项 M1 blocking 与 M0 门禁合计 **24 passed，0 failed，0 skipped，7.39 秒**；命令 `PYTHONPATH=src .venv/bin/python -m pytest -q -m phase1_blocking --junitxml=handoff/M1/blocking-v3.xml`，证据 [blocking-v3.xml](blocking-v3.xml)。本机无 Docker；此结果不冒充干净容器 CI。
 - 回补日期/25 分钟预算、指定调度任务、历史回补不抑制当日调度，均先独立提交失败断言，再提交实现。既检查历史任务放行，也检查当日已运行任务不重复。
 - 原 [database-verification.json](database-verification.json)、[extraction-queue-verification.json](extraction-queue-verification.json) 的真实数据库事务和录音验证继续有效。docs/、golden 和真实 milestones 未修改；M0 变更仍在已授权范围内。
-- 两分支联合验证结果见 integration-blocking-v3.xml / integration-replay-v3.xml：39 blocking 和 1 replay 全通过，分别 9.08 / 5.51 秒；临时联合目录不推送。
+- 两分支联合验证结果见 integration-blocking-v3.xml / integration-replay-v3.xml：39 blocking 和 1 replay 全通过，分别 8.46 / 5.85 秒；临时联合目录不推送。
 
 ## 2. 本模块不变量
 
