@@ -12,7 +12,7 @@ OWNERS = {
     'factor_shadow': 'role_shadow', 'overlay': 'role_overlay',
 }
 READS = {
-    'role_ingest': set(),
+    'role_ingest': {'graph'},
     'role_trading': {'ingest', 'fundamentals', 'marketstate', 'overlay'},
     'role_marketstate': {'ingest', 'graph'},
     'role_valuation': {'ingest', 'fundamentals', 'graph', 'trading'},
