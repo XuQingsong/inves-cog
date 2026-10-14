@@ -224,6 +224,20 @@ def test_segment_extraction(tmp_path):
     assert not auxiliary('srt:ConsolidationItemsAxis','us-gaap:OperatingSegmentsMember',third=('us-gaap:ProductOrServiceAxis','fixture:ProductMember'))
 
 
+    # A context that discloses only assets is not a revenue/profit segment row.
+    metrics=tmp_path/'metrics';metrics.mkdir()
+    for fixture in (FIXTURES/'xbrl').iterdir():shutil.copyfile(fixture,metrics/fixture.name)
+    schema=metrics/'company.xsd'
+    schema.write_text(schema.read_text().replace('</xs:schema>','<xs:element name="AssetsOnlyMember" type="xs:string"/><xs:element name="Assets" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/></xs:schema>'))
+    document=etree.fromstring((metrics/'instance.xml').read_bytes())
+    context=deepcopy(document.find("x:context[@id='client']",ns));context.set('id','assets-only')
+    context.find('.//d:explicitMember',ns).text='fixture:AssetsOnlyMember';document.append(context)
+    fact=etree.SubElement(document,'{http://example.invalid/company}Assets',contextRef='assets-only',unitRef='usd',decimals='0');fact.text='123'
+    (metrics/'instance.xml').write_bytes(etree.tostring(document))
+    metrics_rows=parse_segments(metrics/'instance.xml',ticker='AMD',accession='metrics-fixture',filed=date(2026,8,1))
+    assert {r['segment_raw'] for r in metrics_rows if r['axis']=='business'}=={'ClientMember','DataCenterMember'}
+
+
 def test_segment_recast():
     from inves_cog.ingest.fundamentals.segments import apply_recast
     previous = [{'segment_raw': 'A', 'revenue': 50, 'axis': 'business', 'recast_group': 'old', 'period_end': date(2025, 6, 30)}]
