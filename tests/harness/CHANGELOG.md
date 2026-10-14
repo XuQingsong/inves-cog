@@ -16,3 +16,7 @@
 2026-10-14 tests/fixtures/phase1/m1/sec_acceptance_conflict.json 9631c3b17cc7fcb48cf7241f677498c68bcf96498be8231814c9666aa1678d30 FR-M1-06/Q-M1-8: complete repository-relative frozen fixture path for official SEC comparison.
 
 - 2026-10-14 M1: freeze SEC official Form 4 accession 0001140361-26-039158 XML and index Accepted provenance; S transaction, 2399 shares, 332.01 USD, officer=true. Existing synthetic P input unchanged.
+- m1/form4_official.xml new sha256 3fd3b9cbe1cc36f6c0fb98a1a6f2f10708dd0974a326e70269db9a8a9e7d4ab7: official SEC input frozen once; no existing input modified.
+- m1/form4_official.json new sha256 bd43f415dbff43d7a34bc131af7e3460cf8427b67c1a0b96d2445fe598bef243: official SEC input frozen once; no existing input modified.
+2026-10-14 tests/fixtures/phase1/m1/form4_official.xml 3fd3b9cbe1cc36f6c0fb98a1a6f2f10708dd0974a326e70269db9a8a9e7d4ab7 complete required frozen path and new hash.
+2026-10-14 tests/fixtures/phase1/m1/form4_official.json bd43f415dbff43d7a34bc131af7e3460cf8427b67c1a0b96d2445fe598bef243 complete required frozen path and new hash.
