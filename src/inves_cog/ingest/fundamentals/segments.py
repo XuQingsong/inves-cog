@@ -30,6 +30,8 @@ def load_instance(path,*,offline=True,cache_dir=None,fetch=None):
         def cached(url,*args,**kwargs):
             from urllib.parse import urlparse
             parts=urlparse(url)
+            target=Path(controller.webCache.urlToCacheFilepath(url))
+            if parts.hostname in {'fasb.org','www.fasb.org'} and target.is_file(): return str(target)
             if parts.hostname in {'www.sec.gov','data.sec.gov','xbrl.sec.gov'}:
                 target=Path(controller.webCache.urlToCacheFilepath(url))
                 if not target.exists():
