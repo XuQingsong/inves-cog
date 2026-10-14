@@ -109,6 +109,22 @@ def test_industry_basis_na():
 
 
 def test_fin_state_pit():
+    from inves_cog.ingest.fundamentals.service import FinancialService, MemoryRepository
+    calls = []
+    class SEC:
+        def companyfacts(self,cik):
+            calls.append(cik)
+            return input_facts()
+    clock = FrozenClock(datetime(2026,10,13,1,tzinfo=timezone.utc))
+    repository = MemoryRepository()
+    repository.shared_filings['FIXTURE'] = [{'accession':'q8','form':'10-Q','filing_date':date(2026,8,1),'report_date':date(2026,6,30)}]
+    service = FinancialService(clock=clock,repository=repository,sec=SEC(),llm=None,
+        universe=[{'ticker':'FIXTURE','foreign':False,'sector':'fixture'}],ciks={'FIXTURE':'1'})
+    report = service.collect_financials()
+    assert report['processed_count']==1 and repository.health['FIXTURE']['can_score']
+    assert repository.state_asof('FIXTURE',date(2026,7,31),'fixed') is None
+    assert repository.state_asof('FIXTURE',date(2026,8,1),'fixed').accession=='q8'
+    assert calls==['1'] and 'FIXTURE' in repository.profiles
     from inves_cog.ingest.fundamentals.state import StateStore
     before, after = extract(), extract()
     before.filed, after.filed = date(2026, 8, 1), date(2026, 10, 14)
@@ -215,6 +231,15 @@ def test_consensus_derived_pit():
 
 
 def test_consensus_import_idempotent(tmp_path):
+    from inves_cog.ingest.fundamentals.providers import snapshot_from_tables
+    captured = FrozenClock(datetime(2026,10,13,2,tzinfo=timezone.utc))
+    tables = {'earnings_estimate': {'0y': {'avg':4,'high':5,'low':3,'numberOfAnalysts':4}},
+              'revenue_estimate': {'0y': {'avg':100}},
+              'eps_revisions': {'0y': {'upLast7days':3,'downLast7days':1}},
+              'analyst_price_targets': {'mean':10,'median':9}, 'earnings_history': []}
+    snapshot = snapshot_from_tables(tables,ticker='FIXTURE',clock=captured,fy_cy=date(2026,12,31),fy_ny=date(2027,12,31))
+    assert snapshot['coverage']==4 and snapshot['rev_cy']==100 and snapshot['up_7d']==3
+    assert snapshot['as_of']==date(2026,10,13) and snapshot['captured_at']==captured.now_utc()
     from inves_cog.ingest.fundamentals.consensus import ConsensusStore, import_muse_exports, read_copy_blocks
     store = ConsensusStore()
     folder = FIXTURES / 'muse_export_synthetic'
