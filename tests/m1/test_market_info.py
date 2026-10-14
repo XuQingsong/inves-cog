@@ -162,6 +162,11 @@ def test_wide_universe_rules():
 
 
 def test_news_dedupe_and_times():
+    from inves_cog.ingest.info import source_root
+    assert source_root('') is None and source_root('<p> </p>') is None
+    assert source_root('',provider='Reuters',upstream_id='wire')=='Reuters:wire'
+    assert source_root('0') is not None
+
     from inves_cog.ingest.jobs import JobRunner,HealthBook
     ticks=iter([0,1901,1901]); ledger=[]
     runner=JobRunner(clock=frozen(),health=HealthBook(clock=frozen()),persist=ledger.append,monotonic=lambda:next(ticks,1901))
