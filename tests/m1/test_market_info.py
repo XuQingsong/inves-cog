@@ -486,12 +486,11 @@ def test_info_item_contract(tmp_path):
             requests.append(dict(params))
             if url.endswith('/series'): return {'realtime_end':'2026-10-13','seriess':[{'units':'Percent'}]}
             if url.endswith('/vintagedates'): return {'count':4,'vintage_dates':['2026-10-01','2026-10-02','2026-10-03','2026-10-14']}
-            if params['output_type']==1: raise SourceError('too many vintage dates',status_code=400)
-            assert params['output_type']==3 and 'realtime_start' not in params
-            assert len(params['vintage_dates'].split(','))<=3
-            accepted=params['vintage_dates'].split(',')
+            assert params['output_type']==1
+            if params['realtime_end']=='2026-10-13': raise SourceError('too many vintage dates',status_code=400)
             values={'2026-10-01':'2.0','2026-10-02':'.','2026-10-03':'2.2'}
-            return {'count':1,'observations':[{'date':'2026-09-30',**{'DGS2_'+d.replace('-',''):values[d] for d in accepted}}]}
+            rows=[{'date':'2026-09-30','realtime_start':d,'value':value} for d,value in values.items() if params['realtime_start']<=d<=params['realtime_end']]
+            return {'count':len(rows),'observations':rows}
     vintage=FRED(key='fixture',clock=frozen('2026-10-14T04:03:00Z'),http=ManyVintages())
     vintage.vintage_batch_size=2
     observations=vintage.collect('DGS2')
