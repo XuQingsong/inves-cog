@@ -279,6 +279,25 @@ def test_info_item_contract(tmp_path):
     assert report['DashScope']['missing'] == ['DASHSCOPE_API_KEY', 'DASHSCOPE_BASE_URL']
     assert 'fixture-secret' not in json.dumps(report)
     assert 'fixture-key' not in json.dumps(report)
+    from inves_cog.ingest.providers import FRED
+    from inves_cog.ingest.http import HTTPClient, Response
+    requests = []
+    def fred_response(method, url, **kwargs):
+        requests.append(kwargs['params'])
+        if url.endswith('/series'):
+            return Response(200, {'realtime_end': '2026-10-13', 'seriess': [{'units': 'Percent'}]})
+        offset = kwargs['params'].get('offset', 0)
+        return Response(200, {'count': 2, 'observations': [
+            {'date': '2026-10-01', 'realtime_start': f'2026-10-{12+offset}', 'value': '2.5'}]})
+    fred = FRED(key='fixture-key', clock=frozen('2026-10-14T04:03:00Z'), http=HTTPClient(fred_response))
+    records = fred.collect('DGS2')
+    assert all(request['realtime_end'] == '2026-10-13' for request in requests[1:])
+    assert len(records) == 2 and records[0]['realtime_start'] != records[1]['realtime_start']
+    assert requests[-1]['offset'] == 1
+    requests.clear()
+    fred.clock = frozen('2026-10-10T12:00:00Z')
+    fred.collect('DGS2')
+    assert all(request['realtime_end'] == '2026-10-10' for request in requests[1:])
     configuration.write_text('APCA_API_KEY_ID=a\nALPACA_API_KEY_ID=b\n')
     with pytest.raises(ValueError, match='conflicting.*APCA_API_KEY_ID'):
         read_environment(configuration, environ={})
