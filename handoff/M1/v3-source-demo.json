@@ -1,0 +1,396 @@
+{
+  "classification": "real disconnected endpoint through HTTPClient; data source restored after demonstration",
+  "before": {
+    "AppStoreFree": {
+      "source": "AppStoreFree",
+      "last_success_at": "2026-10-14 16:31:05.329720+08:00",
+      "last_attempt_at": "2026-10-14 16:31:05.329720+08:00",
+      "status": "ok",
+      "latency_sec": 4.173465624975506,
+      "items_last_run": 100,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "AppStoreGrossing": {
+      "source": "AppStoreGrossing",
+      "last_success_at": "2026-10-14 16:31:09.663015+08:00",
+      "last_attempt_at": "2026-10-14 16:31:09.663015+08:00",
+      "status": "ok",
+      "latency_sec": 4.332199791970197,
+      "items_last_run": 100,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "GoogleTrends": {
+      "source": "GoogleTrends",
+      "last_success_at": "2026-10-14 16:35:01.778855+08:00",
+      "last_attempt_at": "2026-10-14 16:35:01.778855+08:00",
+      "status": "ok",
+      "latency_sec": 232.11734624998644,
+      "items_last_run": 8,
+      "note": "",
+      "consecutive_failures": 0
+    },
+    "FINRA": {
+      "source": "FINRA",
+      "last_success_at": "2026-10-14 16:49:24.772911+08:00",
+      "last_attempt_at": "2026-10-14 16:49:24.772911+08:00",
+      "status": "ok",
+      "latency_sec": 117.78144445898943,
+      "items_last_run": 5082,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FRED": {
+      "source": "FRED",
+      "last_success_at": "2026-10-14 16:58:29.406521+08:00",
+      "last_attempt_at": "2026-10-14 16:58:29.406521+08:00",
+      "status": "ok",
+      "latency_sec": 180.4735498750233,
+      "items_last_run": 73384,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "AlpacaNews": {
+      "source": "AlpacaNews",
+      "last_success_at": "2026-10-14 17:24:00.186129+08:00",
+      "last_attempt_at": "2026-10-14 17:24:00.186129+08:00",
+      "status": "ok",
+      "latency_sec": 870.3975470419973,
+      "items_last_run": 24038,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "CBOE": {
+      "source": "CBOE",
+      "last_success_at": "2026-10-14 18:06:48.263687+08:00",
+      "last_attempt_at": "2026-10-14 18:06:48.263687+08:00",
+      "status": "ok",
+      "latency_sec": 2.9720154590322636,
+      "items_last_run": 23,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "CompanyIR": {
+      "source": "CompanyIR",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 18:06:49.616765+08:00",
+      "status": "未接通",
+      "latency_sec": 1.3521260409615934,
+      "items_last_run": 0,
+      "note": "SourceError: HTTP status 403",
+      "consecutive_failures": 2
+    },
+    "FederalReserveNews": {
+      "source": "FederalReserveNews",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 18:53:30.225315+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "First phase excludes this source",
+      "consecutive_failures": 12
+    },
+    "EIANews": {
+      "source": "EIANews",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 18:53:30.225779+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "First phase excludes this source",
+      "consecutive_failures": 12
+    },
+    "Alpaca": {
+      "source": "Alpaca",
+      "last_success_at": "2026-10-14 18:55:26.059788+08:00",
+      "last_attempt_at": "2026-10-14 18:55:26.059788+08:00",
+      "status": "ok",
+      "latency_sec": 115.83320491696941,
+      "items_last_run": 49791,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "DashScope": {
+      "source": "DashScope",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:38:18.475888+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "Verified Token Plan key; Beijing/international models and embedding requests return 401; Token Plan models returns 200 without text-embedding-v3",
+      "consecutive_failures": 1
+    }
+  },
+  "runs": [
+    {
+      "trends": {
+        "status": "failed",
+        "processed_count": 0,
+        "error": "SourceError: HTTP transport failed after bounded retries"
+      },
+      "app_free": {
+        "processed_count": 100,
+        "events": 3
+      }
+    },
+    {
+      "trends": {
+        "status": "failed",
+        "processed_count": 0,
+        "error": "SourceError: HTTP transport failed after bounded retries"
+      }
+    }
+  ],
+  "disconnected_health": {
+    "AppStoreGrossing": {
+      "source": "AppStoreGrossing",
+      "last_success_at": "2026-10-14 16:31:09.663015+08:00",
+      "last_attempt_at": "2026-10-14 16:31:09.663015+08:00",
+      "status": "ok",
+      "latency_sec": 4.332199791970197,
+      "items_last_run": 100,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FINRA": {
+      "source": "FINRA",
+      "last_success_at": "2026-10-14 16:49:24.772911+08:00",
+      "last_attempt_at": "2026-10-14 16:49:24.772911+08:00",
+      "status": "ok",
+      "latency_sec": 117.78144445898943,
+      "items_last_run": 5082,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FRED": {
+      "source": "FRED",
+      "last_success_at": "2026-10-14 16:58:29.406521+08:00",
+      "last_attempt_at": "2026-10-14 16:58:29.406521+08:00",
+      "status": "ok",
+      "latency_sec": 180.4735498750233,
+      "items_last_run": 73384,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "AlpacaNews": {
+      "source": "AlpacaNews",
+      "last_success_at": "2026-10-14 17:24:00.186129+08:00",
+      "last_attempt_at": "2026-10-14 17:24:00.186129+08:00",
+      "status": "ok",
+      "latency_sec": 870.3975470419973,
+      "items_last_run": 24038,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "CBOE": {
+      "source": "CBOE",
+      "last_success_at": "2026-10-14 18:06:48.263687+08:00",
+      "last_attempt_at": "2026-10-14 18:06:48.263687+08:00",
+      "status": "ok",
+      "latency_sec": 2.9720154590322636,
+      "items_last_run": 23,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "CompanyIR": {
+      "source": "CompanyIR",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 18:06:49.616765+08:00",
+      "status": "未接通",
+      "latency_sec": 1.3521260409615934,
+      "items_last_run": 0,
+      "note": "SourceError: HTTP status 403",
+      "consecutive_failures": 2
+    },
+    "Alpaca": {
+      "source": "Alpaca",
+      "last_success_at": "2026-10-14 18:55:26.059788+08:00",
+      "last_attempt_at": "2026-10-14 18:55:26.059788+08:00",
+      "status": "ok",
+      "latency_sec": 115.83320491696941,
+      "items_last_run": 49791,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "DashScope": {
+      "source": "DashScope",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:38:18.475888+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "Verified Token Plan key; Beijing/international models and embedding requests return 401; Token Plan models returns 200 without text-embedding-v3",
+      "consecutive_failures": 1
+    },
+    "AppStoreFree": {
+      "source": "AppStoreFree",
+      "last_success_at": "2026-10-14 19:41:02.693088+08:00",
+      "last_attempt_at": "2026-10-14 19:41:02.693088+08:00",
+      "status": "ok",
+      "latency_sec": 3.681359332986176,
+      "items_last_run": 100,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FederalReserveNews": {
+      "source": "FederalReserveNews",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:41:02.694019+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "First phase excludes this source",
+      "consecutive_failures": 14
+    },
+    "EIANews": {
+      "source": "EIANews",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:41:02.694288+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "First phase excludes this source",
+      "consecutive_failures": 14
+    },
+    "GoogleTrends": {
+      "source": "GoogleTrends",
+      "last_success_at": "2026-10-14 16:35:01.778855+08:00",
+      "last_attempt_at": "2026-10-14 19:41:03.389594+08:00",
+      "status": "degraded",
+      "latency_sec": 0.6950356250163168,
+      "items_last_run": 0,
+      "note": "SourceError: HTTP transport failed after bounded retries",
+      "consecutive_failures": 2
+    }
+  },
+  "restoration": {
+    "trends": {
+      "processed_count": 8,
+      "note": "",
+      "status": "ok"
+    }
+  },
+  "after_restore": {
+    "AppStoreGrossing": {
+      "source": "AppStoreGrossing",
+      "last_success_at": "2026-10-14 16:31:09.663015+08:00",
+      "last_attempt_at": "2026-10-14 16:31:09.663015+08:00",
+      "status": "ok",
+      "latency_sec": 4.332199791970197,
+      "items_last_run": 100,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FINRA": {
+      "source": "FINRA",
+      "last_success_at": "2026-10-14 16:49:24.772911+08:00",
+      "last_attempt_at": "2026-10-14 16:49:24.772911+08:00",
+      "status": "ok",
+      "latency_sec": 117.78144445898943,
+      "items_last_run": 5082,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FRED": {
+      "source": "FRED",
+      "last_success_at": "2026-10-14 16:58:29.406521+08:00",
+      "last_attempt_at": "2026-10-14 16:58:29.406521+08:00",
+      "status": "ok",
+      "latency_sec": 180.4735498750233,
+      "items_last_run": 73384,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "AlpacaNews": {
+      "source": "AlpacaNews",
+      "last_success_at": "2026-10-14 17:24:00.186129+08:00",
+      "last_attempt_at": "2026-10-14 17:24:00.186129+08:00",
+      "status": "ok",
+      "latency_sec": 870.3975470419973,
+      "items_last_run": 24038,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "CBOE": {
+      "source": "CBOE",
+      "last_success_at": "2026-10-14 18:06:48.263687+08:00",
+      "last_attempt_at": "2026-10-14 18:06:48.263687+08:00",
+      "status": "ok",
+      "latency_sec": 2.9720154590322636,
+      "items_last_run": 23,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "CompanyIR": {
+      "source": "CompanyIR",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 18:06:49.616765+08:00",
+      "status": "未接通",
+      "latency_sec": 1.3521260409615934,
+      "items_last_run": 0,
+      "note": "SourceError: HTTP status 403",
+      "consecutive_failures": 2
+    },
+    "Alpaca": {
+      "source": "Alpaca",
+      "last_success_at": "2026-10-14 18:55:26.059788+08:00",
+      "last_attempt_at": "2026-10-14 18:55:26.059788+08:00",
+      "status": "ok",
+      "latency_sec": 115.83320491696941,
+      "items_last_run": 49791,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "DashScope": {
+      "source": "DashScope",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:38:18.475888+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "Verified Token Plan key; Beijing/international models and embedding requests return 401; Token Plan models returns 200 without text-embedding-v3",
+      "consecutive_failures": 1
+    },
+    "AppStoreFree": {
+      "source": "AppStoreFree",
+      "last_success_at": "2026-10-14 19:41:02.693088+08:00",
+      "last_attempt_at": "2026-10-14 19:41:02.693088+08:00",
+      "status": "ok",
+      "latency_sec": 3.681359332986176,
+      "items_last_run": 100,
+      "note": null,
+      "consecutive_failures": 0
+    },
+    "FederalReserveNews": {
+      "source": "FederalReserveNews",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:41:03.394820+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "First phase excludes this source",
+      "consecutive_failures": 15
+    },
+    "EIANews": {
+      "source": "EIANews",
+      "last_success_at": null,
+      "last_attempt_at": "2026-10-14 19:41:03.395246+08:00",
+      "status": "未接通",
+      "latency_sec": null,
+      "items_last_run": 0,
+      "note": "First phase excludes this source",
+      "consecutive_failures": 15
+    },
+    "GoogleTrends": {
+      "source": "GoogleTrends",
+      "last_success_at": "2026-10-14 19:44:55.475957+08:00",
+      "last_attempt_at": "2026-10-14 19:44:55.475957+08:00",
+      "status": "ok",
+      "latency_sec": 232.0784074169933,
+      "items_last_run": 8,
+      "note": "",
+      "consecutive_failures": 0
+    }
+  }
+}

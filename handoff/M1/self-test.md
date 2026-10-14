@@ -1,53 +1,58 @@
 # M1 自测报告
 
-模块：M1；文档：v2；代码提交：7d566bc038b5c557988da7e4a215f00a9fd2df6e；日期：2026-10-14。
+模块：M1；文档：v3（main e7db5a9）；代码提交：c8aa3152d11fec891c0400501831aadc184eaf5b；日期：2026-10-14。
 
-结论：代码、运行入口与离线验证已完成，真实接入已有下列证据；连续运行和原文抽查等阻塞证据尚未齐备，不能判定模块全部验收通过。PR 保持草稿供审查，未合并 main。
+代码和本轮修复已提交；下面分别列出已验证结果与仍缺的验收证据。PR #3 暂为草稿，未合并，未写 milestones。
 
 ## 1. Harness
 
-- `.venv/bin/python -m pytest -q -m phase1_blocking --junitxml=handoff/M1/blocking.xml`：24 项通过，失败/错误/skip 均为 0，6.874 秒；[blocking.xml](blocking.xml)。包含 M0 门禁与 M1 原名 14 项 blocking。
-- 临时联合工作区合并两个模块的依赖、夹具清单及 pending，使用两个最新实现：39 项 blocking 通过、0 skip，7.520 秒；[integration-blocking.xml](integration-blocking.xml)。联合 replay 1 项通过；[integration-replay.xml](integration-replay.xml)。该临时合并未推送、未替代正式 PR。
-- 新功能及本轮修复都保留先失败测试、后实现的独立提交。最近包括空正文转载归并、官方 PCR 保留、401 不重试、共享接口、调度截止与队列持久化。
-- [database-verification.json](database-verification.json)：本项目独立 PostgreSQL + pgvector 真实写入；1024 维向量、版本记录、计数恒等式通过，夹具事务回滚。[extraction-queue-verification.json](extraction-queue-verification.json)：先持久保存原文，再回放抽取更新同一行；模型失败不丢原文、不重复增加采集计数。
-- `git diff --check` 通过；docs/、golden、milestones 未修改。本机没有 Docker，直接 pytest 结果不冒充干净容器 `make phase1-test`；最终提交的 GitHub CI 另行核对。
+- 原名 14 项 M1 blocking 与 M0 门禁合计 **24 passed，0 failed，0 skipped，7.39 秒**；命令 `PYTHONPATH=src .venv/bin/python -m pytest -q -m phase1_blocking --junitxml=handoff/M1/blocking-v3.xml`，证据 [blocking-v3.xml](blocking-v3.xml)。本机无 Docker；此结果不冒充干净容器 CI。
+- 回补日期/25 分钟预算、指定调度任务、历史回补不抑制当日调度，均先独立提交失败断言，再提交实现。既检查历史任务放行，也检查当日已运行任务不重复。
+- 原 [database-verification.json](database-verification.json)、[extraction-queue-verification.json](extraction-queue-verification.json) 的真实数据库事务和录音验证继续有效。docs/、golden 和真实 milestones 未修改；M0 变更仍在已授权范围内。
+- 两分支联合验证结果见 integration-blocking-v3.xml / integration-replay-v3.xml（生成后附）；临时联合目录不推送。
 
 ## 2. 本模块不变量
 
-| 不变量 | 结果 | 证据 |
-|---|---|---|
-| I22 盘后行情 | 绿 | test_bar_window_to_20et / from_04et、test_post_close_null_when_no_trade；按每个 ticker 最后有成交分钟取盘后价，无成交保留 NULL，半日市及合规分钟不误伤 |
-| I28 财报反应时间（数据部分） | 绿 | test_earnings_reaction_day / fallback_flag；golden 经 load_golden，休市 closed、半日市、夏冬令时及索引缺口均覆盖 |
+| 不变量 | 结果与证据 |
+|---|---|
+| I22 盘后行情 | blocking 绿；常规/半日市/缺交易两面断言；5 日真实常规分钟覆盖见下表 |
+| I28 财报反应时间（数据部分） | blocking 绿；索引 Accepted 为权威，缺索引不生成反应日；10 次真实索引核对已完成 |
 
-## 3. pending 与 milestones
+## 3. pending 和 milestones
 
-移除本模块已通过的 14 项 blocking，保留原名 test_ingest_live_smoke；目前真实缺口是全部源运行/SEC 覆盖和规定嵌入接入，不能用离线夹具将其转绿。R4 两个 LLM 已真实验证；R7 已收到并导入，90 日新闻 bootstrap 已完成。没有改 milestones，也没有删除其他模块的 pending。
+14 项 blocking 已移除；原名 `test_ingest_live_smoke` 暂保留。两个 Token Plan 对话模型和 R7 导出均已验证，不再笼统列为等待全部 key。嵌入尚未接通，CompanyIR 实测 403；正式调度证据另行核对。未删除其他模块行，未修改 milestones。
 
 ## 4. 逐条验收自评
 
-| 条款 | 自评 | 证据与限制 |
+| 条款 | 自评 | 可复核证据 |
 |---|---|---|
-| AC-M1-01 | blocking 通过 | blocking.xml；最终 CI 状态见 PR。live 尚在 pending |
-| AC-M1-02 | 单日真实补采覆盖达标，五日及按时完成未证明 | bars-real-verification.json：73/73 日线，全部分页完成；常规分钟合计 99.9649%、最低 98.9744%；此为 10 月 13 日补采，结束超过 20:45 ET，status=degraded，不能作为按时完成或连续五日证据 |
-| AC-M1-03 | 实源诊断入选数达标，启动快照待定时运行 | wide-real-verification.json：13,228 候选，1,302 入选，各排除原因有统计；使用真实前一已完成收盘做诊断、外层事务回滚，不伪造历史月初集合；K18 启动例外已获批准 |
-| AC-M1-04 | 时间/归并机制通过，规定原文抽查未证明 | news-real-verification.json：10 条真实供应商 URL、发布时间和首次见到时间；这不是原文 ≤1 分钟核对表，也不是五条真实转载验收；空正文不错误归为同一个 root |
-| AC-M1-05 | 三个真实时间冲突样例已冻结，十次抽查未证明 | tests/fixtures/phase1/m1/sec_acceptance_conflict.json；三次官方索引 Accepted，其中含盘后财报；夏令时 JSON 字面值差 8 小时、冬令时差 10 小时。按 K17 只认索引美东转 UTC，JSON 原样留证，不写死偏移。59 只十次历史财报原文抽查尚未完成 |
-| AC-M1-06 | 故障隔离验证通过，部分真实源仍未接通 | test_trends_unavailable_marked / test_llm_extraction_failure_degrades；database-summary.json：新闻、App Store、Trends、FINRA、CBOE、FRED 为 ok；CompanyIR 的 403 为未接通，Alpaca 因迟到为 degraded；未运行的 SEC 等源不虚构健康记录 |
-| AC-M1-07 | 计数恒等式、先存后抽取和真实回补已证明 | news bootstrap 第二段：24,038=23,199 入库+839 去重；累计真实新闻库 60,509 行，bootstrap_complete=true；history-import-verification.json：27,624=27,624+0。首次回补在 30 分钟限制后停止，保存进度再续跑，不伪称单次全部完成 |
-| AC-M1-08（非阻塞） | 标注探针通过，嵌入不通过 | 十条真实标注 0 失败；十条嵌入均失败。Token Plan 嵌入返回 404，现有 key 在 DashScope 兼容端点返回 401 invalid_api_key。需匹配业务空间/地区且获该模型权限的嵌入地址和 key；不换模型，不把 60,499 条待抽取原文算成成功 |
+| AC-M1-01 | 本地 blocking 通过；最终 CI 单独核对 | blocking-v3.xml；PR #3 Actions |
+| AC-M1-02 | 5 日正式回补通过；至少一次准时调度尚待今晚真实触发 | v3-m1-backfill.json，下表；调度器已真实启动，不用冻结时间，不把回补算作按时触发 |
+| AC-M1-03 | 实源诊断入选 1,302；正式启动集合等待同一调度器执行 | wide-real-verification.json：13,228 候选/1,302 入选，诊断外层回滚；首次启动例外按 Q-M1-20，不伪造月初快照 |
+| AC-M1-04 | 10 条原文显示分钟已逐条核对；5 条真实转载仍未证明 | v3-news-time-proof.json：10/10 落在原文显示分钟内；原网页仅分钟且未显式写时区，按美国站美东解释，限制保留。直接请求原文 403 与网页读取结果不混写。v3-info-maintenance.json：当前新闻库只有一个重复正文组，且是通用财报日历文字，不能冒充五条通讯社转载 |
+| AC-M1-05 | 10 次真实索引 Accepted / session / reaction_day 核对已完成 | v3-sec-metadata.json 的 earnings_audit，含官方索引 URL、申报号、原始 JSON 时间和权威 Accepted；59 只 submissions 原始元数据均已入库。原 3 个冲突样例夹具保持不变 |
+| AC-M1-06 | 真实断开、其他源继续及恢复演示通过 | v3-source-demo.json：同一 HTTPClient 请求失效域名，两次失败后 Trends 为 degraded；同时 AppStoreFree 真实 100 行、ok；恢复 Trends 8 关键词后 ok。不是 mock 网络故障 |
+| AC-M1-07 | 实源存档/计数恒等式和断点回补通过 | news bootstrap 累计 60,509 行；24,038 = 23,199 入库 + 839 去重；R7 27,624 = 27,624 + 0。v3-info-maintenance.json：按现有已测试空正文规则修复 41,967 个旧空正文根，原文/数量不删，备份在仓库外提交范围的忽略缓存 |
+| AC-M1-08（非阻塞） | 对话标注真实通过；嵌入未接通，原因已验证 | v3-embedding-check.json：同一 key 为 Token Plan key；Token Plan models 200，未列规定嵌入，嵌入 404；北京和国际站 models / embeddings 均 401。需要开通 text-embedding-v3 的百炼普通 API key。原 10 条嵌入探针因地址未配置在本地失败，不能说成十次网络 401 |
 
-真实来源补充：FRED 六系列 73,384 个历史版本；FINRA 5,082 行，CBOE 23 类，App Store 免费和畅销各 100，Trends 8 个关键词。修复前 FINRA 400、CBOE 解析失败的初始输出与修复后的输出分别留存，不以初始失败掩盖最终状态。R7 Form 4 18,335 行、VIX 9,289 行，重复导入新增 0；原始导出未提供的 filed_at/accession/历史发布版本明确标记未知，不伪造可见时间。
+5 个最近完整交易日均经正式 `Pipeline.runtime().run(['bars_full'])`，真实 SystemClock；historical_backfill 的 deadline_met 为 NULL，不假称按时完成。
+
+| 美东交易日 | 日线 | 常规分钟总覆盖 | 最低单标的覆盖 | 真实耗时 | 分页/状态 |
+|---|---:|---:|---:|---:|---|
+| 2026-10-07 | 73/73 | 99.9684% | 98.9744% | 87.03 秒 | 全部完成 / ok |
+| 2026-10-08 | 73/73 | 99.9824% | 98.9744% | 45.04 秒 | 全部完成 / ok |
+| 2026-10-09 | 73/73 | 99.9438% | 97.9487% | 24.29 秒 | 全部完成 / ok |
+| 2026-10-12 | 73/73 | 99.9368% | 98.7179% | 91.05 秒 | 全部完成 / ok |
+| 2026-10-13 | 73/73 | 99.9649% | 98.9744% | 115.84 秒 | 全部完成 / ok |
 
 ## 5. 边界与破坏性验证
 
-保留原名断言，覆盖应拒绝和应放行两面：非普通股/完整合法股本、缺 ADV/完整 20 日、相同与不同正文（保留数字和否定）、空正文/原始 source ID、官方 PCR/没有官方比值才计算、401 不重试/5xx 允许重试、未知任务/注册任务、非法实体 ID/合法图谱 ID、索引缺失/真实合法 Accepted。M0 断网/时间/模型/golden 等门禁随 blocking 运行；没有修改标准答案或禁用门禁。模块文档没有独立编号的破坏性清单，不另造已完成记录。
+blocking 保留原名和应拦/应放行双向断言：非普通股/合法股本；缺 ADV/完整 20 日；相同/不同/空正文；401 不重试/5xx 重试；索引缺失/有效 Accepted；回补日期/未来日期；当日旧回补/已完成当日任务。M0 网络、Clock、模型白名单、golden 门禁一起运行；未修改标准答案或放宽门禁。
 
-## 6. 已知限制与依据
+## 6. 已知限制与已执行答复
 
-K17：索引 Accepted 为时间权威；索引暂缺记录 URL/错误并重试，不生成未核实反应日。K18：第一次空库可在当日收盘后建 startup_baseline，之后月初重算、每日只剔除。监控实体初版 config/monitored_entities.yaml 待需求方审核。M0 修改仅为已授权的权限矩阵和独立负例/迁移清单/模型品牌域识别，其他 M0 内容不动。
+Q-M1-17 至 Q-M1-22 已按 v3 实施。全部任务按美东配置；当日 bars_full 20:20 开始、20:45 截止。当前实际启动的调度器选择 bars_full 和 wide_universe，不启动新闻抽取子进程。下一个窗口为北京时间 **2026-10-15 08:20–08:45**；用户已授权 **08:50 一次**自动核对日志/数据库、更新本报告并推送，尚未发生的结果不提前写通过。采集进程不是开机自启服务。
 
-运行入口已实现：`python -m inves_cog.ingest.cli run --tasks ...`；`schedule` 按美东时间轮询并启动独立抽取进程；`enrich --once` 补处理已保存原文；`health` 输出健康记录。数据库已经运行，但没有安装开机服务，也没有将未运行的定时服务称为已部署。
+## 7. 新问题与待证事项
 
-## 7. 新需求问题与待证事项
-
-已提出问题均有答复并实施；本次不新增未经答复的业务规则。剩余为真实验收证据：五交易日按时采集、十新闻和五转载原文核对、十次真实财报时间核对、全部源运行，以及嵌入接入。证据不足的条款保持待验，不写入 milestones。
+没有待答复的 M1 业务问题。阻塞证据仍缺一次真实按时调度及五条真实转载；CompanyIR 和嵌入响应如实记录。原文一分钟核对保留页面精度/时区解释限制，不用合成稿件填充真实转载证据。

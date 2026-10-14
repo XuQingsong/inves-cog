@@ -1,0 +1,56 @@
+{
+  "checked_at_utc": "2026-10-14 11:25:54.857591+00:00",
+  "key_present": true,
+  "same_as_token_plan_key": true,
+  "configured_embedding_base_url": "",
+  "requests": [
+    {
+      "method": "GET",
+      "url": "https://dashscope.aliyuncs.com/compatible-mode/v1/models",
+      "status": 401,
+      "request_id": "c6560bf0-040b-9b75-a6e8-9cccd3515ca7",
+      "code": "invalid_api_key",
+      "message": "Incorrect API key provided. For details, see: https://help.aliyun.com/zh/model-studio/error-code#apikey-error"
+    },
+    {
+      "method": "POST",
+      "url": "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings",
+      "status": 401,
+      "request_id": "a89c3065-1205-9192-a70f-6558568681a7",
+      "code": "invalid_api_key",
+      "message": "Incorrect API key provided. For details, see: https://help.aliyun.com/zh/model-studio/error-code#apikey-error"
+    },
+    {
+      "method": "GET",
+      "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models",
+      "status": 401,
+      "request_id": "ca2b32a9-f551-9373-a126-7593df2e2d5a",
+      "code": "invalid_api_key",
+      "message": "Incorrect API key provided. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#apikey-error"
+    },
+    {
+      "method": "POST",
+      "url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/embeddings",
+      "status": 401,
+      "request_id": "63e51444-90e9-9c63-8ad8-2c3a46ed842c",
+      "code": "invalid_api_key",
+      "message": "Incorrect API key provided. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#apikey-error"
+    },
+    {
+      "method": "GET",
+      "url": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/models",
+      "status": 200,
+      "request_id": "9a1d92e4-6fe9-4416-b5d8-67da9c1b0efa",
+      "models_count": 17,
+      "required_embedding_listed": false
+    },
+    {
+      "method": "POST",
+      "url": "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/embeddings",
+      "status": 404,
+      "request_id": "766ad0fe-22f2-4ed4-ad32-05cfdab4cde8",
+      "code": "InvalidParameter",
+      "message": "Model not exist."
+    }
+  ]
+}
