@@ -1,6 +1,6 @@
 # M2 需求答复与已验证的新规则问题
 
-基线 main e7db5a9，M2 v3。历史 K13 已写 Q-M2-16，M0 修复仅在 M1；K14 按 Q-M2-17 使用 FRED 七日余额报价和原币证据，实源 ASML 旧期间已补足。K15 于本线程获准仅允许 srt:ConsolidationItemsAxis=us-gaap:OperatingSegmentsMember，测试先行实施，其他混合维度继续拒绝。
+基线main d273b28，M2 v5。K15/Q-M2-18、K16/Q-M2-19均已写入需求并完成。历史 K13 已写 Q-M2-16，M0 修复仅在 M1；K14 按 Q-M2-17 使用 FRED 七日余额报价和原币证据，实源 ASML 旧期间已补足。K15 于本线程获准仅允许 srt:ConsolidationItemsAxis=us-gaap:OperatingSegmentsMember，测试先行实施，其他混合维度继续拒绝。
 
 ## K16：同轴汇总、利润专用抵销与其他经营分部辅助成员
 
@@ -15,3 +15,6 @@
 官方原件目录：https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/ 与 https://www.sec.gov/Archives/edgar/data/1996810/000199681026000148/ 。其他申报号逐家记录在分部证据中；原件缓存保留在提交范围之外。
 
 用户答复（本线程）：采用上述原件规则并继续修复。已测试先行完成K16；59只原件重新核验，14家营收合计异常降至0。原件逐行权重、汇总关系、表格区块/列及哈希见k16-original-audit.json.gz。营收NULL保留，不填0；GEV放行严格限定ticker、namespace和成员。
+
+
+Q-M2-20：Yahoo部署出口封禁已由需求方确认。AC-M2-06b非阻塞，期限为M5提交验收前；等待用户选择代理或Alpha Vantage，当前不重试、不换源。
