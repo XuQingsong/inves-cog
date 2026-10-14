@@ -47,3 +47,20 @@ def assert_usage_accounting(root, clock):
                         recorder=rows.append,monotonic=lambda:0)
     assert live_shape.call('entity_tagging', payload) == {'entities':[]}
     assert rows[-1]['input_tokens'] == 7 and rows[-1]['output_tokens'] == 2
+
+    from inves_cog.ingest.repository import Repository
+    class Connection:
+        def __init__(self):self.writes = []; self.stats = {'input_tokens':11,'output_tokens':3,'usage_missing_calls':0}
+        def execute(self, sql, values=None):
+            if sql.startswith('INSERT'):self.writes.append((sql,values))
+            return self
+        def fetchone(self):return self.stats
+    connection = Connection();repo = Repository(connection)
+    job = {'task_name':'news_test','trade_date':clock.today_trade_date(),'started_at':clock.now_utc(),
+           'ended_at':clock.now_utc(),'status':'ok','processed_count':1,'error_summary':None,'params_version':'p-2026.10'}
+    repo.write_job(job)
+    assert connection.writes[-1][1][-3:] == [11,3,0]
+    assert 'llm_input_tokens' in connection.writes[-1][0]
+    connection.stats = {'input_tokens':None,'output_tokens':None,'usage_missing_calls':1}
+    repo.write_job(job)
+    assert connection.writes[-1][1][-3:] == [None,None,1]
