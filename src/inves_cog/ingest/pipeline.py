@@ -59,19 +59,37 @@ class Pipeline:
         return value
 
     def info(self, items):
-        counts = Counter()
+        count = 0
         for item in items:
             check()
             previous = self.repo.info_signature(item['info_id'])
             if previous != (item['headline'], item['body']):
-                item = enrich(item, llm=self.llm, embed=self.embed, entities=self.entities, clock=self.clock)
-                counts['tagging_failed'] += 'entity_tagging_failed' in item['flags']
-                counts['embedding_failed'] += 'embedding_failed' in item['flags']
+                # The durable pending row is the queue. Collection never waits
+                # for dialogue/embedding, and restart resumes from this row.
                 self.repo.put_info(item)
             else:
                 self.repo.count_duplicate()
-            counts['processed_count'] += 1
-        return dict(counts)
+            count += 1
+        return {'processed_count': count}
+
+    def enrich_pending(self, limit=32):
+        counts = Counter()
+        try:
+            for item in self.repo.pending_info(limit):
+                check()
+                result=enrich(item,llm=self.llm,embed=self.embed,entities=self.entities,clock=self.clock)
+                if self.repo.apply_enrichment(result):
+                    counts['processed_count'] += 1
+                    counts['tagging_failed'] += 'entity_tagging_failed' in result['flags']
+                    counts['embedding_failed'] += 'embedding_failed' in result['flags']
+        except Exception as exc:
+            exc.processed_count=counts['processed_count']
+            raise
+        counts.setdefault('processed_count',0)
+        report=dict(counts)
+        report['status']='degraded' if counts['tagging_failed'] or counts['embedding_failed'] else 'ok'
+        report['note']=f"tagging_failed={counts['tagging_failed']}; embedding_failed={counts['embedding_failed']}"
+        return report
 
     def bars(self, *, prefill=False):
         if not trading_day(self.day):

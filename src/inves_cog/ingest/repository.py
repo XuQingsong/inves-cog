@@ -166,3 +166,19 @@ class Repository:
     def latest_website(self,url):
         row=self.connection.execute('SELECT body FROM ingest.website_snapshots WHERE url=%s ORDER BY captured_at DESC LIMIT 1',(url,)).fetchone()
         return row['body'] if row else None
+
+
+    def pending_info(self,limit=32):
+        return [dict(row) for row in self.connection.execute("SELECT * FROM ingest.info_items WHERE extraction_status='pending' ORDER BY first_seen_at,info_id LIMIT %s",(limit,)).fetchall()]
+
+    def has_pending_info(self):
+        return self.connection.execute("SELECT EXISTS(SELECT 1 FROM ingest.info_items WHERE extraction_status='pending') AS pending").fetchone()['pending']
+
+    def apply_enrichment(self,row):
+        fields=['entities','embedding','extraction_status','flags','is_guidance','guidance_direction','is_rating_change','extraction_source']
+        values=[json_text(row[key]) if key in {'embedding','extraction_source'} and row[key] is not None else row[key] for key in fields]
+        assignments=[key+'=%s'+('::vector' if key=='embedding' else '::jsonb' if key=='extraction_source' else '') for key in fields]
+        with self.transaction():
+            result=self.connection.execute('UPDATE ingest.info_items SET '+','.join(assignments)+",published_at=COALESCE(published_at,%s) WHERE info_id=%s AND headline=%s AND body IS NOT DISTINCT FROM %s RETURNING info_id",values+[row['published_at'],row['info_id'],row['headline'],row['body']]).fetchone()
+        # A newer upstream body remains pending instead of receiving stale tags.
+        return result is not None

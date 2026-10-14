@@ -51,9 +51,11 @@ class JobRunner:
             with budget(self.timeout_seconds, self.monotonic):
                 result = operation()
             duration = self.monotonic() - timer
-            if duration > self.timeout_seconds:
-                raise SourceError('Task exceeded its 30-minute budget')
             count = result.get('processed_count', 0)
+            if duration > self.timeout_seconds:
+                error=SourceError('Task exceeded its 30-minute budget')
+                error.processed_count=count
+                raise error
             degraded = result.get('status') == 'degraded'
             row.update(status='degraded' if degraded else 'ok', processed_count=count)
             self.health.record(source, success=True, count=count, latency=duration,

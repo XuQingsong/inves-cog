@@ -3,6 +3,8 @@ import argparse
 import json
 from pathlib import Path
 import time
+import subprocess
+import sys
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.settings import read_environment
 from inves_cog.ingest.repository import Repository, json_text
@@ -31,10 +33,11 @@ def connect(values):
 
 def main():
     parser = argparse.ArgumentParser(description='Independent market ingestion')
-    parser.add_argument('action',choices=['run','schedule','health'])
+    parser.add_argument('action',choices=['run','schedule','health','enrich'])
     parser.add_argument('--tasks',nargs='+')
     parser.add_argument('--trade-date',type=__import__('datetime').date.fromisoformat)
     parser.add_argument('--output',type=Path)
+    parser.add_argument('--once',action='store_true',help='Process one enrichment batch')
     args = parser.parse_args()
     values, clock = read_environment(), SystemClock()
     with connect(values) as connection:
@@ -44,15 +47,36 @@ def main():
             pipeline = build(clock=clock,values=values,connection=connection)
             pipeline.day_override = args.trade_date
             runtime = pipeline.runtime()
-            if args.action == 'schedule':
-                if args.trade_date: parser.error('schedule uses the injected current clock')
+            if args.action == 'enrich':
+                from inves_cog.ingest.jobs import HealthBook,JobRunner
+                runner=JobRunner(clock=clock,health=HealthBook(clock=clock,rows=pipeline.repo.health_rows(),persist=pipeline.repo.write_health),persist=pipeline.repo.write_job)
                 while True:
-                    tasks = due_tasks(clock,pipeline.repo.last_runs())
-                    if tasks: print(json_text(runtime.run(tasks)),flush=True)
-                    time.sleep(30)
-            if not args.tasks: parser.error('run requires --tasks')
-            output = runtime.run(args.tasks)
-            pipeline.repo.compact(clock.now_utc())
+                    if pipeline.repo.has_pending_info():
+                        output=runner.run('info_enrichment','InfoExtraction',pipeline.enrich_pending)
+                        print(json_text(output),flush=True)
+                    else: output={'processed_count':0,'note':'no pending information'}
+                    if args.once: break
+                    time.sleep(2 if output['processed_count'] else 30)
+            elif args.action == 'schedule':
+                if args.trade_date: parser.error('schedule uses the injected current clock')
+                log_path=Path(__file__).resolve().parents[3]/'.harness/enrichment.log'
+                log_path.parent.mkdir(parents=True,exist_ok=True)
+                with log_path.open('a') as log:
+                    worker=subprocess.Popen([sys.executable,'-m','inves_cog.ingest.cli','enrich'],stdout=log,stderr=log)
+                    try:
+                        while True:
+                            if worker.poll() is not None: raise RuntimeError('Enrichment worker exited; inspect .harness/enrichment.log')
+                            tasks = due_tasks(clock,pipeline.repo.last_runs())
+                            if tasks: print(json_text(runtime.run(tasks)),flush=True)
+                            time.sleep(30)
+                    finally:
+                        worker.terminate()
+                        try: worker.wait(timeout=5)
+                        except subprocess.TimeoutExpired: worker.kill();worker.wait()
+            else:
+                if not args.tasks: parser.error('run requires --tasks')
+                output = runtime.run(args.tasks)
+                pipeline.repo.compact(clock.now_utc())
         text = json_text(output)
         if args.output:
             args.output.parent.mkdir(parents=True,exist_ok=True)
