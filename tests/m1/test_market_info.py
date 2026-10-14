@@ -357,6 +357,31 @@ def test_source_level_mapping():
 
 
 def test_info_item_contract(tmp_path):
+    from inves_cog.ingest.pipeline import Pipeline
+    from inves_cog.ingest.info import make_item
+    calls=[]
+    class LLM:
+        def call(self,task,payload):
+            calls.append(task)
+            return {'entities':[]} if task=='entity_tagging' else {'is_guidance':False,'is_rating_change':False}
+    class Queue:
+        def __init__(self): self.rows={}; self.collected=0
+        def info_signature(self,identifier):
+            row=self.rows.get(identifier); return (row['headline'],row['body']) if row else None
+        def put_info(self,row): self.rows[row['info_id']]=row;self.collected+=1
+        def count_duplicate(self): self.collected+=1
+        def pending_info(self,limit): return [row for row in self.rows.values() if row['extraction_status']=='pending'][:limit]
+        def apply_enrichment(self,row): self.rows[row['info_id']]=row;return True
+    pipeline=Pipeline.__new__(Pipeline);pipeline.repo=Queue();pipeline.clock=frozen()
+    pipeline.llm=LLM();pipeline.embed=lambda *args,**kw:[.1]*1024;pipeline.entities=[]
+    raw=make_item('news','Fixture','queued',headline='Raw source',body='Preserved first',clock=frozen())
+    pipeline.info([raw]); assert not calls
+    assert pipeline.repo.rows[raw['info_id']]['extraction_status']=='pending'
+    result=pipeline.enrich_pending()
+    assert result['processed_count']==1 and pipeline.repo.rows[raw['info_id']]['extraction_status']=='ok'
+    assert pipeline.repo.collected==1 and len(calls)==2
+    pipeline.info([raw]); assert pipeline.repo.collected==2 and len(calls)==2
+
     from inves_cog.ingest.info import make_item, InfoStore, enrich
     from inves_cog.ingest.sources import fred_observations, parse_cboe, parse_finra, website_change
     item = make_item('news', 'unknown', '1', headline='Unimportant update', body='x' * 600, clock=frozen())
