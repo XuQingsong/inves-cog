@@ -219,6 +219,12 @@ def test_earnings_reaction_day():
 
 
 def test_earnings_fallback_flag():
+    from inves_cog.ingest.sec_client import SECClient
+    from inves_cog.ingest.http import HTTPClient,Response
+    client=SECClient(user_agent='fixture test@example.invalid',http=HTTPClient(lambda *a,**k:Response(200,'fixture schema')))
+    assert client.get('https://xbrl.sec.gov/dei/2025/dei.xsd')=='fixture schema'
+    with pytest.raises(ValueError): client.get('https://xbrl.sec.gov.evil.invalid/dei.xsd')
+    with pytest.raises(ValueError): client.get('http://xbrl.sec.gov/dei.xsd')
     from inves_cog.ingest.sec import earnings_fallback
     uncertain = earnings_fallback('AAPL', {'reportDate': '2026-10-29'}, clock=frozen())
     assert uncertain['fallback'] and uncertain['session'] is None and uncertain['reaction_day'] is None
@@ -273,6 +279,14 @@ def test_trends_unavailable_marked():
 
 
 def test_source_level_mapping():
+    from inves_cog.ingest.repository import normalize_entity
+    row = normalize_entity({'entity_id':'fixture','name':'Fixture','aliases':['F'],
+        'ticker':'AAPL','app_store_ids':['app'],'trend_keywords':['Fixture'],'official_urls':['https://example.invalid']})
+    assert row['tickers']==['AAPL'] and row['app_ids']==['app'] and row['trends_keywords']==['Fixture']
+    restricted = normalize_entity({'entity_id':'fixture','name':'Fixture','channels':['site'],
+        'app_store_ids':['app'],'trend_keywords':['Fixture'],'official_urls':['https://example.invalid']})
+    assert restricted['app_ids']==[] and restricted['trends_keywords']==[] and restricted['urls']
+    with pytest.raises(ValueError): normalize_entity({'entity_id':'','name':'Invalid'})
     from inves_cog.ingest.info import source_level
     for source in ('SEC', 'CompanyIR', 'Government', 'CentralBank'):
         assert source_level(source) == 1
@@ -346,6 +360,7 @@ def test_info_item_contract(tmp_path):
         requests.append(kwargs['params'])
         if url.endswith('/series'):
             return Response(200, {'realtime_end': '2026-10-13', 'seriess': [{'units': 'Percent'}]})
+        assert kwargs['params']['output_type'] == 1
         offset = kwargs['params'].get('offset', 0)
         return Response(200, {'count': 2, 'observations': [
             {'date': '2026-10-01', 'realtime_start': f'2026-10-{12+offset}', 'value': '2.5'}]})
