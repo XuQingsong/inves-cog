@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="11" time="0.546" timestamp="2026-10-15T20:00:35.298812+08:00" hostname="192.168.1.101"><testcase classname="tests.m6.test_structure" name="test_marketstate_flags" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.market'">@pytest.mark.phase1_blocking
+    def test_marketstate_flags():
+&gt;       from inves_cog.marketstate.market import market_flags
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.market'
+
+tests/m6/test_structure.py:24: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_residual_exact_linear" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.regression'">@pytest.mark.phase1_blocking
+    def test_residual_exact_linear():
+&gt;       from inves_cog.marketstate.regression import fit_predict
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.regression'
+
+tests/m6/test_structure.py:35: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_residual_leave_one_out" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.factors'">@pytest.mark.phase1_blocking
+    def test_residual_leave_one_out():
+&gt;       from inves_cog.marketstate.factors import basket_return
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.factors'
+
+tests/m6/test_structure.py:47: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_residual_window_excludes_today" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.regression'">@pytest.mark.phase1_blocking
+    def test_residual_window_excludes_today():
+&gt;       from inves_cog.marketstate.regression import fit_predict
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.regression'
+
+tests/m6/test_structure.py:60: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_insufficient_history_null" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.regression'">@pytest.mark.phase1_blocking
+    def test_insufficient_history_null():
+&gt;       from inves_cog.marketstate.regression import fit_predict
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.regression'
+
+tests/m6/test_structure.py:72: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_post_session_null_when_missing" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.factors'">@pytest.mark.phase1_blocking
+    def test_post_session_null_when_missing():
+&gt;       from inves_cog.marketstate.factors import adjusted_returns, post_return
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.factors'
+
+tests/m6/test_structure.py:84: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_beta_share_bounds" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.market'">@pytest.mark.phase1_blocking
+    def test_beta_share_bounds():
+&gt;       from inves_cog.marketstate.market import beta_share
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.market'
+
+tests/m6/test_structure.py:93: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_marketstate_price_only" time="0.005"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.repository'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-192/test_marketstate_price_only0')
+
+    @pytest.mark.phase1_blocking
+    def test_marketstate_price_only(tmp_path):
+&gt;       from inves_cog.marketstate.repository import assert_price_query
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.repository'
+
+tests/m6/test_structure.py:104: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_graph_draft_requires_citation" time="0.007"><failure message="ModuleNotFoundError: No module named 'inves_cog.perception.graph.drafting'">clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-192/test_graph_draft_requires_cita0')
+
+    @pytest.mark.phase1_blocking
+    def test_graph_draft_requires_citation(clock, tmp_path):
+        from tests.m6.recordings import recorded_draft
+    
+        fixture = json.loads((ROOT / "tests/fixtures/phase1/m6/draft.json").read_text())
+&gt;       result = recorded_draft(fixture, clock=clock, recordings=tmp_path)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m6/test_structure.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture = {'classification': 'handwritten synthetic recording, not a real SEC statement', 'source': {'ticker': 'SYN', 'accession...ure_basis': '合同', ...}, {'from_entity': 'SYN', 'to_entity': 'Unproven', 'exposure_usd': 999, 'exposure_basis': '合同'}]}}
+clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+recordings = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-192/test_graph_draft_requires_cita0')
+
+    def recorded_draft(fixture, *, clock, recordings):
+&gt;       from inves_cog.perception.graph.drafting import DraftService
+E       ModuleNotFoundError: No module named 'inves_cog.perception.graph.drafting'
+
+tests/m6/recordings.py:10: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_candidate_edges_not_used" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.perception.graph.review'">clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+
+    @pytest.mark.phase1_blocking
+    def test_candidate_edges_not_used(clock):
+&gt;       from inves_cog.perception.graph.review import ReviewQueue
+E       ModuleNotFoundError: No module named 'inves_cog.perception.graph.review'
+
+tests/m6/test_structure.py:132: ModuleNotFoundError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_auto_cluster_suggestion" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.marketstate.clustering'">@pytest.mark.phase1_blocking
+    def test_auto_cluster_suggestion():
+&gt;       from inves_cog.marketstate.clustering import suggestions
+E       ModuleNotFoundError: No module named 'inves_cog.marketstate.clustering'
+
+tests/m6/test_structure.py:148: ModuleNotFoundError</failure></testcase></testsuite></testsuites>
