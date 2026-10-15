@@ -1,69 +1,48 @@
 # M2 自测报告
 
-模块：M2；文档：v5（main d273b28）；代码提交：a52325591f0a3dde63a050d564fbd97d98b2403f；日期：2026-10-15。
+基线：main c66fab3，M2 v6；2026-10-15。已按用户新授权合入M1最终共享代码，第二轮六项完成。当前59行健康及59份档案已刷新，54只美国公司可打分；五只外国申报人按规则不可交易。PR #4请求验收，最新完整SHA的CI结果在PR说明核对。
 
-真实 59 行健康页、59 份档案、59 只修复差异和五份原文对照已附。分部合计已修复。AC-M2-06的Muse导入、F2历史复算及失败如实显示已满足；两次59只真实采集按v5拆为非阻塞AC-M2-06b。PR #4在M1合并后合入共享基线、CI绿后转正式。
+## 1. 工程与回放
 
-## 1. Harness
+联合阻塞测试39 passed，9.49秒；独立replay 1 passed，5.58秒，零跳过，唯一最终证据为blocking.xml、replay.xml。90组Muse对照、2,255字段仍零差异，输入与oracle哈希不变；未导入或运行Muse/stock-pm代码。M0网络、时钟、模型、golden、权限门禁均保留，测试只用夹具及录音。干净Docker CI以GitHub最新SHA为准，本机pytest不冒称容器结果。
 
-K16 最终验证：M2 blocking **25 passed，7.56 秒，0 failed，0 skipped**，replay **1 passed，5.37 秒，0 failed，0 skipped**；临时联合 blocking **39 passed，8.25 秒，0 failed，0 skipped**，replay **1 passed，5.17 秒，0 failed，0 skipped**。命令仍为 `PYTHONPATH=src .venv/bin/python -m pytest -q -m phase1_blocking` / `phase1_replay`；完整结果附四份 *-k16.xml。M0 本地通信探针在允许 AF_UNIX 的正常环境执行，门禁、测试名和标记未改。
-
-独立 Muse 回放 30×3、90 组、2,255 字段差异 0，输入及 oracle 冻结哈希不动。七日期末 FX、FX 日期索引、预算部分完成计数、PIT 年报推财年、获准辅助维度、旧分部缓存刷新、资产/利息不冒充利润及 FASB 缓存复用均保留测试先行提交。没有修改 docs/、golden 或 milestones；本机无 Docker，不把直接 pytest 冒充干净容器 CI。
+先失败测试再实现：d9867f6覆盖第二轮规则，964f7b7扩充COST财政季度与V维度边界；实现4a089cb。除两个既有复杂函数extract_state、parse_segments外没有新增复杂度豁免；本PR全部改动Python文件通过Ruff整理。共享pending各保留本模块行、CHANGELOG和fixtures MANIFEST取并集，依赖及锁文件已合并。真实milestones及docs不改。
 
 ## 2. 不变量
 
-| 不变量 | 测试 |
-|---|---|
-| I10 | test_revenue_tag_gap：标准/新增营收标签正反断言 |
-| I11 | test_q4_derived_from_annual：Q2/Q3/Q4 累计推单季及缺数 |
-| I12 | test_companyfacts_lag：三天边界、已有 accession、原件解析 |
-| I33 | test_segment_extraction / recast / mapping_pending：批准的精确辅助轴放行，其余混合维度拒绝，1% 容差、原件缓存与审核状态；同轴层级和原件表格口径/权重均附正反用例；实源59只审计与离线测试分开登记 |
-| I34 | test_consensus_derived_pit：可见时点、同财年、窗口、低基数；实际历史复算见下表 |
+I10标签优先级、I11累计推单季、I12三天原件回退、I33分部轴/抵销/合计、I34 PIT一致预期窗口均有正反断言。D9可独立关闭；class A只放行V的精确FASB轴/成员，B类、其他公司、仿造namespace与混合维度仍拒绝。fixed放行80–120天；legacy长度及默认修复开关不变。
 
-## 3. pending 和 milestones
+## 3. 逐条验收
 
-15 项 blocking 和 legacy replay 已移除，只保留原名 test_fundamentals_live_smoke。R4/R5/R7 不是笼统缺 key：阻塞待补仅为M1合并后的共享基线及CI；Yahoo成功采集属于AC-M2-06b非阻塞、期限M5提交验收之前；K15/K16分别见Q-M2-18/19。没有改其他模块行或 milestones。
-
-## 4. 逐条验收自评
-
-| 条款 | 自评 | 证据 |
+| 条款 | 自评 | 唯一最终证据 |
 |---|---|---|
-| AC-M2-01 | 本模块离线和独立回放通过；干净 CI 等 M1 修复基线合入 | blocking-v3.xml、replay-v3.xml、legacy-replay.json；M2 不越权复制 M1 的 M0 迁移清单修正 |
-| AC-M2-02 | 59 只真实差异已形成；LITE/BE/COHR 均可打分 | v3-differences.json.gz、v3-coverage.json：59 行，两套字段差异和健康码均附 |
-| AC-M2-03 | 真实 59 行通过健康一致性检查 | v3-health.json：不可打分但无原因 0 行，可交易但三个核心字段缺失 0 行；外国标的不可交易 |
-| AC-M2-04 | 存在覆盖及已采分部营收合计达标 | v3-coverage.json、k16-original-audit.json.gz：51/54 = 94.44%；缺 NOW/XOM/CRWD；59只原件复核成功，segment_sum_mismatch 由14家降至0，1%阈值不变 |
-| AC-M2-05 | 五只真实 10-Q 营收/利润对照均一致 | v3-segment-spot.json：AMD、WDC、NVDA、MSFT、COHR，原文 URL/sha256/显示金额/scale/context_ref 均附；独立读取 HTML inline facts，与实例数字逐条比，不用夹具冒充 |
-| AC-M2-06 | v5阻塞条款通过：Muse导入、F2历史复算、失败如实显示 | 原 database-verification.json：两次导入均 180 行/30 只，哈希和幂等核对；v3-f2-history.json：5 只×3 日期 15 组窗口独立复算一致。真实两次共识均 59 次失败/0 成功；旧版及隔离最新版都实测 crumb 403、quoteSummary 429，不称为缺 key，不换源 |
-| AC-M2-06b（非阻塞） | 尚未完成；期限为M5提交验收之前 | Q-M2-20：需求方已确认部署机腾讯云首尔AS132203出口被Yahoo封禁；不重试、不换源，待用户选代理或Alpha Vantage。v5-consensus-failure.json保留既有两次59只失败、59行窗口及健康状态；仅180条Muse快照，没有假造yfinance快照 |
-| AC-M2-07 | 59 份真实 F3 档案已生成 | v3-profiles.json.gz；三个区块都有数据或明确理由。共识缺当日快照如实标记，不把 Muse 的 30 只充作 59 只当日采集 |
-| AC-M2-08（非阻塞） | 审核队列接口/录音验证通过；实源草稿尚未生成 | M1 合并前按 Q-M2-14 用显式同接口替身；真实分部 mapping_gap 保留，不把替身称为 glm-5.3 真实映射 |
+| AC-M2-01 | 本地39项阻塞、1项回放通过，最新干净CI见PR | blocking.xml、replay.xml、legacy-replay.json |
+| AC-M2-02 | 59只两套提取差异；LITE/BE/COHR/COST/LRCX/JPM/V/XOM均可打分 | differences.json.gz、d9-impact.json |
+| AC-M2-03 | 59行健康；54只可打分，不可打分无原因0、可交易缺核心0；earnings_event_missing从49降到5 | health.json、earnings-audit.json |
+| AC-M2-04 | 51/54分部覆盖=94.44%；已采分部合计差异均≤1%，缺NOW/XOM/CRWD逐只登记 | coverage.json、segment-original-audit.json.gz |
+| AC-M2-05 | AMD/WDC/NVDA/MSFT/COHR与真实10-Q原文逐元素一致 | segment-spot.json |
+| AC-M2-06 | Muse历史导入幂等、5只×3日期F2历史窗口复算通过；真实采集失败及迟到均如实保留 | database-verification.json、f2-history.json、consensus-collection.json |
+| AC-M2-06b，非阻塞 | 一次真实59/59成功入库、失败0；尚需第二次完整采集，期限M5验收前 | consensus-collection.json |
+| AC-M2-07 | 59份真实F3档案更新，财报/分部/一致预期均有内容或明确原因 | profiles.json.gz |
+| AC-M2-08，非阻塞 | 审核队列接口/录音测试通过；真实映射草稿仍未完成 | 原名test_segment_mapping_pending；backlog.md |
 
-## 5. 边界与破坏性验证
+## 4. 第二轮六项结果
 
-未改测试名/标记，不使用 skip；测试无真实 key、网络或系统时间，LLM 用录音。七日含边界、跨年与八日过期，未来 filed/captured_at 排除，假日记录实际报价日。主轴加获准辅助轴可取数，地域/产品/仿造 namespace 与三维混合仍拒绝；资产和利息不会混作利润。空 reviewer/未知图谱节点拒绝，未确认映射不进入 segment_std。未知 taxonomy 版本正常下载，已存在原件复用；不是断网门禁放宽。
+1. M1共享件合并完成；不自建同名表或第二个SEC/LLM客户端。M1合并main后再同步main。
+2. q4_missing只针对最近八季及打分字段，辅助成本字段和历史久远缺口不误伤。仍保留全部诊断；D4能实际补出的毛利不再误判缺失。
+3. fixed采用80–120天；COST的12周常规季、16周第四季及168/252天累计现金流按实际营收财政日历对齐，不用自然月猜季度。90组legacy回放零差异。
+4. D9：JPM采用RevenuesNetOfInterestExpense；V从十份财报实例取精确A类EPS；XOM当前CIK2115436的序列仅两季，用共享SEC读取前身CIK34088补历史，保留原filed及来源，配置和影响矩阵在m2.yaml。三只关闭/打开D9的逐字段差异见d9-impact.json。
+5. 官方索引Accepted新核实44只，持久化到M1既有表；原10只有效，剩ARM/ASML/NOK/SKHY/TSM的submissions均无Item 2.02 8-K，各自申报数量与原因附证。健康页、档案均重跑，不伪造反应日。
+6. Yahoo接口429后同源网页解析嵌入JSON，页间隔≥5秒，source=yahoo_page，F2与yfinance同优先级。真实59只全成功；首次尝试因未应用新source约束迁移而入库失败，原记录保留。修复迁移后再实际联网采59只，不把缓存回写算第二次采集。成功运行晚于北京10:30，status=degraded、deadline_met=false保留。
 
-## 6. 实源结果与偏差
+## 5. 真实数据与夹具的边界
 
-ASML 最初失败为本项目 FX 历史只导入 2009 年后，而源公司披露包含 2007 年金额。已用同一 FRED 源补入 2006 年起的 real-time 版本，重跑写入真实状态，没有以 NULL 隐藏 FX 缺口；v3-fx-history.json、v3-real-runs.json。外国 6-K 中部分原件无 XBRL 的历史缺口逐号保留。
+current-financial-audit.json.gz是本项目此前捕获SEC输入、标明新增D9取数及原件缓存的重算，不算一次新的59只完整联网财报采集。NOK原件0001104659-26-105772、TSM原件0001046179-26-000680没有可唯一识别实例，保留D3_failure和companyfacts_lag，未用零/前值掩盖；外国申报规则继续生效。
 
-原件 taxonomy 反复网络刷新曾使解析 50 只达到 30 分钟预算。真实原件缓存审计已完成 59 只，正式路径也补缓存复用和失败先行测试；不将缓存审计写成一次新的完整联网财报采集。原超时失败日志不改写。
+金额换算仍使用现有FRED/ALFRED历史可见版本；期末最多向前七个自然日且记录实际报价日，缺口抛FXGap。原ASML历史起点缺口已补2006年起数据并留证，不用NULL掩盖。
 
-K16 已按用户答复实施。利润专用行保留 NULL 营收并排除于营收加总，确有营收元素但 nil 的行仍触发未知金额门禁；同轴父成员按 definition 关系保留为 summary。含内部交易的分部口径按同一原件表格区块和列选择抵销，权重引用原件括号或 gross/intersegment/net 顺序。GE 的原件表明确列出 Corporate & Other revenue 175 百万美元，引用原件标签、期间及 XBRL 金额锚定单位，未用合并额减分部额反推；原利润专用行仍保留。ORCL 的营收分类明细继续排除，避免把已有营收分解重复加总。GEV 例外只适用于获准公司 namespace 和成员，三维子分部及其他公司相似成员仍拒绝。59只审计的原件哈希、逐行纳入/排除理由、权重和前后结果见 k16-original-audit.json.gz。
+## 6. 未完成项
 
-## 7. 新问题
+非阻塞：第二次59只真实一致预期采集（M5验收前）、真实分部映射草稿。Yahoo页上外国公司的预测金额沿用供应商原始口径，付费/新源/代理均未引入；原始响应留在raw，观察用途不冒充统一美元估值输入，后续M5接入前核对单位。
 
-K15、K16 均已获用户答复并实施；没有待答复的分部规则问题。Q-M2-20已明确Yahoo 403/429原因为部署机腾讯云首尔AS132203出口被封，不是调用频率；停止重试，等用户选定代理或Alpha Vantage，不擅自换源或伪造快照。M1 验收合并后，M2 再按共享文件并集规则合入 main、重生成 uv.lock、复跑 CI。
-
-
-## 8. K16 测试先行证据
-
-失败测试提交：3686ace（汇总/利润专用/括号权重）、3467b2b（GEV限制）、bb4ff6a（编码声明/不同区块/计算组件）、33ae338（colspan及2023计算关系）、b045c6c（无inline标签原件表）、fb5fc76（ORCL分类明细不得重复加总）。实现分别在353982f和a523255提交。所有断言加在原 test_segment_extraction 内，辅助函数不新增收集名；测试输入为docs之外的手写临时副本。错误期间、未锚定单位、三维混合、错误公司/namespace、reported nil、缺少标准核心营收计算关系均有拒绝断言。
-
-最终全量原件审计：59/59完成、失败0；原14家合计异常全部消除，ORCL重复计数回归也已修复。没有修改docs、golden、milestones、M0门禁或容差。
-
-
-## 9. v5验收与合并顺序
-
-main d273b28已合入，Q-M2-18/19对应开发K15/K16，docs保持main原样。v5-consensus-failure.json为只读生产库检查，不发Yahoo请求：source_health为degraded，note已补入Q-M2-20确认的出口封禁诊断（只更新note，原尝试时间/状态/计数不变，无新Yahoo请求）；真实两次采集均59只失败，59只window_status有当日失败原因，consensus_snapshot只有180条muse_import，yfinance为0；未以历史导入冒充当天快照。
-
-等待M1验收合并后，再合入新的main：pending各留本模块行，CHANGELOG和fixtures MANIFEST取并集，pyproject依赖取并集，uv.lock用uv lock重新生成。CI绿后把PR #4转正式「[M2] 提交验收」；当前M0迁移清单CI断言的修正只由M1带入，M2不越权复制。
+当前无待用户答复的阻塞问题。M1已在main有条件验收，M2最新CI绿后转正式提交验收，未获M2验收前不合并PR #4。每个AC只留一份最终文件，旧-v3/-k16证据留在Git历史。

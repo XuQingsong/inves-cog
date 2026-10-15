@@ -1,0 +1,335 @@
+{
+  "observed_at": "2026-10-15T04:23:17.569411+00:00",
+  "config": "config/params/p-2026.10/m2.yaml",
+  "rows": [
+    {
+      "ticker": "XOM",
+      "input": "prior own capture: /Users/xuqingsong/workspace/inves-cog/.harness/v3-m2-real/0002115436-companyfacts.json",
+      "D3_accession": null,
+      "health": {
+        "ticker": "XOM",
+        "latest_period_end": "2026-06-30",
+        "latest_filed": "2026-08-03",
+        "latest_8k_202": null,
+        "health_codes": [
+          "earnings_event_missing"
+        ],
+        "can_score": true,
+        "can_trade": true,
+        "reason": null
+      },
+      "before": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 368757000000.0,
+        "ni_ttm": 32757000000.0,
+        "rev_growth": 9.074533095912773,
+        "rev_q_yoy": 42.34166809805413,
+        "rev_accel_pp": 39.92617429317022,
+        "eps_ttm": 7.779999999999999,
+        "eps_growth": 10.511363636363647,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
+        "fcf_ttm": 30553000000.0,
+        "fcf_margin": 8.285402039825684,
+        "fcf_conversion": 0.9327166712458406,
+        "roe": 12.628961369419384,
+        "cash": 10588000000.0,
+        "debt": 33239000000.0,
+        "net_debt": 22651000000.0,
+        "net_debt_fcf": 0.7413674598239125,
+        "current_ratio": 1.1346729708431835,
+        "shares": 4111911960.0,
+        "fcf_margin_change_pp": -0.32888223776706127,
+        "op_margin_ttm": null
+      },
+      "after": {
+        "rev_growth": 9.074533095912773,
+        "rev_q_yoy": 42.34166809805413,
+        "rev_accel_pp": 39.92617429317022,
+        "eps_growth": 10.511363636363647,
+        "rev_ttm": 368757000000.0,
+        "ni_ttm": 32757000000.0,
+        "eps_ttm": 7.779999999999999,
+        "rev_period": "2026-06-30",
+        "fcf_ttm": 30553000000.0,
+        "fcf_margin": 8.285402039825684,
+        "fcf_conversion": 0.9327166712458406,
+        "roe": 12.628961369419384,
+        "cash": 10588000000.0,
+        "debt": 33239000000.0,
+        "net_debt": 22651000000.0,
+        "net_debt_fcf": 0.7413674598239125,
+        "current_ratio": 1.1346729708431835,
+        "shares": 4111911960.0,
+        "shares_date": "2026-06-30",
+        "data_flags": [],
+        "op_margin_ttm": null,
+        "fcf_margin_change_pp": -0.32888223776706127,
+        "gross_margin": null,
+        "gross_margin_change_pp": null
+      },
+      "D9_changes": {
+        "rev_growth": {
+          "off": null,
+          "on": 9.074533095912773
+        },
+        "rev_q_yoy": {
+          "off": null,
+          "on": 42.34166809805413
+        },
+        "rev_accel_pp": {
+          "off": null,
+          "on": 39.92617429317022
+        },
+        "eps_growth": {
+          "off": null,
+          "on": 10.511363636363647
+        },
+        "rev_ttm": {
+          "off": null,
+          "on": 368757000000.0
+        },
+        "ni_ttm": {
+          "off": null,
+          "on": 32757000000.0
+        },
+        "eps_ttm": {
+          "off": null,
+          "on": 7.779999999999999
+        },
+        "rev_period": {
+          "off": null,
+          "on": "2026-06-30"
+        },
+        "fcf_ttm": {
+          "off": null,
+          "on": 30553000000.0
+        },
+        "fcf_margin": {
+          "off": null,
+          "on": 8.285402039825684
+        },
+        "fcf_conversion": {
+          "off": null,
+          "on": 0.9327166712458406
+        },
+        "roe": {
+          "off": null,
+          "on": 12.628961369419384
+        },
+        "debt": {
+          "off": 10139000000.0,
+          "on": 33239000000.0
+        },
+        "net_debt": {
+          "off": -449000000.0,
+          "on": 22651000000.0
+        },
+        "net_debt_fcf": {
+          "off": null,
+          "on": 0.7413674598239125
+        },
+        "fcf_margin_change_pp": {
+          "off": null,
+          "on": -0.32888223776706127
+        }
+      },
+      "earnings_missing_reason": "No currently effective verified Item 2.02 acceptance in ingest.earnings_events",
+      "core": {
+        "rev_ttm": 368757000000.0,
+        "eps_ttm": 7.779999999999999,
+        "shares": 4111911960.0
+      }
+    },
+    {
+      "ticker": "V",
+      "input": "prior own capture: /Users/xuqingsong/workspace/inves-cog/.harness/v3-m2-real/0001403161-companyfacts.json",
+      "D3_accession": "0001403161-26-000104",
+      "health": {
+        "ticker": "V",
+        "latest_period_end": "2026-06-30",
+        "latest_filed": "2026-07-29",
+        "latest_8k_202": "2026-07-29 04:05:26+08:00",
+        "health_codes": [
+          "ni_tag_fallback"
+        ],
+        "can_score": true,
+        "can_trade": true,
+        "reason": null
+      },
+      "before": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2010-01-27",
+        "rev_ttm": 44488000000.0,
+        "ni_ttm": 22592000000.0,
+        "rev_growth": 14.385622091378902,
+        "rev_q_yoy": 14.362957137239473,
+        "rev_accel_pp": -2.6893672321580695,
+        "eps_ttm": 11.75,
+        "eps_growth": 14.74609375,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
+        "fcf_ttm": 21013000000.0,
+        "fcf_margin": 47.23296169753641,
+        "fcf_conversion": 0.9301080028328612,
+        "roe": 85.45598971138934,
+        "cash": 12359000000.0,
+        "debt": 22611000000.0,
+        "net_debt": 10252000000.0,
+        "net_debt_fcf": 0.48788845000713843,
+        "current_ratio": 0.9852226141672228,
+        "shares": 469280842.0,
+        "fcf_margin_change_pp": -9.545893109241156,
+        "op_margin_ttm": 60.68153209854342
+      },
+      "after": {
+        "rev_growth": 14.385622091378902,
+        "rev_q_yoy": 14.362957137239473,
+        "rev_accel_pp": -2.6893672321580695,
+        "eps_growth": 14.74609375,
+        "rev_ttm": 44488000000.0,
+        "ni_ttm": 22592000000.0,
+        "eps_ttm": 11.75,
+        "rev_period": "2026-06-30",
+        "fcf_ttm": 21013000000.0,
+        "fcf_margin": 47.23296169753641,
+        "fcf_conversion": 0.9301080028328612,
+        "roe": 85.45598971138934,
+        "cash": 12359000000.0,
+        "debt": 22611000000.0,
+        "net_debt": 10252000000.0,
+        "net_debt_fcf": 0.48788845000713843,
+        "current_ratio": 0.9852226141672228,
+        "shares": 469280842.0,
+        "shares_date": "2010-01-27",
+        "data_flags": [],
+        "op_margin_ttm": 60.68153209854342,
+        "fcf_margin_change_pp": -9.545893109241156,
+        "gross_margin": null,
+        "gross_margin_change_pp": null
+      },
+      "D9_changes": {
+        "eps_growth": {
+          "off": null,
+          "on": 14.74609375
+        },
+        "eps_ttm": {
+          "off": null,
+          "on": 11.75
+        }
+      },
+      "earnings_missing_reason": null,
+      "core": {
+        "rev_ttm": 44488000000.0,
+        "eps_ttm": 11.75,
+        "shares": 469280842.0
+      }
+    },
+    {
+      "ticker": "JPM",
+      "input": "prior own capture: /Users/xuqingsong/workspace/inves-cog/.harness/v3-m2-real/0000019617-companyfacts.json",
+      "D3_accession": null,
+      "health": {
+        "ticker": "JPM",
+        "latest_period_end": "2026-06-30",
+        "latest_filed": "2026-08-06",
+        "latest_8k_202": "2026-10-13 18:30:38+08:00",
+        "health_codes": [
+          "ok"
+        ],
+        "can_score": true,
+        "can_trade": true,
+        "reason": null
+      },
+      "before": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 199408000000.0,
+        "ni_ttm": 65067000000.0,
+        "rev_growth": 13.529639498075664,
+        "rev_q_yoy": 27.687477734235834,
+        "rev_accel_pp": 17.698512825827088,
+        "eps_ttm": 23.349999999999998,
+        "eps_growth": 19.74358974358974,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
+        "fcf_ttm": null,
+        "fcf_margin": null,
+        "fcf_conversion": null,
+        "roe": 17.36982044751974,
+        "cash": 278793000000.0,
+        "debt": 269929000000.0,
+        "net_debt": -8864000000.0,
+        "net_debt_fcf": null,
+        "current_ratio": null,
+        "shares": 2658186195.0,
+        "fcf_margin_change_pp": null,
+        "op_margin_ttm": null
+      },
+      "after": {
+        "rev_growth": 13.529639498075664,
+        "rev_q_yoy": 27.687477734235834,
+        "rev_accel_pp": 17.698512825827088,
+        "eps_growth": 19.74358974358974,
+        "rev_ttm": 199408000000.0,
+        "ni_ttm": 65067000000.0,
+        "eps_ttm": 23.349999999999998,
+        "rev_period": "2026-06-30",
+        "roe": 17.36982044751974,
+        "cash": 278793000000.0,
+        "debt": 269929000000.0,
+        "net_debt": -8864000000.0,
+        "shares": 2658186195.0,
+        "shares_date": "2026-06-30",
+        "data_flags": [],
+        "op_margin_ttm": null,
+        "fcf_margin_change_pp": null,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
+        "fcf_ttm": null,
+        "fcf_margin": null,
+        "fcf_conversion": null,
+        "net_debt_fcf": null,
+        "current_ratio": null
+      },
+      "D9_changes": {
+        "rev_growth": {
+          "off": -2.3159797467314336,
+          "on": 13.529639498075664
+        },
+        "rev_q_yoy": {
+          "off": -2.0822009449345646,
+          "on": 27.687477734235834
+        },
+        "rev_accel_pp": {
+          "off": -6.966052655796706,
+          "on": 17.698512825827088
+        },
+        "rev_ttm": {
+          "off": 95112000000.0,
+          "on": 199408000000.0
+        },
+        "rev_period": {
+          "off": "2014-12-31",
+          "on": "2026-06-30"
+        },
+        "data_flags": {
+          "off": [
+            "营收序列过期（最新只到 2014-12-31），基本面账不可靠"
+          ],
+          "on": []
+        }
+      },
+      "earnings_missing_reason": null,
+      "core": {
+        "rev_ttm": 199408000000.0,
+        "eps_ttm": 23.349999999999998,
+        "shares": 2658186195.0
+      }
+    }
+  ]
+}

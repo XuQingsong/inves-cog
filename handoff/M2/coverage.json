@@ -1,0 +1,123 @@
+{
+  "as_of": "2026-10-15T04:23:17.159320+00:00",
+  "health_rows": 59,
+  "profile_rows": 59,
+  "difference_rows": 59,
+  "scorable_required": {
+    "LITE": {
+      "ticker": "LITE",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-08-17",
+      "latest_8k_202": "2026-08-12 04:24:11+08:00",
+      "health_codes": [
+        "ni_tag_fallback"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "BE": {
+      "ticker": "BE",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": "2026-07-29 04:07:21+08:00",
+      "health_codes": [
+        "ni_tag_fallback"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "COHR": {
+      "ticker": "COHR",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-14",
+      "latest_8k_202": "2026-08-13 04:10:13+08:00",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "COST": {
+      "ticker": "COST",
+      "latest_period_end": "2026-08-30",
+      "latest_filed": "2026-10-07",
+      "latest_8k_202": "2026-09-25 04:17:37+08:00",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "LRCX": {
+      "ticker": "LRCX",
+      "latest_period_end": "2026-06-28",
+      "latest_filed": "2026-08-07",
+      "latest_8k_202": "2026-07-30 04:07:10+08:00",
+      "health_codes": [
+        "ok"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "JPM": {
+      "ticker": "JPM",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-06",
+      "latest_8k_202": "2026-10-13 18:30:38+08:00",
+      "health_codes": [
+        "ok"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "V": {
+      "ticker": "V",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-07-29",
+      "latest_8k_202": "2026-07-29 04:05:26+08:00",
+      "health_codes": [
+        "ni_tag_fallback"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    },
+    "XOM": {
+      "ticker": "XOM",
+      "latest_period_end": "2026-06-30",
+      "latest_filed": "2026-08-03",
+      "latest_8k_202": "2026-07-31 18:31:39+08:00",
+      "health_codes": [
+        "ok"
+      ],
+      "can_score": true,
+      "can_trade": true,
+      "reason": null
+    }
+  },
+  "unexplained_unscorable": [],
+  "tradable_core_missing": [],
+  "trading_universe": 54,
+  "segment_covered": 51,
+  "segment_missing": [
+    "NOW",
+    "XOM",
+    "CRWD"
+  ],
+  "segment_mismatches": [],
+  "segment_job": {
+    "processed_count": 59,
+    "status": "ok",
+    "failures": []
+  },
+  "source_classification": "Actual SEC companyfacts and archived original XBRL; existing production extractors. Segment mapping remains disclosed pre-merge double.",
+  "can_score": 54,
+  "earnings_event_missing": 5
+}

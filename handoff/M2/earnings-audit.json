@@ -1,0 +1,867 @@
+{
+  "started_at": "2026-10-15T04:12:47.445569+00:00",
+  "rows": [
+    {
+      "ticker": "AAPL",
+      "filing_counts": {
+        "total": 1086,
+        "earnings": 48,
+        "verified": 1
+      },
+      "accepted_before": "2026-07-31 04:30:28+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "ADBE",
+      "filing_counts": {
+        "total": 1368,
+        "earnings": 47,
+        "verified": 1
+      },
+      "accepted_before": "2026-09-11 04:06:14+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "AMAT",
+      "filing_counts": {
+        "total": 834,
+        "earnings": 46,
+        "verified": 1
+      },
+      "accepted_before": "2026-08-14 04:03:36+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "AMD",
+      "filing_counts": {
+        "total": 1303,
+        "earnings": 50,
+        "verified": 1
+      },
+      "accepted_before": "2026-08-05 04:16:24+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "AMZN",
+      "filing_counts": {
+        "total": 1625,
+        "earnings": 47,
+        "verified": 1
+      },
+      "accepted_before": "2026-07-31 04:06:23+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "ANET",
+      "filing_counts": {
+        "total": 2063,
+        "earnings": 49,
+        "verified": 1
+      },
+      "accepted_before": "2026-08-05 04:06:44+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "ARM",
+      "filing_counts": {
+        "total": 160,
+        "earnings": 0,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "missing",
+      "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
+    },
+    {
+      "ticker": "ASML",
+      "filing_counts": {
+        "total": 188,
+        "earnings": 0,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "missing",
+      "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
+    },
+    {
+      "ticker": "AVGO",
+      "filing_counts": {
+        "total": 998,
+        "earnings": 34,
+        "verified": 1
+      },
+      "accepted_before": "2026-09-03 04:26:04+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "BE",
+      "filing_counts": {
+        "total": 1110,
+        "earnings": 33,
+        "verified": 1
+      },
+      "accepted_before": "2026-07-29 04:07:21+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "CAT",
+      "filing_counts": {
+        "total": 1711,
+        "earnings": 49,
+        "verified": 1
+      },
+      "accepted_before": "2026-08-04 18:31:44+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "CEG",
+      "filing_counts": {
+        "total": 405,
+        "earnings": 18,
+        "verified": 1
+      },
+      "accepted_before": "2026-08-06 18:52:23+08:00",
+      "status": "existing_verified"
+    },
+    {
+      "ticker": "CIEN",
+      "filing_counts": {
+        "total": 2153,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-060245",
+      "filing_date": "2026-09-03",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/936395/000162828026060245/0001628280-26-060245-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "ed1cc830392870694b5339a7805eab6d5778668f5b8584ea0aae311559737cde",
+      "accepted_after": "2026-09-03 11:07:42+00:00"
+    },
+    {
+      "ticker": "COHR",
+      "filing_counts": {
+        "total": 1259,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001193125-26-346860",
+      "filing_date": "2026-08-12",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/820318/000119312526346860/0001193125-26-346860-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "4776054b9ef740ccf7e6f190dbf2a6572903a9fa3b3a9a04946d12654fbcfe11",
+      "accepted_after": "2026-08-12 20:10:13+00:00"
+    },
+    {
+      "ticker": "COST",
+      "filing_counts": {
+        "total": 1185,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000909832-26-000084",
+      "filing_date": "2026-09-24",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/0000909832-26-000084-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "a143556aabb2fed94306124e6e62b3b4efb646f1f6a65ba52c27547f3761a744",
+      "accepted_after": "2026-09-24 20:17:37+00:00"
+    },
+    {
+      "ticker": "CRM",
+      "filing_counts": {
+        "total": 4886,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001108524-26-000187",
+      "filing_date": "2026-08-26",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000187/0001108524-26-000187-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "e04ffca0d26a99f6663cb2b1c20dcb8b7b3fa98dc4b0db0215f6856a186dd37c",
+      "accepted_after": "2026-08-26 20:03:53+00:00"
+    },
+    {
+      "ticker": "CRWD",
+      "filing_counts": {
+        "total": 1298,
+        "earnings": 31,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001535527-26-000029",
+      "filing_date": "2026-08-26",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1535527/000153552726000029/0001535527-26-000029-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "f98e3c91c2e7f2f2a9f8f8472be0a06157e5fb333062cbfeb4a8e7f01edb66e8",
+      "accepted_after": "2026-08-26 20:07:02+00:00"
+    },
+    {
+      "ticker": "CRWV",
+      "filing_counts": {
+        "total": 1154,
+        "earnings": 6,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001769628-26-000362",
+      "filing_date": "2026-08-11",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/0001769628-26-000362-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "ebc80c2580aa1e2b02ed1607be49ebc76a1bdd76765e769d9f7a2b440209d108",
+      "accepted_after": "2026-08-11 20:10:26+00:00"
+    },
+    {
+      "ticker": "CVX",
+      "filing_counts": {
+        "total": 1412,
+        "earnings": 50,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000093410-26-000162",
+      "filing_date": "2026-07-31",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/0000093410-26-000162-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "1846bb4af6a8a4737f650ec3557cfc4251a1c140172ff1850973e89885130c5c",
+      "accepted_after": "2026-07-31 10:16:46+00:00"
+    },
+    {
+      "ticker": "DELL",
+      "filing_counts": {
+        "total": 1974,
+        "earnings": 42,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001571996-26-000039",
+      "filing_date": "2026-09-01",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000039/0001571996-26-000039-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "311c404c002c2bf7792b9186c3cc641ddce07012b79ff346154e09a92f93aa78",
+      "accepted_after": "2026-09-01 20:10:14+00:00"
+    },
+    {
+      "ticker": "ETN",
+      "filing_counts": {
+        "total": 1190,
+        "earnings": 50,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001551182-26-000027",
+      "filing_date": "2026-07-31",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1551182/000155118226000027/0001551182-26-000027-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "99bbe20e813d0f8865ddb36c6d924c080cd7269246910bcf1d48b29437c8fc67",
+      "accepted_after": "2026-07-31 11:00:30+00:00"
+    },
+    {
+      "ticker": "FTNT",
+      "filing_counts": {
+        "total": 1332,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001262039-26-000018",
+      "filing_date": "2026-07-29",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1262039/000126203926000018/0001262039-26-000018-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "14db8245b7a6b2284b6558351dba52e2054a229ce1cb254316db99ae23c6522d",
+      "accepted_after": "2026-07-29 20:08:34+00:00"
+    },
+    {
+      "ticker": "GE",
+      "filing_counts": {
+        "total": 1865,
+        "earnings": 50,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000040545-26-000047",
+      "filing_date": "2026-07-16",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/40545/000004054526000047/0000040545-26-000047-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "478ae77e39b5042c370b16da664c59078076c0d5bb33908936daf2906a85db20",
+      "accepted_after": "2026-07-16 10:32:37+00:00"
+    },
+    {
+      "ticker": "GEV",
+      "filing_counts": {
+        "total": 208,
+        "earnings": 9,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001996810-26-000147",
+      "filing_date": "2026-07-22",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1996810/000199681026000147/0001996810-26-000147-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "9c8e61f8ff14ba1c699f787aef5e58483959fc4d1c14000bd9b4f3c39252bba3",
+      "accepted_after": "2026-07-22 10:25:18+00:00"
+    },
+    {
+      "ticker": "GOOGL",
+      "filing_counts": {
+        "total": 2700,
+        "earnings": 45,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001652044-26-000066",
+      "filing_date": "2026-07-22",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000066/0001652044-26-000066-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "5ee40bfe49f92a442b68823293b06190aca2b51d01d35ce20851619d35111a3e",
+      "accepted_after": "2026-07-22 20:01:36+00:00"
+    },
+    {
+      "ticker": "HD",
+      "filing_counts": {
+        "total": 1319,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000354950-26-000145",
+      "filing_date": "2026-08-18",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/354950/000035495026000145/0000354950-26-000145-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "1392fce4f3c9898f343667d281494026075623a71ffa17e7061cbc7fb284daca",
+      "accepted_after": "2026-08-18 10:10:33+00:00"
+    },
+    {
+      "ticker": "INTC",
+      "filing_counts": {
+        "total": 1772,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000050863-26-000155",
+      "filing_date": "2026-07-23",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000155/0000050863-26-000155-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "0af9e7b689408fdfabcbc0947c7cd4922f4a8fec1a6da976b726366593977438",
+      "accepted_after": "2026-07-23 20:09:00+00:00"
+    },
+    {
+      "ticker": "JNJ",
+      "filing_counts": {
+        "total": 1355,
+        "earnings": 51,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000200406-26-000189",
+      "filing_date": "2026-10-13",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000189/0000200406-26-000189-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "18e780ba934bcca6a19114a8bf1d620f52957a92ad979f2cb398b0273a74a72e",
+      "accepted_after": "2026-10-13 12:12:35+00:00"
+    },
+    {
+      "ticker": "JPM",
+      "filing_counts": {
+        "total": 146624,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-065582",
+      "filing_date": "2026-10-13",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/19617/000162828026065582/0001628280-26-065582-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "f05d4dc33a1f2e336e338735c268590d28339106f65bdbceb0cd727af5c69b30",
+      "accepted_after": "2026-10-13 10:30:38+00:00"
+    },
+    {
+      "ticker": "KLAC",
+      "filing_counts": {
+        "total": 1245,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000319201-26-000024",
+      "filing_date": "2026-07-28",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/319201/000031920126000024/0000319201-26-000024-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "cb011fe048271aba7f8e0c5d2320a72f28812110c42b101ea1a8bcf8b8417942",
+      "accepted_after": "2026-07-28 20:08:02+00:00"
+    },
+    {
+      "ticker": "LITE",
+      "filing_counts": {
+        "total": 1292,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-055726",
+      "filing_date": "2026-08-11",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828026055726/0001628280-26-055726-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "371d94fb9658fc09b23b4ebb50a410362e1f1008535143ccec768e857c841590",
+      "accepted_after": "2026-08-11 20:24:11+00:00"
+    },
+    {
+      "ticker": "LLY",
+      "filing_counts": {
+        "total": 2176,
+        "earnings": 53,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000059478-26-000077",
+      "filing_date": "2026-08-05",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000077/0000059478-26-000077-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "094e5c06dce7a12688fccc2ef7b703ce6ee5eb4a37e2050844fde44d717b55c9",
+      "accepted_after": "2026-08-05 11:05:09+00:00"
+    },
+    {
+      "ticker": "LRCX",
+      "filing_counts": {
+        "total": 1024,
+        "earnings": 46,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000707549-26-000033",
+      "filing_date": "2026-07-29",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000033/0000707549-26-000033-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "fec4f1f8970e03527497751e747a5509d27af2373de93232a747a8bc079946d5",
+      "accepted_after": "2026-07-29 20:07:10+00:00"
+    },
+    {
+      "ticker": "MA",
+      "filing_counts": {
+        "total": 1374,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001141391-26-000081",
+      "filing_date": "2026-07-30",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1141391/000114139126000081/0001141391-26-000081-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "45667f5fc1b7c7aa07fe0d9b33a0759d6d9e944dc0190aedf4c3078fc1d71e3a",
+      "accepted_after": "2026-07-30 12:07:03+00:00"
+    },
+    {
+      "ticker": "META",
+      "filing_counts": {
+        "total": 3558,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-050596",
+      "filing_date": "2026-07-29",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050596/0001628280-26-050596-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "f3465b5b27a15f894e057f44ae074b28a9f0195d4ac0c32c4fb4d702f25c2314",
+      "accepted_after": "2026-07-29 20:03:23+00:00"
+    },
+    {
+      "ticker": "MRVL",
+      "filing_counts": {
+        "total": 842,
+        "earnings": 24,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001835632-26-000022",
+      "filing_date": "2026-08-27",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/0001835632-26-000022-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "ce60ccb76d34d1606766c3eebd1f8d92891e75575a8ad14ad4af0a6b75211ca4",
+      "accepted_after": "2026-08-27 20:05:59+00:00"
+    },
+    {
+      "ticker": "MSFT",
+      "filing_counts": {
+        "total": 1871,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001193125-26-323632",
+      "filing_date": "2026-07-29",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323632/0001193125-26-323632-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "2588079e72145d5811c2df314450927422ed7fc365057e33522c1a54f16f9b5c",
+      "accepted_after": "2026-07-29 20:04:53+00:00"
+    },
+    {
+      "ticker": "MU",
+      "filing_counts": {
+        "total": 1232,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000723125-26-000018",
+      "filing_date": "2026-09-30",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000018/0000723125-26-000018-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "bda394e8b8f41e492a0051b11b92a9469c2bdac5d280e273763b8946519861e4",
+      "accepted_after": "2026-09-30 20:02:22+00:00"
+    },
+    {
+      "ticker": "NFLX",
+      "filing_counts": {
+        "total": 3366,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001065280-26-000211",
+      "filing_date": "2026-07-16",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000211/0001065280-26-000211-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "5546321f2cfab6cdb374e54db08602820700dd79b380cee253b95f29c63e4539",
+      "accepted_after": "2026-07-16 20:03:19+00:00"
+    },
+    {
+      "ticker": "NOK",
+      "filing_counts": {
+        "total": 858,
+        "earnings": 0,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "missing",
+      "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
+    },
+    {
+      "ticker": "NOW",
+      "filing_counts": {
+        "total": 2141,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001373715-26-000072",
+      "filing_date": "2026-07-22",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1373715/000137371526000072/0001373715-26-000072-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "00753446d0fb41fe946607cd8ed972b31d9582ff81a70e2651b0291268ac7814",
+      "accepted_after": "2026-07-22 20:11:27+00:00"
+    },
+    {
+      "ticker": "NVDA",
+      "filing_counts": {
+        "total": 1556,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001045810-26-000073",
+      "filing_date": "2026-08-26",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/0001045810-26-000073-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "62590b389fd4feb908c50110ecaf9acfce9b8449b7d693c208672acd3cbe1e99",
+      "accepted_after": "2026-08-26 20:21:19+00:00"
+    },
+    {
+      "ticker": "ORCL",
+      "filing_counts": {
+        "total": 1117,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001193125-26-387905",
+      "filing_date": "2026-09-10",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/0001193125-26-387905-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "aae3a263049bd1a93610f62357d0101677e8bee0f94d77d31693b1ee72d5c247",
+      "accepted_after": "2026-09-10 20:16:50+00:00"
+    },
+    {
+      "ticker": "PANW",
+      "filing_counts": {
+        "total": 1573,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001327567-26-000019",
+      "filing_date": "2026-09-01",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000019/0001327567-26-000019-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "50558c0e2b560ce9e341fa736c02ad81964a86277c61fa16a7c24675df35e99f",
+      "accepted_after": "2026-09-01 20:32:15+00:00"
+    },
+    {
+      "ticker": "PLTR",
+      "filing_counts": {
+        "total": 972,
+        "earnings": 24,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001321655-26-000039",
+      "filing_date": "2026-08-03",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1321655/000132165526000039/0001321655-26-000039-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "9340cc4aa7eae4b8273caee45db003a11728649e2874cbc0437e390a0564df55",
+      "accepted_after": "2026-08-03 20:06:14+00:00"
+    },
+    {
+      "ticker": "QCOM",
+      "filing_counts": {
+        "total": 1749,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000804328-26-000085",
+      "filing_date": "2026-07-29",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/804328/000080432826000085/0000804328-26-000085-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "91683f5f3457bde49fcdd8ce6d3a01bcb1fcda6935e40b76b65da3d59408a7e8",
+      "accepted_after": "2026-07-29 20:01:35+00:00"
+    },
+    {
+      "ticker": "SKHY",
+      "filing_counts": {
+        "total": 35,
+        "earnings": 0,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "missing",
+      "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
+    },
+    {
+      "ticker": "SMCI",
+      "filing_counts": {
+        "total": 1099,
+        "earnings": 64,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001375365-26-000021",
+      "filing_date": "2026-08-11",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536526000021/0001375365-26-000021-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "37f26c82dafd66b15d809246f29755a255256a3f54f36a2e73f5eee89980b86d",
+      "accepted_after": "2026-08-11 20:06:16+00:00"
+    },
+    {
+      "ticker": "SNDK",
+      "filing_counts": {
+        "total": 242,
+        "earnings": 6,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-053346",
+      "filing_date": "2026-08-05",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026053346/0001628280-26-053346-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "27522e811ab8470102eb57fbc67208dc9400a0b1ba1e76c19f63df8746c379bb",
+      "accepted_after": "2026-08-05 20:09:06+00:00"
+    },
+    {
+      "ticker": "STX",
+      "filing_counts": {
+        "total": 1358,
+        "earnings": 56,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001137789-26-000153",
+      "filing_date": "2026-07-28",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1137789/000113778926000153/0001137789-26-000153-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "67ae485fdad0d4cf55a5a19be6e030925fbeeb6b4da635bf00b58e5d57c763b9",
+      "accepted_after": "2026-07-28 20:07:21+00:00"
+    },
+    {
+      "ticker": "TSLA",
+      "filing_counts": {
+        "total": 1340,
+        "earnings": 97,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-064366",
+      "filing_date": "2026-10-02",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026064366/0001628280-26-064366-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "5de7ae28c46fba611c64938fd767582b164a4a609540259478d5268900a7692c",
+      "accepted_after": "2026-10-02 13:04:26+00:00"
+    },
+    {
+      "ticker": "TSM",
+      "filing_counts": {
+        "total": 971,
+        "earnings": 0,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "missing",
+      "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
+    },
+    {
+      "ticker": "UNH",
+      "filing_counts": {
+        "total": 2164,
+        "earnings": 48,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000731766-26-000255",
+      "filing_date": "2026-10-13",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/731766/000073176626000255/0000731766-26-000255-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "9a200d85d907dba1193e0cc5b4f585921655ff06277e222a02affb6f99575aaf",
+      "accepted_after": "2026-10-13 10:14:45+00:00"
+    },
+    {
+      "ticker": "V",
+      "filing_counts": {
+        "total": 1012,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001403161-26-000103",
+      "filing_date": "2026-07-28",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1403161/000140316126000103/0001403161-26-000103-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "4c3f1e468588b14a9a8788d84888bbe7fd0412acda0de44fbf1d1d3b24de8afb",
+      "accepted_after": "2026-07-28 20:05:26+00:00"
+    },
+    {
+      "ticker": "VRT",
+      "filing_counts": {
+        "total": 875,
+        "earnings": 28,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-050323",
+      "filing_date": "2026-07-29",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1674101/000162828026050323/0001628280-26-050323-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "89a76816f6ebb2fc224e87761e7b3c7baa2a004dc33d6602f1fd2a3a5a64840e",
+      "accepted_after": "2026-07-29 10:01:57+00:00"
+    },
+    {
+      "ticker": "WDC",
+      "filing_counts": {
+        "total": 1735,
+        "earnings": 49,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001628280-26-053305",
+      "filing_date": "2026-08-05",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/106040/000162828026053305/0001628280-26-053305-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "d2b0216c4b980db3badeaf03cd1482ab182bfdd972a7fe8d847e62c042ee377b",
+      "accepted_after": "2026-08-05 20:04:35+00:00"
+    },
+    {
+      "ticker": "WMT",
+      "filing_counts": {
+        "total": 2640,
+        "earnings": 47,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0000104169-26-000145",
+      "filing_date": "2026-08-20",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/0000104169-26-000145-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "a23843486e319f0c655da327e2f658525935c6da5ec7ffb9d9943829807a0e2d",
+      "accepted_after": "2026-08-20 10:59:01+00:00"
+    },
+    {
+      "ticker": "XOM",
+      "filing_counts": {
+        "total": 34,
+        "earnings": 1,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0002115436-26-000006",
+      "filing_date": "2026-07-31",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/0002115436-26-000006-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "d2403404f670239228099f8fe7e9c423ba26a4480333a0df3f4a66fca3f01090",
+      "accepted_after": "2026-07-31 10:31:39+00:00"
+    },
+    {
+      "ticker": "ZS",
+      "filing_counts": {
+        "total": 885,
+        "earnings": 34,
+        "verified": 0
+      },
+      "accepted_before": null,
+      "status": "newly_verified",
+      "accession": "0001713683-26-000156",
+      "filing_date": "2026-09-03",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1713683/000171368326000156/0001713683-26-000156-index.html",
+      "previous_index_evidence": null,
+      "index_sha256": "65916abcb295e9c07a2e74fd7ce9a2a06aa2d90bf0234feaf350d67ae3e6e446",
+      "accepted_after": "2026-09-03 20:08:39+00:00"
+    }
+  ],
+  "finished_at": "2026-10-15T04:13:57.189698+00:00",
+  "missing_after": 5,
+  "newly_verified": 44
+}
