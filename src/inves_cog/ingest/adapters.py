@@ -13,6 +13,7 @@ from inves_cog.ingest.sources import optional_number
 
 class Embedding:
     def __init__(self, values, http=None):
+        self.enabled = values.get("INVES_COG_EMBEDDING_ENABLED", "1") == "1"
         self.key, self.base = values.get("DASHSCOPE_API_KEY"), values.get("DASHSCOPE_BASE_URL", "")
         self.http = http or HTTPClient()
         self.auth_failure = None
@@ -21,6 +22,8 @@ class Embedding:
         return self.batch([text], model=model, dimensions=dimensions)[0]
 
     def batch(self, texts, *, model, dimensions):
+        if not self.enabled:
+            raise SourceError("Embedding paused by operator", confirmed_unavailable=True)
         if model != "text-embedding-v3" or dimensions != 1024:
             raise ValueError("Unsupported embedding contract")
         if not isinstance(texts, list) or not 1 <= len(texts) <= 10:
