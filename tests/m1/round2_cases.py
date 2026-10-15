@@ -167,3 +167,43 @@ def assert_embedding_auth_isolation():
     except SourceError:
         pass
     assert adapter("recovered", model="text-embedding-v3", dimensions=1024) == [0.1] * 1024
+
+
+def assert_embedding_batches():
+    import math
+
+    import pytest
+
+    from inves_cog.ingest.adapters import Embedding
+    from inves_cog.ingest.http import HTTPClient, Response, SourceError
+
+    calls = []
+    configuration = {"DASHSCOPE_API_KEY": "fixture-not-a-key", "DASHSCOPE_BASE_URL": "https://example.invalid/v1"}
+
+    def send(*args, **kwargs):
+        calls.append(kwargs["json"])
+        return Response(
+            200, {"data": [{"index": 1, "embedding": [0.2] * 1024}, {"index": 0, "embedding": [0.1] * 1024}]}
+        )
+
+    adapter = Embedding(configuration, http=HTTPClient(send, retries=0))
+    assert adapter.batch(["first", "second"], model="text-embedding-v3", dimensions=1024) == [
+        [0.1] * 1024,
+        [0.2] * 1024,
+    ]
+    assert calls[0]["input"] == ["first", "second"]
+    for payload in (
+        {"data": [{"index": 0, "embedding": [0.1] * 1024}]},
+        {"data": [{"index": 0, "embedding": [0.1] * 1024}] * 2},
+        {"data": [{"index": 0, "embedding": [0.1] * 1024}, {"index": 2, "embedding": [0.1] * 1024}]},
+        {"data": [{"index": 0, "embedding": [0.1] * 1023}, {"index": 1, "embedding": [0.1] * 1024}]},
+        {"data": [{"index": 0, "embedding": [math.nan] * 1024}, {"index": 1, "embedding": [0.1] * 1024}]},
+    ):
+        broken = Embedding(configuration, http=HTTPClient(lambda *a, payload=payload, **k: Response(200, payload)))
+        with pytest.raises(SourceError, match="Embedding"):
+            broken.batch(["first", "second"], model="text-embedding-v3", dimensions=1024)
+    before = len(calls)
+    for texts in ([], ["x"] * 11, [""], [None]):
+        with pytest.raises(ValueError):
+            adapter.batch(texts, model="text-embedding-v3", dimensions=1024)
+    assert len(calls) == before

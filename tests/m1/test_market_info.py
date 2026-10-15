@@ -961,9 +961,10 @@ def test_info_fields_extraction(tmp_path):
 
 
 def test_llm_extraction_failure_degrades():
-    from tests.m1.round2_cases import assert_embedding_auth_isolation
+    from tests.m1.round2_cases import assert_embedding_auth_isolation, assert_embedding_batches
 
     assert_embedding_auth_isolation()
+    assert_embedding_batches()
     from fastapi.testclient import TestClient
 
     from inves_cog.ingest.health import create_app, extraction_counts
