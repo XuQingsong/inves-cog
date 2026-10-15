@@ -207,3 +207,9 @@ def assert_embedding_batches():
         with pytest.raises(ValueError):
             adapter.batch(texts, model="text-embedding-v3", dimensions=1024)
     assert len(calls) == before
+    paused = Embedding({**configuration, "INVES_COG_EMBEDDING_ENABLED": "0"}, http=HTTPClient(send, retries=0))
+    with pytest.raises(SourceError, match="paused"):
+        paused.batch(["first", "second"], model="text-embedding-v3", dimensions=1024)
+    assert len(calls) == before
+    enabled = Embedding({**configuration, "INVES_COG_EMBEDDING_ENABLED": "1"}, http=HTTPClient(send, retries=0))
+    assert enabled.batch(["first", "second"], model="text-embedding-v3", dimensions=1024)[1] == [0.2] * 1024
