@@ -461,6 +461,251 @@
     ]
   },
   "scheduler_evidence": {
-    "status": "waiting for 2026-10-15 08:20–08:45 Asia/Shanghai; not counted as passed"
+    "checked_at": "2026-10-15T01:05:03.384314+00:00",
+    "status": "AC-M1-02 NOT PASSED: no on-time bars_full run",
+    "clock": "SystemClock; original database timestamps retained",
+    "expected_start_et": "2026-10-14T20:20:00-04:00",
+    "deadline_et": "2026-10-14T20:45:00-04:00",
+    "original_scheduler_pid": 42598,
+    "current_scheduler_pid": 65658,
+    "initial_jobs": [
+      {
+        "id": 1,
+        "task_name": "bars_full",
+        "trade_date": "2026-10-14",
+        "started_at": "2026-10-14T07:08:37.515431+00:00",
+        "ended_at": "2026-10-14T07:10:43.480824+00:00",
+        "status": "degraded",
+        "processed_count": 49791,
+        "error_summary": null,
+        "params_version": "p-2026.10",
+        "llm_input_tokens": null,
+        "llm_output_tokens": null,
+        "llm_usage_missing_calls": null,
+        "started_at_et": "2026-10-14T03:08:37.515431-04:00",
+        "ended_at_et": "2026-10-14T03:10:43.480824-04:00",
+        "elapsed_seconds": 125.965393
+      },
+      {
+        "id": 48,
+        "task_name": "wide_universe",
+        "trade_date": "2026-10-14",
+        "started_at": "2026-10-15T00:20:26.836255+00:00",
+        "ended_at": "2026-10-15T00:20:43.385130+00:00",
+        "status": "failed",
+        "processed_count": 0,
+        "error_summary": "SourceError: HTTP status 403",
+        "params_version": "p-2026.10",
+        "llm_input_tokens": 0,
+        "llm_output_tokens": 0,
+        "llm_usage_missing_calls": 0,
+        "started_at_et": "2026-10-14T20:20:26.836255-04:00",
+        "ended_at_et": "2026-10-14T20:20:43.385130-04:00",
+        "elapsed_seconds": 16.548875
+      }
+    ],
+    "scheduled_bars_job_present": false,
+    "root_cause": "due_tasks treated the 03:08 ET manual bars_full record as consuming the entire same-day scheduled slot",
+    "fix": "compare persisted start against the ET schedule slot; runs before the slot cannot suppress it",
+    "red_test_commit": "f7f5d51",
+    "implementation_commit": "dc4b9e7",
+    "regressions": "summer/winter; early manual run and one-second-before boundary run; actual slot run does not repeat; 08:00 prefill",
+    "late_recovery": {
+      "classification": "late manual recovery; not on-time scheduling",
+      "job": {
+        "id": 51,
+        "task_name": "bars_full",
+        "trade_date": "2026-10-14",
+        "started_at": "2026-10-15T01:01:54.160153+00:00",
+        "ended_at": "2026-10-15T01:02:18.011934+00:00",
+        "status": "degraded",
+        "processed_count": 51280,
+        "error_summary": null,
+        "params_version": "p-2026.10",
+        "llm_input_tokens": 0,
+        "llm_output_tokens": 0,
+        "llm_usage_missing_calls": 0,
+        "started_at_et": "2026-10-14T21:01:54.160153-04:00",
+        "ended_at_et": "2026-10-14T21:02:18.011934-04:00",
+        "elapsed_seconds": 23.851781
+      },
+      "report": {
+        "note": "past 20:45 ET deadline",
+        "status": "degraded",
+        "coverage": {
+          "V": 1.0,
+          "BE": 1.0,
+          "GE": 1.0,
+          "HD": 1.0,
+          "MA": 1.0,
+          "MU": 1.0,
+          "ZS": 1.0,
+          "AMD": 1.0,
+          "ARM": 1.0,
+          "CAT": 1.0,
+          "CEG": 1.0,
+          "CRM": 1.0,
+          "CVX": 1.0,
+          "ETN": 1.0,
+          "GEV": 1.0,
+          "IGV": 1.0,
+          "IWM": 1.0,
+          "JNJ": 1.0,
+          "JPM": 1.0,
+          "LLY": 1.0,
+          "NOK": 1.0,
+          "NOW": 1.0,
+          "QQQ": 1.0,
+          "SMH": 1.0,
+          "SPY": 1.0,
+          "STX": 1.0,
+          "TSM": 1.0,
+          "UNH": 1.0,
+          "VRT": 1.0,
+          "WDC": 1.0,
+          "WMT": 1.0,
+          "XLE": 1.0,
+          "XLF": 1.0,
+          "XLI": 1.0,
+          "XLK": 1.0,
+          "XLP": 1.0,
+          "XLU": 1.0,
+          "XLV": 1.0,
+          "XLY": 1.0,
+          "XOM": 1.0,
+          "AAPL": 1.0,
+          "ADBE": 1.0,
+          "AMAT": 1.0,
+          "AMZN": 1.0,
+          "ANET": 1.0,
+          "ASML": 1.0,
+          "AVGO": 1.0,
+          "CIEN": 1.0,
+          "COHR": 1.0,
+          "COST": 1.0,
+          "CRWD": 1.0,
+          "CRWV": 1.0,
+          "DELL": 1.0,
+          "FTNT": 0.9974358974358974,
+          "INTC": 1.0,
+          "KLAC": 1.0,
+          "LITE": 1.0,
+          "LRCX": 1.0,
+          "META": 1.0,
+          "MRVL": 1.0,
+          "MSFT": 1.0,
+          "NFLX": 1.0,
+          "NVDA": 1.0,
+          "ORCL": 1.0,
+          "PANW": 1.0,
+          "PLTR": 1.0,
+          "QCOM": 1.0,
+          "SKHY": 1.0,
+          "SMCI": 1.0,
+          "SNDK": 1.0,
+          "SOXX": 1.0,
+          "TSLA": 1.0,
+          "GOOGL": 1.0
+        },
+        "run_mode": "current_day",
+        "exhausted": true,
+        "daily_codes": 73,
+        "completed_at": "2026-10-15T01:02:18.007189+00:00",
+        "deadline_met": false,
+        "processed_count": 51280,
+        "requested_codes": 73,
+        "unavailable_codes": []
+      },
+      "average_regular_coverage": 0.9999648753073411,
+      "minimum_regular_coverage": 0.9974358974358974,
+      "health": {
+        "source": "Alpaca",
+        "last_success_at": "2026-10-15 09:02:18.011366+08:00",
+        "last_attempt_at": "2026-10-15 09:02:18.011366+08:00",
+        "status": "degraded",
+        "latency_sec": 23.8510599170113,
+        "items_last_run": 51280,
+        "note": "past 20:45 ET deadline",
+        "consecutive_failures": 0
+      }
+    },
+    "failed_recovery_jobs": [
+      {
+        "id": 49,
+        "task_name": "bars_full",
+        "trade_date": "2026-10-14",
+        "started_at": "2026-10-15T00:58:04.736254+00:00",
+        "ended_at": "2026-10-15T00:58:21.942351+00:00",
+        "status": "failed",
+        "processed_count": 48141,
+        "error_summary": "SourceError: HTTP status 403",
+        "params_version": "p-2026.10",
+        "llm_input_tokens": 0,
+        "llm_output_tokens": 0,
+        "llm_usage_missing_calls": 0,
+        "started_at_et": "2026-10-14T20:58:04.736254-04:00",
+        "ended_at_et": "2026-10-14T20:58:21.942351-04:00",
+        "elapsed_seconds": 17.206097
+      }
+    ],
+    "daily_query_403_diagnosis": {
+      "observed_at": "2026-10-15T00:59:31.198378+00:00",
+      "endpoint": "https://data.alpaca.markets/v2/stocks/bars",
+      "probes": [
+        {
+          "label": "current implementation",
+          "params": {
+            "symbols": "AAPL",
+            "timeframe": "1Day",
+            "feed": "sip",
+            "adjustment": "raw",
+            "start": "2026-10-14T00:00:00-04:00",
+            "end": "2026-10-15T00:00:00-04:00",
+            "limit": 10000
+          },
+          "http_status": 403,
+          "response": {
+            "message": "subscription does not permit querying recent SIP data"
+          }
+        },
+        {
+          "label": "completed trading window",
+          "params": {
+            "symbols": "AAPL",
+            "timeframe": "1Day",
+            "feed": "sip",
+            "adjustment": "raw",
+            "start": "2026-10-14T00:00:00-04:00",
+            "end": "2026-10-14T20:00:00-04:00",
+            "limit": 10000
+          },
+          "http_status": 200,
+          "response": {
+            "bars": {
+              "AAPL": [
+                {
+                  "c": 342.96,
+                  "h": 347.09,
+                  "l": 341.72,
+                  "n": 896607,
+                  "o": 344.605,
+                  "t": "2026-10-14T04:00:00Z",
+                  "v": 50215138,
+                  "vw": 344.033608
+                }
+              ]
+            },
+            "next_page_token": null
+          }
+        }
+      ]
+    },
+    "request_fix": {
+      "red_test_commit": "c0f019d",
+      "implementation_commit": "1f30019",
+      "rule": "same SIP endpoint/key/feed/raw adjustment; end at completed 20:00 ET trading window rather than next midnight",
+      "frozen_regressions": "summer and winter 20:20 runs; complete window retained and at least 15 minutes old"
+    },
+    "next_required_evidence": "one genuine scheduler-triggered bars_full run starting at 20:20 ET and finishing before 20:45 ET; current late recovery does not satisfy it"
   }
 }

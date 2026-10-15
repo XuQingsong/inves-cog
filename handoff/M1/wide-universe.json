@@ -1,17 +1,155 @@
 {
-  "processed_count": 13228,
-  "included": 1302,
-  "exclusions": {
-    "no_shares": 1810,
-    "non_common": 7791,
-    "no_cik": 138,
-    "below_mktcap": 2120,
-    "below_adv": 66,
-    "no_price": 1
-  },
   "monthly": false,
+  "included": 1294,
+  "exclusions": {
+    "no_cik": 126,
+    "no_price": 39,
+    "below_adv": 63,
+    "no_shares": 1813,
+    "non_common": 7799,
+    "below_mktcap": 2093
+  },
+  "processed_count": 13227,
   "startup_baseline": true,
-  "classification": "real-source diagnostic using last completed close; transaction rolled back; no historical membership or on-time run asserted",
-  "observed_at": "2026-10-14T07:29:20.591960+00:00",
-  "close_date": "2026-10-13"
+  "status": "ok",
+  "classification": "formal startup_baseline through Pipeline.runtime wide_universe, committed in independent inves_cog database",
+  "close_date": "2026-10-14",
+  "clock": "SystemClock",
+  "job": {
+    "id": 52,
+    "task_name": "wide_universe",
+    "trade_date": "2026-10-14",
+    "started_at": "2026-10-15T01:02:18.014051+00:00",
+    "ended_at": "2026-10-15T01:05:03.379653+00:00",
+    "status": "ok",
+    "processed_count": 13227,
+    "error_summary": null,
+    "params_version": "p-2026.10",
+    "llm_input_tokens": 0,
+    "llm_output_tokens": 0,
+    "llm_usage_missing_calls": 0,
+    "started_at_et": "2026-10-14T21:02:18.014051-04:00",
+    "ended_at_et": "2026-10-14T21:05:03.379653-04:00",
+    "elapsed_seconds": 165.365602
+  },
+  "persisted_verification": [
+    {
+      "trade_date": "2026-10-14",
+      "candidates": 13227,
+      "included": 1294,
+      "startup_baseline_rows": 13227
+    }
+  ],
+  "exclusion_verification": [
+    {
+      "exclude_reason": "below_adv",
+      "count": 63
+    },
+    {
+      "exclude_reason": "below_mktcap",
+      "count": 2093
+    },
+    {
+      "exclude_reason": "no_cik",
+      "count": 126
+    },
+    {
+      "exclude_reason": "no_price",
+      "count": 39
+    },
+    {
+      "exclude_reason": "no_shares",
+      "count": 1813
+    },
+    {
+      "exclude_reason": "non_common",
+      "count": 7799
+    }
+  ],
+  "health": {
+    "source": "AlpacaWide",
+    "last_success_at": "2026-10-15 09:05:03.379325+08:00",
+    "last_attempt_at": "2026-10-15 09:05:03.379325+08:00",
+    "status": "ok",
+    "latency_sec": 165.41522850003093,
+    "items_last_run": 13227,
+    "note": null,
+    "consecutive_failures": 0
+  },
+  "previous_failed_jobs": [
+    {
+      "id": 48,
+      "task_name": "wide_universe",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15T00:20:26.836255+00:00",
+      "ended_at": "2026-10-15T00:20:43.385130+00:00",
+      "status": "failed",
+      "processed_count": 0,
+      "error_summary": "SourceError: HTTP status 403",
+      "params_version": "p-2026.10",
+      "llm_input_tokens": 0,
+      "llm_output_tokens": 0,
+      "llm_usage_missing_calls": 0,
+      "started_at_et": "2026-10-14T20:20:26.836255-04:00",
+      "ended_at_et": "2026-10-14T20:20:43.385130-04:00",
+      "elapsed_seconds": 16.548875
+    },
+    {
+      "id": 50,
+      "task_name": "wide_universe",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15T00:58:21.948679+00:00",
+      "ended_at": "2026-10-15T00:58:39.247232+00:00",
+      "status": "failed",
+      "processed_count": 0,
+      "error_summary": "SourceError: HTTP status 403",
+      "params_version": "p-2026.10",
+      "llm_input_tokens": 0,
+      "llm_output_tokens": 0,
+      "llm_usage_missing_calls": 0,
+      "started_at_et": "2026-10-14T20:58:21.948679-04:00",
+      "ended_at_et": "2026-10-14T20:58:39.247232-04:00",
+      "elapsed_seconds": 17.298553
+    }
+  ],
+  "http_diagnosis": {
+    "failed_url": "https://data.alpaca.markets/v2/stocks/bars",
+    "observed_response": "subscription does not permit querying recent SIP data",
+    "cause": "future next-midnight end requested recent SIP data; same key with completed 20:00 ET end returned 200",
+    "fixed_requests": [
+      {
+        "url": "https://data.alpaca.markets/v2/stocks/bars",
+        "successful_requests": 73
+      },
+      {
+        "url": "https://data.alpaca.markets/v1/corporate-actions",
+        "successful_requests": 1
+      },
+      {
+        "url": "https://paper-api.alpaca.markets/v2/assets",
+        "successful_requests": 1
+      },
+      {
+        "url": "https://www.sec.gov/files/company_tickers_exchange.json",
+        "successful_requests": 1
+      },
+      {
+        "url": "https://data.sec.gov/api/xbrl/frames/dei/EntityCommonStockSharesOutstanding/shares/CY2026Q3I.json",
+        "successful_requests": 1
+      },
+      {
+        "url": "https://data.sec.gov/api/xbrl/frames/dei/EntityCommonStockSharesOutstanding/shares/CY2026Q2I.json",
+        "successful_requests": 1
+      }
+    ],
+    "failed_requests_in_fixed_run": []
+  },
+  "acceptance": {
+    "AC-M1-03": true,
+    "range": [
+      800,
+      2000
+    ],
+    "notes": "This is a late recovery and is not counted as AC-M1-02 on-time evidence. Prior 13,228/1,302 diagnostic was rolled back; its evidence remains in Git history."
+  }
 }
