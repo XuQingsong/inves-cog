@@ -51,3 +51,12 @@ Supervisor 管理 scheduler、watchdog 和可恢复 embedding worker；LaunchAge
 - 第11项：常驻scheduler已补入sec_submissions/sec_index/sec_atom。15:12现场确认caffeinate两项防睡眠断言均有效，AC供电；覆盖本次20:15–21:00 ET窗口，详见service.json。真实 bars_full 尚须在北京10月16日08:20触发并于08:45前完成；本报告不新增虚构job_runs。Mac需保持供电和开盖，登录自启不等于无人登录的冷启动。
 - 第12项：独立数据库已创建继承role_web的inves_cog_review，只读登录和写权限否定检查通过；连接说明及凭据已在仓库外单独交付，不写入Git。
 - 已授权10月16日08:50只执行一次自动核对；须等真实SEC健康记录和live smoke通过后才删除pending，再更新唯一market-bars.json并在PR #3留言。尚未完成的这两项不写成验收通过；milestones仍由需求方填写。
+
+## 8. next-stage数据库核查补充
+
+基线为PR #4/#6合并后的main 1f121fa，含需求方62e4b48的核查清单和M1 v8。证据：next-stage-audit.json；没有修改docs、golden或milestones。
+
+- D-22已完成：仓库外备份后删除CompanyIR和无效演示URL，DashScope根据真实llm_calls成功时间、条数、耗时更新为ok；不是用检查当前时间伪造一次新调用。正式EntitySites记录保留。
+- 对话回补成本为2,951,723 token；新闻对应七个交易日，按真实调用日集中记账。日常按美东预算日汇总，150万后仅保留标的池处理，其他项次日排队；核查时有8条daily_budget队列记录。复跑test_info_item_contract（包含超预算的正反断言及录音）为1 passed/0 skipped，0.18秒，无真实模型调用。不能将预算描述成所有场景硬封顶。
+- D-14主线已实现，实库task=embedding各模型记账见同一JSON；无需重复迁移。D-23决定已写入需求方M1 v8 Q-M1-29，唯一来源是info_embeddings，旧列弃用；停止旧列增量写入的后续代码工作未在此宣称完成。
+- D-17/D-21、M1/M2 live与次晨调度仍列遗留，不在本轮开工复述中冒充完成。
