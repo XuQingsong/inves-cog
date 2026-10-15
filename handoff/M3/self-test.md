@@ -1,13 +1,13 @@
 # M3 自测报告
 
-模块：M3；文档：v3（main be2137e）；日期：2026-10-15。实现提交见本文件所在 PR 的提交历史。
+模块：M3；冻结文档：v3（be2137e）；验收基线：main 3d7db6980c7898139a13c17636dcdbb761eb752c；日期：2026-10-16。实现提交见本文件所在 PR 的提交历史。
 
 ## 1. Harness 与先红后绿
 
 先提交 `ed2db5e` 的 13 个失败测试及冻结输入，之后实现。D-17、D-21、继任 CIK、M2 live 所需修复及证据已移入独立 PR #9（phase1/m2-closeout），本 PR 的最终差异不包含 M1/M2 实现或测试。保留原先失败测试、后实现的提交顺序，不重写已发布历史。原名 13 个测试均存在：12 blocking、1 replay。
 
-- 全仓 `pytest -m phase1_blocking`：51 passed、6 deselected，9.42 秒；[blocking.xml](blocking.xml)。
-- M3 全部 13 项：13 passed，6.92 秒；[replay.xml](replay.xml)。
+- 全仓 `pytest -m phase1_blocking`：51 passed、6 deselected，9.95 秒；[blocking.xml](blocking.xml)。
+- M3 全部 13 项：13 passed，7.25 秒；[replay.xml](replay.xml)。
 - `test_scores_match_muse`：20 日 × 30 只 × 27 字段 = 16,200 项比较，零差异；独立输入适配器校验冻结 companyfacts SHA，未导入或执行 Muse。
 - cases 当前尚无测试：输出 `NO TESTS COLLECTED — pending: 3`，不记为通过；[cases.xml](cases.xml)。
 - Ruff 按 Harness 的改动文件范围检查，保留已有具名复杂度例外；未改其他模块的样式基线。
@@ -18,7 +18,7 @@ I02（只允许 A）、I03（v18 常量）、I04（无 tracker 固定止损）�
 
 ## 3. pending / milestones
 
-M3 的 13 行在测试实际通过后删除；其他模块的行保留。`milestones.txt` 未修改。M2 的 pending 行在本分支保持 main 原样；其删除和真实输出仅在 PR #9。
+M3 的 13 行在测试实际通过后删除；其他模块的行保留。`milestones.txt` 未修改。M2 的 live pending 行已由获验收的 PR #9 从 main 删除；本 PR 对 pending 的最终差异仍仅删除 M3 的 13 行。
 
 ## 4. 验收条款
 
@@ -51,8 +51,8 @@ fixed 独立结果：LITE 52.0 / 96.0 / 13.0 / 69.6；BE 81.7 / 92.4 / 11.2 / 71
 
 ## 6. 上游收尾依赖
 
-D-17 / D-21、继任 CIK 和 M2 live 已独立提交 [PR #9](https://github.com/XuQingsong/inves-cog/pull/9)，最终证据在其 handoff/M2/closeout/。本分支已移除对应实现、测试、M2 pending 删除及实源采集耗时修复。M3 当前退回草稿；待 M2 收尾验收合并后，再合入 main、复核并继续验收。
+D-17 / D-21、继任 CIK 和 M2 live 由 [PR #9](https://github.com/XuQingsong/inves-cog/pull/9) 独立验收通过（M2 报告第 7 节），已用 merge commit 合并，SHA 为 3d7db6980c7898139a13c17636dcdbb761eb752c。M3 已合入该 main 并重新运行 51 项 blocking 及全部 13 项打分测试；最终差异不包含 M1/M2 实现、测试或其 pending 删除。M3 按本次用户指令重新正式提交验收。
 
 ## 7. 已知限制与待办
 
-M1/M2 的 live 关闭和明早 M1 准时调度按独立证据跟进，未提前标绿。M3 不产生订单、不读取持仓。Q-M3-11 真值兼容例外只存在于规则判定，数据库没有假 0。没有需暂停的新增规则问题；没有修改 docs、golden 或 milestones。
+M2 live 已独立验收通过；M1 的 live 关闭及北京时间 2026-10-16 早晨准时调度仍按独立证据跟进，未提前标绿。M3 不产生订单、不读取持仓。Q-M3-11 真值兼容例外只存在于规则判定，数据库没有假 0。没有需暂停的新增规则问题；没有修改 docs、golden 或 milestones。
