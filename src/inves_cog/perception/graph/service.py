@@ -89,7 +89,12 @@ class GraphService:
             if existing >= 3:
                 return {"ticker": ticker, "status": "ok", "relations": existing, "exposures": 0, "reused": True}
             # Full originals remain in source_texts; bounded excerpts retain exact original offsets.
-            chosen = sorted(sources, key=lambda r: ("note" in r["section"], r["section"]))[:6]
+            chosen = sorted(
+                [r for r in sources if r["section"].startswith("item:")]
+                or [r for r in sources if r["section"] not in {"full_filing", "canonical_full"}]
+                or sources,
+                key=lambda r: ("note" in r["section"], r["section"]),
+            )[:6]
             payload = []
             for row in chosen:
                 payload.append(

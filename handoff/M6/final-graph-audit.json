@@ -1,0 +1,2719 @@
+{
+  "relations_by_ticker": [
+    {
+      "ticker": "NVDA",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "AMD",
+      "cited_relations": 15
+    },
+    {
+      "ticker": "AVGO",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "MRVL",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "MU",
+      "cited_relations": 10
+    },
+    {
+      "ticker": "SKHY",
+      "cited_relations": 0
+    },
+    {
+      "ticker": "INTC",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "NOK",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "LITE",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "MSFT",
+      "cited_relations": 15
+    },
+    {
+      "ticker": "ORCL",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "CRM",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "NOW",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "ADBE",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "PLTR",
+      "cited_relations": 11
+    },
+    {
+      "ticker": "META",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "GOOGL",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "AMZN",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "NFLX",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "AAPL",
+      "cited_relations": 10
+    },
+    {
+      "ticker": "TSLA",
+      "cited_relations": 10
+    },
+    {
+      "ticker": "COST",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "WMT",
+      "cited_relations": 10
+    },
+    {
+      "ticker": "HD",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "UNH",
+      "cited_relations": 9
+    },
+    {
+      "ticker": "LLY",
+      "cited_relations": 11
+    },
+    {
+      "ticker": "JNJ",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "JPM",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "V",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "MA",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "XOM",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "CVX",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "CAT",
+      "cited_relations": 10
+    },
+    {
+      "ticker": "GE",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "WDC",
+      "cited_relations": 14
+    },
+    {
+      "ticker": "STX",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "SNDK",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "AMAT",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "LRCX",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "KLAC",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "ASML",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "QCOM",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "ARM",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "TSM",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "ANET",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "CIEN",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "COHR",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "VRT",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "ETN",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "GEV",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "CEG",
+      "cited_relations": 6
+    },
+    {
+      "ticker": "BE",
+      "cited_relations": 5
+    },
+    {
+      "ticker": "DELL",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "SMCI",
+      "cited_relations": 4
+    },
+    {
+      "ticker": "CRWV",
+      "cited_relations": 8
+    },
+    {
+      "ticker": "CRWD",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "PANW",
+      "cited_relations": 7
+    },
+    {
+      "ticker": "FTNT",
+      "cited_relations": 9
+    },
+    {
+      "ticker": "ZS",
+      "cited_relations": 6
+    }
+  ],
+  "at_least_three": 58,
+  "expected": 59,
+  "invalid_citations": [],
+  "exposures": [
+    {
+      "ticker": "AMD",
+      "relation_id": "ec833afe52494fba3d6a8fb2f7b54c8bbf62018e22a8d85a93643f202f13f276",
+      "target": "Sanmina Corporation",
+      "exposure_usd": 2400000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-02-04",
+      "source_info_ids": [
+        "0000002488-26-000018"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "we sold the ZT data center infrastructure manufacturing business (ZT Manufacturing Business) to Sanmina Corporation (Sanmina) for $2.4 billion in cash, subject to certain purchase price adjustments, and 1.2 million shares of Sanmina common stock",
+          "section": "canonical_full",
+          "char_end": 246099,
+          "accession": "0000002488-26-000018",
+          "char_start": 245854
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "AMD",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "COHR",
+      "relation_id": "6a172d259d7186fb5fba485ccf4cdd33716832d018f0e5f5df4054e5ce7750fd",
+      "target": "Nvidia",
+      "exposure_usd": 2000000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-08-14",
+      "source_info_ids": [
+        "0000820318-26-000020"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Separately, on March 2, 2026, NVIDIA made a $2 billion investment in the Company, through the purchase of shares of the Company’s Common Stock in a private placement.",
+          "section": "canonical_full",
+          "char_end": 203511,
+          "accession": "0000820318-26-000020",
+          "char_start": 203345
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "COHR",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "CRM",
+      "relation_id": "896b711ceeb6f8880b71b80540050c7ecde8ae7b4e5415d02dc45c564d6a9eaa",
+      "target": "Informatica, Inc.",
+      "exposure_usd": 9600000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-03-02",
+      "source_info_ids": [
+        "0001108524-26-000060"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "In November 2025, we completed our acquisition of Informatica, an AI-powered enterprise cloud data management platform, for approximately $9.6 billion.",
+          "section": "canonical_full",
+          "char_end": 227446,
+          "accession": "0001108524-26-000060",
+          "char_start": 227295
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "CRM",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "CRWV",
+      "relation_id": "ad041a7af422a777fde0b6c41f442656e220070e1c808827a9400edfc6a56c4d",
+      "target": "Jane Street",
+      "exposure_usd": 6000000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-08-12",
+      "source_info_ids": [
+        "0001769628-26-000366"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Jane Street, a private company, had committed approximately $6.0 billion to use our AI cloud platform",
+          "section": "canonical_full",
+          "char_end": 307325,
+          "accession": "0001769628-26-000366",
+          "char_start": 307224
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "CRWV",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "CRWV",
+      "relation_id": "da5988685232d2fc5e846badbf732e979671debe3e1e1d6aafde8c571616f2fc",
+      "target": "OpenAI OpCo, LLC",
+      "exposure_usd": 6500000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-08-12",
+      "source_info_ids": [
+        "0001769628-26-000366"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "OpenAI committed to pay us up to approximately $6.5 billion through May 31, 2031",
+          "section": "canonical_full",
+          "char_end": 228594,
+          "accession": "0001769628-26-000366",
+          "char_start": 228514
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "CRWV",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "CRWV",
+      "relation_id": "dcb019c3e7a45b3b0e8da7c313acdcc33b2294f3d38842011f67bd8f76a16733",
+      "target": "Meta Platforms, Inc.",
+      "exposure_usd": 21000000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-08-12",
+      "source_info_ids": [
+        "0001769628-26-000366"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Meta”) initially committed to pay us up to approximately $21.0 billion",
+          "section": "canonical_full",
+          "char_end": 228889,
+          "accession": "0001769628-26-000366",
+          "char_start": 228819
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "CRWV",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "GEV",
+      "relation_id": "6a6b7509601d9f77748300c81620f55f98b313964fbfd2332dce0804376f7be0",
+      "target": "Prolec GE",
+      "exposure_usd": 5300000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-01-29",
+      "source_info_ids": [
+        "0001996810-26-000015"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Under the purchase agreement, GE Vernova will pay approximately $5.3 billion at closing, expected to be funded equally between cash and debt.",
+          "section": "canonical_full",
+          "char_end": 201611,
+          "accession": "0001996810-26-000015",
+          "char_start": 201470
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "GEV",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "GEV",
+      "relation_id": "73ebc654b49109033a60449ebfda554c180264307275fea056116e2c3bed000c",
+      "target": "General Electric (GE Aerospace)",
+      "exposure_usd": 8000000000.0,
+      "exposure_basis": "RPO",
+      "exposure_asof": "2026-01-29",
+      "source_info_ids": [
+        "0001996810-26-000015"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "As of December 31, 2025 , we estimated GE Vernova RPO and other obligations that relate to GE credit support to be approximately $8 billion , an over 77% reduction since the Spin-Off.",
+          "section": "canonical_full",
+          "char_end": 239598,
+          "accession": "0001996810-26-000015",
+          "char_start": 239415
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "GEV",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "MRVL",
+      "relation_id": "cc35c63eca14d91473bd697f269d933fce3a6f02694d3e8af76cc29fbf0f5b5e",
+      "target": "XConn Technologies Holdings, Ltd.",
+      "exposure_usd": 280000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-03-11",
+      "source_info_ids": [
+        "0001835632-26-000011"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "At acquisition close, we paid approximately $280.0 million in cash and issued approximately 2.1 million shares of our common stock.",
+          "section": "canonical_full",
+          "char_end": 49379,
+          "accession": "0001835632-26-000011",
+          "char_start": 49248
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "MRVL",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "MRVL",
+      "relation_id": "db11190a956b7974b817182120de263d28071cf776386180ffa1326eed1be101",
+      "target": "Celestial AI, Inc.",
+      "exposure_usd": 1300000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-03-11",
+      "source_info_ids": [
+        "0001835632-26-000011"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "At acquisition close, we paid approximately $1.3 billion in cash (or $1.0 billion, net of cash acquired of approximately $300.0 million) and issued approximately 24.5 million shares of our common stock.",
+          "section": "canonical_full",
+          "char_end": 48740,
+          "accession": "0001835632-26-000011",
+          "char_start": 48538
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "MRVL",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "MRVL",
+      "relation_id": "f0ebc816d4f3b2f576e8617455d1d0d9229d859d22ab81d7c9bf55eb2b6903f9",
+      "target": "Infineon Technologies AG",
+      "exposure_usd": 2500000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-03-11",
+      "source_info_ids": [
+        "0001835632-26-000011"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "On August 14, 2025, we completed the sale of our automotive ethernet business to Infineon Technologies AG for $2.5 billion in cash.",
+          "section": "canonical_full",
+          "char_end": 48020,
+          "accession": "0001835632-26-000011",
+          "char_start": 47889
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "MRVL",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "MSFT",
+      "relation_id": "10ce34a0701828817261a406e7bed27eb4f38bec7333ae94fb5d15946d2e8863",
+      "target": "OpenAI",
+      "exposure_usd": 24100000000.0,
+      "exposure_basis": "收入占比",
+      "exposure_asof": "2026-07-29",
+      "source_info_ids": [
+        "0001193125-26-323660"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "For fiscal year 2026, we recorded revenue from commercial arrangements with OpenAI, inclusive of revenue-sharing payments, of $ 24.1 billion",
+          "section": "canonical_full",
+          "char_end": 257510,
+          "accession": "0001193125-26-323660",
+          "char_start": 257370
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "MSFT",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "MSFT",
+      "relation_id": "27718ac2f9f84488ef6c3e1275dd07aae65a78ae986bb7cc3b4ec716332c1e74",
+      "target": "OpenAI",
+      "exposure_usd": 6000000000.0,
+      "exposure_basis": "应收",
+      "exposure_asof": "2026-07-29",
+      "source_info_ids": [
+        "0001193125-26-323660"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "accounts receivable from OpenAI as of June 30, 2026 was $ 6.0 billion",
+          "section": "canonical_full",
+          "char_end": 257585,
+          "accession": "0001193125-26-323660",
+          "char_start": 257516
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "MSFT",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "MSFT",
+      "relation_id": "f2d982c7e897ba069b184321036683cc64c10e7223d4b222070f90c5f138ff04",
+      "target": "OpenAI",
+      "exposure_usd": 13000000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-07-29",
+      "source_info_ids": [
+        "0001193125-26-323660"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "We have made total funding commitments of $ 13.0 billion related to our investment, of which $ 11.9 billion has been funded as of June 30, 2026",
+          "section": "canonical_full",
+          "char_end": 257730,
+          "accession": "0001193125-26-323660",
+          "char_start": 257587
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "MSFT",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "NVDA",
+      "relation_id": "b1e14cbd03a3da5fa34565f6b3244217f20f09ee923d36a1f423942d4c0ef799",
+      "target": "SB Energy Corp",
+      "exposure_usd": 105000000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-08-26",
+      "source_info_ids": [
+        "0001045810-26-000075"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "we entered into guarantees, capped at a total of $ 105 billion, to provide credit support on a land, power, and shell buildout with affiliates of SB Energy Corp.",
+          "section": "canonical_full",
+          "char_end": 68628,
+          "accession": "0001045810-26-000075",
+          "char_start": 68467
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "NVDA",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "ORCL",
+      "relation_id": "e2f1a37458e5acdeab8a1f976e918d4b61126bfeeee933e5a24acc9c80d45710",
+      "target": "OpenAI",
+      "exposure_usd": 300000000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2026-10-09",
+      "source_info_ids": [
+        "news:benzinga:62258380"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "The lower figure may draw more scrutiny to Oracle and OpenAI’s five-year, roughly $300 billion agreement to supply compute power.",
+          "section": "news_contract",
+          "char_end": 1289,
+          "accession": "news:benzinga:62258380",
+          "char_start": 1160
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "ORCL"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 2
+    },
+    {
+      "ticker": "QCOM",
+      "relation_id": "47e50dbc913892337c5196d983e8bb740f8fc02f9934529d0d4936ab911beca5",
+      "target": "Alphawave IP Group plc",
+      "exposure_usd": 2400000000.0,
+      "exposure_basis": "合同",
+      "exposure_asof": "2025-11-05",
+      "source_info_ids": [
+        "0000804328-25-000085"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "On June 9, 2025, we announced that we reached an agreement to acquire Alphawave at an implied enterprise value of approximately $2.4 billion (as of the announcement date)",
+          "section": "canonical_full",
+          "char_end": 261740,
+          "accession": "0000804328-25-000085",
+          "char_start": 261570
+        },
+        "asof_basis": "source disclosure date; not model-inferred contract date",
+        "source_ticker": "QCOM",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 3
+    },
+    {
+      "ticker": "WDC",
+      "relation_id": "c096bf2de7370fb78f0183b211c2d74b0dd05b1e1a2b07c74e57b62bfba67341",
+      "target": "HDDMember",
+      "exposure_usd": 12919000000.0,
+      "exposure_basis": "分部收入",
+      "exposure_asof": "2026-07-03",
+      "source_info_ids": [
+        "0001628280-26-057139"
+      ],
+      "evidence": {
+        "flags": [],
+        "citation": null,
+        "source_ticker": "WDC",
+        "structured_source": {
+          "filed": "2026-08-14",
+          "row_id": "d71996879c57e0a0d97dd8660733bdd9a9be2aa589f162ff50292a6600c12f22",
+          "ticker": "WDC",
+          "revenue": 12919000000.0,
+          "evidence": {
+            "fx": {},
+            "currency": "USD",
+            "profit_fx": {},
+            "mapping_gap": "RuntimeError: Before M1 merge: injected mapping double; no recorded draft for real segment",
+            "period_start": "2025-06-28",
+            "sum_included": true,
+            "profit_reason": null,
+            "revenue_basis": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "segment_qname": "wdc:HDDMember",
+            "parse_contract": "filing-relations-k16-v2",
+            "primary_sha256": null,
+            "auxiliary_basis": null,
+            "consolidated_fx": {},
+            "member_identity": "{http://www.wdc.com/20260703}HDDMember",
+            "revenue_context": "c-110",
+            "consolidated_basis": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "revenue_disclosure": "reported",
+            "revenue_sum_weight": 1,
+            "consolidated_revenue": 12919000000.0,
+            "original_revenue_positions": []
+          },
+          "accession": "0001628280-26-057139",
+          "period_end": "2026-07-03",
+          "segment_raw": "HDDMember"
+        }
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 1
+    }
+  ],
+  "disclosure_date_repairs": [],
+  "monitored": [
+    {
+      "entity_id": "1_dram_node",
+      "name": "1γ DRAM node",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "1γ DRAM node"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "245tb_6600_ion_ssd",
+      "name": "245TB 6600 ION SSD",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "245TB 6600 ION SSD"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ablecom",
+      "name": "Ablecom",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Ablecom"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ad_supported_subscription_plan",
+      "name": "ad-supported subscription plan",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "ad-supported subscription plan"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "adobe_firefly",
+      "name": "Adobe Firefly",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Adobe Firefly"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "agentforce",
+      "name": "Agentforce",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Agentforce"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "agentforce_360_platform",
+      "name": "Agentforce 360 Platform",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Agentforce 360 Platform"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ai_center",
+      "name": "AI Center",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "AI Center"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ai_optimized_servers",
+      "name": "AI-optimized servers",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "AI-optimized servers"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ai_security_cloud",
+      "name": "AI Security Cloud",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "AI Security Cloud"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "altus",
+      "name": "ALTUS",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "ALTUS"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "amd_instinct_mi350_series_gpus",
+      "name": "AMD Instinct MI350 Series GPUs",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "AMD Instinct MI350 Series GPUs"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "amd_ryzen_processors",
+      "name": "AMD Ryzen processors",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "AMD Ryzen processors"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "anthropic",
+      "name": "Anthropic",
+      "channels": [
+        "app",
+        "trend",
+        "site"
+      ],
+      "trend_keywords": [
+        "Anthropic",
+        "Claude"
+      ],
+      "official_urls": [
+        "https://www.anthropic.com/news"
+      ],
+      "app_store_ids": [
+        "6473753684"
+      ]
+    },
+    {
+      "entity_id": "app_store",
+      "name": "App Store",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "App Store"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "arc",
+      "name": "Arc",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Arc"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "arm_agi_cpu",
+      "name": "Arm AGI CPU",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Arm AGI CPU"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "artificial_intelligence_platform_aip",
+      "name": "Artificial Intelligence Platform (AIP)",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Artificial Intelligence Platform (AIP)"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "aws",
+      "name": "AWS",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "AWS"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "azure",
+      "name": "Azure",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Azure"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "azure_and_other_cloud_services",
+      "name": "Azure and other cloud services",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Azure and other cloud services"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "blackwell_architecture",
+      "name": "Blackwell architecture",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Blackwell architecture"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "blue_planet_automation_software",
+      "name": "Blue Planet Automation Software",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Blue Planet Automation Software"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "boehringer_ingelheim",
+      "name": "Boehringer Ingelheim",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Boehringer Ingelheim"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "boyd_thermal",
+      "name": "Boyd Thermal",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Boyd Thermal"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "calpine",
+      "name": "Calpine",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Calpine"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "caplyta",
+      "name": "CAPLYTA",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "CAPLYTA"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "celestial_ai_inc",
+      "name": "Celestial AI, Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Celestial AI, Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "chronosphere_telemetry_pipeline",
+      "name": "Chronosphere Telemetry Pipeline",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Chronosphere Telemetry Pipeline"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "cloud_light_technology_limited",
+      "name": "Cloud Light Technology Limited",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Cloud Light Technology Limited"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "cloud_transceiver_product_lines",
+      "name": "cloud transceiver product lines",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "cloud transceiver product lines"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "contract_manufacturers",
+      "name": "contract manufacturers",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "contract manufacturers"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "cortex_xsiam",
+      "name": "Cortex XSIAM",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Cortex XSIAM"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "crane_clean_energy_center",
+      "name": "Crane Clean Energy Center",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Crane Clean Energy Center"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "crowdstrike_falcon",
+      "name": "CrowdStrike Falcon",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "CrowdStrike Falcon"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "cuda",
+      "name": "CUDA",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "CUDA"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "cybercab",
+      "name": "Cybercab",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Cybercab"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "darzalex",
+      "name": "DARZALEX",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "DARZALEX"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "data_360",
+      "name": "Data 360",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Data 360"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "deepseek",
+      "name": "DeepSeek",
+      "channels": [
+        "app",
+        "trend",
+        "site"
+      ],
+      "trend_keywords": [
+        "DeepSeek"
+      ],
+      "official_urls": [
+        "https://www.deepseek.com/"
+      ],
+      "app_store_ids": [
+        "6737597349"
+      ]
+    },
+    {
+      "entity_id": "electrolyzer",
+      "name": "Electrolyzer",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Electrolyzer"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "energy_server_systems",
+      "name": "Energy Server systems",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Energy Server systems"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "exe_lithography_systems",
+      "name": "EXE lithography systems",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "EXE lithography systems"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "facebook",
+      "name": "Facebook",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Facebook"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "fortiai",
+      "name": "FortiAI",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "FortiAI"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "fortios",
+      "name": "FortiOS",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "FortiOS"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "fsd_supervised",
+      "name": "FSD (Supervised)",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "FSD (Supervised)"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "g9_nand",
+      "name": "G9 NAND",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "G9 NAND"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "gaudi",
+      "name": "Gaudi",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Gaudi"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "gemini",
+      "name": "Gemini",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Gemini"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "gemini_3",
+      "name": "Gemini 3",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Gemini 3"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "general_electric_ge_aerospace",
+      "name": "General Electric (GE Aerospace)",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "General Electric (GE Aerospace)"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "golden_pass_lng",
+      "name": "Golden Pass LNG",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Golden Pass LNG"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "google_gemini",
+      "name": "Google Gemini",
+      "channels": [
+        "app",
+        "trend",
+        "site"
+      ],
+      "trend_keywords": [
+        "Google Gemini"
+      ],
+      "official_urls": [
+        "https://blog.google/technology/ai/"
+      ],
+      "app_store_ids": [
+        "6477489729"
+      ]
+    },
+    {
+      "entity_id": "google_search",
+      "name": "Google Search",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Google Search"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "graphics_processing_units",
+      "name": "graphics processing units",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "graphics processing units"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "great_value",
+      "name": "Great Value",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Great Value"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "groq_inc",
+      "name": "Groq, Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Groq, Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "hard_disk_drives",
+      "name": "Hard Disk Drives",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Hard Disk Drives"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "hbm",
+      "name": "HBM",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "HBM"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "hbm4",
+      "name": "HBM4",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "HBM4"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "high_bandwidth_memory",
+      "name": "high-bandwidth memory",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "high-bandwidth memory"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "high_capacity_enterprise_hdds",
+      "name": "high-capacity enterprise HDDs",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "high-capacity enterprise HDDs"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "high_capacity_enterprise_hdds_epmr_optinand_ultrasmr_hamr",
+      "name": "high-capacity enterprise HDDs (ePMR, OptiNAND, UltraSMR, HAMR)",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "high-capacity enterprise HDDs (ePMR, OptiNAND, UltraSMR, HAMR)"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "homedepot_com",
+      "name": "homedepot.com",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "homedepot.com"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "hyperforce",
+      "name": "Hyperforce",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Hyperforce"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "idira",
+      "name": "Idira",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Idira"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "indium_phosphide",
+      "name": "indium phosphide",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "indium phosphide"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "informatica_inc",
+      "name": "Informatica, Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Informatica, Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "infrastructure_as_a_service_providers",
+      "name": "Infrastructure-as-a-Service providers",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Infrastructure-as-a-Service providers"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "intel_core",
+      "name": "Intel Core",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Intel Core"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "iphone",
+      "name": "iPhone",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "iPhone"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ironwood_tpu",
+      "name": "Ironwood TPU",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Ironwood TPU"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "kleidi",
+      "name": "Kleidi",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Kleidi"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "lacework",
+      "name": "Lacework",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Lacework"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "lillydirect",
+      "name": "LillyDirect",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "LillyDirect"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "linkedin",
+      "name": "LinkedIn",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "LinkedIn"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "linksys",
+      "name": "Linksys",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Linksys"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "liquefied_natural_gas",
+      "name": "liquefied natural gas",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "liquefied natural gas"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "mac",
+      "name": "Mac",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Mac"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "mastercard_payment_network",
+      "name": "Mastercard payment network",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Mastercard payment network"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "megapack",
+      "name": "Megapack",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Megapack"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "meta_ai",
+      "name": "Meta AI",
+      "channels": [
+        "app",
+        "trend",
+        "site"
+      ],
+      "trend_keywords": [
+        "Meta AI",
+        "Muse"
+      ],
+      "official_urls": [
+        "https://ai.meta.com/blog/"
+      ],
+      "app_store_ids": [
+        "1558240027"
+      ]
+    },
+    {
+      "entity_id": "meta_quest",
+      "name": "Meta Quest",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Meta Quest"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "microsoft_365_commercial_cloud",
+      "name": "Microsoft 365 Commercial cloud",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Microsoft 365 Commercial cloud"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "microsoft_azure",
+      "name": "Microsoft Azure",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Microsoft Azure"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "microsoft_copilot",
+      "name": "Microsoft Copilot",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Microsoft Copilot"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "model_y",
+      "name": "Model Y",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Model Y"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "mounjaro",
+      "name": "Mounjaro",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Mounjaro"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "moveworks_inc",
+      "name": "Moveworks, Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Moveworks, Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "mozaic",
+      "name": "Mozaic",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Mozaic"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "now_assist",
+      "name": "Now Assist",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Now Assist"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nubis_communications_inc",
+      "name": "Nubis Communications, Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Nubis Communications, Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nuvia",
+      "name": "Nuvia",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Nuvia"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nvidia_blackwell_ultra_platform",
+      "name": "NVIDIA Blackwell Ultra platform",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "NVIDIA Blackwell Ultra platform"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nvidia_gb300_nvl72",
+      "name": "NVIDIA GB300 NVL72",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "NVIDIA GB300 NVL72"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nvidia_nemotron",
+      "name": "NVIDIA Nemotron",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "NVIDIA Nemotron"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nvidia_rubin_platform",
+      "name": "NVIDIA Rubin platform",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "NVIDIA Rubin platform"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "nxt_immersion",
+      "name": "NXT immersion",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "NXT immersion"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "office_365",
+      "name": "Office 365",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Office 365"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "open_connect",
+      "name": "Open Connect",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Open Connect"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "openai",
+      "name": "OpenAI",
+      "channels": [
+        "app",
+        "trend",
+        "site"
+      ],
+      "trend_keywords": [
+        "OpenAI",
+        "ChatGPT"
+      ],
+      "official_urls": [
+        "https://openai.com/news/rss.xml"
+      ],
+      "app_store_ids": [
+        "6448311069"
+      ]
+    },
+    {
+      "entity_id": "optimus",
+      "name": "Optimus",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Optimus"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "oracle_cloud",
+      "name": "Oracle Cloud",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Oracle Cloud"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "oracle_cloud_infrastructure",
+      "name": "Oracle Cloud Infrastructure",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Oracle Cloud Infrastructure"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "oracle_database",
+      "name": "Oracle Database",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Oracle Database"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "oracle_engineered_systems",
+      "name": "Oracle Engineered Systems",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Oracle Engineered Systems"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "orforglipron",
+      "name": "orforglipron",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "orforglipron"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "palantir_apollo",
+      "name": "Palantir Apollo",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Palantir Apollo"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "palantir_foundry",
+      "name": "Palantir Foundry",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Palantir Foundry"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "palantir_gotham",
+      "name": "Palantir Gotham",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Palantir Gotham"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "palantir_ontology",
+      "name": "Palantir Ontology",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Palantir Ontology"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "papua_lng",
+      "name": "Papua LNG",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Papua LNG"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "prisma_airs",
+      "name": "Prisma AIRS",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Prisma AIRS"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "pro_trade_credit_program",
+      "name": "Pro Trade Credit program",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Pro Trade Credit program"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "prolec_ge",
+      "name": "Prolec GE",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Prolec GE"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "raptordb",
+      "name": "RaptorDB",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "RaptorDB"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ray_ban_meta",
+      "name": "Ray-Ban Meta",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Ray-Ban Meta"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "recorded_future",
+      "name": "Recorded Future",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Recorded Future"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "regrello_corp",
+      "name": "Regrello Corp.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Regrello Corp."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "resilient_power_systems_inc",
+      "name": "Resilient Power Systems Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Resilient Power Systems Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "robotaxi",
+      "name": "Robotaxi",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Robotaxi"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "rovuma_lng",
+      "name": "Rovuma LNG",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Rovuma LNG"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "sabre",
+      "name": "SABRE",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "SABRE"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "sanmina_corporation",
+      "name": "Sanmina Corporation",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Sanmina Corporation"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "semiconductors",
+      "name": "semiconductors",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "semiconductors"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "servicenow_ai_platform",
+      "name": "ServiceNow AI Platform",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "ServiceNow AI Platform"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "slack",
+      "name": "Slack",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Slack"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "slackbot",
+      "name": "Slackbot",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Slackbot"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "snapdragon",
+      "name": "Snapdragon",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Snapdragon"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "snapdragon_digital_chassis",
+      "name": "Snapdragon Digital Chassis",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Snapdragon Digital Chassis"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "spravato",
+      "name": "SPRAVATO",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "SPRAVATO"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ssw_partners",
+      "name": "SSW Partners",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "SSW Partners"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "stabroek_block",
+      "name": "Stabroek Block",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Stabroek Block"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "steel",
+      "name": "steel",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "steel"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "stelara",
+      "name": "STELARA",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "STELARA"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "third_party_manufacturers",
+      "name": "third-party manufacturers",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "third-party manufacturers"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "tiktok",
+      "name": "TikTok",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "TikTok"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "toshiba",
+      "name": "Toshiba",
+      "channels": [
+        "trend",
+        "site"
+      ],
+      "trend_keywords": [
+        "Toshiba HDD"
+      ],
+      "official_urls": [
+        "https://www.global.toshiba/ww/news/corporate.html"
+      ],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "tsmc_3dfabric",
+      "name": "TSMC 3DFabric®",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "TSMC 3DFabric®"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ualink",
+      "name": "UALink",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "UALink"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "ultra_pcs_limited",
+      "name": "Ultra PCS Limited",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Ultra PCS Limited"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "vcf",
+      "name": "VCF",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "VCF"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "visa_europe",
+      "name": "Visa Europe",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Visa Europe"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "visanet",
+      "name": "VisaNet",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "VisaNet"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "walmart",
+      "name": "Walmart+",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Walmart+"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "walmart_com",
+      "name": "walmart.com",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "walmart.com"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "wavelogic",
+      "name": "WaveLogic",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "WaveLogic"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "weights_biases",
+      "name": "Weights & Biases",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Weights & Biases"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "windows",
+      "name": "Windows",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Windows"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "www_amazon_in",
+      "name": "www.amazon.in",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "www.amazon.in"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "xbox",
+      "name": "XBOX",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "XBOX"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "xbox_game_pass",
+      "name": "XBOX Game Pass",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "XBOX Game Pass"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "xconn_technologies_holdings_ltd",
+      "name": "XConn Technologies Holdings, Ltd.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "XConn Technologies Holdings, Ltd."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "xeon",
+      "name": "Xeon",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Xeon"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "xignux",
+      "name": "Xignux",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Xignux"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "xpu",
+      "name": "XPU",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "XPU"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "zepbound",
+      "name": "Zepbound",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Zepbound"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "zero_trust_exchange",
+      "name": "Zero Trust Exchange",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Zero Trust Exchange"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "zr_zr_transceivers",
+      "name": "ZR/ZR+ transceivers",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "ZR/ZR+ transceivers"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "zscaler_internet_access_zia",
+      "name": "Zscaler Internet Access (ZIA)",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "Zscaler Internet Access (ZIA)"
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    },
+    {
+      "entity_id": "zt_group_int_l_inc",
+      "name": "ZT Group Int'l, Inc.",
+      "channels": [
+        "trend"
+      ],
+      "trend_keywords": [
+        "ZT Group Int'l, Inc."
+      ],
+      "official_urls": [],
+      "app_store_ids": []
+    }
+  ]
+}

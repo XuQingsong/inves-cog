@@ -20,12 +20,13 @@
       "evidence": {
         "citation": {
           "quote": "We provide the Cloud end market with an array of high-capacity enterprise HDDs.",
-          "section": "1",
+          "section": "canonical_full",
           "char_end": 43687,
           "accession": "0001628280-26-057139",
           "char_start": 43608
         },
-        "source_ticker": "WDC"
+        "source_ticker": "WDC",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
       },
       "opposing_evidence": [],
       "first_discovered_at": "2026-10-15 21:16:26.788867+08:00",
@@ -40,7 +41,7 @@
         "ai_capex_chain",
         "hdd"
       ],
-      "revision": 1,
+      "revision": 2,
       "target": "high-capacity enterprise HDDs"
     },
     {
@@ -61,12 +62,13 @@
       "evidence": {
         "citation": {
           "quote": "Our multi-year product roadmap for high-capacity HDDs, which include ePMR, OptiNAND, UltraSMR, heat-assisted magnetic recording (“HAMR”) and triple stage actuators",
-          "section": "1",
+          "section": "canonical_full",
           "char_end": 48124,
           "accession": "0001628280-26-057139",
           "char_start": 47961
         },
-        "source_ticker": "WDC"
+        "source_ticker": "WDC",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
       },
       "opposing_evidence": [],
       "first_discovered_at": "2026-10-15 21:03:13.066216+08:00",
@@ -81,7 +83,7 @@
         "ai_capex_chain",
         "hdd"
       ],
-      "revision": 1,
+      "revision": 2,
       "target": "high-capacity enterprise HDDs (ePMR, OptiNAND, UltraSMR, HAMR)"
     },
     {
@@ -102,12 +104,13 @@
       "evidence": {
         "citation": {
           "quote": "HDD competitors such as Seagate Technology Holdings plc, and Toshiba Electronic Devices & Storage Corporation",
-          "section": "1",
+          "section": "canonical_full",
           "char_end": 49652,
           "accession": "0001628280-26-057139",
           "char_start": 49543
         },
-        "source_ticker": "WDC"
+        "source_ticker": "WDC",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
       },
       "opposing_evidence": [],
       "first_discovered_at": "2026-10-15 21:03:13.066167+08:00",
@@ -122,7 +125,7 @@
         "ai_capex_chain",
         "hdd"
       ],
-      "revision": 1,
+      "revision": 2,
       "target": "Toshiba Electronic Devices & Storage Corporation"
     },
     {
@@ -143,12 +146,13 @@
       "evidence": {
         "citation": {
           "quote": "AI-enhanced applications are further accelerating data creation, increasing reliance on historical data sets for advanced reasoning and creating new opportunities to derive value from previously stored information.",
-          "section": "1",
+          "section": "canonical_full",
           "char_end": 46679,
           "accession": "0001137789-26-000159",
           "char_start": 46465
         },
-        "source_ticker": "STX"
+        "source_ticker": "STX",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
       },
       "opposing_evidence": [],
       "first_discovered_at": "2026-10-15 21:16:39.209055+08:00",
@@ -163,7 +167,7 @@
         "ai_capex_chain",
         "hdd"
       ],
-      "revision": 1,
+      "revision": 2,
       "target": "artificial intelligence"
     },
     {
@@ -184,12 +188,13 @@
       "evidence": {
         "citation": {
           "quote": "Hard disk drives (“HDDs”) remain a foundational technology for delivering scalable, energy-efficient, mass-capacity storage with favorable storage economics that underpins modern digital infrastructure.",
-          "section": "1",
+          "section": "canonical_full",
           "char_end": 44784,
           "accession": "0001137789-26-000159",
           "char_start": 44582
         },
-        "source_ticker": "STX"
+        "source_ticker": "STX",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
       },
       "opposing_evidence": [],
       "first_discovered_at": "2026-10-15 21:16:39.209044+08:00",
@@ -204,7 +209,7 @@
         "ai_capex_chain",
         "hdd"
       ],
-      "revision": 1,
+      "revision": 2,
       "target": "Hard Disk Drives"
     },
     {
@@ -225,12 +230,13 @@
       "evidence": {
         "citation": {
           "quote": "Edge / Internet of Things (“Edge IoT”) : Industrial and consumer oriented environments where data is increasingly processed and stored closer to where it is created.",
-          "section": "1",
+          "section": "canonical_full",
           "char_end": 45487,
           "accession": "0001137789-26-000159",
           "char_start": 45322
         },
-        "source_ticker": "STX"
+        "source_ticker": "STX",
+        "citation_position_basis": "normalized canonical original; heading labels do not infer location"
       },
       "opposing_evidence": [],
       "first_discovered_at": "2026-10-15 21:16:39.209088+08:00",
@@ -245,7 +251,7 @@
         "ai_capex_chain",
         "hdd"
       ],
-      "revision": 1,
+      "revision": 2,
       "target": "Edge IoT"
     },
     {
