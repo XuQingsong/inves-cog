@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v4（新增资金流向图 FR-M6-16） |
+| 文档版本 | v5（按验证报告修改警戒规则、加入 VIX 期限结构和新分组，见 [`validation/M7-validation-report.md`](validation/M7-validation-report.md)） |
 | 规格章节 | 3.1、3.5、6.11、11.3 |
 | 依赖 | M1（行情、全量库）、M2（10-K 原文、分部） |
 | 关闭的不变量 | 无（为 M7、M8、M9 提供基础） |
@@ -61,7 +61,7 @@
 
 **`marketstate.rotation`**（v4 新增，每个交易日、每个时段一组行）：`trade_date, session, group_kind(index/style/sector/l3), group_id, ret, z, ret_5d, z_5d, rank, rank_5d`
 
-**`marketstate.market`**：`trade_date, spy_5d_pct, vix, vix_pctile_252, down_share_5d_pct, shock_flag, l1_state`
+**`marketstate.market`**：`trade_date, spy_5d_pct, vix, vix_pctile_252, down_share_5d_pct, shock_flag, l1_state`；v5 追加 `vix3m, vix_term_inverted(bool：vix3m < vix), spy_drawdown_252_pct`（SPY 收盘相对过去 252 个交易日最高收盘的跌幅，含当日）
 
 ## 5. 功能需求
 
@@ -87,9 +87,9 @@
 | FR-M6-11 | 盘后时段：`ret_post = post_close ÷ close − 1`；因子用 SPY 和篮子成员的同时段收益；β 沿用日收益的估计；`post_close` 为空时该行 `NULL` |
 | FR-M6-12 | 5 日剩余：`resid_5d` = 最近 5 个交易日剩余之和；`resid_5d_z = resid_5d ÷ (σ × √5)`；`beta_share_5d = 1 − |resid_5d| ÷ |5 日总收益|`，限制在 [0, 1]；5 日总收益绝对值 < 0.5% 时为 `NULL` |
 | FR-M6-13 | 篮子：L2 篮子等权收益对 `f_m` 回归；L3 篮子对 (`f_m`, 所属 L2 的 `f_s`) 回归；同样 120 日窗口；输出 `resid_z`、同号成员比例、成员剩余的标准差 |
-| FR-M6-14 | 市场：`vix_pctile_252` = 当日 VIX 在过去 252 个交易日（不含当日）收盘中的百分位秩（≤ 当日值的比例 × 100）；`down_share_5d_pct` = 标的池 + 广域集合中 5 日收益 < 0 的比例；`shock_flag`、`l1_state` 按 `golden/m6_marketstate.json` 的规则（规格第 11.3 节加本文：警戒 = SPY 5 日 ≤ −3% 或 VIX 分位 ≥ 70 或 5 日下跌比例 ≥ 60%） |
+| FR-M6-14 | 市场：`vix_pctile_252` = 当日 VIX 在过去 252 个交易日（不含当日）收盘中的百分位秩（≤ 当日值的比例 × 100）；`down_share_5d_pct` = 标的池 + 广域集合中 5 日收益 < 0 的比例；`shock_flag`、`l1_state` 按 `golden/m6_marketstate.json` 的规则（规格第 11.3 节加本文。**v5 警戒**：以下三个条件至少满足两个——SPY 5 日 ≤ −3%、VIX 分位 ≥ 70、5 日下跌比例 ≥ 60%；**或** `vix_term_inverted` 为真；**或** `spy_drawdown_252_pct` ≤ −10%。v4 的"满足任一条件"在平静期也有 15–25% 的天数报警，失去区分度） |
 | FR-M6-15 | 每天北京 08:55 完成（美东 20:55；冬令时北京 09:55，见 README §3.1）（M1 之后、M7 之前）；写 `job_runs` |
-| FR-M6-16 | **资金流向图**（v4，用户 2026-10-15 提出"要综合来看市场轮动"）：每个交易日把下列分组的当日收益、z 值（收益 ÷ 自身 120 日收益标准差）、5 日累计收益和 5 日 z（σ × √5）算出来并排名，写入 `marketstate.rotation`。分组：**大盘**（SPY、QQQ、IWM）；**风格**（IWM − QQQ 的价差，以及 RSP − SPY 的等权与市值加权价差，需要 M1 补采 RSP 日线）；**行业**（11 只行业 ETF：XLK、XLF、XLV、XLE、XLI、XLU、XLY、XLP、XLB、XLRE、XLC，以及 SMH、IGV）；**L3 篮子**（13 个）。每天另外输出两个汇总值：行业之间最强与最弱的 z 值之差 `sector_spread_z`，以及风格价差的 z 值 `style_spread_z`。只用价格，归 M6 的价格结构层；M7 用它判定轮动，M10 在首页展示，M8 归因时可以引用"当天资金从哪里流向哪里"。**授权 M6 开发**按 Q-M6-5 的方式在 M1 的日线采集里加入 RSP 和第 11 只行业 ETF 之外缺的代码（M1 现有 14 只 ETF 里没有 XLB、XLRE、XLC、RSP） |
+| FR-M6-16 | **资金流向图**（v4，用户 2026-10-15 提出"要综合来看市场轮动"）：每个交易日把下列分组的当日收益、z 值（收益 ÷ 自身 120 日收益标准差）、5 日累计收益和 5 日 z（σ × √5）算出来并排名，写入 `marketstate.rotation`。分组：**大盘**（SPY、QQQ、IWM）；**风格**（IWM − QQQ 的价差、MTUM − VLUE 的动量与价值价差（v5），以及 RSP − SPY 的等权与市值加权价差）；**行业**（11 只行业 ETF：XLK、XLF、XLV、XLE、XLI、XLU、XLY、XLP、XLB、XLRE、XLC，以及 SMH、IGV、地区银行 KRE（v5））；**L3 篮子**（13 个）。每天另外输出两个汇总值：行业之间最强与最弱的 z 值之差 `sector_spread_z`，以及风格价差的 z 值 `style_spread_z`。只用价格，归 M6 的价格结构层；M7 用它判定轮动，M10 在首页展示，M8 归因时可以引用"当天资金从哪里流向哪里"。**授权 M6 开发**按 Q-M6-5 的方式在 M1 的日线采集里加入 RSP 和第 11 只行业 ETF 之外缺的代码（M1 现有 14 只 ETF 里没有 XLB、XLRE、XLC、RSP；v5 再加 KRE、MTUM、VLUE），并按 Q-M6-5 同样的方式采集 CBOE 的 VIX3M 日线（`https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX3M_History.csv`，需求方已验证可访问），写入 `ingest.macro_observations`（`series_id = VIX3M_CBOE`） |
 
 ## 6. 异常与降级
 
@@ -103,7 +103,7 @@
 
 | 测试名 | 标记 | 断言 | 夹具 |
 |---|---|---|---|
-| `test_marketstate_flags` | blocking | `shock_flag`、`l1_state` 全部用例（含边界 −5.0、79.9、70） | `golden/m6_marketstate.json` |
+| `test_marketstate_flags` | blocking | `shock_flag`、`l1_state` 全部用例（v5 共 11 个，含边界 −5.0、79.9、70，以及回撤 −10.0 / −9.9、VIX 倒挂、恰好两个条件） | `golden/m6_marketstate.json` |
 | `test_residual_exact_linear` | blocking | 合成数据：个股收益 = 0.001 + 1.2·f_m + 0.5·f_s + 0.8·f_t（无噪声）→ β 估计误差 < 1e-9，当日剩余 = 0 | 合成 |
 | `test_residual_leave_one_out` | blocking | 篮子收益不含本股：把本股收益放大 10 倍，篮子因子不变 | 合成 |
 | `test_residual_window_excludes_today` | blocking | 改当日收益不影响 β | 合成 |
@@ -142,3 +142,4 @@
 | Q-M6-8 | 监控实体给 M1 的接口 | M1 已经实现了读取（`SELECT e.*, m.channels FROM graph.monitored_entities m JOIN graph.entities e USING (entity_id)`），两套列名都兼容（`app_ids` 或 `app_store_ids`、`trends_keywords` 或 `trend_keywords`、`urls` 或 `official_urls`）。M6 按第 4 节建表即可；`channels` 是 `text[]`，取值为 `app`、`trend`、`site`。初版内容以 `config/monitored_entities.yaml`（M1 起草、需求方已审）为准导入 |
 | Q-M6-9 | AC-M6-03 的分部暴露依赖什么？ | 依赖 M2 的 `fundamentals.segments`。WDC 分拆 SanDisk 后只剩 HDD 业务，可能是单一分部，这时用合并营收作为 HDD 暴露，`exposure_basis = 分部收入`。M2 的分部映射草稿（AC-M2-08）还没生成，M6 起草暴露时直接读分部原名，不等映射审核 |
 | Q-M6-10 | 为什么在 M6 加资金流向图？ | 需求方回放 2024-07 至 2026-10 的数据发现：2024-07-11（CPI 回落后小盘 +3.6%、科技 −2.2%）这类风格轮动，以及 2026-10-14 这类多因素叠加的抛售，单看某个篮子是看不全的，需要同一天把大盘、风格、行业、篮子放在一起比。这张图只用价格，不依赖 M7 的阈值，所以不必等 M7 的验证集 |
+| Q-M6-11 | 为什么改警戒规则？ | 需求方回放 2019-01 至 2026-10：v4 规则下全部日子 32% 是警戒，平静期也有 15–25%；v5 规则下平静期 88–98% 为正常，2022 熊市 84% 为警戒或危机，急性冲击的判定不变；全部日子正常 71%、警戒 20%、危机 8%。VIX 期限倒挂在新冠期间 95%、关税期间 100% 的天数出现，平静期 0–5%。`golden/m6_marketstate.json` 已按 v5 重新生成 |
