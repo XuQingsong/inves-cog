@@ -114,6 +114,23 @@ def test_bar_window_to_20et():
     assert settings["minute_window"] == {"start": "04:00", "end": "20:00", "timezone": "America/New_York"}
     assert market_window(date(2026, 10, 28))[1] == instant("2026-10-29T00:00:00Z")
     assert market_window(date(2026, 11, 2))[1] == instant("2026-11-03T01:00:00Z")
+    from inves_cog.ingest.providers import Alpaca
+
+    for day, clock in (
+        (date(2026, 10, 28), frozen("2026-10-29T00:20:00Z")),
+        (date(2026, 11, 2), frozen("2026-11-03T01:20:00Z")),
+    ):
+        requests = []
+
+        def daily_send(method, url, **kwargs):
+            requests.append(kwargs["params"])
+            return Response(200, {"bars": {}, "next_page_token": None})
+
+        daily_client = Alpaca(clock=clock, key="fixture", secret="fixture", http=HTTPClient(daily_send))
+        assert daily_client.daily_bars(["AAPL"], day - timedelta(days=30), day) == []
+        assert instant(requests[0]["end"]) == market_window(day)[1]
+        assert instant(requests[0]["end"]) <= clock.now_utc() - timedelta(minutes=15)
+        assert requests[0]["feed"] == "sip" and requests[0]["adjustment"] == "raw"
     assert schedule_times(date(2026, 10, 28))["full_start"] == instant("2026-10-29T00:20:00Z")
     assert schedule_times(date(2026, 11, 2))["full_deadline"] == instant("2026-11-03T01:45:00Z")
     pages = [
