@@ -26,6 +26,15 @@ M2 第三轮复验**通过**（M2 报告第 6 节）。请按顺序：
 | D-15 | 一致预期第二次完整采集（59 只） | AC-M2-06b | M5 提交验收前 |
 | D-16 | 分部映射的真实草稿（`glm-5.3`） | AC-M2-08 | backlog |
 
+### 2.1 补充：需求方直接核查数据库发现的问题（2026-10-15，只读账号）
+
+| # | 事项 | 需求方核查到的事实 | 要做什么 | 期限 |
+|---|---|---|---|---|
+| D-21 | **历史财报事件没建** | `ingest.earnings_events` 只有 54 行（每只最新一次，2026-07-16 之后）；而 `ingest.sec_filings` 里 2015 年以来有 2,338 份 8-K Item 2.02 | 按 FR-M1-06 和规格 4.2"每次财报发布一行"，用已有的 `sec_filings` 补齐 2015 年以来的全部财报事件（接收时间以索引页 Accepted 为准，Q-M1-8）。XOM 只有 1 份 8-K 2.02，请查明它用什么方式发布财报 | M3 提交验收前（M3、M4 的财报日规则要用） |
+| D-22 | **健康表有过期和演示数据** | `source_health` 里仍有已改名的 `CompanyIR`（未接通）、已接通却仍显示未接通的 `DashScope`，以及演示用的 `EntitySites:https://round2-invalid-site.example.invalid/rss.xml` | 删除或更新这三行；以后的演示只在测试库里做，不写生产库 | 下一次提交前 |
+| D-23 | **嵌入模型与文档不一致** | 生产用的是 `ingest.info_embeddings` 里的 `text-embedding-async-v1`（1536 维，166,685 条，覆盖 99.4%）；M1 文档 Q-M1-14 写的是 `text-embedding-v3`（1024 维）；`info_items.embedding` 列里还留着 12,331 条旧向量 | 在 `handoff/M1/questions.md` 写明换模型的原因和用户批准的记录；需求方据此更新文档。明确以 `info_embeddings` 为唯一来源，旧列标为弃用 | M8 开工前 |
+| —— | LLM 日用量 | `llm_calls` 显示 10-15 当天对话模型约 333 万 token（实体标注 8,989 次、字段抽取 3,629 次），超过每日 150 万的预算 | 说明这是一次性回补（AC-M1-09 的 7 天回放和 30 天积压）还是日常；日常运行请确认预算逻辑生效 | 下一次提交前 |
+
 ## 3. M3 规则 A 打分：开工复述
 
 - 任务卡：[`T03-M3-rule-a-scoring.md`](T03-M3-rule-a-scoring.md)；需求文档：[`M3-rule-a-scoring.md`](../../phase1/M3-rule-a-scoring.md) **v2**。
