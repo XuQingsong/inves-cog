@@ -211,6 +211,16 @@ def test_milestones_consistency(tmp_path):
 
 def test_requirements_golden_unchanged(tmp_path):
     from tests.harness.tools.golden import load_golden, read_manifest, validate_golden
+    from scripts.m0_selfcheck import fingerprints
+
+    nested = tmp_path / "snapshot"
+    (nested / "v18").mkdir(parents=True)
+    (nested / "v18/same.json").write_text("{}")
+    (nested / "same.json").write_text("[]")
+    before_nested = fingerprints(nested)
+    assert set(before_nested) == {"v18/same.json", "same.json"}
+    (nested / "v18/same.json").write_text("[1]")
+    assert fingerprints(nested) != before_nested
 
     real = ROOT / "docs/phase1/golden"
     original = {
