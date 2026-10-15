@@ -25,6 +25,7 @@
 | replay / cases | `-m phase1_replay`、`-m phase1_cases` | M1 没有这两类测试，显示无测试 |
 | pending | `tests/harness/pending.txt` 的 M1 行 | 只剩 `test_ingest_live_smoke`（live 测试，按规则可以保留） |
 | CI | GitHub API | `phase1-blocking` success |
+| 带数据库的完整命令（2026-10-15 补做） | 需求方本机 `make phase1-test`（加入 docker 组后） | 退出码 0：临时 PostgreSQL 16.15 + pgvector 0.8.7，执行全部 6 个迁移，80 组真实库权限探针符合 README §3.6（含 v1.4 的 `role_ingest` 只读 `graph`），**24 passed**，结束后临时库已删除 |
 
 ## 2. 逐条判定
 
