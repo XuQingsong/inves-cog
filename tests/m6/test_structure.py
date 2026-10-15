@@ -81,6 +81,9 @@ def test_insufficient_history_null():
 
 @pytest.mark.phase1_blocking
 def test_post_session_null_when_missing():
+    from tests.m6.post_cases import assert_post_outputs
+
+    assert_post_outputs()
     from inves_cog.marketstate.factors import adjusted_returns, post_return
 
     assert post_return(100, None) is None and post_return(100, 101) == pytest.approx(0.01)
@@ -131,6 +134,9 @@ def test_graph_draft_requires_citation(clock, tmp_path):
 
 @pytest.mark.phase1_blocking
 def test_candidate_edges_not_used(clock):
+    from tests.m6.post_cases import assert_review_edits
+
+    assert_review_edits(clock)
     from inves_cog.perception.graph.review import ReviewQueue
 
     queue = ReviewQueue(clock=clock)
