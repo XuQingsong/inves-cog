@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v2（早间截止时间顺延，见 README §3.1） |
+| 文档版本 | v4（新增资金流向图 FR-M6-16） |
 | 规格章节 | 3.1、3.5、6.11、11.3 |
 | 依赖 | M1（行情、全量库）、M2（10-K 原文、分部） |
 | 关闭的不变量 | 无（为 M7、M8、M9 提供基础） |
@@ -36,8 +36,10 @@
 
 | 输入 | 来源 |
 |---|---|
-| 日线、盘后收盘 | M1 |
-| 10-K / 10-Q 原文（业务、客户集中度、RPO 附注） | SEC，经 M1 / M2 |
+| 日线、盘后收盘 | M1 `ingest.bars_daily`；收益率用拆股调整价（原始价 × `adj_factor`），见 Q-M6-4 |
+| VIX | `ingest.macro_observations`：当日用 CBOE 收盘（`VIX_CBOE`），FRED `VIXCLS` 作为备用，见 Q-M6-5 |
+| 广域股票的行业代码 | `ingest.issuer_profiles`（v3 新增），见 Q-M6-6 |
+| 10-K / 10-Q 原文（业务、客户集中度、RPO 附注） | 按 M1 `ingest.sec_filings` 的 `primary_document`，用共享 SEC 客户端取原文，见 Q-M6-7 |
 | 分部收入 | M2 `fundamentals.segments` |
 | 初始监控实体 | `config/monitored_entities.yaml`（OpenAI、Anthropic、DeepSeek、Meta Muse、ChatGPT、Gemini、东芝等） |
 
@@ -56,6 +58,8 @@
 `trade_date, ticker, session(close/post), ret, resid, resid_z, sigma, beta_m, beta_s, beta_t, primary_basket, resid_5d, resid_5d_z, beta_share_5d`
 
 **`marketstate.baskets`**：`trade_date, basket_id, session, ret_ew, resid, resid_z, same_sign_share, member_resid_std`
+
+**`marketstate.rotation`**（v4 新增，每个交易日、每个时段一组行）：`trade_date, session, group_kind(index/style/sector/l3), group_id, ret, z, ret_5d, z_5d, rank, rank_5d`
 
 **`marketstate.market`**：`trade_date, spy_5d_pct, vix, vix_pctile_252, down_share_5d_pct, shock_flag, l1_state`
 
@@ -85,6 +89,7 @@
 | FR-M6-13 | 篮子：L2 篮子等权收益对 `f_m` 回归；L3 篮子对 (`f_m`, 所属 L2 的 `f_s`) 回归；同样 120 日窗口；输出 `resid_z`、同号成员比例、成员剩余的标准差 |
 | FR-M6-14 | 市场：`vix_pctile_252` = 当日 VIX 在过去 252 个交易日（不含当日）收盘中的百分位秩（≤ 当日值的比例 × 100）；`down_share_5d_pct` = 标的池 + 广域集合中 5 日收益 < 0 的比例；`shock_flag`、`l1_state` 按 `golden/m6_marketstate.json` 的规则（规格第 11.3 节加本文：警戒 = SPY 5 日 ≤ −3% 或 VIX 分位 ≥ 70 或 5 日下跌比例 ≥ 60%） |
 | FR-M6-15 | 每天北京 08:55 完成（美东 20:55；冬令时北京 09:55，见 README §3.1）（M1 之后、M7 之前）；写 `job_runs` |
+| FR-M6-16 | **资金流向图**（v4，用户 2026-10-15 提出"要综合来看市场轮动"）：每个交易日把下列分组的当日收益、z 值（收益 ÷ 自身 120 日收益标准差）、5 日累计收益和 5 日 z（σ × √5）算出来并排名，写入 `marketstate.rotation`。分组：**大盘**（SPY、QQQ、IWM）；**风格**（IWM − QQQ 的价差，以及 RSP − SPY 的等权与市值加权价差，需要 M1 补采 RSP 日线）；**行业**（11 只行业 ETF：XLK、XLF、XLV、XLE、XLI、XLU、XLY、XLP、XLB、XLRE、XLC，以及 SMH、IGV）；**L3 篮子**（13 个）。每天另外输出两个汇总值：行业之间最强与最弱的 z 值之差 `sector_spread_z`，以及风格价差的 z 值 `style_spread_z`。只用价格，归 M6 的价格结构层；M7 用它判定轮动，M10 在首页展示，M8 归因时可以引用"当天资金从哪里流向哪里"。**授权 M6 开发**按 Q-M6-5 的方式在 M1 的日线采集里加入 RSP 和第 11 只行业 ETF 之外缺的代码（M1 现有 14 只 ETF 里没有 XLB、XLRE、XLC、RSP） |
 
 ## 6. 异常与降级
 
@@ -105,7 +110,7 @@
 | `test_insufficient_history_null` | blocking | 有效样本 59 → `NULL` | 合成 |
 | `test_post_session_null_when_missing` | blocking | 无盘后价时盘后行为 `NULL` | 合成 |
 | `test_beta_share_bounds` | blocking | 限制在 [0, 1]；小于 0.5% 为 `NULL` | 合成 |
-| `test_marketstate_price_only` | blocking | `marketstate` 的输入表清单只含 `ingest.bars_*`、`graph.baskets`、FRED VIX | 源码扫描 |
+| `test_marketstate_price_only` | blocking | `marketstate` 的输入表清单只含 `ingest.bars_*`、`graph.baskets`、`ingest.macro_observations`（只取 VIX 系列）、`ingest.issuer_profiles`（只取 SIC） | 源码扫描 |
 | `test_graph_draft_requires_citation` | blocking | 录音：无原文引用的关系被丢弃；无信息 id 的金额被丢弃 | 录音 |
 | `test_candidate_edges_not_used` | blocking | 状态为"候选"的关系不出现在供 M8 隐含幅度使用的视图里 | 合成 |
 | `test_auto_cluster_suggestion` | blocking | 构造 3 只高相关、不在同一篮子的股票 → 出现建议；与现有篮子 Jaccard ≥ 0.5 → 不出现 | 合成 |
@@ -130,3 +135,10 @@
 | Q-M6-1 | 回归要不要截距？ | 要，剩余扣除截距 |
 | Q-M6-2 | 一只股票属于多个 L3 篮子时用哪个做因子？ | 主篮子；其他篮子只在篮子层面使用 |
 | Q-M6-3 | LLM 起草的暴露未审核能不能先用？ | 不能。未审核 → 隐含幅度"无法检验" |
+| Q-M6-4 | 收益率用原始价还是调整价？ | 拆股调整价：`ret` = 当日调整收盘 ÷ 前一日调整收盘 − 1，调整收盘 = `close × adj_factor`。用原始价的话，拆股当天会出现假的 ±50% 或 ±90% 涨跌，M7 会误报。盘后 `ret_post = post_close ÷ close − 1` 是同一天内的比较，不受拆股影响 |
+| Q-M6-5 | VIX 用哪个来源？ | 当日判定需要当天的 VIX 收盘，但 FRED 的 `VIXCLS` 通常第二天才更新。**主来源**用 CBOE 的公开日线文件 `https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv`（需求方已验证可以访问；v18 复现用的也是 CBOE 收盘价，结果与标准答案完全一致），作为 `series_id = VIX_CBOE` 写入 `ingest.macro_observations`；当天 CBOE 还没更新时用 `VIXCLS`，两者都没有时按第 6 节的 VIX 缺失处理。**授权 M6 开发**在 `inves_cog.ingest` 里新增这个采集任务（M1 已关闭，这是 M1 代码的唯一例外），挂在 M1 的调度器上，写 `job_runs` 和 `source_health` |
+| Q-M6-6 | FR-M6-10 的广域股票按 SIC 映射行业 ETF，SIC 从哪来？ | M1 的 `ingest.wide_universe` 没有 SIC。新增表 `ingest.issuer_profiles`（`cik, ticker, sic, sic_description, fetched_at`），每月随广域集合重算一次，从 SEC submissions 取 `sic`，用共享 SEC 客户端（5 次/秒，约 1,300 次请求，约 5 分钟）。授权方式同 Q-M6-5。`config/sic_to_etf.yaml` 由开发起草，需求方审核；映射不到的用 SPY 单因子并标 `sector_unmapped` |
+| Q-M6-7 | 10-K 原文从哪来？ | M2 没有保存 10-K 正文。按 `ingest.sec_filings` 的 `primary_document` 取最近一期 10-K（外国申报人取 20-F），提取 Item 1（业务）、Item 1A（风险因素）、Item 7（管理层讨论与分析）和收入、客户集中度、RPO 相关附注，存入 `graph.source_texts`（`ticker, accession, section, text, char_start, char_end, fetched_at`）。FR-M6-02 的"原文引用"就是指 `accession + section + 字符位置` |
+| Q-M6-8 | 监控实体给 M1 的接口 | M1 已经实现了读取（`SELECT e.*, m.channels FROM graph.monitored_entities m JOIN graph.entities e USING (entity_id)`），两套列名都兼容（`app_ids` 或 `app_store_ids`、`trends_keywords` 或 `trend_keywords`、`urls` 或 `official_urls`）。M6 按第 4 节建表即可；`channels` 是 `text[]`，取值为 `app`、`trend`、`site`。初版内容以 `config/monitored_entities.yaml`（M1 起草、需求方已审）为准导入 |
+| Q-M6-9 | AC-M6-03 的分部暴露依赖什么？ | 依赖 M2 的 `fundamentals.segments`。WDC 分拆 SanDisk 后只剩 HDD 业务，可能是单一分部，这时用合并营收作为 HDD 暴露，`exposure_basis = 分部收入`。M2 的分部映射草稿（AC-M2-08）还没生成，M6 起草暴露时直接读分部原名，不等映射审核 |
+| Q-M6-10 | 为什么在 M6 加资金流向图？ | 需求方回放 2024-07 至 2026-10 的数据发现：2024-07-11（CPI 回落后小盘 +3.6%、科技 −2.2%）这类风格轮动，以及 2026-10-14 这类多因素叠加的抛售，单看某个篮子是看不全的，需要同一天把大盘、风格、行业、篮子放在一起比。这张图只用价格，不依赖 M7 的阈值，所以不必等 M7 的验证集 |
