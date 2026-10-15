@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.176" timestamp="2026-10-15T20:21:24.395574+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_fundamentals" name="test_health_contract" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.ingest.fundamentals.verification'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b9872d0&gt;
+
+    def test_health_contract(monkeypatch):
+        from tests.m2.extreme_cases import assert_verified_extremes
+    
+&gt;       assert_verified_extremes()
+
+tests/m2/test_fundamentals.py:680: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_verified_extremes():
+&gt;       from inves_cog.ingest.fundamentals.verification import apply_verification, inline_facts
+E       ModuleNotFoundError: No module named 'inves_cog.ingest.fundamentals.verification'
+
+tests/m2/extreme_cases.py:8: ModuleNotFoundError</failure></testcase><testcase classname="tests.m1.test_market_info" name="test_earnings_reaction_day" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.ingest.earnings_history'">def test_earnings_reaction_day():
+        from inves_cog.clock import FrozenClock
+        from tests.m1.history_cases import assert_historical_events
+    
+&gt;       assert_historical_events(FrozenClock(instant("2026-10-15T00:00:00Z")))
+
+tests/m1/test_market_info.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = FrozenClock(instant=datetime.datetime(2026, 10, 15, 0, 0, tzinfo=datetime.timezone.utc))
+
+    def assert_historical_events(clock):
+&gt;       from inves_cog.ingest.earnings_history import backfill_events
+E       ModuleNotFoundError: No module named 'inves_cog.ingest.earnings_history'
+
+tests/m1/history_cases.py:7: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

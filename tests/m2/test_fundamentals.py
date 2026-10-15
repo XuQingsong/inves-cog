@@ -675,6 +675,9 @@ def test_consensus_import_idempotent(tmp_path):
 
 
 def test_health_contract(monkeypatch):
+    from tests.m2.extreme_cases import assert_verified_extremes
+
+    assert_verified_extremes()
     from tests.m2.round3_cases import assert_plausibility
 
     assert_plausibility()
