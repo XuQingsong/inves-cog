@@ -1,0 +1,1021 @@
+{
+  "first_financials": {
+    "status": "failed",
+    "processed_count": 0,
+    "error": "SourceError: Task exceeded its 30-minute budget"
+  },
+  "consensus_runs": [
+    {
+      "processed_count": 0,
+      "status": "degraded",
+      "failures": [
+        {
+          "ticker": "NVDA",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AMD",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AVGO",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MRVL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MU",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "SKHY",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "INTC",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "NOK",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "LITE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MSFT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ORCL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CRM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "NOW",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ADBE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "PLTR",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "META",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "GOOGL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AMZN",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "NFLX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AAPL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "TSLA",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "COST",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "WMT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "HD",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "UNH",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "LLY",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "JNJ",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "JPM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "V",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MA",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "XOM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CVX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CAT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "GE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "WDC",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "STX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "SNDK",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AMAT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "LRCX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "KLAC",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ASML",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "QCOM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ARM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "TSM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ANET",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CIEN",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "COHR",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "VRT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ETN",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "GEV",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CEG",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "BE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "DELL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "SMCI",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CRWV",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CRWD",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "PANW",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "FTNT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ZS",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        }
+      ],
+      "note": "past 10:30 Beijing deadline",
+      "deadline_met": false,
+      "captured_at_utc": "2026-10-14 12:04:30.362495+00:00"
+    },
+    {
+      "processed_count": 0,
+      "status": "degraded",
+      "failures": [
+        {
+          "ticker": "NVDA",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AMD",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AVGO",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MRVL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MU",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "SKHY",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "INTC",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "NOK",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "LITE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MSFT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ORCL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CRM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "NOW",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ADBE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "PLTR",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "META",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "GOOGL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AMZN",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "NFLX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AAPL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "TSLA",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "COST",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "WMT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "HD",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "UNH",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "LLY",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "JNJ",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "JPM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "V",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "MA",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "XOM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CVX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CAT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "GE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "WDC",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "STX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "SNDK",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "AMAT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "LRCX",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "KLAC",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ASML",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "QCOM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ARM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "TSM",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ANET",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CIEN",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "COHR",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "VRT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ETN",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "GEV",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CEG",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "BE",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "DELL",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "SMCI",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CRWV",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "CRWD",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "PANW",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "FTNT",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        },
+        {
+          "ticker": "ZS",
+          "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+        }
+      ],
+      "note": "past 10:30 Beijing deadline",
+      "deadline_met": false,
+      "captured_at_utc": "2026-10-14 12:05:20.374427+00:00"
+    }
+  ],
+  "financials_missing_resume": {
+    "processed_count": 8,
+    "status": "degraded",
+    "failures": [
+      {
+        "ticker": "FTNT",
+        "instance": "0001174947-18-000697",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001174947-18-000697"
+      }
+    ],
+    "health_rows": 59,
+    "note": "1 issuer/source gaps"
+  },
+  "asml_after_fx_history_extension": {
+    "processed_count": 1,
+    "status": "degraded",
+    "failures": [
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-015629",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-015629"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-060206",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-060206"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-072221",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-072221"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-121438",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-121438"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-122967",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-122967"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-130633",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-130633"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-15-142080",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-15-142080"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-15-000005",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-15-000005"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-15-000008",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-15-000008"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-16-423594",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-16-423594"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-16-000010",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-16-000010"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-16-483823",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-16-483823"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-16-000020",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-16-000020"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-16-576173",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-16-576173"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-16-622975",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-16-622975"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-16-001535",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-16-001535"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-16-000024",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-16-000024"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-16-001589",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-16-001589"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-16-000027",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-16-000027"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-16-001720",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-16-001720"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-16-001726",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-16-001726"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-17-000003",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-17-000003"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-17-000126",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-17-000126"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-17-000010",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-17-000010"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-17-000261",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-17-000261"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-17-000278",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-17-000278"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-17-000409",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-17-000409"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-17-000581",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-17-000581"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-17-000017",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-17-000017"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-17-000725",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-17-000725"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-18-000032",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-18-000032"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-18-000008",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-18-000008"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-18-000151",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-18-000151"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-18-000011",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-18-000011"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-18-000244",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-18-000244"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-18-000014",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-18-000014"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001341004-18-000425",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001341004-18-000425"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-18-000019",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-18-000019"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-18-321882",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-18-321882"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-18-323057",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-18-323057"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-18-340472",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-18-340472"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-19-014363",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-19-014363"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-19-000009",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-19-000009"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-19-000012",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-19-000012"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-19-130761",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-19-130761"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-19-163369",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-19-163369"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-19-000016",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-19-000016"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-19-000019",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-19-000019"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-20-000003",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-20-000003"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-20-051179",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-20-051179"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-20-089921",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-20-089921"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-20-000014",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-20-000014"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-20-127508",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-20-127508"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-20-000017",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-20-000017"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-20-197129",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-20-197129"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-20-000020",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-20-000020"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-21-000003",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-21-000003"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-21-000009",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-21-000009"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-21-000012",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-21-000012"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-21-156134",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-21-156134"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-21-000016",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-21-000016"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-21-255123",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-21-255123"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-21-285965",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-21-285965"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-21-287742",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-21-287742"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-21-000019",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-21-000019"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-21-314418",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-21-314418"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-004166",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-004166"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-011881",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-011881"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-076248",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-076248"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-092693",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-092693"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-22-000016",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-22-000016"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-133140",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-133140"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-22-000019",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-22-000019"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-205676",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-205676"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-22-000022",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-22-000022"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-282132",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-282132"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001193125-22-283523",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001193125-22-283523"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-23-000003",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-23-000003"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-23-000016",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-23-000016"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-23-000019",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-23-000019"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-23-000026",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-23-000026"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-23-000029",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-23-000029"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-23-000031",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-23-000031"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000003",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000003"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000010",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000010"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000013",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000013"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000019",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000019"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000022",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000022"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000024",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000024"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-24-000026",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-24-000026"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-25-000003",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-25-000003"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-25-000011",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-25-000011"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0000937966-25-000014",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0000937966-25-000014"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-25-034992",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-25-034992"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-25-045043",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-25-045043"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-26-003701",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-26-003701"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-26-016671",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-26-016671"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-26-025147",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-26-025147"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-26-026703",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-26-026703"
+      },
+      {
+        "ticker": "ASML",
+        "instance": "0001628280-26-048235",
+        "reason": "ValueError: Filing instance absent or ambiguous: 0001628280-26-048235"
+      }
+    ],
+    "health_rows": 59,
+    "note": "100 issuer/source gaps"
+  },
+  "note": "Historical timeout failures remain unchanged; current extractor now retains partial completed count. Consensus attempts failed and are not counted as acceptance successes."
+}

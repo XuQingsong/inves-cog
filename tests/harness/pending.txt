@@ -1,21 +1,4 @@
 test_ingest_live_smoke | M1 | 等待正式SEC采集窗口补齐SEC与SECDailyIndex健康记录；真实冒烟尚未通过
-test_revenue_tag_gap | M2 | 等待 M2 实现
-test_q4_derived_from_annual | M2 | 等待 M2 实现
-test_companyfacts_lag | M2 | 等待 M2 实现
-test_stale_fundamentals_code | M2 | 等待 M2 实现
-test_gross_margin_derived | M2 | 等待 M2 实现
-test_ni_tag_fallback | M2 | 等待 M2 实现
-test_industry_basis_na | M2 | 等待 M2 实现
-test_fin_state_pit | M2 | 等待 M2 实现
-test_legacy_matches_muse_state | M2 | 等待 M2 实现
-test_extractor_fixed_toggles | M2 | 等待 M2 实现
-test_segment_extraction | M2 | 等待 M2 实现
-test_segment_recast | M2 | 等待 M2 实现
-test_segment_mapping_pending | M2 | 等待 M2 实现
-test_consensus_derived_pit | M2 | 等待 M2 实现
-test_consensus_import_idempotent | M2 | 等待 M2 实现
-test_health_contract | M2 | 等待 M2 实现
-test_fundamentals_live_smoke | M2 | 等待 R5
 test_interp_points | M3 | 等待 M3 实现
 test_books_synthetic | M3 | 等待 M3 实现
 test_red_line_boundaries | M3 | 等待 M3 实现
@@ -126,3 +109,4 @@ test_precursor_snapshot_daily | M10 | 等待 M10 实现
 test_miss_sample_frame | M10 | 等待 M10 实现
 test_reports_contents | M10 | 等待 M10 实现
 test_unconnected_shown | M10 | 等待 M10 实现
+test_fundamentals_live_smoke | M2 | 等待59只完整财报实源冒烟及Q-M2-27新门禁核验；Yahoo已接通

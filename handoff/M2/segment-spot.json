@@ -1,0 +1,518 @@
+{
+  "classification": "independent primary 10-Q HTML inline-fact comparison; parsed XBRL context identities used only to locate disclosure rows",
+  "stocks": [
+    {
+      "ticker": "AMD",
+      "accession": "0000002488-26-000123",
+      "original_10q_url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000123/amd-20260627.htm",
+      "original_10q_sha256": "a7fe60144b8a800bd70a9dba431628a6eb4dfba148c6d514e3098868468dc056",
+      "comparisons": [
+        {
+          "segment": "ClientAndGamingMember",
+          "period_end": "2026-06-27",
+          "revenue": 3841000000.0,
+          "profit": 582000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 3062000000.0,
+              "displayed": "3,062",
+              "scale": "6",
+              "context_ref": "c-67"
+            },
+            {
+              "value": 5947000000.0,
+              "displayed": "5,947",
+              "scale": "6",
+              "context_ref": "c-69"
+            },
+            {
+              "value": 779000000.0,
+              "displayed": "779",
+              "scale": "6",
+              "context_ref": "c-71"
+            },
+            {
+              "value": 1499000000.0,
+              "displayed": "1,499",
+              "scale": "6",
+              "context_ref": "c-73"
+            },
+            {
+              "value": 3841000000.0,
+              "displayed": "3,841",
+              "scale": "6",
+              "context_ref": "c-75"
+            },
+            {
+              "value": 7446000000.0,
+              "displayed": "7,446",
+              "scale": "6",
+              "context_ref": "c-77"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 582000000.0,
+              "displayed": "582",
+              "scale": "6",
+              "context_ref": "c-75"
+            },
+            {
+              "value": 1157000000.0,
+              "displayed": "1,157",
+              "scale": "6",
+              "context_ref": "c-77"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        },
+        {
+          "segment": "DataCenterMember",
+          "period_end": "2026-06-27",
+          "revenue": 6718000000.0,
+          "profit": 2103000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 6718000000.0,
+              "displayed": "6,718",
+              "scale": "6",
+              "context_ref": "c-63"
+            },
+            {
+              "value": 12493000000.0,
+              "displayed": "12,493",
+              "scale": "6",
+              "context_ref": "c-65"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 2103000000.0,
+              "displayed": "2,103",
+              "scale": "6",
+              "context_ref": "c-63"
+            },
+            {
+              "value": 3702000000.0,
+              "displayed": "3,702",
+              "scale": "6",
+              "context_ref": "c-65"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        },
+        {
+          "segment": "EmbeddedMember",
+          "period_end": "2026-06-27",
+          "revenue": 977000000.0,
+          "profit": 386000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 977000000.0,
+              "displayed": "977",
+              "scale": "6",
+              "context_ref": "c-79"
+            },
+            {
+              "value": 1850000000.0,
+              "displayed": "1,850",
+              "scale": "6",
+              "context_ref": "c-81"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 386000000.0,
+              "displayed": "386",
+              "scale": "6",
+              "context_ref": "c-79"
+            },
+            {
+              "value": 724000000.0,
+              "displayed": "724",
+              "scale": "6",
+              "context_ref": "c-81"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        }
+      ],
+      "all_match": true
+    },
+    {
+      "ticker": "WDC",
+      "accession": "0001628280-26-029054",
+      "original_10q_url": "https://www.sec.gov/Archives/edgar/data/106040/000162828026029054/wdc-20260403.htm",
+      "original_10q_sha256": "9f64f44a1e08d882e950c4253031c4bb7d0471a6d972c5ee7363a60047e29ff3",
+      "comparisons": [
+        {
+          "segment": "HDDMember",
+          "period_end": "2026-04-03",
+          "revenue": 3337000000.0,
+          "profit": 3205000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 3337000000.0,
+              "displayed": "3,337",
+              "scale": "6",
+              "context_ref": "c-122"
+            },
+            {
+              "value": 9172000000.0,
+              "displayed": "9,172",
+              "scale": "6",
+              "context_ref": "c-124"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 3205000000.0,
+              "displayed": "3,205",
+              "scale": "6",
+              "context_ref": "c-122"
+            },
+            {
+              "value": 6229000000.0,
+              "displayed": "6,229",
+              "scale": "6",
+              "context_ref": "c-124"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        }
+      ],
+      "all_match": true
+    },
+    {
+      "ticker": "NVDA",
+      "accession": "0001045810-26-000075",
+      "original_10q_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+      "original_10q_sha256": "2379ff2b3606fcbb8427606927d312607807fedcef53a54766994f3615a854e5",
+      "comparisons": [
+        {
+          "segment": "ComputeAndNetworkingSegmentMember",
+          "period_end": "2026-07-26",
+          "revenue": 88299000000.0,
+          "profit": 62696000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 88299000000.0,
+              "displayed": "88,299",
+              "scale": "6",
+              "context_ref": "c-239"
+            },
+            {
+              "value": 162850000000.0,
+              "displayed": "162,850",
+              "scale": "6",
+              "context_ref": "c-245"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 62696000000.0,
+              "displayed": "62,696",
+              "scale": "6",
+              "context_ref": "c-239"
+            },
+            {
+              "value": 116031000000.0,
+              "displayed": "116,031",
+              "scale": "6",
+              "context_ref": "c-245"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        },
+        {
+          "segment": "GraphicsSegmentMember",
+          "period_end": "2026-07-26",
+          "revenue": 7922000000.0,
+          "profit": 3899000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 7922000000.0,
+              "displayed": "7,922",
+              "scale": "6",
+              "context_ref": "c-240"
+            },
+            {
+              "value": 14987000000.0,
+              "displayed": "14,987",
+              "scale": "6",
+              "context_ref": "c-246"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 3899000000.0,
+              "displayed": "3,899",
+              "scale": "6",
+              "context_ref": "c-240"
+            },
+            {
+              "value": 6840000000.0,
+              "displayed": "6,840",
+              "scale": "6",
+              "context_ref": "c-246"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        }
+      ],
+      "all_match": true
+    },
+    {
+      "ticker": "MSFT",
+      "accession": "0001193125-26-191507",
+      "original_10q_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526191507/msft-20260331.htm",
+      "original_10q_sha256": "365171444813f23149bc74918aa1f7bf445e6bd057f16fa07a9a46bb26fcab79",
+      "comparisons": [
+        {
+          "segment": "IntelligentCloudMember",
+          "period_end": "2026-03-31",
+          "revenue": 34681000000.0,
+          "profit": 13753000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 34681000000.0,
+              "displayed": "34,681",
+              "scale": "6",
+              "context_ref": "C_a7e0d935-61c5-49fe-bf03-a4e5f3bb0c33"
+            },
+            {
+              "value": 98485000000.0,
+              "displayed": "98,485",
+              "scale": "6",
+              "context_ref": "C_f7bfaf54-dda2-43a4-9984-1c9497c22f6b"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 13753000000.0,
+              "displayed": "13,753",
+              "scale": "6",
+              "context_ref": "C_a7e0d935-61c5-49fe-bf03-a4e5f3bb0c33"
+            },
+            {
+              "value": 41017000000.0,
+              "displayed": "41,017",
+              "scale": "6",
+              "context_ref": "C_f7bfaf54-dda2-43a4-9984-1c9497c22f6b"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        },
+        {
+          "segment": "MorePersonalComputingMember",
+          "period_end": "2026-03-31",
+          "revenue": 13192000000.0,
+          "profit": 3672000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 13192000000.0,
+              "displayed": "13,192",
+              "scale": "6",
+              "context_ref": "C_4c128e1f-befc-404a-b40a-3d958a3fbd9f"
+            },
+            {
+              "value": 41198000000.0,
+              "displayed": "41,198",
+              "scale": "6",
+              "context_ref": "C_113713d3-d565-4126-9972-b056e88c6059"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 3672000000.0,
+              "displayed": "3,672",
+              "scale": "6",
+              "context_ref": "C_4c128e1f-befc-404a-b40a-3d958a3fbd9f"
+            },
+            {
+              "value": 11638000000.0,
+              "displayed": "11,638",
+              "scale": "6",
+              "context_ref": "C_113713d3-d565-4126-9972-b056e88c6059"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        },
+        {
+          "segment": "ProductivityAndBusinessProcessesMember",
+          "period_end": "2026-03-31",
+          "revenue": 35013000000.0,
+          "profit": 20973000000.0,
+          "original_revenue_facts": [
+            {
+              "value": 35013000000.0,
+              "displayed": "35,013",
+              "scale": "6",
+              "context_ref": "C_af940935-9756-4dc0-ae2b-7d3c40c375cc"
+            },
+            {
+              "value": 102149000000.0,
+              "displayed": "102,149",
+              "scale": "6",
+              "context_ref": "C_39243f1c-bf08-49ce-b0cd-66275dfdbb1c"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 20973000000.0,
+              "displayed": "20,973",
+              "scale": "6",
+              "context_ref": "C_af940935-9756-4dc0-ae2b-7d3c40c375cc"
+            },
+            {
+              "value": 61979000000.0,
+              "displayed": "61,979",
+              "scale": "6",
+              "context_ref": "C_39243f1c-bf08-49ce-b0cd-66275dfdbb1c"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        }
+      ],
+      "all_match": true
+    },
+    {
+      "ticker": "COHR",
+      "accession": "0000820318-26-000013",
+      "original_10q_url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000013/iivi-20260331.htm",
+      "original_10q_sha256": "c0b18c387821c00a2a727579661099c6783932487a0960a487945d18cda35955",
+      "comparisons": [
+        {
+          "segment": "DatacenterAndCommunicationsSegmentMember",
+          "period_end": "2026-03-31",
+          "revenue": 1361677000.0,
+          "profit": 347610000.0,
+          "original_revenue_facts": [
+            {
+              "value": 1361677000.0,
+              "displayed": "1,361,677",
+              "scale": "3",
+              "context_ref": "c-92"
+            },
+            {
+              "value": 3659627000.0,
+              "displayed": "3,659,627",
+              "scale": "3",
+              "context_ref": "c-94"
+            },
+            {
+              "value": 1361677000.0,
+              "displayed": "1,361,677",
+              "scale": "3",
+              "context_ref": "c-362"
+            },
+            {
+              "value": 3659627000.0,
+              "displayed": "3,659,627",
+              "scale": "3",
+              "context_ref": "c-364"
+            },
+            {
+              "value": -10179000.0,
+              "displayed": "10,179",
+              "scale": "3",
+              "context_ref": "c-374"
+            },
+            {
+              "value": -30020000.0,
+              "displayed": "30,020",
+              "scale": "3",
+              "context_ref": "c-376"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 347610000.0,
+              "displayed": "347,610",
+              "scale": "3",
+              "context_ref": "c-362"
+            },
+            {
+              "value": 923270000.0,
+              "displayed": "923,270",
+              "scale": "3",
+              "context_ref": "c-364"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        },
+        {
+          "segment": "IndustrialSegmentMember",
+          "period_end": "2026-03-31",
+          "revenue": 443964000.0,
+          "profit": 100642000.0,
+          "original_revenue_facts": [
+            {
+              "value": 443964000.0,
+              "displayed": "443,964",
+              "scale": "3",
+              "context_ref": "c-96"
+            },
+            {
+              "value": 1413021000.0,
+              "displayed": "1,413,021",
+              "scale": "3",
+              "context_ref": "c-98"
+            },
+            {
+              "value": 443964000.0,
+              "displayed": "443,964",
+              "scale": "3",
+              "context_ref": "c-366"
+            },
+            {
+              "value": 1413021000.0,
+              "displayed": "1,413,021",
+              "scale": "3",
+              "context_ref": "c-368"
+            },
+            {
+              "value": -21511000.0,
+              "displayed": "21,511",
+              "scale": "3",
+              "context_ref": "c-378"
+            },
+            {
+              "value": -77752000.0,
+              "displayed": "77,752",
+              "scale": "3",
+              "context_ref": "c-380"
+            }
+          ],
+          "original_profit_facts": [
+            {
+              "value": 100642000.0,
+              "displayed": "100,642",
+              "scale": "3",
+              "context_ref": "c-366"
+            },
+            {
+              "value": 329039000.0,
+              "displayed": "329,039",
+              "scale": "3",
+              "context_ref": "c-368"
+            }
+          ],
+          "revenue_matches": true,
+          "profit_matches": true
+        }
+      ],
+      "all_match": true
+    }
+  ]
+}

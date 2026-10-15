@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v7（按时调度拆为非阻塞的 AC-M1-02b） |
+| 文档版本 | v8（嵌入模型按用户决定改为 text-embedding-async-v1） |
 | 规格章节 | 3.2、4.1、4.2、4.3、4.7、5.5（数据部分） |
 | 依赖 | M0；监控实体清单来自 M6（M6 完成前用 `config/monitored_entities.yaml` 的人工初版） |
 | 关闭的不变量 | I22、I28（数据部分） |
@@ -200,3 +200,4 @@
 | Q-M1-26 | 美联储 / EIA 新闻稿 | **加回第一阶段**：美联储 `https://www.federalreserve.gov/feeds/press_all.xml`；EIA `https://www.eia.gov/rss/press_rss.xml` 和 `https://www.eia.gov/rss/todayinenergy.xml`。需求方已核实三者都返回 200。入 `info_items`（`kind=news`，`source_level=1`），按 FR-M1-18 直接进入第 2 层 |
 | Q-M1-27 | 嵌入返回 401 | **需求方核实**：证据显示 `DASHSCOPE_API_KEY` 填的是 Token Plan 的 key，而且没有配置 `DASHSCOPE_BASE_URL`。这是配置错误，不是缺 key。改用用户提供的 DashScope key 和对应地址，先用 `GET {base}/models` 验证，再对全部条目做嵌入（嵌入不按 FR-M1-18 分级） |
 | Q-M1-28 | 生产库唯一的同根组是两篇不同的文章（Benzinga "Earnings Scheduled For October 5 / October 12"），正文都是同一段 163 字的模板，被正文哈希归成一根 | 需求方更正 Q-M1-10：没有上游原生 id 时，**规范化正文少于 300 个字符**的，哈希改用"规范化标题 + 规范化正文"；不少于 300 字符的，规则不变。这个误合并在 AC-M1-04 里算作归并错误 |
+| Q-M1-29 | 嵌入用哪个模型？（更正 Q-M1-14） | **用户决定（2026-10-15）**：先用 `text-embedding-async-v1`（1536 维，DashScope 批量异步接口），向量存在 `ingest.info_embeddings`，这是唯一来源；`info_items.embedding` 列弃用，不再写入。以后有条件时改用更新的模型，换模型时整体重算、按 `model` 字段区分 |

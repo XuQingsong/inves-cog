@@ -1,11 +1,13 @@
 {
-  "spec": "11.3",
+  "spec": "11.3; M6 v5（警戒：三条件至少两个，或 VIX 期限倒挂，或 SPY 252 日回撤 ≤ −10%）",
   "cases": [
     {
       "input": {
         "spy_5d_pct": -6.0,
         "vix_pctile_252": 50,
-        "down_share_5d_pct": 75
+        "down_share_5d_pct": 75,
+        "spy_drawdown_252_pct": -4.0,
+        "vix_term_inverted": false
       },
       "expected": {
         "shock_flag": true,
@@ -16,7 +18,9 @@
       "input": {
         "spy_5d_pct": -6.0,
         "vix_pctile_252": 50,
-        "down_share_5d_pct": 65
+        "down_share_5d_pct": 65,
+        "spy_drawdown_252_pct": -4.0,
+        "vix_term_inverted": false
       },
       "expected": {
         "shock_flag": false,
@@ -27,7 +31,9 @@
       "input": {
         "spy_5d_pct": -2.0,
         "vix_pctile_252": 85,
-        "down_share_5d_pct": 72
+        "down_share_5d_pct": 72,
+        "spy_drawdown_252_pct": -3.0,
+        "vix_term_inverted": false
       },
       "expected": {
         "shock_flag": true,
@@ -38,18 +44,22 @@
       "input": {
         "spy_5d_pct": -3.0,
         "vix_pctile_252": 40,
-        "down_share_5d_pct": 30
+        "down_share_5d_pct": 30,
+        "spy_drawdown_252_pct": -2.0,
+        "vix_term_inverted": false
       },
       "expected": {
         "shock_flag": false,
-        "l1_state": "警戒"
+        "l1_state": "正常"
       }
     },
     {
       "input": {
         "spy_5d_pct": -1.0,
         "vix_pctile_252": 69.9,
-        "down_share_5d_pct": 59.9
+        "down_share_5d_pct": 59.9,
+        "spy_drawdown_252_pct": -2.0,
+        "vix_term_inverted": false
       },
       "expected": {
         "shock_flag": false,
@@ -60,11 +70,78 @@
       "input": {
         "spy_5d_pct": -5.0,
         "vix_pctile_252": 79.9,
-        "down_share_5d_pct": 70
+        "down_share_5d_pct": 70,
+        "spy_drawdown_252_pct": -6.0,
+        "vix_term_inverted": false
       },
       "expected": {
         "shock_flag": true,
         "l1_state": "危机"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -1.0,
+        "vix_pctile_252": 50,
+        "down_share_5d_pct": 40,
+        "spy_drawdown_252_pct": -2.0,
+        "vix_term_inverted": true
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "警戒"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -1.0,
+        "vix_pctile_252": 50,
+        "down_share_5d_pct": 40,
+        "spy_drawdown_252_pct": -10.0,
+        "vix_term_inverted": false
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "警戒"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -1.0,
+        "vix_pctile_252": 50,
+        "down_share_5d_pct": 40,
+        "spy_drawdown_252_pct": -9.9,
+        "vix_term_inverted": false
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "正常"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -3.0,
+        "vix_pctile_252": 70,
+        "down_share_5d_pct": 30,
+        "spy_drawdown_252_pct": -2.0,
+        "vix_term_inverted": false
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "警戒"
+      }
+    },
+    {
+      "input": {
+        "spy_5d_pct": -2.9,
+        "vix_pctile_252": 70,
+        "down_share_5d_pct": 59.9,
+        "spy_drawdown_252_pct": -2.0,
+        "vix_term_inverted": false
+      },
+      "expected": {
+        "shock_flag": false,
+        "l1_state": "正常"
       }
     }
   ]

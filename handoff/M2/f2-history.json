@@ -1,0 +1,610 @@
+{
+  "classification": "real imported Muse snapshots; independent window date arithmetic and PIT annual-state FY inference",
+  "checks": [
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-10-08",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-01",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-08",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-10",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-10-10",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-03",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-10",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-12",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-10-13",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-06",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-13",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-15",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-10-08",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-01",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-08",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-10",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-10-10",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-03",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-10",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-12",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-10-13",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-06",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-13",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-15",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-10-08",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-01",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-08",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-10",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-10-10",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-03",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-10",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-12",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-10-13",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-06",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-13",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-15",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-10-08",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-01",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-08",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-10",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-10-10",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-03",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-10",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-12",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-10-13",
+      "source": "muse_import",
+      "first_snapshot": "2026-10-08",
+      "snapshot_exists": true,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-06",
+          "expected_status": "不足 7 天",
+          "actual_status": "不足 7 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-13",
+          "expected_status": "不足 30 天",
+          "actual_status": "不足 30 天",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-15",
+          "expected_status": "不足 90 天",
+          "actual_status": "不足 90 天",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "WDC",
+      "as_of": "2026-10-08",
+      "source": "muse_import",
+      "first_snapshot": "None",
+      "snapshot_exists": false,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-01",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-08",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-10",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "WDC",
+      "as_of": "2026-10-10",
+      "source": "muse_import",
+      "first_snapshot": "None",
+      "snapshot_exists": false,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-03",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-10",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-12",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    },
+    {
+      "ticker": "WDC",
+      "as_of": "2026-10-13",
+      "source": "muse_import",
+      "first_snapshot": "None",
+      "snapshot_exists": false,
+      "windows": {
+        "7": {
+          "target_date": "2026-10-06",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        },
+        "30": {
+          "target_date": "2026-09-13",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        },
+        "90": {
+          "target_date": "2026-07-15",
+          "expected_status": "当日快照缺失",
+          "actual_status": "当日快照缺失",
+          "actual_value": null,
+          "matches": true
+        }
+      }
+    }
+  ],
+  "snapshots": 180,
+  "tickers": 30,
+  "unknown_fiscal_years": [
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-08"
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-09"
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-10"
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-11"
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-12"
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-13"
+    }
+  ],
+  "all_match": true,
+  "raw_example": {
+    "ticker": "AAPL",
+    "as_of": "2026-10-08",
+    "fy_cy": "2026-09-27",
+    "raw": {
+      "tables": {
+        "price_targets": [
+          {
+            "low": "215",
+            "high": "405",
+            "mean": "328.09384",
+            "price": "336.67",
+            "median": "340",
+            "ticker": "AAPL",
+            "snapshot_date": "2026-10-08"
+          }
+        ],
+        "estimates_trend": [
+          {
+            "cur": "1.97865",
+            "ago7": "",
+            "ago30": "",
+            "ago60": "",
+            "ago90": "2.00836",
+            "period": "0q",
+            "ticker": "AAPL",
+            "rev90_pct": "-1.47931645720887",
+            "snapshot_date": "2026-10-08"
+          },
+          {
+            "cur": "2.90586",
+            "ago7": "",
+            "ago30": "",
+            "ago60": "",
+            "ago90": "2.94829",
+            "period": "+1q",
+            "ticker": "AAPL",
+            "rev90_pct": "-1.43913929769459",
+            "snapshot_date": "2026-10-08"
+          },
+          {
+            "cur": "8.82022",
+            "ago7": "",
+            "ago30": "",
+            "ago60": "",
+            "ago90": "8.7595",
+            "period": "0y",
+            "ticker": "AAPL",
+            "rev90_pct": "0.693190250585096",
+            "snapshot_date": "2026-10-08"
+          },
+          {
+            "cur": "9.57579",
+            "ago7": "",
+            "ago30": "",
+            "ago60": "",
+            "ago90": "9.68261",
+            "period": "+1y",
+            "ticker": "AAPL",
+            "rev90_pct": "-1.10321493894725",
+            "snapshot_date": "2026-10-08"
+          }
+        ],
+        "estimates_revisions": [
+          {
+            "up7": "1",
+            "up30": "7",
+            "down7": "0",
+            "down30": "14",
+            "period": "0q",
+            "ticker": "AAPL",
+            "snapshot_date": "2026-10-08"
+          },
+          {
+            "up7": "1",
+            "up30": "3",
+            "down7": "2",
+            "down30": "2",
+            "period": "0y",
+            "ticker": "AAPL",
+            "snapshot_date": "2026-10-08"
+          }
+        ]
+      },
+      "missing_fields": "来源无此字段",
+      "earnings_history": [
+        {
+          "ticker": "AAPL",
+          "eps_est": "1.76993",
+          "eps_actual": "1.85",
+          "first_seen": "2026-10-08",
+          "quarter_date": "2025-09-30",
+          "surprise_pct": "4.52"
+        },
+        {
+          "ticker": "AAPL",
+          "eps_est": "2.6708",
+          "eps_actual": "2.84",
+          "first_seen": "2026-10-08",
+          "quarter_date": "2025-12-31",
+          "surprise_pct": "6.34"
+        },
+        {
+          "ticker": "AAPL",
+          "eps_est": "1.94275",
+          "eps_actual": "2.01",
+          "first_seen": "2026-10-08",
+          "quarter_date": "2026-03-31",
+          "surprise_pct": "3.46"
+        },
+        {
+          "ticker": "AAPL",
+          "eps_est": "1.89243",
+          "eps_actual": "2.02",
+          "first_seen": "2026-10-08",
+          "quarter_date": "2026-06-30",
+          "surprise_pct": "6.74"
+        }
+      ],
+      "fiscal_year_source": {
+        "as_of": "2026-10-08",
+        "annual_period_end": "2025-09-27",
+        "reason": null
+      }
+    }
+  }
+}

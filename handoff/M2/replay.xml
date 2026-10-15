@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="5.928" timestamp="2026-10-15T15:32:23.541346+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_external_pending" name="test_legacy_matches_muse_state" time="5.876" /></testsuite></testsuites>

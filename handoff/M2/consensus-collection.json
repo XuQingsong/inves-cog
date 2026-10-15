@@ -1,0 +1,762 @@
+{
+  "requirement": "Q-M2-25 / AC-M2-06 / nonblocking AC-M2-06b",
+  "source": "yahoo_page",
+  "rate_limit_seconds": 5,
+  "api_429_behavior": "fall back to same Yahoo analysis pages; no API retry for subsequent issuers in the batch",
+  "final_real_collection": {
+    "observed_at": "2026-10-15T03:24:40.741976+00:00",
+    "result": {
+      "processed_count": 59,
+      "status": "degraded",
+      "failures": [],
+      "note": "past 10:30 Beijing deadline",
+      "deadline_met": false
+    },
+    "snapshots": [
+      {
+        "ticker": "AAPL",
+        "source": "yahoo_page",
+        "eps_cy": 8.82006,
+        "rev_cy": 478214889500.0,
+        "coverage": 39.0,
+        "captured_at": "2026-10-15 11:21:10.723212+08:00"
+      },
+      {
+        "ticker": "ADBE",
+        "source": "yahoo_page",
+        "eps_cy": 24.47602,
+        "rev_cy": 26606977610.0,
+        "coverage": 35.0,
+        "captured_at": "2026-10-15 11:20:41.279465+08:00"
+      },
+      {
+        "ticker": "AMAT",
+        "source": "yahoo_page",
+        "eps_cy": 12.78556,
+        "rev_cy": 34259411500.0,
+        "coverage": 31.0,
+        "captured_at": "2026-10-15 11:22:41.124002+08:00"
+      },
+      {
+        "ticker": "AMD",
+        "source": "yahoo_page",
+        "eps_cy": 7.5868,
+        "rev_cy": 50948325430.0,
+        "coverage": 49.0,
+        "captured_at": "2026-10-15 11:19:40.606407+08:00"
+      },
+      {
+        "ticker": "AMZN",
+        "source": "yahoo_page",
+        "eps_cy": 12.88952,
+        "rev_cy": 828503148930.0,
+        "coverage": 51.0,
+        "captured_at": "2026-10-15 11:21:01.797694+08:00"
+      },
+      {
+        "ticker": "ANET",
+        "source": "yahoo_page",
+        "eps_cy": 4.11675,
+        "rev_cy": 12681320440.0,
+        "coverage": 29.0,
+        "captured_at": "2026-10-15 11:23:31.462329+08:00"
+      },
+      {
+        "ticker": "ARM",
+        "source": "yahoo_page",
+        "eps_cy": 2.22817,
+        "rev_cy": 6058451630.0,
+        "coverage": 39.0,
+        "captured_at": "2026-10-15 11:23:12.812579+08:00"
+      },
+      {
+        "ticker": "ASML",
+        "source": "yahoo_page",
+        "eps_cy": 39.46858,
+        "rev_cy": 44059480700.0,
+        "coverage": 29.0,
+        "captured_at": "2026-10-15 11:22:56.250432+08:00"
+      },
+      {
+        "ticker": "AVGO",
+        "source": "yahoo_page",
+        "eps_cy": 11.65755,
+        "rev_cy": 105972843240.0,
+        "coverage": 48.0,
+        "captured_at": "2026-10-15 11:19:46.754671+08:00"
+      },
+      {
+        "ticker": "BE",
+        "source": "yahoo_page",
+        "eps_cy": 2.72477,
+        "rev_cy": 4117229600.0,
+        "coverage": 25.0,
+        "captured_at": "2026-10-15 11:24:06.620338+08:00"
+      },
+      {
+        "ticker": "CAT",
+        "source": "yahoo_page",
+        "eps_cy": 27.33042,
+        "rev_cy": 79597373260.0,
+        "coverage": 27.0,
+        "captured_at": "2026-10-15 11:22:16.353731+08:00"
+      },
+      {
+        "ticker": "CEG",
+        "source": "yahoo_page",
+        "eps_cy": 12.144,
+        "rev_cy": 35469754280.0,
+        "coverage": 18.0,
+        "captured_at": "2026-10-15 11:24:00.877110+08:00"
+      },
+      {
+        "ticker": "CIEN",
+        "source": "yahoo_page",
+        "eps_cy": 7.16563,
+        "rev_cy": 6423632030.0,
+        "coverage": 19.0,
+        "captured_at": "2026-10-15 11:23:38.532789+08:00"
+      },
+      {
+        "ticker": "COHR",
+        "source": "yahoo_page",
+        "eps_cy": 9.42042,
+        "rev_cy": 10629628430.0,
+        "coverage": 23.0,
+        "captured_at": "2026-10-15 11:23:40.775955+08:00"
+      },
+      {
+        "ticker": "COST",
+        "source": "yahoo_page",
+        "eps_cy": 22.79295,
+        "rev_cy": 329071338470.0,
+        "coverage": 31.0,
+        "captured_at": "2026-10-15 11:21:20.794893+08:00"
+      },
+      {
+        "ticker": "CRM",
+        "source": "yahoo_page",
+        "eps_cy": 16.7558,
+        "rev_cy": 46296649200.0,
+        "coverage": 52.0,
+        "captured_at": "2026-10-15 11:20:31.422309+08:00"
+      },
+      {
+        "ticker": "CRWD",
+        "source": "yahoo_page",
+        "eps_cy": 1.25668,
+        "rev_cy": 6007381560.0,
+        "coverage": 51.0,
+        "captured_at": "2026-10-15 11:24:25.966776+08:00"
+      },
+      {
+        "ticker": "CRWV",
+        "source": "yahoo_page",
+        "eps_cy": -5.11243,
+        "rev_cy": 12869752880.0,
+        "coverage": 22.0,
+        "captured_at": "2026-10-15 11:24:21.049537+08:00"
+      },
+      {
+        "ticker": "CVX",
+        "source": "yahoo_page",
+        "eps_cy": 17.12449,
+        "rev_cy": 239091899590.0,
+        "coverage": 24.0,
+        "captured_at": "2026-10-15 11:22:11.203239+08:00"
+      },
+      {
+        "ticker": "DELL",
+        "source": "yahoo_page",
+        "eps_cy": 25.89655,
+        "rev_cy": 193444314600.0,
+        "coverage": 26.0,
+        "captured_at": "2026-10-15 11:24:10.700310+08:00"
+      },
+      {
+        "ticker": "ETN",
+        "source": "yahoo_page",
+        "eps_cy": 13.59021,
+        "rev_cy": 32881130610.0,
+        "coverage": 26.0,
+        "captured_at": "2026-10-15 11:23:51.255854+08:00"
+      },
+      {
+        "ticker": "FTNT",
+        "source": "yahoo_page",
+        "eps_cy": 3.45154,
+        "rev_cy": 8119954320.0,
+        "coverage": 41.0,
+        "captured_at": "2026-10-15 11:24:35.836444+08:00"
+      },
+      {
+        "ticker": "GE",
+        "source": "yahoo_page",
+        "eps_cy": 7.92362,
+        "rev_cy": 50337505170.0,
+        "coverage": 22.0,
+        "captured_at": "2026-10-15 11:22:21.068976+08:00"
+      },
+      {
+        "ticker": "GEV",
+        "source": "yahoo_page",
+        "eps_cy": 30.44929,
+        "rev_cy": 46323841390.0,
+        "coverage": 19.0,
+        "captured_at": "2026-10-15 11:23:56.309397+08:00"
+      },
+      {
+        "ticker": "GOOGL",
+        "source": "yahoo_page",
+        "eps_cy": 20.60855,
+        "rev_cy": 499511615640.0,
+        "coverage": 53.0,
+        "captured_at": "2026-10-15 11:20:56.161852+08:00"
+      },
+      {
+        "ticker": "HD",
+        "source": "yahoo_page",
+        "eps_cy": 15.02345,
+        "rev_cy": 171548369610.0,
+        "coverage": 34.0,
+        "captured_at": "2026-10-15 11:21:30.763951+08:00"
+      },
+      {
+        "ticker": "INTC",
+        "source": "yahoo_page",
+        "eps_cy": 1.52366,
+        "rev_cy": 63126778010.0,
+        "coverage": 41.0,
+        "captured_at": "2026-10-15 11:20:06.664671+08:00"
+      },
+      {
+        "ticker": "JNJ",
+        "source": "yahoo_page",
+        "eps_cy": 11.1129,
+        "rev_cy": 101233859060.0,
+        "coverage": 18.0,
+        "captured_at": "2026-10-15 11:21:46.029220+08:00"
+      },
+      {
+        "ticker": "JPM",
+        "source": "yahoo_page",
+        "eps_cy": 24.08958,
+        "rev_cy": 207846974120.0,
+        "coverage": 14.0,
+        "captured_at": "2026-10-15 11:21:52.094143+08:00"
+      },
+      {
+        "ticker": "KLAC",
+        "source": "yahoo_page",
+        "eps_cy": 5.43753,
+        "rev_cy": 18142021850.0,
+        "coverage": 25.0,
+        "captured_at": "2026-10-15 11:22:51.006495+08:00"
+      },
+      {
+        "ticker": "LITE",
+        "source": "yahoo_page",
+        "eps_cy": 21.79072,
+        "rev_cy": 6337442530.0,
+        "coverage": 25.0,
+        "captured_at": "2026-10-15 11:20:16.246003+08:00"
+      },
+      {
+        "ticker": "LLY",
+        "source": "yahoo_page",
+        "eps_cy": 35.21534,
+        "rev_cy": 88549411970.0,
+        "coverage": 28.0,
+        "captured_at": "2026-10-15 11:21:40.708466+08:00"
+      },
+      {
+        "ticker": "LRCX",
+        "source": "yahoo_page",
+        "eps_cy": 9.47647,
+        "rev_cy": 34924175930.0,
+        "coverage": 30.0,
+        "captured_at": "2026-10-15 11:22:45.987742+08:00"
+      },
+      {
+        "ticker": "MA",
+        "source": "yahoo_page",
+        "eps_cy": 19.93607,
+        "rev_cy": 37266263520.0,
+        "coverage": 38.0,
+        "captured_at": "2026-10-15 11:22:01.257106+08:00"
+      },
+      {
+        "ticker": "META",
+        "source": "yahoo_page",
+        "eps_cy": 30.86442,
+        "rev_cy": 254150260040.0,
+        "coverage": 55.0,
+        "captured_at": "2026-10-15 11:20:51.361900+08:00"
+      },
+      {
+        "ticker": "MRVL",
+        "source": "yahoo_page",
+        "eps_cy": 4.22026,
+        "rev_cy": 12069734010.0,
+        "coverage": 41.0,
+        "captured_at": "2026-10-15 11:19:50.904879+08:00"
+      },
+      {
+        "ticker": "MSFT",
+        "source": "yahoo_page",
+        "eps_cy": 19.76985,
+        "rev_cy": 391242383820.0,
+        "coverage": 34.0,
+        "captured_at": "2026-10-15 11:20:21.153756+08:00"
+      },
+      {
+        "ticker": "MU",
+        "source": "yahoo_page",
+        "eps_cy": 176.15115,
+        "rev_cy": 275082789040.0,
+        "coverage": 35.0,
+        "captured_at": "2026-10-15 11:19:57.375681+08:00"
+      },
+      {
+        "ticker": "NFLX",
+        "source": "yahoo_page",
+        "eps_cy": 3.58305,
+        "rev_cy": 51217806130.0,
+        "coverage": 41.0,
+        "captured_at": "2026-10-15 11:21:05.712877+08:00"
+      },
+      {
+        "ticker": "NOK",
+        "source": "yahoo_page",
+        "eps_cy": 0.39945,
+        "rev_cy": 20773813740.0,
+        "coverage": 9.0,
+        "captured_at": "2026-10-15 11:20:11.107193+08:00"
+      },
+      {
+        "ticker": "NOW",
+        "source": "yahoo_page",
+        "eps_cy": 4.06681,
+        "rev_cy": 16217916410.0,
+        "coverage": 44.0,
+        "captured_at": "2026-10-15 11:20:35.855662+08:00"
+      },
+      {
+        "ticker": "NVDA",
+        "source": "yahoo_page",
+        "eps_cy": 9.31242,
+        "rev_cy": 411653409840.0,
+        "coverage": 51.0,
+        "captured_at": "2026-10-15 11:19:35.592408+08:00"
+      },
+      {
+        "ticker": "ORCL",
+        "source": "yahoo_page",
+        "eps_cy": 8.14059,
+        "rev_cy": 90424117580.0,
+        "coverage": 37.0,
+        "captured_at": "2026-10-15 11:20:26.152868+08:00"
+      },
+      {
+        "ticker": "PANW",
+        "source": "yahoo_page",
+        "eps_cy": 4.19114,
+        "rev_cy": 14173386810.0,
+        "coverage": 54.0,
+        "captured_at": "2026-10-15 11:24:31.081927+08:00"
+      },
+      {
+        "ticker": "PLTR",
+        "source": "yahoo_page",
+        "eps_cy": 1.61977,
+        "rev_cy": 8215157880.0,
+        "coverage": 29.0,
+        "captured_at": "2026-10-15 11:20:46.009640+08:00"
+      },
+      {
+        "ticker": "QCOM",
+        "source": "yahoo_page",
+        "eps_cy": 10.48422,
+        "rev_cy": 42876184110.0,
+        "coverage": 31.0,
+        "captured_at": "2026-10-15 11:23:01.923786+08:00"
+      },
+      {
+        "ticker": "SKHY",
+        "source": "yahoo_page",
+        "eps_cy": 26.68399,
+        "rev_cy": 344263593150000.0,
+        "coverage": 5.0,
+        "captured_at": "2026-10-15 11:20:02.181825+08:00"
+      },
+      {
+        "ticker": "SMCI",
+        "source": "yahoo_page",
+        "eps_cy": 4.33765,
+        "rev_cy": 67129653040.0,
+        "coverage": 18.0,
+        "captured_at": "2026-10-15 11:24:15.812139+08:00"
+      },
+      {
+        "ticker": "SNDK",
+        "source": "yahoo_page",
+        "eps_cy": 214.82326,
+        "rev_cy": 49135340890.0,
+        "coverage": 22.0,
+        "captured_at": "2026-10-15 11:22:35.761178+08:00"
+      },
+      {
+        "ticker": "STX",
+        "source": "yahoo_page",
+        "eps_cy": 36.19168,
+        "rev_cy": 18958724950.0,
+        "coverage": 22.0,
+        "captured_at": "2026-10-15 11:22:30.707212+08:00"
+      },
+      {
+        "ticker": "TSLA",
+        "source": "yahoo_page",
+        "eps_cy": 1.7506,
+        "rev_cy": 107147687410.0,
+        "coverage": 31.0,
+        "captured_at": "2026-10-15 11:21:15.908656+08:00"
+      },
+      {
+        "ticker": "TSM",
+        "source": "yahoo_page",
+        "eps_cy": 17.05163,
+        "rev_cy": 5466372923490.0,
+        "coverage": 14.0,
+        "captured_at": "2026-10-15 11:23:26.497578+08:00"
+      },
+      {
+        "ticker": "UNH",
+        "source": "yahoo_page",
+        "eps_cy": 20.42771,
+        "rev_cy": 448513887810.0,
+        "coverage": 24.0,
+        "captured_at": "2026-10-15 11:21:35.852925+08:00"
+      },
+      {
+        "ticker": "V",
+        "source": "yahoo_page",
+        "eps_cy": 13.22927,
+        "rev_cy": 45775836370.0,
+        "coverage": 39.0,
+        "captured_at": "2026-10-15 11:21:55.895652+08:00"
+      },
+      {
+        "ticker": "VRT",
+        "source": "yahoo_page",
+        "eps_cy": 6.7393,
+        "rev_cy": 14004064160.0,
+        "coverage": 29.0,
+        "captured_at": "2026-10-15 11:23:47.311986+08:00"
+      },
+      {
+        "ticker": "WDC",
+        "source": "yahoo_page",
+        "eps_cy": 20.52858,
+        "rev_cy": 19273504620.0,
+        "coverage": 24.0,
+        "captured_at": "2026-10-15 11:22:26.636663+08:00"
+      },
+      {
+        "ticker": "WMT",
+        "source": "yahoo_page",
+        "eps_cy": 2.88556,
+        "rev_cy": 752858232110.0,
+        "coverage": 39.0,
+        "captured_at": "2026-10-15 11:21:25.798630+08:00"
+      },
+      {
+        "ticker": "XOM",
+        "source": "yahoo_page",
+        "eps_cy": 12.5419,
+        "rev_cy": 419090917530.0,
+        "coverage": 14.0,
+        "captured_at": "2026-10-15 11:22:05.906721+08:00"
+      },
+      {
+        "ticker": "ZS",
+        "source": "yahoo_page",
+        "eps_cy": 4.9082,
+        "rev_cy": 3931421480.0,
+        "coverage": 43.0,
+        "captured_at": "2026-10-15 11:24:40.694081+08:00"
+      }
+    ]
+  },
+  "successful_complete_59_runs": 1,
+  "remaining_complete_59_runs": 1,
+  "deadline": "before M5 acceptance",
+  "first_attempt_preserved": {
+    "observed_at": "2026-10-15T03:16:26.587893+00:00",
+    "result": {
+      "processed_count": 0,
+      "status": "degraded",
+      "failures": [
+        {
+          "ticker": "NVDA",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, NVDA, yahoo_page, 2026-10-15 11:10:47.047715+08, 2027-01-25, 2028-01-25, 2.47325, 2.74622, 9.31242, 15.9146, 411653409840, 692206372650, 2, null, 2, 0, 51, 10.1, 9.01, 328.71695, 315, {\"eps_trend\": {\"0q\": {\"current\": 2.47325, \"7daysAgo\": 2.47325, \"...)."
+        },
+        {
+          "ticker": "AMD",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, AMD, yahoo_page, 2026-10-15 11:10:50.54506+08, 2026-12-27, 2027-12-27, 1.92939, 2.65104, 7.5868, 15.72189, 50948325430, 88942371350, 1, null, 4, 1, 49, 8.2, 7, 636.208, 635.5, {\"eps_trend\": {\"0q\": {\"current\": 1.92939, \"7daysAgo\": 1.92939, \"...)."
+        },
+        {
+          "ticker": "AVGO",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, AVGO, yahoo_page, 2026-10-15 11:10:56.585237+08, 2026-11-02, 2027-11-02, 3.82768, 4.07938, 11.65755, 19.39382, 105972843240, 173928264520, 0, null, 22, 15, 48, 12.38, 11.35, 527.5915, 535, {\"eps_trend\": {\"0q\": {\"current\": 3.82768, \"7daysAgo\": 3.82763, \"...)."
+        },
+        {
+          "ticker": "MRVL",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, MRVL, yahoo_page, 2026-10-15 11:11:00.158348+08, 2027-01-31, 2028-01-31, 1.10094, 1.36052, 4.22026, 7.29625, 12069734010, 19699419880, 0, null, 6, 1, 41, 4.61405, 3.92, 339.35742, 350, {\"eps_trend\": {\"0q\": {\"current\": 1.10094, \"7daysAgo\": 1.10081, \"...)."
+        },
+        {
+          "ticker": "MU",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, MU, yahoo_page, 2026-10-15 11:11:38.325616+08, 2027-09-03, 2028-09-03, 38.21061, 42.12014, 176.15115, 206.33243, 275082789040, 318345106180, 28, null, 28, 2, 35, 214.7, 161, 1560.5652, 1550, {\"eps_trend\": {\"0q\": {\"current\": 38.21061, \"7daysAgo\": 38.21061,...)."
+        },
+        {
+          "ticker": "SKHY",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, SKHY, yahoo_page, 2026-10-15 11:11:40.414083+08, null, null, 6.25287, 7.28946, 26.68399, 34.47598, 344263593150000, 531437402860000, 1, null, 2, 1, 5, 28.725, 25.748, 252.2143, 242.5, {\"eps_trend\": {\"0q\": {\"current\": 6.25287, \"7daysAgo\": 6.2512, \"3...)."
+        },
+        {
+          "ticker": "INTC",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, INTC, yahoo_page, 2026-10-15 11:11:45.668817+08, 2026-12-27, 2027-12-27, 0.39202, 0.43309, 1.52366, 2.09076, 63126778010, 72525005090, 1, null, 1, 2, 41, 1.74, 1.12, 118.04651, 115, {\"eps_trend\": {\"0q\": {\"current\": 0.39202, \"7daysAgo\": 0.39091, \"...)."
+        },
+        {
+          "ticker": "NOK",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, NOK, yahoo_page, 2026-10-15 11:11:51.366893+08, 2026-12-31, 2027-12-31, 0.07203, 0.17798, 0.39945, 0.48264, 20773813740, 22217312810, 0, null, 1, 0, 9, 0.45, 0.349, 14.96667, 15, {\"eps_trend\": {\"0q\": {\"current\": 0.07203, \"7daysAgo\": 0.07218, \"...)."
+        },
+        {
+          "ticker": "LITE",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, LITE, yahoo_page, 2026-10-15 11:11:57.424661+08, 2027-06-27, 2028-06-27, 4.20967, 5.03608, 21.79072, 36.02159, 6337442530, 9947180280, 1, null, 1, 0, 25, 25.27, 19.05, 1179.071, 1200, {\"eps_trend\": {\"0q\": {\"current\": 4.20967, \"7daysAgo\": 4.2106, \"3...)."
+        },
+        {
+          "ticker": "MSFT",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, MSFT, yahoo_page, 2026-10-15 11:12:01.271021+08, 2027-06-30, 2028-06-30, 4.71854, 4.82233, 19.76985, 23.68699, 391242383820, 467980368250, 2, null, 3, 0, 34, 20.7, 19.21, 590.27527, 595, {\"eps_trend\": {\"0q\": {\"current\": 4.71854, \"7daysAgo\": 4.72336, \"...)."
+        },
+        {
+          "ticker": "ORCL",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ORCL, yahoo_page, 2026-10-15 11:12:08.45745+08, 2027-05-31, 2028-05-31, 1.8933, 2.02263, 8.14059, 10.99899, 90424117580, 131711631839, 33, null, 35, 1, 37, 8.37, 8.07, 237.97415, 240, {\"eps_trend\": {\"0q\": {\"current\": 1.8933, \"7daysAgo\": 1.89225, \"3...)."
+        },
+        {
+          "ticker": "CRM",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CRM, yahoo_page, 2026-10-15 11:12:11.85377+08, 2027-01-31, 2028-01-31, 3.44653, 3.55791, 16.7558, 16.02297, 46296649200, 50799336690, 0, null, 6, 0, 52, 17.6, 16.67, 285.67557, 285, {\"eps_trend\": {\"0q\": {\"current\": 3.44653, \"7daysAgo\": 3.4463, \"3...)."
+        },
+        {
+          "ticker": "NOW",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, NOW, yahoo_page, 2026-10-15 11:12:16.670003+08, 2026-12-31, 2027-12-31, 1.02284, 1.1714, 4.06681, 5.00666, 16217916410, 19266483710, 0, null, 0, 0, 44, 4.36, 3.84, 150.27522, 150.5, {\"eps_trend\": {\"0q\": {\"current\": 1.02284, \"7daysAgo\": 1.02553, \"...)."
+        },
+        {
+          "ticker": "ADBE",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ADBE, yahoo_page, 2026-10-15 11:12:22.712502+08, 2026-11-28, 2027-11-28, 6.32965, 6.74951, 24.47602, 27.50756, 26606977610, 29037582970, 27, null, 27, 3, 35, 24.6, 24.43, 272.31375, 260.5, {\"eps_trend\": {\"0q\": {\"current\": 6.32965, \"7daysAgo\": 6.33138, \"...)."
+        },
+        {
+          "ticker": "PLTR",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, PLTR, yahoo_page, 2026-10-15 11:12:27.564703+08, 2026-12-31, 2027-12-31, 0.41306, 0.46382, 1.61977, 2.35154, 8215157880, 12332651640, 1, null, 1, 2, 29, 1.75, 1.51, 205.27309, 215, {\"eps_trend\": {\"0q\": {\"current\": 0.41306, \"7daysAgo\": 0.41367, \"...)."
+        },
+        {
+          "ticker": "META",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, META, yahoo_page, 2026-10-15 11:12:34.881323+08, 2026-12-31, 2027-12-31, 6.01286, 8.28044, 30.86442, 34.08992, 254150260040, 306802536750, 2, null, 3, 9, 55, 33.65, 27.7, 813.6503, 830, {\"eps_trend\": {\"0q\": {\"current\": 6.01286, \"7daysAgo\": 6.25261, \"...)."
+        },
+        {
+          "ticker": "GOOGL",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, GOOGL, yahoo_page, 2026-10-15 11:12:41.207259+08, 2026-12-31, 2027-12-31, 3.01272, 3.35166, 20.60855, 15.07093, 499511615640, 619952244560, 3, null, 5, 2, 53, 21.92, 19.80432, 430.41852, 430, {\"eps_trend\": {\"0q\": {\"current\": 3.01272, \"7daysAgo\": 3.02513, \"...)."
+        },
+        {
+          "ticker": "AMZN",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, AMZN, yahoo_page, 2026-10-15 11:12:45.053461+08, 2026-12-31, 2027-12-31, 1.95093, 2.44002, 12.88952, 10.52732, 828503148930, 948875683760, 1, null, 4, 0, 51, 13.51, 12.16, 331.20242, 329.5, {\"eps_trend\": {\"0q\": {\"current\": 1.95093, \"7daysAgo\": 1.95204, \"...)."
+        },
+        {
+          "ticker": "NFLX",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, NFLX, yahoo_page, 2026-10-15 11:12:49.502784+08, 2026-12-31, 2027-12-31, 0.82268, 0.72721, 3.58305, 3.79636, 51217806130, 56951383120, 1, null, 1, 1, 41, 3.69, 3.51, 92.06, 90, {\"eps_trend\": {\"0q\": {\"current\": 0.82268, \"7daysAgo\": 0.82285, \"...)."
+        },
+        {
+          "ticker": "AAPL",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, AAPL, yahoo_page, 2026-10-15 11:12:56.691613+08, 2026-09-27, 2027-09-27, 1.97842, 2.90597, 8.82006, 9.58335, 478214889500, 528641081619, 1, null, 2, 1, 39, 8.94, 8.28, 329.3759, 340, {\"eps_trend\": {\"0q\": {\"current\": 1.97842, \"7daysAgo\": 1.97865, \"...)."
+        },
+        {
+          "ticker": "TSLA",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, TSLA, yahoo_page, 2026-10-15 11:12:59.567263+08, 2026-12-31, 2027-12-31, 0.45494, 0.49335, 1.7506, 2.17987, 107147687410, 121707474090, 2, null, 4, 9, 31, 2.39, 1.4, 397.83212, 412.5, {\"eps_trend\": {\"0q\": {\"current\": 0.45494, \"7daysAgo\": 0.44898, \"...)."
+        },
+        {
+          "ticker": "COST",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, COST, yahoo_page, 2026-10-15 11:13:04.278735+08, 2027-08-30, 2028-08-30, 4.90754, 5.117, 22.79295, 25.07448, 329071338470, 353063445040, 17, null, 17, 5, 31, 23.91925, 22.1, 1060.8, 1065, {\"eps_trend\": {\"0q\": {\"current\": 4.90754, \"7daysAgo\": 4.90189, \"...)."
+        },
+        {
+          "ticker": "WMT",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, WMT, yahoo_page, 2026-10-15 11:13:09.894033+08, 2027-01-31, 2028-01-31, 0.63529, 0.78596, 2.88556, 3.22354, 752858232110, 785705040720, 1, null, 2, 2, 39, 3.08, 2.79903, 126.775, 127, {\"eps_trend\": {\"0q\": {\"current\": 0.63529, \"7daysAgo\": 0.63515, \"...)."
+        },
+        {
+          "ticker": "HD",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, HD, yahoo_page, 2026-10-15 11:13:14.835366+08, 2027-02-01, 2028-02-01, 3.83787, 2.8301, 15.02345, 15.98951, 171548369610, 177330304130, 1, null, 1, 0, 34, 15.2376, 14.85, 379.75, 392.5, {\"eps_trend\": {\"0q\": {\"current\": 3.83787, \"7daysAgo\": 3.8402, \"3...)."
+        },
+        {
+          "ticker": "UNH",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, UNH, yahoo_page, 2026-10-15 11:13:19.262249+08, 2026-12-31, 2027-12-31, 2.24747, 8.19815, 20.42771, 23.09738, 448513887810, 462805642420, 1, null, 2, 0, 24, 20.95, 19.76, 477.72, 490, {\"eps_trend\": {\"0q\": {\"current\": 2.24747, \"7daysAgo\": 2.10253, \"...)."
+        },
+        {
+          "ticker": "LLY",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, LLY, yahoo_page, 2026-10-15 11:13:23.976733+08, 2026-12-31, 2027-12-31, 7.15775, 10.09501, 35.21534, 47.4758, 88549411970, 102302045940, 3, null, 6, 4, 28, 40.77, 31.33, 1328.0547, 1380.5, {\"eps_trend\": {\"0q\": {\"current\": 7.15775, \"7daysAgo\": 9.95585, \"...)."
+        },
+        {
+          "ticker": "JNJ",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, JNJ, yahoo_page, 2026-10-15 11:13:29.826169+08, 2026-12-28, 2027-12-28, 2.92572, 2.70984, 11.1129, 11.73079, 101233859060, 107924872500, 0, null, 0, 0, 18, 11.28, 11.05, 279.13635, 280, {\"eps_trend\": {\"0q\": {\"current\": 2.92572, \"7daysAgo\": 2.93465, \"...)."
+        },
+        {
+          "ticker": "JPM",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, JPM, yahoo_page, 2026-10-15 11:13:36.01344+08, 2026-12-31, 2027-12-31, 5.94066, 6.25041, 24.08958, 25.38657, 207846974120, 216212336030, 1, null, 3, 0, 14, 25.15939, 23.3, 372.5, 373.5, {\"eps_trend\": {\"0q\": {\"current\": 5.94066, \"7daysAgo\": 5.94972, \"...)."
+        },
+        {
+          "ticker": "V",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, V, yahoo_page, 2026-10-15 11:13:39.85+08, 2026-09-30, 2027-09-30, 3.43065, 3.6247, 13.22927, 15.00381, 45775836370, 50784701480, 2, null, 30, 6, 39, 13.5, 13.1, 420.46973, 425, {\"eps_trend\": {\"0q\": {\"current\": 3.43065, \"7daysAgo\": 3.42922, \"...)."
+        },
+        {
+          "ticker": "MA",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, MA, yahoo_page, 2026-10-15 11:13:44.577676+08, 2026-12-31, 2027-12-31, 5.15892, 5.17731, 19.93607, 23.06058, 37266263520, 41966582330, 1, null, 33, 1, 38, 20.2, 19.64, 669.7408, 670, {\"eps_trend\": {\"0q\": {\"current\": 5.15892, \"7daysAgo\": 5.15122, \"...)."
+        },
+        {
+          "ticker": "XOM",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, XOM, yahoo_page, 2026-10-15 11:13:51.228911+08, null, null, 3.76542, 3.40024, 12.5419, 11.60296, 419090917530, 422866814150, 2, null, 5, 0, 14, 13.9, 10.42, 174, 177.5, {\"eps_trend\": {\"0q\": {\"current\": 3.76542, \"7daysAgo\": 3.76248, \"...)."
+        },
+        {
+          "ticker": "CVX",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CVX, yahoo_page, 2026-10-15 11:13:56.173413+08, 2026-12-31, 2027-12-31, 4.83365, 4.99058, 17.12449, 15.15383, 239091899590, 224969654230, 4, null, 8, 1, 24, 19.20487, 13.98, 228.08333, 229, {\"eps_trend\": {\"0q\": {\"current\": 4.83365, \"7daysAgo\": 4.81718, \"...)."
+        },
+        {
+          "ticker": "CAT",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CAT, yahoo_page, 2026-10-15 11:14:00.16707+08, 2026-12-31, 2027-12-31, 7.02641, 6.99539, 27.33042, 32.58861, 79597373260, 88665338550, 1, null, 24, 0, 27, 30.47, 24.26, 951.10614, 967.5, {\"eps_trend\": {\"0q\": {\"current\": 7.02641, \"7daysAgo\": 6.93288, \"...)."
+        },
+        {
+          "ticker": "GE",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, GE, yahoo_page, 2026-10-15 11:14:05.627335+08, 2026-12-31, 2027-12-31, 2.00194, 2.31582, 7.92362, 9.82637, 50337505170, 55890420630, 0, null, 0, 1, 22, 8.15, 7.82, 391.1905, 400, {\"eps_trend\": {\"0q\": {\"current\": 2.00194, \"7daysAgo\": 1.98725, \"...)."
+        },
+        {
+          "ticker": "WDC",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, WDC, yahoo_page, 2026-10-15 11:14:10.877086+08, 2027-07-03, 2028-07-03, 4.07706, 4.75481, 20.52858, 33.09254, 19273504620, 26451223510, 13, null, 1, 0, 24, 26.66482, 15.76, 668.5, 650, {\"eps_trend\": {\"0q\": {\"current\": 4.07706, \"7daysAgo\": 4.0424, \"3...)."
+        },
+        {
+          "ticker": "STX",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, STX, yahoo_page, 2026-10-15 11:14:15.990235+08, 2027-07-03, 2028-07-03, 7.38205, 8.49212, 36.19168, 56.64135, 18958724950, 25556484480, 20, null, 20, 0, 22, 42.85, 32.06, 1138.3334, 1145, {\"eps_trend\": {\"0q\": {\"current\": 7.38205, \"7daysAgo\": 7.34882, \"...)."
+        },
+        {
+          "ticker": "SNDK",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, SNDK, yahoo_page, 2026-10-15 11:14:20.910455+08, 2027-07-03, 2028-07-03, 46.27224, 52.93503, 214.82326, 266.2971, 49135340890, 58436134900, 3, null, 12, 7, 22, 238.36, 186.97, 2173, 2150, {\"eps_trend\": {\"0q\": {\"current\": 46.27224, \"7daysAgo\": 46.18405,...)."
+        },
+        {
+          "ticker": "AMAT",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, AMAT, yahoo_page, 2026-10-15 11:14:26.620832+08, 2026-10-26, 2027-10-26, 4.05576, 4.20698, 12.78556, 18.46723, 34259411500, 46312467080, 1, null, 1, 0, 31, 12.96, 12.53, 635.3333, 645.5, {\"eps_trend\": {\"0q\": {\"current\": 4.05576, \"7daysAgo\": 4.05592, \"...)."
+        },
+        {
+          "ticker": "LRCX",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, LRCX, yahoo_page, 2026-10-15 11:14:30.376051+08, 2027-06-28, 2028-06-28, 2.17706, 2.31167, 9.47647, 11.76569, 34924175930, 41569922710, 0, null, 3, 0, 30, 10.82, 8.44, 375.80646, 385, {\"eps_trend\": {\"0q\": {\"current\": 2.17706, \"7daysAgo\": 2.17786, \"...)."
+        },
+        {
+          "ticker": "KLAC",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, KLAC, yahoo_page, 2026-10-15 11:14:40.046642+08, 2027-06-30, 2028-06-30, 1.17822, 1.35935, 5.43753, 6.74039, 18142021850, 21574835700, 1, null, 2, 0, 25, 5.86, 4.793, 232.76923, 228.5, {\"eps_trend\": {\"0q\": {\"current\": 1.17822, \"7daysAgo\": 1.17852, \"...)."
+        },
+        {
+          "ticker": "ASML",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ASML, yahoo_page, 2026-10-15 11:14:43.743774+08, 2026-12-31, 2027-12-31, 14.66, 12.52569, 39.46858, 53.87814, 44059480700, 55675267430, 0, null, 0, 1, 29, 43.77, 37.12, 2130.6338, 2306.715, {\"eps_trend\": {\"0q\": {\"current\": 14.66, \"7daysAgo\": 13.27016, \"3...)."
+        },
+        {
+          "ticker": "QCOM",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, QCOM, yahoo_page, 2026-10-15 11:14:50.420559+08, 2026-09-28, 2027-09-28, 2.15685, 2.29722, 10.48422, 10.19665, 42876184110, 44910753120, 0, null, 0, 1, 31, 10.61, 9.25, 194.13333, 175, {\"eps_trend\": {\"0q\": {\"current\": 2.15685, \"7daysAgo\": 2.15685, \"...)."
+        },
+        {
+          "ticker": "ARM",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ARM, yahoo_page, 2026-10-15 11:14:55.393426+08, 2027-03-31, 2028-03-31, 0.47338, 0.5507, 2.22817, 3.06276, 6058451630, 8253431750, 0, null, 1, 3, 39, 2.38, 2.06, 290.705, 278.6, {\"eps_trend\": {\"0q\": {\"current\": 0.47338, \"7daysAgo\": 0.47231, \"...)."
+        },
+        {
+          "ticker": "TSM",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, TSM, yahoo_page, 2026-10-15 11:15:09.444148+08, 2026-12-31, 2027-12-31, 4.52449, 5.05036, 17.05163, 22.31735, 5466372923490, 7429063522670, 1, null, 2, 0, 14, 18.11, 15.23, 578.222, 538.5, {\"eps_trend\": {\"0q\": {\"current\": 4.52449, \"7daysAgo\": 4.4614, \"3...)."
+        },
+        {
+          "ticker": "ANET",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ANET, yahoo_page, 2026-10-15 11:15:13.753593+08, 2026-12-31, 2027-12-31, 1.07881, 1.15047, 4.11675, 5.22238, 12681320440, 16362973080, 0, null, 0, 0, 29, 4.22, 4.05, 245.13828, 250, {\"eps_trend\": {\"0q\": {\"current\": 1.07881, \"7daysAgo\": 1.07669, \"...)."
+        },
+        {
+          "ticker": "CIEN",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CIEN, yahoo_page, 2026-10-15 11:15:17.41798+08, 2026-11-01, 2027-11-01, 1.61699, 2.36113, 7.16563, 10.33093, 6423632030, 8410746370, 0, null, 18, 0, 19, 7.32785, 6.99, 512.9907, 536.5, {\"eps_trend\": {\"0q\": {\"current\": 1.61699, \"7daysAgo\": 1.61699, \"...)."
+        },
+        {
+          "ticker": "COHR",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, COHR, yahoo_page, 2026-10-15 11:15:23.048386+08, 2027-06-30, 2028-06-30, 1.96331, 2.1965, 9.42042, 14.05355, 10629628430, 14766217490, 1, null, 19, 1, 23, 10.26, 8.26, 412.52014, 420, {\"eps_trend\": {\"0q\": {\"current\": 1.96331, \"7daysAgo\": 1.96331, \"...)."
+        },
+        {
+          "ticker": "VRT",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, VRT, yahoo_page, 2026-10-15 11:15:31.31586+08, 2026-12-31, 2027-12-31, 1.8284, 2.21575, 6.7393, 9.19281, 14004064160, 18267774370, 2, null, 3, 0, 29, 6.91, 6.6, 335.14285, 335, {\"eps_trend\": {\"0q\": {\"current\": 1.8284, \"7daysAgo\": 1.8293, \"30...)."
+        },
+        {
+          "ticker": "ETN",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ETN, yahoo_page, 2026-10-15 11:15:35.940273+08, 2026-12-31, 2027-12-31, 3.53754, 4.08464, 13.59021, 16.28177, 32881130610, 36836200610, 4, null, 5, 0, 26, 14.12, 13.25, 484.895, 496.5, {\"eps_trend\": {\"0q\": {\"current\": 3.53754, \"7daysAgo\": 3.5351, \"3...)."
+        },
+        {
+          "ticker": "GEV",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, GEV, yahoo_page, 2026-10-15 11:15:42.096893+08, 2026-12-31, 2027-12-31, 4.02194, 6.44001, 30.44929, 24.73547, 46323841390, 52924175980, 2, null, 5, 2, 19, 32.73, 26.64, 1223.9773, 1235, {\"eps_trend\": {\"0q\": {\"current\": 4.02194, \"7daysAgo\": 4.08653, \"...)."
+        },
+        {
+          "ticker": "CEG",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CEG, yahoo_page, 2026-10-15 11:15:47.522652+08, 2026-12-31, 2027-12-31, 3.75279, 3.1233, 12.144, 13.32016, 35469754280, 36677834790, 1, null, 2, 0, 18, 12.49, 11.77, 341.532, 345.5, {\"eps_trend\": {\"0q\": {\"current\": 3.75279, \"7daysAgo\": 3.75279, \"...)."
+        },
+        {
+          "ticker": "BE",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, BE, yahoo_page, 2026-10-15 11:15:51.19391+08, 2026-12-31, 2027-12-31, 0.67123, 0.83272, 2.72477, 4.8744, 4117229600, 6770506300, 1, null, 1, 1, 25, 3.08, 2.49, 283.0077, 303, {\"eps_trend\": {\"0q\": {\"current\": 0.67123, \"7daysAgo\": 0.6677, \"3...)."
+        },
+        {
+          "ticker": "DELL",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, DELL, yahoo_page, 2026-10-15 11:15:55.231246+08, 2027-01-30, 2028-01-30, 6.55748, 6.87486, 25.89655, 26.8056, 193444314600, 229120787530, 1, null, 23, 0, 26, 28.93, 25.5, 593, 600, {\"eps_trend\": {\"0q\": {\"current\": 6.55748, \"7daysAgo\": 6.55748, \"...)."
+        },
+        {
+          "ticker": "SMCI",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, SMCI, yahoo_page, 2026-10-15 11:16:02.426153+08, 2027-06-30, 2028-06-30, 1.03705, 1.03851, 4.33765, 5.32592, 67129653040, 78762368070, 0, null, 0, 1, 18, 5.13, 3.5, 42.26667, 43, {\"eps_trend\": {\"0q\": {\"current\": 1.03705, \"7daysAgo\": 1.03705, \"...)."
+        },
+        {
+          "ticker": "CRWV",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CRWV, yahoo_page, 2026-10-15 11:16:06.549362+08, 2026-12-31, 2027-12-31, -1.52697, -1.04829, -5.11243, -4.32516, 12869752880, 26295931800, 0, null, 1, 4, 22, -3.82931, -5.89, 141.47368, 147.5, {\"eps_trend\": {\"0q\": {\"current\": -1.52697, \"7daysAgo\": -1.52621,...)."
+        },
+        {
+          "ticker": "CRWD",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, CRWD, yahoo_page, 2026-10-15 11:16:10.7867+08, 2027-01-31, 2028-01-31, 0.31146, 0.35708, 1.25668, 1.6095, 6007381560, 7371378280, 0, null, 48, 1, 51, 1.32, 1.24633, 244.01, 247.5, {\"eps_trend\": {\"0q\": {\"current\": 0.31146, \"7daysAgo\": 0.31101, \"...)."
+        },
+        {
+          "ticker": "PANW",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, PANW, yahoo_page, 2026-10-15 11:16:18.419879+08, 2027-07-31, 2028-07-31, 0.9715, 0.43088, 4.19114, 2.21057, 14173386810, 16227795210, 0, null, 37, 10, 54, 4.57, 4.15, 397.92, 412.5, {\"eps_trend\": {\"0q\": {\"current\": 0.9715, \"7daysAgo\": 0.9715, \"30...)."
+        },
+        {
+          "ticker": "FTNT",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, FTNT, yahoo_page, 2026-10-15 11:16:21.842265+08, 2026-12-31, 2027-12-31, 0.8583, 0.87606, 3.45154, 3.77896, 8119954320, 9041438610, 0, null, 0, 0, 41, 3.62, 3.41, 165.70833, 165, {\"eps_trend\": {\"0q\": {\"current\": 0.8583, \"7daysAgo\": 0.85724, \"3...)."
+        },
+        {
+          "ticker": "ZS",
+          "reason": "CheckViolation: new row for relation \"consensus_snapshot\" violates check constraint \"consensus_snapshot_source_check\"\nDETAIL:  Failing row contains (2026-10-15, ZS, yahoo_page, 2026-10-15 11:16:26.570049+08, 2027-07-31, 2028-07-31, 1.1611, 1.18448, 4.9082, 5.62336, 3931421480, 4579298150, 38, null, 39, 0, 43, 5.42, 4.86, 233.38068, 242.5, {\"eps_trend\": {\"0q\": {\"current\": 1.1611, \"7daysAgo\": 1.1611, \"30...)."
+        }
+      ],
+      "note": "past 10:30 Beijing deadline",
+      "deadline_met": false
+    },
+    "snapshots": []
+  },
+  "older_source_failures": [
+    {
+      "task_name": "m2_acceptance_consensus_1",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-14 20:03:44.349797+08:00",
+      "ended_at": "2026-10-14 20:04:30.361824+08:00",
+      "status": "degraded",
+      "processed_count": 0,
+      "error_summary": null
+    },
+    {
+      "task_name": "m2_acceptance_consensus_2",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-14 20:04:30.419649+08:00",
+      "ended_at": "2026-10-14 20:05:20.373834+08:00",
+      "status": "degraded",
+      "processed_count": 0,
+      "error_summary": null
+    }
+  ],
+  "timing_limitation": "The successful collection finished after 10:30 Beijing; status remained degraded and deadline_met=false."
+}

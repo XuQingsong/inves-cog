@@ -1,0 +1,834 @@
+{
+  "spec": "inves-cog R7 T02/M2 legacy oracle",
+  "source_repo": "XuQingsong/muse",
+  "source_commit": "aacea04e4562f70854d69330fe724aa2799f2858",
+  "source_files_sha256": {
+    "screen_asof_2026_01_01.py": "428e87d5a7ca3941b84bd25705c0dc74061b1204b7b4ac7c9f90041410991f2a",
+    "factor_scorecard_v2.py": "360ea40ca447b762baf4a57de68057490524aa189a49b836983a123d92f823a2",
+    "factor_framework_v3.py": "171dbf2d1cd5e0000a5aa26797636e84c704a8c87d756f00e3d86f9210b585ce"
+  },
+  "run_params": {
+    "function": "pit_fundamentals(t, price)",
+    "asof_dates": [
+      "2026-01-12",
+      "2026-05-01",
+      "2026-10-07"
+    ],
+    "pit_semantics": "模块全局 CUTOFF=as_of；财报条目需 end<=CUTOFF 且 filed<=CUTOFF；营收过期判据 rev.index[-1] < CUTOFF-180天；股本即时值需 >= CUTOFF-400天",
+    "price_input": "data.prices_daily.close @ as_of（当日收盘价，美元）",
+    "cache": "pit_cache/{T}_facts.json（SEC companyfacts 原始响应，运行前已预置，运行中无网络抓取）"
+  },
+  "generated_at_cst": "2026-10-14T09:55:21.553533+08:00",
+  "items": [
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-01-12",
+      "file": "AAPL_2026-01-12.json.gz",
+      "price_input": 260.25,
+      "cache_sha256": "73a86c6aedc31f77cac2ea4df5f80f0b3bd7e6eb58bb4e01444fbedf3afb9c43",
+      "output_sha256": "ebe40675ad7e338f73ae1a288eba810c917caed3eddf40dbdb845a09045945b1",
+      "n_fields": 28
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-01-12",
+      "file": "MSFT_2026-01-12.json.gz",
+      "price_input": 477.179992675781,
+      "cache_sha256": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+      "output_sha256": "5154ecf34af45c7fee1c6fe61dec6c5da4a5d6c4e99033e5e117257670e4d9b4",
+      "n_fields": 27
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-01-12",
+      "file": "NVDA_2026-01-12.json.gz",
+      "price_input": 184.940002441406,
+      "cache_sha256": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+      "output_sha256": "2d88da28f1124fa8cb3187f096668e7fec378bbcefd2d36f4eeabc7dec71245b",
+      "n_fields": 27
+    },
+    {
+      "ticker": "META",
+      "as_of": "2026-01-12",
+      "file": "META_2026-01-12.json.gz",
+      "price_input": 641.969970703125,
+      "cache_sha256": "7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+      "output_sha256": "f6a8e27c9458b5cfa4aa48dba27e9f141b8006cffc2687088ed535b05907e50e",
+      "n_fields": 25
+    },
+    {
+      "ticker": "AMZN",
+      "as_of": "2026-01-12",
+      "file": "AMZN_2026-01-12.json.gz",
+      "price_input": 246.470001220703,
+      "cache_sha256": "7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+      "output_sha256": "63e817e4d86150bca59c9c280c52d600c8905cf821eef68c28d68831c422cf15",
+      "n_fields": 24
+    },
+    {
+      "ticker": "AVGO",
+      "as_of": "2026-01-12",
+      "file": "AVGO_2026-01-12.json.gz",
+      "price_input": 352.209991455078,
+      "cache_sha256": "3bdb6644c12addf1e63c4dc861008d7804fbf3d3f5aa6eb9b97f72c0e89a7adf",
+      "output_sha256": "9a104c58702699c82b35a30ba72fbd3bf537ee3a9f05c55cd4fa023b94c31508",
+      "n_fields": 27
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-01-12",
+      "file": "AMD_2026-01-12.json.gz",
+      "price_input": 207.690002441406,
+      "cache_sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e",
+      "output_sha256": "bb11c04161e085012f7f9a8d00ef1a2f026c806ca3a9695cf5fb2ca4a5438717",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MRVL",
+      "as_of": "2026-01-12",
+      "file": "MRVL_2026-01-12.json.gz",
+      "price_input": 82.8899993896484,
+      "cache_sha256": "2190d7525c2749e96636b0f95376c5f7d73d9cb47a7452b3a94f70e156ec1169",
+      "output_sha256": "c48d6c053ece66ddd7ab5278ec1ae7712c1dfeaf886389957db844d788441fa0",
+      "n_fields": 27
+    },
+    {
+      "ticker": "PLTR",
+      "as_of": "2026-01-12",
+      "file": "PLTR_2026-01-12.json.gz",
+      "price_input": 179.410003662109,
+      "cache_sha256": "43014a2e04fa2784dd669d337a65c9eac9374ea638dacb292ecf19905408651f",
+      "output_sha256": "8e34f675f37f2305a23df557b387fdb6ba9d1b6f235beb717252a6781aa1008c",
+      "n_fields": 27
+    },
+    {
+      "ticker": "CRM",
+      "as_of": "2026-01-12",
+      "file": "CRM_2026-01-12.json.gz",
+      "price_input": 259.399993896484,
+      "cache_sha256": "c36bddafd22061dfe573fa22199074d882196f6667cf641eb30c8cec5a340ae5",
+      "output_sha256": "6c84e2fcbc94d2e0cad42bb90d64135fc3c84bba1d9cf2eb24dba64dc582c5c5",
+      "n_fields": 27
+    },
+    {
+      "ticker": "NOW",
+      "as_of": "2026-01-12",
+      "file": "NOW_2026-01-12.json.gz",
+      "price_input": 142.639999389648,
+      "cache_sha256": "1131b67e8d2d6cd6415cafa82c8874cb2139016e4c8d7e04b1728837a8bbec2c",
+      "output_sha256": "01c3728f83a623affdd5e20832307086b0d0ccaf0aaac668ad88bb951445bf6c",
+      "n_fields": 28
+    },
+    {
+      "ticker": "ORCL",
+      "as_of": "2026-01-12",
+      "file": "ORCL_2026-01-12.json.gz",
+      "price_input": 204.679992675781,
+      "cache_sha256": "65523545f040abaea1dfcf321da2a5aec85e7f34387244b0ffcb26e4c8707f7d",
+      "output_sha256": "2c8e5947a4e63ed3266afa023f8169b020dbbaae78bd0db8ec856f81f362997f",
+      "n_fields": 25
+    },
+    {
+      "ticker": "NFLX",
+      "as_of": "2026-01-12",
+      "file": "NFLX_2026-01-12.json.gz",
+      "price_input": 89.4100036621094,
+      "cache_sha256": "00f3449073d90dfa3aec4e384de24b70d92d897f90c67d6bca61f23e33d38634",
+      "output_sha256": "dc3a749867f95456c5bbeeb5ffa73db8bcd90159f5e25d2babaf47749205e28f",
+      "n_fields": 26
+    },
+    {
+      "ticker": "TSLA",
+      "as_of": "2026-01-12",
+      "file": "TSLA_2026-01-12.json.gz",
+      "price_input": 448.959991455078,
+      "cache_sha256": "d0c2b9288d027a6d735039a6fe874a348b65a7fdbc6c133130666c777c885204",
+      "output_sha256": "5c41d065606ae392bf6e2d90189f00cbd8af477a84e95359edd9267b5599eb09",
+      "n_fields": 27
+    },
+    {
+      "ticker": "COST",
+      "as_of": "2026-01-12",
+      "file": "COST_2026-01-12.json.gz",
+      "price_input": 943.080017089844,
+      "cache_sha256": "b675ced201b27ede2b0d26ca6fd873befe96a1afa9679339a2d0b964187dcdff",
+      "output_sha256": "dcfaf0b44af53eeffdf148590f67f35909499b95b3767f010ee3b1e134727252",
+      "n_fields": 25
+    },
+    {
+      "ticker": "WMT",
+      "as_of": "2026-01-12",
+      "file": "WMT_2026-01-12.json.gz",
+      "price_input": 117.970001220703,
+      "cache_sha256": "54ec3fbf36dc203dd00a0333396b3df2b6695ecdf6cbb19b6ec41b053d86b517",
+      "output_sha256": "d73054f74fd7a7cfcd5cf0189f11698d88275e9c9f82a808872b12f2a983ec64",
+      "n_fields": 24
+    },
+    {
+      "ticker": "HD",
+      "as_of": "2026-01-12",
+      "file": "HD_2026-01-12.json.gz",
+      "price_input": 374.940002441406,
+      "cache_sha256": "aaf03befa1695d87ce1252bc08ca278b65be63782e46dc0b2858aab7a32c1be2",
+      "output_sha256": "c32c926f1c636899065aa0336c5d1058463fcda9e540725f3c1f9a51ad95ef6e",
+      "n_fields": 27
+    },
+    {
+      "ticker": "UNH",
+      "as_of": "2026-01-12",
+      "file": "UNH_2026-01-12.json.gz",
+      "price_input": 340.510009765625,
+      "cache_sha256": "6c9dff59732b7c597542b2d5eadaae0313ca0de03defdba2c00203e693632d76",
+      "output_sha256": "e3bb884adf1b4a93692a41caf3ea0a7a03f4a379caf269bdb0705a5875c0b019",
+      "n_fields": 25
+    },
+    {
+      "ticker": "LLY",
+      "as_of": "2026-01-12",
+      "file": "LLY_2026-01-12.json.gz",
+      "price_input": 1081.0,
+      "cache_sha256": "3fe29099e6efaef9acac95711c271de1a644602939ea18487e29708310985942",
+      "output_sha256": "f817b4761ef821fa3c8830a91ff0d5094056a5211205a09de7430657e7558693",
+      "n_fields": 25
+    },
+    {
+      "ticker": "JNJ",
+      "as_of": "2026-01-12",
+      "file": "JNJ_2026-01-12.json.gz",
+      "price_input": 209.720001220703,
+      "cache_sha256": "7141c0c988fa1d30f779687b4c78ab561e19aa5990a58ad86a66467d0a783980",
+      "output_sha256": "8355d055bd3aec62372bf8cd186661090d31a4f791cb44694a4ab3c34e92d5e9",
+      "n_fields": 27
+    },
+    {
+      "ticker": "JPM",
+      "as_of": "2026-01-12",
+      "file": "JPM_2026-01-12.json.gz",
+      "price_input": 324.489990234375,
+      "cache_sha256": "c2e8113ba9d4a3197865714b8594ef65121cce837fcb120763450b708f851083",
+      "output_sha256": "134443ffddad1d1088a9a0bfc5583646641ecf461f965d1b66e2d4ca842813a7",
+      "n_fields": 19
+    },
+    {
+      "ticker": "V",
+      "as_of": "2026-01-12",
+      "file": "V_2026-01-12.json.gz",
+      "price_input": 343.200012207031,
+      "cache_sha256": "df3caf7c5667296569fc3074ce2ff13629c9a555184a06c5ea9925b43e63971d",
+      "output_sha256": "a2ade860c9a65f34abe69d737fc8dfd48721908b2d6e39364e5f462b8c5a7281",
+      "n_fields": 23
+    },
+    {
+      "ticker": "MA",
+      "as_of": "2026-01-12",
+      "file": "MA_2026-01-12.json.gz",
+      "price_input": 566.280029296875,
+      "cache_sha256": "78082e9cbae91bfa8c1480d214bd20c8d35fcbbcc72d71eaf01739c48b1e9511",
+      "output_sha256": "9a4388dab18fcec25020b7f259940b4ba42f44c86d9017b3c9dac4ba614f6e78",
+      "n_fields": 25
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-01-12",
+      "file": "XOM_2026-01-12.json.gz",
+      "price_input": 124.029998779297,
+      "cache_sha256": "98bde704a8084ffb3578951641249b72c0172b88ed37d2e59f6f222027755d2d",
+      "output_sha256": "f0045078133bb11a3068026a7d04dffa839cea9bad915068d2cadd4bc60afb0c",
+      "n_fields": 5
+    },
+    {
+      "ticker": "CVX",
+      "as_of": "2026-01-12",
+      "file": "CVX_2026-01-12.json.gz",
+      "price_input": 162.339996337891,
+      "cache_sha256": "c09b160603412cb45acf1bb9bf3732e531dedfb548afa0e275fd8aefd7ab397e",
+      "output_sha256": "cdddef9be13e5a1f36083cb260d1d77561ceaa3b3375656543b42b4e47bf7e1f",
+      "n_fields": 24
+    },
+    {
+      "ticker": "CAT",
+      "as_of": "2026-01-12",
+      "file": "CAT_2026-01-12.json.gz",
+      "price_input": 629.77001953125,
+      "cache_sha256": "01ddc6ffa741f0a7da440e2949b2ed19cec14fab35435a398e3f3d0100019715",
+      "output_sha256": "41dd436af9039a5e9bb23750e7c97f8cd66893e6a5e565fe4a80b9d55aa9f9ee",
+      "n_fields": 23
+    },
+    {
+      "ticker": "GE",
+      "as_of": "2026-01-12",
+      "file": "GE_2026-01-12.json.gz",
+      "price_input": 324.170013427734,
+      "cache_sha256": "8c18acb17bbe0760fae6205c5df75b805480c58d4d1dbbabeba206d9ca36e1e3",
+      "output_sha256": "d596a51c2b106202560841eac16093158bfd3c8399ecdf13434a428ff32821ab",
+      "n_fields": 25
+    },
+    {
+      "ticker": "ADBE",
+      "as_of": "2026-01-12",
+      "file": "ADBE_2026-01-12.json.gz",
+      "price_input": 327.649993896484,
+      "cache_sha256": "86a5689aa9aa7b0f9e95be21b48b0305376e014c8dbf3b8bb3b4b131f1b6a0c4",
+      "output_sha256": "3bb7bd78477650e436d04b52c4e21f074ace81991ca04b7381e225f22462374e",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MU",
+      "as_of": "2026-01-12",
+      "file": "MU_2026-01-12.json.gz",
+      "price_input": 345.869995117188,
+      "cache_sha256": "a8b088c2111daef36536e53c81fef4c0f01220c64933e126a665b00a9257f882",
+      "output_sha256": "c0b8e9fb48faa5cbfa6b12cc925df3f08f81eb591f5bdfd4f4b3aea7108ba88f",
+      "n_fields": 27
+    },
+    {
+      "ticker": "GOOGL",
+      "as_of": "2026-01-12",
+      "file": "GOOGL_2026-01-12.json.gz",
+      "price_input": 331.859985351562,
+      "cache_sha256": "a017f26ee88cb4a639d1c1ddb06d53b4afe22f0ac89cabec7cd67c88919fe1c5",
+      "output_sha256": "82baa33feadd6d4b54a2195336c5e995abf5a048892e9e544ff88a60c6a510ef",
+      "n_fields": 25
+    },
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-05-01",
+      "file": "AAPL_2026-05-01.json.gz",
+      "price_input": 280.140014648438,
+      "cache_sha256": "73a86c6aedc31f77cac2ea4df5f80f0b3bd7e6eb58bb4e01444fbedf3afb9c43",
+      "output_sha256": "14ae29097e7c8f5a23a93f0ec1ac2d252262b9e7c5f533ec13a12c545b914dcb",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-05-01",
+      "file": "MSFT_2026-05-01.json.gz",
+      "price_input": 414.440002441406,
+      "cache_sha256": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+      "output_sha256": "1a5cae428b5771f4290009641fe7a07175aae0b180a52f7b018ee9c73ebc292e",
+      "n_fields": 27
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-05-01",
+      "file": "NVDA_2026-05-01.json.gz",
+      "price_input": 198.449996948242,
+      "cache_sha256": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+      "output_sha256": "5423d73bf9d9e0aafc8a7a79f2f2b546649e44c30a77fdcb95fc8469e1349c36",
+      "n_fields": 28
+    },
+    {
+      "ticker": "META",
+      "as_of": "2026-05-01",
+      "file": "META_2026-05-01.json.gz",
+      "price_input": 608.75,
+      "cache_sha256": "7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+      "output_sha256": "a18d1cb9a96778e7834e5c7753904dd70936782ee12a035ac096ff9cbf7cf982",
+      "n_fields": 25
+    },
+    {
+      "ticker": "AMZN",
+      "as_of": "2026-05-01",
+      "file": "AMZN_2026-05-01.json.gz",
+      "price_input": 268.260009765625,
+      "cache_sha256": "7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+      "output_sha256": "400ed0218147f23db22753b69262c6a0df1ea42d282c6f5e517fabbdf5ddb15c",
+      "n_fields": 24
+    },
+    {
+      "ticker": "AVGO",
+      "as_of": "2026-05-01",
+      "file": "AVGO_2026-05-01.json.gz",
+      "price_input": 421.279998779297,
+      "cache_sha256": "3bdb6644c12addf1e63c4dc861008d7804fbf3d3f5aa6eb9b97f72c0e89a7adf",
+      "output_sha256": "4594767a931e3679445fe1493e39d82cef1cdbcd3fe88f1962bc2d8c8bb16880",
+      "n_fields": 27
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-05-01",
+      "file": "AMD_2026-05-01.json.gz",
+      "price_input": 360.540008544922,
+      "cache_sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e",
+      "output_sha256": "5696829afd353db690f57eadc5ac25159ad5879b91a8c0b946a6471d9eb0cac0",
+      "n_fields": 28
+    },
+    {
+      "ticker": "MRVL",
+      "as_of": "2026-05-01",
+      "file": "MRVL_2026-05-01.json.gz",
+      "price_input": 164.949996948242,
+      "cache_sha256": "2190d7525c2749e96636b0f95376c5f7d73d9cb47a7452b3a94f70e156ec1169",
+      "output_sha256": "29a68d89cca7edac32f1cc7218776c7b39a537827138152eac28c2cd674997b4",
+      "n_fields": 28
+    },
+    {
+      "ticker": "PLTR",
+      "as_of": "2026-05-01",
+      "file": "PLTR_2026-05-01.json.gz",
+      "price_input": 144.070007324219,
+      "cache_sha256": "43014a2e04fa2784dd669d337a65c9eac9374ea638dacb292ecf19905408651f",
+      "output_sha256": "57b12eeda0715890cb815fa894daa2a25c2a11153da59d8c02061e8efad684e0",
+      "n_fields": 28
+    },
+    {
+      "ticker": "CRM",
+      "as_of": "2026-05-01",
+      "file": "CRM_2026-05-01.json.gz",
+      "price_input": 183.820007324219,
+      "cache_sha256": "c36bddafd22061dfe573fa22199074d882196f6667cf641eb30c8cec5a340ae5",
+      "output_sha256": "395247ec8ced76cc923af10e4db3e5392831cc50ea17e3180f72b35e6c4a03b1",
+      "n_fields": 28
+    },
+    {
+      "ticker": "NOW",
+      "as_of": "2026-05-01",
+      "file": "NOW_2026-05-01.json.gz",
+      "price_input": 91.1600036621094,
+      "cache_sha256": "1131b67e8d2d6cd6415cafa82c8874cb2139016e4c8d7e04b1728837a8bbec2c",
+      "output_sha256": "5efd982d73f67c5d23e404c9f1fda48835b70e07b4a6d8e6fdb573354a67e2e8",
+      "n_fields": 27
+    },
+    {
+      "ticker": "ORCL",
+      "as_of": "2026-05-01",
+      "file": "ORCL_2026-05-01.json.gz",
+      "price_input": 171.830001831055,
+      "cache_sha256": "65523545f040abaea1dfcf321da2a5aec85e7f34387244b0ffcb26e4c8707f7d",
+      "output_sha256": "3eee8a41ab0a66436595dd9aafff24053d052f3d121b3ede966edccaeebe5b9b",
+      "n_fields": 25
+    },
+    {
+      "ticker": "NFLX",
+      "as_of": "2026-05-01",
+      "file": "NFLX_2026-05-01.json.gz",
+      "price_input": 92.0599975585938,
+      "cache_sha256": "00f3449073d90dfa3aec4e384de24b70d92d897f90c67d6bca61f23e33d38634",
+      "output_sha256": "71c7284acb1aa376149d7aa025fc11d311c9b965681dcfcc6496f0888c9b1fcf",
+      "n_fields": 25
+    },
+    {
+      "ticker": "TSLA",
+      "as_of": "2026-05-01",
+      "file": "TSLA_2026-05-01.json.gz",
+      "price_input": 390.820007324219,
+      "cache_sha256": "d0c2b9288d027a6d735039a6fe874a348b65a7fdbc6c133130666c777c885204",
+      "output_sha256": "db3eaf5d7bd600bdb73f9d7cb1718b35b91e67ebf2878a07409e836105b2160c",
+      "n_fields": 26
+    },
+    {
+      "ticker": "COST",
+      "as_of": "2026-05-01",
+      "file": "COST_2026-05-01.json.gz",
+      "price_input": 1011.70001220703,
+      "cache_sha256": "b675ced201b27ede2b0d26ca6fd873befe96a1afa9679339a2d0b964187dcdff",
+      "output_sha256": "17683c9de35bce8a08076ae2a598195c38b9d1d0365d461576378992d8195433",
+      "n_fields": 25
+    },
+    {
+      "ticker": "WMT",
+      "as_of": "2026-05-01",
+      "file": "WMT_2026-05-01.json.gz",
+      "price_input": 131.600006103516,
+      "cache_sha256": "54ec3fbf36dc203dd00a0333396b3df2b6695ecdf6cbb19b6ec41b053d86b517",
+      "output_sha256": "2bd068e3933bc686ef9348059604fa95a570533e01ae62991ace05c0363406f1",
+      "n_fields": 25
+    },
+    {
+      "ticker": "HD",
+      "as_of": "2026-05-01",
+      "file": "HD_2026-05-01.json.gz",
+      "price_input": 323.880004882812,
+      "cache_sha256": "aaf03befa1695d87ce1252bc08ca278b65be63782e46dc0b2858aab7a32c1be2",
+      "output_sha256": "46a971adfdb9ca1645967dcdadb626f3549aaad55e4a6c05388b0bf25c994fc0",
+      "n_fields": 27
+    },
+    {
+      "ticker": "UNH",
+      "as_of": "2026-05-01",
+      "file": "UNH_2026-05-01.json.gz",
+      "price_input": 368.779998779297,
+      "cache_sha256": "6c9dff59732b7c597542b2d5eadaae0313ca0de03defdba2c00203e693632d76",
+      "output_sha256": "794e48d7548440c3740814b8f0fc622a16a98241e918504bf0f53fce799226c1",
+      "n_fields": 26
+    },
+    {
+      "ticker": "LLY",
+      "as_of": "2026-05-01",
+      "file": "LLY_2026-05-01.json.gz",
+      "price_input": 963.330017089844,
+      "cache_sha256": "3fe29099e6efaef9acac95711c271de1a644602939ea18487e29708310985942",
+      "output_sha256": "235d6bdcf3075478710ab92a8de9d6200c2eb49b836220133e6ba6aeff2efb94",
+      "n_fields": 25
+    },
+    {
+      "ticker": "JNJ",
+      "as_of": "2026-05-01",
+      "file": "JNJ_2026-05-01.json.gz",
+      "price_input": 227.190002441406,
+      "cache_sha256": "7141c0c988fa1d30f779687b4c78ab561e19aa5990a58ad86a66467d0a783980",
+      "output_sha256": "e27ea9ed0b5256decbaa29f5848f527ab7fc7017048193ad5d0feaaf298460ee",
+      "n_fields": 27
+    },
+    {
+      "ticker": "JPM",
+      "as_of": "2026-05-01",
+      "file": "JPM_2026-05-01.json.gz",
+      "price_input": 312.470001220703,
+      "cache_sha256": "c2e8113ba9d4a3197865714b8594ef65121cce837fcb120763450b708f851083",
+      "output_sha256": "b217f182ee6b0ff8e9ee55776c1ff2fd1e798361c0d37d751901945e4d30ca2e",
+      "n_fields": 19
+    },
+    {
+      "ticker": "V",
+      "as_of": "2026-05-01",
+      "file": "V_2026-05-01.json.gz",
+      "price_input": 328.029998779297,
+      "cache_sha256": "df3caf7c5667296569fc3074ce2ff13629c9a555184a06c5ea9925b43e63971d",
+      "output_sha256": "16f46570cc79452f386b179018bf558c41e7d3fc96c2c6b7942857b58f597c77",
+      "n_fields": 22
+    },
+    {
+      "ticker": "MA",
+      "as_of": "2026-05-01",
+      "file": "MA_2026-05-01.json.gz",
+      "price_input": 495.459991455078,
+      "cache_sha256": "78082e9cbae91bfa8c1480d214bd20c8d35fcbbcc72d71eaf01739c48b1e9511",
+      "output_sha256": "b0bb2b7e5a856f5460c96a4255839e66eddce654d66a358f64fe893508ce745a",
+      "n_fields": 25
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-05-01",
+      "file": "XOM_2026-05-01.json.gz",
+      "price_input": 152.75,
+      "cache_sha256": "98bde704a8084ffb3578951641249b72c0172b88ed37d2e59f6f222027755d2d",
+      "output_sha256": "9a0299f0f8149b7f4f23c9d33866dd3dd3cd24fe8119f37bb27cf9bf4e857cf0",
+      "n_fields": 5
+    },
+    {
+      "ticker": "CVX",
+      "as_of": "2026-05-01",
+      "file": "CVX_2026-05-01.json.gz",
+      "price_input": 190.630004882812,
+      "cache_sha256": "c09b160603412cb45acf1bb9bf3732e531dedfb548afa0e275fd8aefd7ab397e",
+      "output_sha256": "466a7f45caff34f2f9f6c9694d779eb1638b4d2bac6c0b8223f0292fa1500b8e",
+      "n_fields": 25
+    },
+    {
+      "ticker": "CAT",
+      "as_of": "2026-05-01",
+      "file": "CAT_2026-05-01.json.gz",
+      "price_input": 889.669982910156,
+      "cache_sha256": "01ddc6ffa741f0a7da440e2949b2ed19cec14fab35435a398e3f3d0100019715",
+      "output_sha256": "2b0e316a26ad9a140fc0a666a11541024dda8f11ba663672e25777cd00c6d06c",
+      "n_fields": 24
+    },
+    {
+      "ticker": "GE",
+      "as_of": "2026-05-01",
+      "file": "GE_2026-05-01.json.gz",
+      "price_input": 286.510009765625,
+      "cache_sha256": "8c18acb17bbe0760fae6205c5df75b805480c58d4d1dbbabeba206d9ca36e1e3",
+      "output_sha256": "6ea94e297844b57fccbca4d4955aed15f4b0c04d4d222fdaa3c1b7d50ea514c9",
+      "n_fields": 25
+    },
+    {
+      "ticker": "ADBE",
+      "as_of": "2026-05-01",
+      "file": "ADBE_2026-05-01.json.gz",
+      "price_input": 250.710006713867,
+      "cache_sha256": "86a5689aa9aa7b0f9e95be21b48b0305376e014c8dbf3b8bb3b4b131f1b6a0c4",
+      "output_sha256": "113b08c02ab6a1b7c05f5fdce7ac0d0fa7e7f28f334db5f9c4be2f1981fa9ef4",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MU",
+      "as_of": "2026-05-01",
+      "file": "MU_2026-05-01.json.gz",
+      "price_input": 542.210021972656,
+      "cache_sha256": "a8b088c2111daef36536e53c81fef4c0f01220c64933e126a665b00a9257f882",
+      "output_sha256": "c80b648aff6b3cc599050c7ed8d7ad8cf30c54873a966dc1fe1aef352fe96d3b",
+      "n_fields": 27
+    },
+    {
+      "ticker": "GOOGL",
+      "as_of": "2026-05-01",
+      "file": "GOOGL_2026-05-01.json.gz",
+      "price_input": 385.690002441406,
+      "cache_sha256": "a017f26ee88cb4a639d1c1ddb06d53b4afe22f0ac89cabec7cd67c88919fe1c5",
+      "output_sha256": "9db8fced98f96900d62564bc8f9b76e421cbdf719afb996ac46941110ac0290b",
+      "n_fields": 25
+    },
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-10-07",
+      "file": "AAPL_2026-10-07.json.gz",
+      "price_input": 336.670013427734,
+      "cache_sha256": "73a86c6aedc31f77cac2ea4df5f80f0b3bd7e6eb58bb4e01444fbedf3afb9c43",
+      "output_sha256": "b643c921d502e29c9b93db4cdbac0b6d6205776a0880d6f6d82dbf866e0cb98a",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-10-07",
+      "file": "MSFT_2026-10-07.json.gz",
+      "price_input": 529.760009765625,
+      "cache_sha256": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+      "output_sha256": "93c311a65ca6857cd3e9415cba5b569e5968adde55a8a78d66a8290c2654beba",
+      "n_fields": 28
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-10-07",
+      "file": "NVDA_2026-10-07.json.gz",
+      "price_input": 237.470001220703,
+      "cache_sha256": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+      "output_sha256": "c92e972f7cc0ef70530fa84bd30bb5d62a7906dfec9c8b1c604cad469349f987",
+      "n_fields": 27
+    },
+    {
+      "ticker": "META",
+      "as_of": "2026-10-07",
+      "file": "META_2026-10-07.json.gz",
+      "price_input": 721.309997558594,
+      "cache_sha256": "7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+      "output_sha256": "3c958652c8dd243023ca9983dd209f83ccbeca1246756220c5b5da956275c4c6",
+      "n_fields": 25
+    },
+    {
+      "ticker": "AMZN",
+      "as_of": "2026-10-07",
+      "file": "AMZN_2026-10-07.json.gz",
+      "price_input": 259.920013427734,
+      "cache_sha256": "7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+      "output_sha256": "badd451895cc8b4c8184e224b5eaed01a0149b97fa68a49ff0df8e76c8b81994",
+      "n_fields": 24
+    },
+    {
+      "ticker": "AVGO",
+      "as_of": "2026-10-07",
+      "file": "AVGO_2026-10-07.json.gz",
+      "price_input": 376.510009765625,
+      "cache_sha256": "3bdb6644c12addf1e63c4dc861008d7804fbf3d3f5aa6eb9b97f72c0e89a7adf",
+      "output_sha256": "9162f5f322c30f091fae2236a47f1f3bed6ef452269846243a550dd1255e7044",
+      "n_fields": 27
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-10-07",
+      "file": "AMD_2026-10-07.json.gz",
+      "price_input": 645.859985351562,
+      "cache_sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e",
+      "output_sha256": "fab8409c42a237e97c4950246de9ca92312a1fb81ec282dba7a9c55470204616",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MRVL",
+      "as_of": "2026-10-07",
+      "file": "MRVL_2026-10-07.json.gz",
+      "price_input": 284.679992675781,
+      "cache_sha256": "2190d7525c2749e96636b0f95376c5f7d73d9cb47a7452b3a94f70e156ec1169",
+      "output_sha256": "b85cbbe4039f02c117050e5dc5b09cddd1ab00dfc5cdfcaad320395ca42edaa7",
+      "n_fields": 27
+    },
+    {
+      "ticker": "PLTR",
+      "as_of": "2026-10-07",
+      "file": "PLTR_2026-10-07.json.gz",
+      "price_input": 194.119995117188,
+      "cache_sha256": "43014a2e04fa2784dd669d337a65c9eac9374ea638dacb292ecf19905408651f",
+      "output_sha256": "08f6b8a42fc67c9e4a35d37d65cd4fea9457c91bb744da6855358217accc2736",
+      "n_fields": 27
+    },
+    {
+      "ticker": "CRM",
+      "as_of": "2026-10-07",
+      "file": "CRM_2026-10-07.json.gz",
+      "price_input": 224.559997558594,
+      "cache_sha256": "c36bddafd22061dfe573fa22199074d882196f6667cf641eb30c8cec5a340ae5",
+      "output_sha256": "2ccdf8a48499006664dfc86903576a834cfafdec2b1271928811dcef9be3ab7d",
+      "n_fields": 27
+    },
+    {
+      "ticker": "NOW",
+      "as_of": "2026-10-07",
+      "file": "NOW_2026-10-07.json.gz",
+      "price_input": 137.869995117188,
+      "cache_sha256": "1131b67e8d2d6cd6415cafa82c8874cb2139016e4c8d7e04b1728837a8bbec2c",
+      "output_sha256": "53a46732d71537ca05e71ed5eeec54cf05d4acff071ab42007f2e91e6cd56f0d",
+      "n_fields": 27
+    },
+    {
+      "ticker": "ORCL",
+      "as_of": "2026-10-07",
+      "file": "ORCL_2026-10-07.json.gz",
+      "price_input": 143.559997558594,
+      "cache_sha256": "65523545f040abaea1dfcf321da2a5aec85e7f34387244b0ffcb26e4c8707f7d",
+      "output_sha256": "a8215de35924ee7b94f99359df8f1c3e81c2272867d55cebd6f192a148c65699",
+      "n_fields": 25
+    },
+    {
+      "ticker": "NFLX",
+      "as_of": "2026-10-07",
+      "file": "NFLX_2026-10-07.json.gz",
+      "price_input": 69.6999969482422,
+      "cache_sha256": "00f3449073d90dfa3aec4e384de24b70d92d897f90c67d6bca61f23e33d38634",
+      "output_sha256": "5a06ca3ed6c50d86b0e471ada6d0e73de94c94299f460fecedb76ea556874aa7",
+      "n_fields": 25
+    },
+    {
+      "ticker": "TSLA",
+      "as_of": "2026-10-07",
+      "file": "TSLA_2026-10-07.json.gz",
+      "price_input": 377.809997558594,
+      "cache_sha256": "d0c2b9288d027a6d735039a6fe874a348b65a7fdbc6c133130666c777c885204",
+      "output_sha256": "acf3ac0989d1d7b3615435559bce808400db6f52cbc88206bfaecde828efa370",
+      "n_fields": 27
+    },
+    {
+      "ticker": "COST",
+      "as_of": "2026-10-07",
+      "file": "COST_2026-10-07.json.gz",
+      "price_input": 942.25,
+      "cache_sha256": "b675ced201b27ede2b0d26ca6fd873befe96a1afa9679339a2d0b964187dcdff",
+      "output_sha256": "d5df8c753ff51cceb3dc3e5e0dd9aa81873063bb5fab7c5e223bb32a097560ec",
+      "n_fields": 25
+    },
+    {
+      "ticker": "WMT",
+      "as_of": "2026-10-07",
+      "file": "WMT_2026-10-07.json.gz",
+      "price_input": 108.160003662109,
+      "cache_sha256": "54ec3fbf36dc203dd00a0333396b3df2b6695ecdf6cbb19b6ec41b053d86b517",
+      "output_sha256": "ce011cae7b43d5c0a561be6c1ce8336540fee19c84dfb3506135083425fe3b75",
+      "n_fields": 24
+    },
+    {
+      "ticker": "HD",
+      "as_of": "2026-10-07",
+      "file": "HD_2026-10-07.json.gz",
+      "price_input": 285.769989013672,
+      "cache_sha256": "aaf03befa1695d87ce1252bc08ca278b65be63782e46dc0b2858aab7a32c1be2",
+      "output_sha256": "2c1c53626879468c038ffb4815139cc51498649b1e42458d2badbb1c9e90b1e1",
+      "n_fields": 27
+    },
+    {
+      "ticker": "UNH",
+      "as_of": "2026-10-07",
+      "file": "UNH_2026-10-07.json.gz",
+      "price_input": 375.980010986328,
+      "cache_sha256": "6c9dff59732b7c597542b2d5eadaae0313ca0de03defdba2c00203e693632d76",
+      "output_sha256": "d0c30557ab97fc984ccf123205d1e433d8e485a38ed3540633316bc98a8bb86d",
+      "n_fields": 25
+    },
+    {
+      "ticker": "LLY",
+      "as_of": "2026-10-07",
+      "file": "LLY_2026-10-07.json.gz",
+      "price_input": 1188.71997070312,
+      "cache_sha256": "3fe29099e6efaef9acac95711c271de1a644602939ea18487e29708310985942",
+      "output_sha256": "43b74db82c756b5d44ea305b01485b51f3cbe82ee73c1ee9a8ea3e446de1e535",
+      "n_fields": 25
+    },
+    {
+      "ticker": "JNJ",
+      "as_of": "2026-10-07",
+      "file": "JNJ_2026-10-07.json.gz",
+      "price_input": 258.450012207031,
+      "cache_sha256": "7141c0c988fa1d30f779687b4c78ab561e19aa5990a58ad86a66467d0a783980",
+      "output_sha256": "6d566fff472f04895a23cb55791ae53e349efb918dad9854ad4cc97858c5c6f6",
+      "n_fields": 27
+    },
+    {
+      "ticker": "JPM",
+      "as_of": "2026-10-07",
+      "file": "JPM_2026-10-07.json.gz",
+      "price_input": 329.579986572266,
+      "cache_sha256": "c2e8113ba9d4a3197865714b8594ef65121cce837fcb120763450b708f851083",
+      "output_sha256": "eb9d5d6c8d209d7f88fee12a875b99fe3d0e71b65c416e4ed2d7beb6b941e0ce",
+      "n_fields": 19
+    },
+    {
+      "ticker": "V",
+      "as_of": "2026-10-07",
+      "file": "V_2026-10-07.json.gz",
+      "price_input": 372.100006103516,
+      "cache_sha256": "df3caf7c5667296569fc3074ce2ff13629c9a555184a06c5ea9925b43e63971d",
+      "output_sha256": "85a23c572b5c1a7e9e0d024125c719d6a5475df07348c807004320a284f6a315",
+      "n_fields": 23
+    },
+    {
+      "ticker": "MA",
+      "as_of": "2026-10-07",
+      "file": "MA_2026-10-07.json.gz",
+      "price_input": 570.059997558594,
+      "cache_sha256": "78082e9cbae91bfa8c1480d214bd20c8d35fcbbcc72d71eaf01739c48b1e9511",
+      "output_sha256": "a2a8b71bb86e87b25d48ea098f675678bc513ae4f844f05932fba24c90fe384e",
+      "n_fields": 25
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-07",
+      "file": "XOM_2026-10-07.json.gz",
+      "price_input": 164.050003051758,
+      "cache_sha256": "98bde704a8084ffb3578951641249b72c0172b88ed37d2e59f6f222027755d2d",
+      "output_sha256": "541230649a83d4ddc1de33bdaff3c9546ebb97d5e5acaade7b6a932cefcf3289",
+      "n_fields": 12
+    },
+    {
+      "ticker": "CVX",
+      "as_of": "2026-10-07",
+      "file": "CVX_2026-10-07.json.gz",
+      "price_input": 205.149993896484,
+      "cache_sha256": "c09b160603412cb45acf1bb9bf3732e531dedfb548afa0e275fd8aefd7ab397e",
+      "output_sha256": "4c5aa49af1a27aa8908ea89b8b070e085e9813b115f2cdbbc4609b551e665cd1",
+      "n_fields": 25
+    },
+    {
+      "ticker": "CAT",
+      "as_of": "2026-10-07",
+      "file": "CAT_2026-10-07.json.gz",
+      "price_input": 813.830017089844,
+      "cache_sha256": "01ddc6ffa741f0a7da440e2949b2ed19cec14fab35435a398e3f3d0100019715",
+      "output_sha256": "346246e420dec7675a5e2c43fe7dd582a8e429c83a075e3e086f23225a3f2931",
+      "n_fields": 24
+    },
+    {
+      "ticker": "GE",
+      "as_of": "2026-10-07",
+      "file": "GE_2026-10-07.json.gz",
+      "price_input": 303.619995117188,
+      "cache_sha256": "8c18acb17bbe0760fae6205c5df75b805480c58d4d1dbbabeba206d9ca36e1e3",
+      "output_sha256": "0157df9856c75d9600cdf0a80a7bff275275cc700d3908a111560ee4c7a4d064",
+      "n_fields": 25
+    },
+    {
+      "ticker": "ADBE",
+      "as_of": "2026-10-07",
+      "file": "ADBE_2026-10-07.json.gz",
+      "price_input": 232.770004272461,
+      "cache_sha256": "86a5689aa9aa7b0f9e95be21b48b0305376e014c8dbf3b8bb3b4b131f1b6a0c4",
+      "output_sha256": "23e6d4770b3d9adb2504d253d5dae2938a3a90156f37ea3dc0944351cfd4de90",
+      "n_fields": 27
+    },
+    {
+      "ticker": "MU",
+      "as_of": "2026-10-07",
+      "file": "MU_2026-10-07.json.gz",
+      "price_input": 1088.0,
+      "cache_sha256": "a8b088c2111daef36536e53c81fef4c0f01220c64933e126a665b00a9257f882",
+      "output_sha256": "d7c01d9503b01964c0d8e38aa138c25229a1c5ed2158ee206901c27e4b2fef4f",
+      "n_fields": 27
+    },
+    {
+      "ticker": "GOOGL",
+      "as_of": "2026-10-07",
+      "file": "GOOGL_2026-10-07.json.gz",
+      "price_input": 350.5,
+      "cache_sha256": "a017f26ee88cb4a639d1c1ddb06d53b4afe22f0ac89cabec7cd67c88919fe1c5",
+      "output_sha256": "9760e0a18f1e5db055d433ddd4e7a718a37e41569cf261ccb89517bfecf44ef1",
+      "n_fields": 25
+    }
+  ]
+}

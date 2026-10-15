@@ -1,0 +1,278 @@
+{
+  "spec": "inves-cog R7 T02/M2 companyfacts(pit_cache)",
+  "source": "Muse 沙箱 ~/workspace/quant-practice/pit_cache/{T}_facts.json（SEC data.sec.gov/api/xbrl/companyfacts 原始响应，未改动）",
+  "exported_at_cst": "2026-10-14",
+  "files": [
+    {
+      "ticker": "AAPL",
+      "cik": "320193",
+      "entity": "Apple Inc.",
+      "file": "AAPL_facts.json.gz",
+      "sha256_raw": "73a86c6aedc31f77cac2ea4df5f80f0b3bd7e6eb58bb4e01444fbedf3afb9c43",
+      "sha256_gz": "a34358a900e178bfea1b992e6c48771928a691527203651979057a7596cac3d6",
+      "bytes_gz": 255537
+    },
+    {
+      "ticker": "MSFT",
+      "cik": "789019",
+      "entity": "MICROSOFT CORPORATION",
+      "file": "MSFT_facts.json.gz",
+      "sha256_raw": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+      "sha256_gz": "702610613ac153bece89f5557f88f5a2b58ae5c0b21b7438954dec861798aa4e",
+      "bytes_gz": 313179
+    },
+    {
+      "ticker": "NVDA",
+      "cik": "1045810",
+      "entity": "NVIDIA CORP",
+      "file": "NVDA_facts.json.gz",
+      "sha256_raw": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+      "sha256_gz": "8ba0166577adc354545b062b9c3374534909461c103361e7841fd89f2a3673f8",
+      "bytes_gz": 275679
+    },
+    {
+      "ticker": "META",
+      "cik": "1326801",
+      "entity": "Meta Platforms, Inc.",
+      "file": "META_facts.json.gz",
+      "sha256_raw": "7518e76d6dac2d016e1a3d1dec1cc55ff9ea3bdd58a151b16fcaa067a6c9d94e",
+      "sha256_gz": "45b73d3ca1ca72635b328d3c03ebcca8ec06192ab9fda0d3cc5b5f0aa1b493cb",
+      "bytes_gz": 174340
+    },
+    {
+      "ticker": "AMZN",
+      "cik": "1018724",
+      "entity": "AMAZON COM INC",
+      "file": "AMZN_facts.json.gz",
+      "sha256_raw": "7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+      "sha256_gz": "2848063bb03d4c9f4933ff9b77a0beb64ed8d6d564ee16085dadc65292e26035",
+      "bytes_gz": 292579
+    },
+    {
+      "ticker": "AVGO",
+      "cik": "1730168",
+      "entity": "Broadcom Inc.",
+      "file": "AVGO_facts.json.gz",
+      "sha256_raw": "3bdb6644c12addf1e63c4dc861008d7804fbf3d3f5aa6eb9b97f72c0e89a7adf",
+      "sha256_gz": "39037b4206d87ea40be8ab13a07e171a4e3f00a7b72cfbaf284deb96cca1b76e",
+      "bytes_gz": 138407
+    },
+    {
+      "ticker": "AMD",
+      "cik": "2488",
+      "entity": "ADVANCED MICRO DEVICES INC",
+      "file": "AMD_facts.json.gz",
+      "sha256_raw": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e",
+      "sha256_gz": "352f4c60aaff0d3cf08c109a645d7f9a76f1256dc6295c57fd109c7acafbf3c7",
+      "bytes_gz": 256456
+    },
+    {
+      "ticker": "MRVL",
+      "cik": "1835632",
+      "entity": "MARVELL TECHNOLOGY, INC",
+      "file": "MRVL_facts.json.gz",
+      "sha256_raw": "2190d7525c2749e96636b0f95376c5f7d73d9cb47a7452b3a94f70e156ec1169",
+      "sha256_gz": "35311e708e79a0b75612e8da4b9454b4fa5066f6e7c878ac9483cc461e5fcb91",
+      "bytes_gz": 88282
+    },
+    {
+      "ticker": "PLTR",
+      "cik": "1321655",
+      "entity": "Palantir Technologies Inc.",
+      "file": "PLTR_facts.json.gz",
+      "sha256_raw": "43014a2e04fa2784dd669d337a65c9eac9374ea638dacb292ecf19905408651f",
+      "sha256_gz": "2ea869d70ac6d53915aed6ea4377c53e77d2b03ec221e96b254fa97ee55633de",
+      "bytes_gz": 85588
+    },
+    {
+      "ticker": "CRM",
+      "cik": "1108524",
+      "entity": "Salesforce, Inc.",
+      "file": "CRM_facts.json.gz",
+      "sha256_raw": "c36bddafd22061dfe573fa22199074d882196f6667cf641eb30c8cec5a340ae5",
+      "sha256_gz": "6993a1f4b8df376d6b98e76006f122076b18aad4968639b0a78dc78604617762",
+      "bytes_gz": 324374
+    },
+    {
+      "ticker": "NOW",
+      "cik": "1373715",
+      "entity": "ServiceNow, Inc.",
+      "file": "NOW_facts.json.gz",
+      "sha256_raw": "1131b67e8d2d6cd6415cafa82c8874cb2139016e4c8d7e04b1728837a8bbec2c",
+      "sha256_gz": "03299a2cf7f72f99e60685c7ce0bbbaf25a7d4e751aff1faae1e87a5f5fec2bd",
+      "bytes_gz": 211224
+    },
+    {
+      "ticker": "ORCL",
+      "cik": "1341439",
+      "entity": "Oracle Corporation",
+      "file": "ORCL_facts.json.gz",
+      "sha256_raw": "65523545f040abaea1dfcf321da2a5aec85e7f34387244b0ffcb26e4c8707f7d",
+      "sha256_gz": "d82dab5a4ffcd50e75ef5a08119a8350425e3475cc9027938ee1bb4b7e884c0e",
+      "bytes_gz": 260021
+    },
+    {
+      "ticker": "NFLX",
+      "cik": "1065280",
+      "entity": "NETFLIX INC",
+      "file": "NFLX_facts.json.gz",
+      "sha256_raw": "00f3449073d90dfa3aec4e384de24b70d92d897f90c67d6bca61f23e33d38634",
+      "sha256_gz": "d48f79f59f61bdebde72b6634fa5c82b436f3f5fe5809a52a9c0444761c08579",
+      "bytes_gz": 254287
+    },
+    {
+      "ticker": "TSLA",
+      "cik": "1318605",
+      "entity": "Tesla, Inc.",
+      "file": "TSLA_facts.json.gz",
+      "sha256_raw": "d0c2b9288d027a6d735039a6fe874a348b65a7fdbc6c133130666c777c885204",
+      "sha256_gz": "1012fa9a169cee1fe477e97a346fe99047bc77e23f6ffbe2fcb9c5e3d4fae1be",
+      "bytes_gz": 244468
+    },
+    {
+      "ticker": "COST",
+      "cik": "909832",
+      "entity": "COSTCO WHOLESALE CORP /NEW",
+      "file": "COST_facts.json.gz",
+      "sha256_raw": "b675ced201b27ede2b0d26ca6fd873befe96a1afa9679339a2d0b964187dcdff",
+      "sha256_gz": "3517ccd19630efb3a1fa201644aeaa5d76ca2e1ee20fd2216b8afb4d9a2a0441",
+      "bytes_gz": 239338
+    },
+    {
+      "ticker": "WMT",
+      "cik": "104169",
+      "entity": "WALMART INC.",
+      "file": "WMT_facts.json.gz",
+      "sha256_raw": "54ec3fbf36dc203dd00a0333396b3df2b6695ecdf6cbb19b6ec41b053d86b517",
+      "sha256_gz": "18319072f8d060ee73165d7ff254e52ba9f8930d60394ce716dbc6df70fa9bd1",
+      "bytes_gz": 246678
+    },
+    {
+      "ticker": "HD",
+      "cik": "354950",
+      "entity": "The Home Depot, Inc.",
+      "file": "HD_facts.json.gz",
+      "sha256_raw": "aaf03befa1695d87ce1252bc08ca278b65be63782e46dc0b2858aab7a32c1be2",
+      "sha256_gz": "9c2f539fef0d32ae2069cf56019e4418ad4a2a451ca6844bff6169ac39d83d74",
+      "bytes_gz": 214460
+    },
+    {
+      "ticker": "UNH",
+      "cik": "731766",
+      "entity": "UnitedHealth Group Incorporated",
+      "file": "UNH_facts.json.gz",
+      "sha256_raw": "6c9dff59732b7c597542b2d5eadaae0313ca0de03defdba2c00203e693632d76",
+      "sha256_gz": "cd8833c90cb38bc9ec8e1a0feb81543fe84069681304d1c71b3b67e268094bb5",
+      "bytes_gz": 271058
+    },
+    {
+      "ticker": "LLY",
+      "cik": "59478",
+      "entity": "ELI LILLY AND COMPANY",
+      "file": "LLY_facts.json.gz",
+      "sha256_raw": "3fe29099e6efaef9acac95711c271de1a644602939ea18487e29708310985942",
+      "sha256_gz": "db093b98bb29c8babb6c836f0eff260b9eeb822ea527e5f9a3290db6650d87ff",
+      "bytes_gz": 242596
+    },
+    {
+      "ticker": "JNJ",
+      "cik": "200406",
+      "entity": "Johnson & Johnson",
+      "file": "JNJ_facts.json.gz",
+      "sha256_raw": "7141c0c988fa1d30f779687b4c78ab561e19aa5990a58ad86a66467d0a783980",
+      "sha256_gz": "23244f1ceddab7bac9ad1f0bc266aff2410782c53f18a16513d84420a4b06032",
+      "bytes_gz": 269422
+    },
+    {
+      "ticker": "JPM",
+      "cik": "19617",
+      "entity": "JPMORGAN CHASE & CO",
+      "file": "JPM_facts.json.gz",
+      "sha256_raw": "c2e8113ba9d4a3197865714b8594ef65121cce837fcb120763450b708f851083",
+      "sha256_gz": "8a1676e13e45301f8c1faf93e1fe9d87e2fba693035f4afd7bbdbd46af7a4464",
+      "bytes_gz": 503039
+    },
+    {
+      "ticker": "V",
+      "cik": "1403161",
+      "entity": "VISA INC.",
+      "file": "V_facts.json.gz",
+      "sha256_raw": "df3caf7c5667296569fc3074ce2ff13629c9a555184a06c5ea9925b43e63971d",
+      "sha256_gz": "68daf8ab431608067ae82d5ee648b76726e78bc324d1f1d7015c63d79dbaa25f",
+      "bytes_gz": 233154
+    },
+    {
+      "ticker": "MA",
+      "cik": "1141391",
+      "entity": "Mastercard Incorporated",
+      "file": "MA_facts.json.gz",
+      "sha256_raw": "78082e9cbae91bfa8c1480d214bd20c8d35fcbbcc72d71eaf01739c48b1e9511",
+      "sha256_gz": "677e6a34ee82c4ab73e261f40e045b9646b38222d647ea9795115da793ab6a6d",
+      "bytes_gz": 256090
+    },
+    {
+      "ticker": "XOM",
+      "cik": "2115436",
+      "entity": "ExxonMobil Holdings Corp",
+      "file": "XOM_facts.json.gz",
+      "sha256_raw": "98bde704a8084ffb3578951641249b72c0172b88ed37d2e59f6f222027755d2d",
+      "sha256_gz": "df7a361c76304bdb860eb8b1fb4acae88dc164169c4ac0070c30c945cded21f7",
+      "bytes_gz": 11117
+    },
+    {
+      "ticker": "CVX",
+      "cik": "93410",
+      "entity": "Chevron Corp",
+      "file": "CVX_facts.json.gz",
+      "sha256_raw": "c09b160603412cb45acf1bb9bf3732e531dedfb548afa0e275fd8aefd7ab397e",
+      "sha256_gz": "9e2ab824224f1ada1bffc09de4ef3532a89e1c45c96c37776bcdb0b3d80a38a6",
+      "bytes_gz": 307300
+    },
+    {
+      "ticker": "CAT",
+      "cik": "18230",
+      "entity": "CATERPILLAR INC",
+      "file": "CAT_facts.json.gz",
+      "sha256_raw": "01ddc6ffa741f0a7da440e2949b2ed19cec14fab35435a398e3f3d0100019715",
+      "sha256_gz": "5f0378c25e559dece790b41f863666c4b64499e6f63b0f0cce8734842bbc8a7f",
+      "bytes_gz": 357203
+    },
+    {
+      "ticker": "GE",
+      "cik": "40545",
+      "entity": "GENERAL ELECTRIC CO",
+      "file": "GE_facts.json.gz",
+      "sha256_raw": "8c18acb17bbe0760fae6205c5df75b805480c58d4d1dbbabeba206d9ca36e1e3",
+      "sha256_gz": "10546d6cdabdf9a54705cbfc922c4870cb3fe7a6d024a778d61b18b0ad415478",
+      "bytes_gz": 412510
+    },
+    {
+      "ticker": "ADBE",
+      "cik": "796343",
+      "entity": "ADOBE INC.",
+      "file": "ADBE_facts.json.gz",
+      "sha256_raw": "86a5689aa9aa7b0f9e95be21b48b0305376e014c8dbf3b8bb3b4b131f1b6a0c4",
+      "sha256_gz": "33114c3738c4e3be601f499304bdb766c96e446a4dc39cec92c95f2e41e9fc7c",
+      "bytes_gz": 292277
+    },
+    {
+      "ticker": "MU",
+      "cik": "723125",
+      "entity": "Micron Technology, Inc.",
+      "file": "MU_facts.json.gz",
+      "sha256_raw": "a8b088c2111daef36536e53c81fef4c0f01220c64933e126a665b00a9257f882",
+      "sha256_gz": "5bb9252e8834dafe987650ac7b62bdffb03eeefa8c0a3c3b5ea952c123ca17a6",
+      "bytes_gz": 267032
+    },
+    {
+      "ticker": "GOOGL",
+      "cik": "1652044",
+      "entity": "Alphabet Inc.",
+      "file": "GOOGL_facts.json.gz",
+      "sha256_raw": "a017f26ee88cb4a639d1c1ddb06d53b4afe22f0ac89cabec7cd67c88919fe1c5",
+      "sha256_gz": "4ad2ae609f3bf0e25ef4f45a23298775cf29b821e7aeecec63e67206a4f93c84",
+      "bytes_gz": 183548
+    }
+  ],
+  "total_bytes_gz": 7481243
+}

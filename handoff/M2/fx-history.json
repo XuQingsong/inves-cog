@@ -1,0 +1,17 @@
+{
+  "EUR": {
+    "versions": 5426,
+    "earliest": "2006-01-02",
+    "latest": "2026-10-09"
+  },
+  "TWD": {
+    "versions": 5433,
+    "earliest": "2006-01-02",
+    "latest": "2026-10-09"
+  },
+  "KRW": {
+    "versions": 5430,
+    "earliest": "2006-01-02",
+    "latest": "2026-10-09"
+  }
+}

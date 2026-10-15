@@ -1,1 +1,4 @@
-{}
+{
+  "src/inves_cog/ingest/fundamentals/extractors.py:extract_state": "Existing M2 implementation before round-two Ruff gate; protected by 90-group replay. Refactor deferred per task card \u00a73.",
+  "src/inves_cog/ingest/fundamentals/segments.py:parse_segments": "Existing M2 implementation before round-two Ruff gate; protected by 90-group replay. Refactor deferred per task card \u00a73."
+}
