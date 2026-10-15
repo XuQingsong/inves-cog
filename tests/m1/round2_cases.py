@@ -240,9 +240,9 @@ def assert_embedding_batches():
         assert records[-1]["input_tokens"] == 7 and records[-1]["task"] == "embedding"
     from inves_cog.ingest.embedding_backfill import validate_async_row
 
-    qwen = Embedding(configuration, http=HTTPClient(send, retries=0))
+    single_input_adapter = Embedding(configuration, http=HTTPClient(send, retries=0))
     with pytest.raises(ValueError, match="batch"):
-        qwen.batch(["first", "second"], model="qwen3.7-text-embedding-flash", dimensions=1024)
+        single_input_adapter.batch(["first", "second"], model="qwen3.7-text-embedding-flash", dimensions=1024)
 
     row = {"output": {"text_index": 0, "code": 200, "embedding": [0.1] * 1536}}
     assert validate_async_row(row, 1, 1536)[0] == 0
@@ -313,3 +313,14 @@ def assert_scheduler_watchdog():
         persist_start=start,
     ).run("bars_full", "Alpaca", operation)
     assert events[1][1]["id"] == 42 and events[1][1]["status"] == "ok"
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "service_installer", Path(__file__).parents[2] / "scripts/install_ingest_service.py"
+    )
+    installer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(installer)
+    config = installer.configuration(Path("/tmp/example"), Path("/tmp/example/.venv/bin/python"))
+    assert "[program:embedding]" in config and "autorestart=unexpected" in config
+    assert "--model text-embedding-async-v1" in config
