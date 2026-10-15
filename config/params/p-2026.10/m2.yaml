@@ -1,6 +1,6 @@
 m2:
-  repair_order: [D3, D1, D2, D4, D5, D8]
-  repairs: {D3: true, D1: true, D2: true, D4: true, D5: true, D8: true}
+  repair_order: [D3, D1, D2, D4, D5, D8, D9]
+  repairs: {D3: true, D1: true, D2: true, D4: true, D5: true, D8: true, D9: true}
   stale_days: 180
   companyfacts_lag_days: 3
   consensus_time_beijing: '10:30'
@@ -26,6 +26,16 @@ m2:
     D8:
       direct: [net_debt]
       derived: [net_debt_fcf]
+    D9:
+      direct: [rev_ttm, eps_ttm, rev_period]
+      derived: [rev_growth, rev_q_yoy, rev_accel_pp, eps_growth, gross_margin, gross_margin_change_pp, fcf_margin, fcf_margin_change_pp, op_margin_ttm, pe, ps, peg_rev_approx, fund_unreliable, data_flags]
+  d9:
+    revenue_tags: [RevenuesNetOfInterestExpense]
+    predecessor_ciks:
+      XOM: ['0000034088']
+    dimensional_facts:
+      V:
+        - {tag: EarningsPerShareDiluted, axis: StatementClassOfStockAxis, axis_namespace_prefix: 'http://fasb.org/us-gaap/', member: CommonClassAMember, member_namespace_prefix: 'http://fasb.org/us-gaap/'}
   fx:
     source: FRED
     series: {EUR: DEXUSEU, TWD: DEXTAUS, KRW: DEXKOUS}

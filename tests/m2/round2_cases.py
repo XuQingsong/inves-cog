@@ -23,18 +23,34 @@ def assert_long_quarters():
     assert len(Facts(data, date(2026, 2, 1), fixed=True).quarterly(["Revenues"])) == 1
     assert not Facts(data, date(2026, 2, 1), fixed=False).quarterly(["Revenues"])
     from inves_cog.ingest.fundamentals.extractors import repair_flow
-    calendar = {date(2025, 11, 23): {"start": date(2025, 9, 1), "end": date(2025, 11, 23)},
-                date(2026, 2, 15): {"start": date(2025, 11, 24), "end": date(2026, 2, 15)},
-                date(2026, 5, 10): {"start": date(2026, 2, 16), "end": date(2026, 5, 10)}}
-    rows = [{"start":"2025-09-01", "end":str(end), "filed":"2026-10-07", "val":value,
-             "fp":"FY" if value==10 else "Q3", "form":"10-K" if value==10 else "10-Q"}
-            for end,value in [(date(2025,11,23),1),(date(2026,2,15),3),(date(2026,5,10),6),(date(2026,8,30),10)]]
+
+    calendar = {
+        date(2025, 11, 23): {"start": date(2025, 9, 1), "end": date(2025, 11, 23)},
+        date(2026, 2, 15): {"start": date(2025, 11, 24), "end": date(2026, 2, 15)},
+        date(2026, 5, 10): {"start": date(2026, 2, 16), "end": date(2026, 5, 10)},
+    }
+    rows = [
+        {
+            "start": "2025-09-01",
+            "end": str(end),
+            "filed": "2026-10-07",
+            "val": value,
+            "fp": "FY" if value == 10 else "Q3",
+            "form": "10-K" if value == 10 else "10-Q",
+        }
+        for end, value in [
+            (date(2025, 11, 23), 1),
+            (date(2026, 2, 15), 3),
+            (date(2026, 5, 10), 6),
+            (date(2026, 8, 30), 10),
+        ]
+    ]
     tag = "NetCashProvidedByUsedInOperatingActivities"
-    facts = Facts({"facts":{"us-gaap":{tag:{"units":{"USD":rows}}}}},date(2026,10,15),fixed=True)
-    series=facts.quarterly([tag])
-    assert not repair_flow(facts,[tag],series,calendar_series=calendar)
-    assert series[date(2026,8,30)]["val"]==4
-    assert series[date(2026,5,10)]["start"]==date(2026,2,16)
+    facts = Facts({"facts": {"us-gaap": {tag: {"units": {"USD": rows}}}}}, date(2026, 10, 15), fixed=True)
+    series = facts.quarterly([tag])
+    assert not repair_flow(facts, [tag], series, calendar_series=calendar)
+    assert series[date(2026, 8, 30)]["val"] == 4
+    assert series[date(2026, 5, 10)]["start"] == date(2026, 2, 16)
 
 
 def assert_d9(input_facts):
@@ -68,6 +84,17 @@ def assert_d9(input_facts):
     member.localName = "CommonClassAMember"
     axis.namespaceURI = "https://example.invalid/us-gaap/2026"
     assert not dimension_allowed(fact, "V")
+    extra = {"facts": {"us-gaap": {"EarningsPerShareDiluted": gaap.pop("EarningsPerShareDiluted")}}}
+    for rows in extra["facts"]["us-gaap"]["EarningsPerShareDiluted"]["units"].values():
+        for row in rows:
+            row["d9_only"] = True
+    assert extract_state(data, ticker="V", as_of=date(2026, 10, 13), instance_facts=extra).values["eps_ttm"] == 4
+    assert (
+        extract_state(data, ticker="V", as_of=date(2026, 10, 13), instance_facts=extra, switches={"D9": False}).values[
+            "eps_ttm"
+        ]
+        is None
+    )
 
 
 def assert_recent_gaps(input_facts):
