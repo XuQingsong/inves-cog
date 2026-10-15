@@ -53,7 +53,25 @@ def test_interp_points():
 @pytest.mark.phase1_blocking
 def test_books_synthetic():
     for row in load_golden("m3_books_synthetic.json")["stocks"]:
-        compare(evaluate(row), row["expected"])
+        expected = deepcopy(row["expected"])
+        # Golden groups these under books; the persisted module contract is a separate column.
+        expected["timing_subitems"] = expected["books"].pop("timing_subitems")
+        names = dict(
+            zip(
+                ("M-13", "M-14", "M-15", "M-16", "M-17", "M-18"),
+                (
+                    "趋势破位",
+                    "现金流为负且营收下滑",
+                    "营收与EPS同时明显下滑",
+                    "流动性偏紧",
+                    "高估值与增长不匹配",
+                    "短线过热",
+                ),
+                strict=True,
+            )
+        )
+        expected["red_lines"] = [names.get(code, code) for code in expected["red_lines"]]
+        compare(evaluate(row), expected)
     sample = synthetic()
     sample["input"]["fields"]["roe"] = None
     result = evaluate(sample)

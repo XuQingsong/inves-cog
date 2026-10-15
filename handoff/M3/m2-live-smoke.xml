@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1802.524" timestamp="2026-10-15T20:55:41.193562+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_external_pending" name="test_fundamentals_live_smoke" time="1802.450"><failure message="RuntimeError: Live fundamentals failed; inspect source_health">clock = &lt;inves_cog.clock.SystemClock object at 0x107253050&gt;
+
+    @pytest.mark.phase1_live
+    def test_fundamentals_live_smoke(clock):
+        from inves_cog.ingest.fundamentals.live import run_smoke
+    
+&gt;       report = run_smoke(clock=clock)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m2/test_external_pending.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = &lt;inves_cog.clock.SystemClock object at 0x107253050&gt;
+
+    def run_smoke(*, clock):
+        if os.environ.get("INVES_COG_LIVE") != "1":
+            raise RuntimeError("Explicit phase1_live opt-in required")
+        from inves_cog.ingest.cli import connect
+        from inves_cog.ingest.settings import read_environment
+    
+        values = read_environment()
+        with connect(values) as connection:
+            service, runner, tasks, operational = build(clock=clock, values=values, connection=connection)
+            report = runner.run("m2_live_financials", "SECCompanyfacts", service.collect_financials)
+            if report.get("status") == "failed":
+&gt;               raise RuntimeError("Live fundamentals failed; inspect source_health")
+E               RuntimeError: Live fundamentals failed; inspect source_health
+
+src/inves_cog/ingest/fundamentals/live.py:19: RuntimeError</failure></testcase></testsuite></testsuites>

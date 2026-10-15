@@ -22,6 +22,13 @@ from inves_cog.ingest.fundamentals.state import configure as configure_states
 ROOT = Path(__file__).resolve().parents[4]
 
 
+def current_ciks(rows, *, as_of):
+    visible = [row for row in rows if row["filing_date"] <= as_of]
+    return {
+        row["ticker"]: row["cik"] for row in sorted(visible, key=lambda row: (row["filing_date"], row["accession"]))
+    }
+
+
 def build(*, clock, values, connection):
     try:
         from inves_cog.ingest.http import HTTPClient, RateLimiter
@@ -37,10 +44,10 @@ def build(*, clock, values, connection):
     operational = OperationalRepository(connection)
     sec = SECClient(user_agent=values.get("SEC_USER_AGENT", ""))
     universe = yaml.safe_load((ROOT / "config/universe.yaml").read_text())["stocks"]
-    ciks = {
-        row["ticker"]: row["cik"]
-        for row in connection.execute("SELECT DISTINCT ticker,cik FROM ingest.sec_filings").fetchall()
-    }
+    ciks = current_ciks(
+        connection.execute("SELECT ticker,cik,filing_date,accession FROM ingest.sec_filings").fetchall(),
+        as_of=clock.today_trade_date(),
+    )
     fx = FXBook(repository.rates())
     service = FinancialService(
         clock=clock,
