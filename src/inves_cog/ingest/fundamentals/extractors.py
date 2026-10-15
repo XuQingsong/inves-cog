@@ -406,7 +406,14 @@ def extract_state(
     approved_extra = ticker in d9.get("predecessor_ciks", {}) or ticker in d9.get("dimensional_facts", {})
     if enabled["D9"] and approved_extra and instance_facts:
         data = merge_facts(data, instance_facts)
-    if fixed and foreign and enabled["D3"] and instance_facts:
+    if (
+        fixed
+        and foreign
+        and enabled["D3"]
+        and instance_facts
+        and latest
+        and day(available_as_of or as_of) >= day(latest["filing_date"]) + timedelta(days=3)
+    ):
         data = merge_facts(data, instance_facts)
     facts = Facts(
         data,

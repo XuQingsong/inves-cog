@@ -136,5 +136,7 @@ class ForeignCollector:
                             for r in rows
                         ):
                             return data
+        if latest and self.as_of < day(latest["filing_date"]) + timedelta(days=3):
+            return data
         parsed = self.annual(filings)
         return merge_facts(data, parsed) if parsed else data

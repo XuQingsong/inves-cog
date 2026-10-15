@@ -1,6 +1,6 @@
 # M2 外国申报人补充自测（AC-M2-09）
 
-基线：M2 round3 871f625，已合 main c52fcc0；独立分支 phase1/m2-foreign-interims。先提交失败测试 ae6cd9d、7e45525、eea4313，再实现。此补充 PR 不影响 PR #4 的阻塞修复复核，不自行合并。
+基线：M2 round3 871f625，已合 main c52fcc0；独立分支 phase1/m2-foreign-interims。先提交失败测试 ae6cd9d、7e45525、eea4313，再实现；最终补充D3三天等待边界失败测试d0ebae1后修复。此补充 PR 不影响 PR #4 的阻塞修复复核，不自行合并。
 
 ## 逐项结果
 
@@ -26,7 +26,7 @@
 
 ## 测试与运行边界
 
-原M2测试名不变；补充原test_companyfacts_lag内的规则、PIT、月营收隔离和服务集成断言。拒绝无关表格、无法确定列和缺失字段，并验证真实财务表不误伤。模拟旧月度申报日期覆盖季度状态的故障，重建各知识日期快照；未来季度和公告不能进入早期state_asof。legacy不参与新逻辑，90组Muse回放仍须零差异。
+原M2测试名不变；补充原test_companyfacts_lag内的规则、PIT、月营收隔离和服务集成断言。拒绝无关表格、无法确定列和缺失字段，并验证真实财务表不误伤。模拟旧月度申报日期覆盖季度状态的故障，重建各知识日期快照；未来季度和公告不能进入早期state_asof；年报实例补取保留D3三天等待边界，未满三天不提前采用缓存实例。legacy不参与新逻辑，90组Muse回放仍须零差异。
 
 正式ForeignCollector使用共享SECClient（5次/秒、SEC_USER_AGENT）和共享job_runs/source_health；每个发行人独立失败，定时器在M2的21:15–21:45 ET槽运行interims。实源回填重用已下载的SEC原文/年度实例，不计作新的59只live smoke，不计作准时调度。外汇缺口抛FXGap并保留具体原因，不写伪造美元值。最终任务开始、结束、状态、四季及12个月清单见foreign-interims.json。
 
