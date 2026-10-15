@@ -20,8 +20,6 @@ def health_row(state, *, foreign=False, latest_8k_202=None):
     reasons = sorted(blocked)
     if "implausible_value" in codes:
         reasons.append(str(state.field_sources.get("implausible_value", {})))
-    if "extreme_value_verified" in codes:
-        reasons.append(str(state.field_sources.get("extreme_value_verified", {})))
     if missing:
         reasons.append("Missing core fields: " + ", ".join(missing))
     if foreign:

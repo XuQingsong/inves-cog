@@ -22,13 +22,6 @@ from inves_cog.ingest.fundamentals.state import configure as configure_states
 ROOT = Path(__file__).resolve().parents[4]
 
 
-def current_ciks(rows, *, as_of):
-    visible = [row for row in rows if row["filing_date"] <= as_of]
-    return {
-        row["ticker"]: row["cik"] for row in sorted(visible, key=lambda row: (row["filing_date"], row["accession"]))
-    }
-
-
 def build(*, clock, values, connection):
     try:
         from inves_cog.ingest.http import HTTPClient, RateLimiter
@@ -42,12 +35,12 @@ def build(*, clock, values, connection):
         ) from exc
     repository = Repository(connection)
     operational = OperationalRepository(connection)
-    sec = SECClient(user_agent=values.get("SEC_USER_AGENT", ""), http=HTTPClient(pool=True))
+    sec = SECClient(user_agent=values.get("SEC_USER_AGENT", ""))
     universe = yaml.safe_load((ROOT / "config/universe.yaml").read_text())["stocks"]
-    ciks = current_ciks(
-        connection.execute("SELECT ticker,cik,filing_date,accession FROM ingest.sec_filings").fetchall(),
-        as_of=clock.today_trade_date(),
-    )
+    ciks = {
+        row["ticker"]: row["cik"]
+        for row in connection.execute("SELECT DISTINCT ticker,cik FROM ingest.sec_filings").fetchall()
+    }
     fx = FXBook(repository.rates())
     service = FinancialService(
         clock=clock,
@@ -60,7 +53,6 @@ def build(*, clock, values, connection):
         fx=fx,
         instance_loader=InstanceLoader(sec=sec, cache_dir=ROOT / ".harness/xbrl", offline=False),
     )
-    service.draft_mappings = False
     configure_states(repository)
     configure_mappings(service.queue)
     health = HealthBook(clock=clock, rows=operational.health_rows(), persist=operational.write_health)
@@ -85,9 +77,8 @@ def build(*, clock, values, connection):
         return {"processed_count": count}
 
     tasks = {
-        "financials": ("SECCompanyfacts", lambda: service.collect_financials(history=False)),
+        "financials": ("SECCompanyfacts", service.collect_financials),
         "interims": ("SECForeignInterims", service.collect_interims),
-        "mappings": ("SegmentMappingDrafts", service.collect_mapping_drafts),
         "consensus": ("YFinance", service.collect_consensus),
         "fx": ("FREDFX", rates),
     }
@@ -117,13 +108,12 @@ def run_tasks(*, clock, runner, tasks, names):
 def main():
     parser = argparse.ArgumentParser(description="Independent PIT fundamentals")
     parser.add_argument("action", choices=["run", "schedule", "health", "import-muse", "mappings", "confirm"])
-    parser.add_argument("--tasks", nargs="+", choices=["financials", "interims", "mappings", "consensus", "fx"])
+    parser.add_argument("--tasks", nargs="+", choices=["financials", "interims", "consensus", "fx"])
     parser.add_argument("--folder", type=Path)
     parser.add_argument("--sector")
     parser.add_argument("--ids", nargs="+")
     parser.add_argument("--reviewer")
     parser.add_argument("--decision", choices=["已确认", "驳回"])
-    parser.add_argument("--rebuild-history", action="store_true", help="Explicit full PIT rebuild")
     args = parser.parse_args()
     try:
         from inves_cog.ingest.settings import read_environment
@@ -153,8 +143,6 @@ def main():
             ).fetchone()["n"]
         else:
             service, runner, tasks, operational = build(clock=clock, values=values, connection=connection)
-            if args.rebuild_history:
-                tasks["financials"] = ("SECCompanyfacts", service.collect_financials)
             if args.action == "mappings":
                 output = service.queue.list_pending_mappings(args.sector)
             elif args.action == "confirm":
@@ -171,7 +159,6 @@ def main():
                         ("interims", (ny.hour == 21 and 15 <= ny.minute < 45)),
                         ("consensus", ((bj.hour, bj.minute) >= (9, 15) and (bj.hour, bj.minute) < (10, 30))),
                         ("fx", ((bj.hour, bj.minute) >= (8, 30) and (bj.hour, bj.minute) < (9, 15))),
-                        ("mappings", ny.hour == 22 and ny.minute < 30),
                     ]:
                         stamp = last.get("m2_" + name)
                         if allowed and (

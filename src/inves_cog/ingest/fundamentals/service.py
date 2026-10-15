@@ -1,6 +1,5 @@
 """Injected M1 clients, PIT state builds and daily financial profiles."""
 
-import hashlib
 from copy import deepcopy
 from datetime import date, timedelta
 from zoneinfo import ZoneInfo
@@ -135,7 +134,6 @@ class FinancialService:
             fx,
             instance_loader,
         )
-        self.draft_mappings = True
         self.profiles = ProfileBook(clock=clock, previous=repository.profile_rows())
         self.queue = MappingQueue(
             llm=llm,
@@ -165,7 +163,7 @@ class FinancialService:
             exc.processed_count = processed
             raise
 
-    def collect_financials(self, *, history=True):
+    def collect_financials(self):
         failures = []
         processed = 0
         for entity in self.universe:
@@ -202,9 +200,7 @@ class FinancialService:
                             ):
                                 legacy_dates.add(day(row["filed"]))
                 for extractor, dates in (("legacy", sorted(legacy_dates)), ("fixed", fixed_dates)):
-                    # Daily collection refreshes the latest visible vintage with fresh SEC data.
-                    # Full PIT rebuild remains an explicit, separately budgeted operation.
-                    for cutoff in dates if history else dates[-1:]:
+                    for cutoff in dates:
                         self._budget()
                         parsed = None
                         latest = max(
@@ -504,9 +500,6 @@ class FinancialService:
                 continue
             row["segment_std"] = None
             try:
-                identifier = hashlib.sha256((ticker + "\0" + row["segment_raw"]).encode()).hexdigest()
-                if not self.draft_mappings and identifier not in self.queue.rows:
-                    raise RuntimeError("mapping draft queued for separate mappings task")
                 mapping = self.queue.draft(ticker, row["segment_raw"], graph_nodes=self.repo.graph_nodes())
                 row["segment_std"] = mapping["graph_node_ids"] if mapping["status"] == "已确认" else None
             except Exception as exc:
@@ -516,18 +509,6 @@ class FinancialService:
                 codes.append("segment_unmapped")
             row["health_codes"] = codes
         return result
-
-    def collect_mapping_drafts(self):
-        previous, self.draft_mappings = self.draft_mappings, True
-        before = len(self.queue.rows)
-        try:
-            for entity in self.universe:
-                self._budget()
-                ticker = entity["ticker"]
-                self.repo.put_segments(self.apply_mappings(ticker, self.repo.segment_rows(ticker)))
-        finally:
-            self.draft_mappings = previous
-        return {"processed_count": len(self.queue.rows) - before}
 
     def collect_consensus(self):
         if self.provider is None:

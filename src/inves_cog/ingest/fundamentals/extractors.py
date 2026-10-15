@@ -655,7 +655,7 @@ def extract_state(
             sources["implausible_value"] = {"violations": invalid}
     visible = [r for rows in series.values() for r in rows.values()] + [r for r in inst.values() if r]
     latest_fact = max(visible, key=lambda r: (r["filed"], r["end"])) if visible else None
-    state = FinState(
+    return FinState(
         ticker=ticker,
         extractor=extractor,
         filed=day(latest["filing_date"]) if latest else latest_fact["filed"] if latest_fact else as_of,
@@ -668,6 +668,3 @@ def extract_state(
         health_codes=sorted(set(codes)) or ["ok"],
         oracle_values=oracle,
     )
-    from inves_cog.ingest.fundamentals.verification import apply_registered
-
-    return apply_registered(state)

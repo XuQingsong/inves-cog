@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1309.747" timestamp="2026-10-15T22:13:36.329962+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_external_pending" name="test_fundamentals_live_smoke" time="1309.699" /></testsuite></testsuites>

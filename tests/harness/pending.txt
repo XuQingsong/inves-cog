@@ -96,3 +96,4 @@ test_precursor_snapshot_daily | M10 | 等待 M10 实现
 test_miss_sample_frame | M10 | 等待 M10 实现
 test_reports_contents | M10 | 等待 M10 实现
 test_unconnected_shown | M10 | 等待 M10 实现
+test_fundamentals_live_smoke | M2 | 等待59只完整财报实源冒烟及Q-M2-27新门禁核验；Yahoo已接通

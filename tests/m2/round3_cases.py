@@ -63,8 +63,7 @@ def assert_split_basis():
     lite = extract_state(official["LITE"], ticker="LITE", as_of=date(2026, 10, 15))
     assert lite.values["ni_ttm"] == -6_935_100_000
     assert lite.values["eps_ttm"] == -92.96
-    assert "extreme_value_verified" in lite.health_codes and "implausible_value" not in lite.health_codes
-    assert lite.field_sources["extreme_value_verified"]["verified_fields"]["ni_ttm"]["context_id"] == "c-1"
+    assert "implausible_value" in lite.health_codes
     crowd = extract_state(official["CRWD"], ticker="CRWD", as_of=date(2026, 10, 15))
     assert crowd.values["ni_ttm"] == 44_995_000
     assert abs(crowd.values["eps_ttm"] - 0.05) < 1e-12

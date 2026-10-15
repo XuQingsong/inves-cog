@@ -67,9 +67,6 @@ def apply_interims(state, rows, *, as_of, fx):
     if state.extractor != "fixed":
         return result
     selected = visible_quarters(rows, as_of)
-    from inves_cog.ingest.fundamentals.verification import verify_registered_quarters
-
-    result = verify_registered_quarters(result, selected, as_of=as_of)
     if state.period_end and selected and day(selected[-1]["period_end"]) <= state.period_end:
         return result
     if len(selected) != 4 or any(
