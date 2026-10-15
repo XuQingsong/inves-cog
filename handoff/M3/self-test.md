@@ -18,7 +18,7 @@ I02（只允许 A）、I03（v18 常量）、I04（无 tracker 固定止损）�
 
 ## 3. pending / milestones
 
-M3 的 13 行在测试实际通过后删除；其他模块的行保留。`milestones.txt` 未修改。M2 live 实跑超时，仍保留 pending，证据见 `m2-live-smoke.xml`，不把 xfail 当通过。
+M3 的 13 行在测试实际通过后删除；其他模块的行保留。`milestones.txt` 未修改。M2 live 首次超时的失败证据保留；完成耗时修复后真实重跑通过（m2-live-final.xml，1 passed / 1309.75 秒），已删除 M2 这条 pending，不把 xfail 当通过。
 
 ## 4. 验收条款
 
@@ -62,3 +62,5 @@ M1/M2 的 live 关闭和明早 M1 准时调度按独立证据跟进，未提前�
 ## 8. 实源任务耗时修复
 
 此前一次 M2 live 达 30 分钟上限（完成 8 只），另一次在分部映射 HTTP 等待中中断，真实用量账本保留一条 739.6 秒 failed_usage_missing（token 为 NULL，不写假 0）。修复不改变提取结果：正式日常采集只刷新最新可见 vintage；完整历史重建保留显式开关。每次仍从 SEC 拉新 companyfacts。分部映射转独立 mappings 任务，采集期间未映射行保留 segment_unmapped 和 queued 原因；每个新分部仍由共享 glm-5.3 任务起草、等待审核。映射任务使用 low 思考档和有界输出，不占用 SEC 采集时段。先提交失败的增量及映射回归，再修复，见 incremental-red.xml、mapping-queue-red.xml 和 incremental-green.xml。
+
+M2 最终真实冒烟通过：`m2-live-final.xml`，1 passed，1309.75 秒。先前失败、中断的证据均保留；没有以缓存健康行代替本次采集、跳过测试或改变 Clock。
