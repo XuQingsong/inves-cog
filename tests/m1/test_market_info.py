@@ -46,6 +46,17 @@ def test_bar_window_to_20et():
     assert "bars_full" not in due_tasks(before, {})
     assert "bars_full" in due_tasks(ready, {})
     assert "bars_full" not in due_tasks(ready, {"bars_full": ready.now_utc()})
+    # A manual run before the scheduled slot must not consume that day's slot.
+    for name in ("bars_full", "wide_universe"):
+        assert name in due_tasks(ready, {name: instant("2026-10-27T07:08:37Z")})
+        assert name in due_tasks(ready, {name: instant("2026-10-28T00:19:59Z")})
+        assert name not in due_tasks(ready, {name: ready.now_utc()})
+    winter = frozen("2026-11-03T01:20:00Z")
+    assert "bars_full" in due_tasks(winter, {"bars_full": instant("2026-11-02T08:00:00Z")})
+    assert "bars_full" not in due_tasks(winter, {"bars_full": winter.now_utc()})
+    prefill = frozen("2026-10-28T12:00:00Z")
+    assert "bars_prefill" in due_tasks(prefill, {"bars_prefill": instant("2026-10-28T11:59:59Z")})
+    assert "bars_prefill" not in due_tasks(prefill, {"bars_prefill": prefill.now_utc()})
     assert "bars_prefill" in due_tasks(frozen("2026-10-28T12:00:00Z"), {})
     assert "sec_submissions" not in due_tasks(frozen("2026-10-28T01:16:00Z"), {})
     # M1 v3: historical collection has no current-day deadline assertion.
