@@ -121,6 +121,28 @@ def test_graph_draft_requires_citation(clock, tmp_path):
     from inves_cog.perception.graph.repository import entity_id
 
     assert entity_id("金融竞争者") and entity_id("金融竞争者") != entity_id("其他竞争者")
+    from inves_cog.perception.graph.texts import extract_sections
+
+    original = (
+        "<html><p>Item 1. Business</p><p>Actual business sells to customers. "
+        "See Item 7. Management’s Discussion and Analysis for details.</p>"
+        "<p>Item 1A. Risk Factors</p><p>Actual risk warning.</p>"
+        "<p>Item 7. Management’s Discussion and Analysis</p><p>Operating results. "
+        "Item 1A. “Risk Factors.” " + "Results. " * 50 + "</p>"
+        "<p>Item 8. Financial Statements and Supplementary Data</p></html>"
+    )
+    sections = extract_sections(
+        original,
+        filing={"ticker": "TEST", "accession": "filing", "form": "10-K"},
+        clock=clock,
+        source_url="https://www.sec.gov/Archives/test",
+    )
+    by_name = {row["section"]: row for row in sections}
+    assert "Actual risk warning." in by_name["1A"]["text"]
+    assert "Operating results." not in by_name["1A"]["text"]
+    assert "for details." in by_name["1"]["text"]
+    assert "full_filing" in by_name
+
     from tests.m6.recordings import assert_graph_request_bounds, recorded_draft
 
     assert_graph_request_bounds()
