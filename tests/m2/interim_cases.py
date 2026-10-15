@@ -157,6 +157,17 @@ def assert_annual_and_monthly():
         instance_facts=data("RevenueFromContractsWithCustomers", "2025-12-31", 1000, "annual"),
     )
     assert tsm.values["rev_ttm"] == 1000 and tsm.period_end == date(2025, 12, 31)
+
+    before = extract_state(
+        data("Revenue", "2024-12-31", 700, "old"),
+        ticker="TSM",
+        as_of=date(2026, 4, 18),
+        foreign=True,
+        filings=filings,
+        instance_facts=data("RevenueFromContractsWithCustomers", "2025-12-31", 1000, "annual"),
+    )
+    assert before.values["rev_ttm"] == 700, "Foreign annual fallback must retain D3's three-day waiting gate"
+
     raw = gzip.decompress((ROOT / "TSM-monthly.html.gz").read_bytes()).decode()
     row = parse_monthly(raw, accession="0001046179-26-000680", filed="2026-10-08")
     assert row["month"] == date(2026, 9, 1) and row["revenue"] == 511857399000 and row["currency"] == "TWD"
