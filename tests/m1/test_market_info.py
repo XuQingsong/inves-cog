@@ -39,6 +39,9 @@ class FakeTime:
 
 
 def test_bar_window_to_20et():
+    from tests.m1.round2_cases import assert_scheduler_watchdog
+
+    assert_scheduler_watchdog()
     from inves_cog.ingest.runtime import due_tasks
 
     before = frozen("2026-10-28T00:19:00Z")

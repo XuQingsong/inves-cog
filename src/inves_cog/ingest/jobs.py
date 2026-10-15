@@ -54,10 +54,19 @@ class HealthBook:
 
 class JobRunner:
     def __init__(
-        self, *, clock, health, persist, params_version="p-2026.10", monotonic=time.monotonic, timeout_seconds=1800
+        self,
+        *,
+        clock,
+        health,
+        persist,
+        params_version="p-2026.10",
+        monotonic=time.monotonic,
+        timeout_seconds=1800,
+        persist_start=None,
     ):
         self.clock, self.health, self.persist = clock, health, persist
         self.params_version, self.monotonic, self.timeout_seconds = params_version, monotonic, timeout_seconds
+        self.persist_start = persist_start
 
     def run(self, task_name, source, operation, *, trade_date=None, configured=True):
         started, timer = self.clock.now_utc(), self.monotonic()
@@ -71,6 +80,9 @@ class JobRunner:
             "error_summary": None,
             "params_version": self.params_version,
         }
+        if self.persist_start is not None:
+            row["status"] = "running"
+            row["id"] = self.persist_start(row)
         try:
             if not configured:
                 raise SourceError("Required source configuration absent", confirmed_unavailable=True)
@@ -98,6 +110,7 @@ class JobRunner:
             )
             return result
         except Exception as exc:
+            row["status"] = "failed"
             row["processed_count"] = getattr(exc, "processed_count", 0)
             row["error_summary"] = f"{type(exc).__name__}: {exc}"
             self.health.record(
@@ -110,6 +123,9 @@ class JobRunner:
                 confirmed_unavailable=getattr(exc, "confirmed_unavailable", False),
             )
             return {"status": "failed", "processed_count": row["processed_count"], "error": row["error_summary"]}
+        except BaseException as exc:
+            row.update(status="failed", error_summary=f"{type(exc).__name__}: interrupted")
+            raise
         finally:
             row["ended_at"] = self.clock.now_utc()
             self.persist(row)

@@ -21,6 +21,9 @@ dependencies = [
 [dependency-groups]
 dev = ["pytest>=8,<10", "requests>=2,<3", "ruff==0.14.14"]
 
+[project.optional-dependencies]
+ops = ["supervisor==4.3.0"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/inves_cog"]
 

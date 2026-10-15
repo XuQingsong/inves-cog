@@ -62,7 +62,7 @@ class Pipeline:
     ):
         self.clock, self.repo, self.values, self.llm, self.sec = clock, repository, values, llm, sec
         self.alpaca, self.fred = alpaca, fred
-        self.embed = embed or Embedding(values)
+        self.embed = embed or Embedding(values, clock=clock)
         self.websites, self.trends = websites or Websites(), trends or Trends(clock=clock)
         self.universe = yaml.safe_load((ROOT / "config/universe.yaml").read_text())
         self.stocks = [row["ticker"] for row in self.universe["stocks"]]
@@ -650,5 +650,10 @@ class Pipeline:
 
         tasks = {name: (source, guarded(operation)) for name, (source, operation) in tasks.items()}
         return Runtime(
-            trade_date=lambda: self.day, clock=self.clock, health=health, persist_job=self.repo.write_job, tasks=tasks
+            trade_date=lambda: self.day,
+            clock=self.clock,
+            health=health,
+            persist_job=self.repo.write_job,
+            persist_start=self.repo.write_job,
+            tasks=tasks,
         )
