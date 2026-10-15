@@ -230,10 +230,22 @@ def assert_embedding_batches():
     for model in ("text-embedding-v1", "text-embedding-v2", "text-embedding-v4"):
         dimension = MODEL_DIMENSIONS[model]
         result = {"data": [{"index": 0, "embedding": [0.1] * dimension}], "usage": {"prompt_tokens": 7}}
-        adapter = Embedding(configuration, http=HTTPClient(lambda *a, result=result, **k: Response(200, result)),
-                            clock=clock, recorder=records.append)
+        adapter = Embedding(
+            configuration,
+            http=HTTPClient(lambda *a, result=result, **k: Response(200, result)),
+            clock=clock,
+            recorder=records.append,
+        )
         assert len(adapter("fixture", model=model, dimensions=dimension)) == dimension
         assert records[-1]["input_tokens"] == 7 and records[-1]["task"] == "embedding"
+    from inves_cog.ingest.embedding_backfill import validate_async_row
+
+    row = {"output": {"text_index": 0, "code": 200, "embedding": [0.1] * 1536}}
+    assert validate_async_row(row, 1, 1536)[0] == 0
+    for invalid in ({"output": {**row["output"], "text_index": 1}},
+                    {"output": {**row["output"], "embedding": [math.nan] * 1536}}):
+        with pytest.raises(ValueError):
+            validate_async_row(invalid, 1, 1536)
 
 
 def assert_scheduler_watchdog():
