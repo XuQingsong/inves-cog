@@ -233,13 +233,19 @@ def repair_flow(facts, tags, series, *, eps=False, taxonomy="us-gaap", calendar_
                     six = selected
                 if number == 3 and selected:
                     nine = selected
+        stale_nine = (
+            facts.fixed
+            and nine
+            and all(quarters.values())
+            and any(q["filed"] > nine["filed"] for q in quarters.values())
+        )
         values = derive_quarters(
             annual["val"] if annual else None,
             q1=quarters[1]["val"] if quarters[1] else None,
             q2=quarters[2]["val"] if quarters[2] else None,
             q3=quarters[3]["val"] if quarters[3] else None,
             ytd6=None if eps or six is None else six["val"],
-            ytd9=None if eps or nine is None else nine["val"],
+            ytd9=None if eps or nine is None or stale_nine else nine["val"],
         )
         for n in (2, 3, 4):
             if eps and n != 4:
@@ -251,12 +257,22 @@ def repair_flow(facts, tags, series, *, eps=False, taxonomy="us-gaap", calendar_
                 if n == 4:
                     missing.append(parent["end"])
                 continue
-            inputs = [r for r in (annual, six, nine, *quarters.values()) if r]
+            selected_inputs = (
+                (annual, *quarters.values())
+                if n == 4 and (eps or nine is None or stale_nine)
+                else (annual, nine)
+                if n == 4
+                else (six, quarters[1])
+                if n == 2
+                else (nine, six)
+            )
+            inputs = [r for r in selected_inputs if r]
             previous = quarters.get(n - 1) or (six if n == 3 else nine if n == 4 else None)
             series[parent["end"]] = {
                 **parent,
                 "start": (previous["end"] + timedelta(days=1) if previous else month_after(start, (n - 1) * 3)),
                 "val": values["q" + str(n)],
+                "filed": max(r["filed"] for r in inputs),
                 "derivation": "eps_q4_derived" if eps else values["sources"]["q" + str(n)],
                 "inputs": [source(r) for r in inputs],
             }
