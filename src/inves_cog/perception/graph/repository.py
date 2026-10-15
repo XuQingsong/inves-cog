@@ -79,6 +79,22 @@ class Repository:
             (ticker,),
         ).fetchone()
 
+    def financial_state(self, ticker, *, as_of):
+        return self.connection.execute(
+            "SELECT * FROM fundamentals.fin_state WHERE ticker=%s AND extractor='fixed' "
+            "AND filed<=%s ORDER BY filed DESC LIMIT 1",
+            (ticker, as_of),
+        ).fetchone()
+
+    def interim_rows(self, ticker, *, as_of):
+        return self.connection.execute(
+            "SELECT * FROM fundamentals.interim_results WHERE ticker=%s AND filed<=%s ORDER BY filed,period_end",
+            (ticker, as_of),
+        ).fetchall()
+
+    def fx_rates(self):
+        return self.connection.execute("SELECT * FROM fundamentals.fx_rates").fetchall()
+
     def put_relation(self, row, *, ticker, baskets):
         for side in ("from_entity", "to_entity"):
             name = row[side]

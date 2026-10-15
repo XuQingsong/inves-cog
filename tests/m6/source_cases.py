@@ -69,3 +69,16 @@ def assert_source_exceptions(clock):
     draft = {"segment_id": source["row_id"], "exposure_usd": 123, "exposure_basis": "分部收入", "accession": "annual"}
     validated = validate_segment_draft(draft, [source], clock=clock)
     assert "single_business_consolidated_revenue" in validated["flags"]
+    import json
+
+    json.dumps(validated["structured_source"])  # PostgreSQL JSONB must retain the same source.
+    from inves_cog.llm.client import canonical_payload
+    from inves_cog.perception.graph.segments import draft_segments
+
+    class Recorded:
+        def call(self, task, payload):
+            assert task == "exposure_draft"
+            canonical_payload(payload)  # Real DB date values must cross the JSON boundary.
+            return {"exposures": [draft]}
+
+    assert len(draft_segments(Recorded(), [source], clock=clock)) == 1

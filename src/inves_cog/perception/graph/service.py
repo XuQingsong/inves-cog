@@ -134,3 +134,27 @@ class GraphService:
             "coverage": rows,
             "status": "degraded" if any(row["status"] != "ok" or row["relations"] < 3 for row in rows) else "ok",
         }
+
+    def draft_structured(self):
+        from inves_cog.ingest.fundamentals.fx import FXBook
+        from inves_cog.perception.graph.segments import draft_segments
+        from inves_cog.perception.graph.source_exposures import quarterly_ttm_source, single_business_hdd
+
+        as_of = self.clock.today_trade_date()
+        stx = single_business_hdd(self.repo.financial_state("STX", as_of=as_of), as_of=as_of)
+        skhy = quarterly_ttm_source(
+            self.repo.interim_rows("SKHY", as_of=as_of), as_of=as_of, fx=FXBook(self.repo.fx_rates())
+        )
+        sources = [row for row in (stx, skhy["source"]) if row is not None]
+        drafts = draft_segments(self.llm, sources, clock=self.clock) if sources else []
+        for row in drafts:
+            ticker = row["from_entity"]
+            baskets = [b["basket_id"] for b in self.repo.baskets() if any(m["ticker"] == ticker for m in b["members"])]
+            self.repo.put_relation(row, ticker=ticker, baskets=baskets)
+        return {
+            "processed_count": len(drafts),
+            "sources": sources,
+            "drafts": drafts,
+            "SKHY": skhy,
+            "status": "degraded" if skhy["status"] != "ok" or len(drafts) != len(sources) else "ok",
+        }

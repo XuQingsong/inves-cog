@@ -14,4 +14,4 @@
 
 每条审核前完整编号、版本和原文引用保留在同目录 hdd-review-batch.json。
 
-WDC 的 HDD 年度收入按 M2 原始分部来源；STX 当前只披露单一经营分部及 Data Center / Edge IoT 终端市场，未将公司总收入冒充 HDD 产品收入。
+WDC 的 HDD 年度收入按 M2 原始分部来源；STX 原批次仅含关系。用户后续明确授权以合并营收作为单一业务 HDD 暴露后，另起草 121.95 亿美元候选，注明合并口径，见 structured-exposures.json；它不属于本次已确认的原七条。

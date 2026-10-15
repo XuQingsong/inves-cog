@@ -683,6 +683,149 @@
       "revision": 3
     },
     {
+      "ticker": "STX",
+      "relation_id": "844b670af4dadbecb1044e1bfa1c6171e0b2caaa3f3f5792bd9bbb3ca3c0863d",
+      "target": "HDD（单一业务，合并营收）",
+      "exposure_usd": 12195000000.0,
+      "exposure_basis": "分部收入",
+      "exposure_asof": "2026-07-03",
+      "source_info_ids": [
+        "0001137789-26-000159"
+      ],
+      "evidence": {
+        "flags": [
+          "single_business_consolidated_revenue"
+        ],
+        "citation": null,
+        "source_ticker": "STX",
+        "structured_source": {
+          "filed": "2026-08-04",
+          "row_id": "fin_state:STX:fixed:2026-08-04",
+          "ticker": "STX",
+          "revenue": 12195000000.0,
+          "evidence": {
+            "flags": [
+              "single_business_consolidated_revenue"
+            ],
+            "currency": "USD",
+            "basis_note": "单一业务；按用户确认的 Q-M6-9 口径以合并营收作为 HDD 暴露，非另行披露的产品分部金额",
+            "components": [
+              {
+                "end": "2024-09-27",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-25-000317",
+                "unit": "USD",
+                "filed": "2025-10-31",
+                "start": "2024-06-29"
+              },
+              {
+                "end": "2024-12-27",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-26-000026",
+                "unit": "USD",
+                "filed": "2026-01-30",
+                "start": "2024-09-28"
+              },
+              {
+                "end": "2025-03-28",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-26-000088",
+                "unit": "USD",
+                "filed": "2026-04-29",
+                "start": "2024-12-28"
+              },
+              {
+                "end": "2025-06-27",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-26-000159",
+                "unit": "USD",
+                "filed": "2026-08-04",
+                "start": "2025-03-29",
+                "inputs": [
+                  {
+                    "end": "2025-06-27",
+                    "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                    "accn": "0001137789-26-000159",
+                    "unit": "USD",
+                    "filed": "2026-08-04",
+                    "start": "2024-06-29"
+                  },
+                  {
+                    "end": "2025-03-28",
+                    "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                    "accn": "0001137789-26-000088",
+                    "unit": "USD",
+                    "filed": "2026-04-29",
+                    "start": "2024-06-29"
+                  }
+                ],
+                "derivation": "q4_derived"
+              },
+              {
+                "end": "2025-10-03",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-25-000317",
+                "unit": "USD",
+                "filed": "2025-10-31",
+                "start": "2025-06-28"
+              },
+              {
+                "end": "2026-01-02",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-26-000026",
+                "unit": "USD",
+                "filed": "2026-01-30",
+                "start": "2025-10-04"
+              },
+              {
+                "end": "2026-04-03",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-26-000088",
+                "unit": "USD",
+                "filed": "2026-04-29",
+                "start": "2026-01-03"
+              },
+              {
+                "end": "2026-07-03",
+                "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "accn": "0001137789-26-000159",
+                "unit": "USD",
+                "filed": "2026-08-04",
+                "start": "2026-04-04",
+                "inputs": [
+                  {
+                    "end": "2026-07-03",
+                    "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                    "accn": "0001137789-26-000159",
+                    "unit": "USD",
+                    "filed": "2026-08-04",
+                    "start": "2025-06-28"
+                  },
+                  {
+                    "end": "2026-04-03",
+                    "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                    "accn": "0001137789-26-000088",
+                    "unit": "USD",
+                    "filed": "2026-04-29",
+                    "start": "2025-06-28"
+                  }
+                ],
+                "derivation": "q4_derived"
+              }
+            ],
+            "source_field": "rev_ttm",
+            "source_table": "fundamentals.fin_state"
+          },
+          "accession": "0001137789-26-000159",
+          "period_end": "2026-07-03",
+          "segment_raw": "HDD（单一业务，合并营收）"
+        }
+      },
+      "citation_valid": true,
+      "status": "候选",
+      "revision": 1
+    },
+    {
       "ticker": "WDC",
       "relation_id": "c096bf2de7370fb78f0183b211c2d74b0dd05b1e1a2b07c74e57b62bfba67341",
       "target": "HDDMember",
@@ -729,8 +872,8 @@
         }
       },
       "citation_valid": true,
-      "status": "候选",
-      "revision": 1
+      "status": "观察到",
+      "revision": 2
     }
   ],
   "disclosure_date_repairs": [],

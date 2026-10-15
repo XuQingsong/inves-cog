@@ -59,7 +59,10 @@ def run(*, action, values, clock, basket=None, identifiers=(), edits=None, revis
             return runner.run(
                 "graph_" + action,
                 "GraphDrafts",
-                operation or (service.seed_config if action == "seed" else service.draft_all),
+                operation
+                or (
+                    {"seed": service.seed_config, "structured": service.draft_structured}.get(action, service.draft_all)
+                ),
             )
 
 
@@ -68,7 +71,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Graph drafting and batch review")
     parser.add_argument(
-        "action", choices=["seed", "draft", "cluster", "monitored", "list", "confirm", "reject", "modify"]
+        "action", choices=["seed", "draft", "structured", "cluster", "monitored", "list", "confirm", "reject", "modify"]
     )
     parser.add_argument("--basket")
     parser.add_argument("--ids", nargs="+")
