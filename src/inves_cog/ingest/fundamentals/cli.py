@@ -78,6 +78,7 @@ def build(*, clock, values, connection):
 
     tasks = {
         "financials": ("SECCompanyfacts", service.collect_financials),
+        "interims": ("SECForeignInterims", service.collect_interims),
         "consensus": ("YFinance", service.collect_consensus),
         "fx": ("FREDFX", rates),
     }
@@ -89,7 +90,7 @@ def run_tasks(*, clock, runner, tasks, names):
         raise ValueError("Unknown M2 tasks")
     output = {}
     for name in names:
-        if name == "financials":
+        if name in {"financials", "interims"}:
             now = clock.now_utc().astimezone(ZoneInfo("America/New_York"))
             start = now.replace(hour=21, minute=15, second=0, microsecond=0)
             end = now.replace(hour=21, minute=45, second=0, microsecond=0)
@@ -107,7 +108,7 @@ def run_tasks(*, clock, runner, tasks, names):
 def main():
     parser = argparse.ArgumentParser(description="Independent PIT fundamentals")
     parser.add_argument("action", choices=["run", "schedule", "health", "import-muse", "mappings", "confirm"])
-    parser.add_argument("--tasks", nargs="+", choices=["financials", "consensus", "fx"])
+    parser.add_argument("--tasks", nargs="+", choices=["financials", "interims", "consensus", "fx"])
     parser.add_argument("--folder", type=Path)
     parser.add_argument("--sector")
     parser.add_argument("--ids", nargs="+")
@@ -155,6 +156,7 @@ def main():
                     names = []
                     for name, allowed in [
                         ("financials", (ny.hour == 21 and 15 <= ny.minute < 45)),
+                        ("interims", (ny.hour == 21 and 15 <= ny.minute < 45)),
                         ("consensus", ((bj.hour, bj.minute) >= (9, 15) and (bj.hour, bj.minute) < (10, 30))),
                         ("fx", ((bj.hour, bj.minute) >= (8, 30) and (bj.hour, bj.minute) < (9, 15))),
                     ]:

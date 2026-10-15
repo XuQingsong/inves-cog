@@ -205,3 +205,123 @@ def assert_skhy_report():
     assert row["operating_income"] == 60542608e6 and row["net_income"] == 93820236e6
     assert row["net_income"] != 94864501e6  # Total comprehensive income.
     assert row["eps_diluted"] == 131478  # Won per ordinary share, not KRW millions.
+
+
+def assert_foreign_service(tmp_path):
+    from datetime import datetime, timezone
+
+    from inves_cog.clock import FrozenClock
+    from inves_cog.ingest.fundamentals.service import FinancialService, MemoryRepository
+    from inves_cog.ingest.fundamentals.state import FinState
+
+    repo = MemoryRepository()
+    filings = [
+        dict(
+            ticker="TSM",
+            cik="1046179",
+            accession="0001046179-26-000008",
+            form="6-K",
+            filing_date="2026-01-15",
+            primary_document="tsm-20260115x6k.htm",
+        ),
+        dict(
+            ticker="TSM",
+            cik="1046179",
+            accession="annual",
+            form="20-F",
+            filing_date="2026-04-16",
+            report_date="2025-12-31",
+        ),
+        dict(
+            ticker="TSM",
+            cik="1046179",
+            accession="0001046179-26-000451",
+            form="6-K",
+            filing_date="2026-07-16",
+            primary_document="tsm-20260716x6k.htm",
+        ),
+        dict(
+            ticker="TSM",
+            cik="1046179",
+            accession="0001046179-26-000680",
+            form="6-K",
+            filing_date="2026-10-08",
+            primary_document="tsm-revenue20261008.htm",
+        ),
+    ]
+    repo.shared_filings["TSM"] = filings
+    old = FinState(
+        ticker="TSM",
+        extractor="fixed",
+        filed=date(2026, 10, 8),
+        period_end=date(2024, 12, 31),
+        accession="old-monthly",
+        form="6-K",
+        fiscal_period="FY",
+        values={"rev_ttm": 7},
+        field_sources={},
+        health_codes=["stale_fundamentals"],
+    )
+    repo.put_state(old)
+
+    def annual_facts(year):
+        return {
+            "facts": {
+                "ifrs-full": {
+                    "RevenueFromContractsWithCustomers": {
+                        "units": {
+                            "USD": [
+                                dict(
+                                    start=f"{year}-01-01",
+                                    end=f"{year}-12-31",
+                                    filed="2026-04-16",
+                                    form="20-F",
+                                    accn="annual",
+                                    val=1000,
+                                )
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+
+    class SEC:
+        def companyfacts(self, cik):
+            return annual_facts(2024)
+
+        def get(self, url):
+            if url.endswith("index.json"):
+                return {"directory": {"item": [{"name": "withguidance.htm"}]}}
+            name = "TSM-Q4" if "000104617926000008" in url else "TSM-monthly" if "revenue" in url else "TSM"
+            return gzip.decompress((ROOT / (name + ".html.gz")).read_bytes()).decode()
+
+    class Loader:
+        cache = tmp_path
+
+        def facts(self, filing):
+            assert filing["form"] == "20-F"
+            return annual_facts(2025)
+
+    class Rates:
+        def convert(self, value, **kwargs):
+            return value, {"fixture": True}
+
+    service = FinancialService(
+        clock=FrozenClock(datetime(2026, 10, 15, tzinfo=timezone.utc)),
+        repository=repo,
+        sec=SEC(),
+        llm=None,
+        universe=[dict(ticker="TSM", foreign=True, sector="fixture")],
+        ciks={"TSM": "1046179"},
+        fx=Rates(),
+        instance_loader=Loader(),
+    )
+    result = service.collect_interims()
+    assert not result["issuers"][0]["failures"], result
+    latest = repo.state_asof("TSM", date(2026, 10, 15), "fixed")
+    assert latest.period_end == date(2026, 6, 30) and latest.values["rev_ttm"] > 1000
+    assert latest.field_sources["interim_ttm"]["annual_period_end"] == date(2025, 12, 31)
+    assert repo.profiles["TSM"]["monthly_revenue"]["data"][0]["revenue"] == 511857399000
+    assert repo.state_asof("TSM", date(2026, 7, 15), "fixed").period_end == date(2025, 12, 31)
+    assert not repo.health["TSM"]["can_trade"]

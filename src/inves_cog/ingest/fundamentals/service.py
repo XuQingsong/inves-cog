@@ -40,6 +40,8 @@ class MemoryRepository(StateStore):
         self.derived = {}
         self.guidance = {}
         self.missing_bars = set()
+        self.interims = {}
+        self.months = {}
 
     def put_state(self, state):
         self.put(state)
@@ -100,6 +102,24 @@ class MemoryRepository(StateStore):
 
     def latest_earnings(self, ticker, as_of):
         return None
+
+    def put_interim(self, row):
+        self.interims[(row["ticker"], row["accession"], row["period_end"])] = deepcopy(row)
+
+    def interim_rows(self, ticker):
+        return [r for r in self.interims.values() if r["ticker"] == ticker]
+
+    def put_monthly(self, row):
+        self.months[(row["ticker"], row["month"], row["accession"])] = deepcopy(row)
+
+    def monthly_rows(self, ticker, as_of):
+        selected = {}
+        for row in self.months.values():
+            if row["ticker"] == ticker and row["filed"] <= as_of:
+                old = selected.get(row["month"])
+                if old is None or row["filed"] > old["filed"]:
+                    selected[row["month"]] = row
+        return [selected[k] for k in sorted(selected, reverse=True)[:12]]
 
 
 class FinancialService:
@@ -300,6 +320,97 @@ class FinancialService:
             "failures": failures,
             "health_rows": len(self.repo.health_rows()),
             "note": str(len(failures)) + " issuer/source gaps",
+        }
+
+    def collect_interims(self):
+        from inves_cog.ingest.fundamentals.foreign import ISSUERS, ForeignCollector
+        from inves_cog.ingest.fundamentals.interims import apply_interims
+
+        collector = ForeignCollector(
+            sec=self.sec, instance_loader=self.instance_loader, repository=self.repo, as_of=self.as_of
+        )
+        reports = []
+        for entity in self.universe:
+            ticker = entity["ticker"]
+            if ticker not in ISSUERS:
+                continue
+            self._checked_budget(len(reports))
+            filings = self.repo.read_shared_filings(ticker)
+            report = collector.collect(ticker, filings)
+            try:
+                data = collector.annual_data(self.sec.companyfacts(self.ciks[ticker]), filings)
+                annual_filings = [
+                    f
+                    for f in filings
+                    if str(f["form"]).removesuffix("/A") in {"20-F", "40-F"} and day(f["filing_date"]) <= self.as_of
+                ]
+                annual_cutoff = max((day(f["filing_date"]) for f in annual_filings), default=self.as_of)
+                dates = sorted(
+                    {day(f["filing_date"]) for f in filings if annual_cutoff <= day(f["filing_date"]) <= self.as_of}
+                ) or [self.as_of]
+                interim_rows = self.repo.interim_rows(ticker)
+                for cutoff in dates:
+                    self._budget()
+                    annual = extract_state(data, ticker=ticker, as_of=cutoff, foreign=True, filings=filings, fx=self.fx)
+                    current = apply_interims(annual, interim_rows, as_of=cutoff, fx=self.fx)
+                    # Rebuild the existing knowledge-date snapshots too: an old
+                    # monthly 6-K must not keep an obsolete annual state newer
+                    # than a correctly reconstructed quarterly announcement.
+                    current.filed = cutoff
+                    self.repo.put_state(current)
+                if current.period_end and (self.as_of - current.period_end).days > 180:
+                    current.health_codes.append("stale_fundamentals")
+                if not report["rows"] and not any(str(f["form"]).startswith(("20-F", "40-F")) for f in filings):
+                    current.health_codes.append("no_financial_filings_yet")
+                    current.field_sources["filing_search"] = {"checked": report["checked"]}
+                elif "interim_unaudited" not in current.health_codes:
+                    current.health_codes.append("interim_unparsed")
+                    current.field_sources["interim_unparsed"] = {
+                        "reason": "fewer than four fully parsed consecutive quarters",
+                        "filings": [
+                            {k: r.get(k) for k in ("accession", "period_end", "parse_status")} for r in report["rows"]
+                        ],
+                        "failures": report["failures"],
+                    }
+                self.repo.put_state(current)
+                health = health_row(current, foreign=True)
+                if "interim_unparsed" in current.health_codes or "no_financial_filings_yet" in current.health_codes:
+                    health["reason"] = (
+                        (health["reason"] or "")
+                        + "; "
+                        + str(
+                            current.field_sources.get("interim_unparsed") or current.field_sources.get("filing_search")
+                        )
+                    )
+                self.repo.put_health(health)
+                profile = self.profiles.generate(
+                    current, segments=self.repo.segment_rows(ticker), consensus=None, guidance=[]
+                )
+                if ticker == "TSM":
+                    profile["monthly_revenue"] = {
+                        "data": self.repo.monthly_rows(ticker, self.as_of),
+                        "basis": "original TWD; display/attribution only; excluded from TTM",
+                    }
+                self.repo.put_profile(profile)
+                report["health"] = health
+            except Exception as exc:
+                reason = type(exc).__name__ + ": " + str(exc)
+                report["failures"].append({"reason": reason})
+                report["status"] = "failed"
+                existing = self.repo.state_asof(ticker, self.as_of, "fixed")
+                if existing:
+                    display = deepcopy(existing)
+                    display.health_codes.append("interim_unparsed")
+                    if isinstance(exc, FXGap):
+                        display.health_codes.append("core_field_missing")
+                    health = health_row(display, foreign=True)
+                    health["reason"] = (health["reason"] or "") + "; " + reason
+                    self.repo.put_health(health)
+            reports.append(report)
+        return {
+            "processed_count": len(reports),
+            "status": "degraded" if any(r["failures"] for r in reports) else "ok",
+            "issuers": reports,
         }
 
     def merge_d9(self, parsed, extra):

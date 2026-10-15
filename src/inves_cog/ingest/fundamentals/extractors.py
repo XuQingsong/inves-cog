@@ -22,7 +22,7 @@ TAGS = {
     "op": ["OperatingIncomeLoss"],
 }
 IFRS = {
-    "rev": ["Revenue"],
+    "rev": ["RevenueFromContractsWithCustomers", "Revenue"],
     "gp": ["GrossProfit"],
     "ni": ["ProfitLossAttributableToOwnersOfParent", "ProfitLoss"],
     "eps": ["DilutedEarningsLossPerShare"],
@@ -58,11 +58,12 @@ def derive_quarters(annual, *, q1=None, q2=None, q3=None, ytd6=None, ytd9=None):
 
 
 class Facts:
-    def __init__(self, data, as_of, *, fixed=False, fx=None):
+    def __init__(self, data, as_of, *, fixed=False, fx=None, preferred_currency=None):
         self.data = data.get("facts", data)
         self.as_of = as_of
         self.fixed = fixed
         self.fx = fx
+        self.preferred_currency = preferred_currency
         from inves_cog.ingest.fundamentals.plausibility import split_events
 
         self.splits = split_events(self.data, as_of) if fixed else []
@@ -73,6 +74,8 @@ class Facts:
         unit = next((u for u in units if u in choices), None)
         if unit is None and self.fixed:
             unit = next((u for u in choices if len(u.split("/")[0]) == 3), None)
+        if self.fixed and self.preferred_currency:
+            unit = next((u for u in choices if u.split("/")[0] == self.preferred_currency), unit)
         output = []
         for source in choices.get(unit, []):
             if (
@@ -352,6 +355,8 @@ def extract_state(
         if str(r.get("form", "")).removesuffix("/A") in {"10-Q", "10-K", "20-F", "40-F", "6-K"}
         and day(r["filing_date"]) <= as_of
     ]
+    if fixed and foreign:
+        relevant = [r for r in relevant if str(r.get("form", "")).removesuffix("/A") in {"20-F", "40-F"}]
     latest = (
         max(relevant, key=lambda r: (day(r["filing_date"]), str(r.get("accepted_at") or ""), r["accession"]))
         if relevant
@@ -401,7 +406,17 @@ def extract_state(
     approved_extra = ticker in d9.get("predecessor_ciks", {}) or ticker in d9.get("dimensional_facts", {})
     if enabled["D9"] and approved_extra and instance_facts:
         data = merge_facts(data, instance_facts)
-    facts = Facts(data, as_of, fixed=fixed, fx=fx)
+    if fixed and foreign and enabled["D3"] and instance_facts:
+        data = merge_facts(data, instance_facts)
+    facts = Facts(
+        data,
+        as_of,
+        fixed=fixed,
+        fx=fx,
+        preferred_currency={"TSM": "TWD", "NOK": "EUR", "ASML": "EUR", "ARM": "USD", "SKHY": "KRW"}.get(ticker)
+        if foreign and fixed
+        else None,
+    )
     tags = deepcopy(TAGS)
     if enabled["D1"]:
         tags["rev"].insert(1, "RevenueFromContractWithCustomerIncludingAssessedTax")
