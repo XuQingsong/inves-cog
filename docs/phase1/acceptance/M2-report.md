@@ -107,3 +107,19 @@
 ### 6.5 合并之后
 
 `test_fundamentals_live_smoke` 仍在 pending，M2 暂时不能写进 milestones；冒烟测试通过并从 pending 删除后，需求方写入。
+
+---
+
+## 7. 收尾验收（PR #9，32a0fac，2026-10-15）
+
+**结论：通过。** 合并后需求方把 M2 写进 `milestones.txt`，T02 关闭。
+
+| 项 | 结果 |
+|---|---|
+| 改动范围 | 只含 M1、M2 的代码和测试；`pending.txt` 只删除 `test_fundamentals_live_smoke | M2`，附真实冒烟通过的输出 |
+| 需求方本机 `make phase1-test` | 39 passed；replay 1 passed（90 组 Muse 对照零差异） |
+| D-17（Q-M2-32） | `apply_verification` 正反用例齐全：与原件一致 → `extreme_value_verified`、不阻止打分；数值被改动或期间不符 → 仍为 `implausible_value`。数据库中 LITE 为 `extreme_value_verified`、可打分可交易；54 只本土标的全部可交易 |
+| D-21 历史财报事件 | 需求方直接查数据库：`ingest.earnings_events` 2,392 行，54 只，2015-01-07 至 2026-10-13；上市晚的 SNDK、CRWV、GEV 行数少，符合预期；XOM 的问题是公司更名前后 CIK 不同，已按继承关系补齐 |
+| 共享 LLM 客户端 | 仅对 `segment_mapping_draft` 加了 `max_tokens` 和 `reasoning_effort = low`，模型仍为 `glm-5.3`，没有降级换模型 |
+
+遗留（不阻塞，已进 tracker）：ASML、TSM 的 `stale_fundamentals` 没有算上 6-K 季度业绩（M5 前）；一致预期第二次完整采集（AC-M2-06b，M5 前）；分部映射真实草稿（AC-M2-08，backlog）。
