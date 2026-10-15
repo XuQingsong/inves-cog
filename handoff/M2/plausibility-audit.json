@@ -1,0 +1,482 @@
+{
+  "observed_at": "2026-10-15T07:35:20.287497+00:00",
+  "health_rows": 59,
+  "profiles": 59,
+  "can_score": 53,
+  "missing_earnings_after": 5,
+  "implausible": [
+    {
+      "ticker": "LITE",
+      "can_score": false,
+      "reason": "implausible_value; {'violations': [{'rule': 1, 'field': 'ni_ttm/rev_ttm', 'ratio': -2.3009621765096218, 'quarters': {'ni': [{'end': '2025-09-27', 'value': 4200000.0}, {'end': '2025-12-27', 'value': 78200000.0}, {'end': '2026-03-28', 'value': 144200000.0}, {'end': '2026-06-27', 'value': -7161700000.0}], 'rev': [{'end': '2025-09-27', 'value': 533800000.0}, {'end': '2025-12-27', 'value': 665500000.0}, {'end': '2026-03-28', 'value': 808400000.0}, {'end': '2026-06-27', 'value': 1006300000.0}]}}, {'rule': 3, 'field': 'ni', 'quarters': [{'end': '2025-09-27', 'value': 4200000.0, 'derivation': None}, {'end': '2025-12-27', 'value': 78200000.0, 'derivation': None}, {'end': '2026-03-28', 'value': 144200000.0, 'derivation': None}, {'end': '2026-06-27', 'value': -7161700000.0, 'derivation': 'q4_derived'}], 'derived_end': '2026-06-27'}, {'rule': 3, 'field': 'eps', 'quarters': [{'end': '2025-09-27', 'value': 0.05, 'derivation': None}, {'end': '2025-12-27', 'value': 0.89, 'derivation': None}, {'end': '2026-03-28', 'value': 1.5, 'derivation': None}, {'end': '2026-06-27', 'value': -95.39999999999999, 'derivation': 'eps_q4_derived'}], 'derived_end': '2026-06-27'}]}",
+      "violations": [
+        {
+          "rule": 1,
+          "field": "ni_ttm/rev_ttm",
+          "ratio": -2.3009621765096218,
+          "quarters": {
+            "ni": [
+              {
+                "end": "2025-09-27",
+                "value": 4200000.0
+              },
+              {
+                "end": "2025-12-27",
+                "value": 78200000.0
+              },
+              {
+                "end": "2026-03-28",
+                "value": 144200000.0
+              },
+              {
+                "end": "2026-06-27",
+                "value": -7161700000.0
+              }
+            ],
+            "rev": [
+              {
+                "end": "2025-09-27",
+                "value": 533800000.0
+              },
+              {
+                "end": "2025-12-27",
+                "value": 665500000.0
+              },
+              {
+                "end": "2026-03-28",
+                "value": 808400000.0
+              },
+              {
+                "end": "2026-06-27",
+                "value": 1006300000.0
+              }
+            ]
+          }
+        },
+        {
+          "rule": 3,
+          "field": "ni",
+          "quarters": [
+            {
+              "end": "2025-09-27",
+              "value": 4200000.0,
+              "derivation": null
+            },
+            {
+              "end": "2025-12-27",
+              "value": 78200000.0,
+              "derivation": null
+            },
+            {
+              "end": "2026-03-28",
+              "value": 144200000.0,
+              "derivation": null
+            },
+            {
+              "end": "2026-06-27",
+              "value": -7161700000.0,
+              "derivation": "q4_derived"
+            }
+          ],
+          "derived_end": "2026-06-27"
+        },
+        {
+          "rule": 3,
+          "field": "eps",
+          "quarters": [
+            {
+              "end": "2025-09-27",
+              "value": 0.05,
+              "derivation": null
+            },
+            {
+              "end": "2025-12-27",
+              "value": 0.89,
+              "derivation": null
+            },
+            {
+              "end": "2026-03-28",
+              "value": 1.5,
+              "derivation": null
+            },
+            {
+              "end": "2026-06-27",
+              "value": -95.39999999999999,
+              "derivation": "eps_q4_derived"
+            }
+          ],
+          "derived_end": "2026-06-27"
+        }
+      ]
+    }
+  ],
+  "job": {
+    "task_name": "m2_round3_cached_recompute",
+    "trade_date": "2026-10-15",
+    "started_at": "2026-10-15T07:32:44.871586+00:00",
+    "ended_at": "2026-10-15T07:32:53.613630+00:00",
+    "status": "ok",
+    "processed_count": 59,
+    "error_summary": "Cached raw SEC recompute; LITE official values retained, new gate blocks scoring",
+    "params_version": "p-2026.10",
+    "id": 690
+  },
+  "v_eps_shares_ni_ratio": 0.9871414660056658,
+  "independent_ratio_checks": [
+    {
+      "ticker": "AAPL",
+      "ni_to_rev": 0.27618604910212224,
+      "eps_shares_to_ni": 0.9859249809974403,
+      "can_score": true
+    },
+    {
+      "ticker": "ADBE",
+      "ni_to_rev": 0.28047747400847134,
+      "eps_shares_to_ni": 0.9569703459637562,
+      "can_score": true
+    },
+    {
+      "ticker": "AMAT",
+      "ni_to_rev": 0.30051561435937346,
+      "eps_shares_to_ni": 0.991675665257365,
+      "can_score": true
+    },
+    {
+      "ticker": "AMD",
+      "ni_to_rev": 0.15576806681999758,
+      "eps_shares_to_ni": 0.9869953238078955,
+      "can_score": true
+    },
+    {
+      "ticker": "AMZN",
+      "ni_to_rev": 0.1744031043729373,
+      "eps_shares_to_ni": 0.9910769265451911,
+      "can_score": true
+    },
+    {
+      "ticker": "ANET",
+      "ni_to_rev": 0.3837090163934426,
+      "eps_shares_to_ni": 0.9853804795727638,
+      "can_score": true
+    },
+    {
+      "ticker": "ARM",
+      "ni_to_rev": 0.183739837398374,
+      "eps_shares_to_ni": 1.004203539823009,
+      "can_score": false
+    },
+    {
+      "ticker": "ASML",
+      "ni_to_rev": 0.29415960302810457,
+      "eps_shares_to_ni": 0.9910785795315005,
+      "can_score": false
+    },
+    {
+      "ticker": "AVGO",
+      "ni_to_rev": 0.4294420003591309,
+      "eps_shares_to_ni": 0.9780545705370443,
+      "can_score": true
+    },
+    {
+      "ticker": "BE",
+      "ni_to_rev": 0.07960447982909846,
+      "eps_shares_to_ni": 0.9090497854091156,
+      "can_score": true
+    },
+    {
+      "ticker": "CAT",
+      "ni_to_rev": 0.14511100108391656,
+      "eps_shares_to_ni": 0.9847148350673183,
+      "can_score": true
+    },
+    {
+      "ticker": "CEG",
+      "ni_to_rev": 0.13991121872477805,
+      "eps_shares_to_ni": 1.048512751237381,
+      "can_score": true
+    },
+    {
+      "ticker": "CIEN",
+      "ni_to_rev": 0.10868983908369753,
+      "eps_shares_to_ni": 0.9708014730826242,
+      "can_score": true
+    },
+    {
+      "ticker": "COHR",
+      "ni_to_rev": 0.11252060041743811,
+      "eps_shares_to_ni": 1.0073499123781746,
+      "can_score": true
+    },
+    {
+      "ticker": "COST",
+      "ni_to_rev": 0.03043337709546963,
+      "eps_shares_to_ni": 0.9971130809928462,
+      "can_score": true
+    },
+    {
+      "ticker": "CRM",
+      "ni_to_rev": 0.2199007692657836,
+      "eps_shares_to_ni": 0.9335624094390396,
+      "can_score": true
+    },
+    {
+      "ticker": "CRWD",
+      "ni_to_rev": 0.008338360070012945,
+      "eps_shares_to_ni": 1.1378318057561947,
+      "can_score": true
+    },
+    {
+      "ticker": "CRWV",
+      "ni_to_rev": -0.25401844532279316,
+      "eps_shares_to_ni": 0.9316701244813278,
+      "can_score": true
+    },
+    {
+      "ticker": "CVX",
+      "ni_to_rev": 0.09865795286304986,
+      "eps_shares_to_ni": 0.9979127409839251,
+      "can_score": true
+    },
+    {
+      "ticker": "DELL",
+      "ni_to_rev": 0.0752528158627486,
+      "eps_shares_to_ni": 0.9669186148708031,
+      "can_score": true
+    },
+    {
+      "ticker": "ETN",
+      "ni_to_rev": 0.1275270607826811,
+      "eps_shares_to_ni": 0.9961055105771741,
+      "can_score": true
+    },
+    {
+      "ticker": "FTNT",
+      "ni_to_rev": 0.2817307436830778,
+      "eps_shares_to_ni": 0.9791152157259394,
+      "can_score": true
+    },
+    {
+      "ticker": "GE",
+      "ni_to_rev": 0.17717919349105415,
+      "eps_shares_to_ni": 0.9818218608303613,
+      "can_score": true
+    },
+    {
+      "ticker": "GEV",
+      "ni_to_rev": 0.23034712821504544,
+      "eps_shares_to_ni": 0.9734913029940182,
+      "can_score": true
+    },
+    {
+      "ticker": "GOOGL",
+      "ni_to_rev": 0.5477094014793682,
+      "eps_shares_to_ni": 0.9971102147785672,
+      "can_score": true
+    },
+    {
+      "ticker": "HD",
+      "ni_to_rev": 0.08409585283964628,
+      "eps_shares_to_ni": 1.002107595103676,
+      "can_score": true
+    },
+    {
+      "ticker": "INTC",
+      "ni_to_rev": -0.19794150652265394,
+      "eps_shares_to_ni": 0.9338258481707857,
+      "can_score": true
+    },
+    {
+      "ticker": "JNJ",
+      "ni_to_rev": 0.21481889940671303,
+      "eps_shares_to_ni": 0.9863206217697389,
+      "can_score": true
+    },
+    {
+      "ticker": "JPM",
+      "ni_to_rev": 0.3263008505175319,
+      "eps_shares_to_ni": 0.9539190012333439,
+      "can_score": true
+    },
+    {
+      "ticker": "KLAC",
+      "ni_to_rev": 0.3557406044239115,
+      "eps_shares_to_ni": 0.9898960695466624,
+      "can_score": true
+    },
+    {
+      "ticker": "LITE",
+      "ni_to_rev": -2.3009621765096218,
+      "eps_shares_to_ni": 1.2023636284985075,
+      "can_score": false
+    },
+    {
+      "ticker": "LLY",
+      "ni_to_rev": 0.3352915332956756,
+      "eps_shares_to_ni": 1.050220528508854,
+      "can_score": true
+    },
+    {
+      "ticker": "LRCX",
+      "ni_to_rev": 0.3127229778385542,
+      "eps_shares_to_ni": 0.9920462642366638,
+      "can_score": true
+    },
+    {
+      "ticker": "MA",
+      "ni_to_rev": 0.4633868255280335,
+      "eps_shares_to_ni": 0.9874478686104448,
+      "can_score": true
+    },
+    {
+      "ticker": "META",
+      "ni_to_rev": 0.29835091654691387,
+      "eps_shares_to_ni": 1.000053452377456,
+      "can_score": true
+    },
+    {
+      "ticker": "MRVL",
+      "ni_to_rev": 0.2793456292392834,
+      "eps_shares_to_ni": 1.0031584529717035,
+      "can_score": true
+    },
+    {
+      "ticker": "MSFT",
+      "ni_to_rev": 0.4030538905915218,
+      "eps_shares_to_ni": 0.9965572943607055,
+      "can_score": true
+    },
+    {
+      "ticker": "MU",
+      "ni_to_rev": 0.6379628795386971,
+      "eps_shares_to_ni": 0.9897572920472171,
+      "can_score": true
+    },
+    {
+      "ticker": "NFLX",
+      "ni_to_rev": 0.2821878521496993,
+      "eps_shares_to_ni": 0.9700861143229983,
+      "can_score": true
+    },
+    {
+      "ticker": "NOK",
+      "ni_to_rev": 0.02813881591537925,
+      "eps_shares_to_ni": 1.0584773633179723,
+      "can_score": false
+    },
+    {
+      "ticker": "NOW",
+      "ni_to_rev": 0.11335867499321206,
+      "eps_shares_to_ni": 0.9906586826347304,
+      "can_score": true
+    },
+    {
+      "ticker": "NVDA",
+      "ni_to_rev": 0.6366294901458565,
+      "eps_shares_to_ni": 0.9883450246009158,
+      "can_score": true
+    },
+    {
+      "ticker": "ORCL",
+      "ni_to_rev": 0.2635978600089166,
+      "eps_shares_to_ni": 1.0196319069767439,
+      "can_score": true
+    },
+    {
+      "ticker": "PANW",
+      "ni_to_rev": 0.026742160278745646,
+      "eps_shares_to_ni": 1.065798045602606,
+      "can_score": true
+    },
+    {
+      "ticker": "PLTR",
+      "ni_to_rev": 0.49004563234118065,
+      "eps_shares_to_ni": 0.9319444908528945,
+      "can_score": true
+    },
+    {
+      "ticker": "QCOM",
+      "ni_to_rev": 0.21010233951303636,
+      "eps_shares_to_ni": 0.993411815530835,
+      "can_score": true
+    },
+    {
+      "ticker": "SKHY",
+      "ni_to_rev": null,
+      "eps_shares_to_ni": null,
+      "can_score": false
+    },
+    {
+      "ticker": "SMCI",
+      "ni_to_rev": 0.05709835109742521,
+      "eps_shares_to_ni": 0.9602186261436659,
+      "can_score": true
+    },
+    {
+      "ticker": "SNDK",
+      "ni_to_rev": 0.5646483603318846,
+      "eps_shares_to_ni": 0.94462219135485,
+      "can_score": true
+    },
+    {
+      "ticker": "STX",
+      "ni_to_rev": 0.2610906109061091,
+      "eps_shares_to_ni": 0.9894342965452262,
+      "can_score": true
+    },
+    {
+      "ticker": "TSLA",
+      "ni_to_rev": 0.03671141392987772,
+      "eps_shares_to_ni": 1.1213226039747635,
+      "can_score": true
+    },
+    {
+      "ticker": "TSM",
+      "ni_to_rev": 0.4002265826800199,
+      "eps_shares_to_ni": 0.9983308427659142,
+      "can_score": false
+    },
+    {
+      "ticker": "UNH",
+      "ni_to_rev": 0.03137322856336739,
+      "eps_shares_to_ni": 0.990265381409149,
+      "can_score": true
+    },
+    {
+      "ticker": "V",
+      "ni_to_rev": 0.5078223341125697,
+      "eps_shares_to_ni": 0.9871414660056658,
+      "can_score": true
+    },
+    {
+      "ticker": "VRT",
+      "ni_to_rev": 0.1508763371546047,
+      "eps_shares_to_ni": 0.9824755916050809,
+      "can_score": true
+    },
+    {
+      "ticker": "WDC",
+      "ni_to_rev": 0.7294682250948216,
+      "eps_shares_to_ni": 0.9288979329711375,
+      "can_score": true
+    },
+    {
+      "ticker": "WMT",
+      "ni_to_rev": 0.030304777436421192,
+      "eps_shares_to_ni": 0.9918979717865555,
+      "can_score": true
+    },
+    {
+      "ticker": "XOM",
+      "ni_to_rev": 0.08883085609222334,
+      "eps_shares_to_ni": 0.9766057651433281,
+      "can_score": true
+    },
+    {
+      "ticker": "ZS",
+      "ni_to_rev": -0.018845210010490606,
+      "eps_shares_to_ni": 1.0065264125737983,
+      "can_score": true
+    }
+  ],
+  "scorable_ratio_violations": []
+}

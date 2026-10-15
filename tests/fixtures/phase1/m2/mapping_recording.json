@@ -1,0 +1,9 @@
+{
+  "task": "segment_mapping_draft",
+  "result": {
+    "graph_node_ids": [
+      "datacenter"
+    ],
+    "reason": "Frozen synthetic mapping; requires human confirmation"
+  }
+}

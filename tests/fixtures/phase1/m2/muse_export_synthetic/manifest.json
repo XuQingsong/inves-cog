@@ -1,0 +1,134 @@
+{
+  "format_version": 1,
+  "synthetic": true,
+  "tables": [
+    {
+      "table": "data.estimates_trend",
+      "file": "estimates_trend.csv.gz",
+      "sha256": "e14e32330468cd8df9fb42bbad2aad018b3f61290e9a0236a22ab3c039409869",
+      "rows": 2,
+      "columns": [
+        {
+          "name": "snapshot_date",
+          "type": "text"
+        },
+        {
+          "name": "ticker",
+          "type": "text"
+        },
+        {
+          "name": "period",
+          "type": "text"
+        },
+        {
+          "name": "cur",
+          "type": "text"
+        },
+        {
+          "name": "ago7",
+          "type": "text"
+        }
+      ],
+      "timezone": "Asia/Shanghai",
+      "null": "\\N"
+    },
+    {
+      "table": "data.estimates_revisions",
+      "file": "estimates_revisions.csv.gz",
+      "sha256": "4998384da180b7ffd4c7f7559fb5f33e2e6b7445d2b1a19f0edd874b91df6945",
+      "rows": 1,
+      "columns": [
+        {
+          "name": "snapshot_date",
+          "type": "text"
+        },
+        {
+          "name": "ticker",
+          "type": "text"
+        },
+        {
+          "name": "period",
+          "type": "text"
+        },
+        {
+          "name": "up7",
+          "type": "text"
+        },
+        {
+          "name": "down7",
+          "type": "text"
+        },
+        {
+          "name": "up30",
+          "type": "text"
+        },
+        {
+          "name": "down30",
+          "type": "text"
+        }
+      ],
+      "timezone": "Asia/Shanghai",
+      "null": "\\N"
+    },
+    {
+      "table": "data.price_targets",
+      "file": "price_targets.csv.gz",
+      "sha256": "8e615d0251d4921bb106d855d7e184ad329152ef08e601758d37f37534d1d000",
+      "rows": 1,
+      "columns": [
+        {
+          "name": "snapshot_date",
+          "type": "text"
+        },
+        {
+          "name": "ticker",
+          "type": "text"
+        },
+        {
+          "name": "mean",
+          "type": "text"
+        },
+        {
+          "name": "median",
+          "type": "text"
+        }
+      ],
+      "timezone": "Asia/Shanghai",
+      "null": "\\N"
+    },
+    {
+      "table": "data.earnings_history",
+      "file": "earnings_history.csv.gz",
+      "sha256": "9a367dee1a5f6b79cf2c8105c0915fc6361793fa1948802cfeb7bf00eeeb08f9",
+      "rows": 1,
+      "columns": [
+        {
+          "name": "ticker",
+          "type": "text"
+        },
+        {
+          "name": "quarter_date",
+          "type": "text"
+        },
+        {
+          "name": "eps_actual",
+          "type": "text"
+        },
+        {
+          "name": "eps_est",
+          "type": "text"
+        },
+        {
+          "name": "surprise_pct",
+          "type": "text"
+        },
+        {
+          "name": "first_seen",
+          "type": "text"
+        }
+      ],
+      "timezone": "Asia/Shanghai",
+      "null": "\\N"
+    }
+  ]
+}

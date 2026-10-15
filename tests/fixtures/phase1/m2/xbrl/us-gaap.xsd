@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xbrli="http://www.xbrl.org/2003/instance" targetNamespace="http://example.invalid/us-gaap" elementFormDefault="qualified">
+ <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="xbrli.xsd"/>
+ <xs:element name="RevenueFromContractWithCustomerExcludingAssessedTax" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/>
+ <xs:element name="OperatingIncomeLoss" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration"/>
+ <xs:element name="StatementBusinessSegmentsAxis" type="xs:string"/>
+ <xs:element name="ConsolidationItemsAxis" type="xs:string"/>
+ <xs:element name="ProductOrServiceAxis" type="xs:string"/>
+ <xs:element name="IntersegmentEliminationMember" type="xs:string"/>
+</xs:schema>
