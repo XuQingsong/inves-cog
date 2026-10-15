@@ -9,6 +9,29 @@ from inves_cog.llm.registry import ALLOWED_MODELS
 from inves_cog.llm.usage import DialogueResult
 
 TASK_FORMATS = {
+    "graph_seed_draft": (
+        'Return {"relations":[{"from_entity":ticker,"to_entity":name,"to_entity_kind":'
+        "string,"
+        '"connection_type":string,"mechanism":string,'
+        '"direction":string,"citation":{"accession":string,"section":string,"char_start":null,'
+        '"char_end":null,"quote":exact unique substring}}]}. Use one enum value, never slash-separated values. '
+        "Allowed connection types: 业务关系, 市场共振, 市场叙事, 经营传导. "
+        "Allowed mechanisms: 供给, 需求, 竞争, 客户融资, 估值倍数. "
+        "Allowed entity kinds: company, private_company, product, app, model, workload, segment, theme. "
+        "Extract at least three distinct evidenced relationships when present. "
+        "Use only supplied originals. Do not count character offsets; "
+        "the server resolves exact unique quotes. Never invent unnamed customers."
+    ),
+    "exposure_draft": (
+        'Return {"exposures":[{"from_entity":ticker,"to_entity":name,"exposure_usd":number,'
+        '"exposure_basis":"收入占比/RPO/合同/应收/预付/分部收入","exposure_asof":"YYYY-MM-DD",'
+        '"accession":string,"citation":{"accession":string,"section":string,"char_start":null,'
+        '"char_end":null,"quote":exact unique substring}}]}. Use one basis value. '
+        "Do not count character offsets; the server resolves quotes. "
+        "Only evidenced USD amounts; quotes must include the dollar amount and units. "
+        "No estimates, unnamed-customer identities, inferred contract value or unsupported currency conversion. "
+        "If absent return an empty exposures array."
+    ),
     "entity_tagging": "Return entities as a JSON array of graph entity identifier strings.",
     "info_fields_extraction": (
         "Return is_guidance, guidance_direction (up/down/maintain), "
@@ -64,6 +87,9 @@ class OpenAICompatibleTransport:
         }
         if spec.model == "deepseek-v4.1-flash":
             request["enable_thinking"] = False
+        if spec.task in {"graph_seed_draft", "exposure_draft"}:
+            request["max_tokens"] = 8192
+            request["reasoning_effort"] = "low"
         try:
             response = http.request(
                 "POST",

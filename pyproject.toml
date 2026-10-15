@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Independent market research and paper trading system"
 requires-python = ">=3.11,<3.12"
 dependencies = [
+    "numpy>=2,<3",
+    "pandas>=2.2,<4",
+    "scipy>=1.14,<2",
     "fastapi>=0.115,<1",
     "PyYAML>=6,<7",
     "exchange-calendars>=4.5,<5",

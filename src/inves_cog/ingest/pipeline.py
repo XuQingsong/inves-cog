@@ -611,6 +611,8 @@ class Pipeline:
         return {"processed_count": len(rows)}
 
     def runtime(self):
+        from inves_cog.ingest.market_structure import collect_issuer_profiles, collect_market_inputs
+
         health = HealthBook(clock=self.clock, rows=self.repo.health_rows(), persist=self.repo.write_health)
         tasks = {
             "bars_full": ("Alpaca", self.bars),
@@ -631,6 +633,8 @@ class Pipeline:
         }
         tasks.update(
             {
+                "m6_market_inputs": ("MarketStructureInputs", lambda: collect_market_inputs(self)),
+                "issuer_profiles": ("SECIssuerProfiles", lambda: collect_issuer_profiles(self)),
                 "fed_news": ("FederalReserveNews", lambda: self.rss_task("FederalReserveNews")),
                 "eia_press": ("EIANews", lambda: self.rss_task("EIANews")),
                 "eia_energy": ("EIATodayInEnergy", lambda: self.rss_task("EIATodayInEnergy")),

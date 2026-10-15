@@ -41,18 +41,6 @@ test_implied_growth_no_solution | M5 | 等待 M5 实现
 test_position_panel | M5 | 等待 M5 实现
 test_shadow_rules_no_orders | M5 | 等待 M5 实现
 test_valuation_live_smoke | M5 | 等待 R5
-test_marketstate_flags | M6 | 等待 M6 实现
-test_residual_exact_linear | M6 | 等待 M6 实现
-test_residual_leave_one_out | M6 | 等待 M6 实现
-test_residual_window_excludes_today | M6 | 等待 M6 实现
-test_insufficient_history_null | M6 | 等待 M6 实现
-test_post_session_null_when_missing | M6 | 等待 M6 实现
-test_beta_share_bounds | M6 | 等待 M6 实现
-test_marketstate_price_only | M6 | 等待 M6 实现
-test_graph_draft_requires_citation | M6 | 等待 M6 实现
-test_candidate_edges_not_used | M6 | 等待 M6 实现
-test_auto_cluster_suggestion | M6 | 等待 M6 实现
-test_marketstate_live_smoke | M6 | 等待 R5
 test_path_a_total_shock | M7 | 等待 M7 实现
 test_path_b_relative | M7 | 等待 M7 实现
 test_path_c_factor | M7 | 等待 M7 实现

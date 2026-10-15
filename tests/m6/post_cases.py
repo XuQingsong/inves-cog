@@ -58,5 +58,5 @@ def assert_review_edits(clock):
         queue.review(["edit"], action="modify", edits={"edit": {"unrecognized_field": True}})
     with pytest.raises(ValueError):
         queue.review(["edit"], action="modify", edits={"edit": {"exposure_usd": -1}})
-    queue.review(["edit"], action="modify", edits={"edit": {"direction": "负", "strength": "强"}})
+    queue.review(["edit"], action="modify", edits={"edit": {"direction": "负", "strength": 0.8}})
     assert queue.candidates()[0]["direction"] == "负"

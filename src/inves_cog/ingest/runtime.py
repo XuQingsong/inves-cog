@@ -46,6 +46,11 @@ def due_tasks(clock, last_runs):
     due("news_prefill", after=480, before=490)
     due("bars_full", after=1220, session=True)
     due("wide_universe", after=1220, session=True)
+    due("m6_market_inputs", after=1220, session=True)
+    if now.day <= 7:
+        previous = last_runs.get("issuer_profiles")
+        if previous is None or (previous.year, previous.month) != (now.year, now.month):
+            due("issuer_profiles", after=1220, session=True)
     due("news_full", after=1220)
     due("sec_submissions", after=1245, before=1275)
     due("sec_index", after=1245, before=1275)
