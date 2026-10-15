@@ -115,7 +115,9 @@ def test_marketstate_price_only(tmp_path):
 
 @pytest.mark.phase1_blocking
 def test_graph_draft_requires_citation(clock, tmp_path):
-    from tests.m6.recordings import recorded_draft
+    from tests.m6.recordings import assert_graph_request_bounds, recorded_draft
+
+    assert_graph_request_bounds()
 
     fixture = json.loads((ROOT / "tests/fixtures/phase1/m6/draft.json").read_text())
     result = recorded_draft(fixture, clock=clock, recordings=tmp_path)
