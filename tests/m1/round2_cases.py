@@ -240,10 +240,16 @@ def assert_embedding_batches():
         assert records[-1]["input_tokens"] == 7 and records[-1]["task"] == "embedding"
     from inves_cog.ingest.embedding_backfill import validate_async_row
 
+    qwen = Embedding(configuration, http=HTTPClient(send, retries=0))
+    with pytest.raises(ValueError, match="batch"):
+        qwen.batch(["first", "second"], model="qwen3.7-text-embedding-flash", dimensions=1024)
+
     row = {"output": {"text_index": 0, "code": 200, "embedding": [0.1] * 1536}}
     assert validate_async_row(row, 1, 1536)[0] == 0
-    for invalid in ({"output": {**row["output"], "text_index": 1}},
-                    {"output": {**row["output"], "embedding": [math.nan] * 1536}}):
+    for invalid in (
+        {"output": {**row["output"], "text_index": 1}},
+        {"output": {**row["output"], "embedding": [math.nan] * 1536}},
+    ):
         with pytest.raises(ValueError):
             validate_async_row(invalid, 1, 1536)
 
