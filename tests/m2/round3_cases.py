@@ -48,6 +48,20 @@ def assert_split_basis():
     assert after[date(2025, 3, 31)]["split_adjustment"][0]["ratio"] == 4
     assert Facts(data, date(2025, 8, 2)).quarterly(["EarningsPerShareDiluted"])[date(2025, 3, 31)]["val"] == -0.4
 
+    import json
+    from pathlib import Path
+
+    from inves_cog.ingest.fundamentals.extractors import extract_state
+
+    official = json.loads((Path(__file__).parents[1] / "fixtures/phase1/m2/round3_official.json").read_text())
+    lite = extract_state(official["LITE"], ticker="LITE", as_of=date(2026, 10, 15))
+    assert lite.values["ni_ttm"] == -6_935_100_000
+    assert lite.values["eps_ttm"] == -92.96
+    assert "implausible_value" in lite.health_codes
+    crowd = extract_state(official["CRWD"], ticker="CRWD", as_of=date(2026, 10, 15))
+    assert crowd.values["ni_ttm"] == 58_460_000
+    assert abs(crowd.values["eps_ttm"] - 0.05) < 1e-12
+
 
 def assert_multi_class(input_facts):
     from inves_cog.ingest.fundamentals.extractors import extract_state
@@ -67,9 +81,8 @@ def assert_multi_class(input_facts):
 
 
 def assert_plausibility():
-    from inves_cog.ingest.fundamentals.plausibility import violations
-
     from inves_cog.ingest.fundamentals.health import health_row
+    from inves_cog.ingest.fundamentals.plausibility import violations
     from inves_cog.ingest.fundamentals.state import FinState
 
     values = {"rev_ttm": 100e6, "ni_ttm": 20e6, "eps_ttm": 2, "shares": 10e6}
@@ -87,6 +100,8 @@ def assert_plausibility():
         }
     }
     assert any(r["rule"] == 3 and r["quarters"] for r in violations(values, series))
+    ratio_errors = violations({**values, "ni_ttm": -200e6}, series)
+    assert any(row["rule"] == 1 and row["quarters"] for row in ratio_errors)
     safe = deepcopy(series)
     safe["ni"][date(2026, 10, 1)]["val"] = -30
     assert not violations(values, safe)
