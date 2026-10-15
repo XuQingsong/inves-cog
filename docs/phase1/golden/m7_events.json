@@ -1,0 +1,809 @@
+{
+ "spec": "M7 v6 验证集（需求方 2026-10-15 整理）。split=in_sample 的事件参与过 v6 阈值的设计，out_of_sample 的没有。mild=true 的是幅度温和的事件，不计入查全率。controls 是不应产生篮子异常的日子。scope 取值：L1、style、sector:<ETF>、basket:<L3 篮子名>、stock:<代码>",
+ "events": [
+  {
+   "date": "2018-02-05",
+   "type": "流动性",
+   "scope": [
+    "L1"
+   ],
+   "desc": "波动率崩盘（Volmageddon），VIX 单日翻倍",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-02-08",
+   "type": "流动性",
+   "scope": [
+    "L1"
+   ],
+   "desc": "波动率冲击第二波，S&P 跌约 3.8%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-03-22",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "对华加征关税，S&P 跌约 2.5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-10-10",
+   "type": "利率",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美债收益率飙升，科技股领跌，S&P 跌约 3.3%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-10-24",
+   "type": "宏观叙事",
+   "scope": [
+    "L1"
+   ],
+   "desc": "纳指单日跌约 4.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-12-04",
+   "type": "宏观叙事",
+   "scope": [
+    "L1"
+   ],
+   "desc": "收益率曲线倒挂担忧、贸易休战存疑，S&P 跌约 3.2%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-12-24",
+   "type": "政治",
+   "scope": [
+    "L1"
+   ],
+   "desc": "平安夜暴跌（政府停摆、白宫与美联储冲突）",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2018-12-26",
+   "type": "宏观叙事",
+   "scope": [
+    "L1"
+   ],
+   "desc": "圣诞后反弹约 5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2019-01-03",
+   "type": "龙头财报",
+   "scope": [
+    "L1",
+    "stock:AAPL"
+   ],
+   "desc": "苹果下调营收指引，AAPL 跌约 10%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2019-05-13",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "中国报复性关税，S&P 跌约 2.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2019-08-05",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "人民币破 7，S&P 跌约 3%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2019-08-14",
+   "type": "利率",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美债收益率曲线倒挂，S&P 跌约 2.9%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2019-09-09",
+   "type": "风格轮动",
+   "scope": [
+    "style"
+   ],
+   "desc": "动量股暴跌、价值股和小盘股走强",
+   "source": "https://www.bloombergquint.com/markets/coatue-winton-join-hedge-funds-damaged-by-momentum-reversal",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-02-24",
+   "type": "公共卫生",
+   "scope": [
+    "L1"
+   ],
+   "desc": "新冠在意大利、韩国扩散，S&P 跌约 3.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-03-09",
+   "type": "公共卫生",
+   "scope": [
+    "L1",
+    "sector:XLE"
+   ],
+   "desc": "油价战 + 新冠，熔断，S&P 跌约 7.6%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-03-12",
+   "type": "公共卫生",
+   "scope": [
+    "L1"
+   ],
+   "desc": "欧洲旅行禁令，熔断，S&P 跌约 9.5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-03-16",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美联储紧急降息到零，熔断，S&P 跌约 12%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-03-24",
+   "type": "政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "刺激法案预期，S&P 涨约 9.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-06-11",
+   "type": "公共卫生",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美联储悲观展望 + 第二波疫情担忧，S&P 跌约 5.9%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-09-03",
+   "type": "宏观叙事",
+   "scope": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "desc": "科技股暴跌，纳指跌约 5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2020-11-09",
+   "type": "公共卫生",
+   "scope": [
+    "style",
+    "sector:XLE"
+   ],
+   "desc": "辉瑞疫苗有效，价值和小盘股暴涨、成长股下跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2021-02-25",
+   "type": "利率",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美债收益率急升，纳指跌约 3.5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2021-11-26",
+   "type": "公共卫生",
+   "scope": [
+    "L1"
+   ],
+   "desc": "奥密克戎变种，S&P 跌约 2.3%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2021-11-30",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "鲍威尔放弃'暂时性通胀'说法",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-01-05",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "FOMC 纪要鹰派，纳指跌约 3.3%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-02-24",
+   "type": "地缘政治",
+   "scope": [
+    "L1"
+   ],
+   "desc": "俄罗斯入侵乌克兰，盘中暴跌后反转",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-04-29",
+   "type": "龙头财报",
+   "scope": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "desc": "亚马逊财报后跌约 14%，纳指跌约 4.2%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-05-05",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "FOMC 次日反转暴跌，纳指跌约 5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-05-18",
+   "type": "龙头财报",
+   "scope": [
+    "sector:XLP",
+    "stock:WMT"
+   ],
+   "desc": "塔吉特、沃尔玛财报暴雷，零售股暴跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-06-13",
+   "type": "宏观数据",
+   "scope": [
+    "L1"
+   ],
+   "desc": "CPI 超预期，S&P 进入熊市，跌约 3.9%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-08-26",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "鲍威尔杰克逊霍尔讲话，S&P 跌约 3.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-09-13",
+   "type": "宏观数据",
+   "scope": [
+    "L1"
+   ],
+   "desc": "CPI 超预期，S&P 跌约 4.3%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-10-07",
+   "type": "行业事件",
+   "scope": [
+    "basket:CPU",
+    "basket:半导体设备"
+   ],
+   "desc": "AMD 预警营收 + 美国对华芯片出口管制",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-10-13",
+   "type": "宏观数据",
+   "scope": [
+    "L1"
+   ],
+   "desc": "CPI 超预期后盘中大反转",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-11-10",
+   "type": "宏观数据",
+   "scope": [
+    "L1"
+   ],
+   "desc": "CPI 低于预期，纳指涨约 7.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2022-11-30",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "鲍威尔布鲁金斯讲话暗示放缓加息，S&P 涨约 3.1%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2023-03-09",
+   "type": "金融风险",
+   "scope": [
+    "sector:XLF"
+   ],
+   "desc": "硅谷银行增资失败，银行股暴跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2023-03-10",
+   "type": "金融风险",
+   "scope": [
+    "sector:XLF"
+   ],
+   "desc": "硅谷银行倒闭",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2023-03-13",
+   "type": "金融风险",
+   "scope": [
+    "sector:XLF"
+   ],
+   "desc": "签名银行倒闭，地区银行暴跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2023-05-25",
+   "type": "龙头财报",
+   "scope": [
+    "basket:AI加速芯片",
+    "stock:NVDA"
+   ],
+   "desc": "英伟达指引大超预期，NVDA 涨约 24%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2023-08-02",
+   "type": "政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "惠誉下调美国主权评级，S&P 跌约 1.4%（对照：温和下跌）",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample",
+   "mild": true
+  },
+  {
+   "date": "2023-10-03",
+   "type": "利率",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美债收益率创新高，S&P 跌约 1.4%（对照：收益率异动但股市跌幅温和）",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample",
+   "mild": true
+  },
+  {
+   "date": "2023-11-14",
+   "type": "宏观数据",
+   "scope": [
+    "style",
+    "L1"
+   ],
+   "desc": "CPI 低于预期，小盘股涨约 5.4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "out_of_sample"
+  },
+  {
+   "date": "2024-07-11",
+   "type": "宏观数据",
+   "scope": [
+    "style",
+    "L1"
+   ],
+   "desc": "6 月 CPI 回落，小盘暴涨、大型科技股下跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-07-24",
+   "type": "龙头财报",
+   "scope": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "desc": "特斯拉、谷歌财报后科技股大跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-08-02",
+   "type": "宏观数据",
+   "scope": [
+    "L1"
+   ],
+   "desc": "7 月非农远低于预期，触发萨姆规则",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-08-05",
+   "type": "流动性",
+   "scope": [
+    "L1"
+   ],
+   "desc": "日元套息交易平仓，全球股市暴跌，VIX 盘中飙升",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-09-03",
+   "type": "宏观数据",
+   "scope": [
+    "L1",
+    "basket:AI加速芯片"
+   ],
+   "desc": "ISM 制造业疲弱，英伟达单日跌约 9.5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-09-19",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美联储首次降息 50bp 后次日大涨",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-10-15",
+   "type": "行业事件",
+   "scope": [
+    "basket:半导体设备"
+   ],
+   "desc": "ASML 提前泄露财报、下调指引，半导体设备股大跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-11-06",
+   "type": "政治",
+   "scope": [
+    "style",
+    "L1"
+   ],
+   "desc": "美国大选结果，小盘股、金融股大涨",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2024-12-18",
+   "type": "美联储",
+   "scope": [
+    "L1"
+   ],
+   "desc": "美联储鹰派降息，下调明年降息次数",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-01-27",
+   "type": "AI 叙事",
+   "scope": [
+    "basket:AI加速芯片",
+    "basket:数据中心电力"
+   ],
+   "desc": "DeepSeek R1 冲击 AI 资本开支叙事",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-02-27",
+   "type": "龙头财报",
+   "scope": [
+    "basket:AI加速芯片"
+   ],
+   "desc": "英伟达财报后大跌约 8.5%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-03-10",
+   "type": "宏观叙事",
+   "scope": [
+    "L1"
+   ],
+   "desc": "衰退担忧，纳指单日跌约 4%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-04-03",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "'解放日'对等关税公布",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-04-04",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "中国反制关税，继续暴跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-04-09",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "关税暂停 90 天，史诗级反弹",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-04-16",
+   "type": "行业事件",
+   "scope": [
+    "L1",
+    "basket:AI加速芯片"
+   ],
+   "desc": "英伟达 H20 出口限制，计提约 55 亿美元",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-04-21",
+   "type": "政治",
+   "scope": [
+    "L1"
+   ],
+   "desc": "特朗普抨击鲍威尔，股债汇齐跌",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-05-12",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "中美日内瓦谈判达成降关税协议，大涨",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-05-27",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "推迟对欧盟加征关税，大涨",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-06-13",
+   "type": "地缘政治",
+   "scope": [
+    "sector:XLE"
+   ],
+   "desc": "以色列空袭伊朗，油价大涨（股票反应温和：XLE 仅 +1.7%，归为温和事件，不计漏检）",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "mild": true,
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-08-01",
+   "type": "宏观数据",
+   "scope": [
+    "L1"
+   ],
+   "desc": "非农远低于预期 + 新一轮关税",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-09-10",
+   "type": "龙头财报",
+   "scope": [
+    "basket:云厂商",
+    "basket:OpenAI合作方"
+   ],
+   "desc": "甲骨文 RPO 暴增，单日大涨约 36%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2025-10-10",
+   "type": "贸易政策",
+   "scope": [
+    "L1"
+   ],
+   "desc": "特朗普威胁对中国大幅加征关税，纳指跌约 3.5%，VIX 涨约 32%",
+   "source": "memory; price-verified 2026-10-15 (index/ETF/stock moves match description)",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-03-31",
+   "type": "地缘政治",
+   "scope": [
+    "L1"
+   ],
+   "desc": "市场预期伊朗战争即将结束，S&P 500 涨 2.9%",
+   "source": "https://lite.aol.com/news/story/0001/20260331/832321ec3b7e09411c593752063d0c20.htm",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-04-08",
+   "type": "地缘政治",
+   "scope": [
+    "sector:XLE",
+    "L1"
+   ],
+   "desc": "伊朗有条件停火、霍尔木兹海峡重开，原油单日跌超 18%，能源股暴跌、成长股大涨",
+   "source": "https://finance.yahoo.com/sectors/energy/articles/wall-street-just-sent-oil-203300330.html",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-05-06",
+   "type": "行业事件",
+   "scope": [
+    "basket:CPU",
+    "basket:NAND/DRAM"
+   ],
+   "desc": "芯片股普涨，纳指和 S&P 创新高（英特尔 05-05 单日 +13.5%）",
+   "source": "https://app.sentisense.ai/stories/nasdaq-and-s-p-500-hit-new-highs-as-chip-stocks-surge-05062026",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-06-05",
+   "type": "龙头财报",
+   "scope": [
+    "L1",
+    "basket:AI加速芯片",
+    "basket:NAND/DRAM"
+   ],
+   "desc": "博通 AI 芯片指引不及预期 + 存储过剩 + 非农强劲推高收益率，费城半导体指数跌 10.3%",
+   "source": "https://baselight.app/daily-insights/stocks/2026-06-08/semiconductor-rout-broadcom-outlook-jobs-report",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-06-23",
+   "type": "行业事件",
+   "scope": [
+    "basket:NAND/DRAM",
+    "basket:AI加速芯片"
+   ],
+   "desc": "韩国 KOSPI 跌近 10%，SK 海力士、三星跌约 12%，美股存储股跌约 13%",
+   "source": "https://briefing.com/stock-market-update/archive/2026/6/23/semiconductor-selloff-weighs-on-market",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-07-27",
+   "type": "行业事件",
+   "scope": [
+    "basket:NAND/DRAM"
+   ],
+   "desc": "存储股暴跌，SanDisk 跌超 13%",
+   "source": "https://www.itiger.com/hant/news/1173140352",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-07-29",
+   "type": "行业事件",
+   "scope": [
+    "basket:NAND/DRAM"
+   ],
+   "desc": "SK 海力士资本开支提高 50%，担忧 AI 投资周期过热；同日 FOMC 维持利率",
+   "source": "https://247wallst.com/investing/2026/07/29/sandisk-sinks-7-micron-slides-6-as-memory-selloff-intensifies-seagate-bucks-the-trend/",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-07-30",
+   "type": "龙头财报",
+   "scope": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "desc": "微软财报超预期，纳指 100 涨约 3.2%；Meta 资本开支上调后跌约 8%",
+   "source": "https://www.t-online.de/finanzen/boerse/ticker/aktien-new-york-nasdaq-stark-erholt-microsoft-bringt-erleichterung/0DB9FC004A7F2D61/",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-09-21",
+   "type": "AI 叙事",
+   "scope": [
+    "basket:CPU",
+    "stock:META"
+   ],
+   "desc": "Meta Muse 登顶，智能体叙事推动 CPU 股",
+   "source": "M7 文档 7.1",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-10-02",
+   "type": "行业事件",
+   "scope": [
+    "basket:HDD"
+   ],
+   "desc": "东芝扩大 HDD 产能",
+   "source": "M7 文档 7.1",
+   "split": "in_sample"
+  },
+  {
+   "date": "2026-10-14",
+   "type": "多因叠加",
+   "scope": [
+    "basket:OpenAI合作方",
+    "basket:AI服务器",
+    "L1"
+   ],
+   "desc": "CoreWeave 债务担忧 + 巴克莱下调 Dell 等 + CPI 超预期 + OpenAI 营收叙事",
+   "source": "https://www.cnbc.com/2026/10/14/dell-stock-barclays-enterprise-ai.html",
+   "split": "in_sample"
+  }
+ ],
+ "controls": [
+  {
+   "date": "2026-10-08",
+   "desc": "OpenAI 营收报道当天：合作方 −4.3%（约 1.7σ），不应有篮子异常"
+  }
+ ]
+}

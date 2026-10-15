@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v8（外国申报人的季度业绩、TSM 月度营收、TSM / NOK 年报缺口） |
+| 文档版本 | v9（合理性门禁先与申报原件核对：一致则 `extreme_value_verified`、不阻止打分） |
 | 规格章节 | 4.4、4.5、4.6、4.8、9.2（财报字段） |
 | 依赖 | M0；SEC submissions 来自 M1 |
 | 关闭的不变量 | I10、I11、I12、I33、I34 |
@@ -169,3 +169,4 @@
 | Q-M2-29 | 外国申报人不交 10-Q，季度业绩通过 6-K 报备，SEC 结构化数据里没有 | 新增"6-K 业绩公告"取数，只在 `fixed` 下使用：（1）从 M1 的 `ingest.sec_filings` 里找出 ASML、TSM、NOK、ARM（以及以后的 SKHY）的季度业绩 6-K，通常是附件 99.1 的新闻稿；（2）从公告的财务报表里取季度核心数字：营收、毛利、营业利润、归母净利润、稀释 EPS（写明是每股还是每 ADS，以及换算比例）、币种；（3）按发行人写固定的表格解析规则，不调用 LLM，解析不出来的标 `interim_unparsed` 并写明原因；（4）存入新表 `fundamentals.interim_results`（`ticker, accession, filed, period_end, currency, revenue, gross_profit, operating_income, net_income, eps_diluted, eps_basis, source_exhibit, parse_status`）；（5）`fixed` 下外国申报人的营收、净利润、EPS 改为用"最近一份年报 + 之后的季度公告"拼出 TTM；货币按 Q-M2-17 换算；健康码 `interim_unaudited`（不阻止打分）。这些公司仍然不可交易（I13 不变） |
 | Q-M2-30 | TSM 每月公布营收 | TSM 的月度营收 6-K 单独存入 `fundamentals.monthly_revenue`（`ticker, month, revenue, currency, filed, accession`），只用于档案展示和 M8 归因引用，不参与 TTM |
 | Q-M2-31 | SKHY 在 SEC 没有财务数据 | 上市时间短，还没有年报或季度公告。有 6-K 业绩公告时，按 Q-M2-29 处理；没有时健康码 `no_financial_filings_yet`，`reason` 写明已检查的申报类型和日期。不另找数据源 |
+| Q-M2-32 | Q-M2-27 的门禁把真实发生的巨额损失也拦住了（LITE 2026 财年 GAAP 净亏损 69.35 亿美元，来自 77.57 亿美元的可转债清偿损失；SKHY 2026 Q2 归母净利润高于营收，来自 63.3 万亿韩元的投资收益），与 AC-M2-02"LITE 可打分"矛盾 | **需求方更正（2026-10-15）**：门禁本意是拦截提取错误，不是拦截真实数据。命中 Q-M2-27 三条规则中任一条时，先把涉及的数值与申报原件（10-K / 10-Q 实例的无维度主报表 context，或外国申报人的 6-K 附件）核对：**一致**，健康码改为 `extreme_value_verified`（不阻止打分），`reason` 写明原件位置和主要原因（例如"可转债清偿损失 77.57 亿美元，非现金"），页面同样显示；**不一致**，才标 `implausible_value`，阻止打分。`legacy` 不检查 |
