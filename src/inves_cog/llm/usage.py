@@ -48,8 +48,8 @@ def tokens(usage):
 
 
 class PostgresRecorder:
-    def __init__(self, url):
-        self.url = url
+    def __init__(self, url, *, ignore_duplicates=False):
+        self.url, self.ignore_duplicates = url, ignore_duplicates
 
     def __call__(self, row):
         import psycopg
@@ -57,6 +57,7 @@ class PostgresRecorder:
         placeholders = ",".join(["%s"] * len(FIELDS))
         with psycopg.connect(self.url) as connection:
             connection.execute(
-                f"INSERT INTO ingest.llm_calls ({','.join(FIELDS)}) VALUES ({placeholders})",
+                f"INSERT INTO ingest.llm_calls ({','.join(FIELDS)}) VALUES ({placeholders})"
+                + (" ON CONFLICT (call_id) DO NOTHING" if self.ignore_duplicates else ""),
                 [row.get(name) for name in FIELDS],
             )

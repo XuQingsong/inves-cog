@@ -35,9 +35,11 @@ class Embedding:
     def batch(self, texts, *, model, dimensions):
         if not self.enabled:
             raise SourceError("Embedding paused by operator", confirmed_unavailable=True)
-        if model != "text-embedding-v3" or dimensions != 1024:
+        from inves_cog.ingest.embedding_models import ASYNC_MODELS, MODEL_BATCH_SIZES, MODEL_DIMENSIONS
+
+        if model in ASYNC_MODELS or MODEL_DIMENSIONS.get(model) != dimensions:
             raise ValueError("Unsupported embedding contract")
-        if not isinstance(texts, list) or not 1 <= len(texts) <= 10:
+        if not isinstance(texts, list) or not 1 <= len(texts) <= MODEL_BATCH_SIZES[model]:
             raise ValueError("Embedding batch requires one to ten texts")
         if any(not isinstance(text, str) or not text.strip() for text in texts):
             raise ValueError("Embedding input must be nonempty text")
@@ -46,21 +48,24 @@ class Embedding:
         if not self.key or urlparse(self.base).scheme != "https":
             raise SourceError("DashScope embedding endpoint/key missing: 等待 R5", confirmed_unavailable=True)
         try:
-            data = self._request(texts, model, dimensions)
+            return self._request(texts, model, dimensions)
         except SourceError as exc:
             if exc.status_code in {401, 403}:
                 self.auth_failure = exc
             raise
+
+    @staticmethod
+    def _vectors(data, count, dimensions):
         rows = data.get("data")
-        if not isinstance(rows, list) or len(rows) != len(texts):
+        if not isinstance(rows, list) or len(rows) != count:
             raise SourceError("Embedding response has missing or extra vectors")
         vectors = {}
         for row in rows:
             if not isinstance(row, dict):
                 raise SourceError("Embedding response has invalid row")
-            index = row.get("index", 0 if len(texts) == 1 else None)
+            index = row.get("index", 0 if count == 1 else None)
             vector = row.get("embedding")
-            if type(index) is not int or index not in range(len(texts)) or index in vectors:
+            if type(index) is not int or index not in range(count) or index in vectors:
                 raise SourceError("Embedding response has invalid or duplicate index")
             if (
                 not isinstance(vector, list)
@@ -69,7 +74,7 @@ class Embedding:
             ):
                 raise SourceError("Embedding response has invalid dimension or value")
             vectors[index] = vector
-        return [vectors[index] for index in range(len(texts))]
+        return [vectors[index] for index in range(count)]
 
     def _request(self, texts, model, dimensions):
         from inves_cog.llm.usage import call_context, tokens
@@ -84,8 +89,9 @@ class Embedding:
                     json={"model": model, "input": texts, "dimensions": dimensions},
                 )
             )
+            vectors = self._vectors(data, len(texts), dimensions)
             success = True
-            return data
+            return vectors
         finally:
             if self.recorder is not None:
                 input_tokens, _ = tokens(data.get("usage"))

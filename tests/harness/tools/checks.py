@@ -249,6 +249,7 @@ def scan_clock(root):
 
 
 def scan_models(root):
+    from inves_cog.ingest.embedding_models import MODEL_DIMENSIONS
     from inves_cog.llm.registry import ALLOWED_MODELS
 
     root = Path(root)
@@ -277,5 +278,9 @@ def scan_models(root):
             continue
         for line_no, line in enumerate(text.splitlines(), 1):
             for match in MODEL_PATTERN.finditer(line):
-                if match.group() not in ALLOWED_MODELS and not _brand_hostname(line, match):
+                if (
+                    match.group() not in ALLOWED_MODELS
+                    and match.group() not in MODEL_DIMENSIONS
+                    and not _brand_hostname(line, match)
+                ):
                     fail(path, line_no, "I37/FR-M0-10", f"non-whitelisted model {match.group()}")
