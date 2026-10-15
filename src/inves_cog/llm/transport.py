@@ -29,6 +29,9 @@ TASK_FORMATS = {
         '"char_end":null,"quote":exact unique substring}}]}. Use one basis value. '
         "Do not count character offsets; the server resolves quotes. "
         "Only evidenced USD amounts; quotes must include the dollar amount and units. "
+        "If segments are provided, return segment_id equal to its row_id, accession unchanged, "
+        "exposure_usd equal to revenue, exposure_basis=分部收入, and to_entity=segment_raw. "
+        "A structured M2 segment requires no prose citation. Return each sourced segment separately. "
         "No estimates, unnamed-customer identities, inferred contract value or unsupported currency conversion. "
         "If absent return an empty exposures array."
     ),

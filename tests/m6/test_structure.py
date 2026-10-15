@@ -133,6 +133,21 @@ def test_graph_draft_requires_citation(clock, tmp_path):
     fixture["source"]["text"] = "Changed evidence with no valid cited passage."
     result = recorded_draft(fixture, clock=clock, recordings=tmp_path)
     assert result["relations"] == [] and result["exposures"] == []
+    from inves_cog.perception.graph.segments import validate_segment_draft
+
+    source = {
+        "row_id": "seg",
+        "ticker": "WDC",
+        "accession": "filing",
+        "period_end": "2026-06-30",
+        "revenue": 123,
+        "segment_raw": "HDD",
+        "evidence": {"currency": "USD"},
+    }
+    draft = {"segment_id": "seg", "exposure_usd": 123, "exposure_basis": "分部收入", "accession": "filing"}
+    assert validate_segment_draft(draft, [source], clock=clock)["structured_source"]["row_id"] == "seg"
+    assert validate_segment_draft({**draft, "exposure_usd": 999}, [source], clock=clock) is None
+    assert validate_segment_draft(draft, [{**source, "evidence": {"currency": "EUR"}}], clock=clock) is None
 
 
 @pytest.mark.phase1_blocking

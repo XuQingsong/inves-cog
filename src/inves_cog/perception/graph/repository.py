@@ -3,6 +3,7 @@
 import hashlib
 import json
 import re
+from zoneinfo import ZoneInfo
 
 from psycopg.types.json import Jsonb
 
@@ -96,8 +97,32 @@ class Repository:
                 }
             )
             row[side] = identifier
-        citation = row["citation"]
-        evidence = {"citation": citation, "source_ticker": ticker}
+        citation = row.get("citation")
+        if citation is None and not row.get("structured_source"):
+            raise ValueError("A prose citation or validated M2 source is required")
+        evidence = {
+            "citation": citation,
+            "source_ticker": ticker,
+            "structured_source": row.get("structured_source"),
+            "flags": row.get("flags", []),
+        }
+        if row.get("exposure_usd") is not None and not row.get("structured_source"):
+            metadata = self.connection.execute(
+                "SELECT filing_date FROM ingest.sec_filings WHERE accession=%s LIMIT 1", (citation["accession"],)
+            ).fetchone()
+            if metadata:
+                row["exposure_asof"] = metadata["filing_date"]
+            else:
+                metadata = self.connection.execute(
+                    "SELECT published_at FROM ingest.info_items WHERE info_id=%s",
+                    (row.get("info_id") or citation["accession"],),
+                ).fetchone()
+                row["exposure_asof"] = (
+                    metadata["published_at"].astimezone(ZoneInfo("America/New_York")).date()
+                    if metadata and metadata["published_at"]
+                    else None
+                )
+            evidence["asof_basis"] = "source disclosure date; not a model-inferred contract date"
         self.connection.execute(
             """INSERT INTO graph.relations
          (relation_id,from_entity,to_entity,connection_type,mechanism,direction,strength,lag,exposure_usd,

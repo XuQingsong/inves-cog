@@ -1,0 +1,318 @@
+{
+  "basket": "hdd",
+  "status": "awaiting_user_review",
+  "rows": [
+    {
+      "relation_id": "04d33a48195d0cff75a327ca8b1dbcd6124585a11e23b90069635541aae7d2e0",
+      "from_entity": "ticker:WDC",
+      "to_entity": "high_capacity_enterprise_hdds",
+      "connection_type": "经营传导",
+      "mechanism": "供给",
+      "direction": "from_entity_to_to_entity",
+      "strength": null,
+      "lag": null,
+      "exposure_usd": null,
+      "exposure_basis": null,
+      "exposure_asof": null,
+      "source_info_ids": [
+        "0001628280-26-057139"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "We provide the Cloud end market with an array of high-capacity enterprise HDDs.",
+          "section": "1",
+          "char_end": 43687,
+          "accession": "0001628280-26-057139",
+          "char_start": 43608
+        },
+        "source_ticker": "WDC"
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 21:16:26.788867+08:00",
+      "last_evidence_at": "2026-10-15 21:16:26.788867+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "l2_01",
+        "ai_capex_chain",
+        "hdd"
+      ],
+      "revision": 1,
+      "target": "high-capacity enterprise HDDs"
+    },
+    {
+      "relation_id": "0f7f6b429742246e914cf9c3e9625c6a3c207f7e87989d327aabbba145d5fe59",
+      "from_entity": "ticker:WDC",
+      "to_entity": "high_capacity_enterprise_hdds_epmr_optinand_ultrasmr_hamr",
+      "connection_type": "市场共振",
+      "mechanism": "供给",
+      "direction": "from_entity_to_to_entity",
+      "strength": null,
+      "lag": null,
+      "exposure_usd": null,
+      "exposure_basis": null,
+      "exposure_asof": null,
+      "source_info_ids": [
+        "0001628280-26-057139"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Our multi-year product roadmap for high-capacity HDDs, which include ePMR, OptiNAND, UltraSMR, heat-assisted magnetic recording (“HAMR”) and triple stage actuators",
+          "section": "1",
+          "char_end": 48124,
+          "accession": "0001628280-26-057139",
+          "char_start": 47961
+        },
+        "source_ticker": "WDC"
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 21:03:13.066216+08:00",
+      "last_evidence_at": "2026-10-15 21:03:13.066216+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "l2_01",
+        "ai_capex_chain",
+        "hdd"
+      ],
+      "revision": 1,
+      "target": "high-capacity enterprise HDDs (ePMR, OptiNAND, UltraSMR, HAMR)"
+    },
+    {
+      "relation_id": "24b2f4c782eb28490f9e8235bee37bfed62c43a2dfff514a169dcdf91f624f14",
+      "from_entity": "ticker:WDC",
+      "to_entity": "toshiba_electronic_devices_storage_corporation",
+      "connection_type": "业务关系",
+      "mechanism": "竞争",
+      "direction": "bidirectional",
+      "strength": null,
+      "lag": null,
+      "exposure_usd": null,
+      "exposure_basis": null,
+      "exposure_asof": null,
+      "source_info_ids": [
+        "0001628280-26-057139"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "HDD competitors such as Seagate Technology Holdings plc, and Toshiba Electronic Devices & Storage Corporation",
+          "section": "1",
+          "char_end": 49652,
+          "accession": "0001628280-26-057139",
+          "char_start": 49543
+        },
+        "source_ticker": "WDC"
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 21:03:13.066167+08:00",
+      "last_evidence_at": "2026-10-15 21:03:13.066167+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "l2_01",
+        "ai_capex_chain",
+        "hdd"
+      ],
+      "revision": 1,
+      "target": "Toshiba Electronic Devices & Storage Corporation"
+    },
+    {
+      "relation_id": "079a8f3326b3b85ba68c905e500e4be15441e94a15c60b9ced253dc725c98fd2",
+      "from_entity": "ticker:STX",
+      "to_entity": "artificial_intelligence",
+      "connection_type": "市场叙事",
+      "mechanism": "需求",
+      "direction": "company_to_theme",
+      "strength": null,
+      "lag": null,
+      "exposure_usd": null,
+      "exposure_basis": null,
+      "exposure_asof": null,
+      "source_info_ids": [
+        "0001137789-26-000159"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "AI-enhanced applications are further accelerating data creation, increasing reliance on historical data sets for advanced reasoning and creating new opportunities to derive value from previously stored information.",
+          "section": "1",
+          "char_end": 46679,
+          "accession": "0001137789-26-000159",
+          "char_start": 46465
+        },
+        "source_ticker": "STX"
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 21:16:39.209055+08:00",
+      "last_evidence_at": "2026-10-15 21:16:39.209055+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "l2_01",
+        "ai_capex_chain",
+        "hdd"
+      ],
+      "revision": 1,
+      "target": "artificial intelligence"
+    },
+    {
+      "relation_id": "1f26acbd80398d55a845973540ed8ec9d8831cd6afd3ad492bc1b23b0e2fd5a8",
+      "from_entity": "ticker:STX",
+      "to_entity": "hard_disk_drives",
+      "connection_type": "业务关系",
+      "mechanism": "供给",
+      "direction": "company_to_product",
+      "strength": null,
+      "lag": null,
+      "exposure_usd": null,
+      "exposure_basis": null,
+      "exposure_asof": null,
+      "source_info_ids": [
+        "0001137789-26-000159"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Hard disk drives (“HDDs”) remain a foundational technology for delivering scalable, energy-efficient, mass-capacity storage with favorable storage economics that underpins modern digital infrastructure.",
+          "section": "1",
+          "char_end": 44784,
+          "accession": "0001137789-26-000159",
+          "char_start": 44582
+        },
+        "source_ticker": "STX"
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 21:16:39.209044+08:00",
+      "last_evidence_at": "2026-10-15 21:16:39.209044+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "l2_01",
+        "ai_capex_chain",
+        "hdd"
+      ],
+      "revision": 1,
+      "target": "Hard Disk Drives"
+    },
+    {
+      "relation_id": "5bd4f96cf2d7e18a266b9e6fa33c10b210eaf1f84873ffb7b5efe6dc476b18ae",
+      "from_entity": "ticker:STX",
+      "to_entity": "edge_iot",
+      "connection_type": "业务关系",
+      "mechanism": "需求",
+      "direction": "company_to_segment",
+      "strength": null,
+      "lag": null,
+      "exposure_usd": null,
+      "exposure_basis": null,
+      "exposure_asof": null,
+      "source_info_ids": [
+        "0001137789-26-000159"
+      ],
+      "evidence": {
+        "citation": {
+          "quote": "Edge / Internet of Things (“Edge IoT”) : Industrial and consumer oriented environments where data is increasingly processed and stored closer to where it is created.",
+          "section": "1",
+          "char_end": 45487,
+          "accession": "0001137789-26-000159",
+          "char_start": 45322
+        },
+        "source_ticker": "STX"
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 21:16:39.209088+08:00",
+      "last_evidence_at": "2026-10-15 21:16:39.209088+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "l2_01",
+        "ai_capex_chain",
+        "hdd"
+      ],
+      "revision": 1,
+      "target": "Edge IoT"
+    },
+    {
+      "relation_id": "c096bf2de7370fb78f0183b211c2d74b0dd05b1e1a2b07c74e57b62bfba67341",
+      "from_entity": "ticker:WDC",
+      "to_entity": "hddmember",
+      "connection_type": "经营传导",
+      "mechanism": "需求",
+      "direction": null,
+      "strength": null,
+      "lag": null,
+      "exposure_usd": 12919000000.0,
+      "exposure_basis": "分部收入",
+      "exposure_asof": "2026-07-03",
+      "source_info_ids": [
+        "0001628280-26-057139"
+      ],
+      "evidence": {
+        "flags": [],
+        "citation": null,
+        "source_ticker": "WDC",
+        "structured_source": {
+          "filed": "2026-08-14",
+          "row_id": "d71996879c57e0a0d97dd8660733bdd9a9be2aa589f162ff50292a6600c12f22",
+          "ticker": "WDC",
+          "revenue": 12919000000.0,
+          "evidence": {
+            "fx": {},
+            "currency": "USD",
+            "profit_fx": {},
+            "mapping_gap": "RuntimeError: Before M1 merge: injected mapping double; no recorded draft for real segment",
+            "period_start": "2025-06-28",
+            "sum_included": true,
+            "profit_reason": null,
+            "revenue_basis": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "segment_qname": "wdc:HDDMember",
+            "parse_contract": "filing-relations-k16-v2",
+            "primary_sha256": null,
+            "auxiliary_basis": null,
+            "consolidated_fx": {},
+            "member_identity": "{http://www.wdc.com/20260703}HDDMember",
+            "revenue_context": "c-110",
+            "consolidated_basis": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+            "revenue_disclosure": "reported",
+            "revenue_sum_weight": 1,
+            "consolidated_revenue": 12919000000.0,
+            "original_revenue_positions": []
+          },
+          "accession": "0001628280-26-057139",
+          "period_end": "2026-07-03",
+          "segment_raw": "HDDMember"
+        }
+      },
+      "opposing_evidence": [],
+      "first_discovered_at": "2026-10-15 22:37:19.019791+08:00",
+      "last_evidence_at": "2026-10-15 22:37:19.019791+08:00",
+      "next_check_at": null,
+      "invalidation_condition": null,
+      "status": "候选",
+      "drafted_by": "glm-5.3",
+      "reviewed_at": null,
+      "basket_ids": [
+        "hdd",
+        "ai_capex_chain"
+      ],
+      "revision": 1,
+      "target": "HDDMember"
+    }
+  ]
+}
