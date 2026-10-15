@@ -1,0 +1,44 @@
+[
+  {
+    "fixture": "TSM-Q4.html.gz",
+    "ticker": "TSM",
+    "accession": "0001046179-26-000008",
+    "filed": "2026-01-15",
+    "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm"
+  },
+  {
+    "fixture": "NOK-Q4.html.gz",
+    "ticker": "NOK",
+    "accession": "0001104659-26-007608",
+    "filed": "2026-01-29",
+    "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926007608/tm264427d1_6k.htm"
+  },
+  {
+    "fixture": "NOK-Q3.html.gz",
+    "ticker": "NOK",
+    "accession": "0001104659-25-101680",
+    "filed": "2025-10-23",
+    "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465925101680/tm2529343d1_6k.htm"
+  },
+  {
+    "fixture": "ARM-Q4.html.gz",
+    "ticker": "ARM",
+    "accession": "0001973239-26-000062",
+    "filed": "2026-05-06",
+    "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/exhibit992fye26q431-marx26.htm"
+  },
+  {
+    "fixture": "ARM-Q3.html.gz",
+    "ticker": "ARM",
+    "accession": "0001973239-26-000005",
+    "filed": "2026-02-04",
+    "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000005/exhibit992fye26q331-decx25.htm"
+  },
+  {
+    "fixture": "ARM-Q2.html.gz",
+    "ticker": "ARM",
+    "accession": "0001973239-25-000042",
+    "filed": "2025-11-05",
+    "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000042/exhibit992fye26q230-sepx25.htm"
+  }
+]

@@ -154,3 +154,17 @@
 2026-10-15 tests/fixtures/phase1/m2/round3_official.json 0f9f3c386a1ee8038c00fcf0f06872b398fc426433c16f0c31c5b972275b045d SEC LITE/CRWD subset with official 10-K/10-Q source hashes; new input only.
 
 - M2 AC-M2-09: freeze SEC ASML/TSM/NOK/ARM/SKHY 6-K originals, with reported versus adjusted, parent versus group income, EPS versus denominator and PIT positive/negative assertions. No golden changed.
+- `tests/fixtures/phase1/m2/interims/ARM.html.gz` SHA256 `59fe1bf94fc2c54fea57e367374b49bf88bdc28e21c2430c77fe7ab6187fb689`: SEC original, AC-M2-09.
+- `tests/fixtures/phase1/m2/interims/ASML.html.gz` SHA256 `86b721ccc9f94c7c5625c3cbb36c96ea10ae55bb8b6ba7ab49fdc117e6c9ea4a`: SEC original, AC-M2-09.
+- `tests/fixtures/phase1/m2/interims/NOK.html.gz` SHA256 `8e8f5dfe0b93ce03602a2d5d1f0a989dce8f1d13bec54c649a228fedd78ddd9a`: SEC original, AC-M2-09.
+- `tests/fixtures/phase1/m2/interims/SKHY.html.gz` SHA256 `7a84d8c430a65c4a92dca14ffe39bc66c1047d8cb28f495ddd3912ee0273ce02`: SEC original, AC-M2-09.
+- `tests/fixtures/phase1/m2/interims/TSM-monthly.html.gz` SHA256 `afcd3d5e1be792db4731cf6bb24b693f3b110e7caa7a63ce0d763975ef908b0b`: SEC original, AC-M2-09.
+- `tests/fixtures/phase1/m2/interims/TSM.html.gz` SHA256 `c60952b5ef53993198ac691aa6b14c2b04ca96e108dff57be67b72dad802526d`: SEC original, AC-M2-09.
+- `tests/fixtures/phase1/m2/interims/TSM-Q4.html.gz` SHA256 `e2039a5fa8b2c5887128386e6e2d834c079d8a57f57b950cbefd76cc1088aa68`: additional SEC quarter identity and four-quarter coverage.
+- `tests/fixtures/phase1/m2/interims/NOK-Q4.html.gz` SHA256 `9427c5b51856b2cbdfa2e5b2aa22fc99f7da579618901acd129266b81afe2781`: additional SEC quarter identity and four-quarter coverage.
+- `tests/fixtures/phase1/m2/interims/NOK-Q3.html.gz` SHA256 `4d669fcb4f1b29737e00407db1ed313d4b332c395b97a1c72c93fd510bec3373`: additional SEC quarter identity and four-quarter coverage.
+- `tests/fixtures/phase1/m2/interims/ARM-Q4.html.gz` SHA256 `1be344ac0b27ed462242c0ddbc5cff0b722eb9ab2b0cd522bcb9114493c22fd4`: additional SEC quarter identity and four-quarter coverage.
+- `tests/fixtures/phase1/m2/interims/ARM-Q3.html.gz` SHA256 `58a66cb271fe6467b449f654030f72a210cf4e5f6afeffd4a350472c11c9dc8d`: additional SEC quarter identity and four-quarter coverage.
+- `tests/fixtures/phase1/m2/interims/ARM-Q2.html.gz` SHA256 `6899fef7fc41a996ee75eb33cb2b731bc6144eb82f62a3c6b685480e6075ed09`: additional SEC quarter identity and four-quarter coverage.
+- `tests/fixtures/phase1/m2/interims/sources.json` SHA256 `4473ce2ef322e41f7e4f33592c20fc742fda854e8107b1724b386d5ac03aa5e3`: SEC accession, filing date and exact exhibit URLs.
+- `tests/fixtures/phase1/m2/interims/SKHY-full.html.gz` SHA256 `d1336b176f3ee5b1fca7ab27885429fff05574f3bc4a1d71da13095a9945cd2b`: SEC SKHY reviewed interim statements, distinguishes parent profit and comprehensive income.

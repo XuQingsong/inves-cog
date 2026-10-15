@@ -92,11 +92,19 @@ def test_q4_derived_from_annual():
 
 
 def test_companyfacts_lag():
-    from tests.m2.interim_cases import assert_annual_and_monthly, assert_interim_parsers, assert_interim_pit
+    from tests.m2.interim_cases import (
+        assert_annual_and_monthly,
+        assert_four_quarters,
+        assert_interim_parsers,
+        assert_interim_pit,
+        assert_skhy_report,
+    )
 
     assert_interim_parsers()
     assert_interim_pit()
     assert_annual_and_monthly()
+    assert_four_quarters()
+    assert_skhy_report()
     filings = [{"accession": "latest", "form": "10-Q", "filing_date": "2026-10-10", "report_date": "2026-09-30"}]
     plain = extract(filings=filings, as_of=date(2026, 10, 12))
     assert "companyfacts_lag" in plain.health_codes
