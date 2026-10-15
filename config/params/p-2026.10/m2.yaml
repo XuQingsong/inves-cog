@@ -27,15 +27,17 @@ m2:
       direct: [net_debt]
       derived: [net_debt_fcf]
     D9:
-      direct: [rev_ttm, eps_ttm, rev_period]
-      derived: [rev_growth, rev_q_yoy, rev_accel_pp, eps_growth, gross_margin, gross_margin_change_pp, fcf_margin, fcf_margin_change_pp, op_margin_ttm, pe, ps, peg_rev_approx, fund_unreliable, data_flags]
+      direct: [rev_ttm, eps_ttm, rev_period, shares, shares_date]
+      derived: [rev_growth, rev_q_yoy, rev_accel_pp, eps_growth, gross_margin, gross_margin_change_pp, fcf_margin, fcf_margin_change_pp, op_margin_ttm, pe, ps, peg_rev_approx, fund_unreliable, data_flags, mktcap_asof, fcf_yield]
   d9:
+    multi_class_issuers: [V]
     revenue_tags: [RevenuesNetOfInterestExpense]
     predecessor_ciks:
       XOM: ['0000034088']
     dimensional_facts:
       V:
         - {tag: EarningsPerShareDiluted, axis: StatementClassOfStockAxis, axis_namespace_prefix: 'http://fasb.org/us-gaap/', member: CommonClassAMember, member_namespace_prefix: 'http://fasb.org/us-gaap/'}
+        - {tag: WeightedAverageNumberOfDilutedSharesOutstanding, axis: StatementClassOfStockAxis, axis_namespace_prefix: 'http://fasb.org/us-gaap/', member: CommonClassAMember, member_namespace_prefix: 'http://fasb.org/us-gaap/'}
   fx:
     source: FRED
     series: {EUR: DEXUSEU, TWD: DEXTAUS, KRW: DEXKOUS}

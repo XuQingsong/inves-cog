@@ -1,6 +1,14 @@
 """Health severity and explicit missing-field explanations."""
 
-BLOCKING = {"no_bar", "stale_fundamentals", "revenue_tag_gap", "q4_missing", "companyfacts_lag", "core_field_missing"}
+BLOCKING = {
+    "no_bar",
+    "stale_fundamentals",
+    "revenue_tag_gap",
+    "q4_missing",
+    "companyfacts_lag",
+    "core_field_missing",
+    "implausible_value",
+}
 
 
 def health_row(state, *, foreign=False, latest_8k_202=None):
@@ -10,6 +18,8 @@ def health_row(state, *, foreign=False, latest_8k_202=None):
         codes.add("core_field_missing")
     blocked = codes & BLOCKING
     reasons = sorted(blocked)
+    if "implausible_value" in codes:
+        reasons.append(str(state.field_sources.get("implausible_value", {})))
     if missing:
         reasons.append("Missing core fields: " + ", ".join(missing))
     if foreign:

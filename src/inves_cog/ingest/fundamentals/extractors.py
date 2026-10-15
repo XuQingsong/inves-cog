@@ -63,6 +63,9 @@ class Facts:
         self.as_of = as_of
         self.fixed = fixed
         self.fx = fx
+        from inves_cog.ingest.fundamentals.plausibility import split_events
+
+        self.splits = split_events(self.data, as_of) if fixed else []
 
     def entries(self, taxonomy, tag, units=("USD", "USD/shares", "shares")):
         node = self.data.get(taxonomy, {}).get(tag, {})
@@ -72,6 +75,12 @@ class Facts:
             unit = next((u for u in choices if len(u.split("/")[0]) == 3), None)
         output = []
         for source in choices.get(unit, []):
+            if (
+                self.fixed
+                and source.get("form")
+                and str(source["form"]).removesuffix("/A") not in {"10-Q", "10-K", "20-F", "40-F", "6-K"}
+            ):
+                continue
             try:
                 end, filed = day(source["end"]), day(source["filed"])
                 if end > self.as_of or filed > self.as_of:
@@ -102,6 +111,10 @@ class Facts:
                     value, currency=unit.split("/")[0], start=row.get("start"), end=end, as_of=self.as_of, field=tag
                 )
                 row.update(val=value, fx=evidence, original_value=float(source["val"]), original_unit=unit)
+            if self.fixed and tag == "EarningsPerShareDiluted":
+                from inves_cog.ingest.fundamentals.plausibility import adjust_eps
+
+                row = adjust_eps(row, self.splits)
             output.append(row)
         return output
 
@@ -152,6 +165,7 @@ def source(row):
             "origin",
             "d9_only",
             "dimensions",
+            "split_adjustment",
         )
         if key in row
     }
@@ -520,6 +534,12 @@ def extract_state(
     if value("current_assets") is not None and value("current_liabilities"):
         out["current_ratio"] = value("current_assets") / value("current_liabilities")
     share_value, share_date, share_source = shares(facts)
+    if enabled["D9"] and ticker in d9.get("multi_class_issuers", []):
+        weighted = facts.quarterly(["WeightedAverageNumberOfDilutedSharesOutstanding"])
+        last = weighted[max(weighted)] if weighted else None
+        share_value = last["val"] if last else None
+        share_date = str(last["end"]) if last else None
+        share_source = {"method": "multi_class_diluted", **source(last)}
     sources["shares"] = share_source
     if share_value:
         out.update(shares=share_value, shares_date=share_date)
@@ -588,6 +608,13 @@ def extract_state(
         codes.append("industry_basis_na")
     if any(out.get(key) is None for key in ("rev_ttm", "eps_ttm", "shares")):
         codes.append("core_field_missing")
+    if fixed:
+        from inves_cog.ingest.fundamentals.plausibility import violations
+
+        invalid = violations(out, series)
+        if invalid:
+            codes.append("implausible_value")
+            sources["implausible_value"] = {"violations": invalid}
     visible = [r for rows in series.values() for r in rows.values()] + [r for r in inst.values() if r]
     latest_fact = max(visible, key=lambda r: (r["filed"], r["end"])) if visible else None
     return FinState(

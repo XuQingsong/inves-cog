@@ -109,4 +109,4 @@ test_precursor_snapshot_daily | M10 | 等待 M10 实现
 test_miss_sample_frame | M10 | 等待 M10 实现
 test_reports_contents | M10 | 等待 M10 实现
 test_unconnected_shown | M10 | 等待 M10 实现
-test_fundamentals_live_smoke | M2 | 等待 M1 共享基线合并；Yahoo实采为非阻塞AC-M2-06b，等待用户选代理或Alpha Vantage（Q-M2-20，期限M5提交验收前）；不重试、不换源
+test_fundamentals_live_smoke | M2 | 等待59只完整财报实源冒烟及Q-M2-27新门禁核验；Yahoo已接通
