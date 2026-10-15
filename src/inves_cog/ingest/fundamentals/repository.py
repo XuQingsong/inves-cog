@@ -52,6 +52,14 @@ TABLES = {
     ),
     "profile": ("as_of ticker profile", "as_of,ticker"),
     "health": ("ticker latest_period_end latest_filed latest_8k_202 health_codes can_score can_trade reason", "ticker"),
+    "interim_results": (
+        (
+            "ticker accession filed period_end currency revenue gross_profit operating_income "
+            "net_income eps_diluted eps_basis source_exhibit parse_status"
+        ),
+        "ticker,accession,period_end",
+    ),
+    "monthly_revenue": ("ticker month revenue currency filed accession", "ticker,month,accession"),
     "fx_rates": (
         "currency series_id observation_date realtime_start value fetched_at",
         "currency,observation_date,realtime_start",
@@ -268,3 +276,27 @@ class Repository:
             ),
             (ticker, as_of, as_of),
         ).fetchone()["accepted"]
+
+    def put_interim(self, row):
+        self.write("interim_results", row)
+
+    def interim_rows(self, ticker):
+        return list(
+            self.connection.execute(
+                "SELECT * FROM fundamentals.interim_results WHERE ticker=%s ORDER BY filed,period_end", (ticker,)
+            ).fetchall()
+        )
+
+    def put_monthly(self, row):
+        self.write("monthly_revenue", row)
+
+    def monthly_rows(self, ticker, as_of):
+        return list(
+            self.connection.execute(
+                (
+                    "SELECT DISTINCT ON (month) * FROM fundamentals.monthly_revenue "
+                    "WHERE ticker=%s AND filed<=%s ORDER BY month DESC,filed DESC LIMIT 12"
+                ),
+                (ticker, as_of),
+            ).fetchall()
+        )

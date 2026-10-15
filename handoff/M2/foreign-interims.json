@@ -1,0 +1,1145 @@
+{
+  "TSM_latest12_months": [
+    {
+      "accession": "0001046179-26-000680",
+      "currency": "TWD",
+      "filed": "2026-10-08",
+      "month": "2026-09-01",
+      "revenue": 511857399000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000658",
+      "currency": "TWD",
+      "filed": "2026-09-10",
+      "month": "2026-08-01",
+      "revenue": 514805337000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000471",
+      "currency": "TWD",
+      "filed": "2026-08-10",
+      "month": "2026-07-01",
+      "revenue": 467580548000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000447",
+      "currency": "TWD",
+      "filed": "2026-07-13",
+      "month": "2026-06-01",
+      "revenue": 442679969000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000367",
+      "currency": "TWD",
+      "filed": "2026-06-10",
+      "month": "2026-05-01",
+      "revenue": 416975163000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000213",
+      "currency": "TWD",
+      "filed": "2026-05-08",
+      "month": "2026-04-01",
+      "revenue": 410725118000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000136",
+      "currency": "TWD",
+      "filed": "2026-04-10",
+      "month": "2026-03-01",
+      "revenue": 415191699000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000031",
+      "currency": "TWD",
+      "filed": "2026-03-10",
+      "month": "2026-02-01",
+      "revenue": 317656613000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000015",
+      "currency": "TWD",
+      "filed": "2026-02-10",
+      "month": "2026-01-01",
+      "revenue": 401255128000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-26-000005",
+      "currency": "TWD",
+      "filed": "2026-01-09",
+      "month": "2025-12-01",
+      "revenue": 335003568000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-25-000137",
+      "currency": "TWD",
+      "filed": "2025-12-10",
+      "month": "2025-11-01",
+      "revenue": 343613802000.0,
+      "ticker": "TSM"
+    },
+    {
+      "accession": "0001046179-25-000124",
+      "currency": "TWD",
+      "filed": "2025-11-10",
+      "month": "2025-10-01",
+      "revenue": 367473051000.0,
+      "ticker": "TSM"
+    }
+  ],
+  "captured_at": "2026-10-15T08:11:28.047666+00:00",
+  "issuers": {
+    "ARM": {
+      "all_parse_statuses": [
+        {
+          "accession": "0001973239-25-000023",
+          "filed": "2025-07-30",
+          "parse_status": "parsed",
+          "period_end": "2024-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000023/exhibit992fye26q130-junx25.htm"
+        },
+        {
+          "accession": "0001973239-25-000024",
+          "filed": "2025-07-30",
+          "parse_status": "parsed",
+          "period_end": "2024-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000024/arm-20250630.htm"
+        },
+        {
+          "accession": "0001973239-25-000023",
+          "filed": "2025-07-30",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000023/exhibit992fye26q130-junx25.htm"
+        },
+        {
+          "accession": "0001973239-25-000024",
+          "filed": "2025-07-30",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000024/arm-20250630.htm"
+        },
+        {
+          "accession": "0001973239-25-000023",
+          "filed": "2025-07-30",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000023/arm-20250730.htm"
+        },
+        {
+          "accession": "0001973239-25-000027",
+          "filed": "2025-08-11",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000027/arm-20250811.htm"
+        },
+        {
+          "accession": "0001973239-25-000033",
+          "filed": "2025-09-10",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000033/arm-20250908.htm"
+        },
+        {
+          "accession": "0001973239-25-000035",
+          "filed": "2025-09-18",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000035/arm-20250918.htm"
+        },
+        {
+          "accession": "0001973239-25-000042",
+          "filed": "2025-11-05",
+          "parse_status": "parsed",
+          "period_end": "2024-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000042/exhibit992fye26q230-sepx25.htm"
+        },
+        {
+          "accession": "0001973239-25-000042",
+          "filed": "2025-11-05",
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000042/exhibit992fye26q230-sepx25.htm"
+        },
+        {
+          "accession": "0001973239-25-000042",
+          "filed": "2025-11-05",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000042/arm-20251105.htm"
+        },
+        {
+          "accession": "0001973239-25-000043",
+          "filed": "2025-11-05",
+          "parse_status": "interim_unparsed:ARM GAAP summary missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000043/arm-20250930.htm"
+        },
+        {
+          "accession": "0001973239-26-000005",
+          "filed": "2026-02-04",
+          "parse_status": "parsed",
+          "period_end": "2024-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000005/exhibit992fye26q331-decx25.htm"
+        },
+        {
+          "accession": "0001973239-26-000005",
+          "filed": "2026-02-04",
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000005/exhibit992fye26q331-decx25.htm"
+        },
+        {
+          "accession": "0001973239-26-000006",
+          "filed": "2026-02-04",
+          "parse_status": "interim_unparsed:ARM GAAP summary missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000006/arm-20251231.htm"
+        },
+        {
+          "accession": "0001973239-26-000005",
+          "filed": "2026-02-04",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000005/arm-20260204.htm"
+        },
+        {
+          "accession": "0001973239-26-000052",
+          "filed": "2026-03-24",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000052/arm-20260324.htm"
+        },
+        {
+          "accession": "0001973239-26-000050",
+          "filed": "2026-03-24",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000050/arm-20260324.htm"
+        },
+        {
+          "accession": "0001973239-26-000059",
+          "filed": "2026-04-21",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000059/arm-20260421.htm"
+        },
+        {
+          "accession": "0001973239-26-000062",
+          "filed": "2026-05-06",
+          "parse_status": "parsed",
+          "period_end": "2025-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/exhibit992fye26q431-marx26.htm"
+        },
+        {
+          "accession": "0001973239-26-000062",
+          "filed": "2026-05-06",
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/exhibit992fye26q431-marx26.htm"
+        },
+        {
+          "accession": "0001973239-26-000062",
+          "filed": "2026-05-06",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/arm-20260506.htm"
+        },
+        {
+          "accession": "0001973239-26-000113",
+          "filed": "2026-07-29",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000113/exhibit992fye27q130-junx26.htm"
+        },
+        {
+          "accession": "0001973239-26-000114",
+          "filed": "2026-07-29",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000114/arm-20260630.htm"
+        },
+        {
+          "accession": "0001973239-26-000114",
+          "filed": "2026-07-29",
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000114/arm-20260630.htm"
+        },
+        {
+          "accession": "0001973239-26-000113",
+          "filed": "2026-07-29",
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000113/exhibit992fye27q130-junx26.htm"
+        },
+        {
+          "accession": "0001973239-26-000113",
+          "filed": "2026-07-29",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000113/arm-20260729.htm"
+        },
+        {
+          "accession": "0001973239-26-000117",
+          "filed": "2026-08-10",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000117/arm-20260810.htm"
+        },
+        {
+          "accession": "0001973239-26-000128",
+          "filed": "2026-09-10",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000128/arm-20260910.htm"
+        },
+        {
+          "accession": "0001973239-26-000135",
+          "filed": "2026-09-18",
+          "parse_status": "interim_unparsed:ARM quarter announcement period missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000135/arm-20260918.htm"
+        }
+      ],
+      "annual_anchor": {
+        "annual_accession": "0001973239-26-000097",
+        "annual_period_end": "2026-03-31",
+        "annual_values": {
+          "eps_ttm": 0.85,
+          "ni_ttm": 904000000.0,
+          "rev_ttm": 4920000000.0
+        }
+      },
+      "current_state": {
+        "filed": "2026-09-23",
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "period_end": "2026-06-30",
+        "values": {
+          "eps_ttm": 0.97,
+          "gross_margin": 97.53685027152832,
+          "ni_ttm": 1044000000.0,
+          "op_margin_ttm": 17.00930954228084,
+          "rev_ttm": 5156000000.0,
+          "shares": 1068000000.0
+        }
+      },
+      "health": {
+        "can_score": true,
+        "can_trade": false,
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "latest_8k_202": null,
+        "latest_filed": "2026-09-23",
+        "latest_period_end": "2026-06-30",
+        "reason": "Foreign filer is excluded from trading",
+        "ticker": "ARM"
+      },
+      "quarter_count": 4,
+      "quarters": [
+        {
+          "accession": "0001973239-25-000042",
+          "currency": "USD",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.22,
+          "filed": "2025-11-05",
+          "gross_profit": 1106000000.0,
+          "net_income": 238000000.0,
+          "operating_income": 163000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "revenue": 1135000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323925000042/exhibit992fye26q230-sepx25.htm",
+          "ticker": "ARM"
+        },
+        {
+          "accession": "0001973239-26-000005",
+          "currency": "USD",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.21,
+          "filed": "2026-02-04",
+          "gross_profit": 1212000000.0,
+          "net_income": 223000000.0,
+          "operating_income": 185000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "revenue": 1242000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000005/exhibit992fye26q331-decx25.htm",
+          "ticker": "ARM"
+        },
+        {
+          "accession": "0001973239-26-000062",
+          "currency": "USD",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.29,
+          "filed": "2026-05-06",
+          "gross_profit": 1458000000.0,
+          "net_income": 313000000.0,
+          "operating_income": 438000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "revenue": 1490000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/exhibit992fye26q431-marx26.htm",
+          "ticker": "ARM"
+        },
+        {
+          "accession": "0001973239-26-000114",
+          "currency": "USD",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.25,
+          "filed": "2026-07-29",
+          "gross_profit": 1253000000.0,
+          "net_income": 270000000.0,
+          "operating_income": 91000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "revenue": 1289000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000114/arm-20260630.htm",
+          "ticker": "ARM"
+        }
+      ],
+      "four_consecutive_quarters": true
+    },
+    "ASML": {
+      "all_parse_statuses": [
+        {
+          "accession": "0001628280-25-045043",
+          "filed": "2025-10-15",
+          "parse_status": "interim_unparsed:ASML five-quarter EUR summary header missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828025045043/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-003701",
+          "filed": "2026-01-28",
+          "parse_status": "interim_unparsed:ASML five-quarter EUR summary header missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026003701/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-025147",
+          "filed": "2026-04-15",
+          "parse_status": "interim_unparsed:ASML five-quarter EUR summary header missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026025147/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-048235",
+          "filed": "2026-07-15",
+          "parse_status": "parsed",
+          "period_end": "2025-06-29",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-048235",
+          "filed": "2026-07-15",
+          "parse_status": "parsed",
+          "period_end": "2025-09-28",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-048235",
+          "filed": "2026-07-15",
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-048235",
+          "filed": "2026-07-15",
+          "parse_status": "parsed",
+          "period_end": "2026-03-29",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-048235",
+          "filed": "2026-07-15",
+          "parse_status": "parsed",
+          "period_end": "2026-06-28",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "filed": "2026-10-14",
+          "parse_status": "parsed",
+          "period_end": "2025-09-28",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "filed": "2026-10-14",
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "filed": "2026-10-14",
+          "parse_status": "parsed",
+          "period_end": "2026-03-29",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "filed": "2026-10-14",
+          "parse_status": "parsed",
+          "period_end": "2026-06-28",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "filed": "2026-10-14",
+          "parse_status": "parsed",
+          "period_end": "2026-09-27",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm"
+        }
+      ],
+      "annual_anchor": {
+        "annual_accession": "0001628280-26-011378",
+        "annual_period_end": "2025-12-31",
+        "annual_values": {
+          "eps_ttm": 27.93765973600002,
+          "ni_ttm": 10864595203.040007,
+          "rev_ttm": 36934354993.68002
+        }
+      },
+      "current_state": {
+        "filed": "2026-10-14",
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "period_end": "2026-09-27",
+        "values": {
+          "eps_ttm": 40.62024546664816,
+          "gross_margin": 54.32502546062099,
+          "ni_ttm": 15638241776.436134,
+          "op_margin_ttm": 38.529382918227846,
+          "rev_ttm": 45854896558.96165,
+          "shares": 385417665.0
+        }
+      },
+      "health": {
+        "can_score": true,
+        "can_trade": false,
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "latest_8k_202": null,
+        "latest_filed": "2026-10-14",
+        "latest_period_end": "2026-09-27",
+        "reason": "Foreign filer is excluded from trading",
+        "ticker": "ASML"
+      },
+      "quarter_count": 4,
+      "quarters": [
+        {
+          "accession": "0001628280-26-065813",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; NASDAQ registered ordinary share 1:1; ADS not applicable",
+          "eps_diluted": 7.34,
+          "filed": "2026-10-14",
+          "gross_profit": 5068600000.0,
+          "net_income": 2839600000.0,
+          "operating_income": 3431100000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "revenue": 9718100000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm",
+          "ticker": "ASML"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; NASDAQ registered ordinary share 1:1; ADS not applicable",
+          "eps_diluted": 7.15,
+          "filed": "2026-10-14",
+          "gross_profit": 4645000000.0,
+          "net_income": 2756700000.0,
+          "operating_income": 3157800000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-03-29",
+          "revenue": 8766900000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm",
+          "ticker": "ASML"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; NASDAQ registered ordinary share 1:1; ADS not applicable",
+          "eps_diluted": 7.58,
+          "filed": "2026-10-14",
+          "gross_profit": 5035400000.0,
+          "net_income": 2917600000.0,
+          "operating_income": 3456100000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-06-28",
+          "revenue": 9326500000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm",
+          "ticker": "ASML"
+        },
+        {
+          "accession": "0001628280-26-065813",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; NASDAQ registered ordinary share 1:1; ADS not applicable",
+          "eps_diluted": 12.93,
+          "filed": "2026-10-14",
+          "gross_profit": 6699800000.0,
+          "net_income": 4960400000.0,
+          "operating_income": 5172800000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-09-27",
+          "revenue": 11662000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/937966/000162828026065813/financial_statementsxusx.htm",
+          "ticker": "ASML"
+        }
+      ],
+      "four_consecutive_quarters": true
+    },
+    "NOK": {
+      "all_parse_statuses": [
+        {
+          "accession": "0001104659-25-070159",
+          "filed": "2025-07-24",
+          "parse_status": "interim_unparsed:NOK missing row: Profit for the period",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465925070159/tm2521634d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-25-101680",
+          "filed": "2025-10-23",
+          "parse_status": "parsed",
+          "period_end": "2024-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465925101680/tm2529343d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-25-101680",
+          "filed": "2025-10-23",
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465925101680/tm2529343d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-25-101680",
+          "filed": "2025-10-23",
+          "parse_status": "interim_unparsed:NOK ambiguous numeric columns: 80 175 116 471 324 358 713 1 198 ",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465925101680/tm2529343d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-007608",
+          "filed": "2026-01-29",
+          "parse_status": "parsed",
+          "period_end": "2024-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926007608/tm264427d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-007608",
+          "filed": "2026-01-29",
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926007608/tm264427d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-007608",
+          "filed": "2026-01-29",
+          "parse_status": "interim_unparsed:NOK ambiguous numeric columns: 544 813 660 1 284 882 977 1 595 2 175 ",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926007608/tm264427d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-086081",
+          "filed": "2026-07-23",
+          "parse_status": "parsed",
+          "period_end": "2025-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-086081",
+          "filed": "2026-07-23",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-086081",
+          "filed": "2026-07-23",
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm"
+        },
+        {
+          "accession": "0001104659-26-086081",
+          "filed": "2026-07-23",
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm"
+        }
+      ],
+      "annual_anchor": {
+        "annual_accession": "0001628280-26-015034",
+        "annual_period_end": "2025-12-31",
+        "annual_values": {
+          "eps_ttm": 0.13567459200000007,
+          "ni_ttm": 736034661.6000004,
+          "rev_ttm": 22486933002.400013
+        }
+      },
+      "current_state": {
+        "filed": "2026-10-01",
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "period_end": "2026-06-30",
+        "values": {
+          "eps_ttm": 0.15150293723558958,
+          "gross_margin": 44.48235598572655,
+          "ni_ttm": 825072281.3323132,
+          "op_margin_ttm": 4.019012818133786,
+          "rev_ttm": 23560105940.01095,
+          "shares": 5742239696.0
+        }
+      },
+      "health": {
+        "can_score": true,
+        "can_trade": false,
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "latest_8k_202": null,
+        "latest_filed": "2026-10-01",
+        "latest_period_end": "2026-06-30",
+        "reason": "Foreign filer is excluded from trading",
+        "ticker": "NOK"
+      },
+      "quarter_count": 4,
+      "quarters": [
+        {
+          "accession": "0001104659-25-101680",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.01,
+          "filed": "2025-10-23",
+          "gross_profit": 2110000000.0,
+          "net_income": 78000000.0,
+          "operating_income": 239000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "revenue": 4828000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465925101680/tm2529343d1_6k.htm",
+          "ticker": "NOK"
+        },
+        {
+          "accession": "0001104659-26-007608",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.1,
+          "filed": "2026-01-29",
+          "gross_profit": 2753000000.0,
+          "net_income": 542000000.0,
+          "operating_income": 540000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "revenue": 6125000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926007608/tm264427d1_6k.htm",
+          "ticker": "NOK"
+        },
+        {
+          "accession": "0001104659-26-086081",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share; ytd6_minus_q2",
+          "eps_diluted": 0.02,
+          "filed": "2026-07-23",
+          "gross_profit": 1977000000.0,
+          "net_income": 86000000.0,
+          "operating_income": 83000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "revenue": 4433000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm",
+          "ticker": "NOK"
+        },
+        {
+          "accession": "0001104659-26-086081",
+          "currency": "EUR",
+          "eps_basis": "ordinary share; 1 ADS = 1 ordinary share",
+          "eps_diluted": 0.0,
+          "filed": "2026-07-23",
+          "gross_profit": 2146000000.0,
+          "net_income": 2000000.0,
+          "operating_income": -50000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "revenue": 4815000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/924613/000110465926086081/tm2621179d1_6k.htm",
+          "ticker": "NOK"
+        }
+      ],
+      "four_consecutive_quarters": true
+    },
+    "SKHY": {
+      "all_parse_statuses": [
+        {
+          "accession": "0001193125-26-321989",
+          "filed": "2026-07-29",
+          "parse_status": "interim_unparsed:missing gross_profit,eps_diluted",
+          "period_end": "2026-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526321989/d115239d6k.htm"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "filed": "2026-08-18",
+          "parse_status": "parsed",
+          "period_end": "2025-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "filed": "2026-08-18",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "filed": "2026-08-18",
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "filed": "2026-08-18",
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "filed": "2026-08-18",
+          "parse_status": "interim_unparsed:SKHY supported financial statement layout missing",
+          "period_end": null,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm"
+        }
+      ],
+      "annual_anchor": {
+        "annual_accession": null,
+        "annual_period_end": null,
+        "annual_values": null
+      },
+      "current_state": {
+        "filed": "2026-10-15",
+        "health_codes": [
+          "annual_basis",
+          "core_field_missing",
+          "interim_unparsed"
+        ],
+        "period_end": null,
+        "values": {
+          "eps_ttm": null,
+          "gross_margin": null,
+          "ni_ttm": null,
+          "op_margin_ttm": null,
+          "rev_ttm": null,
+          "shares": null
+        }
+      },
+      "health": {
+        "can_score": false,
+        "can_trade": false,
+        "health_codes": [
+          "annual_basis",
+          "core_field_missing",
+          "interim_unparsed"
+        ],
+        "latest_8k_202": null,
+        "latest_filed": "2026-10-15",
+        "latest_period_end": null,
+        "reason": "core_field_missing; Missing core fields: rev_ttm, eps_ttm, shares; Foreign filer is excluded from trading; {'reason': 'fewer than four fully parsed consecutive quarters', 'filings': [{'accession': '0001193125-26-321989', 'period_end': datetime.date(2026, 6, 30), 'parse_status': 'interim_unparsed:missing gross_profit,eps_diluted'}, {'accession': '0001193125-26-354777', 'period_end': datetime.date(2026, 6, 30), 'parse_status': 'parsed'}, {'accession': '0001193125-26-354777', 'period_end': datetime.date(2025, 6, 30), 'parse_status': 'parsed'}, {'accession': '0001193125-26-354777', 'period_end': datetime.date(2026, 3, 31), 'parse_status': 'parsed'}, {'accession': '0001193125-26-354777', 'period_end': datetime.date(2025, 3, 31), 'parse_status': 'parsed'}], 'failures': []}",
+        "ticker": "SKHY"
+      },
+      "quarter_count": 4,
+      "quarters": [
+        {
+          "accession": "0001193125-26-354777",
+          "currency": "KRW",
+          "eps_basis": "ordinary share; ADS ratio not established by this announcement; ytd6_minus_q2",
+          "eps_diluted": 11416.0,
+          "filed": "2026-08-18",
+          "gross_profit": 10101991000000.0,
+          "net_income": 8107081000000.0,
+          "operating_income": 7440504000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-03-31",
+          "revenue": 17639141000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm",
+          "ticker": "SKHY"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "currency": "KRW",
+          "eps_basis": "ordinary share; ADS ratio not established by this announcement",
+          "eps_diluted": 9580.0,
+          "filed": "2026-08-18",
+          "gross_profit": 11983324000000.0,
+          "net_income": 6997228000000.0,
+          "operating_income": 9212851000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "revenue": 22231952000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm",
+          "ticker": "SKHY"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "currency": "KRW",
+          "eps_basis": "ordinary share; ADS ratio not established by this announcement; ytd6_minus_q2",
+          "eps_diluted": 56715.0,
+          "filed": "2026-08-18",
+          "gross_profit": 41679414000000.0,
+          "net_income": 40330176000000.0,
+          "operating_income": 37610283000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "revenue": 52576287000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm",
+          "ticker": "SKHY"
+        },
+        {
+          "accession": "0001193125-26-354777",
+          "currency": "KRW",
+          "eps_basis": "ordinary share; ADS ratio not established by this announcement",
+          "eps_diluted": 131478.0,
+          "filed": "2026-08-18",
+          "gross_profit": 65991356000000.0,
+          "net_income": 93820236000000.0,
+          "operating_income": 60542608000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "revenue": 79318746000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm",
+          "ticker": "SKHY"
+        }
+      ],
+      "four_consecutive_quarters": false
+    },
+    "TSM": {
+      "all_parse_statuses": [
+        {
+          "accession": "0001046179-25-000116",
+          "filed": "2025-10-16",
+          "parse_status": "parsed",
+          "period_end": "2024-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617925000116/a3q25e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-25-000116",
+          "filed": "2025-10-16",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617925000116/a3q25e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-25-000116",
+          "filed": "2025-10-16",
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617925000116/a3q25e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000008",
+          "filed": "2026-01-15",
+          "parse_status": "parsed",
+          "period_end": "2024-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000008",
+          "filed": "2026-01-15",
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000008",
+          "filed": "2026-01-15",
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000199",
+          "filed": "2026-04-16",
+          "parse_status": "parsed",
+          "period_end": "2025-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000199/a1q26e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000199",
+          "filed": "2026-04-16",
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000199/a1q26e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000199",
+          "filed": "2026-04-16",
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000199/a1q26e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000451",
+          "filed": "2026-07-16",
+          "parse_status": "parsed",
+          "period_end": "2025-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000451",
+          "filed": "2026-07-16",
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm"
+        },
+        {
+          "accession": "0001046179-26-000451",
+          "filed": "2026-07-16",
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm"
+        }
+      ],
+      "annual_anchor": {
+        "annual_accession": "0001628280-26-025362",
+        "annual_period_end": "2025-12-31",
+        "annual_values": {
+          "eps_ttm": 2.1043409144073206,
+          "ni_ttm": 54564496008.27135,
+          "rev_ttm": 122430866178.23639
+        }
+      },
+      "current_state": {
+        "filed": "2026-10-08",
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "period_end": "2026-06-30",
+        "values": {
+          "eps_ttm": 2.771602076359092,
+          "gross_margin": 64.16316311782478,
+          "ni_ttm": 71871236621.56354,
+          "op_margin_ttm": 56.02395189992322,
+          "rev_ttm": 142847727575.05765,
+          "shares": 25932524521.0
+        }
+      },
+      "health": {
+        "can_score": true,
+        "can_trade": false,
+        "health_codes": [
+          "interim_unaudited"
+        ],
+        "latest_8k_202": null,
+        "latest_filed": "2026-10-08",
+        "latest_period_end": "2026-06-30",
+        "reason": "Foreign filer is excluded from trading",
+        "ticker": "TSM"
+      },
+      "quarter_count": 4,
+      "quarters": [
+        {
+          "accession": "0001046179-26-000008",
+          "currency": "TWD",
+          "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+          "eps_diluted": 17.44,
+          "filed": "2026-01-15",
+          "gross_profit": 588543000000.0,
+          "net_income": 452302000000.0,
+          "operating_income": 500685000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-09-30",
+          "revenue": 989918000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm",
+          "ticker": "TSM"
+        },
+        {
+          "accession": "0001046179-26-000199",
+          "currency": "TWD",
+          "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+          "eps_diluted": 19.5,
+          "filed": "2026-04-16",
+          "gross_profit": 651987000000.0,
+          "net_income": 505744000000.0,
+          "operating_income": 564903000000.0,
+          "parse_status": "parsed",
+          "period_end": "2025-12-31",
+          "revenue": 1046090000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000199/a1q26e_withguidancexfinal.htm",
+          "ticker": "TSM"
+        },
+        {
+          "accession": "0001046179-26-000451",
+          "currency": "TWD",
+          "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+          "eps_diluted": 22.08,
+          "filed": "2026-07-16",
+          "gross_profit": 751295000000.0,
+          "net_income": 572480000000.0,
+          "operating_income": 658966000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-03-31",
+          "revenue": 1134103000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm",
+          "ticker": "TSM"
+        },
+        {
+          "accession": "0001046179-26-000451",
+          "currency": "TWD",
+          "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+          "eps_diluted": 27.25,
+          "filed": "2026-07-16",
+          "gross_profit": 860311000000.0,
+          "net_income": 706562000000.0,
+          "operating_income": 766603000000.0,
+          "parse_status": "parsed",
+          "period_end": "2026-06-30",
+          "revenue": 1270381000000.0,
+          "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm",
+          "ticker": "TSM"
+        }
+      ],
+      "four_consecutive_quarters": true
+    }
+  },
+  "job": {
+    "ended_at": "2026-10-15T16:11:27.725567+08:00",
+    "error_summary": null,
+    "id": 1407,
+    "llm_input_tokens": 0,
+    "llm_output_tokens": 0,
+    "llm_usage_missing_calls": 0,
+    "params_version": "p-2026.10",
+    "processed_count": 5,
+    "started_at": "2026-10-15T16:11:05.450501+08:00",
+    "status": "ok",
+    "task_name": "m2_round3_foreign_backfill",
+    "trade_date": "2026-10-15"
+  },
+  "known_gap": "SKHY has complete 2026 Q2/Q1 and comparative 2025 Q2/Q1, but no four consecutive quarters or annual anchor in current M1 filings; do not fabricate TTM or classify no_financial_filings_yet",
+  "llm_calls_for_6k": 0,
+  "source": "SEC originals via shared SECClient; cached originals and parsed latest annual instances reused; not counted as 59-ticker live smoke",
+  "unit_contract": "money in original reporting currency in interim_results; EPS per ordinary share; USD conversion uses separate quarterly FRED daily mean and PIT vintages; monthly revenue excluded from TTM"
+}
