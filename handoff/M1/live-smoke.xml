@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="32.217" timestamp="2026-10-15T14:41:03.128848+08:00"><testcase classname="tests.m1.test_live" name="test_ingest_live_smoke" time="32.157"><failure message="RuntimeError: Source health records missing: SEC, SECAtom, SECDailyIndex">clock = &lt;inves_cog.clock.SystemClock object at 0x10acb7690&gt;
+
+    @pytest.mark.phase1_live
+    def test_ingest_live_smoke(clock):
+        from inves_cog.ingest.live import run_smoke
+    
+&gt;       report = run_smoke(clock=clock)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m1/test_live.py:8: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/xuqingsong/workspace/inves-cog/src/inves_cog/ingest/live.py:37: in run_smoke
+    validate_smoke(bars, news, health, required_sources=required)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+bars = {'processed_count': 51280, 'daily_codes': 73, 'requested_codes': 73, 'unavailable_codes': [], ...}
+news = {'processed_count': 938, 'collected': 938, 'inserted': 1, 'deduped': 937}
+health = {'SECCompanyfacts': {'source': 'SECCompanyfacts', 'last_success_at': datetime.datetime(2026, 10, 14, 21, 21, 38, 79735...me.datetime(2026, 10, 14, 16, 31, 9, 663015, tzinfo=zoneinfo.ZoneInfo(key='Asia/Shanghai')), 'status': 'ok', ...}, ...}
+required_sources = {'Alpaca', 'AlpacaNews', 'AlpacaWide', 'AppStoreFree', 'AppStoreGrossing', 'CBOE', ...}
+
+    def validate_smoke(bars, news, health, *, required_sources):
+        if bars.get("daily_codes", 0) + len(bars.get("confirmed_unavailable_codes", [])) != 73:
+            raise RuntimeError("Daily coverage gap is not proven to be unsupported by Alpaca")
+        if news.get("processed_count", 0) &lt;= 0:
+            raise RuntimeError("No real news collected")
+        missing = required_sources - set(health)
+        if missing:
+&gt;           raise RuntimeError("Source health records missing: " + ", ".join(sorted(missing)))
+E           RuntimeError: Source health records missing: SEC, SECAtom, SECDailyIndex
+
+/Users/xuqingsong/workspace/inves-cog/src/inves_cog/ingest/live.py:18: RuntimeError</failure></testcase></testsuite></testsuites>

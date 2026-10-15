@@ -1,4 +1,4 @@
-test_ingest_live_smoke | M1 | 等待正式 SEC 时段的健康记录验证（SEC/SECAtom/SECDailyIndex）；R5 嵌入 key 已接通，全量按用户预算决定暂停
+test_ingest_live_smoke | M1 | 等待正式SEC采集窗口补齐SEC与SECDailyIndex健康记录；真实冒烟尚未通过
 test_revenue_tag_gap | M2 | 等待 M2 实现
 test_q4_derived_from_annual | M2 | 等待 M2 实现
 test_companyfacts_lag | M2 | 等待 M2 实现

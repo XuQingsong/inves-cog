@@ -1,6 +1,6 @@
 # M1 自测报告
 
-基线：main c66fab3，M1 v7；2026-10-15。需求方已在 `docs/phase1/acceptance/M1-report.md` 有条件验收通过。全部阻塞条款完成；AC-M1-02b 的下一次准时调度仍待真实窗口，AC-M1-08 全量补齐现已完成。最新完整 SHA 和 CI 链接在 PR #3 核验，不用旧提交的绿灯代替。
+基线：main c52fcc0，M1 v7 / T01-T02-round3；2026-10-15。需求方已在 `docs/phase1/acceptance/M1-report.md` 有条件验收通过。全部阻塞条款完成；AC-M1-02b 的下一次准时调度仍待真实窗口，AC-M1-08 全量补齐现已完成。最新完整 SHA 和 CI 链接在 PR #3 核验，不用旧提交的绿灯代替。
 
 ## 1. 测试与工程证据
 
@@ -43,4 +43,11 @@ Supervisor 管理 scheduler、watchdog 和可恢复 embedding worker；LaunchAge
 
 ## 6. 已知限制与合并
 
-唯一待真实时间验证的是非阻塞AC-M1-02b；本次不得把迟到补采改写为准时。M1按main中验收授权，在最新CI通过后用merge commit合并；milestones由需求方填写。M2已按用户新授权合入M1并完成第二轮六项，不再等待M1合并才开发。没有新的待答复问题。
+除非阻塞AC-M1-02b外，关闭模块前还必须通过真实 live smoke 并退出 pending；本次不得把迟到补采改写为准时。M1按main中验收授权，在最新CI通过后用merge commit合并；milestones由需求方填写。M2已按用户新授权合入M1并完成第二轮六项，不再等待M1合并才开发。没有新的待答复问题。
+
+## 7. 第三轮收尾现状（未冒充完成）
+
+- 第10项：显式 `-m phase1_live` / `INVES_COG_LIVE=1` 的真实冒烟于北京时间14:41执行，日线73只、新闻938条；32.22秒后因 SEC/SECAtom/SECDailyIndex 健康记录不全失败，见 live-smoke.xml。pending 的 xfail 不算通过，未删除该行。之后正式 SECAtom 任务真实处理100条，另两项因尚未到20:45–21:15 ET窗口返回not_due；未伪造时钟、健康码或来源成功。pending原因已更正。
+- 第11项：常驻scheduler已补入sec_submissions/sec_index/sec_atom。15:12现场确认caffeinate两项防睡眠断言均有效，AC供电；覆盖本次20:15–21:00 ET窗口，详见service.json。真实 bars_full 尚须在北京10月16日08:20触发并于08:45前完成；本报告不新增虚构job_runs。Mac需保持供电和开盖，登录自启不等于无人登录的冷启动。
+- 第12项：独立数据库已创建继承role_web的inves_cog_review，只读登录和写权限否定检查通过；连接说明及凭据已在仓库外单独交付，不写入Git。
+- 已授权10月16日08:50只执行一次自动核对；须等真实SEC健康记录和live smoke通过后才删除pending，再更新唯一market-bars.json并在PR #3留言。尚未完成的这两项不写成验收通过；milestones仍由需求方填写。

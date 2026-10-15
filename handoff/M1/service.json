@@ -11,11 +11,39 @@
   "scheduler_tasks": [
     "bars_prefill",
     "bars_full",
-    "wide_universe"
+    "wide_universe",
+    "sec_submissions",
+    "sec_index",
+    "sec_atom"
   ],
   "watchdog": "Scheduler:bars_full red after 20:30 ET on trading days if no bars_full start at/after 20:20 ET",
   "power": "caffeinate -i -s prevents idle/system sleep while on AC; power loss and closed-lid sleep are not guaranteed",
   "embedding_worker": "resumable task IDs, autorestart unexpected, clean completion exits 0",
   "scheduled_evidence_deadline": "2026-10-16 08:45 Asia/Shanghai",
-  "automatic_followup": "2026-10-16 08:50 Asia/Shanghai, one authorized run"
+  "automatic_followup": "2026-10-16 08:50 Asia/Shanghai, one authorized run",
+  "round3_preflight": {
+    "checked_at": "2026-10-15T15:12:46+08:00",
+    "awake_process": "Supervisor-managed caffeinate -i -s",
+    "pid": 3392,
+    "prevent_user_idle_system_sleep": true,
+    "prevent_system_sleep": true,
+    "power_source": "AC Power",
+    "covered_window_ET": "2026-10-15 20:15–21:00",
+    "actual_scheduled_run": "pending actual future window",
+    "live_smoke": "failed: SEC and SECDailyIndex health records still required; SECAtom real collection succeeded",
+    "SEC_window_ET": "20:45–21:15",
+    "SEC_preflight": {
+      "sec_atom": {
+        "processed_count": 100
+      },
+      "sec_index": {
+        "status": "not_due",
+        "note": "M1 SEC slot is 20:45–21:15 ET"
+      },
+      "sec_submissions": {
+        "status": "not_due",
+        "note": "M1 SEC slot is 20:45–21:15 ET"
+      }
+    }
+  }
 }
