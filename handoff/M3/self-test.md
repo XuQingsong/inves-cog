@@ -6,7 +6,7 @@
 
 先提交 `ed2db5e` 的 13 个失败测试及冻结输入，再提交 D-17/D-21 的失败回归（`77bcacb`）和继任 CIK 的失败回归（`6f5e4b2`），之后实现。原名 13 个测试均存在：12 blocking、1 replay。
 
-- 全仓 `pytest -m phase1_blocking`：51 passed、6 deselected，10.91 秒；[blocking.xml](blocking.xml)。
+- 全仓 `pytest -m phase1_blocking`：51 passed、6 deselected，11.29 秒；[blocking.xml](blocking.xml)。
 - M3 全部 13 项及 M2 健康回归：14 passed，7.77 秒；[replay.xml](replay.xml)。
 - `test_scores_match_muse`：20 日 × 30 只 × 27 字段 = 16,200 项比较，零差异；独立输入适配器校验冻结 companyfacts SHA，未导入或执行 Muse。
 - cases 当前尚无测试：输出 `NO TESTS COLLECTED — pending: 3`，不记为通过；[cases.xml](cases.xml)。
@@ -58,3 +58,7 @@ D-21：2015 年以来 2,392 份 8-K Item 2.02 已逐份用官方索引 Accepted 
 ## 7. 已知限制与待办
 
 M1/M2 的 live 关闭和明早 M1 准时调度按独立证据跟进，未提前标绿。M3 不产生订单、不读取持仓。Q-M3-11 真值兼容例外只存在于规则判定，数据库没有假 0。没有需暂停的新增规则问题；没有修改 docs、golden 或 milestones。
+
+## 8. 实源任务耗时修复
+
+此前一次 M2 live 达 30 分钟上限（完成 8 只），另一次在分部映射 HTTP 等待中中断，真实用量账本保留一条 739.6 秒 failed_usage_missing（token 为 NULL，不写假 0）。修复不改变提取结果：正式日常采集只刷新最新可见 vintage；完整历史重建保留显式开关。每次仍从 SEC 拉新 companyfacts。分部映射转独立 mappings 任务，采集期间未映射行保留 segment_unmapped 和 queued 原因；每个新分部仍由共享 glm-5.3 任务起草、等待审核。映射任务使用 low 思考档和有界输出，不占用 SEC 采集时段。先提交失败的增量及映射回归，再修复，见 incremental-red.xml、mapping-queue-red.xml 和 incremental-green.xml。
