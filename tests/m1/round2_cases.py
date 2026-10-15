@@ -225,6 +225,15 @@ def assert_embedding_batches():
     assert records[0]["input_tokens"] is None and records[0]["output_tokens"] == 0
     assert records[0]["status"] == "usage_missing"
     assert records[0]["created_at"] == clock.now_utc()
+    from inves_cog.ingest.embedding_models import MODEL_DIMENSIONS
+
+    for model in ("text-embedding-v1", "text-embedding-v2", "text-embedding-v4"):
+        dimension = MODEL_DIMENSIONS[model]
+        result = {"data": [{"index": 0, "embedding": [0.1] * dimension}], "usage": {"prompt_tokens": 7}}
+        adapter = Embedding(configuration, http=HTTPClient(lambda *a, result=result, **k: Response(200, result)),
+                            clock=clock, recorder=records.append)
+        assert len(adapter("fixture", model=model, dimensions=dimension)) == dimension
+        assert records[-1]["input_tokens"] == 7 and records[-1]["task"] == "embedding"
 
 
 def assert_scheduler_watchdog():
