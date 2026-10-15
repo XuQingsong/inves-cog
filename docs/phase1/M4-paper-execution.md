@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v1 |
+| 文档版本 | v2（v18 冻结输入包已由需求方验证；开工前对齐 M1、M2 的实际实现） |
 | 规格章节 | 9.1、9.8（M-34 起）–9.15、11.2（读取部分）、12.5、16.6 |
 | 依赖 | M3（`daily_scores`）；覆盖层标记来自 M9（M9 完成前用夹具） |
 | 关闭的不变量 | I05、I06、I07、I14、I15、I16 |
@@ -36,7 +36,7 @@
 | 开盘价、SPY、VIX | M1、FRED |
 | 覆盖层标记 | `overlay.current(trade_date)`：`{ticker: {cooling_off, version, event_ids}}`；M9 完成前用 `tests/fixtures/phase1/overlay/*.json` |
 | 池子成员 | `config/universe.yaml` + 上市日期（I14） |
-| v18 标准答案 | Muse `aacea04`：`summary.json`、`trades.jsonl`、`inputs/` |
+| v18 标准答案与冻结输入 | **`docs/phase1/golden/v18/`**（v2，需求方已验证，见 Q-M4-5）：`paper_trade_v18full_trades.json`（标准答案）、`prices/*.json.gz`（30 只 + SPY 的 Nasdaq 日线）、`vix_close.csv`（CBOE VIX 收盘价）、`companyfacts_used.json`（所用 30 份 companyfacts 的哈希，文件本身在 M2 夹具 `tests/fixtures/phase1/m2/muse/companyfacts/`）。通过 `load_golden` 读取 |
 
 ## 4. 输出
 
@@ -81,7 +81,7 @@
 | FR-M4-11 | 覆盖层读取：`cooling_off = true` → 不生成该股新买和加仓，写 `skips`（N5）；当日计划中已有该股买单 → 移到 `cancels`；覆盖层缺失或 `generated_at` 早于当日 18:00（北京）→ `overlay.status = missing / stale`，照常生成 |
 | FR-M4-12 | 停机条件：可交易股票行情覆盖率 < 95% → `published = false`，写缺失清单，不生成订单 |
 | FR-M4-13 | 纸面任务写死 `rule_set = 'A'`；纸面运行用 `fixed` 提取器的打分，v18 回放用 `legacy` |
-| FR-M4-14 | v18 回放入口：吃冻结输入，输出交易清单和摘要，与标准答案对比，生成逐笔差异报告 |
+| FR-M4-14 | v18 回放入口：只吃 `golden/v18/` 的冻结输入和 M2 的 `legacy` 提取器，不读 `ingest.bars_daily` 和 R7 导入的数据；回放区间 2026-01-02 至 2026-10-07；输出交易清单和摘要，与标准答案对比，生成逐笔差异报告 |
 | FR-M4-15 | 每日运行写 `job_runs`；计划 JSON 在北京 20:30 前发布 |
 
 ## 6. 异常与降级
@@ -109,7 +109,7 @@
 | `test_plan_unpublished_low_coverage` | blocking | 覆盖率 94% → 不发布 | 合成 |
 | `test_plan_json_contract` | blocking | 计划 JSON 字段齐全；`rule_set = "A"`；`skips` 只含第 4 节四类 | 合成 |
 | `test_vix_missing_not_panic` | blocking | VIX 缺失不当成恐慌日 | 合成 |
-| `test_v18_replay` | replay | I15 | v18 标准答案 + 冻结输入 |
+| `test_v18_replay` | replay | I15；目标是 90 笔逐笔一致（日期、代码、动作、股数），不一致的每一笔都要在差异报告里说明原因 | `golden/v18/` |
 | `test_amd_entry_2026_01_12` | replay | I16 | 同上 |
 | `test_paper_live_smoke` | live | 真实跑一天：计划已发布，字段齐全 | 真实 |
 
@@ -135,3 +135,4 @@
 | Q-M4-2 | VIX 缺失算不算恐慌日？ | 不算，并在计划上标注 |
 | Q-M4-3 | 59 只池子的回测基线（A5）做不做？ | 第一阶段不做，放第二阶段 |
 | Q-M4-4 | 订单是否允许小数股？ | 不允许。v18 标准答案的持仓均为整数股（例如期末 NVDA 731 股、AMD 75 股）；取整方式以 Muse 源码为准，开工复述时确认 |
+| Q-M4-5 | v18 复现用什么输入？ | **需求方已验证（2026-10-15）**：Muse v18 运行时直接调 Nasdaq.com 的历史行情接口（拆股调整后的价格），VIX 读 `options_vix_history.csv`，内部人买入读两份 JSON。需求方在隔离环境里用 Muse `aacea04` 源码，配上 Nasdaq 价格（截至 2026-10-07）、CBOE VIX 收盘价和 M2 夹具里的 30 份 companyfacts 重跑 v18，**摘要和 90 笔交易与标准答案完全一致**；内部人文件缺失不影响结果。这份输入已冻结为 `golden/v18/`，并用打包后的文件再次重跑，结果仍然完全一致。所以复现时不要用我们自己的 Alpaca 价格和 R7 的 Form 4 |
