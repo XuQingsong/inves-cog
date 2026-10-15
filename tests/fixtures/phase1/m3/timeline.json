@@ -1,0 +1,7 @@
+{
+  "classification": "handwritten synthetic M20/PIT boundaries, not an external oracle",
+  "signal_date": "2026-10-09",
+  "filings": ["2026-09-29", "2026-10-09", "2026-10-10"],
+  "stale_days": [180, 181],
+  "valuation_zero_compatibility": {"vol60": 40, "rev_growth": 40, "expected_tier": "normal"}
+}

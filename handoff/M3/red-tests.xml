@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="13" time="0.189" timestamp="2026-10-15T20:00:35.298820+08:00" hostname="192.168.1.101"><testcase classname="tests.m3.test_scoring" name="test_interp_points" time="0.002"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_interp_points():
+&gt;       from inves_cog.trading.scoring.curves import interp, weighted_book
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:41: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_books_synthetic" time="0.010"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_books_synthetic():
+        for row in load_golden("m3_books_synthetic.json")["stocks"]:
+&gt;           compare(evaluate(row), row["expected"])
+                    ^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = {'id': 'SYN-DEF', 'note': '防守层候选，四本账全过', 'input': {'fields': {'price': 150.0, 'eps_ttm': 6.25, 'shares': 1000000000.0,...: {'quality': 87.8, 'growth': 59.8, 'valuation': 50.5, 'timing': 72.7, ...}, 'rank_score': 66.7, 'red_lines': [], ...}}
+kwargs = {}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_red_line_boundaries" time="0.002"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_red_line_boundaries():
+        row = synthetic()
+        row["input"]["tech"].update(rsi=80, dev50=15)
+&gt;       assert "短线过热" not in evaluate(row)["red_lines"]
+                             ^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = {'id': 'SYN-DEF', 'note': '防守层候选，四本账全过', 'input': {'fields': {'price': 150.0, 'eps_ttm': 6.25, 'shares': 1000000000.0,...: {'quality': 87.8, 'growth': 59.8, 'valuation': 50.5, 'timing': 72.7, ...}, 'rank_score': 66.7, 'red_lines': [], ...}}
+kwargs = {}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_tier_reassess_only_on_filing" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_tier_reassess_only_on_filing():
+&gt;       first = evaluate(state_filed=DAY - timedelta(days=10))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = None, kwargs = {'state_filed': datetime.date(2026, 9, 29)}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_m31_m32" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_m31_m32():
+&gt;       from inves_cog.trading.scoring.rules import assign_tier, entry_rules
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:93: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_stale_books_are_null" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_stale_books_are_null():
+        timeline = json.loads((ROOT / "tests/fixtures/phase1/m3/timeline.json").read_text())
+&gt;       current = evaluate(period_end=DAY - timedelta(days=timeline["stale_days"][0]))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = None, kwargs = {'period_end': datetime.date(2026, 4, 12)}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_split_suspect_valuation_null" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_split_suspect_valuation_null():
+&gt;       result = evaluate(health_codes=["split_suspect"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = None, kwargs = {'health_codes': ['split_suspect']}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_pit_filed_date" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_pit_filed_date():
+&gt;       from inves_cog.trading.scoring import score_day
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:132: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_foreign_filers_not_tradable" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_foreign_filers_not_tradable():
+        for ticker in ("ASML", "ARM", "TSM", "SKHY", "NOK"):
+&gt;           result = evaluate(ticker=ticker)
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = None, kwargs = {'ticker': 'ASML'}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_rule_set_a_locked" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_rule_set_a_locked():
+&gt;       assert evaluate(rule_set="A")["rule_set"] == "A"
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+row = None, kwargs = {'rule_set': 'A'}
+
+    def evaluate(row=None, **kwargs):
+&gt;       from inves_cog.trading.scoring import score_fields
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:22: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_v18_constants" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_blocking
+    def test_v18_constants():
+&gt;       from inves_cog.trading.scoring.rules import load_rule_a
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:166: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_no_tracker_stops_in_rule_a" time="0.004"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-191/test_no_tracker_stops_in_rule_0')
+
+    @pytest.mark.phase1_blocking
+    def test_no_tracker_stops_in_rule_a(tmp_path):
+&gt;       from inves_cog.trading.scoring.rules import load_rule_a
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/test_scoring.py:176: ModuleNotFoundError</failure></testcase><testcase classname="tests.m3.test_scoring" name="test_scores_match_muse" time="0.006"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.scoring'">@pytest.mark.phase1_replay
+    def test_scores_match_muse():
+        from tests.m3.replay_support import compare_frozen
+    
+&gt;       result = compare_frozen()
+                 ^^^^^^^^^^^^^^^^
+
+tests/m3/test_scoring.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def compare_frozen():
+&gt;       from inves_cog.trading.scoring import score_history
+E       ModuleNotFoundError: No module named 'inves_cog.trading.scoring'
+
+tests/m3/replay_support.py:62: ModuleNotFoundError</failure></testcase></testsuite></testsuites>
