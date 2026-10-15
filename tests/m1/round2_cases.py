@@ -213,3 +213,67 @@ def assert_embedding_batches():
     assert len(calls) == before
     enabled = Embedding({**configuration, "INVES_COG_EMBEDDING_ENABLED": "1"}, http=HTTPClient(send, retries=0))
     assert enabled.batch(["first", "second"], model="text-embedding-v3", dimensions=1024)[1] == [0.2] * 1024
+    from inves_cog.clock import FrozenClock
+    from datetime import datetime, timezone
+
+    records = []
+    clock = FrozenClock(datetime(2026, 10, 15, tzinfo=timezone.utc))
+    audited = Embedding(configuration, http=HTTPClient(send, retries=0), clock=clock, recorder=records.append)
+    audited.batch(["first", "second"], model="text-embedding-v3", dimensions=1024)
+    assert records[0]["task"] == "embedding" and records[0]["item_count"] == 2
+    assert records[0]["input_tokens"] is None and records[0]["output_tokens"] == 0
+    assert records[0]["status"] == "usage_missing"
+    assert records[0]["created_at"] == clock.now_utc()
+
+
+def assert_scheduler_watchdog():
+    from datetime import datetime
+
+    from inves_cog.clock import FrozenClock
+    from inves_cog.ingest.jobs import HealthBook, JobRunner
+    from inves_cog.ingest.service import check_bars_start
+
+    class Repo:
+        def __init__(self):
+            self.health = {}
+            self.runs = {}
+
+        def last_runs(self, **kwargs):
+            return self.runs
+
+        def health_rows(self):
+            return self.health
+
+        def write_health(self, row):
+            self.health[row["source"]] = row
+
+    repo = Repo()
+    def at(text):
+        return FrozenClock(datetime.fromisoformat(text))
+
+    check_bars_start(repo, at("2026-10-16T00:29:59+00:00"))
+    assert not repo.health
+    check_bars_start(repo, at("2026-10-16T00:30:00+00:00"))
+    assert repo.health["Scheduler:bars_full"]["status"] == "unavailable"
+    repo.runs["bars_full"] = datetime.fromisoformat("2026-10-15T07:00:00+00:00")
+    check_bars_start(repo, at("2026-10-16T00:30:01+00:00"))
+    assert repo.health["Scheduler:bars_full"]["status"] == "unavailable"
+    repo.runs["bars_full"] = datetime.fromisoformat("2026-10-16T00:20:00+00:00")
+    check_bars_start(repo, at("2026-10-16T00:30:02+00:00"))
+    assert repo.health["Scheduler:bars_full"]["status"] == "ok"
+    repo.health.clear()
+    check_bars_start(repo, at("2026-10-18T00:31:00+00:00"))
+    assert not repo.health  # Saturday ET: no false alarm.
+    check_bars_start(repo, at("2026-11-03T01:30:00+00:00"))
+    assert repo.health["Scheduler:bars_full"]["status"] == "unavailable"
+    events = []
+    def start(row):
+        events.append(("start", dict(row)))
+        return 42
+    def operation():
+        assert events[0][0] == "start" and events[0][1]["ended_at"] is None
+        return {"processed_count": 1}
+    clock = at("2026-10-16T00:20:00+00:00")
+    JobRunner(clock=clock, health=HealthBook(clock=clock), persist=lambda row: events.append(("end", dict(row))),
+              persist_start=start).run("bars_full", "Alpaca", operation)
+    assert events[1][1]["id"] == 42 and events[1][1]["status"] == "ok"
