@@ -210,8 +210,8 @@ def test_milestones_consistency(tmp_path):
 
 
 def test_requirements_golden_unchanged(tmp_path):
-    from tests.harness.tools.golden import load_golden, read_manifest, validate_golden
     from scripts.m0_selfcheck import fingerprints
+    from tests.harness.tools.golden import load_golden, read_manifest, validate_golden
 
     nested = tmp_path / "snapshot"
     (nested / "v18").mkdir(parents=True)
