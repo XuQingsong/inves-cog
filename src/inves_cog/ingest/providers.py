@@ -3,13 +3,13 @@
 import csv
 import json
 import re
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from io import StringIO
 from xml.etree import ElementTree
 
 from inves_cog.ingest.http import HTTPClient, RateLimiter, SourceError, require_mapping
 from inves_cog.ingest.info import make_item
-from inves_cog.ingest.market import NY
+from inves_cog.ingest.market import NY, market_window
 from inves_cog.ingest.sources import fred_observations
 
 
@@ -48,7 +48,7 @@ class Alpaca:
             "feed": feed,
             "adjustment": "raw",
             "start": datetime.combine(first, datetime.min.time(), NY).isoformat(),
-            "end": datetime.combine(last + timedelta(days=1), datetime.min.time(), NY).isoformat(),
+            "end": market_window(last)[1].isoformat(),
             "limit": 10000,
         }
         seen_tokens, seen_rows, rows = set(), set(), []

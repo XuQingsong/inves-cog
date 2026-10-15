@@ -122,7 +122,7 @@ def test_bar_window_to_20et():
     ):
         requests = []
 
-        def daily_send(method, url, **kwargs):
+        def daily_send(method, url, requests=requests, **kwargs):
             requests.append(kwargs["params"])
             return Response(200, {"bars": {}, "next_page_token": None})
 
