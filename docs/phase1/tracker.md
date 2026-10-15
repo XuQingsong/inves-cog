@@ -42,8 +42,8 @@
 | D-16 | 分部映射的真实草稿 | AC-M2-08 | 否 | ⬜ backlog |
 | D-17 | 合理性门禁先核对原件（`extreme_value_verified`），LITE 恢复可打分 | M2 v9 Q-M2-32 | 否（M3 验收前） | 🔄 |
 | D-18 | M2 `test_fundamentals_live_smoke` 跑通后从 pending 删除 | M0 FR-M0-05 | 是（关闭 M2） | 🔄 |
-| D-19 | M3 开工复述 | next-stage-M3-M6.md | —— | 🔄 |
-| D-20 | M6 开工复述 | next-stage-M3-M6.md | —— | 🔄 |
+| D-19 | M3 开工复述 | next-stage-M3-M6.md | —— | ✅ 已答复（M3 v3） |
+| D-20 | M6 开工复述 | next-stage-M3-M6.md | —— | ✅ 已答复（M6 v6） |
 | D-21 | 历史财报事件补齐（`earnings_events` 只有 54 行，应有 2015 年以来约 2,300 次） | FR-M1-06 | 是（M3 验收前） | 🔄 |
 | D-22 | 健康表清理过期和演示数据 | next-stage 2.1 | 否 | 🔄 |
 | D-23 | 嵌入以 `info_embeddings` 为唯一来源，旧列弃用（模型 async-v1 为用户决定，Q-M1-29） | Q-M1-29 | 否（M8 前） | 🔄 |

@@ -49,10 +49,10 @@
           "fcf_yield": 3.373333
         },
         "books": {
-          "quality": 87.825,
-          "growth": 59.766667,
-          "valuation": 50.506087,
-          "timing": 72.704167,
+          "quality": 87.8,
+          "growth": 59.8,
+          "valuation": 50.5,
+          "timing": 72.7,
           "timing_subitems": {
             "trend": 75.833333,
             "momentum": 63.0,
@@ -61,7 +61,7 @@
             "risk": 82.416667
           }
         },
-        "rank_score": 66.730168,
+        "rank_score": 66.7,
         "red_lines": [],
         "tier": "defense",
         "certainty_points": 0,
@@ -123,10 +123,10 @@
           "fcf_yield": 0.469055
         },
         "books": {
-          "quality": 74.075,
-          "growth": 86.82,
-          "valuation": 12.062297,
-          "timing": 73.3875,
+          "quality": 74.1,
+          "growth": 86.8,
+          "valuation": 12.1,
+          "timing": 73.4,
           "timing_subitems": {
             "trend": 90.0,
             "momentum": 88.0,
@@ -135,7 +135,7 @@
             "risk": 58.375
           }
         },
-        "rank_score": 62.593637,
+        "rank_score": 62.6,
         "red_lines": [],
         "tier": "attack",
         "certainty_points": 6,
@@ -144,7 +144,7 @@
         "hold_ok": true,
         "fund_bad": false,
         "runway_ok": true,
-        "m31_adjusted_valuation": 24.228964,
+        "m31_adjusted_valuation": 24.266667,
         "m32_ok": true,
         "entry_pass": false
       }
@@ -197,9 +197,9 @@
           "fcf_yield": 4.0
         },
         "books": {
-          "quality": 66.333333,
-          "growth": 17.640476,
-          "valuation": 73.333333,
+          "quality": 66.3,
+          "growth": 17.6,
+          "valuation": 73.3,
           "timing": 38.8,
           "timing_subitems": {
             "trend": 26.309524,
@@ -209,7 +209,7 @@
             "risk": 57.5
           }
         },
-        "rank_score": 47.439821,
+        "rank_score": 47.4,
         "red_lines": [
           "M-13",
           "M-15"
