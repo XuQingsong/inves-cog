@@ -21,6 +21,12 @@ def assert_source_selection():
     assert series[date(2025, 12, 31)]["val"] == 40
     legacy = Facts(data, date(2026, 3, 2), fixed=False)
     assert any(r["form"] == "DEF 14A" for r in legacy.entries("us-gaap", "NetIncomeLoss"))
+    rows.append({"start": "2025-01-01", "end": "2025-09-30", "filed": "2025-11-01", "form": "10-Q", "val": 60})
+    rows.append({"start": "2025-01-01", "end": "2025-03-31", "filed": "2026-03-02", "form": "10-Q", "val": 20})
+    revised = Facts(data, date(2026, 3, 3), fixed=True)
+    updated = revised.quarterly(["NetIncomeLoss"])
+    repair_flow(revised, ["NetIncomeLoss"], updated)
+    assert updated[date(2025, 12, 31)]["val"] == 30  # old YTD9 must not override restated Q1
 
 
 def assert_split_basis():
@@ -59,7 +65,7 @@ def assert_split_basis():
     assert lite.values["eps_ttm"] == -92.96
     assert "implausible_value" in lite.health_codes
     crowd = extract_state(official["CRWD"], ticker="CRWD", as_of=date(2026, 10, 15))
-    assert crowd.values["ni_ttm"] == 58_460_000
+    assert crowd.values["ni_ttm"] == 44_995_000
     assert abs(crowd.values["eps_ttm"] - 0.05) < 1e-12
 
 
