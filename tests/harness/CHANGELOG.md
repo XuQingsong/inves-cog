@@ -152,3 +152,5 @@
 2026-10-14 tests/fixtures/phase1/m1/form4_official.xml 3fd3b9cbe1cc36f6c0fb98a1a6f2f10708dd0974a326e70269db9a8a9e7d4ab7 complete required frozen path and new hash.
 2026-10-14 tests/fixtures/phase1/m1/form4_official.json bd43f415dbff43d7a34bc131af7e3460cf8427b67c1a0b96d2445fe598bef243 complete required frozen path and new hash.
 2026-10-15 tests/fixtures/phase1/m2/round3_official.json 0f9f3c386a1ee8038c00fcf0f06872b398fc426433c16f0c31c5b972275b045d SEC LITE/CRWD subset with official 10-K/10-Q source hashes; new input only.
+
+- M2 AC-M2-09: freeze SEC ASML/TSM/NOK/ARM/SKHY 6-K originals, with reported versus adjusted, parent versus group income, EPS versus denominator and PIT positive/negative assertions. No golden changed.
