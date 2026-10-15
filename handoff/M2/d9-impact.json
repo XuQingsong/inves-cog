@@ -45,14 +45,18 @@
         "op_margin_ttm": null
       },
       "after": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 368757000000.0,
+        "ni_ttm": 32757000000.0,
         "rev_growth": 9.074533095912773,
         "rev_q_yoy": 42.34166809805413,
         "rev_accel_pp": 39.92617429317022,
-        "eps_growth": 10.511363636363647,
-        "rev_ttm": 368757000000.0,
-        "ni_ttm": 32757000000.0,
         "eps_ttm": 7.779999999999999,
-        "rev_period": "2026-06-30",
+        "eps_growth": 10.511363636363647,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
         "fcf_ttm": 30553000000.0,
         "fcf_margin": 8.285402039825684,
         "fcf_conversion": 0.9327166712458406,
@@ -63,12 +67,8 @@
         "net_debt_fcf": 0.7413674598239125,
         "current_ratio": 1.1346729708431835,
         "shares": 4111911960.0,
-        "shares_date": "2026-06-30",
-        "data_flags": [],
-        "op_margin_ttm": null,
         "fcf_margin_change_pp": -0.32888223776706127,
-        "gross_margin": null,
-        "gross_margin_change_pp": null
+        "op_margin_ttm": null
       },
       "D9_changes": {
         "rev_growth": {
@@ -139,6 +139,7 @@
       "earnings_missing_reason": "No currently effective verified Item 2.02 acceptance in ingest.earnings_events",
       "core": {
         "rev_ttm": 368757000000.0,
+        "ni_ttm": 32757000000.0,
         "eps_ttm": 7.779999999999999,
         "shares": 4111911960.0
       }
@@ -186,14 +187,18 @@
         "op_margin_ttm": 60.68153209854342
       },
       "after": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 44488000000.0,
+        "ni_ttm": 22592000000.0,
         "rev_growth": 14.385622091378902,
         "rev_q_yoy": 14.362957137239473,
         "rev_accel_pp": -2.6893672321580695,
-        "eps_growth": 14.74609375,
-        "rev_ttm": 44488000000.0,
-        "ni_ttm": 22592000000.0,
         "eps_ttm": 11.75,
-        "rev_period": "2026-06-30",
+        "eps_growth": 14.74609375,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
         "fcf_ttm": 21013000000.0,
         "fcf_margin": 47.23296169753641,
         "fcf_conversion": 0.9301080028328612,
@@ -203,13 +208,9 @@
         "net_debt": 10252000000.0,
         "net_debt_fcf": 0.48788845000713843,
         "current_ratio": 0.9852226141672228,
-        "shares": 469280842.0,
-        "shares_date": "2010-01-27",
-        "data_flags": [],
-        "op_margin_ttm": 60.68153209854342,
+        "shares": 1898000000.0,
         "fcf_margin_change_pp": -9.545893109241156,
-        "gross_margin": null,
-        "gross_margin_change_pp": null
+        "op_margin_ttm": 60.68153209854342
       },
       "D9_changes": {
         "eps_growth": {
@@ -219,13 +220,18 @@
         "eps_ttm": {
           "off": null,
           "on": 11.75
+        },
+        "shares": {
+          "off": 469280842,
+          "on": 1898000000
         }
       },
       "earnings_missing_reason": null,
       "core": {
         "rev_ttm": 44488000000.0,
+        "ni_ttm": 22592000000.0,
         "eps_ttm": 11.75,
-        "shares": 469280842.0
+        "shares": 1898000000.0
       }
     },
     {
@@ -271,30 +277,30 @@
         "op_margin_ttm": null
       },
       "after": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 199408000000.0,
+        "ni_ttm": 65067000000.0,
         "rev_growth": 13.529639498075664,
         "rev_q_yoy": 27.687477734235834,
         "rev_accel_pp": 17.698512825827088,
-        "eps_growth": 19.74358974358974,
-        "rev_ttm": 199408000000.0,
-        "ni_ttm": 65067000000.0,
         "eps_ttm": 23.349999999999998,
-        "rev_period": "2026-06-30",
-        "roe": 17.36982044751974,
-        "cash": 278793000000.0,
-        "debt": 269929000000.0,
-        "net_debt": -8864000000.0,
-        "shares": 2658186195.0,
-        "shares_date": "2026-06-30",
-        "data_flags": [],
-        "op_margin_ttm": null,
-        "fcf_margin_change_pp": null,
+        "eps_growth": 19.74358974358974,
         "gross_margin": null,
         "gross_margin_change_pp": null,
         "fcf_ttm": null,
         "fcf_margin": null,
         "fcf_conversion": null,
+        "roe": 17.36982044751974,
+        "cash": 278793000000.0,
+        "debt": 269929000000.0,
+        "net_debt": -8864000000.0,
         "net_debt_fcf": null,
-        "current_ratio": null
+        "current_ratio": null,
+        "shares": 2658186195.0,
+        "fcf_margin_change_pp": null,
+        "op_margin_ttm": null
       },
       "D9_changes": {
         "rev_growth": {
@@ -327,9 +333,11 @@
       "earnings_missing_reason": null,
       "core": {
         "rev_ttm": 199408000000.0,
+        "ni_ttm": 65067000000.0,
         "eps_ttm": 23.349999999999998,
         "shares": 2658186195.0
       }
     }
-  ]
+  ],
+  "note": "Current fixed amounts include round-three restatement fixes; D9 share override for registered multi-class V is independently recorded. Prior non-D9 fields may also change because D2 was corrected."
 }

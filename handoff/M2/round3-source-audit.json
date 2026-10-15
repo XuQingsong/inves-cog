@@ -1,0 +1,42 @@
+{
+  "requirement": "T01-T02-round3 items 1–5 / M2 v8",
+  "LITE": {
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828026057358/lite-20260627.htm",
+    "source_sha256": "362fb92153d079580ddd832f1b68b0f72d69a3aa3686820b9a77436f79fee743",
+    "context": "c-1; consolidated, no dimensions; 2025-06-29 through 2026-06-27",
+    "revenue_USD": 3014000000,
+    "net_income_USD": -6935100000,
+    "eps_diluted_USD": -92.96,
+    "debt_extinguishment_loss_USD": 7756600000,
+    "finding": "Official 10-K and fresh SEC companyfacts both confirm the large GAAP loss. It is not an erroneous annual-minus-quarter result. Original values retained; Q-M2-27 rules 1 and 3 block scoring."
+  },
+  "CRWD": {
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1535527/000153552726000031/crwd-20260731.htm",
+    "source_sha256": "6d6051fba25074030f4a5325218219a0132d5556109be4016344c9b9a86e97e2",
+    "stock_split": {
+      "ratio": 4,
+      "effective_date": "2026-07-01",
+      "first_reported_in_facts": "2026-08-27"
+    },
+    "original_problem": [
+      "Unadjusted older EPS and split-restated newer comparative EPS were summed.",
+      "Old 9-month cumulative net income overrode newer restated individual quarters when deriving Q4."
+    ],
+    "net_income_independent_rollforward": {
+      "annual": -162502000,
+      "current_6m": 33080000,
+      "prior_6m_comparative": -174417000,
+      "result": 44995000
+    },
+    "fixed_eps_ttm": 0.05,
+    "eps_q4_method": "annual diluted EPS minus Q1–Q3, approximate as required by Q-M2-5; all EPS converted to the latest visible split basis",
+    "legacy": "unchanged"
+  },
+  "V": {
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1403161/000140316126000104/v-20260630.htm",
+    "source_sha256": "92c336eef815ce659bfa359eed4f19607ada4361cb6de9da8016a74e296ca918",
+    "weighted_diluted_shares": 1898000000,
+    "method": "multi_class_diluted",
+    "quarter_end": "2026-06-30"
+  }
+}

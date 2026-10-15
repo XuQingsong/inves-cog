@@ -1,21 +1,9 @@
 {
-  "as_of": "2026-10-15T04:23:17.159320+00:00",
+  "as_of": "2026-10-15T07:35:20.287497+00:00",
   "health_rows": 59,
   "profile_rows": 59,
   "difference_rows": 59,
   "scorable_required": {
-    "LITE": {
-      "ticker": "LITE",
-      "latest_period_end": "2026-06-27",
-      "latest_filed": "2026-08-17",
-      "latest_8k_202": "2026-08-12 04:24:11+08:00",
-      "health_codes": [
-        "ni_tag_fallback"
-      ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
-    },
     "BE": {
       "ticker": "BE",
       "latest_period_end": "2026-06-30",
@@ -41,23 +29,11 @@
       "can_trade": true,
       "reason": null
     },
-    "COST": {
-      "ticker": "COST",
-      "latest_period_end": "2026-08-30",
-      "latest_filed": "2026-10-07",
-      "latest_8k_202": "2026-09-25 04:17:37+08:00",
-      "health_codes": [
-        "gross_margin_derived"
-      ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
-    },
-    "LRCX": {
-      "ticker": "LRCX",
-      "latest_period_end": "2026-06-28",
-      "latest_filed": "2026-08-07",
-      "latest_8k_202": "2026-07-30 04:07:10+08:00",
+    "CRWD": {
+      "ticker": "CRWD",
+      "latest_period_end": "2026-07-31",
+      "latest_filed": "2026-08-27",
+      "latest_8k_202": "2026-08-27 04:07:02+08:00",
       "health_codes": [
         "ok"
       ],
@@ -65,17 +41,18 @@
       "can_trade": true,
       "reason": null
     },
-    "JPM": {
-      "ticker": "JPM",
-      "latest_period_end": "2026-06-30",
-      "latest_filed": "2026-08-06",
-      "latest_8k_202": "2026-10-13 18:30:38+08:00",
+    "LITE": {
+      "ticker": "LITE",
+      "latest_period_end": "2026-06-27",
+      "latest_filed": "2026-08-17",
+      "latest_8k_202": "2026-08-12 04:24:11+08:00",
       "health_codes": [
-        "ok"
+        "implausible_value",
+        "ni_tag_fallback"
       ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
+      "can_score": false,
+      "can_trade": false,
+      "reason": "implausible_value; {'violations': [{'rule': 1, 'field': 'ni_ttm/rev_ttm', 'ratio': -2.3009621765096218, 'quarters': {'ni': [{'end': '2025-09-27', 'value': 4200000.0}, {'end': '2025-12-27', 'value': 78200000.0}, {'end': '2026-03-28', 'value': 144200000.0}, {'end': '2026-06-27', 'value': -7161700000.0}], 'rev': [{'end': '2025-09-27', 'value': 533800000.0}, {'end': '2025-12-27', 'value': 665500000.0}, {'end': '2026-03-28', 'value': 808400000.0}, {'end': '2026-06-27', 'value': 1006300000.0}]}}, {'rule': 3, 'field': 'ni', 'quarters': [{'end': '2025-09-27', 'value': 4200000.0, 'derivation': None}, {'end': '2025-12-27', 'value': 78200000.0, 'derivation': None}, {'end': '2026-03-28', 'value': 144200000.0, 'derivation': None}, {'end': '2026-06-27', 'value': -7161700000.0, 'derivation': 'q4_derived'}], 'derived_end': '2026-06-27'}, {'rule': 3, 'field': 'eps', 'quarters': [{'end': '2025-09-27', 'value': 0.05, 'derivation': None}, {'end': '2025-12-27', 'value': 0.89, 'derivation': None}, {'end': '2026-03-28', 'value': 1.5, 'derivation': None}, {'end': '2026-06-27', 'value': -95.39999999999999, 'derivation': 'eps_q4_derived'}], 'derived_end': '2026-06-27'}]}"
     },
     "V": {
       "ticker": "V",
@@ -84,18 +61,6 @@
       "latest_8k_202": "2026-07-29 04:05:26+08:00",
       "health_codes": [
         "ni_tag_fallback"
-      ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
-    },
-    "XOM": {
-      "ticker": "XOM",
-      "latest_period_end": "2026-06-30",
-      "latest_filed": "2026-08-03",
-      "latest_8k_202": "2026-07-31 18:31:39+08:00",
-      "health_codes": [
-        "ok"
       ],
       "can_score": true,
       "can_trade": true,
@@ -118,6 +83,6 @@
     "failures": []
   },
   "source_classification": "Actual SEC companyfacts and archived original XBRL; existing production extractors. Segment mapping remains disclosed pre-merge double.",
-  "can_score": 54,
+  "can_score": 53,
   "earnings_event_missing": 5
 }

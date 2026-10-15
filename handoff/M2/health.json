@@ -1,76 +1,128 @@
 {
   "summary": {
-    "observed_at": "2026-10-15T04:23:17.159320+00:00",
-    "states": 59,
+    "observed_at": "2026-10-15T07:35:20.287497+00:00",
     "health_rows": 59,
     "profiles": 59,
-    "can_score": 54,
-    "missing_earnings_before": 49,
+    "can_score": 53,
     "missing_earnings_after": 5,
-    "newly_verified_earnings": 44,
-    "missing_reasons": [
+    "implausible": [
       {
-        "ticker": "ARM",
-        "filing_counts": {
-          "total": 160,
-          "earnings": 0,
-          "verified": 0
-        },
-        "accepted_before": null,
-        "status": "missing",
-        "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
-      },
-      {
-        "ticker": "ASML",
-        "filing_counts": {
-          "total": 188,
-          "earnings": 0,
-          "verified": 0
-        },
-        "accepted_before": null,
-        "status": "missing",
-        "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
-      },
-      {
-        "ticker": "NOK",
-        "filing_counts": {
-          "total": 858,
-          "earnings": 0,
-          "verified": 0
-        },
-        "accepted_before": null,
-        "status": "missing",
-        "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
-      },
-      {
-        "ticker": "SKHY",
-        "filing_counts": {
-          "total": 35,
-          "earnings": 0,
-          "verified": 0
-        },
-        "accepted_before": null,
-        "status": "missing",
-        "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
-      },
-      {
-        "ticker": "TSM",
-        "filing_counts": {
-          "total": 971,
-          "earnings": 0,
-          "verified": 0
-        },
-        "accepted_before": null,
-        "status": "missing",
-        "reason": "No Item 2.02 8-K in captured SEC submissions; foreign issuers may report on Form 6-K"
+        "ticker": "LITE",
+        "can_score": false,
+        "reason": "implausible_value; {'violations': [{'rule': 1, 'field': 'ni_ttm/rev_ttm', 'ratio': -2.3009621765096218, 'quarters': {'ni': [{'end': '2025-09-27', 'value': 4200000.0}, {'end': '2025-12-27', 'value': 78200000.0}, {'end': '2026-03-28', 'value': 144200000.0}, {'end': '2026-06-27', 'value': -7161700000.0}], 'rev': [{'end': '2025-09-27', 'value': 533800000.0}, {'end': '2025-12-27', 'value': 665500000.0}, {'end': '2026-03-28', 'value': 808400000.0}, {'end': '2026-06-27', 'value': 1006300000.0}]}}, {'rule': 3, 'field': 'ni', 'quarters': [{'end': '2025-09-27', 'value': 4200000.0, 'derivation': None}, {'end': '2025-12-27', 'value': 78200000.0, 'derivation': None}, {'end': '2026-03-28', 'value': 144200000.0, 'derivation': None}, {'end': '2026-06-27', 'value': -7161700000.0, 'derivation': 'q4_derived'}], 'derived_end': '2026-06-27'}, {'rule': 3, 'field': 'eps', 'quarters': [{'end': '2025-09-27', 'value': 0.05, 'derivation': None}, {'end': '2025-12-27', 'value': 0.89, 'derivation': None}, {'end': '2026-03-28', 'value': 1.5, 'derivation': None}, {'end': '2026-06-27', 'value': -95.39999999999999, 'derivation': 'eps_q4_derived'}], 'derived_end': '2026-06-27'}]}",
+        "violations": [
+          {
+            "rule": 1,
+            "field": "ni_ttm/rev_ttm",
+            "ratio": -2.3009621765096218,
+            "quarters": {
+              "ni": [
+                {
+                  "end": "2025-09-27",
+                  "value": 4200000.0
+                },
+                {
+                  "end": "2025-12-27",
+                  "value": 78200000.0
+                },
+                {
+                  "end": "2026-03-28",
+                  "value": 144200000.0
+                },
+                {
+                  "end": "2026-06-27",
+                  "value": -7161700000.0
+                }
+              ],
+              "rev": [
+                {
+                  "end": "2025-09-27",
+                  "value": 533800000.0
+                },
+                {
+                  "end": "2025-12-27",
+                  "value": 665500000.0
+                },
+                {
+                  "end": "2026-03-28",
+                  "value": 808400000.0
+                },
+                {
+                  "end": "2026-06-27",
+                  "value": 1006300000.0
+                }
+              ]
+            }
+          },
+          {
+            "rule": 3,
+            "field": "ni",
+            "quarters": [
+              {
+                "end": "2025-09-27",
+                "value": 4200000.0,
+                "derivation": null
+              },
+              {
+                "end": "2025-12-27",
+                "value": 78200000.0,
+                "derivation": null
+              },
+              {
+                "end": "2026-03-28",
+                "value": 144200000.0,
+                "derivation": null
+              },
+              {
+                "end": "2026-06-27",
+                "value": -7161700000.0,
+                "derivation": "q4_derived"
+              }
+            ],
+            "derived_end": "2026-06-27"
+          },
+          {
+            "rule": 3,
+            "field": "eps",
+            "quarters": [
+              {
+                "end": "2025-09-27",
+                "value": 0.05,
+                "derivation": null
+              },
+              {
+                "end": "2025-12-27",
+                "value": 0.89,
+                "derivation": null
+              },
+              {
+                "end": "2026-03-28",
+                "value": 1.5,
+                "derivation": null
+              },
+              {
+                "end": "2026-06-27",
+                "value": -95.39999999999999,
+                "derivation": "eps_q4_derived"
+              }
+            ],
+            "derived_end": "2026-06-27"
+          }
+        ]
       }
     ],
-    "D3_original_gaps": {
-      "NOK": "ValueError: Filing instance absent or ambiguous: 0001104659-26-105772",
-      "TSM": "ValueError: Filing instance absent or ambiguous: 0001046179-26-000680"
+    "job": {
+      "task_name": "m2_round3_cached_recompute",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-15T07:32:44.871586+00:00",
+      "ended_at": "2026-10-15T07:32:53.613630+00:00",
+      "status": "ok",
+      "processed_count": 59,
+      "error_summary": "Cached raw SEC recompute; LITE official values retained, new gate blocks scoring",
+      "params_version": "p-2026.10",
+      "id": 690
     },
-    "input_kind": "own prior captured SEC inputs plus explicitly labelled fresh D9 reads",
-    "not_a_new_59_issuer_network_collection": true
+    "v_eps_shares_ni_ratio": 0.9871414660056658
   },
   "rows": [
     {
@@ -448,11 +500,12 @@
       "latest_filed": "2026-08-17",
       "latest_8k_202": "2026-08-12 04:24:11+08:00",
       "health_codes": [
+        "implausible_value",
         "ni_tag_fallback"
       ],
-      "can_score": true,
-      "can_trade": true,
-      "reason": null
+      "can_score": false,
+      "can_trade": false,
+      "reason": "implausible_value; {'violations': [{'rule': 1, 'field': 'ni_ttm/rev_ttm', 'ratio': -2.3009621765096218, 'quarters': {'ni': [{'end': '2025-09-27', 'value': 4200000.0}, {'end': '2025-12-27', 'value': 78200000.0}, {'end': '2026-03-28', 'value': 144200000.0}, {'end': '2026-06-27', 'value': -7161700000.0}], 'rev': [{'end': '2025-09-27', 'value': 533800000.0}, {'end': '2025-12-27', 'value': 665500000.0}, {'end': '2026-03-28', 'value': 808400000.0}, {'end': '2026-06-27', 'value': 1006300000.0}]}}, {'rule': 3, 'field': 'ni', 'quarters': [{'end': '2025-09-27', 'value': 4200000.0, 'derivation': None}, {'end': '2025-12-27', 'value': 78200000.0, 'derivation': None}, {'end': '2026-03-28', 'value': 144200000.0, 'derivation': None}, {'end': '2026-06-27', 'value': -7161700000.0, 'derivation': 'q4_derived'}], 'derived_end': '2026-06-27'}, {'rule': 3, 'field': 'eps', 'quarters': [{'end': '2025-09-27', 'value': 0.05, 'derivation': None}, {'end': '2025-12-27', 'value': 0.89, 'derivation': None}, {'end': '2026-03-28', 'value': 1.5, 'derivation': None}, {'end': '2026-06-27', 'value': -95.39999999999999, 'derivation': 'eps_q4_derived'}], 'derived_end': '2026-06-27'}]}"
     },
     {
       "ticker": "LLY",
