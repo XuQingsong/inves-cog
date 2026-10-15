@@ -58,6 +58,10 @@ def test_revenue_tag_gap():
 
 
 def test_q4_derived_from_annual():
+    from tests.m2.round3_cases import assert_source_selection, assert_split_basis
+
+    assert_source_selection()
+    assert_split_basis()
     from tests.m2.round2_cases import assert_long_quarters, assert_recent_gaps
 
     assert_long_quarters()
@@ -197,6 +201,9 @@ def test_fin_state_pit():
 
 
 def test_extractor_fixed_toggles():
+    from tests.m2.round3_cases import assert_multi_class
+
+    assert_multi_class(input_facts)
     settings = yaml.safe_load((ROOT / "config/params/p-2026.10/m2.yaml").read_text())["m2"]
     assert settings["repair_order"] == ["D3", "D1", "D2", "D4", "D5", "D8", "D9"]
     base = input_facts()
@@ -653,6 +660,9 @@ def test_consensus_import_idempotent(tmp_path):
 
 
 def test_health_contract(monkeypatch):
+    from tests.m2.round3_cases import assert_plausibility
+
+    assert_plausibility()
     from inves_cog.ingest.fundamentals.fx import FXBook, FXGap, fetch_fred_rates
 
     seen = []
