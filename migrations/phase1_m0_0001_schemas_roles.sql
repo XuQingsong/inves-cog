@@ -100,6 +100,9 @@ REVOKE ALL ON ALL SEQUENCES IN SCHEMA graph FROM PUBLIC, role_ingest, role_tradi
 ALTER DEFAULT PRIVILEGES FOR ROLE inves_cog_admin IN SCHEMA graph REVOKE ALL ON TABLES FROM PUBLIC, role_ingest, role_trading, role_marketstate, role_valuation, role_perception, role_overlay, role_shadow, role_web;
 ALTER DEFAULT PRIVILEGES FOR ROLE inves_cog_admin IN SCHEMA graph REVOKE ALL ON SEQUENCES FROM PUBLIC, role_ingest, role_trading, role_marketstate, role_valuation, role_perception, role_overlay, role_shadow, role_web;
 ALTER DEFAULT PRIVILEGES FOR ROLE inves_cog_admin IN SCHEMA graph REVOKE ALL ON FUNCTIONS FROM PUBLIC, role_ingest, role_trading, role_marketstate, role_valuation, role_perception, role_overlay, role_shadow, role_web;
+GRANT USAGE ON SCHEMA graph TO role_ingest;
+GRANT SELECT ON ALL TABLES IN SCHEMA graph TO role_ingest;
+ALTER DEFAULT PRIVILEGES FOR ROLE inves_cog_admin IN SCHEMA graph GRANT SELECT ON TABLES TO role_ingest;
 GRANT USAGE ON SCHEMA graph TO role_marketstate;
 GRANT SELECT ON ALL TABLES IN SCHEMA graph TO role_marketstate;
 ALTER DEFAULT PRIVILEGES FOR ROLE inves_cog_admin IN SCHEMA graph GRANT SELECT ON TABLES TO role_marketstate;

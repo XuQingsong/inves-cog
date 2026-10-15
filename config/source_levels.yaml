@@ -1,0 +1,23 @@
+sources:
+  SEC: 1
+  CompanyIR: 1
+  EntitySites: 1
+  FederalReserveNews: 1
+  EIANews: 1
+  EIATodayInEnergy: 1
+  Government: 1
+  CentralBank: 1
+  FRED: 1
+  FINRA: 1
+  CBOE: 1
+  AppStore: 1
+  Reuters: 2
+  Bloomberg: 2
+  WSJ: 2
+  FT: 2
+  CNBC: 2
+  AP: 2
+  SellSide: 3
+  GoogleTrends: 4
+  Alpaca: 4
+  Aggregator: 4

@@ -1,0 +1,32 @@
+m1:
+  minute_window:
+    start: '04:00'
+    end: '20:00'
+    timezone: America/New_York
+  schedules:
+    full_bars_start_et: '20:20'
+    full_bars_deadline_et: '20:45'
+    prefill_et: '08:00'
+    sec_m1_start_et: '20:45'
+    sec_m1_end_et: '21:15'
+    sec_m2_start_et: '21:15'
+    sec_m2_end_et: '21:45'
+    atom_poll_seconds: 600
+  feed: sip
+  http_retries: 3
+  http_wait_max_seconds: 60
+  task_timeout_seconds: 1800
+  rates:
+    alpaca: {count: 120, seconds: 60}
+    sec: {count: 5, seconds: 1}
+    trends: {count: 1, seconds: 10}
+    website_per_host: {count: 1, seconds: 2}
+    finra: {count: 60, seconds: 60}
+    fred: {count: 30, seconds: 60}
+  wide_universe: {min_market_cap: 2000000000, min_adv20: 20000000, history_sessions: 20}
+  body_retention_days: 90
+  summary_characters: 500
+  extraction_characters: 2000
+  llm_daily_token_budget: 1500000
+  embedding: {model: text-embedding-v3, dimensions: 1024}
+  fred_series: [CPIAUCSL, PAYEMS, DGS2, VIXCLS, DCOILWTICO, DTWEXBGS]

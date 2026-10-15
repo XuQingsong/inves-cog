@@ -1,0 +1,543 @@
+{
+  "status": "complete: all current info_items have model-isolated embeddings",
+  "credential_validation": {
+    "key_variable": "DASHSCOPE_API_KEY",
+    "equals_token_plan_key": false,
+    "models_http_status": 200,
+    "checked_at": "2026-10-15T02:57:58.296925+00:00",
+    "no_key_printed": true
+  },
+  "ten_real_samples": {
+    "checked_at": "2026-10-15T02:14:01.592962+00:00",
+    "model": "text-embedding-v3",
+    "dimensions": 1024,
+    "classification": "actual production adapter and real information rows; no fixtures or dialogue calls",
+    "samples": [
+      {
+        "info_id": "app_rank:AppStore:free:6448311069:2026-10-14T08:31:05.324570+00:00",
+        "kind": "app_rank",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "c273bc05e5f7ce180d7cf4c91a1b92b75af54dc031b47902152a6643eadd0ff5"
+      },
+      {
+        "info_id": "form4:MuseExport:0004aa54cb18bec837f4f46b18ff4ecb34d6cf879f211ed0736eddc1843b600c",
+        "kind": "form4",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "6598e37dd64a86697344e01c71341d1114ccf1d3484fccf1d19366fb736aaee0"
+      },
+      {
+        "info_id": "macro:FRED:CPIAUCSL:1947-01-01:1994-02-17",
+        "kind": "macro",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "bba01bf1c45936a575cbb9a9208594229946d7a70415d16ebabd39eb53b7b320"
+      },
+      {
+        "info_id": "news:EIANews:/pressroom/releases/press582.php",
+        "kind": "news",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "31aa58fff3120d0f1d82a26793aa85c72f87df7a7b626cecbba890abae21feac"
+      },
+      {
+        "info_id": "options_stats:CBOE:2026-10-13:cboe_volatility_index_vix",
+        "kind": "options_stats",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "ec8de7248274c3ef465dd5fdfc6f569af8d17ee568078e744410fa6ecd8ecea1"
+      },
+      {
+        "info_id": "short_interest:FINRA:000921e16a64dcd4e786f1e16a4272b9e6131138d51849299300f84a6bc0b95c",
+        "kind": "short_interest",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "daf9da0349745330ba0a5da551d5ee8ef4b463dfdd967edb79d47a8ede84d60a"
+      },
+      {
+        "info_id": "site_change:EntitySites:https://ai.meta.com/blog/:3fcf58c353a8b1c1cc5c2c3e446015418f7544063c417889ba274c0635a7b5f5",
+        "kind": "site_change",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "06cd923554109f7aa77d670099dfee85e4a4a751b4ae78b3cabc5a9281601fa8"
+      },
+      {
+        "info_id": "news:EIANews:/pressroom/releases/press583.php",
+        "kind": "news",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "c8d63e8eccec2a7a06f098b008a14b5175fb723e4ea69342bfc6444ebacb6b43"
+      },
+      {
+        "info_id": "news:EIANews:/pressroom/releases/press584.php",
+        "kind": "news",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "3a8968331004ea3615a1a440cd2d3419ba72f19b6f7926aca2892b9f5e1bc506"
+      },
+      {
+        "info_id": "news:EIANews:/pressroom/releases/press585.php",
+        "kind": "news",
+        "success": true,
+        "dimensions": 1024,
+        "persisted": true,
+        "vector_sha256": "784a40d1c608d0392e64b0ab840110576ac03d0d9fc1be67e274a819715ff342"
+      }
+    ],
+    "calls": [
+      {
+        "started_at": "2026-10-15T02:14:01.593631+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 16,
+          "total_tokens": 16
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:01.864981+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 107,
+          "total_tokens": 107
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:02.007058+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 15,
+          "total_tokens": 15
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:02.263749+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 62,
+          "total_tokens": 62
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:02.451282+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 135,
+          "total_tokens": 135
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:02.636032+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 6,
+          "total_tokens": 6
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:02.831333+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 1015,
+          "total_tokens": 1015
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:03.024770+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 101,
+          "total_tokens": 101
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:03.176432+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 113,
+          "total_tokens": 113
+        }
+      },
+      {
+        "started_at": "2026-10-15T02:14:03.441448+00:00",
+        "http_status": 200,
+        "model": "text-embedding-v3",
+        "usage": {
+          "prompt_tokens": 63,
+          "total_tokens": 63
+        }
+      }
+    ],
+    "success_count": 10,
+    "total": 10
+  },
+  "final_database_verification": {
+    "observed_at": "2026-10-15T04:16:26.515031+00:00",
+    "total": 166685,
+    "models": [
+      {
+        "model": "text-embedding-async-v1",
+        "dimensions": 1536,
+        "rows": 166685,
+        "info_ids": 166685
+      },
+      {
+        "model": "text-embedding-v4",
+        "dimensions": 1024,
+        "rows": 10,
+        "info_ids": 10
+      }
+    ],
+    "missing_any_model": 0,
+    "by_kind": [
+      {
+        "kind": "app_rank",
+        "total": 8,
+        "embedded": 8
+      },
+      {
+        "kind": "form4",
+        "total": 18335,
+        "embedded": 18335
+      },
+      {
+        "kind": "macro",
+        "total": 82673,
+        "embedded": 82673
+      },
+      {
+        "kind": "news",
+        "total": 60557,
+        "embedded": 60557
+      },
+      {
+        "kind": "options_stats",
+        "total": 23,
+        "embedded": 23
+      },
+      {
+        "kind": "short_interest",
+        "total": 5082,
+        "embedded": 5082
+      },
+      {
+        "kind": "site_change",
+        "total": 7,
+        "embedded": 7
+      }
+    ],
+    "usage": [
+      {
+        "model": "qwen3.7-text-embedding-flash",
+        "status": "failed",
+        "calls": 1,
+        "item_count": 10,
+        "input_tokens": "1343",
+        "output_tokens": "0",
+        "latency_ms": 427.15962504735216
+      },
+      {
+        "model": "qwen3.7-text-embedding-flash",
+        "status": "ok",
+        "calls": 106,
+        "item_count": 106,
+        "input_tokens": "21559",
+        "output_tokens": "0",
+        "latency_ms": 23740.908417035826
+      },
+      {
+        "model": "text-embedding-async-v1",
+        "status": "ok",
+        "calls": 3,
+        "item_count": 165379,
+        "input_tokens": "12091487",
+        "output_tokens": "0",
+        "latency_ms": 3507846.595
+      },
+      {
+        "model": "text-embedding-async-v2",
+        "status": "failed_usage_missing",
+        "calls": 1,
+        "item_count": 10,
+        "input_tokens": null,
+        "output_tokens": "0",
+        "latency_ms": 184138.34
+      },
+      {
+        "model": "text-embedding-v1",
+        "status": "ok",
+        "calls": 11,
+        "item_count": 106,
+        "input_tokens": "19148",
+        "output_tokens": "0",
+        "latency_ms": 5111.8203740916215
+      },
+      {
+        "model": "text-embedding-v2",
+        "status": "ok",
+        "calls": 11,
+        "item_count": 106,
+        "input_tokens": "19148",
+        "output_tokens": "0",
+        "latency_ms": 6478.90229098266
+      },
+      {
+        "model": "text-embedding-v3",
+        "status": "failed_usage_missing",
+        "calls": 1,
+        "item_count": 10,
+        "input_tokens": null,
+        "output_tokens": "0",
+        "latency_ms": 69.733208976686
+      },
+      {
+        "model": "text-embedding-v4",
+        "status": "ok",
+        "calls": 12,
+        "item_count": 116,
+        "input_tokens": "20815",
+        "output_tokens": "0",
+        "latency_ms": 78602.89199906401
+      }
+    ]
+  },
+  "full_inventory": {
+    "successful_inputs": 165369,
+    "failed_inputs": 0,
+    "tasks": [
+      {
+        "task_id": "fbbc1461-2538-4ee1-829b-a943da8b6608",
+        "inputs": 100000,
+        "failed": 0,
+        "tokens": 7309274
+      },
+      {
+        "task_id": "70c023c8-65e7-4a87-a42f-7f7c40f51098",
+        "inputs": 65369,
+        "failed": 0,
+        "tokens": 4781523
+      }
+    ],
+    "errors": [],
+    "model": "text-embedding-async-v1",
+    "input_rows": 166675,
+    "unique_inputs": 165369,
+    "rows_written": 65519,
+    "started_at": "2026-10-15T04:13:25.369267+00:00",
+    "finished_at": "2026-10-15T04:14:43.264972+00:00"
+  },
+  "full_inventory_failed_rate": 0.0,
+  "free_only": {
+    "provider_stop_when_free_exhausted": true,
+    "paid_access_not_enabled": true,
+    "exhausted_v3_not_retried_after_confirmation": true,
+    "remaining_quota_not_burned_for_its_own_sake": true
+  },
+  "model_comparison": {
+    "documents": 98,
+    "queries": 8,
+    "models": [
+      {
+        "model": "text-embedding-v1",
+        "dimensions": 1536,
+        "elapsed_seconds": 5.27793,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      {
+        "model": "text-embedding-v2",
+        "dimensions": 1536,
+        "elapsed_seconds": 6.563908,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      {
+        "model": "text-embedding-v4",
+        "dimensions": 1024,
+        "elapsed_seconds": 78.153118,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      {
+        "model": "qwen3.7-text-embedding-flash",
+        "dimensions": 1024,
+        "elapsed_seconds": 24.824486,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      }
+    ],
+    "limitation": "Small operator-labelled corpus; default document-mode vectors for both queries and documents; not a general benchmark."
+  },
+  "async_v2_probe": {
+    "successful_inputs": 0,
+    "failed_inputs": 10,
+    "tasks": [
+      {
+        "task_id": "966f44dc-7ea7-4490-916c-28fd83b8cbf7",
+        "inputs": 10,
+        "failed": 10,
+        "tokens": null
+      }
+    ],
+    "errors": [
+      {
+        "input_sha256": "02dc40faafa7fb8fdd70b67cecb2a667eb07552b26b2eb10d119237527711149",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "aae245846e63635afeb20e3269996c18f071059cb89b88b429dd7ed5621dc613",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "833720a766551bb558f5d047f5f33428bcac00aa48bbd2ed0f5eb5d8cd3b8968",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "0433f9d342ea277b22a724cd60a74138682ec26b09095a482df6ed3cabfedad1",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "3c4babc0c164b83c42381b9cb676dafeab58ee7a9ccc383bdf04d3d4a431bb63",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "1e53d2075d1bd0f5d86111990d91679d56eb18cc629a88910e99774bb334a5f6",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "0edb057a09cc7c4084e41d10bc5b80a6eb7d209c25ac4c45845c9e8b766cfa8f",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "540b38c93765d1e4d39b1a4d65233c08c490eccb00d58c561e5dcf042d0e3e98",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "c97ca25cf69c25d2c7c51696b33b8236fac6a59e46af996330497d217d895598",
+        "error": "InternalError"
+      },
+      {
+        "input_sha256": "d19de54ff7634be270b0bba0e92f9881571baaba90897de45152b4df2b6e7c21",
+        "error": "InternalError"
+      }
+    ],
+    "model": "text-embedding-async-v2",
+    "input_rows": 10,
+    "unique_inputs": 10,
+    "rows_written": 0,
+    "started_at": "2026-10-15T04:02:19.835995+00:00",
+    "finished_at": "2026-10-15T04:05:25.736265+00:00"
+  },
+  "storage_contract": {
+    "legacy_column": "ingest.info_items.embedding remains v3/1024 only",
+    "approved_alternatives": "ingest.info_embeddings keyed by info_id,model,input_sha256; dimensionality validated per model",
+    "mixing_spaces": false,
+    "async_input_newlines": "CR/LF flattened to spaces to preserve one input per line; text hash stored"
+  },
+  "historical_v3": {
+    "rows": 12331,
+    "tokens_before_new_logger": 1317887,
+    "list_cost_before_free_rmb": 0.6589435,
+    "not_an_invoice": true,
+    "original_interrupted_job_retained": 53
+  },
+  "monthly_budget_proposal": {
+    "recent_news_rows": 6694,
+    "recent_trade_days": 7,
+    "average_daily_news": 956.2857142857143,
+    "average_input_chars": 680.7996713474754,
+    "estimated_tokens_per_news": [
+      171.47695697639676,
+      342.9539139527935
+    ],
+    "monthly_news_reservation": 25000,
+    "monthly_news_token_range": [
+      4286923.924409919,
+      8573847.848819839
+    ],
+    "other_sources_monthly_token_reservation": 5000000,
+    "retrieval_queries_monthly_token_reservation": 1000000,
+    "monthly_token_range": [
+      10286923.924409918,
+      14573847.848819839
+    ],
+    "monthly_rmb_range": [
+      5.14,
+      7.29
+    ],
+    "recommended_monthly_budget_rmb": 20,
+    "monthly_budget_equivalent_tokens": 40000000,
+    "historical_backfill_reserved_budget_rmb": 20,
+    "first_month_reserved_budget_rmb": 40,
+    "assumption_note": "Character-based planning scenarios only; not provider tokenizer counts; includes headroom for as-yet-unmeasured SEC/other sources and query usage. Budget proposals have not been enabled as automatic spend authority."
+  },
+  "limits": [
+    "The small 98-document, 8-query test cannot establish a general quality winner.",
+    "async-v2 returned InternalError for all 10 real sample rows despite task SUCCEEDED; no invalid vector was stored.",
+    "Qwen returns duplicate index=0 for batch inputs; only single-input calls are allowed.",
+    "Current inventory is fully covered; incremental automatic v3 calls remain disabled while using free alternative backfills.",
+    "Remaining free balances stay available; no paid model switch or monthly charge authority has been activated."
+  ]
+}

@@ -1,0 +1,120 @@
+"""Install the user-owned Supervisor service without putting keys in service files."""
+
+import argparse
+import os
+import platform
+import plistlib
+import shlex
+import subprocess
+from pathlib import Path
+
+
+def configuration(root, python):
+    state = root / ".harness/service"
+    text = f"""[unix_http_server]
+file={state}/supervisor.sock
+chmod=0700
+[supervisord]
+logfile={state}/supervisord.log
+pidfile={state}/supervisord.pid
+childlogdir={state}
+umask=077
+nodaemon=true
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory=supervisor.rpcinterface:make_main_rpcinterface
+[supervisorctl]
+serverurl=unix://{state}/supervisor.sock
+"""
+    programs = {
+        "scheduler": "inves_cog.ingest.cli schedule --tasks bars_prefill bars_full wide_universe",
+        "watchdog": "inves_cog.ingest.service",
+        "embedding": "inves_cog.ingest.embedding_backfill --model text-embedding-async-v1",
+    }
+    for name, arguments in programs.items():
+        restart = "unexpected" if name == "embedding" else "true"
+        text += f"""
+[program:{name}]
+command={shlex.quote(str(python))} -u -m {arguments}
+directory={root}
+autostart=true
+autorestart={restart}
+startsecs=3
+startretries=100000
+stopasgroup=true
+killasgroup=true
+stopwaitsecs=15
+stdout_logfile={state}/{name}.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3
+redirect_stderr=true
+environment=PYTHONUNBUFFERED="1"
+"""
+    if platform.system() == "Darwin":
+        text += f"""
+[program:awake]
+command=/usr/bin/caffeinate -i -s
+autostart=true
+autorestart=true
+stdout_logfile={state}/awake.log
+redirect_stderr=true
+"""
+    return text
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--install", action="store_true")
+    args = parser.parse_args()
+    root = args.root.resolve()
+    state = root / ".harness/service"
+    state.mkdir(parents=True, exist_ok=True, mode=0o700)
+    python = root / ".venv/bin/python"
+    config = state / "supervisord.conf"
+    config.write_text(configuration(root, python))
+    command = [str(python), "-m", "supervisor.supervisord", "-c", str(config)]
+    if platform.system() == "Darwin":
+        destination = Path.home() / "Library/LaunchAgents/com.inves-cog.ingest.plist"
+        payload = {
+            "Label": "com.inves-cog.ingest",
+            "ProgramArguments": command,
+            "WorkingDirectory": str(root),
+            "RunAtLoad": True,
+            "KeepAlive": True,
+            "ThrottleInterval": 10,
+            "StandardOutPath": str(state / "launchd.log"),
+            "StandardErrorPath": str(state / "launchd.log"),
+        }
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(plistlib.dumps(payload))
+        if args.install:
+            exists = (
+                subprocess.run(
+                    ["launchctl", "print", f"gui/{os.getuid()}/com.inves-cog.ingest"], capture_output=True
+                ).returncode
+                == 0
+            )
+            if not exists:
+                subprocess.run(["launchctl", "bootstrap", f"gui/{os.getuid()}", str(destination)], check=True)
+            subprocess.run(["launchctl", "enable", f"gui/{os.getuid()}/com.inves-cog.ingest"], check=True)
+            if exists:
+                control = [str(python), "-m", "supervisor.supervisorctl", "-c", str(config)]
+                subprocess.run([*control, "reread"], check=True)
+                subprocess.run([*control, "update"], check=True)
+        print(f"macOS login autostart: {destination}; Supervisor autorestart enabled")
+    else:
+        destination = Path.home() / ".config/systemd/user/inves-cog-ingest.service"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            "[Unit]\nDescription=Inves Cog ingestion supervisor\n"
+            "[Service]\nExecStart=" + shlex.join(command) + "\nRestart=always\nRestartSec=10\n"
+            "[Install]\nWantedBy=default.target\n"
+        )
+        if args.install:
+            subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
+            subprocess.run(["systemctl", "--user", "enable", "--now", "inves-cog-ingest"], check=True)
+        print(f"systemd user autostart: {destination}; enable linger for unattended boot")
+
+
+if __name__ == "__main__":
+    main()

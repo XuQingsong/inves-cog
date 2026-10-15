@@ -1,18 +1,4 @@
-test_bar_window_to_20et | M1 | 等待 M1 实现
-test_bar_window_from_04et | M1 | 等待 M1 实现
-test_post_close_null_when_no_trade | M1 | 等待 M1 实现
-test_wide_universe_rules | M1 | 等待 M1 实现
-test_news_dedupe_and_times | M1 | 等待 M1 实现
-test_earnings_reaction_day | M1 | 等待 M1 实现
-test_earnings_fallback_flag | M1 | 等待 M1 实现
-test_form4_parse_code_p | M1 | 等待 M1 实现
-test_app_rank_jump | M1 | 等待 M1 实现
-test_trends_unavailable_marked | M1 | 等待 M1 实现
-test_source_level_mapping | M1 | 等待 M1 实现
-test_info_item_contract | M1 | 等待 M1 实现
-test_info_fields_extraction | M1 | 等待 M1 实现
-test_llm_extraction_failure_degrades | M1 | 等待 M1 实现
-test_ingest_live_smoke | M1 | 等待 R5
+test_ingest_live_smoke | M1 | 等待正式 SEC 时段的健康记录验证（SEC/SECAtom/SECDailyIndex）；R5 嵌入 key 已接通，全量按用户预算决定暂停
 test_revenue_tag_gap | M2 | 等待 M2 实现
 test_q4_derived_from_annual | M2 | 等待 M2 实现
 test_companyfacts_lag | M2 | 等待 M2 实现

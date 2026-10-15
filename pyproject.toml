@@ -7,10 +7,20 @@ name = "inves-cog"
 version = "0.1.0"
 description = "Independent market research and paper trading system"
 requires-python = ">=3.11,<3.12"
-dependencies = ["fastapi>=0.115,<1", "PyYAML>=6,<7", "exchange-calendars>=4.5,<5"]
+dependencies = [
+    "fastapi>=0.115,<1",
+    "PyYAML>=6,<7",
+    "exchange-calendars>=4.5,<5",
+    "httpx==0.28.1",
+    "psycopg[binary]>=3.2,<4",
+    "pytrends==4.9.2",
+]
 
 [dependency-groups]
-dev = ["pytest>=8,<10", "requests>=2,<3", "httpx==0.28.1"]
+dev = ["pytest>=8,<10", "requests>=2,<3", "ruff==0.14.14"]
+
+[project.optional-dependencies]
+ops = ["supervisor==4.3.0"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/inves_cog"]
@@ -26,3 +36,13 @@ markers = [
   "phase1_cases: frozen cases and recorded LLM responses",
   "phase1_live: explicit opt-in real-source smoke tests; excluded from CI",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "W", "I", "C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 25
