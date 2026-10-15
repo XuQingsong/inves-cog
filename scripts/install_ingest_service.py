@@ -28,14 +28,16 @@ serverurl=unix://{state}/supervisor.sock
     programs = {
         "scheduler": "inves_cog.ingest.cli schedule --tasks bars_prefill bars_full wide_universe",
         "watchdog": "inves_cog.ingest.service",
+        "embedding": "inves_cog.ingest.embedding_backfill --model text-embedding-async-v1",
     }
     for name, arguments in programs.items():
+        restart = "unexpected" if name == "embedding" else "true"
         text += f"""
 [program:{name}]
 command={shlex.quote(str(python))} -u -m {arguments}
 directory={root}
 autostart=true
-autorestart=true
+autorestart={restart}
 startsecs=3
 startretries=100000
 stopasgroup=true
@@ -46,6 +48,15 @@ stdout_logfile_maxbytes=10MB
 stdout_logfile_backups=3
 redirect_stderr=true
 environment=PYTHONUNBUFFERED="1"
+"""
+    if platform.system() == "Darwin":
+        text += f"""
+[program:awake]
+command=/usr/bin/caffeinate -i -s
+autostart=true
+autorestart=true
+stdout_logfile={state}/awake.log
+redirect_stderr=true
 """
     return text
 
@@ -77,8 +88,19 @@ def main():
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(plistlib.dumps(payload))
         if args.install:
-            subprocess.run(["launchctl", "bootstrap", f"gui/{os.getuid()}", str(destination)], check=True)
+            exists = (
+                subprocess.run(
+                    ["launchctl", "print", f"gui/{os.getuid()}/com.inves-cog.ingest"], capture_output=True
+                ).returncode
+                == 0
+            )
+            if not exists:
+                subprocess.run(["launchctl", "bootstrap", f"gui/{os.getuid()}", str(destination)], check=True)
             subprocess.run(["launchctl", "enable", f"gui/{os.getuid()}/com.inves-cog.ingest"], check=True)
+            if exists:
+                control = [str(python), "-m", "supervisor.supervisorctl", "-c", str(config)]
+                subprocess.run([*control, "reread"], check=True)
+                subprocess.run([*control, "update"], check=True)
         print(f"macOS login autostart: {destination}; Supervisor autorestart enabled")
     else:
         destination = Path.home() / ".config/systemd/user/inves-cog-ingest.service"

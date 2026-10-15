@@ -8,9 +8,10 @@ from typing import Any, Callable
 
 
 class SourceError(RuntimeError):
-    def __init__(self, message, *, status_code=None, confirmed_unavailable=False):
+    def __init__(self, message, *, status_code=None, confirmed_unavailable=False, error_code=None):
         super().__init__(message)
         self.status_code = status_code
+        self.error_code = error_code
         self.confirmed_unavailable = confirmed_unavailable
 
 
@@ -114,9 +115,12 @@ class HTTPClient:
             if retryable and attempt < self.retries:
                 self.sleep(min(60, 2**attempt))
                 continue
+            error = response.data.get("error", response.data) if isinstance(response.data, dict) else {}
+            code = error.get("code", error.get("type")) if isinstance(error, dict) else None
             raise SourceError(
-                f"HTTP status {response.status_code}",
+                f"HTTP status {response.status_code}" + (f" ({code})" if code else ""),
                 status_code=response.status_code,
+                error_code=code,
                 confirmed_unavailable=response.status_code in {401, 403},
             )
         raise AssertionError("Unreachable request state")
