@@ -36,8 +36,11 @@ def due_tasks(clock, last_runs):
             bucket = now.replace(minute=now.minute // interval * interval, second=0, microsecond=0)
             if previous is None or previous < bucket:
                 output.append(name)
-        elif previous is None or previous.astimezone(NY).date() < now.date():
-            output.append(name)
+        else:
+            slot = after or 0
+            scheduled_at = now.replace(hour=slot // 60, minute=slot % 60, second=0, microsecond=0)
+            if previous is None or previous < scheduled_at:
+                output.append(name)
 
     due("bars_prefill", after=480, before=490, session=True)
     due("news_prefill", after=480, before=490)
