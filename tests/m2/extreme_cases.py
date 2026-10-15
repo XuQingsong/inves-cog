@@ -5,10 +5,17 @@ from datetime import date
 
 
 def assert_verified_extremes():
-    from inves_cog.ingest.fundamentals.verification import apply_verification, inline_facts
+    from inves_cog.ingest.fundamentals.cli import current_ciks
 
+    history = [
+        {"ticker": "XOM", "cik": "34088", "filing_date": date(2026, 5, 1), "accession": "old"},
+        {"ticker": "XOM", "cik": "2115436", "filing_date": date(2026, 7, 1), "accession": "new"},
+    ]
+    assert current_ciks(history, as_of=date(2026, 6, 30))["XOM"] == "34088"
+    assert current_ciks(list(reversed(history)), as_of=date(2026, 10, 15))["XOM"] == "2115436"
     from inves_cog.ingest.fundamentals.health import health_row
     from inves_cog.ingest.fundamentals.state import FinState
+    from inves_cog.ingest.fundamentals.verification import apply_verification, inline_facts
 
     raw = """<html><xbrli:context id="main"><xbrli:entity></xbrli:entity>
     <xbrli:period><xbrli:startdate>2025-01-01</xbrli:startdate><xbrli:enddate>2025-12-31</xbrli:enddate></xbrli:period>
