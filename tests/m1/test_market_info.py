@@ -373,6 +373,10 @@ def test_news_dedupe_and_times():
 
 
 def test_earnings_reaction_day():
+    from inves_cog.clock import FrozenClock
+    from tests.m1.history_cases import assert_historical_events
+
+    assert_historical_events(FrozenClock(instant("2026-10-15T00:00:00Z")))
     from inves_cog.ingest.http import SourceError
     from inves_cog.ingest.sec import accepted_from_index, collect_submissions, earnings_event, parse_acceptance_et
 
