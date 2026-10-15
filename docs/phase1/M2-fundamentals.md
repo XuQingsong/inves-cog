@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v7（多类别股的股数；数值合理性门禁） |
+| 文档版本 | v8（外国申报人的季度业绩、TSM 月度营收、TSM / NOK 年报缺口） |
 | 规格章节 | 4.4、4.5、4.6、4.8、9.2（财报字段） |
 | 依赖 | M0；SEC submissions 来自 M1 |
 | 关闭的不变量 | I10、I11、I12、I33、I34 |
@@ -132,6 +132,7 @@
 | AC-M2-06b | 本项目自己的**每一次**真实采集都覆盖 59 只，至少 2 次（v5 拆出：部署机 IP 被 Yahoo 封禁，见 Q-M2-20）。**期限**：M5 提交验收之前 | E | 分析师一致预期 | 否 |
 | AC-M2-07 | 59 份 F3 档案生成，三个区块都有数据或写明缺失原因 | E | 基本面档案 | 是 |
 | AC-M2-08 | 分部映射草稿已生成并进入审核队列，用户可以按板块批量确认 | D | Q7 | 否 |
+| AC-M2-09 | 外国申报人：TSM、NOK 的年报缺口已补齐（Q-M2-28）；ASML、TSM、NOK、ARM 最近 4 个季度的 6-K 业绩公告核心数字已入库，需求方抽 4 只各 1 个季度与公告原文核对一致（Q-M2-29）；TSM 最近 12 个月的月度营收已入库（Q-M2-30）；SKHY 的状态如实标注（Q-M2-31）。**期限**：M5 提交验收之前 | E | 只观察标的的基本面可用于估值展示 | 否 |
 
 ## 9. 已决定的问题
 
@@ -164,3 +165,7 @@
 | Q-M2-25 | Yahoo 怎么采？（更正 Q-M2-20） | **需求方复测（2026-10-15 00:48 北京时间，距开发最后一次请求已 4 小时以上）**：`query1/query2.finance.yahoo.com` 的所有数据接口（chart、search、quoteSummary、getcrumb）第一个请求就返回 429；但网页 `finance.yahoo.com/quote/{T}/analysis/` 返回 200，页面里含 Earnings Estimate、Revenue Estimate、EPS Trend、EPS Revisions、分析师人数，还嵌着 `earningsTrend` 原始 JSON。开发之前每次诊断只发 5 个请求，每轮 59 只，可以基本排除"请求太频繁"；更像是 Yahoo 对这台云服务器 IP 的数据接口做了限制。**规则**：数据接口返回 429 时，改从同一个 Yahoo 分析页取同一套字段（优先解析嵌入的 JSON），两个页面之间间隔至少 5 秒，每天 59 次；`source` 记 `yahoo_page`，F2 把它和 `yfinance` 视为同一个来源。不用代理，不换供应商。AC-M2-06b 仍按原条款判定 |
 | Q-M2-26 | V 在 `fixed` 下的 `shares` 只有 A 类股（4.69 亿股），按全部类别折算后约 19 亿股，导致市值、市销率、自由现金流收益率被低估约 4 倍（需求方 2026-10-15 发现；Muse 原来也是这样，属需求缺口） | 纳入 D9：`m2.yaml` 里登记多类别股发行人（先登记 V），`fixed` 下它们的 `shares` 改用最近一个季度的 `WeightedAverageNumberOfDilutedSharesOutstanding`（按全部类别折算的稀释股本），`field_sources` 标 `multi_class_diluted`。`legacy` 不变 |
 | Q-M2-27 | 怎样防止明显错误的数值进入打分？（LITE 的 TTM 净利润 −69.4 亿美元，而营收只有 30 亿美元） | 新增健康码 **`implausible_value`**（只在 `fixed` 下检查，属于"阻止打分"类）：（1）\|`ni_ttm` ÷ `rev_ttm`\| > 1；（2）`eps_ttm × shares` 与 `ni_ttm` 之比不在 0.5–2 之间（\|`ni_ttm`\| < 1,000 万美元时不检查）；（3）任一 TTM 金额由某一季度的推算值（`q4_derived` / `ytd_derived`）主导，而该推算值的符号与另外三季都相反、且绝对值超过另外三季绝对值之和。命中时 `reason` 写明是哪条规则、涉及哪些季度。`legacy` 不检查（与 Muse 一致） |
+| Q-M2-28 | TSM 的最新年报期末停在 2024-12-31，NOK 停在 2017-12-31（需求方 2026-10-15 发现） | 两者都应当有更新的 20-F。请查明原因（例如 IFRS 标签、`ifrs-full` 与 `us-gaap` 混用、20-F 实例没取到），修复后 `fixed` 下按年度口径给出最近一个财年 |
+| Q-M2-29 | 外国申报人不交 10-Q，季度业绩通过 6-K 报备，SEC 结构化数据里没有 | 新增"6-K 业绩公告"取数，只在 `fixed` 下使用：（1）从 M1 的 `ingest.sec_filings` 里找出 ASML、TSM、NOK、ARM（以及以后的 SKHY）的季度业绩 6-K，通常是附件 99.1 的新闻稿；（2）从公告的财务报表里取季度核心数字：营收、毛利、营业利润、归母净利润、稀释 EPS（写明是每股还是每 ADS，以及换算比例）、币种；（3）按发行人写固定的表格解析规则，不调用 LLM，解析不出来的标 `interim_unparsed` 并写明原因；（4）存入新表 `fundamentals.interim_results`（`ticker, accession, filed, period_end, currency, revenue, gross_profit, operating_income, net_income, eps_diluted, eps_basis, source_exhibit, parse_status`）；（5）`fixed` 下外国申报人的营收、净利润、EPS 改为用"最近一份年报 + 之后的季度公告"拼出 TTM；货币按 Q-M2-17 换算；健康码 `interim_unaudited`（不阻止打分）。这些公司仍然不可交易（I13 不变） |
+| Q-M2-30 | TSM 每月公布营收 | TSM 的月度营收 6-K 单独存入 `fundamentals.monthly_revenue`（`ticker, month, revenue, currency, filed, accession`），只用于档案展示和 M8 归因引用，不参与 TTM |
+| Q-M2-31 | SKHY 在 SEC 没有财务数据 | 上市时间短，还没有年报或季度公告。有 6-K 业绩公告时，按 Q-M2-29 处理；没有时健康码 `no_financial_filings_yet`，`reason` 写明已检查的申报类型和日期。不另找数据源 |
