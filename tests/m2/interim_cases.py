@@ -73,3 +73,25 @@ def assert_interim_pit():
     legacy = deepcopy(state)
     legacy.extractor = "legacy"
     assert apply_interims(legacy, rows, as_of=date(2026, 10, 15), fx=Rates()).values == state.values
+
+
+def assert_annual_and_monthly():
+    from inves_cog.ingest.fundamentals.extractors import extract_state
+    from inves_cog.ingest.fundamentals.interims import parse_monthly
+
+    def data(tag, end, amount, accession):
+        return {"facts": {"ifrs-full": {tag: {"units": {"USD": [{"start": end[:4] + "-01-01", "end": end, "filed": "2026-04-16", "val": amount, "accn": accession, "form": "20-F", "fp": "FY"}]}}}}}
+
+    facts = data("Revenue", "2017-12-31", 1, "old")
+    facts["facts"]["ifrs-full"].update(data("RevenueFromContractsWithCustomers", "2025-12-31", 900, "annual")["facts"]["ifrs-full"])
+    filings = [dict(accession="annual", form="20-F", filing_date="2026-04-16"), dict(accession="monthly", form="6-K", filing_date="2026-10-08")]
+    state = extract_state(facts, ticker="NOK", as_of=date(2026, 10, 15), foreign=True, filings=filings)
+    assert state.values["rev_ttm"] == 900 and state.period_end == date(2025, 12, 31)
+    assert "companyfacts_lag" not in state.health_codes
+    tsm = extract_state(data("Revenue", "2024-12-31", 700, "old"), ticker="TSM", as_of=date(2026, 10, 15), foreign=True, filings=filings, instance_facts=data("RevenueFromContractsWithCustomers", "2025-12-31", 1000, "annual"))
+    assert tsm.values["rev_ttm"] == 1000 and tsm.period_end == date(2025, 12, 31)
+    raw = gzip.decompress((ROOT / "TSM-monthly.html.gz").read_bytes()).decode()
+    row = parse_monthly(raw, accession="0001046179-26-000680", filed="2026-10-08")
+    assert row["month"] == date(2026, 9, 1) and row["revenue"] == 511857399000 and row["currency"] == "TWD"
+    with pytest.raises(ValueError, match="monthly"):
+        parse_monthly("quarterly revenue not a monthly report", accession="bad", filed="2026-10-08")
