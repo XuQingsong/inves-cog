@@ -1,42 +1,11 @@
 {
-  "status": "new ordinary key connected; full backfill stopped at user request pending budget activation",
-  "model": "text-embedding-v3",
-  "dimensions": 1024,
-  "configuration_fix": {
-    "new_key_had_been_in": "LLM_STANDARD_API_KEY",
-    "new_key_now_in": "DASHSCOPE_API_KEY",
-    "dialogue_keys": "original Token Plan retained for both dialogue models",
-    "keys_in_report": false,
-    "embedding_enabled": false
-  },
-  "key_probe": {
-    "checked_at": "2026-10-15T02:09:15.356466+00:00",
-    "credential_source": "new standard key supplied in LLM_STANDARD_API_KEY; identified config mismatch",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-    "requests": [
-      {
-        "method": "GET",
-        "url": "https://dashscope.aliyuncs.com/compatible-mode/v1/models",
-        "http_status": 200,
-        "request_id": "d01b867a-b230-9713-ba1d-3ca5cb951e18",
-        "embedding_models": [
-          "qwen3.7-text-embedding-flash",
-          "qwen3.7-text-embedding"
-        ]
-      },
-      {
-        "method": "POST",
-        "url": "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings",
-        "http_status": 200,
-        "request_id": "70fefcf1-c0f3-9819-94a8-cbd19086508d",
-        "dimensions": 1024,
-        "usage": {
-          "prompt_tokens": 7,
-          "total_tokens": 7
-        },
-        "model": "text-embedding-v3"
-      }
-    ]
+  "status": "complete: all current info_items have model-isolated embeddings",
+  "credential_validation": {
+    "key_variable": "DASHSCOPE_API_KEY",
+    "equals_token_plan_key": false,
+    "models_http_status": 200,
+    "checked_at": "2026-10-15T02:57:58.296925+00:00",
+    "no_key_printed": true
   },
   "ten_real_samples": {
     "checked_at": "2026-10-15T02:14:01.592962+00:00",
@@ -220,303 +189,319 @@
     "success_count": 10,
     "total": 10
   },
-  "backfill": {
-    "started_at": "2026-10-15T02:18:42.299813+00:00",
-    "model": "text-embedding-v3",
-    "dimensions": 1024,
+  "final_database_verification": {
+    "observed_at": "2026-10-15T04:16:26.515031+00:00",
+    "total": 166685,
+    "models": [
+      {
+        "model": "text-embedding-async-v1",
+        "dimensions": 1536,
+        "rows": 166685,
+        "info_ids": 166685
+      },
+      {
+        "model": "text-embedding-v4",
+        "dimensions": 1024,
+        "rows": 10,
+        "info_ids": 10
+      }
+    ],
+    "missing_any_model": 0,
+    "by_kind": [
+      {
+        "kind": "app_rank",
+        "total": 8,
+        "embedded": 8
+      },
+      {
+        "kind": "form4",
+        "total": 18335,
+        "embedded": 18335
+      },
+      {
+        "kind": "macro",
+        "total": 82673,
+        "embedded": 82673
+      },
+      {
+        "kind": "news",
+        "total": 60557,
+        "embedded": 60557
+      },
+      {
+        "kind": "options_stats",
+        "total": 23,
+        "embedded": 23
+      },
+      {
+        "kind": "short_interest",
+        "total": 5082,
+        "embedded": 5082
+      },
+      {
+        "kind": "site_change",
+        "total": 7,
+        "embedded": 7
+      }
+    ],
+    "usage": [
+      {
+        "model": "qwen3.7-text-embedding-flash",
+        "status": "failed",
+        "calls": 1,
+        "item_count": 10,
+        "input_tokens": "1343",
+        "output_tokens": "0",
+        "latency_ms": 427.15962504735216
+      },
+      {
+        "model": "qwen3.7-text-embedding-flash",
+        "status": "ok",
+        "calls": 106,
+        "item_count": 106,
+        "input_tokens": "21559",
+        "output_tokens": "0",
+        "latency_ms": 23740.908417035826
+      },
+      {
+        "model": "text-embedding-async-v1",
+        "status": "ok",
+        "calls": 3,
+        "item_count": 165379,
+        "input_tokens": "12091487",
+        "output_tokens": "0",
+        "latency_ms": 3507846.595
+      },
+      {
+        "model": "text-embedding-async-v2",
+        "status": "failed_usage_missing",
+        "calls": 1,
+        "item_count": 10,
+        "input_tokens": null,
+        "output_tokens": "0",
+        "latency_ms": 184138.34
+      },
+      {
+        "model": "text-embedding-v1",
+        "status": "ok",
+        "calls": 11,
+        "item_count": 106,
+        "input_tokens": "19148",
+        "output_tokens": "0",
+        "latency_ms": 5111.8203740916215
+      },
+      {
+        "model": "text-embedding-v2",
+        "status": "ok",
+        "calls": 11,
+        "item_count": 106,
+        "input_tokens": "19148",
+        "output_tokens": "0",
+        "latency_ms": 6478.90229098266
+      },
+      {
+        "model": "text-embedding-v3",
+        "status": "failed_usage_missing",
+        "calls": 1,
+        "item_count": 10,
+        "input_tokens": null,
+        "output_tokens": "0",
+        "latency_ms": 69.733208976686
+      },
+      {
+        "model": "text-embedding-v4",
+        "status": "ok",
+        "calls": 12,
+        "item_count": 116,
+        "input_tokens": "20815",
+        "output_tokens": "0",
+        "latency_ms": 78602.89199906401
+      }
+    ]
+  },
+  "full_inventory": {
+    "successful_inputs": 165369,
+    "failed_inputs": 0,
+    "tasks": [
+      {
+        "task_id": "fbbc1461-2538-4ee1-829b-a943da8b6608",
+        "inputs": 100000,
+        "failed": 0,
+        "tokens": 7309274
+      },
+      {
+        "task_id": "70c023c8-65e7-4a87-a42f-7f7c40f51098",
+        "inputs": 65369,
+        "failed": 0,
+        "tokens": 4781523
+      }
+    ],
+    "errors": [],
+    "model": "text-embedding-async-v1",
     "input_rows": 166675,
-    "unique_inputs": 165370,
-    "processed_count": 12321,
-    "failed_rows": 5410,
-    "changed_rows": 0,
-    "successful_http_calls": 1232,
-    "failed_http_calls": 5995,
-    "prompt_tokens": 1316247,
-    "usage_missing_calls": 0,
-    "batches": 1773,
+    "unique_inputs": 165369,
+    "rows_written": 65519,
+    "started_at": "2026-10-15T04:13:25.369267+00:00",
+    "finished_at": "2026-10-15T04:14:43.264972+00:00"
+  },
+  "full_inventory_failed_rate": 0.0,
+  "free_only": {
+    "provider_stop_when_free_exhausted": true,
+    "paid_access_not_enabled": true,
+    "exhausted_v3_not_retried_after_confirmation": true,
+    "remaining_quota_not_burned_for_its_own_sake": true
+  },
+  "model_comparison": {
+    "documents": 98,
+    "queries": 8,
+    "models": [
+      {
+        "model": "text-embedding-v1",
+        "dimensions": 1536,
+        "elapsed_seconds": 5.27793,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      {
+        "model": "text-embedding-v2",
+        "dimensions": 1536,
+        "elapsed_seconds": 6.563908,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      {
+        "model": "text-embedding-v4",
+        "dimensions": 1024,
+        "elapsed_seconds": 78.153118,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      {
+        "model": "qwen3.7-text-embedding-flash",
+        "dimensions": 1024,
+        "elapsed_seconds": 24.824486,
+        "target_ranks": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "top1": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      }
+    ],
+    "limitation": "Small operator-labelled corpus; default document-mode vectors for both queries and documents; not a general benchmark."
+  },
+  "async_v2_probe": {
+    "successful_inputs": 0,
+    "failed_inputs": 10,
+    "tasks": [
+      {
+        "task_id": "966f44dc-7ea7-4490-916c-28fd83b8cbf7",
+        "inputs": 10,
+        "failed": 10,
+        "tokens": null
+      }
+    ],
     "errors": [
       {
-        "info_id": "form4:MuseExport:abdc6d34b284c045be648f01653794664575d02670951d527c435c5321d938d2",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "02dc40faafa7fb8fdd70b67cecb2a667eb07552b26b2eb10d119237527711149",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abdc71032da64e2d4bbbce98b7877e9d062bd4cdd31229c0aab0f37ca7758135",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "aae245846e63635afeb20e3269996c18f071059cb89b88b429dd7ed5621dc613",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abde83d2a480ebca4885cbbb18a8f53c8e120593980f5257e383b1c8eea91cbf",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "833720a766551bb558f5d047f5f33428bcac00aa48bbd2ed0f5eb5d8cd3b8968",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abe010a017b673a69edb148eb1b4983259f5d4cdfd3c44a2c7ea45239c40159f",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "0433f9d342ea277b22a724cd60a74138682ec26b09095a482df6ed3cabfedad1",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abe15800ceb30d4299eb9f5a9681302d69e18ec4be7c0d2bd9e378719eb223f1",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "3c4babc0c164b83c42381b9cb676dafeab58ee7a9ccc383bdf04d3d4a431bb63",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abebdb48e3d8ed0ae0af84db1d79c9cc9855cda8afcefc6bd13af71b50cc60e8",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "1e53d2075d1bd0f5d86111990d91679d56eb18cc629a88910e99774bb334a5f6",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abecbeff1405580522378d049e1010f4d816c541b81d242960d4882883415218",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "0edb057a09cc7c4084e41d10bc5b80a6eb7d209c25ac4c45845c9e8b766cfa8f",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abee206560c4ad5e4985fcab09910247832ee7f68b1ddb86a949ed572c4335b8",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "540b38c93765d1e4d39b1a4d65233c08c490eccb00d58c561e5dcf042d0e3e98",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abef0aa4fd95d16537bfb9a291b575248b1fc5448404a79a069931e70974e635",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "c97ca25cf69c25d2c7c51696b33b8236fac6a59e46af996330497d217d895598",
+        "error": "InternalError"
       },
       {
-        "info_id": "form4:MuseExport:abf731b7a932ce7dc3899e5b5ea2e6c2883a610a0217646ac10ca89ed3c7248e",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac01f0235d9bdc5a28c15c121f726716bf9ed085552cd8d77bbdf3c3843571f5",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac051bea160238806e289542721412983814961fd510a2e6bb77723d4c514001",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac05f0d2a17c6f71a4f53f6206fc164e6cc266727daf779fb657c1429838980d",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac08b3b5ffdbe56d0c72dc84a7f178ef822eb43fda716531fb2ad6eab32f097d",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac0a5a863ef2c1c3c13c9aca5cc452549f549414218fcbd0f04365355a5219f7",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac0e3dde0ffafb037dd667994a4aae98825df4584fbb5434f5bc95c0660a545c",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac11836564fd5ddac941f8e7e41fb73917768eaff18a648845a04e502b1ea359",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac1d318ffdfbac0671931b549a452674833e16f3a291ff22d9f4a6a4516de7c8",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac211b6efab42f592a06b56b38da351f42bda49734368622e780b656df1faaf1",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac21fb7052f76adc4c57332ba53bcb6d71972be852a1094f32412187f60708b2",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac368483b97e7e670cd51573a80aa2f0756087b1ad1d7680d11e4b267d53055d",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac368c5c56d84abbf7ce7b2d0fc678d70c18bdb144df5c2aa3c5b1e1f8ffe43c",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac4447c0a26e4647788122ffcd7084ddf73d75b542508ff8cd5e437c1c2a3283",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac4978dcb3c735636ff640c7a040c7b3307d4c9ccd0011c7be6866f9ee8e2db8",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac4a205ebc66c43b194244add98fee9cf746296bcd344e5ebc76daa290742a3c",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac4ea46d6405107082754f96f43b0be9d6d0128cb950f5bef72a2af1c7e646ad",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac517c3da3ca3b2289f86fa36970b05de54c42035b0bf3d31bcdca9520e3a661",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac524dc503c2ed1c0ba9a52c11591c9ed27a1093e1c25387f8430ce1ebaef430",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac52fb5754ef3687ec8d18360852703693cdf092cec5fdb693bd178b162e3e49",
-        "type": "SourceError",
-        "message": "HTTP status 400"
-      },
-      {
-        "info_id": "form4:MuseExport:ac54f54143f4ae8eb6c5cdc7e402412278fd9fa81746f67d83e4dfb9203f1a74",
-        "type": "SourceError",
-        "message": "HTTP status 400"
+        "input_sha256": "d19de54ff7634be270b0bba0e92f9881571baaba90897de45152b4df2b6e7c21",
+        "error": "InternalError"
       }
     ],
-    "clock": "SystemClock",
-    "workers": 4,
-    "before": {
-      "total": 166685,
-      "embedded": 10
-    },
-    "identical_input_reuse_rows": 1305,
-    "finished_at": "2026-10-15T02:24:14.415211+00:00",
-    "after": {
-      "total": 166685,
-      "embedded": 12331,
-      "missing": 154354,
-      "failed_flags": 12105
-    },
-    "job": {
-      "id": 53,
-      "task_name": "embedding_backfill",
-      "trade_date": "2026-10-14",
-      "started_at": "2026-10-15 10:18:42.516527+08:00",
-      "ended_at": "2026-10-15 10:24:14.369868+08:00",
-      "status": "failed",
-      "processed_count": 0,
-      "error_summary": null,
-      "params_version": "p-2026.10",
-      "llm_input_tokens": 0,
-      "llm_output_tokens": 0,
-      "llm_usage_missing_calls": 0
-    },
-    "health": null
+    "model": "text-embedding-async-v2",
+    "input_rows": 10,
+    "unique_inputs": 10,
+    "rows_written": 0,
+    "started_at": "2026-10-15T04:02:19.835995+00:00",
+    "finished_at": "2026-10-15T04:05:25.736265+00:00"
   },
-  "usage_and_estimated_cost": {
-    "observed_at": "2026-10-15T02:25:17.222047+00:00",
-    "total_success_prompt_tokens": 1317887,
-    "probe_tokens": 7,
-    "sample_tokens": 1633,
-    "backfill_tokens": 1316247,
-    "backfill_success_rows": 12321,
-    "backfill_failed_rows": 5410,
-    "average_tokens_per_successful_backfill_row": 106.82955928901875,
-    "list_price_rmb_per_million_tokens": 0.5,
-    "estimated_list_cost_before_free_quota": 0.6589435,
-    "estimated_after_500k_free_if_fully_available": 0.4089435,
-    "not_invoice": true,
-    "stopped_at": "2026-10-15T02:24:14.415211+00:00",
-    "database": {
-      "total": 166685,
-      "embedded": 12331,
-      "missing": 154354,
-      "failure_flags": 12105
-    },
-    "job": {
-      "id": 53,
-      "task_name": "embedding_backfill",
-      "started_at": "2026-10-15 10:18:42.516527+08:00",
-      "ended_at": "2026-10-15 10:24:14.369868+08:00",
-      "status": "failed",
-      "processed_count": 0,
-      "error_summary": null
-    },
-    "backfill_still_running": false
+  "storage_contract": {
+    "legacy_column": "ingest.info_items.embedding remains v3/1024 only",
+    "approved_alternatives": "ingest.info_embeddings keyed by info_id,model,input_sha256; dimensionality validated per model",
+    "mixing_spaces": false,
+    "async_input_newlines": "CR/LF flattened to spaces to preserve one input per line; text hash stored"
   },
-  "historical_inventory_estimate": {
-    "by_kind": {
-      "news": {
-        "rows": 60557,
-        "input_chars": 39703999,
-        "non_ascii_chars": 112748,
-        "average_input_chars": 655.65,
-        "planning_low_tokens": 10010561,
-        "planning_high_tokens": 20021122
-      },
-      "app_rank": {
-        "rows": 8,
-        "input_chars": 398,
-        "non_ascii_chars": 16,
-        "average_input_chars": 49.75,
-        "planning_low_tokens": 112,
-        "planning_high_tokens": 223
-      },
-      "macro": {
-        "rows": 82673,
-        "input_chars": 4575375,
-        "non_ascii_chars": 0,
-        "average_input_chars": 55.34,
-        "planning_low_tokens": 1143844,
-        "planning_high_tokens": 2287688
-      },
-      "site_change": {
-        "rows": 7,
-        "input_chars": 14377,
-        "non_ascii_chars": 6,
-        "average_input_chars": 2053.86,
-        "planning_low_tokens": 3599,
-        "planning_high_tokens": 7198
-      },
-      "form4": {
-        "rows": 18335,
-        "input_chars": 4230387,
-        "non_ascii_chars": 0,
-        "average_input_chars": 230.73,
-        "planning_low_tokens": 1057597,
-        "planning_high_tokens": 2115194
-      },
-      "options_stats": {
-        "rows": 23,
-        "input_chars": 4946,
-        "non_ascii_chars": 0,
-        "average_input_chars": 215.04,
-        "planning_low_tokens": 1236,
-        "planning_high_tokens": 2473
-      },
-      "short_interest": {
-        "rows": 5082,
-        "input_chars": 145295,
-        "non_ascii_chars": 0,
-        "average_input_chars": 28.59,
-        "planning_low_tokens": 36324,
-        "planning_high_tokens": 72648
-      }
-    },
-    "not_actual_tokenizer": true,
-    "assumptions": "ASCII chars / 4 to / 2; non-ASCII chars x1 to x2; coarse scenarios only",
-    "total_input_chars": 48674777,
-    "planning_token_range": [
-      12253273,
-      24506546
-    ],
-    "planning_rmb_range": [
-      6.13,
-      12.25
-    ]
+  "historical_v3": {
+    "rows": 12331,
+    "tokens_before_new_logger": 1317887,
+    "list_cost_before_free_rmb": 0.6589435,
+    "not_an_invoice": true,
+    "original_interrupted_job_retained": 53
   },
   "monthly_budget_proposal": {
     "recent_news_rows": 6694,
@@ -548,17 +533,11 @@
     "first_month_reserved_budget_rmb": 40,
     "assumption_note": "Character-based planning scenarios only; not provider tokenizer counts; includes headroom for as-yet-unmeasured SEC/other sources and query usage. Budget proposals have not been enabled as automatic spend authority."
   },
-  "acceptance": {
-    "AC-M1-08": "not yet passed: full inventory incomplete; key authentication and 10 real examples passed",
-    "embedded_rows": 12331,
-    "total_rows": 166685,
-    "missing_rows": 154354
-  },
-  "limitations": [
-    "Character-based token estimates are planning scenarios, not the vendor tokenizer or a bill.",
-    "Job 53 was interrupted with SIGINT: its original processed_count=0/error_summary=NULL is retained. Actual persisted backfill=12321, plus 10 sample rows; database and live counters are the evidence.",
-    "Before interruption, 5410 rows received HTTP 400 after bounded batch isolation. Error response bodies were not retained; do not infer a precise provider reason from status alone.",
-    "No monthly automatic spending cap has been activated. The local embedding switch is off and no backfill process remains.",
-    "Quoted costs cover embedding only; exclude Token Plan, hosting, market data and other services."
+  "limits": [
+    "The small 98-document, 8-query test cannot establish a general quality winner.",
+    "async-v2 returned InternalError for all 10 real sample rows despite task SUCCEEDED; no invalid vector was stored.",
+    "Qwen returns duplicate index=0 for batch inputs; only single-input calls are allowed.",
+    "Current inventory is fully covered; incremental automatic v3 calls remain disabled while using free alternative backfills.",
+    "Remaining free balances stay available; no paid model switch or monthly charge authority has been activated."
   ]
 }

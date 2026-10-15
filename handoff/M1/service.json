@@ -1,0 +1,21 @@
+{
+  "restart_probe": {
+    "tested_at": "2026-10-15T02:57:18.987421+00:00",
+    "old_scheduler_pid": 98184,
+    "injected_signal": "SIGKILL",
+    "restarted": true,
+    "status": "scheduler                        RUNNING   pid 98293, uptime 0:00:03\nwatchdog                         RUNNING   pid 98185, uptime 0:01:00\n"
+  },
+  "runtime": "macOS LaunchAgent + Supervisor",
+  "startup_scope": "automatic at user login; unattended boot before login requires administrator-level daemon installation",
+  "scheduler_tasks": [
+    "bars_prefill",
+    "bars_full",
+    "wide_universe"
+  ],
+  "watchdog": "Scheduler:bars_full red after 20:30 ET on trading days if no bars_full start at/after 20:20 ET",
+  "power": "caffeinate -i -s prevents idle/system sleep while on AC; power loss and closed-lid sleep are not guaranteed",
+  "embedding_worker": "resumable task IDs, autorestart unexpected, clean completion exits 0",
+  "scheduled_evidence_deadline": "2026-10-16 08:45 Asia/Shanghai",
+  "automatic_followup": "2026-10-16 08:50 Asia/Shanghai, one authorized run"
+}

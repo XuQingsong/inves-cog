@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v1 |
+| 文档版本 | v2（开工前对齐 M1、M2 的实际实现，见第 9 节 Q-M3-4 至 Q-M3-9） |
 | 规格章节 | 9.1–9.8、9.13 |
 | 依赖 | M1（日线）、M2（`state_asof`） |
 | 关闭的不变量 | I02、I03、I04、I08、I09、I13 |
@@ -31,9 +31,9 @@
 
 | 输入 | 来源 |
 |---|---|
-| 日线、SPY、VIX | M1 `ingest.bars_daily`、FRED |
+| 日线、SPY、VIX | 日常：M1 `ingest.bars_daily`（原始价 × `adj_factor`，即拆股调整价）、`ingest.macro_observations` 的 `VIXCLS`；v18 回放：`docs/phase1/golden/v18/`（v2，Q-M3-7） |
 | 财报状态 | M2 `state_asof(ticker, signal_date, extractor)`；v18 复现用 `legacy`，纸面运行用 `fixed` |
-| 健康码 | M2 `fundamentals.health` |
+| 健康码 | **`state_asof(...)` 返回的 `health_codes`**（按当时可见口径）。`fundamentals.health` 每只只有最新一行，只能用于当天的页面，**不能**用于打分或回放（v2，Q-M3-4） |
 | 规则 A 常量 | `config/params/rule_a_v18.yaml` |
 
 ## 4. 输出
@@ -64,14 +64,14 @@
 | FR-M3-09 | 规则集锁定：打分函数只接受 `rule_set='A'`；传入其他值抛错（I02） |
 | FR-M3-10 | 常量：`rule_a_v18.yaml` 中单票上限 12 / 12 / 8、首笔 50 / 40 / 30、层预算 30 / 30 / 40（I03）；源码和配置中不出现 −8 / −12 / −18、+15 / +20 / +25 这组固定止损止盈（I04） |
 | FR-M3-11 | PIT：只通过 `state_asof` 取财报，不得直接查表（I08） |
-| FR-M3-12 | 每天北京 10:30 后、财报和一致预期同步完成后运行；写 `job_runs` |
+| FR-M3-12 | 每天北京 10:30 后、M2 财报状态更新完成后运行；**不依赖一致预期**（规则 A 不用一致预期，v2）；写 `job_runs` |
 
 ## 6. 异常与降级
 
 | 情况 | 行为 |
 |---|---|
 | 某只行情缺失 | 该只当日不出快照行；健康页 `no_bar` |
-| 财报健康码不是 `ok` 类 | 三本账为空，`entry_pass = false` |
+| 财报健康码 | 按提取器分两种处理，见 Q-M3-5 |
 | VIX 或 SPY 缺失 | 打分照常（打分不用它们）；M4 的闸门按 M4 文档处理 |
 
 ## 7. Harness 与自测
@@ -90,7 +90,7 @@
 | `test_rule_set_a_locked` | blocking | I02 | —— |
 | `test_v18_constants` | blocking | I03 | 配置 |
 | `test_no_tracker_stops_in_rule_a` | blocking | I04 | 源码扫描 |
-| `test_scores_match_muse` | replay | 30 只、v18 区间内随机 20 个信号日：四本账、红线、层级、`entry_pass` 与 Muse 冻结输出一致 | 冻结输入（与 M2 共用 Muse 产出） |
+| `test_scores_match_muse` | replay | 30 只、v18 区间内随机 20 个信号日：四本账、红线、层级、`entry_pass` 与 Muse 冻结输出一致 | `golden/v18/scores_20days.json.gz`（需求方已生成，见 Q-M3-8）+ `golden/v18/` 的输入 |
 
 ## 8. 需求方验收
 
@@ -109,3 +109,9 @@
 | Q-M3-1 | 进攻层和防守层条件同时满足时谁优先？ | 以 Muse 源码为准（需求方标准答案按"进攻优先"计算，三只合成股票都不触发这种冲突）；开工复述时确认 |
 | Q-M3-2 | 需求方标准答案与 Muse 源码不一致怎么办？ | 开发提出，需求方核对后修正标准答案或在本文写明例外；开发不得自行改标准答案 |
 | Q-M3-3 | `fcf_conversion` 在 `ni_ttm ≤ 0` 时怎么算？ | 以 Muse 源码为准，开工复述时确认 |
+| Q-M3-4 | 健康码从哪里读？ | 从 `state_asof(ticker, signal_date, extractor)` 返回的状态里读 `health_codes`，它是按申报日生效的历史。M2 的 `fundamentals.health` 每只只有一行最新状态，用它回放历史会把今天的健康码套到过去 |
+| Q-M3-5 | 健康码怎么影响打分？ | **`legacy`（v18 复现）**：只执行 Muse 自己的两条规则——M-07 财报过期（营收期末距信号日超过 180 天）三本账为空，M-08 拆股疑似估值账为空。`fixed` 才有的健康码（`q4_missing`、`core_field_missing`、`annual_basis` 等）在 `legacy` 下一律不看；字段缺失时按 M-11 缺项重配权，和 Muse 一样。否则 v18 复现会和标准答案对不上（例如 Muse 在 V 的 EPS 缺失时照常打分）。**`fixed`（日常纸面运行）**：按 M2 Q-M2-10 的严重级别矩阵，出现"阻止打分"的码时三本账为空、`null_reason` = 该码；其他码不影响打分，只在快照里记录 |
+| Q-M3-6 | `fixed` 下有些字段是 `NULL`（D8 现金缺失时 `net_debt_fcf` 为空、EPS ≤ 0 时 `eps_growth` 为空等），怎么打分？ | 按 M-11 缺项重配权：该子项不计分，权重按比例分给同一本账的其他子项，`timing_subitems` 里记录哪个子项缺失、为什么。不能当 0 分 |
+| Q-M3-7 | 用原始价还是调整价？ | 拆股调整价。Muse v18 用的 Nasdaq 历史行情是拆股调整后的价格（需求方核实：NVDA 2023-01-03 收盘显示 14.315），不含分红调整。日常打分用 M1 的原始价 × `adj_factor`；v18 回放直接用 `golden/v18/prices/` |
+| Q-M3-8 | `test_scores_match_muse` 用什么做对照？ | **需求方已生成**：`golden/v18/scores_20days.json.gz`。在隔离环境里用 Muse `aacea04` 的 v18 脚本，以 `golden/v18/` 的输入重跑（交易与标准答案完全一致），导出逐日的打分结果，按固定种子 18 抽出 20 个信号日（2026-02-17 至 2026-09-17），30 只共 600 行。每行包含 Muse 的全部逐日字段：四本账（`books`：质量 / 成长与预期 / 估值 / 入场时机）、综合排名分 `rank`、红线 `redlines`、层级 `tier`、成长确定性 `certainty`、`entry_pass`、`consec_pass`、`hold_ok`、`fund_bad`、`runway_ok` 及全部技术字段。比较时浮点相对容差 1e-9 |
+| Q-M3-9 | 外国申报人和 `annual_basis` | `tradable = false`，照常算技术字段；财报字段按 M2 的年度口径能算多少算多少，不进入候选扫描（I13 不变） |

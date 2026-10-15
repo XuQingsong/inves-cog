@@ -34,27 +34,6 @@
   },
   "empty_body_root_maintenance": {
     "old_empty_body_roots_corrected": 41967,
-    "actual_reprint_groups": [
-      {
-        "source_root": "sha256:35fa62d60233c91dfc4b6e091d3c43ac32c33ad81e50474fdb527e24fc24bc93",
-        "same_nonempty_body": true,
-        "items": [
-          {
-            "info_id": "news:benzinga:62157498",
-            "headline": "Earnings Scheduled For October 5, 2026",
-            "url": "https://www.benzinga.com/news/earnings/26/10/62157498/earnings-scheduled-october-5-2026",
-            "published_at": "2026-10-05 19:11:04+08:00"
-          },
-          {
-            "info_id": "news:benzinga:62294568",
-            "headline": "Earnings Scheduled For October 12, 2026",
-            "url": "https://www.benzinga.com/news/earnings/26/10/62294568/earnings-scheduled-october-12-2026",
-            "published_at": "2026-10-12 19:11:02+08:00"
-          }
-        ],
-        "body_length": 163
-      }
-    ],
     "embedding_health": {
       "source": "DashScope",
       "last_success_at": null,
@@ -64,7 +43,8 @@
       "items_last_run": 0,
       "note": "Verified Token Plan key; Beijing/international models and embedding requests return 401; Token Plan models returns 200 without text-embedding-v3",
       "consecutive_failures": 1
-    }
+    },
+    "current_identity_audit": "news-identity.json: date-specific short templates have distinct roots; five frozen genuine reprint groups remain valid"
   },
-  "explanation": "Actual source data and offline Muse exports are identified separately. Counts and original prose were retained."
+  "explanation": "Historical import/count checks retained; current source-root identity is verified in news-identity.json."
 }
