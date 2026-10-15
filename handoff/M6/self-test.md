@@ -9,7 +9,7 @@
 - 全仓 blocking：50 passed、6 deselected，11.88 秒，blocking.xml。
 - M6 blocking：11 passed，2.66 秒，blocking-module.xml。
 - 显式 phase1_live、INVES_COG_LIVE=1：1 passed，93.04 秒，live-smoke.xml；本次真实覆盖 1,306 只，包括 59 只标的。只允许 live 联网，CI 不运行。
-- 当前完整提交 dd2d4c6a13bcb51f96709f6ed2a3af410ec074c0 的 GitHub CI 成功：https://github.com/XuQingsong/inves-cog/actions/runs/38749207365 。后续提交须重新核对完整 SHA。
+- 实现及引用审计完整提交 f733d29537730350677264f0a52e70e87f9f05f4 的 GitHub CI 成功：https://github.com/XuQingsong/inves-cog/actions/runs/38757142390 。审核证据提交的最新 CI 以 PR 检查为准。
 
 ## 2. 不变量、pending 与 milestones
 
@@ -22,7 +22,7 @@ M6 无独立关闭的不变量；M0 导入防火墙、价格隔离、网络和�
 | AC-M6-01 | 通过 | 11 blocking 全绿，v5 marketstate golden 全命中；blocking-module.xml。 |
 | AC-M6-02 | 部分 | 58/59 只每只至少 3 条引用关系；HD 首轮为空、单次重试得到 8 条。SKHY 无规定的年度申报，未编造引用，见 backlog.md。已建 16 个 L2、13 个 L3，AMD 主 AI 加速芯片，同时属于 CPU，graph-seed-task.json。 |
 | AC-M6-03 | 部分 | MSFT、NVDA、ORCL、CRWV 四家已有来源金额候选；WDC HDD 年度 129.19 亿美元直接对应 M2 原始分部行。STX 当期未单列 HDD 营收，缺口见 backlog.md。最终金额和披露时间以 final-graph-audit.json 为准。 |
-| AC-M6-04 | 待现场审核 | API 和 CLI 已提供按篮子列出、确认、驳回、修改及版本检查；开发未自动确认生产候选。 |
+| AC-M6-04 | 通过 | 用户明确答复“确认这7条候选”后，按 hdd-review-batch.json 的完整编号和版本执行确认。生产已确认视图核验 7 条“观察到”，其中 1 条 WDC 分部收入 129.19 亿美元；7 条审核日志及审核时间见 hdd-review-result.json。 |
 | AC-M6-05 | 通过，待需求方独立复核 | 2026-10-12/13/14 的 AMD、ANET、WDC 共 9 组；independent-full-check.json 从原始调整行情、成员关系独立重建全部因子，再以 QR 回归，最大误差 6.25e-17 < 1e-6；independent_reference.py 未导入生产计算。real-three-days.json 保存生产窗口和因子，另留早期的仅回归 QR 检查。 |
 | AC-M6-06 | 通过 | 已审种子及 Toshiba 官网/趋势；graph-monitored-task.json 新增 156 个篮子上游实体，均至少有趋势关键词。Toshiba 官方新闻频道已实际打开核实。 |
 | AC-M6-07 | 运行记录具备 | graph-cluster-task.json 实跑为空，sample_days=3、insufficient_history；建议保存在 graph.cluster_suggestions，不自动建立篮子。 |
@@ -45,12 +45,12 @@ GLM 首轮三次触及默认 65,536 输出上限导致无 JSON，真实失败用
 
 ## 6. 待办与边界
 
-backlog.md 列 SKHY 年度源缺口和现场审核；按 §4.7 不因此修改冻结文档或停掉其他开发。不修改 docs/golden/milestones；不运行 Muse；M7 尚未开工。正式常驻部署参数与审核入口在 handoff 交付，价格作业以美东时区配置，不能把显式回补当作准时运行。
+backlog.md 保留 SKHY 年度源、STX 单列 HDD 金额两项缺口；HDD 实际审核已完成。按 §4.7 不因此修改冻结文档或停掉其他开发。不修改 docs/golden/milestones；不运行 Muse；M7 尚未开工。正式常驻部署参数与审核入口在 handoff 交付，价格作业以美东时区配置，不能把显式回补当作准时运行。
 
 ## 7. 最终引用与金额审计
 
-62 份实际 SEC 原件重新下载复核，444 条候选引用均定位到规范化完整原文；fetch_failures=0、unresolved=0，见 canonical-sources.json。已修复“正文交叉引用被当成章节标题”和 Unicode 解析问题，先失败回归见 headings-red.xml。最终审计 final-graph-audit.json：58/59 只至少三条关系、无无效引用、18 条带来源金额候选、162 个监控实体。SKHY 输入缺口如实保留。
+62 份实际 SEC 原件重新下载复核，444 条候选引用均定位到规范化完整原文；fetch_failures=0、unresolved=0，见 canonical-sources.json。已修复“正文交叉引用被当成章节标题”和 Unicode 解析问题，先失败回归见 headings-red.xml。审核前最终来源快照 final-graph-audit.json：58/59 只至少三条关系、无无效引用、18 条带来源金额候选、162 个监控实体。后续确认只改变审核状态，原快照保留；SKHY 输入缺口如实保留。
 
 金额口径分别保留：MSFT 的已披露收入、应收和投资承诺；NVDA 对 OpenAI 使用园区的附条件担保上限；CRWV 的合同承诺；ORCL 是现有新闻信息 id 对应的约 3000 亿美元合同报道，属于待核验候选。它们不相加成统一“已实现收入”。WDC 采用 M2 HDD 原始分部，保留 row_id、申报、期间、币种和数值，不虚构原文句子。非结构化金额的 asof 由实际披露日确定，结构化金额对应原件期间，模型推测日期不入库。
 
-HDD 七条具体候选已发布 hdd-review.md / hdd-review-batch.json：六条关系和一条 WDC 金额；等待用户实际确认，生产已确认视图仍为空。审核编号稳定，引用校正增加 revision，当前批次包含最新版本。测试、docs、golden 和 milestones 的范围遵循原任务。
+HDD 七条具体候选已发布 hdd-review.md / hdd-review-batch.json：六条关系和一条 WDC 金额。用户在本线程确认后，于北京时间 2026-10-15 23:07:42 完成实际审核，7 条均进入“观察到”视图，并产生 7 条 confirm 审核日志。hdd-review-batch.json 保留审核前版本，hdd-review-result.json 保存授权、完整编号、确认结果和时间。测试、docs、golden 和 milestones 的范围遵循原任务。
