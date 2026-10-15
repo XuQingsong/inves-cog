@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.296" timestamp="2026-10-15T23:44:52.143447+08:00" hostname="192.168.1.101"><testcase classname="tests.m6.test_structure" name="test_graph_draft_requires_citation" time="0.004"><failure message="ModuleNotFoundError: No module named 'inves_cog.perception.graph.source_exposures'">clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-224/test_graph_draft_requires_cita0')
+
+    @pytest.mark.phase1_blocking
+    def test_graph_draft_requires_citation(clock, tmp_path):
+        from tests.m6.source_cases import assert_source_exceptions
+    
+&gt;       assert_source_exceptions(clock)
+
+tests/m6/test_structure.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+
+    def assert_source_exceptions(clock):
+        from inves_cog.ingest.fundamentals.fx import FXBook
+&gt;       from inves_cog.perception.graph.source_exposures import quarterly_ttm_source, single_business_hdd
+E       ModuleNotFoundError: No module named 'inves_cog.perception.graph.source_exposures'
+
+tests/m6/source_cases.py:9: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

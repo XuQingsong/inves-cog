@@ -118,6 +118,9 @@ def test_marketstate_price_only(tmp_path):
 
 @pytest.mark.phase1_blocking
 def test_graph_draft_requires_citation(clock, tmp_path):
+    from tests.m6.source_cases import assert_source_exceptions
+
+    assert_source_exceptions(clock)
     from inves_cog.perception.graph.repository import entity_id
 
     assert entity_id("金融竞争者") and entity_id("金融竞争者") != entity_id("其他竞争者")
