@@ -1,0 +1,61 @@
+# Rule aliases for the 59-stock pool; graph identities take precedence when available.
+companies:
+  NVDA: {name: NVIDIA, aliases: [Nvidia, CUDA, Blackwell, GeForce]}
+  AMD: {name: Advanced Micro Devices, aliases: [AMD, Ryzen, EPYC]}
+  AVGO: {name: Broadcom, aliases: [VMware]}
+  MRVL: {name: Marvell Technology, aliases: [Marvell]}
+  MU: {name: Micron Technology, aliases: [Micron]}
+  SKHY: {name: SK Hynix, aliases: [SK hynix]}
+  INTC: {name: Intel, aliases: [Xeon]}
+  NOK: {name: Nokia, aliases: []}
+  LITE: {name: Lumentum, aliases: []}
+  MSFT: {name: Microsoft, aliases: [Azure, Copilot]}
+  ORCL: {name: Oracle, aliases: []}
+  CRM: {name: Salesforce, aliases: []}
+  NOW: {name: ServiceNow, aliases: []}
+  ADBE: {name: Adobe, aliases: [Photoshop]}
+  PLTR: {name: Palantir, aliases: []}
+  META: {name: Meta Platforms, aliases: [Facebook, Instagram, WhatsApp, Llama]}
+  GOOGL: {name: Alphabet, aliases: [Google, YouTube]}
+  AMZN: {name: Amazon, aliases: [AWS]}
+  NFLX: {name: Netflix, aliases: []}
+  AAPL: {name: Apple, aliases: [iPhone, iPad, MacBook]}
+  TSLA: {name: Tesla, aliases: [Cybertruck]}
+  COST: {name: Costco, aliases: []}
+  WMT: {name: Walmart, aliases: []}
+  HD: {name: Home Depot, aliases: []}
+  UNH: {name: UnitedHealth, aliases: [UnitedHealth Group, Optum]}
+  LLY: {name: Eli Lilly, aliases: [Mounjaro, Zepbound]}
+  JNJ: {name: Johnson & Johnson, aliases: [Johnson and Johnson]}
+  JPM: {name: JPMorgan Chase, aliases: [JPMorgan, J.P. Morgan]}
+  V: {name: Visa, aliases: []}
+  MA: {name: Mastercard, aliases: [MasterCard]}
+  XOM: {name: Exxon Mobil, aliases: [ExxonMobil, Exxon]}
+  CVX: {name: Chevron, aliases: []}
+  CAT: {name: Caterpillar, aliases: []}
+  GE: {name: GE Aerospace, aliases: [General Electric]}
+  WDC: {name: Western Digital, aliases: []}
+  STX: {name: Seagate, aliases: []}
+  SNDK: {name: SanDisk, aliases: [Sandisk]}
+  AMAT: {name: Applied Materials, aliases: []}
+  LRCX: {name: Lam Research, aliases: []}
+  KLAC: {name: KLA Corporation, aliases: [KLA]}
+  ASML: {name: ASML, aliases: []}
+  QCOM: {name: Qualcomm, aliases: [Snapdragon]}
+  ARM: {name: Arm Holdings, aliases: [Arm Holdings plc]}
+  TSM: {name: Taiwan Semiconductor, aliases: [TSMC]}
+  ANET: {name: Arista Networks, aliases: [Arista]}
+  CIEN: {name: Ciena, aliases: []}
+  COHR: {name: Coherent, aliases: []}
+  VRT: {name: Vertiv, aliases: []}
+  ETN: {name: Eaton, aliases: []}
+  GEV: {name: GE Vernova, aliases: []}
+  CEG: {name: Constellation Energy, aliases: []}
+  BE: {name: Bloom Energy, aliases: []}
+  DELL: {name: Dell Technologies, aliases: [Dell]}
+  SMCI: {name: Super Micro Computer, aliases: [Supermicro]}
+  CRWV: {name: CoreWeave, aliases: []}
+  CRWD: {name: CrowdStrike, aliases: []}
+  PANW: {name: Palo Alto Networks, aliases: []}
+  FTNT: {name: Fortinet, aliases: []}
+  ZS: {name: Zscaler, aliases: []}

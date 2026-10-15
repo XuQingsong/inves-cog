@@ -1,0 +1,393 @@
+{
+  "classification": "real read-only SEC metadata/index collection; no scheduled-time claim",
+  "stocks": [
+    {
+      "ticker": "AVGO",
+      "rows": 998,
+      "cik": "0001730168"
+    },
+    {
+      "ticker": "MRVL",
+      "rows": 842,
+      "cik": "0001835632"
+    },
+    {
+      "ticker": "AMD",
+      "rows": 1303,
+      "cik": "0000002488"
+    },
+    {
+      "ticker": "SKHY",
+      "rows": 35,
+      "cik": "0002120882"
+    },
+    {
+      "ticker": "NVDA",
+      "rows": 1559,
+      "cik": "0001045810"
+    },
+    {
+      "ticker": "NOK",
+      "rows": 858,
+      "cik": "0000924613"
+    },
+    {
+      "ticker": "MU",
+      "rows": 1232,
+      "cik": "0000723125"
+    },
+    {
+      "ticker": "LITE",
+      "rows": 1292,
+      "cik": "0001633978"
+    },
+    {
+      "ticker": "MSFT",
+      "rows": 1871,
+      "cik": "0000789019"
+    },
+    {
+      "ticker": "INTC",
+      "rows": 1776,
+      "cik": "0000050863"
+    },
+    {
+      "ticker": "ORCL",
+      "rows": 1117,
+      "cik": "0001341439"
+    },
+    {
+      "ticker": "NOW",
+      "rows": 2141,
+      "cik": "0001373715"
+    },
+    {
+      "ticker": "ADBE",
+      "rows": 1368,
+      "cik": "0000796343"
+    },
+    {
+      "ticker": "CRM",
+      "rows": 4886,
+      "cik": "0001108524"
+    },
+    {
+      "ticker": "PLTR",
+      "rows": 972,
+      "cik": "0001321655"
+    },
+    {
+      "ticker": "GOOGL",
+      "rows": 2713,
+      "cik": "0001652044"
+    },
+    {
+      "ticker": "AMZN",
+      "rows": 1625,
+      "cik": "0001018724"
+    },
+    {
+      "ticker": "META",
+      "rows": 3558,
+      "cik": "0001326801"
+    },
+    {
+      "ticker": "AAPL",
+      "rows": 1086,
+      "cik": "0000320193"
+    },
+    {
+      "ticker": "TSLA",
+      "rows": 1340,
+      "cik": "0001318605"
+    },
+    {
+      "ticker": "NFLX",
+      "rows": 3366,
+      "cik": "0001065280"
+    },
+    {
+      "ticker": "COST",
+      "rows": 1185,
+      "cik": "0000909832"
+    },
+    {
+      "ticker": "WMT",
+      "rows": 2640,
+      "cik": "0000104169"
+    },
+    {
+      "ticker": "HD",
+      "rows": 1319,
+      "cik": "0000354950"
+    },
+    {
+      "ticker": "UNH",
+      "rows": 2164,
+      "cik": "0000731766"
+    },
+    {
+      "ticker": "LLY",
+      "rows": 2176,
+      "cik": "0000059478"
+    },
+    {
+      "ticker": "JNJ",
+      "rows": 1355,
+      "cik": "0000200406"
+    },
+    {
+      "ticker": "V",
+      "rows": 1012,
+      "cik": "0001403161"
+    },
+    {
+      "ticker": "XOM",
+      "rows": 34,
+      "cik": "0002115436"
+    },
+    {
+      "ticker": "MA",
+      "rows": 1374,
+      "cik": "0001141391"
+    },
+    {
+      "ticker": "CVX",
+      "rows": 1412,
+      "cik": "0000093410"
+    },
+    {
+      "ticker": "CAT",
+      "rows": 1711,
+      "cik": "0000018230"
+    },
+    {
+      "ticker": "GE",
+      "rows": 1867,
+      "cik": "0000040545"
+    },
+    {
+      "ticker": "WDC",
+      "rows": 1746,
+      "cik": "0000106040"
+    },
+    {
+      "ticker": "SNDK",
+      "rows": 242,
+      "cik": "0002023554"
+    },
+    {
+      "ticker": "AMAT",
+      "rows": 834,
+      "cik": "0000006951"
+    },
+    {
+      "ticker": "STX",
+      "rows": 1369,
+      "cik": "0001137789"
+    },
+    {
+      "ticker": "KLAC",
+      "rows": 1274,
+      "cik": "0000319201"
+    },
+    {
+      "ticker": "LRCX",
+      "rows": 1028,
+      "cik": "0000707549"
+    },
+    {
+      "ticker": "ASML",
+      "rows": 189,
+      "cik": "0000937966"
+    },
+    {
+      "ticker": "ARM",
+      "rows": 160,
+      "cik": "0001973239"
+    },
+    {
+      "ticker": "TSM",
+      "rows": 971,
+      "cik": "0001046179"
+    },
+    {
+      "ticker": "QCOM",
+      "rows": 1749,
+      "cik": "0000804328"
+    },
+    {
+      "ticker": "ANET",
+      "rows": 2063,
+      "cik": "0001596532"
+    },
+    {
+      "ticker": "CIEN",
+      "rows": 2157,
+      "cik": "0000936395"
+    },
+    {
+      "ticker": "COHR",
+      "rows": 1259,
+      "cik": "0000820318"
+    },
+    {
+      "ticker": "VRT",
+      "rows": 875,
+      "cik": "0001674101"
+    },
+    {
+      "ticker": "GEV",
+      "rows": 208,
+      "cik": "0001996810"
+    },
+    {
+      "ticker": "ETN",
+      "rows": 1197,
+      "cik": "0001551182"
+    },
+    {
+      "ticker": "CEG",
+      "rows": 405,
+      "cik": "0001868275"
+    },
+    {
+      "ticker": "BE",
+      "rows": 1110,
+      "cik": "0001664703"
+    },
+    {
+      "ticker": "SMCI",
+      "rows": 1099,
+      "cik": "0001375365"
+    },
+    {
+      "ticker": "DELL",
+      "rows": 1974,
+      "cik": "0001571996"
+    },
+    {
+      "ticker": "CRWV",
+      "rows": 1154,
+      "cik": "0001769628"
+    },
+    {
+      "ticker": "CRWD",
+      "rows": 1298,
+      "cik": "0001535527"
+    },
+    {
+      "ticker": "FTNT",
+      "rows": 1332,
+      "cik": "0001262039"
+    },
+    {
+      "ticker": "PANW",
+      "rows": 1573,
+      "cik": "0001327567"
+    },
+    {
+      "ticker": "ZS",
+      "rows": 885,
+      "cik": "0001713683"
+    },
+    {
+      "ticker": "JPM",
+      "rows": 146624,
+      "cik": "0000019617"
+    }
+  ],
+  "earnings_audit": [
+    {
+      "ticker": "AAPL",
+      "accession": "0000320193-26-000018",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/0000320193-26-000018-index.html",
+      "accepted_at_utc": "2026-07-30 20:30:28+00:00",
+      "session": "post",
+      "reaction_day": "2026-07-31",
+      "stored_event_id": "SEC:0000320193-26-000018"
+    },
+    {
+      "ticker": "ADBE",
+      "accession": "0000796343-26-000147",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000147/0000796343-26-000147-index.html",
+      "accepted_at_utc": "2026-09-10 20:06:14+00:00",
+      "session": "post",
+      "reaction_day": "2026-09-11",
+      "stored_event_id": "SEC:0000796343-26-000147"
+    },
+    {
+      "ticker": "AMAT",
+      "accession": "0001628280-26-056699",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/6951/000162828026056699/0001628280-26-056699-index.html",
+      "accepted_at_utc": "2026-08-13 20:03:36+00:00",
+      "session": "post",
+      "reaction_day": "2026-08-14",
+      "stored_event_id": "SEC:0001628280-26-056699"
+    },
+    {
+      "ticker": "AMD",
+      "accession": "0000002488-26-000121",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000121/0000002488-26-000121-index.html",
+      "accepted_at_utc": "2026-08-04 20:16:24+00:00",
+      "session": "post",
+      "reaction_day": "2026-08-05",
+      "stored_event_id": "SEC:0000002488-26-000121"
+    },
+    {
+      "ticker": "AMZN",
+      "accession": "0001018724-26-000024",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/0001018724-26-000024-index.html",
+      "accepted_at_utc": "2026-07-30 20:06:23+00:00",
+      "session": "post",
+      "reaction_day": "2026-07-31",
+      "stored_event_id": "SEC:0001018724-26-000024"
+    },
+    {
+      "ticker": "ANET",
+      "accession": "0001596532-26-000174",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1596532/000159653226000174/0001596532-26-000174-index.html",
+      "accepted_at_utc": "2026-08-04 20:06:44+00:00",
+      "session": "post",
+      "reaction_day": "2026-08-05",
+      "stored_event_id": "SEC:0001596532-26-000174"
+    },
+    {
+      "ticker": "AVGO",
+      "accession": "0001730168-26-000076",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000076/0001730168-26-000076-index.html",
+      "accepted_at_utc": "2026-09-02 20:26:04+00:00",
+      "session": "post",
+      "reaction_day": "2026-09-03",
+      "stored_event_id": "SEC:0001730168-26-000076"
+    },
+    {
+      "ticker": "BE",
+      "accession": "0001628280-26-050150",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1664703/000162828026050150/0001628280-26-050150-index.html",
+      "accepted_at_utc": "2026-07-28 20:07:21+00:00",
+      "session": "post",
+      "reaction_day": "2026-07-29",
+      "stored_event_id": "SEC:0001628280-26-050150"
+    },
+    {
+      "ticker": "CAT",
+      "accession": "0000018230-26-000040",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000040/0000018230-26-000040-index.html",
+      "accepted_at_utc": "2026-08-04 10:31:44+00:00",
+      "session": "pre",
+      "reaction_day": "2026-08-04",
+      "stored_event_id": "SEC:0000018230-26-000040"
+    },
+    {
+      "ticker": "CEG",
+      "accession": "0001868275-26-000097",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000097/0001868275-26-000097-index.html",
+      "accepted_at_utc": "2026-08-06 10:52:23+00:00",
+      "session": "pre",
+      "reaction_day": "2026-08-06",
+      "stored_event_id": "SEC:0001868275-26-000097"
+    }
+  ],
+  "checked_at_utc": "2026-10-14 11:30:07.117368+00:00"
+}

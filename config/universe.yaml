@@ -1,0 +1,61 @@
+stocks:
+  - {ticker: NVDA, sector: AI 算力芯片, foreign: false}
+  - {ticker: AMD, sector: AI 算力芯片, foreign: false}
+  - {ticker: AVGO, sector: AI 算力芯片, foreign: false}
+  - {ticker: MRVL, sector: AI 算力芯片, foreign: false}
+  - {ticker: MU, sector: 存储, foreign: false}
+  - {ticker: SKHY, sector: 存储, foreign: true}
+  - {ticker: INTC, sector: CPU 与代工, foreign: false}
+  - {ticker: NOK, sector: AI 网络与光通信, foreign: true}
+  - {ticker: LITE, sector: AI 网络与光通信, foreign: false}
+  - {ticker: MSFT, sector: 软件与平台, foreign: false}
+  - {ticker: ORCL, sector: 软件与平台, foreign: false}
+  - {ticker: CRM, sector: 软件与平台, foreign: false}
+  - {ticker: NOW, sector: 软件与平台, foreign: false}
+  - {ticker: ADBE, sector: 软件与平台, foreign: false}
+  - {ticker: PLTR, sector: 软件与平台, foreign: false}
+  - {ticker: META, sector: 互联网, foreign: false}
+  - {ticker: GOOGL, sector: 互联网, foreign: false}
+  - {ticker: AMZN, sector: 互联网, foreign: false}
+  - {ticker: NFLX, sector: 互联网, foreign: false}
+  - {ticker: AAPL, sector: 消费硬件与汽车, foreign: false}
+  - {ticker: TSLA, sector: 消费硬件与汽车, foreign: false}
+  - {ticker: COST, sector: 零售, foreign: false}
+  - {ticker: WMT, sector: 零售, foreign: false}
+  - {ticker: HD, sector: 零售, foreign: false}
+  - {ticker: UNH, sector: 医疗, foreign: false}
+  - {ticker: LLY, sector: 医疗, foreign: false}
+  - {ticker: JNJ, sector: 医疗, foreign: false}
+  - {ticker: JPM, sector: 金融与支付, foreign: false}
+  - {ticker: V, sector: 金融与支付, foreign: false}
+  - {ticker: MA, sector: 金融与支付, foreign: false}
+  - {ticker: XOM, sector: 能源, foreign: false}
+  - {ticker: CVX, sector: 能源, foreign: false}
+  - {ticker: CAT, sector: 工业, foreign: false}
+  - {ticker: GE, sector: 工业, foreign: false}
+  - {ticker: WDC, sector: 存储, foreign: false}
+  - {ticker: STX, sector: 存储, foreign: false}
+  - {ticker: SNDK, sector: 存储, foreign: false}
+  - {ticker: AMAT, sector: 半导体设备, foreign: false}
+  - {ticker: LRCX, sector: 半导体设备, foreign: false}
+  - {ticker: KLAC, sector: 半导体设备, foreign: false}
+  - {ticker: ASML, sector: 半导体设备, foreign: true}
+  - {ticker: QCOM, sector: CPU 与代工, foreign: false}
+  - {ticker: ARM, sector: CPU 与代工, foreign: true}
+  - {ticker: TSM, sector: CPU 与代工, foreign: true}
+  - {ticker: ANET, sector: AI 网络与光通信, foreign: false}
+  - {ticker: CIEN, sector: AI 网络与光通信, foreign: false}
+  - {ticker: COHR, sector: AI 网络与光通信, foreign: false}
+  - {ticker: VRT, sector: 数据中心电力与散热, foreign: false}
+  - {ticker: ETN, sector: 数据中心电力与散热, foreign: false}
+  - {ticker: GEV, sector: 数据中心电力与散热, foreign: false}
+  - {ticker: CEG, sector: 数据中心电力与散热, foreign: false}
+  - {ticker: BE, sector: 数据中心电力与散热, foreign: false}
+  - {ticker: DELL, sector: AI 服务器与算力云, foreign: false}
+  - {ticker: SMCI, sector: AI 服务器与算力云, foreign: false}
+  - {ticker: CRWV, sector: AI 服务器与算力云, foreign: false}
+  - {ticker: CRWD, sector: 网络安全, foreign: false}
+  - {ticker: PANW, sector: 网络安全, foreign: false}
+  - {ticker: FTNT, sector: 网络安全, foreign: false}
+  - {ticker: ZS, sector: 网络安全, foreign: false}
+etfs: [SPY, QQQ, IWM, SMH, SOXX, IGV, XLK, XLE, XLF, XLV, XLI, XLU, XLY, XLP]

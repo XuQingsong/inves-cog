@@ -1,0 +1,940 @@
+[
+  {
+    "ticker": "GOOD",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "ETF",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [
+      "etf"
+    ],
+    "cik": "1",
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "ADR",
+    "name": "Fixture Depositary ADR",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "SMALL",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 1000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "THIN",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      },
+      {
+        "close": 30,
+        "volume": 1
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "MISSING",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": null,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "NOCIK",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": null,
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "NOPRICE",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 100000000,
+    "close": null,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "SHORT",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": false
+  },
+  {
+    "ticker": "CLASS.A",
+    "name": "Fixture Corporation",
+    "asset_class": "us_equity",
+    "status": "active",
+    "exchange": "NASDAQ",
+    "attributes": [],
+    "cik": "1",
+    "shares": 100000000,
+    "close": 30,
+    "history": [
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      },
+      {
+        "close": 30,
+        "volume": 1000000
+      }
+    ],
+    "multi_class": true
+  }
+]

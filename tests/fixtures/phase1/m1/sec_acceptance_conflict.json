@@ -1,0 +1,55 @@
+{
+  "samples": [
+    {
+      "ticker": "AAPL",
+      "cik": "0000320193",
+      "accession": "0000320193-26-000018",
+      "form": "8-K",
+      "items": "2.02,9.01",
+      "submissions_acceptanceDateTime": "2026-07-31T00:30:28.000Z",
+      "index_accepted_et": "2026-07-30 16:30:28",
+      "literal_matches_index_local_time": false,
+      "naive_difference_hours": 8.0,
+      "submissions_url": "https://data.sec.gov/submissions/CIK0000320193.json",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/0000320193-26-000018-index.html",
+      "checked_at_utc": "2026-10-14T04:12:03.858521+00:00",
+      "accepted_at_utc_from_index": "2026-07-30T20:30:28+00:00",
+      "session_from_index": "post"
+    },
+    {
+      "ticker": "AAPL",
+      "cik": "0000320193",
+      "accession": "0000320193-26-000011",
+      "form": "8-K",
+      "items": "2.02,9.01",
+      "submissions_acceptanceDateTime": "2026-05-01T00:30:41.000Z",
+      "index_accepted_et": "2026-04-30 16:30:41",
+      "literal_matches_index_local_time": false,
+      "naive_difference_hours": 8.0,
+      "submissions_url": "https://data.sec.gov/submissions/CIK0000320193.json",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000011/0000320193-26-000011-index.html",
+      "checked_at_utc": "2026-10-14T04:12:04.913390+00:00",
+      "accepted_at_utc_from_index": "2026-04-30T20:30:41+00:00",
+      "session_from_index": "post"
+    },
+    {
+      "ticker": "AAPL",
+      "cik": "0000320193",
+      "accession": "0000320193-26-000005",
+      "form": "8-K",
+      "items": "2.02,9.01",
+      "submissions_acceptanceDateTime": "2026-01-30T02:30:33.000Z",
+      "index_accepted_et": "2026-01-29 16:30:33",
+      "literal_matches_index_local_time": false,
+      "naive_difference_hours": 10.0,
+      "submissions_url": "https://data.sec.gov/submissions/CIK0000320193.json",
+      "index_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000005/0000320193-26-000005-index.html",
+      "checked_at_utc": "2026-10-14T04:12:06.118672+00:00",
+      "accepted_at_utc_from_index": "2026-01-29T21:30:33+00:00",
+      "session_from_index": "post"
+    }
+  ],
+  "origin": "official SEC submissions JSON paired with official filing index Accepted field",
+  "complete": true,
+  "all_match_claimed_et_literals": false
+}

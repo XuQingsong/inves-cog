@@ -1,0 +1,12 @@
+{
+  "database_write": true,
+  "vector_dimensions": 1024,
+  "versions": 1,
+  "counts": {
+    "collected": 3,
+    "inserted": 1,
+    "deduped": 2
+  },
+  "runtime_tasks": 15,
+  "fixture_rows_rolled_back": true
+}
