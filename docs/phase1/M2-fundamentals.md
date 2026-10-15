@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v6（`q4_missing` 的判定范围；单季长度；新增 D9；一致预期改走 Yahoo 网页；核实财报事件关联） |
+| 文档版本 | v7（多类别股的股数；数值合理性门禁） |
 | 规格章节 | 4.4、4.5、4.6、4.8、9.2（财报字段） |
 | 依赖 | M0；SEC submissions 来自 M1 |
 | 关闭的不变量 | I10、I11、I12、I33、I34 |
@@ -162,3 +162,5 @@
 | Q-M2-23 | JPM、V、XOM 两套提取器都取不到核心字段 | 新增 **D9**（只在 `fixed`，可单独开关，写进差异报告）。已知原因：JPM 的 `Revenues` 停在 2014 年，银行用的是 `RevenuesNetOfInterestExpense`，把它加进营收标签清单（排在现有标签之后）；V 的 EPS 只按股票类别披露（`StatementClassOfStockAxis`），取主要交易类别（V = A 类）的 EPS，类别在 `config/params/p-2026.10/m2.yaml` 里按 ticker 配置。XOM 的营收序列为什么不完整，请开发查申报原件，确定具体规则后同样放进 D9；规则写进 `m2.yaml`，在差异报告里说明，需求方验收时审核（按任务书 §4.6 属于"不停"，不必等答复） |
 | Q-M2-24 | 59 只里 49 只 `earnings_event_missing` | M2 分支跑这一轮时，大概率没有连上 M1 的 `ingest.earnings_events`。两边合并后重跑健康页；如果仍然大量缺失，逐只列出原因 |
 | Q-M2-25 | Yahoo 怎么采？（更正 Q-M2-20） | **需求方复测（2026-10-15 00:48 北京时间，距开发最后一次请求已 4 小时以上）**：`query1/query2.finance.yahoo.com` 的所有数据接口（chart、search、quoteSummary、getcrumb）第一个请求就返回 429；但网页 `finance.yahoo.com/quote/{T}/analysis/` 返回 200，页面里含 Earnings Estimate、Revenue Estimate、EPS Trend、EPS Revisions、分析师人数，还嵌着 `earningsTrend` 原始 JSON。开发之前每次诊断只发 5 个请求，每轮 59 只，可以基本排除"请求太频繁"；更像是 Yahoo 对这台云服务器 IP 的数据接口做了限制。**规则**：数据接口返回 429 时，改从同一个 Yahoo 分析页取同一套字段（优先解析嵌入的 JSON），两个页面之间间隔至少 5 秒，每天 59 次；`source` 记 `yahoo_page`，F2 把它和 `yfinance` 视为同一个来源。不用代理，不换供应商。AC-M2-06b 仍按原条款判定 |
+| Q-M2-26 | V 在 `fixed` 下的 `shares` 只有 A 类股（4.69 亿股），按全部类别折算后约 19 亿股，导致市值、市销率、自由现金流收益率被低估约 4 倍（需求方 2026-10-15 发现；Muse 原来也是这样，属需求缺口） | 纳入 D9：`m2.yaml` 里登记多类别股发行人（先登记 V），`fixed` 下它们的 `shares` 改用最近一个季度的 `WeightedAverageNumberOfDilutedSharesOutstanding`（按全部类别折算的稀释股本），`field_sources` 标 `multi_class_diluted`。`legacy` 不变 |
+| Q-M2-27 | 怎样防止明显错误的数值进入打分？（LITE 的 TTM 净利润 −69.4 亿美元，而营收只有 30 亿美元） | 新增健康码 **`implausible_value`**（只在 `fixed` 下检查，属于"阻止打分"类）：（1）\|`ni_ttm` ÷ `rev_ttm`\| > 1；（2）`eps_ttm × shares` 与 `ni_ttm` 之比不在 0.5–2 之间（\|`ni_ttm`\| < 1,000 万美元时不检查）；（3）任一 TTM 金额由某一季度的推算值（`q4_derived` / `ytd_derived`）主导，而该推算值的符号与另外三季都相反、且绝对值超过另外三季绝对值之和。命中时 `reason` 写明是哪条规则、涉及哪些季度。`legacy` 不检查（与 Muse 一致） |
