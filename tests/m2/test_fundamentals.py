@@ -199,6 +199,12 @@ def test_fin_state_pit():
         fresh = service.collect_financials(history=False)
         assert fresh["processed_count"] == 1 and compute.call_count == 2
     assert calls == ["1", "1"]  # Incremental still fetches fresh companyfacts.
+    service.draft_mappings = False
+    rows = [{"ticker": "FIXTURE", "axis": "business", "segment_raw": "New segment", "health_codes": []}]
+    with patch.object(service.queue, "draft", side_effect=AssertionError("LLM must not block collection")):
+        result = service.apply_mappings("FIXTURE", rows)
+    assert "segment_unmapped" in result[0]["health_codes"]
+    assert "queued" in result[0]["evidence"]["mapping_gap"]
     from inves_cog.ingest.fundamentals.state import StateStore
 
     before, after = extract(), extract()
