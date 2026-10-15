@@ -1,0 +1,294 @@
+[
+  {
+    "ticker": "LITE",
+    "period_end": "2026-06-27",
+    "original": {
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1633978/000162828026057358/lite-20260627.htm",
+      "source_sha256": "362fb92153d079580ddd832f1b68b0f72d69a3aa3686820b9a77436f79fee743",
+      "facts": [
+        {
+          "tag": "EntityCommonStockSharesOutstanding",
+          "value": 89700000.0,
+          "context_id": "c-3",
+          "start": null,
+          "end": "2026-08-14",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -6935100000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": 25900000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -546500000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "EarningsPerShareDiluted",
+          "value": -92.96,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "EarningsPerShareDiluted",
+          "value": 0.37,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "EarningsPerShareDiluted",
+          "value": -8.12,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "value": 74600000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "value": 69600000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "value": 67300000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -6935100000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": 25900000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -546500000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "CommonStockSharesOutstanding",
+          "value": 88600000.0,
+          "context_id": "c-6",
+          "start": null,
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "CommonStockSharesOutstanding",
+          "value": 69800000.0,
+          "context_id": "c-7",
+          "start": null,
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -6935100000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": 25900000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -546500000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -546500000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": 25900000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -6935100000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -6935100000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": 25900000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "NetIncomeLoss",
+          "value": -546500000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "value": 74600000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "value": 69600000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "value": 67300000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "EarningsPerShareDiluted",
+          "value": -92.96,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "EarningsPerShareDiluted",
+          "value": 0.37,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "EarningsPerShareDiluted",
+          "value": -8.12,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        },
+        {
+          "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "value": 3014000000.0,
+          "context_id": "c-1",
+          "start": "2025-06-29",
+          "end": "2026-06-27",
+          "dimensions": []
+        },
+        {
+          "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "value": 1645000000.0,
+          "context_id": "c-4",
+          "start": "2024-06-30",
+          "end": "2025-06-28",
+          "dimensions": []
+        },
+        {
+          "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "value": 1359200000.0,
+          "context_id": "c-5",
+          "start": "2023-07-02",
+          "end": "2024-06-29",
+          "dimensions": []
+        }
+      ]
+    },
+    "reason": "Original consolidated 10-K context c-1 confirms GAAP net loss USD 6,935,100,000 and diluted EPS -92.96; convertible-debt extinguishment loss USD 7,756,600,000, non-cash. Source audit accepted in M2 report section 6.1.",
+    "filed": "2026-08-17"
+  },
+  {
+    "kind": "interim",
+    "ticker": "SKHY",
+    "period_end": "2026-06-30",
+    "filed": "2026-08-18",
+    "accession": "0001193125-26-354777",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526354777/d147827d6k.htm",
+    "source_sha256": "2345f968bec780fd835c03983bfd5f1e2c94affe11450104c2a4ba1754c7a44b",
+    "values": {
+      "revenue": 79318746000000.0,
+      "net_income": 93820236000000.0,
+      "eps_diluted": 131478.0,
+      "currency": "KRW"
+    },
+    "reason": "Original 6-K consolidated quarterly statement confirms net income KRW 93,820,236,000,000 exceeds revenue KRW 79,318,746,000,000 because investment gains are about KRW 63.3 trillion. Only this quarter is verified; missing consecutive quarters still block TTM."
+  }
+]

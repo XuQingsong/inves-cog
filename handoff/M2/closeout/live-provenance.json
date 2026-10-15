@@ -1,0 +1,18 @@
+{
+  "original_live_commit": "1be5aff12af0434acf49d363d484744e33bf7a92",
+  "original_live_output": "m2-live-final.xml",
+  "tests": 1,
+  "failures": 0,
+  "skipped": 0,
+  "seconds": 1309.747,
+  "copied_implementation_identical_sha256": {
+    "src/inves_cog/ingest/fundamentals/cli.py": "ad4b1d7fc99f2593d1f4a25efd3cdf1a0dfb86fdc1ced2c3ba7904b30d7f9a36",
+    "src/inves_cog/ingest/fundamentals/extractors.py": "08a5a61093ee4b0d61ef2ccf437bd75aeaef0bae4341a0b3fa4d5b3163e14eba",
+    "src/inves_cog/ingest/fundamentals/health.py": "a355c9c682e46e53323102978f78cdd44607324c805acc60c4bf6fc78c34192b",
+    "src/inves_cog/ingest/fundamentals/interims.py": "be10c46e73ebe4df9b85b76033350cc2af7ee098ad21b3bf716addd3fe130cf4",
+    "src/inves_cog/ingest/fundamentals/live.py": "5fd9a9e1c8316e611de3d64acea45e87166e7418894f42197ee549c4d8916b50",
+    "src/inves_cog/ingest/fundamentals/service.py": "ed29d9c7f852ef06825065ff233091f386f6aea06fbe01d17dd76208ca70821c",
+    "src/inves_cog/llm/transport.py": "cdec22f1ca5f8ac9d50214b76cf1cf60ec70e710c5796c756af97e45f0d43091"
+  },
+  "note": "Original actual live result retained during module split; not a new run and not a cache-only smoke."
+}
