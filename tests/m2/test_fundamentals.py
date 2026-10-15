@@ -27,6 +27,8 @@ def extract(data=None, *, extractor='fixed', switches=None, as_of=ASOF, sic=3571
 
 
 def test_revenue_tag_gap():
+    from tests.m2.round2_cases import assert_d9
+    assert_d9(input_facts)
     facts = input_facts()
     gaap = facts['facts']['us-gaap']
     gaap['RevenueFromContractWithCustomerIncludingAssessedTax'] = gaap.pop('RevenueFromContractWithCustomerExcludingAssessedTax')
@@ -40,6 +42,9 @@ def test_revenue_tag_gap():
 
 
 def test_q4_derived_from_annual():
+    from tests.m2.round2_cases import assert_long_quarters, assert_recent_gaps
+    assert_long_quarters()
+    assert_recent_gaps(input_facts)
     from inves_cog.ingest.fundamentals.extractors import derive_quarters
     case = load_golden('m2_fundamentals.json')['q4_derivation']
     rows = derive_quarters(case['fy_total'], q1=case['q1'], q2=case['q2'], q3=case['q3'])
@@ -141,7 +146,7 @@ def test_fin_state_pit():
 
 def test_extractor_fixed_toggles():
     settings = yaml.safe_load((ROOT / 'config/params/p-2026.10/m2.yaml').read_text())['m2']
-    assert settings['repair_order'] == ['D3', 'D1', 'D2', 'D4', 'D5', 'D8']
+    assert settings['repair_order'] == ['D3', 'D1', 'D2', 'D4', 'D5', 'D8', 'D9']
     base = input_facts()
     base['facts']['us-gaap'].pop('CashAndCashEquivalentsAtCarryingValue')
     plain = extract(base, switches={key: False for key in settings['repair_order']})
@@ -350,6 +355,8 @@ def test_segment_mapping_pending():
 
 
 def test_consensus_derived_pit():
+    from tests.m2.round2_cases import assert_yahoo_page
+    assert_yahoo_page(FrozenClock(datetime(2026, 10, 15, tzinfo=timezone.utc)))
     from inves_cog.ingest.fundamentals.consensus import derive_consensus
     case = load_golden('m2_fundamentals.json')['consensus_derived']
     snapshots = [dict(row, ticker='FIXTURE', source='yfinance', fy_cy='2026-12-31', fy_ny='2027-12-31', captured_at=row['as_of'] + 'T01:00:00Z') for row in case['snapshots']]
