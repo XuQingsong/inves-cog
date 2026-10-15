@@ -1,5 +1,6 @@
 """Approved source adapters; no synthetic values are produced on failure."""
 
+import math
 from collections import defaultdict
 from datetime import date
 from html.parser import HTMLParser
@@ -17,8 +18,15 @@ class Embedding:
         self.auth_failure = None
 
     def __call__(self, text, *, model, dimensions):
+        return self.batch([text], model=model, dimensions=dimensions)[0]
+
+    def batch(self, texts, *, model, dimensions):
         if model != "text-embedding-v3" or dimensions != 1024:
             raise ValueError("Unsupported embedding contract")
+        if not isinstance(texts, list) or not 1 <= len(texts) <= 10:
+            raise ValueError("Embedding batch requires one to ten texts")
+        if any(not isinstance(text, str) or not text.strip() for text in texts):
+            raise ValueError("Embedding input must be nonempty text")
         if self.auth_failure is not None:
             raise self.auth_failure
         if not self.key or urlparse(self.base).scheme != "https":
@@ -29,17 +37,32 @@ class Embedding:
                     "POST",
                     self.base.rstrip("/") + "/embeddings",
                     headers={"Authorization": "Bearer " + self.key},
-                    json={"model": model, "input": text, "dimensions": dimensions},
+                    json={"model": model, "input": texts, "dimensions": dimensions},
                 )
             )
         except SourceError as exc:
             if exc.status_code in {401, 403}:
                 self.auth_failure = exc
             raise
-        try:
-            return data["data"][0]["embedding"]
-        except (KeyError, IndexError, TypeError):
-            raise SourceError("Embedding response lacks data[0].embedding") from None
+        rows = data.get("data")
+        if not isinstance(rows, list) or len(rows) != len(texts):
+            raise SourceError("Embedding response has missing or extra vectors")
+        vectors = {}
+        for row in rows:
+            if not isinstance(row, dict):
+                raise SourceError("Embedding response has invalid row")
+            index = row.get("index", 0 if len(texts) == 1 else None)
+            vector = row.get("embedding")
+            if type(index) is not int or index not in range(len(texts)) or index in vectors:
+                raise SourceError("Embedding response has invalid or duplicate index")
+            if (
+                not isinstance(vector, list)
+                or len(vector) != dimensions
+                or not all(type(value) in (int, float) and math.isfinite(value) for value in vector)
+            ):
+                raise SourceError("Embedding response has invalid dimension or value")
+            vectors[index] = vector
+        return [vectors[index] for index in range(len(texts))]
 
 
 def cik_mapping(sec):
