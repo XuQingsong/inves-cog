@@ -1,6 +1,8 @@
 """Approved source adapters; no synthetic values are produced on failure."""
 
 import math
+import time
+import uuid
 from collections import defaultdict
 from datetime import date
 from html.parser import HTMLParser
@@ -12,11 +14,20 @@ from inves_cog.ingest.sources import optional_number
 
 
 class Embedding:
-    def __init__(self, values, http=None):
+    def __init__(self, values, http=None, *, clock=None, recorder=None, monotonic=time.monotonic):
         self.enabled = values.get("INVES_COG_EMBEDDING_ENABLED", "1") == "1"
         self.key, self.base = values.get("DASHSCOPE_API_KEY"), values.get("DASHSCOPE_BASE_URL", "")
         self.http = http or HTTPClient()
         self.auth_failure = None
+        if clock is None:
+            from inves_cog.clock import SystemClock
+
+            clock = SystemClock()
+        if recorder is None and values.get("INVES_COG_DATABASE_URL"):
+            from inves_cog.llm.usage import PostgresRecorder
+
+            recorder = PostgresRecorder(values["INVES_COG_DATABASE_URL"])
+        self.clock, self.recorder, self.monotonic = clock, recorder, monotonic
 
     def __call__(self, text, *, model, dimensions):
         return self.batch([text], model=model, dimensions=dimensions)[0]
@@ -35,14 +46,7 @@ class Embedding:
         if not self.key or urlparse(self.base).scheme != "https":
             raise SourceError("DashScope embedding endpoint/key missing: 等待 R5", confirmed_unavailable=True)
         try:
-            data = require_mapping(
-                self.http.request(
-                    "POST",
-                    self.base.rstrip("/") + "/embeddings",
-                    headers={"Authorization": "Bearer " + self.key},
-                    json={"model": model, "input": texts, "dimensions": dimensions},
-                )
-            )
+            data = self._request(texts, model, dimensions)
         except SourceError as exc:
             if exc.status_code in {401, 403}:
                 self.auth_failure = exc
@@ -66,6 +70,43 @@ class Embedding:
                 raise SourceError("Embedding response has invalid dimension or value")
             vectors[index] = vector
         return [vectors[index] for index in range(len(texts))]
+
+    def _request(self, texts, model, dimensions):
+        from inves_cog.llm.usage import call_context, tokens
+
+        started, data, success = self.monotonic(), {}, False
+        try:
+            data = require_mapping(
+                self.http.request(
+                    "POST",
+                    self.base.rstrip("/") + "/embeddings",
+                    headers={"Authorization": "Bearer " + self.key},
+                    json={"model": model, "input": texts, "dimensions": dimensions},
+                )
+            )
+            success = True
+            return data
+        finally:
+            if self.recorder is not None:
+                input_tokens, _ = tokens(data.get("usage"))
+                purpose, info_ids = call_context("embedding")
+                self.recorder(
+                    {
+                        "call_id": uuid.uuid4().hex,
+                        "task": "embedding",
+                        "model": model,
+                        "purpose": purpose,
+                        "input_tokens": input_tokens,
+                        "output_tokens": 0,
+                        "item_count": len(texts),
+                        "latency_ms": max(0, self.monotonic() - started) * 1000,
+                        "status": ("ok" if input_tokens is not None else "usage_missing")
+                        if success
+                        else ("failed" if input_tokens is not None else "failed_usage_missing"),
+                        "info_ids": info_ids,
+                        "created_at": self.clock.now_utc(),
+                    }
+                )
 
 
 def cik_mapping(sec):

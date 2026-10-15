@@ -5,7 +5,9 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 
 _context = ContextVar("inves_cog_llm_context", default=None)
-FIELDS = "call_id task model purpose input_tokens output_tokens latency_ms status info_ids created_at".split()
+FIELDS = (
+    "call_id task model purpose input_tokens output_tokens latency_ms status info_ids created_at item_count".split()
+)
 
 
 @dataclass
@@ -56,5 +58,5 @@ class PostgresRecorder:
         with psycopg.connect(self.url) as connection:
             connection.execute(
                 f"INSERT INTO ingest.llm_calls ({','.join(FIELDS)}) VALUES ({placeholders})",
-                [row[name] for name in FIELDS],
+                [row.get(name) for name in FIELDS],
             )

@@ -78,12 +78,13 @@ def assert_usage_accounting(root, clock):
             self.stats = {"input_tokens": 11, "output_tokens": 3, "usage_missing_calls": 0}
 
         def execute(self, sql, values=None):
+            self.returning_id = sql.startswith(("INSERT", "UPDATE"))
             if sql.startswith("INSERT"):
                 self.writes.append((sql, values))
             return self
 
         def fetchone(self):
-            return self.stats
+            return {"id": 1} if self.returning_id else self.stats
 
     connection = Connection()
     repo = Repository(connection)

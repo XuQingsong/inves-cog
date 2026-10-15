@@ -213,8 +213,9 @@ def assert_embedding_batches():
     assert len(calls) == before
     enabled = Embedding({**configuration, "INVES_COG_EMBEDDING_ENABLED": "1"}, http=HTTPClient(send, retries=0))
     assert enabled.batch(["first", "second"], model="text-embedding-v3", dimensions=1024)[1] == [0.2] * 1024
-    from inves_cog.clock import FrozenClock
     from datetime import datetime, timezone
+
+    from inves_cog.clock import FrozenClock
 
     records = []
     clock = FrozenClock(datetime(2026, 10, 15, tzinfo=timezone.utc))
@@ -248,6 +249,7 @@ def assert_scheduler_watchdog():
             self.health[row["source"]] = row
 
     repo = Repo()
+
     def at(text):
         return FrozenClock(datetime.fromisoformat(text))
 
@@ -267,13 +269,20 @@ def assert_scheduler_watchdog():
     check_bars_start(repo, at("2026-11-03T01:30:00+00:00"))
     assert repo.health["Scheduler:bars_full"]["status"] == "unavailable"
     events = []
+
     def start(row):
         events.append(("start", dict(row)))
         return 42
+
     def operation():
         assert events[0][0] == "start" and events[0][1]["ended_at"] is None
         return {"processed_count": 1}
+
     clock = at("2026-10-16T00:20:00+00:00")
-    JobRunner(clock=clock, health=HealthBook(clock=clock), persist=lambda row: events.append(("end", dict(row))),
-              persist_start=start).run("bars_full", "Alpaca", operation)
+    JobRunner(
+        clock=clock,
+        health=HealthBook(clock=clock),
+        persist=lambda row: events.append(("end", dict(row))),
+        persist_start=start,
+    ).run("bars_full", "Alpaca", operation)
     assert events[1][1]["id"] == 42 and events[1][1]["status"] == "ok"

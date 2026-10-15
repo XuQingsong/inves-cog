@@ -156,10 +156,21 @@ class Repository:
                 llm_output_tokens=stats["output_tokens"],
                 llm_usage_missing_calls=stats["usage_missing_calls"],
             )
-            self.connection.execute(
-                f"INSERT INTO ingest.job_runs ({','.join(fields)}) VALUES ({','.join(['%s'] * len(fields))})",
-                [row[field] for field in fields],
-            )
+            values = [row[field] for field in fields]
+            if row.get("id") is not None:
+                result = self.connection.execute(
+                    "UPDATE ingest.job_runs SET "
+                    + ",".join(f"{field}=%s" for field in fields)
+                    + " WHERE id=%s RETURNING id",
+                    [*values, row["id"]],
+                ).fetchone()
+            else:
+                result = self.connection.execute(
+                    f"INSERT INTO ingest.job_runs ({','.join(fields)}) "
+                    f"VALUES ({','.join(['%s'] * len(fields))}) RETURNING id",
+                    values,
+                ).fetchone()
+            return result["id"]
 
     def write_health(self, row):
         self.write(
