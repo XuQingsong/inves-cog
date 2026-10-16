@@ -623,6 +623,29 @@ def test_price_retrieval_must_be_seen_before_the_response():
 
 
 @pytest.mark.phase1_blocking
+def test_missing_vectors_are_named_as_a_rule_fallback():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.rules import m8_rules
+
+    anomaly = {"anomaly_id": "pool-1", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    rules = m8_rules()
+    quiet = explanation_report(anomaly, impact, [], [])
+    assert quiet["retrieval_gap"] is None
+    empty = explanation_report(anomaly, impact, [], [], embeddings=[])
+    assert empty["retrieval_gap"] == "向量检索降到规则检索"
+    assert "operating_impact_proven" not in empty
+    assert empty["fundamental_standing"] is None
+    wrong = [{"model": rules["embedding_model"], "dimensions": 768}]
+    named = explanation_report(anomaly, impact, [], [], embeddings=wrong)
+    assert named["retrieval_gap"] == "向量检索降到规则检索"
+    approved = [{"model": rules["embedding_model"], "dimensions": rules["embedding_dimensions"]}]
+    kept = explanation_report(anomaly, impact, [], [], embeddings=approved)
+    assert kept["retrieval_gap"] is None
+    assert kept["market_confidence"] == "低"
+
+
+@pytest.mark.phase1_blocking
 def test_fingerprint_registers_only_a_medium_market_score():
     from inves_cog.perception.attribution.second_hit import later_matches_fingerprint, prediction_fingerprint
 

@@ -2,6 +2,7 @@
 
 from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.impact import anomaly_status
+from inves_cog.perception.attribution.retrieve import retrieval_gap
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
 CONSTRAINT_ITEMS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
@@ -120,6 +121,7 @@ def explanation_report(
     supplement=None,
     narrative_shock=False,
     fundamental_unchanged=False,
+    embeddings=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -141,6 +143,7 @@ def explanation_report(
         "supplement": note,
         "market_confidence": conclusions["market_confidence"],
         "fundamental_standing": conclusions["fundamental_standing"],
+        "retrieval_gap": retrieval_gap(embeddings),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

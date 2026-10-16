@@ -44,6 +44,13 @@ def retrieval_mode(rows, rules=None):
     return "rules"
 
 
+def retrieval_gap(rows):
+    """Missing or unapproved vectors stay on the rule path and are named."""
+    if rows is None or retrieval_mode(rows) == "vector":
+        return None
+    return "向量检索降到规则检索"
+
+
 def supplement_calls(requested, already_used, rules=None):
     budget = (rules or m8_rules())["search_daily_budget"]
     room = budget - already_used
