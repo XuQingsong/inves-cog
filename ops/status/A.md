@@ -10,7 +10,9 @@
 - 变更计划：调度上线及既有角色登录配置仅在热修复合并后实施；任何仓库调度注册变更先 PR，不把未合并代码装进服务。不改 docs/golden/milestones、M7 或超出限定的 M6 代码，不合并 PR。
 - 进行中：热修复 [PR #14](https://github.com/XuQingsong/inves-cog/pull/14) 待审，head **0c5e0e8457f0943adc3364182852aec0e68b0a27**。test_market_service_preserves_requested_tickers 先红 1 failed 再绿 1 passed；全仓 **90 blocking passed、0 skipped**，Ruff 通过。产品仅 SIC 覆盖映射变量两行改名，不改其他 M6/M7；证据 handoff/ops/A-006/d32-*.xml。CI 正在核对，不将待运行写成成功。
 - 变更准备：M2 现有 schedule 循环未按 --tasks 过滤，直接注册会连带启用 consensus/Yahoo；因此将仅封装现有 run --tasks financials 的正式入口和日窗/每日一次门禁，提交独立 ops PR 后才上线，不修改 M2 代码或切换来源。
-- 继续第二部分准备和 M4；未部署未合并热修复，不停在等待。无新增用户决定，不新建自动化。
+- 热修复 PR #14 当前 head **0c5e0e8457f0943adc3364182852aec0e68b0a27** 的 [CI 38863229785](https://github.com/XuQingsong/inves-cog/actions/runs/38863229785) 已绿，待需求方审核合并。
+- 进行中：M2 正式财报日更新独立 [PR #15](https://github.com/XuQingsong/inves-cog/pull/15)，head **73789edbab9d8c82d0db93680ef02b1427f8150e**，[CI 38863699107](https://github.com/XuQingsong/inves-cog/actions/runs/38863699107) 已绿；先红 8 failed 后 tests/ops 19 passed、全仓 97 blocking passed。只调用既有 M2 build/run_tasks 的 financials，21:15–21:45 ET、每日一次，不启用 Yahoo；证据 handoff/ops/A-006/financials-*.xml。两 PR 未合并前均未部署。
+- M4 已合入最新 main，已先提交失败测试/合成覆盖夹具及 MANIFEST/CHANGELOG：本机 12 failed、2 replay setup errors（尚无实现），live 按显式条件排除；提交 1926a18。接着实现执行/回放主链并先交检查点。无新增用户决定，不新建自动化。
 
 ## A-005  已完成  2026-10-16 14:31 北京
 - 已完成 A-005 三项运维/修复，提交正式待审 PR [#13](https://github.com/XuQingsong/inves-cog/pull/13)“[ops] 每日调度注册（A-005）”，分支 ops/a005-daily-scheduling。完整 head **8d3aa5a762f564ecfd6263a0dee6c9d9f0bc9241**，本地/GitHub 完整 SHA 与代码树 **70b54b2f06abbb7c6711b75b209e79f6fb770b2d** 一致，工作树干净。
