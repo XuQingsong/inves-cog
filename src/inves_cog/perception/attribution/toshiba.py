@@ -104,7 +104,7 @@ def midpoint_report():
         {"source_root": "nikkei", "outcome": "命中", "published_at": nikkei_at, "info_id": NIKKEI},
         {
             "source_root": "tdk",
-            "outcome": classify_response(1.4, 0.2),
+            "outcome": classify_response(-1.4, 0.2, direction="down"),
             "published_at": tdk_at,
             "info_id": TDK,
         },

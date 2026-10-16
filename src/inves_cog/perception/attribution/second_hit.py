@@ -1,10 +1,15 @@
 """Later information on the same narrative. One source root counts once, and only on the market layer."""
 
 
-def classify_response(expected_z, control_z):
-    if expected_z >= 1 and abs(control_z) < 1:
+def classify_response(expected_z, control_z, *, direction):
+    """A hit matches the expected direction. The control basket must stay inside 1 sigma."""
+    if direction not in {"up", "down"}:
+        raise ValueError("方向只接受 up 或 down")
+    aligned = expected_z >= 1 if direction == "up" else expected_z <= -1
+    opposed = expected_z <= -1 if direction == "up" else expected_z >= 1
+    if aligned and abs(control_z) < 1:
         return "命中"
-    if expected_z <= -1:
+    if opposed:
         return "反证"
     return "无响应"
 

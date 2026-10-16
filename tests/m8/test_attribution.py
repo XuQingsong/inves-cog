@@ -572,9 +572,14 @@ def test_lifecycle_transitions():
 def test_second_hit():
     from inves_cog.perception.attribution.second_hit import classify_response, second_hit_conclusion
 
-    assert classify_response(1.2, 0.4) == "命中"
-    assert classify_response(-1.2, 0.2) == "反证"
-    assert classify_response(0.4, 0.1) == "无响应"
+    assert classify_response(1.2, 0.4, direction="up") == "命中"
+    assert classify_response(-1.2, 0.2, direction="up") == "反证"
+    assert classify_response(0.4, 0.1, direction="up") == "无响应"
+    assert classify_response(-1.2, 0.2, direction="down") == "命中"
+    assert classify_response(1.2, 0.4, direction="down") == "反证"
+    assert classify_response(-1.2, 1.1, direction="down") == "无响应"
+    with pytest.raises(ValueError, match="方向只接受"):
+        classify_response(-1.2, 0.2, direction="flat")
     events = [
         {"source_root": "wire", "outcome": "命中"},
         {"source_root": "wire", "outcome": "反证"},
