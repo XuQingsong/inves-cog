@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 02:32 北京
+
+- 草稿 PR #18 head `234b149`。没有合并进 main。本地 `make phase1-test`：169 passed，18 deselected。
+- 检索实体只含异常成员、这些成员所属篮子的其他成员、从这组名字出发的一跳邻居，以及用代码挂到这组名字上的监控实体。邻居任何状态都算，包括驳回。邻居的下一跳、同伴所在的其他篮子、监控实体带出的其他代码，都不进入检索。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 02:22 北京
 
 - 草稿 PR #18 head `37dd333`。没有合并进 main。本地 `make phase1-test`：168 passed，18 deselected。
