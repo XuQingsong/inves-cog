@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.102" timestamp="2026-10-16T21:31:56.784964+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_valuation_monotone_and_stable" time="0.024"><failure message="AssertionError: assert '高' == '低'&#10;  &#10;  - 低&#10;  + 高">tests/m5/test_valuation.py:102: in test_valuation_monotone_and_stable
+    assert missing["confidence"] == "低"
+E   AssertionError: assert '高' == '低'
+E     
+E     - 低
+E     + 高</failure></testcase></testsuite></testsuites>

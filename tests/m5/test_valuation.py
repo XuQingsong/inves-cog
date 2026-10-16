@@ -99,6 +99,7 @@ def test_valuation_monotone_and_stable():
     assert len(set(ranges)) == 1
     missing = evaluate("稳定", {"price": 100})
     assert missing["neutral"] is None and missing["reason"]
+    assert missing["confidence"] == "低"
     assert evaluate("困境", {"price": 1})["reason"] == "不估值：亏损且无增长"
 
 
@@ -133,6 +134,9 @@ def test_valuation_schema_revoke():
 
 @pytest.mark.phase1_blocking
 def test_valuation_label():
+    from tests.m5.inputs_cases import assert_schedule
+
+    assert_schedule()
     from inves_cog.valuation_v1.calculations import LABEL, evaluate
     from inves_cog.valuation_v1.shadows import panel, shadow, summarize
 
