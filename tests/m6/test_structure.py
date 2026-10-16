@@ -287,6 +287,49 @@ def test_auto_cluster_suggestion():
     assert suggestions(returns.iloc[:59], existing=[]) == []
 
 
+@pytest.mark.phase1_blocking
+def test_draft_all_does_not_share_one_connection():
+    import threading
+    import time
+
+    from inves_cog.perception.graph.service import GraphService
+
+    class Connection:
+        def __init__(self):
+            self.active = 0
+            self.max_active = 0
+            self.lock = threading.Lock()
+
+        def execute(self, *_args, **_kwargs):
+            with self.lock:
+                self.active += 1
+                self.max_active = max(self.max_active, self.active)
+            time.sleep(0.05)
+            with self.lock:
+                self.active -= 1
+
+            class Result:
+                def fetchone(self):
+                    return None
+
+            return Result()
+
+    class Repository:
+        def __init__(self, connection):
+            self.connection = connection
+
+    class Probe(GraphService):
+        def draft_ticker(self, ticker):
+            self.repo.connection.execute("SELECT 1")
+            return {"ticker": ticker, "status": "ok", "relations": 3, "exposures": 0}
+
+    connection = Connection()
+    service = Probe(repository=Repository(connection), sec=None, llm=None, clock=None, universe=[])
+    result = service.draft_all(["AAA", "BBB", "CCC"], workers=3)
+    assert result["status"] == "ok"
+    assert connection.max_active == 1
+
+
 @pytest.mark.phase1_live
 def test_marketstate_live_smoke(clock):
     from inves_cog.marketstate.live import run_smoke
