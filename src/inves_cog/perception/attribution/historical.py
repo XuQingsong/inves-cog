@@ -71,7 +71,7 @@ def _missing(anomaly, leads, items, candidates):
     if kind == "muse_rank":
         return _muse_missing(anomaly, leads, cited)
     if kind == "toshiba":
-        return _toshiba_missing(items, cited)
+        return _toshiba_missing(items, candidates)
     return ["案例种类未知"]
 
 
@@ -105,12 +105,23 @@ def _openai_missing(items, cited):
     return ["前 4 名未含至少 3 类"]
 
 
-def _toshiba_missing(items, cited):
+def _toshiba_disk(items, info_id):
     by_id = {item["info_id"]: item for item in items}
-    for info_id in cited:
-        headline = (by_id.get(info_id) or {}).get("headline", "").lower()
-        if "toshiba" in headline and "disk" in headline:
-            return []
+    headline = (by_id.get(info_id) or {}).get("headline", "").lower()
+    return "toshiba" in headline and "disk" in headline
+
+
+def _toshiba_missing(items, candidates):
+    cited = _cited(candidates)
+    supply = any(
+        row.get("mechanism") == "供给" and any(_toshiba_disk(items, info_id) for info_id in row.get("info_ids") or [])
+        for row in candidates
+        if row.get("scored")
+    )
+    if supply:
+        return []
+    if any(_toshiba_disk(items, info_id) for info_id in cited):
+        return ["机制不是供给"]
     return ["日经扩产原文未冻结"]
 
 

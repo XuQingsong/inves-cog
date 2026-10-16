@@ -1138,11 +1138,12 @@ def test_export_headlines_fill_known_categories_without_live_visibility():
     assert {row["info_id"] for row in seen} == {by_kind["coreweave_debt"]}
 
     class Cite:
-        def __init__(self, ids):
+        def __init__(self, ids, mechanism="估值倍数"):
             self.ids = ids
+            self.mechanism = mechanism
 
         def call(self, task, body):
-            return {"candidates": [{"mechanism": "估值倍数", "info_ids": self.ids, "affected": []}]}
+            return {"candidates": [{"mechanism": self.mechanism, "info_ids": self.ids, "affected": []}]}
 
     opened = {
         "anomaly_id": "2026-10-14:close:001",
@@ -1169,7 +1170,10 @@ def test_export_headlines_fill_known_categories_without_live_visibility():
         "members": [{"ticker": "WDC"}],
         "baskets": ["HDD"],
     }
-    toshiba = historical_report(disk, leads, "2026-10-16", Cite([by_kind["toshiba_supply"]]))
+    multiple = historical_report(disk, leads, "2026-10-16", Cite([by_kind["toshiba_supply"]]))
+    assert multiple["closes_case"] is False
+    assert multiple["missing"] == ["机制不是供给"]
+    toshiba = historical_report(disk, leads, "2026-10-16", Cite([by_kind["toshiba_supply"]], "供给"))
     assert toshiba["closes_case"] is True
     assert toshiba["closes_ac_m8_06"] is False
     assert toshiba["collected_then"] is False
@@ -1343,3 +1347,75 @@ def test_muse_case_keeps_the_september_18_date(tmp_path):
         assert report["closes_ac_m8_06"] is False
         assert report["collected_then"] is False
         assert report["sources"] == ["manual-r1-2025-01-20", "manual-axios-muse-2026-09-18"]
+
+
+@pytest.mark.phase1_cases
+def test_toshiba_reprint_is_not_operating_evidence(tmp_path):
+    from datetime import date
+
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.anomaly.cases import case_anomalies
+    from inves_cog.perception.anomaly.replay import _identify
+    from inves_cog.perception.attribution.historical import headline_lead, historical_report, retrieval_items
+    from inves_cog.perception.attribution.operating import operating_verdict
+    from inves_cog.perception.attribution.second_hit import later_event
+
+    day = date.fromisoformat("2026-10-02")
+    fixture = ROOT / "tests/fixtures/phase1/m7"
+    rows = _identify(day, case_anomalies(fixture, "toshiba_bars.jsonl.gz", day.isoformat()))
+    found = next(row for row in rows if "HDD" in " ".join(row["baskets"]) and row["universe"] == "pool")
+    members = {member["ticker"] for member in found["members"]}
+    assert members == {"STX", "WDC"}
+    anomaly = {**found, "case_kind": "toshiba"}
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/export_headlines.json").read_text())
+    leads = [headline_lead(row) for row in payload["items"]]
+    by_kind = {row["kind"]: row for row in payload["items"]}
+    visible = retrieval_items(leads, day.isoformat(), "2026-10-16")
+    assert [item["info_id"] for item in visible] == [by_kind["toshiba_supply"]["info_id"]]
+    assert visible[0]["source_level"] == 4
+    with pytest.raises(LLMUnavailable, match="待分析"):
+        historical_report(anomaly, leads, "2026-10-16", Client(recordings=tmp_path))
+
+    class Cite:
+        def call(self, task, body):
+            assert task == "anomaly_candidates"
+            assert [item["info_id"] for item in body["items"]] == [by_kind["toshiba_supply"]["info_id"]]
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": [by_kind["toshiba_supply"]["info_id"]],
+                        "affected": [{"ticker": "WDC"}, {"ticker": "MU"}],
+                    }
+                ]
+            }
+
+    report = historical_report(anomaly, leads, "2026-10-16", Cite())
+    assert report["closes_case"] is True
+    assert report["closes_ac_m8_06"] is False
+    assert report["collected_then"] is False
+    assert report["candidates"][0]["affected"] == [{"ticker": "WDC"}]
+    supply = by_kind["toshiba_supply"]
+    verdict = operating_verdict(
+        [
+            {
+                "kind": "company_primary",
+                "source_level": supply["source_level"],
+                "citation": supply["headline"],
+                "form": "8-K",
+                "guidance_change": True,
+                "direction": "down",
+                "published_at": datetime.fromisoformat(supply["published_at"]),
+                "first_seen_at": datetime.fromisoformat(supply["first_seen_at"]),
+            }
+        ],
+        as_of=datetime.fromisoformat(supply["first_seen_at"]),
+        expected_direction="down",
+    )
+    assert verdict.outcome != "支持"
+    published = datetime.fromisoformat(by_kind["tdk_second_hit"]["published_at"])
+    start = datetime.fromisoformat("2026-10-02T21:30:00+08:00")
+    assert later_event(published, start, source_root=by_kind["tdk_second_hit"]["info_id"]) == {
+        "eligible": True,
+        "conclusion": "未检验",
+    }
