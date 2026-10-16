@@ -534,6 +534,32 @@ def test_market_confirmation_four_conditions():
 
 
 @pytest.mark.phase1_blocking
+def test_independent_evidence_is_not_the_price_move():
+    from inves_cog.perception.attribution.candidates import independent_of_price, market_confirmed
+
+    price = [{"kind": "price", "source_root": "tape"}, {"kind": "price", "source_root": "tape-2"}]
+    assert independent_of_price(price) is False
+    one = [{"source_root": "nikkei", "source_level": 2}]
+    assert independent_of_price(one) is False
+    two = [{"source_root": "nikkei"}, {"source_root": "nikkei"}, {"source_root": "reuters"}]
+    assert independent_of_price(two) is True
+    heat = [{"heat_spike": True, "monitor": "hdd"}]
+    assert independent_of_price(heat) is True
+    assert independent_of_price([{"heat_spike": True}]) is False
+    note = [{"kind": "commentary", "source_level": 3, "source_root": "barclays"}]
+    assert independent_of_price(note) is True
+    rumor = [{"kind": "commentary", "source_level": 4, "source_root": "social"}]
+    assert independent_of_price(rumor) is False
+    confirmed = market_confirmed(
+        claim_time=False,
+        response=True,
+        independent=independent_of_price(two),
+        alternative=0.5,
+    )
+    assert confirmed is False
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

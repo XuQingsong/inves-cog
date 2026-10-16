@@ -19,6 +19,24 @@ def market_confirmed(*, claim_time, response, independent, alternative):
     return bool(claim_time and response and independent and alternative is not None and alternative >= 0.5)
 
 
+def independent_of_price(items):
+    """Two source roots, a monitored heat spike, or a level-1/2/3 commentary. Price does not count."""
+    roots = set()
+    heat = False
+    commentary = False
+    for row in items:
+        if row.get("kind") == "price":
+            continue
+        root = row.get("source_root")
+        if root:
+            roots.add(root)
+        if row.get("heat_spike") is True and (row.get("entity") or row.get("monitor")):
+            heat = True
+        if row.get("kind") == "commentary" and row.get("source_level") in (1, 2, 3):
+            commentary = True
+    return len(roots) >= 2 or heat or commentary
+
+
 def verified_from_evidence(records, *, as_of, expected_direction):
     from inves_cog.perception.attribution.operating import operating_verdict
 
