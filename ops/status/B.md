@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 06:52 北京
+
+- 草稿 PR #18 head `0fc5472`。没有合并进 main。本地 `make phase1-test`：193 passed，18 deselected。
+- 晚于异常起点的报道可以解释之后的传播，不能解释已经发生的下跌。同一时刻或更早的报道，这条两边都不下结论。缺发布时间或缺起点是缺失。这不改时间对齐的 1.0、0.7 和 0，也不改基本面栏，也不证明经营影响。没有传入时间时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 06:42 北京
 
 - 草稿 PR #18 head `3c53a64`。没有合并进 main。本地 `make phase1-test`：192 passed，18 deselected。
