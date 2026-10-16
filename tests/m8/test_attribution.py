@@ -783,7 +783,7 @@ def test_case_no_news_unexplained():
         {"anomaly_id": "toshiba-2026-10-02", "universe": "pool", "fixture": "synthetic", "news": []},
         {"anomaly_id": "openai-2026-10-14", "universe": "pool", "fixture": "synthetic", "news": []},
         {"anomaly_id": "muse-2026-09-21", "universe": "pool", "fixture": "synthetic", "news": []},
-        {"anomaly_id": "deepseek-2025-01-20", "universe": "pool", "fixture": "synthetic", "news": []},
+        {"anomaly_id": "r1-release-2025-01-20", "universe": "pool", "fixture": "synthetic", "news": []},
     ]
     rows = statuses_without_news(cases, Boom())
     assert [row["anomaly_id"] for row in rows] == [case["anomaly_id"] for case in cases]
