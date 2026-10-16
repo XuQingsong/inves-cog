@@ -43,6 +43,36 @@ def test_residual_exact_linear():
 
 
 @pytest.mark.phase1_blocking
+def test_sic_review_additions():
+    from inves_cog.marketstate.sic import load_sic, sector_etf
+
+    rules, tickers = load_sic()
+    expected = {
+        3714: "XLY",
+        5500: "XLY",
+        5599: "XLY",
+        5810: "XLY",
+        5812: "XLY",
+        3812: "XLI",
+        7340: "XLI",
+        8742: "XLI",
+        3823: "XLK",
+        3824: None,
+        3825: "XLK",
+        3826: "XLV",
+        8731: "XLV",
+        7990: "XLC",
+        8200: "XLY",
+        7389: None,
+    }
+    assert {code: sector_etf(code, rules) for code in expected} == expected
+    assert sector_etf(7372, rules) == "IGV"
+    assert sector_etf(7372, rules, ticker="SHW", tickers=tickers) == "XLB"
+    assert sector_etf(3674, rules) == "SMH"
+    assert sector_etf(3674, rules, ticker="BKNG", tickers=tickers) == "XLY"
+
+
+@pytest.mark.phase1_blocking
 def test_l3_same_as_l2_drops_theme_factor():
     from inves_cog.marketstate.engine import stock_rows
     from inves_cog.marketstate.factors import stock_factors

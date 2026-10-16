@@ -1,5 +1,10 @@
 # Ordered first-match rules from the approved kickoff; unknown codes are SPY-only.
+# Q-M6-19: ticker overrides win before ranges. 5810-5812 already map to XLY via 5600-5999.
+# 7389 (commercial services, including PYPL and UBER) stays unmapped and uses SPY only.
 version: m6-v6
+tickers:
+  BKNG: XLY
+  SHW: XLB
 rules:
 - etf: SMH
   ranges:
@@ -19,10 +24,14 @@ rules:
   ranges:
   - - 2833
     - 2836
+  - - 3826
+    - 3826
   - - 3840
     - 3851
   - - 8000
     - 8099
+  - - 8731
+    - 8731
 - etf: XLP
   ranges:
   - - 2840
@@ -67,14 +76,20 @@ rules:
     - 2519
   - - 3711
     - 3711
+  - - 3714
+    - 3714
   - - 3751
     - 3751
   - - 5200
     - 5399
+  - - 5500
+    - 5599
   - - 5600
     - 5999
   - - 7000
     - 7099
+  - - 8200
+    - 8200
 - etf: XLI
   ranges:
   - - 1520
@@ -87,14 +102,24 @@ rules:
     - 3749
   - - 3760
     - 3799
+  - - 3812
+    - 3812
   - - 4000
     - 4799
+  - - 7340
+    - 7340
+  - - 8742
+    - 8742
 - etf: XLK
   ranges:
   - - 3570
     - 3579
   - - 3660
     - 3699
+  - - 3823
+    - 3823
+  - - 3825
+    - 3825
   - - 7370
     - 7379
 - etf: XLC
@@ -109,6 +134,8 @@ rules:
     - 2741
   - - 4800
     - 4899
+  - - 7990
+    - 7990
 - etf: XLU
   ranges:
   - - 4900

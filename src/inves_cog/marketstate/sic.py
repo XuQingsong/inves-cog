@@ -5,12 +5,20 @@ from pathlib import Path
 import yaml
 
 
-def load_mapping(path=None):
+def load_sic(path=None):
     path = Path(path) if path else Path(__file__).resolve().parents[3] / "config/sic_to_etf.yaml"
-    return yaml.safe_load(path.read_text())["rules"]
+    document = yaml.safe_load(path.read_text())
+    return document["rules"], document.get("tickers") or {}
 
 
-def sector_etf(sic, rules):
+def load_mapping(path=None):
+    return load_sic(path)[0]
+
+
+def sector_etf(sic, rules, *, ticker=None, tickers=None):
+    if ticker and tickers and ticker in tickers:
+        chosen = tickers[ticker]
+        return None if chosen in {None, "SPY"} else chosen
     try:
         code = int(sic)
     except (ValueError, TypeError):
