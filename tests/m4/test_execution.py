@@ -286,6 +286,25 @@ def test_plan_json_contract():
     capped.fill(NEXT, {t: 100 for t in candidates})
     assert sum(not p["swing_only"] for p in capped.positions.values()) <= 12
     assert sum(p["swing_only"] for p in capped.positions.values()) == 3
+    # Missing books are visible; price-only exits remain available (M4 section 6).
+    for broken in (False, True):
+        incomplete = engine()
+        incomplete.positions["AAA"] = position()
+        incomplete.index = 20
+        incomplete.decide(
+            DAY,
+            {
+                "AAA": signal(
+                    entry_pass=False,
+                    books={"quality": None, "growth": None, "valuation": 60, "timing": 80},
+                    consec_below200=3 if broken else 0,
+                )
+            },
+            prices={"AAA": 100},
+        )
+        holding = incomplete.plan(NEXT)["holdings"][0]
+        assert holding["n_code"] == "N8" and "quality" in holding["status"]
+        assert ("M-55" in holding["reason_zh"]) is broken
 
 
 def test_vix_missing_not_panic():
