@@ -2,7 +2,6 @@ m7:
   path_a_z: 3
   path_a_same_sign: 0.6
   path_b_z: 3
-  path_b_gap: 0.04
   path_b_abs_ret: 0.03
   path_b_basket_z: 3
   watch_z: 2

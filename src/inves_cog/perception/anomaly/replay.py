@@ -10,6 +10,9 @@ from inves_cog.perception.anomaly.panel import PricePanel
 STYLE_GROUPS = {"iwm_qqq", "mtum_vlue"}
 MILD_DATES = {"2023-08-02", "2023-10-03", "2025-06-13"}
 OBJECT_COUNT_RULE = "close 且 universe=pool，合并之后的 alert 与 watch。不含 post，不含 wide。Q-M7-9。"
+# Validation labels that are not the stored display name. Q-M7-16.
+# sector:XLF is not aliased to KRE.
+BASKET_ALIASES = {"NAND/DRAM": "memory"}
 
 
 def main(argv=None):
@@ -73,6 +76,7 @@ def build_report(args):
         "n_days": len(counted),
         "object_count_rule": OBJECT_COUNT_RULE,
         "membership_note": getattr(panel, "membership_note", None),
+        "basket_aliases": [{"scope": label, "basket_id": identifier} for label, identifier in BASKET_ALIASES.items()],
     }
     return {"events": events, "misses": misses, "summary": summary}
 
@@ -144,6 +148,9 @@ def _sector(row, etf):
 
 
 def _basket(row, name):
+    alias = BASKET_ALIASES.get(name)
+    if alias and alias in (row.get("basket_ids") or []):
+        return True
     needle = name.replace(" ", "")
     for basket in row["baskets"]:
         hay = str(basket).replace(" ", "")

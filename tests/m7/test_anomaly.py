@@ -96,11 +96,26 @@ def test_path_b_relative():
     hit = one(-3.0, -0.04, -0.04)
     assert any("B" in row["entry_paths"] and "NVDA" in {m["ticker"] for m in row["members"]} for row in hit)
     assert one(-2.99, -0.04, -0.04) == []
-    gap = one(-0.5, -0.06, -0.02)
-    assert any("B" in row["entry_paths"] for row in gap)
+    assert one(-0.5, -0.06, -0.02) == []
     assert one(-0.5, -0.02, -0.10) == []
     assert one(3.0, 0.04, 0.04)  # direction matches
     assert one(-3.0, 0.04, 0.04) == []
+
+
+@pytest.mark.phase1_blocking
+def test_replay_basket_alias():
+    from inves_cog.perception.anomaly.replay import BASKET_ALIASES, _scope_hit
+
+    assert BASKET_ALIASES == {"NAND/DRAM": "memory"}
+    row = {
+        "baskets": ["存储"],
+        "basket_ids": ["memory"],
+        "entry_paths": ["B_basket"],
+        "members": [{"ticker": "KRE"}],
+        "layer": "L3",
+    }
+    assert _scope_hit("basket:NAND/DRAM", [row])
+    assert not _scope_hit("sector:XLF", [row])
 
 
 @pytest.mark.phase1_blocking

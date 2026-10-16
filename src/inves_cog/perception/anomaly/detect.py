@@ -15,10 +15,6 @@ def limits():
     return loaded.params_version, loaded.values["m7"]
 
 
-def _at_least(value, limit):
-    return value >= limit or math.isclose(value, limit, rel_tol=0.0, abs_tol=1e-12)
-
-
 def _sign(value):
     if value is None or not np.isfinite(value) or value == 0:
         return None
@@ -111,13 +107,8 @@ def _path_b(row, rule):
     ret, resid = row.get("ret"), row.get("resid")
     if ret is None or resid is None or abs(ret) < rule["path_b_abs_ret"] or np.sign(ret) != np.sign(resid) or ret == 0:
         return False
-    gap = None
-    if row.get("primary_basket") and row.get("l3_ex_ret") is not None:
-        gap = abs(ret - row["l3_ex_ret"])
     resid_z = row.get("resid_z")
-    return (resid_z is not None and abs(resid_z) >= rule["path_b_z"]) or (
-        gap is not None and _at_least(gap, rule["path_b_gap"])
-    )
+    return resid_z is not None and abs(resid_z) >= rule["path_b_z"]
 
 
 def _index_hits(snapshot, rule):
