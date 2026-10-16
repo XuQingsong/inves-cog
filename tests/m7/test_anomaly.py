@@ -394,16 +394,16 @@ def test_case_detection():
 
     toshiba = case_anomalies(FIXTURE, "toshiba_bars.jsonl.gz", "2026-10-02")
     hdd = [row for row in toshiba if "HDD" in " ".join(row["baskets"])]
-    assert hdd and hdd[0]["severity"] == "watch" and hdd[0]["layer"] == "L3"
+    assert hdd and hdd[0]["layer"] == "L3" and "A_watch" in hdd[0]["entry_paths"]
     assert all(member["ticker"] != "MU" for row in hdd for member in row["members"])
     quiet = case_anomalies(FIXTURE, "openai_bars.jsonl.gz", "2026-10-08")
     assert not [row for row in quiet if row["baskets"]]
     partners = case_anomalies(FIXTURE, "openai_bars.jsonl.gz", "2026-10-14")
-    assert any("OpenAI" in " ".join(row["baskets"]) and row["severity"] == "watch" for row in partners)
+    assert any("OpenAI" in " ".join(row["baskets"]) and "A_watch" in row["entry_paths"] for row in partners)
     meta = case_anomalies(FIXTURE, "meta_bars.jsonl.gz", "2026-09-21")
     assert any(member["ticker"] == "META" and row["severity"] == "alert" for row in meta for member in row["members"])
-    assert any("CPU" in " ".join(row["baskets"]) and row["severity"] == "watch" for row in meta)
-    deep = case_anomalies(FIXTURE, "deepseek_bars.jsonl.gz", "2025-01-27")
+    assert any("CPU" in " ".join(row["baskets"]) and "A_watch" in row["entry_paths"] for row in meta)
+    deep = case_anomalies(FIXTURE, "case_20250127_bars.jsonl.gz", "2025-01-27")
     assert any(
         "AI" in " ".join(row["baskets"])
         and "加速" in " ".join(row["baskets"])

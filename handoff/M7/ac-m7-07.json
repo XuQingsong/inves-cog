@@ -1,0 +1,1751 @@
+{
+ "events": [
+  {
+   "date": "2018-02-05",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-02-05:close:001",
+    "2018-02-05:close:002",
+    "2018-02-05:close:003",
+    "2018-02-05:close:004",
+    "2018-02-05:close:005",
+    "2018-02-05:close:006",
+    "2018-02-05:close:007",
+    "2018-02-05:close:008",
+    "2018-02-05:close:009"
+   ]
+  },
+  {
+   "date": "2018-02-08",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-02-08:close:001",
+    "2018-02-08:close:002",
+    "2018-02-08:close:003",
+    "2018-02-08:close:004",
+    "2018-02-08:close:005",
+    "2018-02-08:close:006",
+    "2018-02-08:close:007",
+    "2018-02-08:close:008",
+    "2018-02-08:close:009",
+    "2018-02-08:close:010",
+    "2018-02-08:close:011",
+    "2018-02-08:close:012",
+    "2018-02-08:close:013",
+    "2018-02-08:close:014"
+   ]
+  },
+  {
+   "date": "2018-03-22",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-03-22:close:001",
+    "2018-03-22:close:002",
+    "2018-03-22:close:003",
+    "2018-03-22:close:004",
+    "2018-03-22:close:005",
+    "2018-03-22:close:006"
+   ]
+  },
+  {
+   "date": "2018-10-10",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-10-10:close:001",
+    "2018-10-10:close:002",
+    "2018-10-10:close:003",
+    "2018-10-10:close:004",
+    "2018-10-10:close:005",
+    "2018-10-10:close:006"
+   ]
+  },
+  {
+   "date": "2018-10-24",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-10-24:close:001",
+    "2018-10-24:close:002",
+    "2018-10-24:close:003",
+    "2018-10-24:close:004",
+    "2018-10-24:close:005",
+    "2018-10-24:close:006"
+   ]
+  },
+  {
+   "date": "2018-12-04",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-12-04:close:001",
+    "2018-12-04:close:002",
+    "2018-12-04:close:003",
+    "2018-12-04:close:004",
+    "2018-12-04:close:005",
+    "2018-12-04:close:006",
+    "2018-12-04:close:007"
+   ]
+  },
+  {
+   "date": "2018-12-24",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-12-24:close:001",
+    "2018-12-24:close:002",
+    "2018-12-24:close:003"
+   ]
+  },
+  {
+   "date": "2018-12-26",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2018-12-26:close:001",
+    "2018-12-26:close:002",
+    "2018-12-26:close:003",
+    "2018-12-26:close:004",
+    "2018-12-26:close:005",
+    "2018-12-26:close:006",
+    "2018-12-26:close:007",
+    "2018-12-26:close:008",
+    "2018-12-26:close:009",
+    "2018-12-26:close:010"
+   ]
+  },
+  {
+   "date": "2019-01-03",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "stock:AAPL"
+   ],
+   "hit_scopes": [
+    "L1",
+    "stock:AAPL"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2019-01-03:close:001",
+    "2019-01-03:close:002",
+    "2019-01-03:close:003",
+    "2019-01-03:close:004",
+    "2019-01-03:close:005",
+    "2019-01-03:close:006"
+   ]
+  },
+  {
+   "date": "2019-05-13",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2019-05-13:close:001",
+    "2019-05-13:close:002",
+    "2019-05-13:close:003",
+    "2019-05-13:close:004",
+    "2019-05-13:close:005",
+    "2019-05-13:close:006",
+    "2019-05-13:close:007",
+    "2019-05-13:close:008"
+   ]
+  },
+  {
+   "date": "2019-08-05",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2019-08-05:close:001",
+    "2019-08-05:close:002",
+    "2019-08-05:close:003",
+    "2019-08-05:close:004",
+    "2019-08-05:close:005",
+    "2019-08-05:close:006",
+    "2019-08-05:close:007",
+    "2019-08-05:close:008",
+    "2019-08-05:close:009"
+   ]
+  },
+  {
+   "date": "2019-08-14",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2019-08-14:close:001",
+    "2019-08-14:close:002",
+    "2019-08-14:close:003",
+    "2019-08-14:close:004",
+    "2019-08-14:close:005",
+    "2019-08-14:close:006",
+    "2019-08-14:close:007",
+    "2019-08-14:close:008",
+    "2019-08-14:close:009"
+   ]
+  },
+  {
+   "date": "2019-09-09",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "style"
+   ],
+   "hit_scopes": [
+    "style"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2019-09-09:close:001",
+    "2019-09-09:close:002",
+    "2019-09-09:close:003",
+    "2019-09-09:close:004",
+    "2019-09-09:close:005"
+   ]
+  },
+  {
+   "date": "2020-02-24",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-02-24:close:001",
+    "2020-02-24:close:002",
+    "2020-02-24:close:003",
+    "2020-02-24:close:004",
+    "2020-02-24:close:005",
+    "2020-02-24:close:006",
+    "2020-02-24:close:007",
+    "2020-02-24:close:008",
+    "2020-02-24:close:009",
+    "2020-02-24:close:010",
+    "2020-02-24:close:011"
+   ]
+  },
+  {
+   "date": "2020-03-09",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "sector:XLE"
+   ],
+   "hit_scopes": [
+    "L1",
+    "sector:XLE"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-03-09:close:001",
+    "2020-03-09:close:002",
+    "2020-03-09:close:003",
+    "2020-03-09:close:004",
+    "2020-03-09:close:005",
+    "2020-03-09:close:006",
+    "2020-03-09:close:007",
+    "2020-03-09:close:008",
+    "2020-03-09:close:009",
+    "2020-03-09:close:010",
+    "2020-03-09:close:011",
+    "2020-03-09:close:012"
+   ]
+  },
+  {
+   "date": "2020-03-12",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-03-12:close:001",
+    "2020-03-12:close:002",
+    "2020-03-12:close:003",
+    "2020-03-12:close:004",
+    "2020-03-12:close:005",
+    "2020-03-12:close:006",
+    "2020-03-12:close:007",
+    "2020-03-12:close:008",
+    "2020-03-12:close:009",
+    "2020-03-12:close:010",
+    "2020-03-12:close:011"
+   ]
+  },
+  {
+   "date": "2020-03-16",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-03-16:close:001",
+    "2020-03-16:close:002",
+    "2020-03-16:close:003",
+    "2020-03-16:close:004",
+    "2020-03-16:close:005",
+    "2020-03-16:close:006",
+    "2020-03-16:close:007",
+    "2020-03-16:close:008",
+    "2020-03-16:close:009",
+    "2020-03-16:close:010",
+    "2020-03-16:close:011"
+   ]
+  },
+  {
+   "date": "2020-03-24",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-03-24:close:001",
+    "2020-03-24:close:002",
+    "2020-03-24:close:003",
+    "2020-03-24:close:004",
+    "2020-03-24:close:005",
+    "2020-03-24:close:006",
+    "2020-03-24:close:007",
+    "2020-03-24:close:008",
+    "2020-03-24:close:009",
+    "2020-03-24:close:010",
+    "2020-03-24:close:011",
+    "2020-03-24:close:012"
+   ]
+  },
+  {
+   "date": "2020-06-11",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-06-11:close:001",
+    "2020-06-11:close:002",
+    "2020-06-11:close:003",
+    "2020-06-11:close:004",
+    "2020-06-11:close:005",
+    "2020-06-11:close:006",
+    "2020-06-11:close:007",
+    "2020-06-11:close:008",
+    "2020-06-11:close:009",
+    "2020-06-11:close:010",
+    "2020-06-11:close:011"
+   ]
+  },
+  {
+   "date": "2020-09-03",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [
+    "basket:云厂商"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-09-03:close:001",
+    "2020-09-03:close:002",
+    "2020-09-03:close:003",
+    "2020-09-03:close:004",
+    "2020-09-03:close:005"
+   ]
+  },
+  {
+   "date": "2020-11-09",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "style",
+    "sector:XLE"
+   ],
+   "hit_scopes": [
+    "style",
+    "sector:XLE"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2020-11-09:close:001",
+    "2020-11-09:close:002",
+    "2020-11-09:close:003",
+    "2020-11-09:close:004",
+    "2020-11-09:close:005",
+    "2020-11-09:close:006",
+    "2020-11-09:close:007",
+    "2020-11-09:close:008",
+    "2020-11-09:close:009",
+    "2020-11-09:close:010",
+    "2020-11-09:close:011",
+    "2020-11-09:close:012",
+    "2020-11-09:close:013",
+    "2020-11-09:close:014"
+   ]
+  },
+  {
+   "date": "2021-02-25",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2021-02-25:close:001",
+    "2021-02-25:close:002",
+    "2021-02-25:close:003",
+    "2021-02-25:close:004",
+    "2021-02-25:close:005",
+    "2021-02-25:close:006"
+   ]
+  },
+  {
+   "date": "2021-11-26",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2021-11-26:close:001",
+    "2021-11-26:close:002",
+    "2021-11-26:close:003",
+    "2021-11-26:close:004"
+   ]
+  },
+  {
+   "date": "2021-11-30",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2021-11-30:close:001",
+    "2021-11-30:close:002",
+    "2021-11-30:close:003",
+    "2021-11-30:close:004",
+    "2021-11-30:close:005"
+   ]
+  },
+  {
+   "date": "2022-01-05",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-01-05:close:001",
+    "2022-01-05:close:002",
+    "2022-01-05:close:003",
+    "2022-01-05:close:004",
+    "2022-01-05:close:005",
+    "2022-01-05:close:006",
+    "2022-01-05:close:007"
+   ]
+  },
+  {
+   "date": "2022-02-24",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-02-24:close:001",
+    "2022-02-24:close:002",
+    "2022-02-24:close:003",
+    "2022-02-24:close:004",
+    "2022-02-24:close:005",
+    "2022-02-24:close:006",
+    "2022-02-24:close:007"
+   ]
+  },
+  {
+   "date": "2022-04-29",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "hit_scopes": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-04-29:close:001",
+    "2022-04-29:close:002",
+    "2022-04-29:close:003",
+    "2022-04-29:close:004",
+    "2022-04-29:close:005"
+   ]
+  },
+  {
+   "date": "2022-05-05",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-05-05:close:001",
+    "2022-05-05:close:002",
+    "2022-05-05:close:003",
+    "2022-05-05:close:004",
+    "2022-05-05:close:005",
+    "2022-05-05:close:006"
+   ]
+  },
+  {
+   "date": "2022-05-18",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "sector:XLP",
+    "stock:WMT"
+   ],
+   "hit_scopes": [
+    "sector:XLP",
+    "stock:WMT"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-05-18:close:001",
+    "2022-05-18:close:002",
+    "2022-05-18:close:003",
+    "2022-05-18:close:004",
+    "2022-05-18:close:005"
+   ]
+  },
+  {
+   "date": "2022-06-13",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-06-13:close:001",
+    "2022-06-13:close:002"
+   ]
+  },
+  {
+   "date": "2022-08-26",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-08-26:close:001",
+    "2022-08-26:close:002",
+    "2022-08-26:close:003"
+   ]
+  },
+  {
+   "date": "2022-09-13",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-09-13:close:001",
+    "2022-09-13:close:002",
+    "2022-09-13:close:003",
+    "2022-09-13:close:004",
+    "2022-09-13:close:005"
+   ]
+  },
+  {
+   "date": "2022-10-07",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "basket:CPU",
+    "basket:半导体设备"
+   ],
+   "hit_scopes": [
+    "basket:CPU",
+    "basket:半导体设备"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-10-07:close:001",
+    "2022-10-07:close:002",
+    "2022-10-07:close:003",
+    "2022-10-07:close:004",
+    "2022-10-07:close:005"
+   ]
+  },
+  {
+   "date": "2022-10-13",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-10-13:close:001",
+    "2022-10-13:close:002",
+    "2022-10-13:close:003"
+   ]
+  },
+  {
+   "date": "2022-11-10",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-11-10:close:001",
+    "2022-11-10:close:002",
+    "2022-11-10:close:003",
+    "2022-11-10:close:004",
+    "2022-11-10:close:005",
+    "2022-11-10:close:006",
+    "2022-11-10:close:007"
+   ]
+  },
+  {
+   "date": "2022-11-30",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2022-11-30:close:001",
+    "2022-11-30:close:002",
+    "2022-11-30:close:003",
+    "2022-11-30:close:004"
+   ]
+  },
+  {
+   "date": "2023-03-09",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "sector:XLF"
+   ],
+   "hit_scopes": [
+    "sector:XLF"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2023-03-09:close:001",
+    "2023-03-09:close:002",
+    "2023-03-09:close:003",
+    "2023-03-09:close:004",
+    "2023-03-09:close:005"
+   ]
+  },
+  {
+   "date": "2023-03-10",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "sector:XLF"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "sector:XLF"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2023-03-10:close:001",
+    "2023-03-10:close:002",
+    "2023-03-10:close:003"
+   ]
+  },
+  {
+   "date": "2023-03-13",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "sector:XLF"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "sector:XLF"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2023-03-13:close:001",
+    "2023-03-13:close:002",
+    "2023-03-13:close:003",
+    "2023-03-13:close:004"
+   ]
+  },
+  {
+   "date": "2023-05-25",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "basket:AI加速芯片",
+    "stock:NVDA"
+   ],
+   "hit_scopes": [
+    "basket:AI加速芯片",
+    "stock:NVDA"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2023-05-25:close:001",
+    "2023-05-25:close:002",
+    "2023-05-25:close:003",
+    "2023-05-25:close:004",
+    "2023-05-25:close:005"
+   ]
+  },
+  {
+   "date": "2023-08-02",
+   "split": "out_of_sample",
+   "mild": true,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "L1"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2023-08-02:close:001",
+    "2023-08-02:close:002",
+    "2023-08-02:close:003"
+   ]
+  },
+  {
+   "date": "2023-10-03",
+   "split": "out_of_sample",
+   "mild": true,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "L1"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2023-10-03:close:001"
+   ]
+  },
+  {
+   "date": "2023-11-14",
+   "split": "out_of_sample",
+   "mild": false,
+   "scopes": [
+    "style",
+    "L1"
+   ],
+   "hit_scopes": [
+    "style",
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2023-11-14:close:001",
+    "2023-11-14:close:002",
+    "2023-11-14:close:003",
+    "2023-11-14:close:004",
+    "2023-11-14:close:005",
+    "2023-11-14:close:006"
+   ]
+  },
+  {
+   "date": "2024-07-11",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "style",
+    "L1"
+   ],
+   "hit_scopes": [
+    "style",
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-07-11:close:001",
+    "2024-07-11:close:002",
+    "2024-07-11:close:003",
+    "2024-07-11:close:004",
+    "2024-07-11:close:005",
+    "2024-07-11:close:006"
+   ]
+  },
+  {
+   "date": "2024-07-24",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [
+    "basket:云厂商"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-07-24:close:001",
+    "2024-07-24:close:002",
+    "2024-07-24:close:003",
+    "2024-07-24:close:004",
+    "2024-07-24:close:005",
+    "2024-07-24:close:006",
+    "2024-07-24:close:007"
+   ]
+  },
+  {
+   "date": "2024-08-02",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-08-02:close:001",
+    "2024-08-02:close:002",
+    "2024-08-02:close:003",
+    "2024-08-02:close:004",
+    "2024-08-02:close:005",
+    "2024-08-02:close:006",
+    "2024-08-02:close:007",
+    "2024-08-02:close:008",
+    "2024-08-02:close:009"
+   ]
+  },
+  {
+   "date": "2024-08-05",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-08-05:close:001",
+    "2024-08-05:close:002",
+    "2024-08-05:close:003",
+    "2024-08-05:close:004",
+    "2024-08-05:close:005",
+    "2024-08-05:close:006",
+    "2024-08-05:close:007",
+    "2024-08-05:close:008",
+    "2024-08-05:close:009",
+    "2024-08-05:close:010",
+    "2024-08-05:close:011",
+    "2024-08-05:close:012"
+   ]
+  },
+  {
+   "date": "2024-09-03",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:AI加速芯片"
+   ],
+   "hit_scopes": [
+    "L1",
+    "basket:AI加速芯片"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-09-03:close:001",
+    "2024-09-03:close:002",
+    "2024-09-03:close:003",
+    "2024-09-03:close:004",
+    "2024-09-03:close:005"
+   ]
+  },
+  {
+   "date": "2024-09-19",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-09-19:close:001",
+    "2024-09-19:close:002",
+    "2024-09-19:close:003"
+   ]
+  },
+  {
+   "date": "2024-10-15",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:半导体设备"
+   ],
+   "hit_scopes": [
+    "basket:半导体设备"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-10-15:close:001",
+    "2024-10-15:close:002",
+    "2024-10-15:close:003",
+    "2024-10-15:close:004"
+   ]
+  },
+  {
+   "date": "2024-11-06",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "style",
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [
+    "style"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-11-06:close:001",
+    "2024-11-06:close:002",
+    "2024-11-06:close:003",
+    "2024-11-06:close:004",
+    "2024-11-06:close:005",
+    "2024-11-06:close:006",
+    "2024-11-06:close:007",
+    "2024-11-06:close:008",
+    "2024-11-06:close:009",
+    "2024-11-06:close:010",
+    "2024-11-06:close:011",
+    "2024-11-06:close:012",
+    "2024-11-06:close:013",
+    "2024-11-06:close:014",
+    "2024-11-06:close:015"
+   ]
+  },
+  {
+   "date": "2024-12-18",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2024-12-18:close:001",
+    "2024-12-18:close:002",
+    "2024-12-18:close:003",
+    "2024-12-18:close:004",
+    "2024-12-18:close:005",
+    "2024-12-18:close:006",
+    "2024-12-18:close:007"
+   ]
+  },
+  {
+   "date": "2025-01-27",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:AI加速芯片",
+    "basket:数据中心电力"
+   ],
+   "hit_scopes": [
+    "basket:AI加速芯片",
+    "basket:数据中心电力"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-01-27:close:001",
+    "2025-01-27:close:002",
+    "2025-01-27:close:003",
+    "2025-01-27:close:004",
+    "2025-01-27:close:005",
+    "2025-01-27:close:006",
+    "2025-01-27:close:007",
+    "2025-01-27:close:008",
+    "2025-01-27:close:009"
+   ]
+  },
+  {
+   "date": "2025-02-27",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:AI加速芯片"
+   ],
+   "hit_scopes": [
+    "basket:AI加速芯片"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-02-27:close:001",
+    "2025-02-27:close:002",
+    "2025-02-27:close:003",
+    "2025-02-27:close:004"
+   ]
+  },
+  {
+   "date": "2025-03-10",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-03-10:close:001",
+    "2025-03-10:close:002",
+    "2025-03-10:close:003",
+    "2025-03-10:close:004",
+    "2025-03-10:close:005",
+    "2025-03-10:close:006",
+    "2025-03-10:close:007",
+    "2025-03-10:close:008",
+    "2025-03-10:close:009",
+    "2025-03-10:close:010",
+    "2025-03-10:close:011"
+   ]
+  },
+  {
+   "date": "2025-04-03",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-04-03:close:001",
+    "2025-04-03:close:002",
+    "2025-04-03:close:003",
+    "2025-04-03:close:004",
+    "2025-04-03:close:005",
+    "2025-04-03:close:006",
+    "2025-04-03:close:007",
+    "2025-04-03:close:008"
+   ]
+  },
+  {
+   "date": "2025-04-04",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-04-04:close:001",
+    "2025-04-04:close:002",
+    "2025-04-04:close:003",
+    "2025-04-04:close:004",
+    "2025-04-04:close:005",
+    "2025-04-04:close:006",
+    "2025-04-04:close:007",
+    "2025-04-04:close:008",
+    "2025-04-04:close:009",
+    "2025-04-04:close:010"
+   ]
+  },
+  {
+   "date": "2025-04-09",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-04-09:close:001",
+    "2025-04-09:close:002",
+    "2025-04-09:close:003",
+    "2025-04-09:close:004",
+    "2025-04-09:close:005",
+    "2025-04-09:close:006",
+    "2025-04-09:close:007",
+    "2025-04-09:close:008",
+    "2025-04-09:close:009",
+    "2025-04-09:close:010"
+   ]
+  },
+  {
+   "date": "2025-04-16",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:AI加速芯片"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [
+    "basket:AI加速芯片"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-04-16:close:001",
+    "2025-04-16:close:002",
+    "2025-04-16:close:003"
+   ]
+  },
+  {
+   "date": "2025-04-21",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-04-21:close:001",
+    "2025-04-21:close:002",
+    "2025-04-21:close:003",
+    "2025-04-21:close:004"
+   ]
+  },
+  {
+   "date": "2025-05-12",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-05-12:close:001",
+    "2025-05-12:close:002",
+    "2025-05-12:close:003",
+    "2025-05-12:close:004",
+    "2025-05-12:close:005"
+   ]
+  },
+  {
+   "date": "2025-05-27",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-05-27:close:001"
+   ]
+  },
+  {
+   "date": "2025-06-13",
+   "split": "in_sample",
+   "mild": true,
+   "scopes": [
+    "sector:XLE"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "sector:XLE"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2025-06-13:close:001",
+    "2025-06-13:close:002",
+    "2025-06-13:close:003"
+   ]
+  },
+  {
+   "date": "2025-08-01",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-08-01:close:001",
+    "2025-08-01:close:002",
+    "2025-08-01:close:003",
+    "2025-08-01:close:004",
+    "2025-08-01:close:005",
+    "2025-08-01:close:006"
+   ]
+  },
+  {
+   "date": "2025-09-10",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:云厂商",
+    "basket:OpenAI合作方"
+   ],
+   "hit_scopes": [
+    "basket:云厂商",
+    "basket:OpenAI合作方"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-09-10:close:001",
+    "2025-09-10:close:002"
+   ]
+  },
+  {
+   "date": "2025-10-10",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2025-10-10:close:001",
+    "2025-10-10:close:002",
+    "2025-10-10:close:003",
+    "2025-10-10:close:004",
+    "2025-10-10:close:005",
+    "2025-10-10:close:006",
+    "2025-10-10:close:007"
+   ]
+  },
+  {
+   "date": "2026-03-31",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-03-31:close:001",
+    "2026-03-31:close:002",
+    "2026-03-31:close:003",
+    "2026-03-31:close:004"
+   ]
+  },
+  {
+   "date": "2026-04-08",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "sector:XLE",
+    "L1"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [
+    "sector:XLE"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-04-08:close:001",
+    "2026-04-08:close:002",
+    "2026-04-08:close:003",
+    "2026-04-08:close:004",
+    "2026-04-08:close:005",
+    "2026-04-08:close:006",
+    "2026-04-08:close:007",
+    "2026-04-08:close:008",
+    "2026-04-08:close:009",
+    "2026-04-08:close:010"
+   ]
+  },
+  {
+   "date": "2026-05-06",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:CPU",
+    "basket:NAND/DRAM"
+   ],
+   "hit_scopes": [
+    "basket:CPU"
+   ],
+   "missed_scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-05-06:close:001",
+    "2026-05-06:close:002",
+    "2026-05-06:close:003",
+    "2026-05-06:close:004",
+    "2026-05-06:close:005",
+    "2026-05-06:close:006",
+    "2026-05-06:close:007"
+   ]
+  },
+  {
+   "date": "2026-06-05",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:AI加速芯片",
+    "basket:NAND/DRAM"
+   ],
+   "hit_scopes": [
+    "L1",
+    "basket:AI加速芯片",
+    "basket:NAND/DRAM"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-06-05:close:001",
+    "2026-06-05:close:002",
+    "2026-06-05:close:003",
+    "2026-06-05:close:004"
+   ]
+  },
+  {
+   "date": "2026-06-23",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:NAND/DRAM",
+    "basket:AI加速芯片"
+   ],
+   "hit_scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "missed_scopes": [
+    "basket:AI加速芯片"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-06-23:close:001",
+    "2026-06-23:close:002",
+    "2026-06-23:close:003",
+    "2026-06-23:close:004"
+   ]
+  },
+  {
+   "date": "2026-07-27",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2026-07-27:close:001",
+    "2026-07-27:close:002",
+    "2026-07-27:close:003",
+    "2026-07-27:close:004",
+    "2026-07-27:close:005"
+   ]
+  },
+  {
+   "date": "2026-07-29",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "hit_scopes": [],
+   "missed_scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "hit_any": false,
+   "anomaly_ids": [
+    "2026-07-29:close:001",
+    "2026-07-29:close:002",
+    "2026-07-29:close:003",
+    "2026-07-29:close:004",
+    "2026-07-29:close:005",
+    "2026-07-29:close:006"
+   ]
+  },
+  {
+   "date": "2026-07-30",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "L1",
+    "basket:云厂商"
+   ],
+   "hit_scopes": [
+    "L1"
+   ],
+   "missed_scopes": [
+    "basket:云厂商"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-07-30:close:001",
+    "2026-07-30:close:002",
+    "2026-07-30:close:003",
+    "2026-07-30:close:004",
+    "2026-07-30:close:005",
+    "2026-07-30:close:006",
+    "2026-07-30:close:007",
+    "2026-07-30:close:008",
+    "2026-07-30:close:009",
+    "2026-07-30:close:010"
+   ]
+  },
+  {
+   "date": "2026-09-21",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:CPU",
+    "stock:META"
+   ],
+   "hit_scopes": [
+    "basket:CPU",
+    "stock:META"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-09-21:close:001",
+    "2026-09-21:close:002",
+    "2026-09-21:close:003",
+    "2026-09-21:close:004"
+   ]
+  },
+  {
+   "date": "2026-10-02",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:HDD"
+   ],
+   "hit_scopes": [
+    "basket:HDD"
+   ],
+   "missed_scopes": [],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-10-02:close:001"
+   ]
+  },
+  {
+   "date": "2026-10-14",
+   "split": "in_sample",
+   "mild": false,
+   "scopes": [
+    "basket:OpenAI合作方",
+    "basket:AI服务器",
+    "L1"
+   ],
+   "hit_scopes": [
+    "basket:OpenAI合作方",
+    "basket:AI服务器"
+   ],
+   "missed_scopes": [
+    "L1"
+   ],
+   "hit_any": true,
+   "anomaly_ids": [
+    "2026-10-14:close:001",
+    "2026-10-14:close:002"
+   ]
+  }
+ ],
+ "misses": [
+  {
+   "date": "2023-03-10",
+   "scopes": [
+    "sector:XLF"
+   ],
+   "reason": "当日合并后的池内异常没有覆盖这些范围"
+  },
+  {
+   "date": "2023-03-13",
+   "scopes": [
+    "sector:XLF"
+   ],
+   "reason": "当日合并后的池内异常没有覆盖这些范围"
+  },
+  {
+   "date": "2026-07-27",
+   "scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "reason": "当日合并后的池内异常没有覆盖这些范围"
+  },
+  {
+   "date": "2026-07-29",
+   "scopes": [
+    "basket:NAND/DRAM"
+   ],
+   "reason": "当日合并后的池内异常没有覆盖这些范围"
+  }
+ ],
+ "summary": {
+  "recall_non_mild": 0.9459459459459459,
+  "recall_out_of_sample_non_mild": 0.9512195121951219,
+  "control_basket_anomalies": 0,
+  "mean_objects_per_day": 3.3283514492753623,
+  "n_days": 2208,
+  "object_count_rule": "close 且 universe=pool，合并之后的 alert 与 watch。不含 post，不含 wide。Q-M7-9。",
+  "membership_note": "成员按导出日的名单回看"
+ }
+}
