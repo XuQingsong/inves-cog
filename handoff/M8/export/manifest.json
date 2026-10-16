@@ -1,0 +1,123 @@
+{
+  "exported_at": "2026-10-16T13:48:59.716364+00:00",
+  "source_main": "8d748ef34d11b547a5925f6cb715e44ee9b48a66",
+  "readonly": true,
+  "classification": "public market and issuer research data; no account, position, token, credential or connection configuration",
+  "windows": [
+    [
+      "2025-01-13",
+      "2025-02-10"
+    ],
+    [
+      "2026-09-12",
+      "2026-10-16"
+    ]
+  ],
+  "files": {
+    "bars-daily.jsonl.gz": {
+      "rows": 2595,
+      "bytes": 22623,
+      "sha256": "cfa29d9d444f4016d0736d28b86b3835bf41684ea501ddcfa705909e81de3057"
+    },
+    "consensus-derived.jsonl.gz": {
+      "rows": 118,
+      "bytes": 2798,
+      "sha256": "3573f49455669220c801b14bae903f43a2da9177ba0939e571b5e1c1acfe5f1f"
+    },
+    "consensus-snapshot.jsonl.gz": {
+      "rows": 239,
+      "bytes": 4501,
+      "sha256": "279773e4f92a5bfbd404a516906eb8cd2f5912f7788e13797cd12430dd120fb4"
+    },
+    "earnings-events.jsonl.gz": {
+      "rows": 396,
+      "bytes": 10281,
+      "sha256": "c1f8599ba63398f0c6fcbf72af77fdc1df160c3cfe194a172f1028164977776c"
+    },
+    "fin-state.jsonl.gz": {
+      "rows": 3555,
+      "bytes": 142030,
+      "sha256": "a7fd05c4b5af9a8165a06b54a297b2a040147ed83b033f92f05f0f63c853eec9"
+    },
+    "graph-baskets.jsonl.gz": {
+      "rows": 29,
+      "bytes": 1558,
+      "sha256": "c4191ae2fc6ee9290208a1dd65a58df875330346b059b408b4b6899ad9d44f68"
+    },
+    "graph-entities.jsonl.gz": {
+      "rows": 441,
+      "bytes": 7980,
+      "sha256": "d8089330cdc8afca6c597c7005214160e6c10e6baca9f25d27aa32e475a94cff"
+    },
+    "graph-monitored-entities.jsonl.gz": {
+      "rows": 158,
+      "bytes": 1571,
+      "sha256": "d44fe7f9c73d8b88b87b424a7f0926221e6a9b8dec858aa3986129e520720b63"
+    },
+    "graph-relations.jsonl.gz": {
+      "rows": 449,
+      "bytes": 86227,
+      "sha256": "6c7e66b414d3ebb2af1d771961e492d9962735a15e014132f7b6404fd97e780c"
+    },
+    "info-embeddings.jsonl.gz": {
+      "rows": 5192,
+      "bytes": 38625305,
+      "sha256": "c6974577669a415aa89fc11629e89f47bea1caa27e9b9d7b2249d226486c5fe4"
+    },
+    "info-items.jsonl.gz": {
+      "rows": 5680,
+      "bytes": 1338173,
+      "sha256": "01a3d8f545d56d1c601e3da218ebecc8a7b3cd2bc4e330d02ad66fff94a4192d"
+    },
+    "marketstate-baskets.jsonl.gz": {
+      "rows": 1450,
+      "bytes": 46476,
+      "sha256": "e5ec3a3fb6f880a4d988ef158ac2f7414000ed89d3562360b586faaaed2abdda"
+    },
+    "marketstate-daily.jsonl.gz": {
+      "rows": 2950,
+      "bytes": 157598,
+      "sha256": "8e11ca2dc56377e4266e8c7162fc2010f0bc6949dde9e057842bf5cdbe67ed56"
+    },
+    "marketstate-market.jsonl.gz": {
+      "rows": 25,
+      "bytes": 733,
+      "sha256": "b66b4681fcdb4238057ac74246ed0ad63bba2bd59cec4ab6c8896f62da780b0c"
+    },
+    "segments.jsonl.gz": {
+      "rows": 755,
+      "bytes": 22305,
+      "sha256": "064ed18cb0ed5d70a887162afc3a3d3114ec8ded02f2ac72a13102f94ed78d00"
+    },
+    "wide-universe.jsonl.gz": {
+      "rows": 118,
+      "bytes": 2442,
+      "sha256": "afa187a7cd92fa52fa9c33ff633d4b9a0a4bd01bcbe8415d9d36c529275c0816"
+    }
+  },
+  "limitations": [
+    "Actual original timestamps are preserved. Enforce published_at and first_seen_at visibility. Embedding created_at, consensus captured_at and filing/accepted timestamps also matter. Export time does not prove historical availability.",
+    "Graph is a current snapshot, not historical versions. Check first_discovered_at, reviewed_at and exposure_asof. Current membership alone does not prove historical membership.",
+    "Marketstate has limited historical coverage; empty windows are missing, not zero. M7 is not merged; use accepted contract/fixtures, no unmerged implementation.",
+    "Stored mktcap applies only to its actual trade_date. No TTM PE is invented. Use only PIT-valid matching price, positive earnings and currency; otherwise NULL with reason. Ordinary shares cannot substitute for diluted shares.",
+    "No account or actual holdings data. Synthetic holding priority tests must be clearly labelled.",
+    "Canonical case source coverage may be incomplete. Frozen recordings/synthetic inputs/real exports must be distinguished. These data do not establish historical search availability.",
+    "News export contains title/summary only, matching the data request. Any quotation or mechanism unsupported by these fields needs a source or explicit missing reason; do not fabricate it.",
+    "2026-10-09 precedes 2026-10-14: earlier OpenAI material is context, not a later second hit. Do not change timestamps to pass tests."
+  ],
+  "news_coverage_by_window": {
+    "2025-01-13..2025-02-10": {
+      "rows": 1,
+      "first_seen_min": "2026-10-14 16:32:59.555353+08:00",
+      "published_min": "2025-01-15 08:00:00+08:00",
+      "published_max": "2025-01-15 08:00:00+08:00"
+    },
+    "2026-09-12..2026-10-16": {
+      "rows": 5679,
+      "first_seen_min": "2026-10-14 16:18:08.256124+08:00",
+      "published_min": "2026-09-12 10:35:05+08:00",
+      "published_max": "2026-10-16 20:02:58+08:00"
+    }
+  },
+  "scope": "Current configured baskets/constituents, their one-hop entities, and targeted Toshiba/TDK/OpenAI/CoreWeave/Muse/DeepSeek/CPI/Barclays headline/summary matches in the listed windows; no full news body or raw payload included."
+}
