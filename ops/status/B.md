@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-003  已完成  2026-10-16 12:26 北京
+
+- 已把最新 `origin/main` `b0f5eb1`（含 M3 合并 `9bbf151`）合进 PR #8。head `c144899`。没有合并 PR。
+- 冲突只动了三个文件。`pyproject.toml` 依赖取并集，保留 `scipy>=1.14,<2`，其余与 main 相同。`uv lock` 已按这份依赖重算，`uv.lock` 没有变化。`tests/fixtures/phase1/MANIFEST.sha256` 两边条目都保留，Harness `validate_frozen` 通过（162 条，无缺、无多余、无哈希不符）。`tests/harness/CHANGELOG.md` 只追加，M6 `draft.json` 与 M3 `timeline.json` 两行都在。
+- blocking：本地 `make phase1-test` 65 passed，7 deselected，1 warning，19.43s，退出码 0。CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/38850453859 （PR，65 passed / 7 deselected / 22.15s）。push 同头：https://github.com/XuQingsong/inves-cog/actions/runs/38850448970 。
+- 已自行决定：无。没有改 `docs/`、golden、milestones 里原有内容；main 带进来的文档和 M3 代码原样保留。
+- 下一步：无。不开始 M7。
+
 ## B-003  已收到  2026-10-16 12:21 北京
 
 - 任务：把最新 `origin/main` 再合进 PR #8。不合并 PR，不改别的文件。
