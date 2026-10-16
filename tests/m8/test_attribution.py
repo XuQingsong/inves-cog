@@ -118,6 +118,52 @@ def test_channels_follow_the_mechanism_and_the_best_source():
 
 
 @pytest.mark.phase1_blocking
+def test_missing_exposure_is_a_fill_task_and_not_incompatible():
+    from inves_cog.perception.attribution.magnitude import exposure_tasks, implied_magnitude
+
+    exposures = [
+        {"channel": "订单/积压", "status": "观察到", "exposure_usd": None, "relation_id": "r-order", "ticker": "CRWV"},
+        {
+            "channel": "融资/对手方",
+            "status": "有支持",
+            "exposure_usd": 50,
+            "relation_id": "r-loan",
+            "ticker": "CRWV",
+            "op_margin_ttm": 0.2,
+        },
+        {
+            "channel": "融资/对手方",
+            "status": "候选",
+            "exposure_usd": None,
+            "relation_id": "r-candidate",
+            "ticker": "DELL",
+        },
+        {"channel": "直接收入", "status": "已确立", "exposure_usd": None, "relation_id": "r-income", "ticker": "NVDA"},
+    ]
+    tasks = exposure_tasks("客户融资", exposures)
+    assert tasks == [
+        {
+            "channel": "订单/积压",
+            "relation_id": "r-order",
+            "ticker": "CRWV",
+            "from_entity": None,
+            "to_entity": None,
+            "reason": "缺美元暴露",
+        }
+    ]
+    assert exposure_tasks("估值倍数", exposures) == []
+    assert all(task["reason"] != "不相容" for task in tasks)
+    known = [
+        {"channel": "直接收入", "source_level": 2, "exposure_usd": 4000000000.0, "incremental_margin": 0.5},
+        {"channel": "融资/对手方", "source_level": 2, "exposure_usd": None},
+    ]
+    verdict = implied_magnitude({"delta_mktcap": -10000000000.0, "pe": 20.0, "channels": known})
+    assert verdict["verdict"] == "相容"
+    with pytest.raises(ValueError, match="渠道只接受"):
+        exposure_tasks("情绪", [])
+
+
+@pytest.mark.phase1_blocking
 def test_implied_magnitude_rules():
     from inves_cog.perception.attribution.magnitude import implied_magnitude
 

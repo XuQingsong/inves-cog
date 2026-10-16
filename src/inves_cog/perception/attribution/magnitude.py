@@ -42,6 +42,24 @@ def _member_move(member):
     return cap * resid / pe
 
 
+def exposure_tasks(mechanism, exposures):
+    """An observed edge with no dollar exposure is a fill task. It is not a verdict."""
+    names = _CHANNELS.get(mechanism)
+    if names is None:
+        raise ValueError("渠道只接受供给、需求、竞争、客户融资、估值倍数")
+    if mechanism == "估值倍数":
+        return []
+    tasks = []
+    for name in names:
+        for row in exposures:
+            if row.get("channel") != name or row.get("status") not in _OBSERVED:
+                continue
+            if row.get("exposure_usd") is not None:
+                continue
+            tasks.append(_exposure_task(name, row))
+    return tasks
+
+
 def channel_rows(mechanism, citations, exposures, *, years_to_realize=None):
     """Mechanism picks the channels. The best cited level is the smallest number."""
     names = _CHANNELS.get(mechanism)
@@ -96,6 +114,17 @@ def _event_limit(row, income_cap, counterparty_cap):
             return None
         return exposure * cap / years * margin
     return exposure * cap * margin
+
+
+def _exposure_task(channel, row):
+    return {
+        "channel": channel,
+        "relation_id": row.get("relation_id"),
+        "ticker": row.get("ticker"),
+        "from_entity": row.get("from_entity"),
+        "to_entity": row.get("to_entity"),
+        "reason": "缺美元暴露",
+    }
 
 
 def _channel_row(name, level, exposures, years):
