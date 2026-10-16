@@ -134,6 +134,23 @@ def test_evidence_scores():
 
 
 @pytest.mark.phase1_blocking
+def test_magnitude_component_drops_an_untested_channel():
+    from inves_cog.perception.attribution.evidence import evidence_score, magnitude_component
+
+    assert magnitude_component("相容") == 1.0
+    assert magnitude_component("部分相容") == 0.6
+    assert magnitude_component("不相容") == 0.2
+    assert magnitude_component("无法检验") is None
+    assert magnitude_component("情绪") is None
+    base = {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "alternatives": 1.0}
+    scored = evidence_score({**base, "magnitude": magnitude_component("不相容")})
+    skipped = evidence_score({**base, "magnitude": magnitude_component("无法检验")})
+    assert scored["total"] == 0.88
+    assert skipped["total"] == 1.0
+    assert "情绪" not in json.dumps(scored, ensure_ascii=False)
+
+
+@pytest.mark.phase1_blocking
 def test_exposure_gradient_needs_three_observed_relations():
     from inves_cog.perception.attribution.evidence import exposure_gradient
 

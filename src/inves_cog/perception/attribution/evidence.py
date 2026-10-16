@@ -17,6 +17,14 @@ def evidence_score(components, rules=None):
     return {"total": total, "confidence": confidence, "enters_hypothesis": total >= 0.5}
 
 
+_MAGNITUDE = {"相容": 1.0, "部分相容": 0.6, "不相容": 0.2}
+
+
+def magnitude_component(verdict):
+    """An untested channel stays missing. An incompatible verdict is not an emotion label."""
+    return _MAGNITUDE.get(verdict)
+
+
 def time_alignment(published, session_start, session_end):
     if published < session_start:
         return 1.0
