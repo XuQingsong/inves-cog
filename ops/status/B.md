@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 23:55 北京
+
+- 草稿 PR #18 head `9b66ae4`。没有合并进 main。本地 `make phase1-test`：155 passed，14 deselected。`make phase1-cases`：3 passed，166 deselected。
+- M7 四个案例日的异常对象在没有当时可见新闻时各有状态：池内是「已发现·原因未明」，广域是「已记录」。不调用模型。这不是第 7.1 节通过。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-16 23:41 北京
 
 - 已读 main `a5991c9`。UD-COORD-02 已把 PR #11 和 PR #16 合并进 main。草稿 PR #18 head `15479f3`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：154 passed，13 deselected。
