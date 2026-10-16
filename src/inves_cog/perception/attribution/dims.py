@@ -157,3 +157,30 @@ def _rumor_verified(item, verifiers):
             continue
         return True
     return False
+
+
+_ESTABLISHED = {"核实", "修订"}
+
+
+def weakest_link(chain):
+    """A later link does not fill an earlier one. The discovery price is not transmission."""
+    if chain is None:
+        return None
+    authenticity = chain.get("authenticity")
+    transmitted = chain.get("transmission") is True and chain.get("price_as_evidence") is not True
+    confirmed = chain.get("market_confirmed") is True
+    open_links = []
+    if authenticity not in _ESTABLISHED:
+        open_links.append("消息真实性")
+    if not transmitted:
+        open_links.append("盈利传导")
+    if not confirmed:
+        open_links.append("市场确认")
+    return {
+        "authenticity": authenticity,
+        "market_confirmed": confirmed,
+        "transmission": transmitted,
+        "open_links": open_links,
+        "fundamental_standing": None,
+        "operating_impact_proven": False,
+    }

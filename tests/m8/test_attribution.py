@@ -763,6 +763,47 @@ def test_rumor_publication_is_not_operating_evidence():
 
 
 @pytest.mark.phase1_blocking
+def test_a_later_link_does_not_fill_an_earlier_one():
+    from inves_cog.perception.attribution.dims import weakest_link
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert weakest_link(None) is None
+    confirmed = weakest_link({"market_confirmed": True, "authenticity": "未核实"})
+    assert confirmed["authenticity"] == "未核实"
+    assert confirmed["market_confirmed"] is True
+    assert confirmed["transmission"] is False
+    assert confirmed["open_links"] == ["消息真实性", "盈利传导"]
+    assert confirmed["fundamental_standing"] is None
+    assert confirmed["operating_impact_proven"] is False
+    verified = weakest_link({"authenticity": "核实", "market_confirmed": False, "transmission": False})
+    assert verified["authenticity"] == "核实"
+    assert verified["open_links"] == ["盈利传导", "市场确认"]
+    priced = weakest_link(
+        {"authenticity": "核实", "transmission": True, "price_as_evidence": True, "market_confirmed": True}
+    )
+    assert priced["transmission"] is False
+    assert priced["open_links"] == ["盈利传导"]
+    closed = {"authenticity": "修订", "transmission": True, "price_as_evidence": False, "market_confirmed": True}
+    revised = weakest_link(closed)
+    assert revised["open_links"] == []
+    assert revised["operating_impact_proven"] is False
+    denied = weakest_link({"authenticity": "证伪", "transmission": True, "market_confirmed": True})
+    assert denied["open_links"] == ["消息真实性"]
+    partial = weakest_link({"authenticity": "部分核实", "transmission": True, "market_confirmed": True})
+    assert partial["open_links"] == ["消息真实性"]
+    anomaly = {"anomaly_id": "chain", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["weakest_link"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], chain=closed)
+    assert report["weakest_link"]["open_links"] == []
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
