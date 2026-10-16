@@ -2,6 +2,23 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-004  已完成  2026-10-16 13:16 北京
+
+- 草稿 PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `ac7c252`。复述在 `handoff/M7/kickoff.md`。没有写实现，没有改 `docs/`、golden、milestones，没有改 M6，没有合并。
+- 必须停，等答复后再写代码：
+  1. AC-M7-07 每天的异常对象，我倾向只计 `close` 且 `universe = pool`、合并之后的对象。把盘后和广域算进去会超过每天 2.5 个。
+  2. `role_perception` 对 `ingest.job_runs` 只有 SELECT。我倾向只给这张表补 INSERT，任务名 `anomaly_detect` 和 `premarket_review`。
+  3. 轮动单独命中时的 `severity`。我倾向风格价差 `|z| ≥ 3` 为 `alert`，只有行业极差 ≥ 4 为 `watch`。
+- 数据申请（不含凭证，不含新闻；导出放 PR 分支 `handoff/M7/export/`，合并前删除）：
+  1. `ingest.bars_daily`：篮子成员加 SPY、QQQ、IWM、RSP、11 只行业 ETF、SMH、IGV、KRE、MTUM、VLUE；列 `ticker, trade_date, open, high, low, close, volume, post_close, adj_factor, source`；2017-01-03 至 2026-10-14。
+  2. `ingest.macro_observations`：`VIX_CBOE`、`VIX3M_CBOE`、`VIXCLS`、`DGS2`、`DTWEXBGS`、`DCOILWTICO`；列 `series_id, observation_date, value, units, realtime_start`；同一日期。
+  3. `graph.baskets` 全表，成员保留生效区间。
+  4. `ingest.issuer_profiles` 的 `ticker, sic`，范围是日线里出现的代码。
+  5. `ingest.short_interest`：池内代码，`publish_date` 2018-01-02 至 2026-10-14；缺的不要填 0。
+  6. `graph.cluster_suggestions` 有行才导。
+- 已自行决定：见复述第 6 节。没有连接工厂或阈值之外的新决定。
+- 下一步：停下。不开始实现。
+
 ## B-004  已收到  2026-10-16 13:10 北京
 
 - 任务：M7 开工复述。只写 `handoff/M7/kickoff.md`，开草稿 PR，分支 `phase1/m7-anomaly-detection`。提交后停下，不写实现。
