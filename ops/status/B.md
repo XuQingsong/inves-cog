@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 05:02 北京
+
+- 草稿 PR #18 head `3ca9d66`。没有合并进 main。本地 `make phase1-test`：182 passed，18 deselected。新的检查在原有二次命中测试里。
+- 二次命中按预期方向取号。上涨时剩余收益至少 +1 且对照篮子绝对值小于 1 才是命中，反方向至少 1 是反证。下跌把符号反过来。对照篮子自己也到 1 时不算命中。东芝合成走查的后续剩余收益改成与下跌方向一致的负数，结论仍是确认。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 04:52 北京
 
 - 草稿 PR #18 head `85152d5`。没有合并进 main。本地 `make phase1-test`：182 passed，18 deselected。
