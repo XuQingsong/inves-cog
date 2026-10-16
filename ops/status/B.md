@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-006  进行中  2026-10-16 17:10 北京
+
+- 实现已推到 PR #11，head `b529480`（先合入 `origin/main` `3f5d476`，冲突只在 `MANIFEST.sha256` 和 `CHANGELOG.md`，两边都保留）。路径 B 不再用 4 个百分点分支，`m7.yaml` 已去掉 `path_b_gap`。别名表只有 `NAND/DRAM` → `memory`，写在复跑代码和 `handoff/M7/ac-m7-07.json` 的 `summary.basket_aliases`。`sector:XLF` 没有改判。
+- 本地 `make phase1-test`：109 passed，9 deselected。M7 blocking 11 个，`test_case_detection` 通过。
+- AC-M7-07（`--source file`）：非温和查全率 0.9459（70/74），样本外 0.9512（39/41），对照日篮子异常 0，平均每天对象 2.327（2208 个交易日，5139 条）。四项都过线。2026-07-27 和 07-29 仍未命中 `basket:NAND/DRAM`：当天 2 条和 5 条异常里没有 `basket_id = memory`。XLF 两天仍未命中。
+- 下一步：等这条 head 的 CI。绿了再写已完成，并删除本机 `/tmp/m7-export`。不要重做实现。
+
 ## B-006  已收到  2026-10-16 17:00 北京
 
 - 任务：M7 验收修复。在 PR #11 的分支上删除路径 B 的 4 个百分点分支（Q-M7-15，`m7.yaml` 去掉 `path_b_gap`），复跑程序加验证集篮子别名表（至少 `NAND/DRAM` → `memory`，Q-M7-16），合入最新 main，重跑 blocking、`test_case_detection`、`--source file` 的 AC-M7-07 和最近 5 天清单。
