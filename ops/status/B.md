@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 00:54 北京
+
+- 草稿 PR #18 head `79e49ef`。没有合并进 main。本地 `make phase1-test`：161 passed，14 deselected。
+- TDK 标题的发布时间晚于 2026-10-02 开盘，时间上可以做二次命中。夹具没有价格响应，结论保持未检验。它的首次见到时间在 2026-10-14，发布当天的严格路径看不见。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 00:41 北京
 
 - 草稿 PR #18 head `d427085`。没有合并进 main。本地 `make phase1-test`：160 passed，14 deselected。
