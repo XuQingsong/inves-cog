@@ -34,6 +34,90 @@ def test_market_move_uses_residual_return_and_positive_eps():
 
 
 @pytest.mark.phase1_blocking
+def test_channels_follow_the_mechanism_and_the_best_source():
+    from inves_cog.perception.attribution.magnitude import channel_rows, implied_magnitude
+
+    citations = [{"source_level": 4}, {"source_level": 1}, {"source_level": None}]
+    supply = channel_rows(
+        "供给",
+        citations,
+        [
+            {
+                "channel": "供给/价格",
+                "status": "观察到",
+                "exposure_usd": 100,
+                "basis": "分部收入",
+                "segment_margin": 0.4,
+                "op_margin_ttm": 0.1,
+            },
+            {
+                "channel": "供给/价格",
+                "status": "候选",
+                "exposure_usd": 900,
+                "basis": "分部收入",
+                "segment_margin": 0.4,
+            },
+        ],
+    )
+    assert supply == [
+        {"channel": "供给/价格", "source_level": 1, "exposure_usd": 100, "incremental_margin": 0.4},
+    ]
+    demand = channel_rows(
+        "需求",
+        [{"source_level": 2}],
+        [
+            {
+                "channel": "直接收入",
+                "status": "有支持",
+                "exposure_usd": 80,
+                "basis": "公司",
+                "segment_margin": 0.9,
+                "op_margin_ttm": 0.2,
+            }
+        ],
+    )
+    assert demand[0]["channel"] == "直接收入"
+    assert demand[0]["incremental_margin"] == 0.2
+    assert channel_rows("竞争", [{"source_level": 3}], [])[0]["channel"] == "直接收入"
+    financing = channel_rows(
+        "客户融资",
+        [{"source_level": 2}],
+        [
+            {"channel": "订单/积压", "status": "已确立", "exposure_usd": 100, "op_margin_ttm": 0.3},
+            {"channel": "融资/对手方", "status": "驳回", "exposure_usd": 80, "op_margin_ttm": 0.3},
+        ],
+        years_to_realize=5,
+    )
+    assert [row["channel"] for row in financing] == ["订单/积压", "融资/对手方"]
+    assert financing[0]["years_to_realize"] == 5
+    assert financing[1]["exposure_usd"] is None
+    multiple = implied_magnitude(
+        {"delta_mktcap": 90000000000.0, "pe": 30.0, "channels": channel_rows("估值倍数", [], [])}
+    )
+    assert multiple["verdict"] == "不相容"
+    assert "情绪" not in json.dumps(multiple, ensure_ascii=False)
+    missing_margin = channel_rows(
+        "供给",
+        [{"source_level": 2}],
+        [{"channel": "供给/价格", "status": "观察到", "exposure_usd": 100, "basis": "分部收入", "op_margin_ttm": 0.2}],
+    )
+    blocked = implied_magnitude({"delta_mktcap": -120.0, "pe": 12.0, "channels": missing_margin})
+    assert missing_margin[0]["incremental_margin"] is None
+    assert blocked["verdict"] == "无法检验"
+    no_years = channel_rows(
+        "客户融资",
+        [{"source_level": 1}],
+        [
+            {"channel": "订单/积压", "status": "观察到", "exposure_usd": 100, "op_margin_ttm": 0.3},
+            {"channel": "融资/对手方", "status": "观察到", "exposure_usd": 50, "op_margin_ttm": 0.2},
+        ],
+    )
+    assert implied_magnitude({"delta_mktcap": -10.0, "pe": 10.0, "channels": no_years})["verdict"] == "无法检验"
+    with pytest.raises(ValueError, match="渠道只接受"):
+        channel_rows("情绪", [], [])
+
+
+@pytest.mark.phase1_blocking
 def test_implied_magnitude_rules():
     from inves_cog.perception.attribution.magnitude import implied_magnitude
 
