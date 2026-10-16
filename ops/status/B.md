@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 21:34 北京
+
+- 草稿 PR #18：https://github.com/XuQingsong/inves-cog/pull/18 ，分支 `phase1/m8-attribution-tracking`，head `bdb5ad8`。复述在 `handoff/M8/kickoff.md`。没有合并。没有改 `docs/`、golden、milestones，没有连接或写入共用库。
+- 没有必须停的问题。复述第 6 节按规格执行：截止日结果落入生命周期的方式、`search_daily_budget = 200`、向量只用 `text-embedding-async-v1` / 1536、M7 对象先用已验收夹具。要改写 `ops/answers/B-008.md`。
+- D-28：三处都还在，但不改变 M8 要读的已入库关系和篮子 id。`draft_ticker` 的健康标签、多 L2 覆盖、STX/SKHY 硬编码列为 backlog，本模块不改 M6。
+- 下一步：先提交失败的 blocking 测试和冻结夹具，再实现。不开始下一条任务。
+
 ## B-008  已收到  2026-10-16 21:30 北京
 
 - 任务：M8 建连归因与三轨跟踪。先写开工复述和草稿 PR，分支 `phase1/m8-attribution-tracking`。没有「必须停」就直接开发。
