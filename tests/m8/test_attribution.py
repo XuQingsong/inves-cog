@@ -709,6 +709,60 @@ def test_review_queue_keeps_authenticity_off_the_rank():
 
 
 @pytest.mark.phase1_blocking
+def test_rumor_publication_is_not_operating_evidence():
+    from inves_cog.perception.attribution.dims import rumor_split
+    from inves_cog.perception.attribution.report import explanation_report
+
+    rumor = {
+        "info_id": "social-1",
+        "kind": "rumor",
+        "source_level": 4,
+        "source_root": "social",
+        "variable": "产能",
+        "quantity": "翻倍",
+    }
+    check = {
+        "source_root": "company",
+        "source_level": 1,
+        "variable": "产能",
+        "quantity": "增加 20%",
+    }
+    assert rumor_split(None) is None
+    assert rumor_split({"source_level": 1, "source_root": "sec", "variable": "产能"}) is None
+    alone = rumor_split(rumor)
+    assert alone["narrative"] is True
+    assert alone["operating_evidence"] is False
+    assert alone["authenticity"] is None
+    assert alone["fundamental_standing"] is None
+    same = rumor_split(rumor, [{**check, "source_root": "social"}])
+    assert same["operating_evidence"] is False
+    other_variable = rumor_split(rumor, [{**check, "variable": "价格"}])
+    assert other_variable["operating_evidence"] is False
+    price = rumor_split(rumor, [{**check, "kind": "price"}])
+    assert price["operating_evidence"] is False
+    level3 = rumor_split(rumor, [{**check, "source_level": 3}])
+    assert level3["operating_evidence"] is False
+    denied = rumor_split(rumor, [{**check, "contradiction": True}])
+    assert denied["operating_evidence"] is False
+    missing = rumor_split({**rumor, "variable": None}, [check])
+    assert missing["narrative"] is True
+    assert missing["operating_evidence"] is False
+    checked = rumor_split(rumor, [check])
+    assert checked["narrative"] is True
+    assert checked["operating_evidence"] is True
+    assert checked["fundamental_standing"] is None
+    anomaly = {"anomaly_id": "rumor", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["rumor_split"] is None
+    report = explanation_report(anomaly, impact, [supply], [], rumor=rumor, verifiers=(check,))
+    assert report["rumor_split"]["operating_evidence"] is True
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

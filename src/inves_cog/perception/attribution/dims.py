@@ -121,3 +121,39 @@ def _heat_rising(heat):
     if any(item is None for item in known):
         return None
     return False
+
+
+_NOT_OPERATING = {"price", "social_heat", "second_hit", "consensus", "flow"}
+
+
+def rumor_split(item, verifiers=()):
+    """A published rumor is narrative. Its content is operating evidence only after an independent check."""
+    if item is None:
+        return None
+    if item.get("kind") != "rumor" and item.get("source_level") != 4:
+        return None
+    published = bool(item.get("source_root") or item.get("info_id"))
+    return {
+        "narrative": published,
+        "operating_evidence": published and _rumor_verified(item, verifiers),
+        "authenticity": None,
+        "fundamental_standing": None,
+    }
+
+
+def _rumor_verified(item, verifiers):
+    variable = item.get("variable")
+    root = item.get("source_root")
+    if not variable or not root:
+        return False
+    for row in verifiers:
+        if row.get("source_root") in (None, root):
+            continue
+        if row.get("source_level") not in (1, 2):
+            continue
+        if row.get("kind") in _NOT_OPERATING or row.get("quantity") is None:
+            continue
+        if row.get("variable") != variable or row.get("contradiction") is True:
+            continue
+        return True
+    return False
