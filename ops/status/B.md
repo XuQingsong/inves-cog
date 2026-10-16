@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 05:12 北京
+
+- 草稿 PR #18 head `945a4c6`。没有合并进 main。本地 `make phase1-test`：183 passed，18 deselected。
+- 由价格异常回捞来的后续信息，首次见到时间必须早于那次响应。同一时刻或更晚见到的不算，缺首次见到时间也不算。不是从价格异常回捞来的材料，仍只看发布时间和来源根。这不改经营结论。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 05:02 北京
 
 - 草稿 PR #18 head `3ca9d66`。没有合并进 main。本地 `make phase1-test`：182 passed，18 deselected。新的检查在原有二次命中测试里。
