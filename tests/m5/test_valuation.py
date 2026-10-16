@@ -99,12 +99,15 @@ def test_valuation_monotone_and_stable():
     assert len(set(ranges)) == 1
     # Strict >3% means an exact endpoint is stable, one float64 step outside is not.
     import math
-    for boundary, direction in [(6.6*1.03, math.inf), (6.6*.97, -math.inf)]:
+
+    for boundary, direction in [(6.6 * 1.03, math.inf), (6.6 * 0.97, -math.inf)]:
         edge_book = ValuationBook()
-        edge_book.update('EDGE', date(2026,10,9), '稳定', stable(), period='2026-06-30', price=170)
+        edge_book.update("EDGE", date(2026, 10, 9), "稳定", stable(), period="2026-06-30", price=170)
         outside = math.nextafter(boundary, direction)
-        edge = edge_book.update('EDGE', date(2026,10,12), '稳定', {**stable(), 'eps_ntm':outside}, period='2026-06-30', price=170)
-        assert edge['inputs']['eps_ntm'] == outside
+        edge = edge_book.update(
+            "EDGE", date(2026, 10, 12), "稳定", {**stable(), "eps_ntm": outside}, period="2026-06-30", price=170
+        )
+        assert edge["inputs"]["eps_ntm"] == outside
     missing = evaluate("稳定", {"price": 100})
     assert missing["neutral"] is None and missing["reason"]
     assert missing["confidence"] == "低"

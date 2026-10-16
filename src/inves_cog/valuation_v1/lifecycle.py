@@ -1,6 +1,5 @@
 """Distinct-period type confirmation and event-driven, auditable range publication."""
 
-import math
 from copy import deepcopy
 
 from inves_cog.valuation_v1.calculations import calculate, mark_price, settings
@@ -140,15 +139,13 @@ class ValuationBook:
             kind = h.override(manual["type"], who=manual["who"], reason=manual["reason"], when=manual.get("when"))
         old_ntm = old["inputs"].get("eps_ntm") if old else None
         new_ntm = inputs.get("eps_ntm")
-        change = abs(new_ntm / old_ntm - 1) * 100 if old_ntm not in (None, 0) and new_ntm is not None else None
-        consensus_event = (
-            (old_ntm is None) != (new_ntm is None)
-            or (old_ntm == 0 and new_ntm not in (None, 0))
-            or (
-                change is not None
-                and change > c["consensus_trigger_pct"]
-                and not math.isclose(change, c["consensus_trigger_pct"], abs_tol=1e-9)
-            )
+        bounds = (
+            sorted([old_ntm * (1 - c["consensus_trigger_pct"] / 100), old_ntm * (1 + c["consensus_trigger_pct"] / 100)])
+            if old_ntm is not None
+            else None
+        )
+        consensus_event = (old_ntm is None) != (new_ntm is None) or (
+            new_ntm is not None and bounds is not None and not bounds[0] <= new_ntm <= bounds[1]
         )
         trigger = new_report or consensus_event or month_refresh or manual is not None
         if trigger:
