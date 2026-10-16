@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 23:12 北京
+
+- 已读 main `31e8ceb` 对 `a028e59` 的四项反例。草稿 PR #18 head `f559023`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：137 passed，11 deselected。
+- 覆盖人数 NaN、修订人数无穷大、修订人数超过覆盖人数、EPS 变化 NaN，都保持条件风险。恰好 30% 和 3% 仍通过。空证据的条件风险不能靠普通赋值改成支持；截止日使用时会再核验。合法结构化证据仍能走到已验证。等需求方按这个 SHA 独立复核。
+- `test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-16 23:04 北京
 
 - 草稿 PR #18 head `7dbbca3`。没有合并进 main。本地 `make phase1-test`：137 passed，11 deselected。`make phase1-cases`：1 passed，147 deselected。
