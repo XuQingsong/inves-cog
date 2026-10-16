@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 04:03 北京
+
+- 草稿 PR #18 head `5dbdbcf`。没有合并进 main。本地 `make phase1-test`：177 passed，18 deselected。
+- 市场侧金额只加总 EPS 为正的成员：前一日市值乘剩余收益再除以 TTM PE。EPS≤0、PE 不可用、或只有总涨跌没有剩余收益的成员不计入。一个都计不上时结论是无法检验，不把金额写成 0。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 03:51 北京
 
 - 草稿 PR #18 head `a34efe2`。没有合并进 main。本地 `make phase1-test`：176 passed，18 deselected。
