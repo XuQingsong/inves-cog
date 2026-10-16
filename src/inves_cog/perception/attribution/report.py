@@ -2,6 +2,7 @@
 
 from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.dims import rumor_split, sentiment_amplification, weakest_link
+from inves_cog.perception.attribution.evidence import later_report
 from inves_cog.perception.attribution.impact import anomaly_status
 from inves_cog.perception.attribution.lifecycle import weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines
@@ -136,6 +137,7 @@ def explanation_report(
     rumor=None,
     verifiers=(),
     chain=None,
+    timing=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -164,6 +166,7 @@ def explanation_report(
         "review_queue": None if queue is None else review_queue(queue),
         "rumor_split": None if rumor is None else rumor_split(rumor, verifiers),
         "weakest_link": weakest_link(chain),
+        "later_report": later_report(timing),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

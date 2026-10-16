@@ -33,6 +33,23 @@ def time_alignment(published, session_start, session_end):
     return 0.0
 
 
+def later_report(timing):
+    """A report after the start can explain later spread. It cannot explain the drop already underway."""
+    if timing is None:
+        return None
+    published = timing.get("published_at")
+    start = timing.get("anomaly_start")
+    if published is None or start is None:
+        return None
+    late = published > start
+    return {
+        "explains_prior_drop": False if late else None,
+        "explains_later_spread": True if late else None,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
 _EXPOSURE_SCORE = {"直接": 3, "间接": 2, "概念关联": 1}
 _OBSERVED = {"观察到", "有支持", "已确立"}
 

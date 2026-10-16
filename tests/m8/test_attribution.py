@@ -804,6 +804,46 @@ def test_a_later_link_does_not_fill_an_earlier_one():
 
 
 @pytest.mark.phase1_blocking
+def test_a_later_report_cannot_explain_the_prior_drop():
+    from inves_cog.perception.attribution.evidence import later_report, time_alignment
+    from inves_cog.perception.attribution.report import explanation_report
+
+    start = datetime(2026, 10, 14, 13, 30)
+    assert later_report(None) is None
+    assert later_report({"published_at": start}) is None
+    assert later_report({"anomaly_start": start}) is None
+    same = later_report({"published_at": start, "anomaly_start": start})
+    assert same["explains_prior_drop"] is None
+    assert same["explains_later_spread"] is None
+    early = later_report({"published_at": start - timedelta(hours=1), "anomaly_start": start})
+    assert early["explains_prior_drop"] is None
+    assert early["explains_later_spread"] is None
+    late = later_report({"published_at": start + timedelta(hours=1), "anomaly_start": start})
+    assert late["explains_prior_drop"] is False
+    assert late["explains_later_spread"] is True
+    assert late["operating_evidence"] is False
+    assert late["fundamental_standing"] is None
+    session_end = start + timedelta(hours=6)
+    assert time_alignment(start + timedelta(days=1), start, session_end) == 0.0
+    anomaly = {"anomaly_id": "late", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["later_report"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        timing={"published_at": start + timedelta(hours=1), "anomaly_start": start},
+    )
+    assert report["later_report"]["explains_prior_drop"] is False
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
