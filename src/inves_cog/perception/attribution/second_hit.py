@@ -9,6 +9,16 @@ def classify_response(expected_z, control_z):
     return "无响应"
 
 
+def later_event(published_at, anomaly_start, *, source_root, outcome=None):
+    """A later page is only eligible. Without a measured response it stays untested."""
+    if published_at <= anomaly_start:
+        return {"eligible": False, "conclusion": "未检验"}
+    if outcome is None:
+        return {"eligible": True, "conclusion": "未检验"}
+    event = {"source_root": source_root, "published_at": published_at, "outcome": outcome}
+    return {"eligible": True, "conclusion": second_hit_conclusion([event], anomaly_start)}
+
+
 def second_hit_conclusion(events, anomaly_start=None):
     seen = set()
     outcomes = []

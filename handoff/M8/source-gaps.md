@@ -38,4 +38,6 @@ v8 之后，这三条可以进入后补录历史案例：发布页走发布路�
 
 现场录音入口是 `candidate_capture`：文件名是候选载荷的 SHA-256，目录是 `anomaly_candidates`。缺这一个文件时调用失败，仓库里不存放编造的成功录音。
 
+TDK 标题的发布时间晚于 2026-10-02 的开盘，时间上可以做二次命中。夹具里没有价格响应，所以结论保持未检验。它的 `first_seen_at` 在 2026-10-14，发布当天的严格路径看不见。
+
 `tests/fixtures/phase1/m8/export_headlines.json` 是导出 `cd02bdd` 的标题短摘录，没有把导出文件放进本分支。CoreWeave、巴克莱三条和 CPI 能对上 OpenAI 的三类；东芝扩产标题是日经转载。这些标题在规则上可以补上对应缺口，但仍是后补录，北京 10-15 09:15 只能看见 CoreWeave，看不见巴克莱和 CPI。没有现场录音。`test_case_attribution` 继续 pending。仍缺能证明早于开盘的 Muse 分钟，以及发布材料所影响的加速芯片篮子。

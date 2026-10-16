@@ -1221,3 +1221,31 @@ def test_candidate_capture_path_is_the_recording_file(tmp_path):
     assert report["closes_ac_m8_06"] is False
     assert report["collected_then"] is False
     assert report["evidence_mode"] == "后补录历史案例"
+
+
+@pytest.mark.phase1_blocking
+def test_tdk_headline_is_eligible_but_untested_without_a_response():
+    from inves_cog.perception.attribution.manual import production_visible
+    from inves_cog.perception.attribution.second_hit import later_event
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/export_headlines.json").read_text())
+    row = next(item for item in payload["items"] if item["kind"] == "tdk_second_hit")
+    published = datetime.fromisoformat(row["published_at"])
+    start = datetime.fromisoformat("2026-10-02T21:30:00+08:00")
+    alone = later_event(published, start, source_root=row["info_id"])
+    assert alone == {"eligible": True, "conclusion": "未检验"}
+    measured = later_event(published, start, source_root=row["info_id"], outcome="命中")
+    assert measured == {"eligible": True, "conclusion": "确认"}
+    after = datetime.fromisoformat("2026-10-06T23:00:00+08:00")
+    assert later_event(published, after, source_root=row["info_id"], outcome="命中")["eligible"] is False
+    visible = production_visible(
+        [
+            {
+                "info_id": row["info_id"],
+                "published_at": published,
+                "first_seen_at": datetime.fromisoformat(row["first_seen_at"]),
+            }
+        ],
+        after,
+    )
+    assert visible == []
