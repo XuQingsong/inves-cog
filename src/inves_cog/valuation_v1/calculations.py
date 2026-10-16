@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from statistics import median
 
-import yaml
+from inves_cog.params import load_params
 
 LABEL = "估值参考 v1，不参与仓位"
 SCENARIOS = ("bear", "neutral", "bull")
@@ -16,7 +16,7 @@ SCENARIOS = ("bear", "neutral", "bull")
 
 @lru_cache(maxsize=1)
 def settings():
-    return yaml.safe_load((Path(__file__).resolve().parents[3] / "config/params/p-2026.10/m5.yaml").read_text())
+    return load_params(Path(__file__).resolve().parents[3] / "config/params/p-2026.10").values["m5"]
 
 
 def clamp(x, low, high):

@@ -40,18 +40,19 @@ def shadow(row, *, bear_30d=None, seen_versions=()):
     score = curve(delta, c["v1_growth_nodes"]) if growth else curve(p, c["v1_p_nodes"])
     return {
         "label": LABEL,
+        "params_version": settings()["params_version"],
         "ticker": row.get("ticker"),
         "date": row.get("date"),
         "version": row.get("version"),
-        "vt1": bool(vt1),
-        "vt2": bool(vt2),
+        "vt1": bool(vt1) if p is not None or (growth and delta is not None) else None,
+        "vt2": bool(vt2) if p is not None else None,
         "vt2_cap_multiplier": c["vt2_cap_multiplier"] if vt2 else 1,
         "v1_score": score,
         "v1_reason": "K01：成长类Δg曲线节点待答"
         if growth and not c["v1_growth_nodes"]
         else ("隐含增速缺失" if growth and delta is None else None),
         "v2_coef": coef,
-        "v3_trim_flag": p is not None and p >= c["v3_p"] and row.get("version") not in seen_versions,
+        "v3_trim_flag": (p >= c["v3_p"] and row.get("version") not in seen_versions) if p is not None else None,
         "v3_fraction": c["v3_fraction"],
         "difference": "仅影子记录；不影响规则A实际订单",
     }
@@ -73,6 +74,7 @@ def panel(row, *, bear_30d=None, seen_versions=()):
     return {
         **row,
         "label": LABEL,
+        "params_version": settings()["params_version"],
         "downside_pct": down,
         "valuation_at_risk_pct": risk,
         "shadow_vt1": s["vt1"],
@@ -97,6 +99,7 @@ def summarize(rows):
             l3[row.get("l3") or "未分类"] += row["valuation_at_risk_pct"]
     return {
         "label": LABEL,
+        "params_version": settings()["params_version"],
         "ticker": "__portfolio__",
         "valuation_at_risk_pct": sum(
             r["valuation_at_risk_pct"] for r in rows if r.get("valuation_at_risk_pct") is not None

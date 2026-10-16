@@ -1,0 +1,177 @@
+"""Daily standalone valuation; read M2 fixed, M1 prices, and M4 snapshots only."""
+
+from datetime import datetime, time, timezone
+from zoneinfo import ZoneInfo
+
+from inves_cog.ingest.fundamentals.state import StateStore
+from inves_cog.ingest.market import exchange
+from inves_cog.valuation_v1.calculations import LABEL, calculate, pe_percentiles, settings
+from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs
+from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
+from inves_cog.valuation_v1.shadows import panel, shadow, summarize
+
+NY = ZoneInfo("America/New_York")
+
+
+def memberships(baskets, as_of):
+    membership = {}
+    peers = {}
+    for basket in baskets:
+        members = [
+            m
+            for m in basket["members"]
+            if str(m.get("effective_from") or "0001-01-01") <= str(as_of)
+            and (m.get("effective_to") is None or str(as_of) < str(m["effective_to"]))
+        ]
+        for member in members:
+            ticker = member["ticker"]
+            level = basket["level"].lower()
+            if member.get("primary", True):
+                membership.setdefault(ticker, {})[level] = basket["name"]
+            if level == "l2":
+                peers[ticker] = [m["ticker"] for m in members if m["ticker"] != ticker]
+    return membership, peers
+
+
+def first_session(day):
+    cal = exchange(day.year)
+    return cal.date_to_session(day.replace(day=1), direction="next").date() == day
+
+
+def build(*, clock, repository, universe, as_of, persist=True, book=None, source=None):
+    tickers = [e["ticker"] for e in universe]
+    source = source or repository.inputs(as_of, tickers)
+    book = book or repository.restore(as_of)
+    seen, bear_past = repository.shadow_history(as_of)
+    cutoff = min(clock.now_utc(), datetime.combine(as_of, time(22, 30), NY).astimezone(timezone.utc))
+    membership, peers = memberships(source["baskets"], as_of)
+    pe = {}
+    for ticker in tickers:
+        store = StateStore(source["states"].get(ticker, []))
+        rows = []
+        for bar in source["bars"].get(ticker, []):
+            # Current price is not an input to a historical multiple. Each PE uses
+            # the financial state that was visible on that historical trade date.
+            if bar["trade_date"] >= as_of:
+                continue
+            state = store.state_asof(ticker, bar["trade_date"], "fixed")
+            rows.append(
+                {
+                    "date": bar["trade_date"],
+                    "close": bar["close"],
+                    "eps_ttm": state.values.get("eps_ttm") if state else None,
+                }
+            )
+        pe[ticker] = pe_percentiles(rows, as_of)
+    ranges = []
+    shadows = []
+    for entity in universe:
+        ticker = entity["ticker"]
+        state = source["store"].state_asof(ticker, as_of, "fixed")
+        bars = [r for r in source["bars"].get(ticker, []) if r["trade_date"] == as_of]
+        price = bars[-1]["close"] if bars else None
+        try:
+            if ticker not in book.types:
+                h = TypeHistory()
+                for prior in source["states"].get(ticker, []):
+                    if prior.period_end is None or (state is not None and prior.filed >= state.filed):
+                        continue
+                    prior_inputs = financial_inputs(prior, source["states"][ticker], entity)
+                    prior_inputs.update(consensus_inputs(source["consensus"].get(ticker, []), prior.filed))
+                    h.observe(prior.period_end, classify(prior_inputs))
+                book.types[ticker] = h
+            inputs = financial_inputs(state, source["states"].get(ticker, []), entity)
+            inputs.update(consensus_inputs(source["consensus"].get(ticker, []), as_of, cutoff=cutoff))
+            p = (
+                pe_percentiles([], as_of, peer_p50=[pe[t]["own_p50"] for t in peers.get(ticker, []) if t in pe])
+                if pe[ticker]["insufficient_pe_history"]
+                else pe[ticker]
+            )
+            inputs.update(p)
+            kind = classify(inputs)
+            row = book.update(
+                ticker,
+                as_of,
+                kind,
+                inputs,
+                period=state.period_end if state else "missing",
+                financial_version=state.filed if state else "missing",
+                price=price,
+                month_refresh=first_session(as_of),
+            )
+            if row["status"] != "ok":
+                extra = [
+                    inputs.get("input_reason"),
+                    inputs.get("diluted_shares_reason") if inputs.get("diluted_shares") is None else None,
+                    inputs.get("normal_margin_reason") if row["type"] == "周期" else None,
+                    inputs.get("consensus_reason"),
+                ]
+                row["reason"] = "; ".join(filter(None, [row["reason"], *extra]))
+            row.update(membership.get(ticker, {}))
+        except Exception as exc:
+            row = calculate("未确定", {})
+            row.update(
+                ticker=ticker,
+                date=as_of,
+                price=price,
+                status="failed",
+                reason=type(exc).__name__ + ": " + str(exc),
+                p=None,
+                p_label=None,
+                implied_growth=None,
+                delta_g=None,
+                financial_version="failed",
+                period=None,
+            )
+        ranges.append(row)
+        shadows.append(shadow(row, bear_30d=bear_past.get(ticker), seen_versions=seen.get(ticker, set())))
+    holdings = repository.holdings(as_of)
+    by_ticker = {r["ticker"]: r for r in ranges}
+    panel_rows = {}
+    for holding in holdings["holdings"]:
+        ticker = holding["ticker"]
+        valuation = by_ticker.get(ticker)
+        if valuation is None:
+            valuation = calculate("未确定", {})
+            valuation.update(ticker=ticker, price=None, p=None, delta_g=None)
+        equity = holding.get("equity")
+        price = valuation.get("price")
+        weight = (
+            holding["shares"] * price / equity * 100
+            if price is not None and equity is not None and equity > 0
+            else None
+        )
+        panel_rows[ticker] = panel({**valuation, "weight_pct": weight}, bear_30d=bear_past.get(ticker))
+    for candidate in holdings["candidates"]:
+        ticker = candidate["ticker"]
+        valuation = by_ticker.get(ticker)
+        if valuation is None:
+            continue
+        equity = holdings.get("equity")
+        amount = candidate.get("notional_est")
+        target = amount / equity * 100 if amount is not None and equity is not None and equity > 0 else None
+        old = panel_rows.get(ticker)
+        # Candidates are compared at the plan's first amount, existing positions
+        # at their actual marked value. An add does not redefine actual exposure.
+        row = {**valuation, "weight_pct": old["weight_pct"] if old else target, "target_weight_pct": target}
+        panel_rows[ticker] = panel(row, bear_30d=bear_past.get(ticker))
+    summary = summarize(list(panel_rows.values()))
+    summary["date"] = as_of
+    if holdings.get("reason"):
+        summary.update(valuation_at_risk_pct=None, shadow_weight_pct=None, reason=holdings["reason"])
+    result = {
+        "label": LABEL,
+        "params_version": settings()["params_version"],
+        "trade_date": as_of,
+        "ranges": ranges,
+        "shadows": shadows,
+        "panel": list(panel_rows.values()),
+        "summary": summary,
+        "holdings_reason": holdings.get("reason"),
+        "processed_count": len(ranges),
+        "status": "degraded" if any(r["status"] != "ok" for r in ranges) or holdings.get("reason") else "ok",
+        "note": str(sum(r["status"] != "ok" for r in ranges)) + "只明确不估或失败；交易不受影响",
+    }
+    if persist:
+        repository.save(as_of, result, clock.now_utc())
+    return result

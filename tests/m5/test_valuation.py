@@ -86,7 +86,7 @@ def test_valuation_monotone_and_stable():
     data = json.loads((ROOT / "tests/fixtures/phase1/m5/lifecycle.json").read_text())
     book = ValuationBook()
     ranges = []
-    for d, p, change in zip(data["dates"], data["prices"], data["consensus_changes_pct"]):
+    for d, p, change in zip(data["dates"], data["prices"], data["consensus_changes_pct"], strict=False):
         r = book.update(
             "AAA",
             date.fromisoformat(d),
@@ -162,8 +162,8 @@ def test_type_switch_needs_two_periods():
 
 @pytest.mark.phase1_blocking
 def test_change_decomposition_sums():
-    from inves_cog.valuation_v1.lifecycle import decompose
     from inves_cog.valuation_v1.calculations import evaluate
+    from inves_cog.valuation_v1.lifecycle import decompose
 
     a = stable()
     b = {**a, "eps_ntm": 7, "eps_ttm": 6.5, "pe_p50": 28}
@@ -244,9 +244,9 @@ def test_shadow_rules_no_orders():
 
 @pytest.mark.phase1_live
 def test_valuation_live_smoke():
-    from inves_cog.valuation_v1.cli import run
     from inves_cog.clock import SystemClock
     from inves_cog.ingest.settings import read_environment
+    from inves_cog.valuation_v1.cli import run
 
     out = run(clock=SystemClock(), values=read_environment(), persist=False)
     assert len(out["ranges"]) == 59

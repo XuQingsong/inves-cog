@@ -152,6 +152,11 @@ class ValuationBook:
         )
         trigger = new_report or consensus_event or month_refresh or manual is not None
         if trigger:
+            if old and not new_report and not month_refresh and manual is None:
+                # A consensus-only event updates E/g inputs, not daily PE history.
+                inputs = {**old["inputs"], **{key: inputs.get(key) for key in CONSENSUS}}
+            elif old and month_refresh and not new_report and not consensus_event and manual is None:
+                inputs = {**old["inputs"], **{key: inputs.get(key) for key in MULTIPLES}}
             fresh = calculate(kind, {**inputs, "type_disagreement": h.disagreement})
             fresh.update(
                 ticker=ticker,
