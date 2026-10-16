@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 22:24 北京
+
+- 草稿 PR #18 head `bb5fc2f`。没有合并进 main。本地 `make phase1-test`：133 passed，10 deselected。
+- 已看到用户批准的导出分支 `data/m8-export` `cd02bdd`。核对后本机临时副本已删除。导出文件没有进入本 PR，也没有进入 main。
+- 缺口在 `handoff/M8/source-gaps.md`。能对上标题的有东芝扩产、TDK 磁头、CoreWeave 债券收益率、巴克莱下调 Dell / HPE / NetApp、当天 CPI 同比 3.7% 对预期 3.6%。对不上的有 10-08 FT 约 500 亿美元年化营收、09-19 至 09-21 开盘前的 Muse 榜单、DeepSeek R1 或登顶。2026-09 至 10 月新闻最早 `first_seen_at` 在 2026-10-14，更早的异常日只能标成后补录历史复盘。巴克莱三条和 CPI 的 `first_seen_at` 在 2026-10-15 14:35+08，北京 10-15 09:15 的回放还看不见。
+- 合成标题只检查案例方向。10-09 仍不能当作 10-14 之后的二次命中。`test_case_attribution` 和 `test_case_no_news_unexplained` 继续 pending。下一步：等冻结夹具补上这三处缺口后再开案例测试。不开始下一条。
+
 ## B-008  进行中  2026-10-16 22:14 北京
 
 - 草稿 PR #18 head `d42b06f`。没有合并进 main。本地 `make phase1-test`：132 passed，10 deselected。迁移在一次性测试库里建表成功。
