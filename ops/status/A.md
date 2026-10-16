@@ -2,6 +2,11 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-006  进行中  2026-10-16 17:18 北京
+- 已读 main **47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a** 的 [ops/answers/A-006.md](https://github.com/XuQingsong/inves-cog/blob/47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a/ops/answers/A-006.md)，blob **de99ea7da9231af94e0f74fd4c9f70881a6f69bd**。需求方明确批准只给既有 role_trading、role_marketstate 授予 inves_cog 的 CONNECT；此处原权限阻塞已解除，不再等待或索要确认。
+- 下一步：快进最新 main，执行这两项 CONNECT 并验证原 schema/table 权限未变，安装已合并 PR13/15 调度、重启并核对新进程；在本任务最终回报列语句/时间、服务 SHA/重启时间和今晚预计时段。
+- 变更：仅已批准的数据库 CONNECT 和 A-006 服务切换；不做其他权限变更或生产迁移。M4 已正式提交验收，head459d91e、CI38878686128保持，不重复跑其测试、不开始 M5。状态推送前已尝试 git pull --rebase（超时），只改 A.md、保留 B.md。
+
 ## A-006  阻塞  2026-10-16 17:15 北京
 - **M4 已完成开发并正式提交验收；A-006 整体仅部署尚未完成**。部署实际连接被数据库拒绝，需要需求方允许或执行给既有 role_trading、role_marketstate 授予 **inves_cog 数据库 CONNECT**。A-006 只授权 LOGIN 且明确不增加别的权限，故未自行授予 CONNECT、用管理员作长期账号或启动已知无法写库的新服务。未自动合并任何 PR。
 - **[PR #12「[M4] 提交验收」](https://github.com/XuQingsong/inves-cog/pull/12) 已转正式**，完整 head **459d91ed407e945227e726a84cd3291898afc977**；本地/GitHub 完整 SHA 和代码树 **ca2b0aae3a355461087483bba94f7da64d59f5a4** 一致，工作树干净。[当前 SHA 的 CI 38878686128](https://github.com/XuQingsong/inves-cog/actions/runs/38878686128) **绿**，准确 head_sha 已核对；干净容器 make phase1-test、M0 CI 断言及破坏性自测成功。nightly 按条件未运行，不冒称夜间回放。
