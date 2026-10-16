@@ -1616,3 +1616,37 @@ def test_openai_rank_counts_candidates_not_citations():
     parked = historical_report(anomaly, leads, "2026-10-16", _cite(fillers))
     assert parked["missing"] == ["前 4 名未含至少 3 类"]
     assert parked["closes_case"] is False
+
+
+@pytest.mark.phase1_cases
+def test_case_capture_plan_prints_paths_without_calling(tmp_path, capsys):
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.attribution.capture_plan import case_bundles, main
+    from inves_cog.perception.attribution.historical import historical_report
+
+    fixture = ROOT / "tests/fixtures/phase1"
+    assert main(["--fixture", str(fixture), "--root", str(tmp_path)]) == 0
+    plans = json.loads(capsys.readouterr().out)
+    by_kind = {}
+    for row in plans:
+        by_kind.setdefault(row["case_kind"], []).append(row)
+        assert row["closes_case"] is False
+        assert row["closes_ac_m8_06"] is False
+        assert row["collected_then"] is False
+        assert row["evidence_mode"] == "后补录历史案例"
+        recording = Path(row["recording"])
+        assert recording.parent == tmp_path / "anomaly_candidates"
+        assert not recording.exists()
+    assert set(by_kind) == {"r1_release", "muse_rank", "toshiba", "openai_arr"}
+    assert by_kind["r1_release"][0]["sources"] == ["manual-r1-2025-01-20"]
+    muse_sources = {tuple(row["sources"]) for row in by_kind["muse_rank"]}
+    assert muse_sources == {("manual-axios-muse-2026-09-18",)}
+    assert by_kind["toshiba"][0]["sources"] == ["news:benzinga:62130092"]
+    opened = set(by_kind["openai_arr"][0]["sources"])
+    assert "manual-reuters-arr-2026-10-08" in opened
+    assert "news:benzinga:62345955" in opened
+    assert "news:benzinga:62350981" in opened
+    assert "news:benzinga:62194029" not in opened
+    bundle = next(row for row in case_bundles(fixture) if row["case_kind"] == "r1_release")
+    with pytest.raises(LLMUnavailable, match="待分析"):
+        historical_report(bundle["anomaly"], bundle["leads"], bundle["read_on"], Client(recordings=tmp_path))

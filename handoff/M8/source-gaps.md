@@ -47,3 +47,9 @@ TDK 标题的发布时间晚于 2026-10-02 的开盘，时间上可以做二次�
 2026-10-02 的 HDD 对象成员是 STX 和 WDC，没有 MU。截止日只能看见东芝扩产这条四级转载，看不见 10-06 的 TDK 标题。机制不是供给时，结构清单不通过。机制写成供给后，只表示标题对上了日经转载，`closes_case` 仍为假，这条四级材料仍然不能当成经营证据。TDK 时间上可以做二次命中，夹具没有价格响应，结论保持未检验。
 
 OpenAI 的前 4 名按候选计。同一个候选里的多条 CoreWeave 引用不占掉后面的名次。第 5 名才出现的因素不能补进前 4 名。
+
+现场录音还没有文件。下面的命令只打印四个案例的载荷路径，不调用模型，也不写录音：
+
+`PYTHONPATH=src python -m inves_cog.perception.attribution.capture_plan --fixture tests/fixtures/phase1 --root recordings`
+
+缺文件时，用 `Client(recordings=...)` 调用 `historical_report` 会失败，状态是待分析。不要编造成功录音。需求方用批准的客户端把结果写成 `recordings/anomaly_candidates/<sha256>.json`，字段是 `task`、`payload_sha256`、`result`。
