@@ -1,26 +1,30 @@
-"""Read-only marketstate snapshot. The connection string stays outside this repository."""
+"""Read-only replay. Basket math uses the same price history as file mode.
+
+Stored marketstate.baskets begins later than the bar history, so a z-score
+taken from that short window does not match the 120-session file calculation.
+This reader rebuilds the snapshot from ingest.bars_daily. Wide names that are
+only present in marketstate.daily stay out of the pool.
+"""
 
 import os
 from datetime import date, timedelta
 
 from inves_cog.perception.anomaly.detect import detect_snapshot
+from inves_cog.perception.anomaly.panel import PricePanel
+from inves_cog.perception.anomaly.universe import pool_names, rotation_names
 
 
 class DatabasePanel:
-    def __init__(self, connection, sessions, baskets, daily, basket_rows, rotation, macro, bars, shorts):
-        self.connection = connection
-        self.sessions = sessions
-        self.membership_note = None
-        self.baskets = baskets
-        self.daily = daily
-        self.basket_rows = basket_rows
-        self.rotation = rotation
-        self.macro = macro
-        self.bars = bars
-        self.shorts = shorts
-        self.levels = {row["basket_id"]: row["level"] for row in baskets}
-        self.names = {row["basket_id"]: row["name"] for row in baskets}
-        self.members = {row["basket_id"]: _members(row) for row in baskets}
+    def __init__(self, panel, wide_daily=None):
+        self.panel = panel
+        self.sessions = panel.sessions
+        self.membership_note = panel.membership_note
+        self.wide_daily = list(wide_daily or [])
+
+    @classmethod
+    def from_frames(cls, bars, baskets, macro_rows=None, short_rows=None, wide_daily=None):
+        panel = PricePanel.from_records(bars, baskets, macro_rows, short_rows)
+        return cls(panel, wide_daily)
 
     @classmethod
     def from_env(cls):
@@ -37,39 +41,18 @@ class DatabasePanel:
     def from_connection(cls, connection, start=None, end=None):
         start = start or date(2017, 1, 1)
         end = end or date(2026, 10, 14)
-        sessions = [
-            row["trade_date"]
-            for row in connection.execute(
-                "SELECT DISTINCT trade_date FROM marketstate.market WHERE trade_date BETWEEN %s AND %s ORDER BY 1",
-                (start, end),
-            ).fetchall()
-        ]
         baskets = connection.execute(
             "SELECT basket_id, level, name, members, factor_basis FROM graph.baskets"
         ).fetchall()
-        daily = connection.execute(
+        pool = sorted(pool_names(baskets))
+        bar_names = sorted(set(pool) | rotation_names())
+        bars = connection.execute(
             """
-            SELECT trade_date, ticker, ret, resid, resid_z, sigma, primary_basket
-            FROM marketstate.daily
-            WHERE session = 'close' AND trade_date BETWEEN %s AND %s
+            SELECT ticker, trade_date, open, high, low, close, volume, post_close, adj_factor, source
+            FROM ingest.bars_daily
+            WHERE ticker = ANY(%s) AND trade_date BETWEEN %s AND %s
             """,
-            (start, end),
-        ).fetchall()
-        basket_rows = connection.execute(
-            """
-            SELECT trade_date, basket_id, ret_ew, resid_z
-            FROM marketstate.baskets
-            WHERE session = 'close' AND trade_date BETWEEN %s AND %s
-            """,
-            (start, end),
-        ).fetchall()
-        rotation = connection.execute(
-            """
-            SELECT trade_date, group_kind, group_id, ret, z
-            FROM marketstate.rotation
-            WHERE session = 'close' AND trade_date BETWEEN %s AND %s
-            """,
-            (start, end),
+            (bar_names, start, end),
         ).fetchall()
         macro = connection.execute(
             """
@@ -80,53 +63,44 @@ class DatabasePanel:
             """,
             (start - timedelta(days=40), end),
         ).fetchall()
-        bars = connection.execute(
-            """
-            SELECT ticker, trade_date, close, volume, adj_factor, source
-            FROM ingest.bars_daily
-            WHERE trade_date BETWEEN %s AND %s
-            """,
-            (end - timedelta(days=10), end),
-        ).fetchall()
         shorts = connection.execute(
             """
             SELECT ticker, settlement_date, publish_date, days_to_cover, si_pct_shares_outstanding
             FROM ingest.short_interest
-            """
+            WHERE ticker = ANY(%s)
+            """,
+            (pool,),
         ).fetchall()
-        return cls(connection, sessions, baskets, daily, basket_rows, rotation, macro, bars, shorts)
+        wide = connection.execute(
+            """
+            SELECT trade_date, ticker, ret, resid, resid_z, sigma, primary_basket
+            FROM marketstate.daily
+            WHERE session = 'close' AND trade_date BETWEEN %s AND %s
+              AND NOT (ticker = ANY(%s))
+            """,
+            (start, end, bar_names),
+        ).fetchall()
+        return cls.from_frames(bars, baskets, macro, shorts, wide)
 
     def detect(self, day, session="close"):
+        rows = self.panel.detect(day, session)
         if session != "close":
-            return []
-        day = date.fromisoformat(str(day)[:10])
-        return detect_snapshot(self.snapshot(day))
+            return rows
+        return rows + self._wide(day)
 
-    def snapshot(self, day):
-        history_days = [item for item in self.sessions if item <= day][-121:]
-        by_day = {}
-        for row in self.basket_rows:
-            by_day.setdefault(row["trade_date"], {}).setdefault(row["basket_id"], row)
-        baskets, history, member_returns = [], {}, {}
-        daily = [row for row in self.daily if row["trade_date"] == day]
-        returns = {row["ticker"]: row["ret"] for row in daily}
-        for basket in self.baskets:
-            identifier = basket["basket_id"]
-            current = by_day.get(day, {}).get(identifier)
-            if current is None or current["ret_ew"] is None:
+    def snapshot(self, day, session="close"):
+        return self.panel.snapshot(day, session)
+
+    def _wide(self, day):
+        day = date.fromisoformat(str(day)[:10])
+        daily = []
+        for row in self.wide_daily:
+            trade_date = row["trade_date"]
+            if not isinstance(trade_date, date):
+                trade_date = date.fromisoformat(str(trade_date)[:10])
+            if trade_date != day:
                 continue
-            baskets.append({"basket_id": identifier, "ret_ew": current["ret_ew"], "resid_z": current["resid_z"]})
-            history[identifier] = [(by_day.get(item, {}).get(identifier) or {}).get("ret_ew") for item in history_days]
-            member_returns[identifier] = {
-                ticker: returns[ticker] for ticker in self.members[identifier] if returns.get(ticker) is not None
-            }
-        return {
-            "trade_date": day.isoformat(),
-            "session": "close",
-            "baskets": baskets,
-            "basket_history": history,
-            "member_returns": member_returns,
-            "daily": [
+            daily.append(
                 {
                     "ticker": row["ticker"],
                     "ret": row["ret"],
@@ -134,51 +108,27 @@ class DatabasePanel:
                     "resid_z": row["resid_z"],
                     "sigma": row["sigma"],
                     "l3_ex_ret": None,
-                    "primary_basket": row["primary_basket"],
+                    "primary_basket": row.get("primary_basket"),
                 }
-                for row in daily
-            ],
+            )
+        if not daily:
+            return []
+        snapshot = {
+            "trade_date": day.isoformat(),
+            "session": "close",
+            "baskets": [],
+            "basket_history": {},
+            "member_returns": {},
+            "daily": daily,
             "daily_history": {},
-            "rotation": [
-                {"group_kind": row["group_kind"], "group_id": row["group_id"], "ret": row["ret"], "z": row["z"]}
-                for row in self.rotation
-                if row["trade_date"] == day
-            ],
-            "macro": _macro_on(self.macro, day),
+            "rotation": [],
+            "macro": {},
             "bars": {},
             "calendar": {"index_rebalance": False, "option_expiry": False, "index_rebalance_connected": False},
             "shorts": {},
             "clusters": [],
-            "levels": self.levels,
-            "names": self.names,
+            "levels": {},
+            "names": {},
+            "pool": sorted(self.panel.classified),
         }
-
-
-def _members(basket):
-    names = []
-    for member in basket["members"]:
-        names.append(member["ticker"] if isinstance(member, dict) else member)
-    return names
-
-
-def _macro_on(rows, day):
-    payload = {}
-    for key, series_ids in {
-        "VIX": ("VIX_CBOE", "VIXCLS"),
-        "DGS2": ("DGS2",),
-        "DTWEXBGS": ("DTWEXBGS",),
-        "DCOILWTICO": ("DCOILWTICO",),
-    }.items():
-        visible = [
-            row
-            for row in rows
-            if row["series_id"] in series_ids and row["observation_date"] <= day and row["realtime_start"] <= day
-        ]
-        if key == "VIX":
-            preferred = [row for row in visible if row["series_id"] == "VIX_CBOE"]
-            visible = preferred or visible
-        visible.sort(key=lambda row: row["observation_date"])
-        current = visible[-1]["value"] if visible else None
-        previous = visible[-2]["value"] if len(visible) > 1 else None
-        payload[key] = {"z": None, "level": current, "prev": previous, "change": None}
-    return payload
+        return detect_snapshot(snapshot)

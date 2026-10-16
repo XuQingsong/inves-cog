@@ -13,6 +13,7 @@ from inves_cog.marketstate.regression import fit_predict
 from inves_cog.marketstate.rotation import SECTORS, STYLES
 from inves_cog.marketstate.sic import load_sic, sector_etf
 from inves_cog.perception.anomaly.detect import detect_snapshot
+from inves_cog.perception.anomaly.universe import pool_names, rotation_names
 
 MACRO_SERIES = {
     "VIX": ("VIX_CBOE", "VIXCLS"),
@@ -164,13 +165,31 @@ class PricePanel:
         basket_path = find_table(directory, "baskets")
         self.baskets = json.loads(basket_path.read_text()) if basket_path else []
         self.membership_note = MEMBERSHIP_NOTE if membership_is_constant(self.baskets) else None
+        self._macro_rows = None
+        self._short_input = None
         self._build(directory, bars)
+
+    @classmethod
+    def from_records(cls, bars, baskets, macro_rows=None, short_rows=None):
+        panel = cls.__new__(cls)
+        panel.baskets = list(baskets)
+        panel.membership_note = MEMBERSHIP_NOTE if membership_is_constant(panel.baskets) else None
+        panel._macro_rows = list(macro_rows or [])
+        panel._short_input = list(short_rows or [])
+        frame = pd.DataFrame(bars)
+        frame["trade_date"] = frame["trade_date"].map(_parse_date)
+        for column in ("open", "high", "low", "close", "volume", "post_close", "adj_factor"):
+            if column in frame:
+                frame[column] = pd.to_numeric(frame[column], errors="coerce")
+        panel._build(None, frame.sort_values(["trade_date", "ticker"]))
+        return panel
 
     def _build(self, directory, bars):
         as_of = max(bars["trade_date"])
         self.levels = {row["basket_id"]: row["level"] for row in self.baskets}
         self.names = {row["basket_id"]: row["name"] for row in self.baskets}
         self.members = {row["basket_id"]: active_tickers(row, as_of) for row in self.baskets}
+        self.classified = pool_names(self.baskets)
         adjusted = bars.assign(adjusted=bars["close"] * bars["adj_factor"])
         self.prices = _pivot(adjusted, "adjusted")
         self.raw_close = _pivot(bars, "close")
@@ -244,8 +263,11 @@ class PricePanel:
         return factors
 
     def _macro(self, directory):
-        path = find_table(directory, "macro")
-        rows = read_rows(path) if path else []
+        if self._macro_rows is not None:
+            rows = self._macro_rows
+        else:
+            path = find_table(directory, "macro") if directory is not None else None
+            rows = read_rows(path) if path else []
         frame = pd.DataFrame(rows)
         self.macro_level = {}
         self.macro_z = {}
@@ -269,11 +291,13 @@ class PricePanel:
             self.macro_z[key] = rolling_z(level.diff())[0]
 
     def _shorts(self, directory):
-        path = find_table(directory, "short_interest")
         self.short_rows = {}
-        if path is None:
-            return
-        for row in read_rows(path):
+        if self._short_input is not None:
+            rows = self._short_input
+        else:
+            path = find_table(directory, "short_interest") if directory is not None else None
+            rows = read_rows(path) if path else []
+        for row in rows:
             settlement = _parse_date(row["settlement_date"])
             visible = self._plus_sessions(settlement, 9)
             if visible is None:
@@ -296,7 +320,7 @@ class PricePanel:
     def _stocks(self, directory):
         rules, ticker_map = load_sic()
         profiles = {}
-        path = find_table(directory, "issuer_profiles")
+        path = find_table(directory, "issuer_profiles") if directory is not None else None
         if path is not None:
             for row in read_rows(path):
                 profiles[row["ticker"]] = row.get("sic")
@@ -312,7 +336,7 @@ class PricePanel:
         self.stock = {}
         self.loo = {}
         sector_cache = {}
-        for ticker in self.pool:
+        for ticker in list(self.pool) + self._wide_tickers():
             if ticker not in self.returns:
                 continue
             factors = self._stock_factors(ticker, profiles, rules, ticker_map, sector_cache)
@@ -320,6 +344,13 @@ class PricePanel:
             primary = self.l3_of.get(ticker)
             if primary is not None:
                 self.loo[ticker] = basket_return(self.returns, self.members[primary["basket_id"]], exclude=ticker)
+
+    def _wide_tickers(self):
+        # Sector and style ETFs are rotation inputs. They are not wide stocks.
+        skipped = rotation_names()
+        return sorted(
+            ticker for ticker in self.returns.columns if ticker not in self.classified and ticker not in skipped
+        )
 
     def _stock_factors(self, ticker, profiles, rules, ticker_map, cache):
         factors = pd.DataFrame({"m": self.returns["SPY"]}, index=self.returns.index)
@@ -423,6 +454,7 @@ class PricePanel:
             "clusters": [],
             "levels": self.levels,
             "names": self.names,
+            "pool": sorted(self.classified),
         }
 
     def _session_returns(self, session):

@@ -2,9 +2,11 @@
 
 复跑输入是 `data/m7-export` 的导出，命令 `--source file`。成员在导出里从 2015-01-01 起不变，报告按「成员按导出日的名单回看」。Q-M7-15 删掉路径 B 的 4 个百分点分支，其余阈值没改。
 
+B-007：文件模式和数据库模式原先不一致，有两个原因。一是数据库模式用 `marketstate.baskets` 的短窗口（导出只有 2026-07-01 起）计算收益 z，120 日文件模式的 z 不同，关注级抢在联动前面，`数据中心电力与散热` 被标成 `A_watch`，合并后把数据中心电力从 L3 抬到 L2。二是 `universe` 写死为 `pool`，广域股票 BAC、LQDA、MMED、PGR、U 被算进池内。现在两种模式都用同一套日线重算篮子；广域只取不在 `config/universe.yaml` 和篮子成员里的 `marketstate.daily`。行业和风格 ETF 只参与轮动，不当作广域个股。一致性测试是 `test_file_and_database_views_match`。
+
 | 验收 | 结果 |
 |---|---|
-| AC-M7-01 | 本地 `make phase1-test` 109 passed、9 deselected。其中 M7 blocking 11 个（含别名测试）和 `test_case_detection` 通过。`test_anomaly_live_smoke` 仍留着，原因等待 R5 |
+| AC-M7-01 | 合入 `origin/main` `e2c223c` 后，本地 `make phase1-test` 122 passed、12 deselected。其中 M7 blocking 12 个（含别名测试和 `test_file_and_database_views_match`）和 `test_case_detection` 通过。`test_anomaly_live_smoke` 仍留着，原因等待 R5 |
 | AC-M7-02 | 四个案例只读冻结行情、篮子、宏观和 SIC。`src/inves_cog/perception/anomaly` 没有 `info_items` |
 | AC-M7-03 | 最近 5 个交易日 2026-10-08、10-09、10-12、10-13、10-14 的收盘和盘后清单在 `handoff/M7/ac-m7-03.json`。每条有层次、篮子、成员、入口、数据质量。已按去掉 4 个百分点分支后的结果重出 |
 | AC-M7-04 | 不在本次跑。只读库复跑用 `--source db`，连接串由调用方放在 `INVES_COG_DATABASE_URL`，仓库不保存 |

@@ -118,6 +118,120 @@ def test_replay_basket_alias():
     assert not _scope_hit("sector:XLF", [row])
 
 
+def _member(ticker):
+    return {
+        "ticker": ticker,
+        "weight": 1,
+        "primary": True,
+        "effective_from": "2015-01-01",
+        "effective_to": None,
+    }
+
+
+def _views():
+    import numpy as np
+    import pandas as pd
+
+    from inves_cog.perception.anomaly.database import DatabasePanel
+    from inves_cog.perception.anomaly.panel import PricePanel
+
+    dates = pd.bdate_range("2025-01-02", periods=81)
+    rng = np.random.default_rng(7)
+    spy = rng.normal(0, 0.01, len(dates))
+    idiosyncratic = rng.normal(0, 0.12, (len(dates), 3))
+    basket = spy[:, None] + idiosyncratic
+    wide = spy + rng.normal(0, 0.01, len(dates))
+    spy[-1] = 0.0
+    basket[-1] = [-0.08, -0.08, -0.08]
+    wide[-1] = -0.15
+    series = {"SPY": spy, "AAA": basket[:, 0], "BBB": basket[:, 1], "CCC": basket[:, 2], "WIDE": wide}
+
+    def closes(values):
+        price = 100.0
+        out = []
+        for value in values:
+            price *= 1 + float(value)
+            out.append(price)
+        return out
+
+    rows = []
+    for name, values in series.items():
+        for day, close in zip(dates, closes(values), strict=True):
+            rows.append(
+                {
+                    "ticker": name,
+                    "trade_date": day.date().isoformat(),
+                    "open": close,
+                    "high": close,
+                    "low": close,
+                    "close": close,
+                    "volume": 1_000_000,
+                    "post_close": None,
+                    "adj_factor": 1,
+                    "source": "synthetic",
+                }
+            )
+    baskets = [
+        {
+            "basket_id": "l2_syn",
+            "level": "L2",
+            "name": "合成",
+            "members": [_member(ticker) for ticker in ("AAA", "BBB", "CCC")],
+            "factor_basis": {"kind": "market"},
+        },
+        {
+            "basket_id": "l3_syn",
+            "level": "L3",
+            "name": "合成主题",
+            "members": [_member(ticker) for ticker in ("AAA", "BBB", "CCC")],
+            "factor_basis": {"kind": "l2", "sector": "合成"},
+        },
+    ]
+    file_panel = PricePanel.from_records(rows, baskets)
+    database = DatabasePanel.from_frames(rows, baskets)
+    day = dates[-1].date()
+    stored = DatabasePanel.from_frames(
+        rows,
+        baskets,
+        wide_daily=[
+            {
+                "trade_date": day,
+                "ticker": "BAC",
+                "ret": -0.08,
+                "resid": -0.08,
+                "resid_z": -4.0,
+                "sigma": 0.02,
+                "primary_basket": None,
+            }
+        ],
+    )
+    return file_panel.detect(day), database.detect(day), stored.detect(day)
+
+
+@pytest.mark.phase1_blocking
+def test_file_and_database_views_match():
+    def signature(rows):
+        return sorted(
+            (
+                row["universe"],
+                row["layer"],
+                tuple(row["entry_paths"]),
+                tuple(row["baskets"]),
+                tuple(sorted(row["tickers"])),
+            )
+            for row in rows
+        )
+
+    file_rows, database_rows, stored_rows = _views()
+    assert signature(file_rows) == signature(database_rows)
+    assert any(row["universe"] == "wide" and row["tickers"] == {"WIDE"} for row in file_rows)
+    linked = [row for row in file_rows if "A_linked" in row["entry_paths"]]
+    assert linked and linked[0]["layer"] == "L2"
+    assert "合成" in linked[0]["baskets"]
+    assert any(row["universe"] == "wide" and row["tickers"] == {"BAC"} for row in stored_rows)
+    assert signature(file_rows) == signature([row for row in stored_rows if "BAC" not in row["tickers"]])
+
+
 @pytest.mark.phase1_blocking
 def test_path_c_factor():
     from inves_cog.perception.anomaly.detect import detect_snapshot

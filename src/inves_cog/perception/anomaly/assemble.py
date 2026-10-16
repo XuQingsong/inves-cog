@@ -110,7 +110,7 @@ def _finish(group, snapshot, rule, version):
         "direction": "down" if score < 0 else "up",
         "max_abs_z": abs(score),
         "data_quality": _quality(tickers, snapshot, rule),
-        "universe": "pool",
+        "universe": _universe(paths, basket_ids, tickers, snapshot),
         "status": "已发现·原因未明",
         "params_version": version,
     }
@@ -118,6 +118,15 @@ def _finish(group, snapshot, rule, version):
     anomaly["type_candidates_prelim"] = candidates(anomaly, snapshot, rule)
     anomaly["coverage"] = {"members": len(members)}
     return anomaly
+
+
+def _universe(paths, basket_ids, tickers, snapshot):
+    if basket_ids or "C" in paths or "C_abs" in paths or any(path.startswith("rotation") for path in paths):
+        return "pool"
+    pool = set(snapshot.get("pool") or [])
+    if pool and tickers and set(tickers).isdisjoint(pool):
+        return "wide"
+    return "pool"
 
 
 def _layer(paths, basket_ids, snapshot, rule):
