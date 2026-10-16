@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 01:44 北京
+
+- 草稿 PR #18 head `82d485f`。没有合并进 main。本地 `make phase1-test`：164 passed，18 deselected。新的案例测试单独通过。
+- 四个历史案例的录音路径可以打印。命令不调用模型，也不写文件：`PYTHONPATH=src python -m inves_cog.perception.attribution.capture_plan --fixture tests/fixtures/phase1 --root recordings`。缺文件时调用失败，状态是待分析。没有编造成功录音。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 01:37 北京
 
 - 已读 main `158f056` 的 Q-M8-12。草稿 PR #18 head `b0f9ddf`。没有合并进 main。本地 `make phase1-test`：164 passed，17 deselected。
