@@ -109,9 +109,7 @@ def test_l3_same_as_l2_drops_theme_factor():
     assert list(different_factors.columns) == ["m", "s", "t"]
     assert "l3_same_as_l2" not in different_reasons
 
-    same_rows, _proof = stock_rows(
-        returns, post, ticker="A", l2=l2, l3=l3_same, sector_etf=None, day=index[-1]
-    )
+    same_rows, _proof = stock_rows(returns, post, ticker="A", l2=l2, l3=l3_same, sector_etf=None, day=index[-1])
     same_close = same_rows[0]
     assert same_close["factor_set"] == "m+s"
     assert "l3_same_as_l2" in same_close["health_codes"]
