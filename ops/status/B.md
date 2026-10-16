@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-002  已收到  2026-10-16 11:40 北京
+
+- 任务：M6 合并前修复（PR #8，分支 `phase1/m6-graph-baskets-marketstate`）。不合并 PR。
+- 依据：`origin/main` `0f6371f`；`ops/control.md` 中 B 为「运行」。验收报告有条件通过。
+- 下一步：合入 main 并解决 `transport.py`；Q-M6-18 先红后绿；补 `sic_to_etf.yaml`；`draft_all` 每线程一条连接；跑 blocking。第 6 项重算共用库需要可写的 `marketstate` 连接，当前只有一份到不了的只读说明。
+
 ## B-001  已完成  2026-10-16 11:08 北京
 
 - `make phase1-test`：在 `origin/main` `273be4a` 上退出码 0。**39 passed**，5 deselected，1 warning，**10.66s**。Python 3.11.17。用的是脚本自带的一次性 docker compose 库，没有连生产库。M6 还在 PR #8，不在这条 main 上，所以这 39 个是 M0–M2 的 blocking，不是 M6 的 11 个。
