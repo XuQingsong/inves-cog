@@ -176,3 +176,5 @@
 - A-006/M4: tests/fixtures/phase1/m4/overlay.json d5cb6e3845b9c3a7cf0b8c3e734ffd0b00b9210d6b37947fca69d3f600e61182 — synthetic cooling and rejected-increase contract, before implementation.
 
 - M4 K04: tests/fixtures/phase1/m4/capacity_synthetic.json 3dcfa7f6e0dd06dff71e8725e075e5c1805e481eeb9653ee6b6a07c8581c0c8a — synthetic watch-slot omission regression; no behavior change before decision.
+
+- 2026-10-16 M5: freeze lifecycle dates, price-only updates and <=3% consensus changes. m5/lifecycle.json sha256 b1e17622cc1204f1fd577a988ff7d4067c72653ac60765e338754015a8d7f410
