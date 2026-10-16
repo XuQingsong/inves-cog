@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 22:14 北京
+
+- 草稿 PR #18 head `d42b06f`。没有合并进 main。本地 `make phase1-test`：132 passed，10 deselected。迁移在一次性测试库里建表成功。
+- 新增 `migrations/phase1_m8_0001_attribution.sql`：回捞、说法、候选、联动事件、三轨、二次命中、冲击分解、系统性标签、标的代码、解释报告。没有 GRANT ingest，没有写共用库。
+- 东芝中期走查是合成夹具，不是冻结新闻。候选引用日经扩产，机制为供给。2026-10-06 的 TDK 只做二次命中。生命周期从已发现走到已验证·有影响。报告写明终结原因，并保留未完成的约束项。标的代码为空，因为这条不是估值倍数连带、叙事冲击未变或原因未明。
+- 仍在 pending：`test_case_attribution`、`test_case_no_news_unexplained`。不假定 `data/m8-export` 已存在。下一步：把另外三个案例的候选排序接到同一份报告契约上，仍用合成或录音，等冻结新闻再开案例测试。不开始下一条。
+
 ## B-008  进行中  2026-10-16 22:09 北京
 
 - 已读 `ops/answers/B-008.md`。草稿 PR #18 head `eaa3dae`，已合入 `origin/main` `c8fee63`。没有合并进 main。本地 `make phase1-test`：130 passed，10 deselected。
