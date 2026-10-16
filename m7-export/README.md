@@ -4,3 +4,7 @@
 - 范围：篮子成员 + SPY、QQQ、IWM、RSP、11 只行业 ETF、SMH、SOXX、IGV、KRE、MTUM、VLUE，2017-01-03 至 2026-10-14。
 - `post_close` 从 2026-10-07 起才有（M7 Q-M7-13）；`short_interest.publish_date` 全空（Q-M7-12）。
 - 用完删除：本地和你的分支都不留，在 status 写"已删除"。本分支在 M7 合并后由需求方删除（Q-M7-14）。
+
+## stored-marketstate/（2026-10-16 追加）
+
+库里实际存的 `marketstate` 四张表，2026-07-01 至 10-15（含 10-14 起的广域股票）。用来比对数据库模式和文件模式的差异（M7 报告第 4 节、B-007）。同样用完删除。
