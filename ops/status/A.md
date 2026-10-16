@@ -2,7 +2,10 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-005  已收到  2026-10-16 14:00 北京
+## A-005  进行中  2026-10-16 14:05 北京
+- 已确认主线 M6 入口缺陷，先通知需求方分派 B 修复（本任务禁止 A 改 M6）：main 2307132 的 marketstate/service.py::MarketService.run 将参数 tickers 覆盖为 load_sic 的 overrides，仅剩 BKNG/SHW；无写入只读探针请求 NVDA/AMD/MSFT/WIDE，calculate 实收到 BKNG/SHW。文件 blob e4eececd3d41a6143dd296e80223591f8922234a，证据暂存 /private/tmp/inves-a005-ops/preflight.json。不是数据源或 key 猜测。
+- 不修改 M6 文件。补算拟直接复用 main 的 calculate 与 MarketService.put，显式传当日 PIT 成员，只写 marketstate；不会用遮蔽后的入口伪称完成。调度 PR 将复用正式命令并标明此入口修复是 A-006 上线前置；请需求方安排 B 修复，避免上线后只处理两个代码。
+- 前置真实数据：日线最新 10-15；广域快照仅 10-14/15（1294/1292），7 月至 10-13 不倒灌未来广域成员；10-14 三只当前均 m+s+t（旧行），待覆盖。分钟缺窗当前确为 0 行。继续完成其余已授权工作。
 - 已读 A-005（blob ee6141e68d294cfd7d1f45ab7f88e7dc55f4d072），期限今天；本轮仅做其三项运维与修复，不开始 M4，实现留 A-006。
 - 将用最新 main 的现有 M6 代码，按明确授权只写 marketstate，补算 2026-07-01 至最近已收盘交易日，报告行数、10-14 NVDA/AMD/MSFT 的 factor_set 以及广域 SPY 单因子数。
 - 调度如需仓库代码/配置，开 [ops] 每日调度注册（A-005）PR；**合并前不在服务生效**，按任务留到 A-006 切换。不修改 M6/M7 代码或执行 M7 迁移。
