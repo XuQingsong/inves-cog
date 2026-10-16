@@ -605,6 +605,62 @@ def test_sentiment_amplification_does_not_change_the_fundamental():
 
 
 @pytest.mark.phase1_blocking
+def test_weak_signal_only_raises_research_priority():
+    from inves_cog.perception.attribution.lifecycle import transition, weak_signal
+    from inves_cog.perception.attribution.report import explanation_report
+
+    clues = [
+        {"variable": "产能", "source_root": "a", "stage": "招聘", "sessions_ago": 0},
+        {"variable": "产能", "source_root": "b", "stage": "招聘", "sessions_ago": 10},
+        {"variable": "产能", "source_root": "c", "stage": "设备安装", "sessions_ago": 30},
+    ]
+    found = weak_signal(clues)
+    assert found["research_priority"] is True
+    assert found["lifecycle"] == "已发现"
+    assert found["authenticity"] is None
+    assert found["fundamental_standing"] is None
+    assert found["overlay"] is False
+    assert found["tasks"] == [
+        {"variable": "产能", "reason": "弱信号补证", "is_evidence": False, "roots": 3, "stages": 2}
+    ]
+    with pytest.raises(ValueError):
+        transition(None, "假设中", [], when="t", trigger="weak", evidence_ids=["a"])
+    late = [{**clues[0], "sessions_ago": 31}, clues[1], clues[2]]
+    assert weak_signal(late)["research_priority"] is False
+    future = [{**clues[0], "sessions_ago": -1}, clues[1], clues[2]]
+    assert weak_signal(future)["research_priority"] is False
+    blocked = clues + [
+        {"variable": "产能", "source_root": "d", "stage": "认证", "sessions_ago": 2, "contradiction": True}
+    ]
+    assert weak_signal(blocked)["research_priority"] is False
+    outside = clues + [
+        {"variable": "产能", "source_root": "d", "stage": "认证", "sessions_ago": 31, "contradiction": True}
+    ]
+    assert weak_signal(outside)["research_priority"] is True
+    assert weak_signal(clues[:2])["research_priority"] is False
+    assert weak_signal([{**row, "stage": "招聘"} for row in clues])["research_priority"] is False
+    assert weak_signal([{**row, "source_root": "a"} for row in clues])["research_priority"] is False
+    assert weak_signal([])["research_priority"] is False
+    assert weak_signal(None) is None
+    missing = [{**clues[0], "sessions_ago": None}, clues[1], clues[2]]
+    assert weak_signal(missing)["research_priority"] is None
+    incomplete = [{**clues[0], "stage": None}, clues[1], clues[2]]
+    assert weak_signal(incomplete)["research_priority"] is None
+    anomaly = {"anomaly_id": "clue", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["weak_signal"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    assert "lifecycle" not in quiet
+    report = explanation_report(anomaly, impact, [supply], [], clues=clues)
+    assert report["weak_signal"]["lifecycle"] == "已发现"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+    assert "lifecycle" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

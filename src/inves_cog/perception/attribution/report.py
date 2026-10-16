@@ -3,6 +3,7 @@
 from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.dims import sentiment_amplification
 from inves_cog.perception.attribution.impact import anomaly_status
+from inves_cog.perception.attribution.lifecycle import weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.retrieve import retrieval_gap
 from inves_cog.perception.attribution.tracks import local_support
@@ -129,6 +130,7 @@ def explanation_report(
     statements=(),
     as_of=None,
     heat=None,
+    clues=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -153,6 +155,7 @@ def explanation_report(
         "retrieval_gap": retrieval_gap(embeddings),
         "magnitude_channels": None if magnitude is None else channel_lines(magnitude),
         "sentiment_amplification": sentiment_amplification(heat, conclusions["fundamental_standing"]),
+        "weak_signal": None if clues is None else weak_signal(clues),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
