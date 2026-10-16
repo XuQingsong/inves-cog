@@ -1,18 +1,43 @@
 """Operating-impact gate. A label is not evidence, and missing fields do not pass."""
 
+import math
+
 _TOKEN = object()
+_OUTCOMES = {"支持", "反证", "条件风险"}
 
 
 class Verdict:
+    __slots__ = ("_outcome", "_unknowns", "_seal")
+
+    def __setattr__(self, name, value):
+        raise AttributeError("判定结果不能改写")
+
     def __init__(self, outcome, unknowns, token):
-        if token is not _TOKEN:
+        if token is not _TOKEN or outcome not in _OUTCOMES:
             raise ValueError("截止日结果必须来自经营证据规则")
-        self.outcome = outcome
-        self.unknowns = list(unknowns)
+        sealed = (outcome, tuple(unknowns))
+        object.__setattr__(self, "_outcome", outcome)
+        object.__setattr__(self, "_unknowns", sealed[1])
+        object.__setattr__(self, "_seal", sealed)
+
+    @property
+    def outcome(self):
+        return self._outcome
+
+    @property
+    def unknowns(self):
+        return list(self._unknowns)
+
+    def confirmed(self):
+        return self._seal == (self._outcome, self._unknowns)
 
 
-def _number(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
+def _finite(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _count(value):
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
 def _row(record):
@@ -49,9 +74,9 @@ def _eps(record, as_of, expected):
     coverage = record.get("coverage")
     revisions = record.get("same_direction_revisions")
     change = record.get("eps_change")
-    if not _number(coverage) or coverage <= 0 or not _number(revisions) or not _number(change):
+    if not _finite(coverage) or coverage <= 0 or not _count(revisions) or revisions > coverage:
         return False
-    if revisions < 0.30 * coverage:
+    if not _finite(change) or revisions < 0.30 * coverage:
         return False
     if expected == "down":
         return change <= -0.03

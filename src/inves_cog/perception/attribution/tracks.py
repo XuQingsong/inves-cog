@@ -69,7 +69,7 @@ def apply_deadline(verdict, *, level1_denial=False, renewed=False):
 
     if renewed:
         raise ValueError("截止日不能续期")
-    if not isinstance(verdict, Verdict):
+    if not isinstance(verdict, Verdict) or not verdict.confirmed():
         raise ValueError("截止日结果必须来自经营证据规则")
     return _deadline_result(verdict.outcome, level1_denial=level1_denial, unknowns=verdict.unknowns)
 

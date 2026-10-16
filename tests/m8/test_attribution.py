@@ -578,7 +578,10 @@ def test_case_direction_on_synthetic_headlines():
 
 @pytest.mark.phase1_blocking
 def test_operating_evidence_thresholds():
+    import math
+
     from inves_cog.perception.attribution.operating import operating_verdict
+    from inves_cog.perception.attribution.tracks import apply_deadline
 
     as_of = datetime(2026, 10, 20, 13, 30)
 
@@ -620,6 +623,18 @@ def test_operating_evidence_thresholds():
     assert verdict([seen(**{**exact, "eps_change": -0.029})]) == "条件风险"
     assert verdict([seen(**{**exact, "coverage": None})]) == "条件风险"
     assert verdict([seen(**{**exact, "eps_change": 0.03})]) == "反证"
+    assert verdict([seen(**{**exact, "coverage": math.nan})]) == "条件风险"
+    assert verdict([seen(**{**exact, "same_direction_revisions": math.inf})]) == "条件风险"
+    assert verdict([seen(**{**exact, "same_direction_revisions": 11})]) == "条件风险"
+    assert verdict([seen(**{**exact, "eps_change": math.nan})]) == "条件风险"
+    empty = operating_verdict([], as_of=as_of, expected_direction="down", unknowns=["投产与良率"])
+    with pytest.raises(AttributeError, match="不能改写"):
+        empty.outcome = "支持"
+    untouched = apply_deadline(empty)
+    assert untouched["operating_impact_proven"] is False
+    assert untouched["unknowns"] == ["投产与良率"]
+    proven = apply_deadline(operating_verdict([exact], as_of=as_of, expected_direction="down"))
+    assert proven["operating_impact_proven"] is True
     industry = [
         seen(kind="industry", source_level=2, quantitative=True, source_root="nikkei", direction="down"),
         seen(kind="industry", source_level=3, quantitative=True, source_root="reuters", direction="down"),
