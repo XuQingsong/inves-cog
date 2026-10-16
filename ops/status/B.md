@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 03:01 北京
+
+- 草稿 PR #18 head `78e6b0b`。没有合并进 main。本地 `make phase1-test`：172 passed，18 deselected。
+- 短名单已经有 5 条时不补搜。不足 5 条且预算用完时，调用次数是 0，报告写「补证未执行」。补搜结果的首次见到时间是当前时刻，时间对齐仍只用发布时间；当前时刻之前的回放看不见它。这一步只做计划，不发起搜索。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 02:52 北京
 
 - 草稿 PR #18 head `38c798f`。没有合并进 main。本地 `make phase1-test`：171 passed，18 deselected。
