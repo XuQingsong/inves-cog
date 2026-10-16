@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 22:55 北京
+
+- 已读 main `5ce0e6e` 上的经营证据预检和 M8 v7。草稿 PR #18 head `a028e59`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：137 passed，10 deselected。
+- 经营已验证不再接受单独的 filing、股价、资金流、社交热度、市场共识度或二次命中。公司一级材料要有可定位引用，并且是 8-K 指引变更或电话会定量表述。EPS 修订要至少 30% 分析师同向、当年共识变化至少 3%、方向一致。产业数据要两个独立来源根。缺字段、未来材料、已证伪材料不通过。约束项仍未知时，另一条合格证据可以支持，未知项保留。截止日不能直接传入「支持」。
+- 东芝走查用的是标明 synthetic 的 8-K 指引变更，不是真实公告。`test_case_attribution` 和 `test_case_no_news_unexplained` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-16 22:45 北京
 
 - 草稿 PR #18 head `ed694dc`。没有合并进 main。本地 `make phase1-test`：136 passed，10 deselected。
