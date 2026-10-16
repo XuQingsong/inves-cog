@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 23:04 北京
+
+- 草稿 PR #18 head `7dbbca3`。没有合并进 main。本地 `make phase1-test`：137 passed，11 deselected。`make phase1-cases`：1 passed，147 deselected。
+- 空新闻路径已从 pending 删除。四个案例在标明 synthetic、新闻为空时状态都是「已发现·原因未明」，不调用模型。这不是真实源判定。
+- `test_case_attribution` 继续 pending。真实冻结新闻仍缺 10-08 FT 年化营收、09-19 至 09-21 开盘前的 Muse 榜单、R1 或登顶。不开始下一条。
+
 ## B-008  进行中  2026-10-16 22:55 北京
 
 - 已读 main `5ce0e6e` 上的经营证据预检和 M8 v7。草稿 PR #18 head `a028e59`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：137 passed，10 deselected。
