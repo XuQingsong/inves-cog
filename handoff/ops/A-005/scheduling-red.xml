@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="11" time="0.085" timestamp="2026-10-16T14:09:11.809943+08:00" hostname="192.168.1.101"><testcase classname="tests.ops.test_daily_scheduling" name="test_installer_registers_inputs_without_dropping_existing_sec_tasks" time="0.001"><failure message="AssertionError: assert 'sec_submissions' in '/fixture/python -u -m inves_cog.ingest.cli schedule --tasks bars_prefill bars_full wide_universe'">def test_installer_registers_inputs_without_dropping_existing_sec_tasks():
+        config = ConfigParser(interpolation=None)
+        config.read_string(configuration(Path("/fixture/inves-cog"), Path("/fixture/python")))
+        command = config.get("program:scheduler", "command")
+        for name in (
+            "bars_prefill",
+            "bars_full",
+            "wide_universe",
+            "sec_submissions",
+            "sec_index",
+            "sec_atom",
+            "m6_market_inputs",
+            "issuer_profiles",
+        ):
+&gt;           assert name in command
+E           AssertionError: assert 'sec_submissions' in '/fixture/python -u -m inves_cog.ingest.cli schedule --tasks bars_prefill bars_full wide_universe'
+
+tests/ops/test_daily_scheduling.py:31: AssertionError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T00:44:00Z-names0]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-10-17T00:44:00Z', names = []
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T00:45:00Z-names1]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-10-17T00:45:00Z', names = ['market_structure']
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T02:29:00Z-names2]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-10-17T02:29:00Z', names = ['market_structure']
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T02:30:00Z-names3]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-10-17T02:30:00Z', names = ['market_structure', 'rule_a_scores']
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T01:44:00Z-names4]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-11-03T01:44:00Z', names = []
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T01:45:00Z-names5]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-11-03T01:45:00Z', names = ['market_structure']
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T03:30:00Z-names6]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">stamp = '2026-11-03T03:30:00Z', names = ['market_structure', 'rule_a_scores']
+
+    @pytest.mark.parametrize(
+        "stamp,names",
+        [
+            ("2026-10-17T00:44:00Z", []),
+            ("2026-10-17T00:45:00Z", ["market_structure"]),
+            ("2026-10-17T02:29:00Z", ["market_structure"]),
+            ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+            ("2026-11-03T01:44:00Z", []),
+            ("2026-11-03T01:45:00Z", ["market_structure"]),
+            ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ],
+    )
+    def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:51: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_waits_for_inputs_and_financials_before_dispatch" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">def test_module_poll_waits_for_inputs_and_financials_before_dispatch():
+&gt;       from scripts.schedule_daily_modules import dependencies_met, run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:73: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_market_failure_does_not_prevent_ready_scoring" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">def test_market_failure_does_not_prevent_ready_scoring():
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:96: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_never_starts_on_weekend" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'">def test_module_poll_never_starts_on_weekend():
+&gt;       from scripts.schedule_daily_modules import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_daily_modules'
+
+tests/ops/test_daily_scheduling.py:113: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

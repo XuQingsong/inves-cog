@@ -26,15 +26,29 @@ supervisor.rpcinterface_factory=supervisor.rpcinterface:make_main_rpcinterface
 serverurl=unix://{state}/supervisor.sock
 """
     programs = {
-        "scheduler": "inves_cog.ingest.cli schedule --tasks bars_prefill bars_full wide_universe",
-        "watchdog": "inves_cog.ingest.service",
-        "embedding": "inves_cog.ingest.embedding_backfill --model text-embedding-async-v1",
+        "scheduler": [
+            "-m",
+            "inves_cog.ingest.cli",
+            "schedule",
+            "--tasks",
+            "bars_prefill",
+            "bars_full",
+            "wide_universe",
+            "sec_submissions",
+            "sec_index",
+            "sec_atom",
+            "m6_market_inputs",
+            "issuer_profiles",
+        ],
+        "daily_modules": [str(root / "scripts/schedule_daily_modules.py")],
+        "watchdog": ["-m", "inves_cog.ingest.service"],
+        "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
     }
     for name, arguments in programs.items():
         restart = "unexpected" if name == "embedding" else "true"
         text += f"""
 [program:{name}]
-command={shlex.quote(str(python))} -u -m {arguments}
+command={shlex.join([str(python), "-u", *arguments])}
 directory={root}
 autostart=true
 autorestart={restart}
