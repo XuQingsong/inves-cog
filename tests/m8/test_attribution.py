@@ -71,6 +71,35 @@ def test_exposure_gradient_needs_three_observed_relations():
 
 
 @pytest.mark.phase1_blocking
+def test_specificity_narrative_and_alternatives_are_separate_scores():
+    from inves_cog.perception.attribution.evidence import alternative_exclusion, basket_specificity, narrative_support
+
+    assert basket_specificity([3.0, 3.0], None) is None
+    assert basket_specificity([3.0], []) is None
+    assert basket_specificity([3.0, 3.0], [0.0]) == 1.0
+    assert basket_specificity([1.5], [0.0]) == 0.5
+    assert basket_specificity([0.0], [1.0]) == 0.0
+    items = [
+        {"source_root": "nikkei", "entities": ["toshiba", "WDC"]},
+        {"source_root": "nikkei", "entities": ["toshiba", "WDC"]},
+        {"source_root": "wire", "entities": ["toshiba"]},
+        {"source_root": "desk", "tickers": ["WDC"]},
+    ]
+    assert narrative_support(items, ["toshiba"], ["WDC"]) == 0.2
+    assert narrative_support([], ["toshiba"], ["WDC"]) == 0.0
+    many = [{"source_root": f"root-{index}", "entities": ["toshiba", "WDC"]} for index in range(6)]
+    assert narrative_support(many, ["toshiba"], ["WDC"]) == 1.0
+    members = [
+        {"ticker": "AAA"},
+        {"ticker": "BBB", "earnings_reaction": True},
+        {"ticker": "CCC", "rating_change": True},
+    ]
+    assert alternative_exclusion([]) is None
+    assert alternative_exclusion(members) == 0.333333
+    assert alternative_exclusion([{"ticker": "AAA", "resid_z": -4.0}]) == 1.0
+
+
+@pytest.mark.phase1_blocking
 def test_time_alignment_late_news():
     from inves_cog.perception.attribution.evidence import time_alignment
 

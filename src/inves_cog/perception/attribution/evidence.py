@@ -29,6 +29,43 @@ _EXPOSURE_SCORE = {"直接": 3, "间接": 2, "概念关联": 1}
 _OBSERVED = {"观察到", "有支持", "已确立"}
 
 
+def basket_specificity(expected, control):
+    """How far the expected basket moved past the control, scaled by 3. No control basket is missing."""
+    if not expected or not control:
+        return None
+    gap = _mean_abs(expected) - _mean_abs(control)
+    return min(1.0, max(0.0, gap / 3))
+
+
+def narrative_support(items, event_entities, affected):
+    """Share of independent roots that name both the event and an affected entity, capped at 1."""
+    event = set(event_entities)
+    names = set(affected)
+    roots = set()
+    for item in items:
+        mentioned = set(item.get("entities") or []) | set(item.get("tickers") or [])
+        root = item.get("source_root")
+        if root and mentioned & event and mentioned & names:
+            roots.add(root)
+    return min(len(roots) / 5, 1.0)
+
+
+def alternative_exclusion(members):
+    """One minus the share of members with their own earnings, 8-K guidance, or rating change."""
+    if not members:
+        return None
+    flagged = sum(1 for member in members if _own_news(member))
+    return round(1 - flagged / len(members), 6)
+
+
+def _mean_abs(values):
+    return sum(abs(value) for value in values) / len(values)
+
+
+def _own_news(member):
+    return bool(member.get("earnings_reaction") or member.get("guidance_8k") or member.get("rating_change"))
+
+
 def exposure_gradient(members, relations, *, direction):
     """Spearman of observed exposure and the move in the expected direction. Below three names is missing."""
     if direction not in {"up", "down"}:
