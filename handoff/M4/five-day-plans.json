@@ -1,0 +1,1957 @@
+{
+  "kind": "historical replay using actual database inputs, not scheduled runs",
+  "captured_at": "2026-10-16 09:05:43.148638+00:00",
+  "targets": [
+    "2026-10-09",
+    "2026-10-12",
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15"
+  ],
+  "write_operations": 0,
+  "plans": [
+    {
+      "trade_date": "2026-10-09",
+      "signal_date": "2026-10-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "overlay": {
+        "version": null,
+        "status": "missing",
+        "errors": []
+      },
+      "data_coverage": {
+        "tradable": 54,
+        "with_bars": 54,
+        "pct": 100.0
+      },
+      "published": true,
+      "unpublished_reason": null,
+      "orders": [
+        {
+          "ticker": "HD",
+          "action": "buy_watch",
+          "label": "观察波段买入",
+          "rule_ids": [
+            "M-60"
+          ],
+          "reason_zh": "M-60 观察波段买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "defense",
+          "value": 25000.0,
+          "watch_cap": 0.08,
+          "order_id": "eb35df27eb34d645251bbbc42ed38d575bee2663e7abf90692773238b1f1d1b8",
+          "kind": "swing_buy",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 25000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "SNDK",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.6,
+          "certainty": "high",
+          "half": false,
+          "order_id": "b3ef97379ae615ab1b5bacafbff1621bf799bf48d051302c11eda4f30b1a02f6",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 48000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "MU",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.6,
+          "certainty": "high",
+          "half": false,
+          "order_id": "c545a8cf1f10de5f4dad9d303e5d35063c224ed73ff56033fa1c74f516292ecf",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 48000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "WDC",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.6,
+          "certainty": "high",
+          "half": false,
+          "order_id": "ac0fce7b3e26ee533fb80136e1ecdb326f0bf6c14b6559060ed011835207b309",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 48000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "AVGO",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.6,
+          "certainty": "high",
+          "half": false,
+          "order_id": "3b6f4aaf6f6e245518a49196b453333a8eeb95c8356bd02e5464227880e4ec89",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 48000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "STX",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.6,
+          "certainty": "high",
+          "half": false,
+          "order_id": "485c4f6a4b139494223a9b3d82ae0c4b7a46a26d35b36df2df2900712176a1a3",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 48000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "PLTR",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.6,
+          "certainty": "high",
+          "half": false,
+          "order_id": "620c11f5381fd375732c8b49422ee42a6f264a0e86489c486175b29920370f45",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 48000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "NVDA",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.7000000000000001,
+          "certainty": "high",
+          "half": false,
+          "order_id": "956c878cfa94f162d9aac2736aebe8fa066ef323f8be3f9f69849a2e9e3f4f8a",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 84000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "CVX",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "defense",
+          "fraction": 0.6799999999999999,
+          "certainty": "medium",
+          "half": false,
+          "order_id": "a03bae1cdc63d88214d14fc0e73bf553e33f188debb03d4a28dc797b1df67254",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 81599.99999999999,
+          "overlay_version": null
+        },
+        {
+          "ticker": "JPM",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.5800000000000001,
+          "certainty": "medium",
+          "half": false,
+          "order_id": "d2dd6acdc5c30e16525b98d94d45b9d9a327b1fd6692cc459e5e1a0dc1042a83",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 69600.00000000001,
+          "overlay_version": null
+        },
+        {
+          "ticker": "LLY",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.7000000000000001,
+          "certainty": "high",
+          "half": false,
+          "order_id": "87c8226f8d0393a3642d1844d72d3faa7387aa24aea02136ec965ae3830c1c02",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 84000.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "GOOGL",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.5800000000000001,
+          "certainty": "medium",
+          "half": false,
+          "order_id": "0f5818a3fe723c7dd2a372cd753fe248f0e7cef8e3f38161ff6616bec94eb129",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 69600.00000000001,
+          "overlay_version": null
+        },
+        {
+          "ticker": "XOM",
+          "action": "buy_to",
+          "label": "试仓买入",
+          "rule_ids": [
+            "M-34",
+            "M-35",
+            "M-36",
+            "M-37"
+          ],
+          "reason_zh": "M-34 试仓买入",
+          "signal_date": "2026-10-08",
+          "trade_date": "2026-10-09",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "defense",
+          "fraction": 0.42,
+          "certainty": "low",
+          "half": false,
+          "order_id": "b95e068e10a0e0d9dc2a6895121a7b2638eeb6a4f16493d5f56039211b13fb6b",
+          "kind": "open",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 50399.99999999999,
+          "overlay_version": null
+        }
+      ],
+      "cancels": [],
+      "skips": [
+        {
+          "ticker": "GEV",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "ANET",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LRCX",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "BE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LITE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "MSFT",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "AMZN",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "META",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "CAT",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        }
+      ],
+      "health_codes": [
+        "ok"
+      ],
+      "holdings": [],
+      "portfolio": {
+        "equity": 1000000.0,
+        "invested_pct": 0.0,
+        "holdings_count": 0,
+        "tier_usage": {
+          "defense": {
+            "market_value": 0,
+            "weight_pct": 0.0,
+            "buy_limit": 750000.0,
+            "holdings_count": 0
+          },
+          "normal": {
+            "market_value": 0,
+            "weight_pct": 0.0,
+            "buy_limit": 750000.0,
+            "holdings_count": 0
+          },
+          "attack": {
+            "market_value": 0,
+            "weight_pct": 0.0,
+            "buy_limit": 500000.0,
+            "holdings_count": 0
+          }
+        },
+        "gates": {
+          "panic": false,
+          "black_swan": false,
+          "drawdown_brake": false,
+          "vix": {
+            "status": "ok",
+            "threshold": 23.502000000000002,
+            "source": "VIX_CBOE",
+            "observation_date": "2026-10-08"
+          }
+        }
+      },
+      "missing_tickers": [],
+      "score_source": "M3 pure historical replay",
+      "input_asof": "2026-10-08",
+      "generated_at": "2026-10-09 12:00:00+00:00",
+      "portfolio_id": "acceptance-fixed-five-days",
+      "missing_scores": []
+    },
+    {
+      "trade_date": "2026-10-12",
+      "signal_date": "2026-10-09",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "overlay": {
+        "version": null,
+        "status": "missing",
+        "errors": []
+      },
+      "data_coverage": {
+        "tradable": 54,
+        "with_bars": 54,
+        "pct": 100.0
+      },
+      "published": true,
+      "unpublished_reason": null,
+      "orders": [
+        {
+          "ticker": "SNDK",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-09",
+          "trade_date": "2026-10-12",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "e8758013bd237b3f9aefc6dc00f60aca3e6a983d822a25a21969af08feedbef6",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 22044.53430758002,
+          "overlay_version": null
+        },
+        {
+          "ticker": "LLY",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-09",
+          "trade_date": "2026-10-12",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "b184228763668cfe0b050839a73c7cc56b77183ca245ef4bd976add8f19ba026",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 16968.531461370017,
+          "overlay_version": null
+        },
+        {
+          "ticker": "GOOGL",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-09",
+          "trade_date": "2026-10-12",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.85,
+          "certainty": "medium",
+          "half": false,
+          "order_id": "afb64fc06972c8d1c4e13974affc1da62c122b44fa83fb137e90f509202565e2",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 32247.291461370012,
+          "overlay_version": null
+        },
+        {
+          "ticker": "WDC",
+          "action": "buy_swing",
+          "label": "波段买入",
+          "rule_ids": [
+            "M-60"
+          ],
+          "reason_zh": "M-60 波段买入",
+          "signal_date": "2026-10-09",
+          "trade_date": "2026-10-12",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "value": 15980.544542960004,
+          "order_id": "5fd4aabc631eeb484a89d6d27237316f671fee8a07f8b59a385977686f95fcf9",
+          "kind": "swing_buy",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 15980.544542960004,
+          "overlay_version": null
+        },
+        {
+          "ticker": "STX",
+          "action": "buy_swing",
+          "label": "波段买入",
+          "rule_ids": [
+            "M-60"
+          ],
+          "reason_zh": "M-60 波段买入",
+          "signal_date": "2026-10-09",
+          "trade_date": "2026-10-12",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "value": 15980.544542960004,
+          "order_id": "d8e124a990ffab00ca5d28fb61bcf1225546e68ec2bf1ac5b8d99def04faabe9",
+          "kind": "swing_buy",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 15980.544542960004,
+          "overlay_version": null
+        }
+      ],
+      "cancels": [],
+      "skips": [
+        {
+          "ticker": "GEV",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LRCX",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "ANET",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "BE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LITE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "META",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "AMZN",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "CAT",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        }
+      ],
+      "health_codes": [
+        "ok"
+      ],
+      "holdings": [
+        {
+          "ticker": "HD",
+          "qty": 84,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "SNDK",
+          "qty": 29,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "MU",
+          "qty": 45,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "WDC",
+          "qty": 120,
+          "tier": "attack",
+          "status": "M-60 波段买入",
+          "n_code": null,
+          "reason_zh": "M-60 波段买入"
+        },
+        {
+          "ticker": "AVGO",
+          "qty": 131,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "STX",
+          "qty": 61,
+          "tier": "attack",
+          "status": "M-60 波段买入",
+          "n_code": null,
+          "reason_zh": "M-60 波段买入"
+        },
+        {
+          "ticker": "PLTR",
+          "qty": 238,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "NVDA",
+          "qty": 359,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "CVX",
+          "qty": 386,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "JPM",
+          "qty": 210,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "LLY",
+          "qty": 72,
+          "tier": "normal",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "GOOGL",
+          "qty": 198,
+          "tier": "normal",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "XOM",
+          "qty": 300,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        }
+      ],
+      "portfolio": {
+        "equity": 998784.0339350002,
+        "invested_pct": 74.93451783077937,
+        "holdings_count": 13,
+        "tier_usage": {
+          "defense": {
+            "market_value": 156928.44,
+            "weight_pct": 15.7119491970386,
+            "buy_limit": 535540.5104512501,
+            "holdings_count": 3
+          },
+          "normal": {
+            "market_value": 306775.54000000004,
+            "weight_pct": 30.714902278860883,
+            "buy_limit": 535540.5104512501,
+            "holdings_count": 4
+          },
+          "attack": {
+            "market_value": 284730.02,
+            "weight_pct": 28.507666354879873,
+            "buy_limit": 499392.0169675001,
+            "holdings_count": 6
+          }
+        },
+        "gates": {
+          "panic": false,
+          "black_swan": false,
+          "drawdown_brake": false,
+          "vix": {
+            "status": "ok",
+            "threshold": 23.502000000000002,
+            "source": "VIX_CBOE",
+            "observation_date": "2026-10-09"
+          }
+        }
+      },
+      "missing_tickers": [],
+      "score_source": "M3 pure historical replay",
+      "input_asof": "2026-10-09",
+      "generated_at": "2026-10-12 12:00:00+00:00",
+      "portfolio_id": "acceptance-fixed-five-days",
+      "missing_scores": []
+    },
+    {
+      "trade_date": "2026-10-13",
+      "signal_date": "2026-10-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "overlay": {
+        "version": null,
+        "status": "missing",
+        "errors": []
+      },
+      "data_coverage": {
+        "tradable": 54,
+        "with_bars": 54,
+        "pct": 100.0
+      },
+      "published": true,
+      "unpublished_reason": null,
+      "orders": [
+        {
+          "ticker": "MU",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-12",
+          "trade_date": "2026-10-13",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "c9310fa8e726ed9d7c747b5a3fa38f89e624064d2267cc7ea060d99d7cdc5408",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 22869.85093940002,
+          "overlay_version": null
+        },
+        {
+          "ticker": "NVDA",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-12",
+          "trade_date": "2026-10-13",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "a9b47e09fe11ab6fc41c26bb8620d3b1c1d2ff67423a50094bb702a61980dfe7",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 19816.096409100006,
+          "overlay_version": null
+        },
+        {
+          "ticker": "LLY",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-12",
+          "trade_date": "2026-10-13",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "68a9f640dc28f43f579237fb1ec2655acf210827c1d84f3d49e00168c20eb8f4",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 0.0,
+          "overlay_version": null
+        },
+        {
+          "ticker": "GOOGL",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-12",
+          "trade_date": "2026-10-13",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "normal",
+          "fraction": 0.85,
+          "certainty": "medium",
+          "half": false,
+          "order_id": "d4c1b5ee24859ae243d4ed145a439f84426aad8287de501c7e6b5e05d0551cc4",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 0.0,
+          "overlay_version": null
+        }
+      ],
+      "cancels": [],
+      "skips": [
+        {
+          "ticker": "GEV",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "ANET",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LRCX",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "BE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LITE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "AMZN",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "META",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "CAT",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        }
+      ],
+      "health_codes": [
+        "ok"
+      ],
+      "holdings": [
+        {
+          "ticker": "HD",
+          "qty": 84,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "SNDK",
+          "qty": 44,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "MU",
+          "qty": 45,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "WDC",
+          "qty": 160,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "AVGO",
+          "qty": 131,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "STX",
+          "qty": 81,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "PLTR",
+          "qty": 238,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "NVDA",
+          "qty": 359,
+          "tier": "normal",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "CVX",
+          "qty": 386,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "JPM",
+          "qty": 210,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "LLY",
+          "qty": 86,
+          "tier": "normal",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "GOOGL",
+          "qty": 288,
+          "tier": "normal",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "XOM",
+          "qty": 300,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        }
+      ],
+      "portfolio": {
+        "equity": 990833.1020500001,
+        "invested_pct": 85.06702473465268,
+        "holdings_count": 13,
+        "tier_usage": {
+          "defense": {
+            "market_value": 159047.08000000002,
+            "weight_pct": 16.051853704820417,
+            "buy_limit": 371562.41326875007,
+            "holdings_count": 3
+          },
+          "normal": {
+            "market_value": 354740.56000000006,
+            "weight_pct": 35.80225158667528,
+            "buy_limit": 371562.41326875007,
+            "holdings_count": 4
+          },
+          "attack": {
+            "market_value": 329084.6,
+            "weight_pct": 33.212919443156984,
+            "buy_limit": 495416.55102500005,
+            "holdings_count": 6
+          }
+        },
+        "gates": {
+          "panic": false,
+          "black_swan": false,
+          "drawdown_brake": false,
+          "vix": {
+            "status": "ok",
+            "threshold": 23.502000000000002,
+            "source": "VIX_CBOE",
+            "observation_date": "2026-10-12"
+          }
+        }
+      },
+      "missing_tickers": [],
+      "score_source": "M3 pure historical replay",
+      "input_asof": "2026-10-12",
+      "generated_at": "2026-10-13 12:00:00+00:00",
+      "portfolio_id": "acceptance-fixed-five-days",
+      "missing_scores": []
+    },
+    {
+      "trade_date": "2026-10-14",
+      "signal_date": "2026-10-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "overlay": {
+        "version": null,
+        "status": "missing",
+        "errors": []
+      },
+      "data_coverage": {
+        "tradable": 54,
+        "with_bars": 54,
+        "pct": 100.0
+      },
+      "published": true,
+      "unpublished_reason": null,
+      "orders": [
+        {
+          "ticker": "MU",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-13",
+          "trade_date": "2026-10-14",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "5e40ce1b95cc53f37ed573cca05c66d0d5c1abf3d0ec14d82a95957c4b51965c",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 0.0,
+          "overlay_version": null
+        }
+      ],
+      "cancels": [],
+      "skips": [
+        {
+          "ticker": "NVDA",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "JPM",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LLY",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GOOGL",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GEV",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "ANET",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LRCX",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "BE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LITE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "META",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "AMZN",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        }
+      ],
+      "health_codes": [
+        "ok"
+      ],
+      "holdings": [
+        {
+          "ticker": "HD",
+          "qty": 84,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "SNDK",
+          "qty": 44,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "MU",
+          "qty": 71,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "WDC",
+          "qty": 160,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "AVGO",
+          "qty": 131,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "STX",
+          "qty": 81,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "PLTR",
+          "qty": 238,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "NVDA",
+          "qty": 444,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "CVX",
+          "qty": 386,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "JPM",
+          "qty": 210,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "LLY",
+          "qty": 86,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "GOOGL",
+          "qty": 288,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "XOM",
+          "qty": 300,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        }
+      ],
+      "portfolio": {
+        "equity": 989598.4073300002,
+        "invested_pct": 89.43381612626912,
+        "holdings_count": 13,
+        "tier_usage": {
+          "defense": {
+            "market_value": 160957.06,
+            "weight_pct": 16.264886726553293,
+            "buy_limit": 371099.40274875006,
+            "holdings_count": 3
+          },
+          "normal": {
+            "market_value": 373271.67999999993,
+            "weight_pct": 37.719510989019355,
+            "buy_limit": 371099.40274875006,
+            "holdings_count": 4
+          },
+          "attack": {
+            "market_value": 350806.88000000006,
+            "weight_pct": 35.44941841069647,
+            "buy_limit": 494799.2036650001,
+            "holdings_count": 6
+          }
+        },
+        "gates": {
+          "panic": false,
+          "black_swan": false,
+          "drawdown_brake": false,
+          "vix": {
+            "status": "ok",
+            "threshold": 23.502000000000002,
+            "source": "VIX_CBOE",
+            "observation_date": "2026-10-13"
+          }
+        }
+      },
+      "missing_tickers": [],
+      "score_source": "M3 pure historical replay",
+      "input_asof": "2026-10-13",
+      "generated_at": "2026-10-14 12:00:00+00:00",
+      "portfolio_id": "acceptance-fixed-five-days",
+      "missing_scores": []
+    },
+    {
+      "trade_date": "2026-10-15",
+      "signal_date": "2026-10-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "overlay": {
+        "version": null,
+        "status": "missing",
+        "errors": []
+      },
+      "data_coverage": {
+        "tradable": 54,
+        "with_bars": 54,
+        "pct": 100.0
+      },
+      "published": true,
+      "unpublished_reason": null,
+      "orders": [
+        {
+          "ticker": "SNDK",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-14",
+          "trade_date": "2026-10-15",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "84afbe2265e9297cc86bc98ca2fbca95b37aff07171a47119136b0454b4809c1",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 4677.246578440019,
+          "overlay_version": null
+        },
+        {
+          "ticker": "MU",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-14",
+          "trade_date": "2026-10-15",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "eec059ea68f5e89809887af1f4361d9662fde87424760c87fa0cc20622fa9240",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 1520.9765784400151,
+          "overlay_version": null
+        },
+        {
+          "ticker": "STX",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-14",
+          "trade_date": "2026-10-15",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "a1e783ff128ef64b16ad41ccad9f83e6a362d274219662decbb04cdf86d7ed90",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 8627.46657844002,
+          "overlay_version": null
+        },
+        {
+          "ticker": "PLTR",
+          "action": "buy_to",
+          "label": "确认加仓",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 确认加仓",
+          "signal_date": "2026-10-14",
+          "trade_date": "2026-10-15",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "fraction": 0.85,
+          "certainty": "high",
+          "half": false,
+          "order_id": "3a4626dbad0efadf53477087ead643f076b829f0bacae4ed26b078a5852ae3b0",
+          "kind": "add",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 18593.346578440018,
+          "overlay_version": null
+        },
+        {
+          "ticker": "SNDK",
+          "action": "buy_swing",
+          "label": "波段买入",
+          "rule_ids": [
+            "M-60"
+          ],
+          "reason_zh": "M-60 波段买入",
+          "signal_date": "2026-10-14",
+          "trade_date": "2026-10-15",
+          "rule_set": "A",
+          "params_version": "p-2026.10",
+          "tier": "attack",
+          "value": 15629.225077280002,
+          "order_id": "8f3d77d02b81788dc700acbb820ce08e29ae0ed751626a997b31ddf9afd7a788",
+          "kind": "swing_buy",
+          "overlay_multiplier": 1,
+          "side": "buy",
+          "qty": null,
+          "notional_est": 15629.225077280002,
+          "overlay_version": null
+        }
+      ],
+      "cancels": [],
+      "skips": [
+        {
+          "ticker": "NVDA",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "JPM",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LLY",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GOOGL",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-40"
+          ],
+          "reason_zh": "M-40 组合闸门或层额度不足，暂不加仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GEV",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "ANET",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LRCX",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "BE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "AMAT",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "LITE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "GE",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "META",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        },
+        {
+          "ticker": "AMZN",
+          "n_code": "N7",
+          "rule_ids": [
+            "M-34"
+          ],
+          "reason_zh": "M-34 组合只数或闸门约束，暂不开仓",
+          "params_version": "p-2026.10"
+        }
+      ],
+      "health_codes": [
+        "ok"
+      ],
+      "holdings": [
+        {
+          "ticker": "HD",
+          "qty": 84,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "SNDK",
+          "qty": 44,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "MU",
+          "qty": 71,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "WDC",
+          "qty": 160,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "AVGO",
+          "qty": 131,
+          "tier": "attack",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "STX",
+          "qty": 81,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "PLTR",
+          "qty": 238,
+          "tier": "attack",
+          "status": "M-40 确认加仓",
+          "n_code": null,
+          "reason_zh": "M-40 确认加仓"
+        },
+        {
+          "ticker": "NVDA",
+          "qty": 444,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "CVX",
+          "qty": 386,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "JPM",
+          "qty": 210,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "LLY",
+          "qty": 86,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "GOOGL",
+          "qty": 288,
+          "tier": "normal",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        },
+        {
+          "ticker": "XOM",
+          "qty": 300,
+          "tier": "defense",
+          "status": "M-59 未触发卖出规则，继续持有",
+          "n_code": null,
+          "reason_zh": "M-59 未触发卖出规则，继续持有"
+        }
+      ],
+      "portfolio": {
+        "equity": 976826.5673300001,
+        "invested_pct": 89.29566508251247,
+        "holdings_count": 13,
+        "tier_usage": {
+          "defense": {
+            "market_value": 163633.28,
+            "weight_pct": 16.751518178632825,
+            "buy_limit": 366309.96274875005,
+            "holdings_count": 3
+          },
+          "normal": {
+            "market_value": 372737.96,
+            "weight_pct": 38.15804897882947,
+            "buy_limit": 366309.96274875005,
+            "holdings_count": 4
+          },
+          "attack": {
+            "market_value": 335892.54,
+            "weight_pct": 34.386097925050166,
+            "buy_limit": 488413.28366500005,
+            "holdings_count": 6
+          }
+        },
+        "gates": {
+          "panic": false,
+          "black_swan": false,
+          "drawdown_brake": false,
+          "vix": {
+            "status": "ok",
+            "threshold": 23.502000000000002,
+            "source": "VIX_CBOE",
+            "observation_date": "2026-10-14"
+          }
+        }
+      },
+      "missing_tickers": [],
+      "score_source": "M3 pure historical replay",
+      "input_asof": "2026-10-14",
+      "generated_at": "2026-10-15 12:00:00+00:00",
+      "portfolio_id": "acceptance-fixed-five-days",
+      "missing_scores": []
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "version": "synthetic-cooling-v1",
+  "generated_at": "2026-01-12T12:30:00Z",
+  "params_version": "p-2026.10",
+  "tickers": {
+    "AAA": {"cooling_off": true, "event_ids": ["synthetic-event-1"]},
+    "BBB": {"cooling_off": false, "first_lot_multiplier": 2.0}
+  }
+}

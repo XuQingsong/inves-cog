@@ -1,0 +1,34 @@
+{
+  "database": "inves_cog_m4_a006_verify",
+  "production_migrations": 0,
+  "new_roles": 0,
+  "migrations": [
+    "phase1_m0_0001_schemas_roles.sql",
+    "phase1_m1_0001_jobs_source_health.sql",
+    "phase1_m1_0002_market_information.sql",
+    "phase1_m1_0003_llm_usage.sql",
+    "phase1_m1_0003_source_cursors.sql",
+    "phase1_m1_0004_offline_history.sql",
+    "phase1_m1_0004_operations.sql",
+    "phase1_m1_0005_embedding_models.sql",
+    "phase1_m2_0001_fundamentals.sql",
+    "phase1_m2_0003_yahoo_page.sql",
+    "phase1_m2_0004_interim_results.sql",
+    "phase1_m3_0001_daily_scores.sql",
+    "phase1_m4_0001_paper_ledger_orders_plan.sql",
+    "phase1_m6_0001_graph_marketstate.sql",
+    "phase1_m6_0002_graph_review_integrity.sql"
+  ],
+  "idempotent_order_rows": 1,
+  "idempotent_ledger_rows": 1,
+  "restored_fill": {
+    "side": "buy",
+    "kind": "open",
+    "qty": 840,
+    "cost": 84.0,
+    "status": "filled"
+  },
+  "role_web_write_denied": true,
+  "status": "passed",
+  "temporary_database_removed": true
+}

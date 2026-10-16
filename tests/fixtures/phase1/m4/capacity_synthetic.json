@@ -1,0 +1,8 @@
+{
+  "kind": "synthetic reproduction of verified 2026-10-08 signal / 10-09 plan capacity omission",
+  "attack": ["NVDA", "AMD", "MU", "AVGO", "MRVL", "PLTR"],
+  "normal": ["AAPL", "MSFT", "JPM", "LLY", "GOOGL", "XOM"],
+  "watch": "HD",
+  "price": 100.0,
+  "watch_history": [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 95, 100]
+}
