@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 06:12 北京
+
+- 草稿 PR #18 head `b1cbc23`。没有合并进 main。本地 `make phase1-test`：189 passed，18 deselected。
+- 弱信号在 30 个交易日内凑齐至少 3 个来源根和 2 个阶段，并且窗口内没有直接反证时，只提高研究优先级，并记一条补证任务。生命周期停在已发现，不进入假设中。缺比较日或缺阶段时是缺失。这一条不升级真实性，不改基本面栏，也不进覆盖层。没有传入线索时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 06:04 北京
 
 - 草稿 PR #18 head `a27dc2e`。没有合并进 main。本地 `make phase1-test`：188 passed，18 deselected。
