@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 00:41 北京
+
+- 草稿 PR #18 head `d427085`。没有合并进 main。本地 `make phase1-test`：160 passed，14 deselected。
+- 现场候选录音的入口是 `candidate_capture`。文件名是载荷的 SHA-256，缺文件就失败。仓库里没有编造的成功录音。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 00:33 北京
 
 - 草稿 PR #18 head `55302e7`。没有合并进 main。本地 `make phase1-test`：159 passed，14 deselected。导出文件没有进入本 PR。
