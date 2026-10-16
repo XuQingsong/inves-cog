@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="6" time="0.102" timestamp="2026-10-16T12:19:53.629733+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_a003_margins" name="test_unh_gross_profit_includes_medical_and_product_costs" time="0.022"><failure message="assert 88.57127623414621 == 19.5141837117804 ± 2.0e-05&#10;  &#10;  comparison failed&#10;  Obtained: 88.57127623414621&#10;  Expected: 19.5141837117804 ± 2.0e-05">def test_unh_gross_profit_includes_medical_and_product_costs():
+        data = facts()
+        revenue = ttm(data, 'Revenues')
+        product_cost = ttm(data, 'CostOfGoodsAndServicesSold')
+        medical_cost = ttm(data, 'PolicyholderBenefitsAndClaimsIncurredNet')
+        expected = (revenue - product_cost - medical_cost) / revenue * 100
+        state = extract(data, extractor='fixed')
+&gt;       assert state.values['gross_margin'] == pytest.approx(expected)
+E       assert 88.57127623414621 == 19.5141837117804 ± 2.0e-05
+E         
+E         comparison failed
+E         Obtained: 88.57127623414621
+E         Expected: 19.5141837117804 ± 2.0e-05
+
+tests/m2/test_a003_margins.py:41: AssertionError</failure></testcase><testcase classname="tests.m2.test_a003_margins" name="test_unh_incomplete_medical_costs_cannot_produce_high_margin[True]" time="0.001"><failure message="assert 88.57127623414621 is None">missing = True
+
+    @pytest.mark.parametrize('missing', [True, False])
+    def test_unh_incomplete_medical_costs_cannot_produce_high_margin(missing):
+        data = facts()
+        nodes = data['facts']['us-gaap']
+        if missing:
+            nodes.pop('PolicyholderBenefitsAndClaimsIncurredNet')
+        else:
+            for row in nodes['PolicyholderBenefitsAndClaimsIncurredNet']['units']['USD']:
+                row['end'] = (date.fromisoformat(row['end']) - timedelta(days=2)).isoformat()
+        state = extract(data, extractor='fixed')
+&gt;       assert state.values['gross_margin'] is None
+E       assert 88.57127623414621 is None
+
+tests/m2/test_a003_margins.py:57: AssertionError</failure></testcase><testcase classname="tests.m2.test_a003_margins" name="test_unh_incomplete_medical_costs_cannot_produce_high_margin[False]" time="0.001"><failure message="assert 88.57127623414621 is None">missing = False
+
+    @pytest.mark.parametrize('missing', [True, False])
+    def test_unh_incomplete_medical_costs_cannot_produce_high_margin(missing):
+        data = facts()
+        nodes = data['facts']['us-gaap']
+        if missing:
+            nodes.pop('PolicyholderBenefitsAndClaimsIncurredNet')
+        else:
+            for row in nodes['PolicyholderBenefitsAndClaimsIncurredNet']['units']['USD']:
+                row['end'] = (date.fromisoformat(row['end']) - timedelta(days=2)).isoformat()
+        state = extract(data, extractor='fixed')
+&gt;       assert state.values['gross_margin'] is None
+E       assert 88.57127623414621 is None
+
+tests/m2/test_a003_margins.py:57: AssertionError</failure></testcase><testcase classname="tests.m2.test_a003_margins" name="test_unh_reported_gross_profit_takes_precedence" time="0.001" /><testcase classname="tests.m2.test_a003_margins" name="test_other_issuer_cost_derivation_is_unchanged" time="0.001" /><testcase classname="tests.m2.test_a003_margins" name="test_unh_legacy_does_not_inherit_fixed_cost_repair" time="0.001" /></testsuite></testsuites>
