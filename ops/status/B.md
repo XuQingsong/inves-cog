@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 01:12 北京
+
+- 草稿 PR #18 head `5d43332`。没有合并进 main。本地 `make phase1-test`：161 passed，16 deselected。新的案例测试单独通过。
+- 2026-09-21 的池内对象已经分别含有 CPU 篮子和 META。Axios 仍停在 09-18，角色是背景。没有录音时调用失败。引用登顶材料之后，剩下的缺口是「不能证明早于开盘」，案例不关闭。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 01:04 北京
 
 - 草稿 PR #18 head `744bc39`。没有合并进 main。本地 `make phase1-test`：161 passed，15 deselected。新的案例测试单独通过。
