@@ -523,6 +523,24 @@ def test_wide_anomaly_skips_candidates(tmp_path):
     assert report["unknowns"] == ["eps_consensus", "coverage"]
     assert report["operating_impact_proven"] is False
     assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["type_candidates"] == ["原因未明"]
+
+
+@pytest.mark.phase1_blocking
+def test_type_candidates_follow_score_not_case_name():
+    from inves_cog.perception.attribution.report import type_candidates
+
+    assert type_candidates([], ("待定",)) == ["待定", "原因未明"]
+    narrative = [{"scored": True, "score": 0.8, "mechanism": "估值倍数"}]
+    assert type_candidates(narrative) == ["叙事冲击"]
+    weak = [{"scored": True, "score": 0.4, "mechanism": "估值倍数"}]
+    assert type_candidates(weak) == ["原因未明"]
+    supply = [{"scored": True, "score": 0.8, "mechanism": "供给"}]
+    assert type_candidates(supply) == []
+    assert type_candidates(supply, operating_impact_proven=True) == ["事件冲击"]
+    named = {"case_kind": "openai_arr"}
+    assert type_candidates([], (named["case_kind"],)) == ["openai_arr", "原因未明"]
+    assert "叙事冲击" not in type_candidates([], (named["case_kind"],))
 
 
 @pytest.mark.phase1_blocking

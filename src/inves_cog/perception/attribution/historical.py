@@ -7,6 +7,7 @@ from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.attribution.cases import muse_chart, openai_cover, openai_labels, r1_or_store
 from inves_cog.perception.attribution.manual import historical_case, open_relation
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
+from inves_cog.perception.attribution.report import type_candidates
 
 
 def retrieval_items(leads, anomaly_on, read_on):
@@ -45,6 +46,9 @@ def historical_report(anomaly, leads, read_on, client):
         "missing": missing,
         "candidates": candidates,
         "sources": [item["info_id"] for item in items],
+        "type_candidates": type_candidates(candidates, anomaly.get("type_candidates_prelim") or ()),
+        "valuation": "不变 / 待基本面轨道",
+        "trading": None,
     }
 
 
