@@ -11,15 +11,16 @@ def retrieval_items(leads, anomaly_on, read_on):
         decision = historical_case(lead, anomaly_on, read_on)
         if not decision["usable"]:
             continue
-        items.append(
-            {
-                "info_id": lead["id"],
-                "published_at": lead["published_on"],
-                "headline": lead.get("excerpt") or "",
-                "summary": lead.get("excerpt") or "",
-                "role": decision["role"],
-            }
-        )
+        item = {
+            "info_id": lead["id"],
+            "published_at": lead["published_on"],
+            "headline": lead.get("excerpt") or "",
+            "summary": lead.get("excerpt") or "",
+            "role": decision["role"],
+        }
+        if lead.get("source_level") is not None:
+            item["source_level"] = lead["source_level"]
+        items.append(item)
     return items
 
 
@@ -55,8 +56,20 @@ def _missing(anomaly, leads, items, candidates):
     if kind == "muse_rank":
         return _muse_missing(anomaly, leads, cited)
     if kind == "toshiba":
-        return ["日经扩产原文未冻结"]
+        return _toshiba_missing(items, cited)
     return ["案例种类未知"]
+
+
+def headline_lead(row):
+    return {
+        "id": row["info_id"],
+        "kind": row["kind"],
+        "case_id": row["case_id"],
+        "published_on": row["published_at"][:10],
+        "published_precision": "minute",
+        "excerpt": row["headline"],
+        "source_level": row["source_level"],
+    }
 
 
 def _r1_missing(anomaly, cited):
@@ -75,6 +88,15 @@ def _openai_missing(items, cited):
     if openai_cover(ranked):
         return []
     return ["前 4 名未含至少 3 类"]
+
+
+def _toshiba_missing(items, cited):
+    by_id = {item["info_id"]: item for item in items}
+    for info_id in cited:
+        headline = (by_id.get(info_id) or {}).get("headline", "").lower()
+        if "toshiba" in headline and "disk" in headline:
+            return []
+    return ["日经扩产原文未冻结"]
 
 
 def _muse_missing(anomaly, leads, cited):

@@ -1,0 +1,79 @@
+{
+  "evidence_mode": "后补录历史案例",
+  "source_export": "data/m8-export",
+  "source_commit": "cd02bdd81d1a292ba3cc92df79e3fc0f1627f4b7",
+  "closes_ac_m8_06": false,
+  "note": "导出标题短摘录。保留原始发布时间与首次见到时间。不是当时采集，不关闭严格回放验收。",
+  "items": [
+    {
+      "info_id": "news:benzinga:62130092",
+      "kind": "toshiba_supply",
+      "case_id": "toshiba-2026-10-02",
+      "published_at": "2026-10-02 19:56:22+08:00",
+      "first_seen_at": "2026-10-14 17:19:00.498948+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "Reported October 1, 'Toshiba to double hard disk drive supply to fill AI chip memory gap; Japan tech group will expand Philippine plant, raise per-unit storage capacity' - Nikkei"
+    },
+    {
+      "info_id": "news:benzinga:62194029",
+      "kind": "tdk_second_hit",
+      "case_id": "toshiba-2026-10-02",
+      "published_at": "2026-10-06 22:44:19+08:00",
+      "first_seen_at": "2026-10-14 17:20:17.700711+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "Reported Earlier, 'Seagate Said to Vie With Toshiba for TDK’s Hard-Drive Magnetic Heads Unit' - Bloomberg"
+    },
+    {
+      "info_id": "news:benzinga:62345955",
+      "kind": "coreweave_debt",
+      "case_id": "openai-2026-10-14",
+      "published_at": "2026-10-14 16:41:36+08:00",
+      "first_seen_at": "2026-10-14 17:24:00.163829+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "Elon Musk Says ‘Yikes’ As CoreWeave Bond Yield Hits 15% Amid Chamath Palihapitiya’s ‘Private Credit Bubble’ Warning"
+    },
+    {
+      "info_id": "news:benzinga:62352933",
+      "kind": "barclays_downgrade",
+      "case_id": "openai-2026-10-14",
+      "published_at": "2026-10-14 21:13:22+08:00",
+      "first_seen_at": "2026-10-15 14:35:34.002176+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "Barclays Downgrades Dell Technologies to Equal-Weight, Lowers Price Target to $574"
+    },
+    {
+      "info_id": "news:benzinga:62352950",
+      "kind": "barclays_downgrade",
+      "case_id": "openai-2026-10-14",
+      "published_at": "2026-10-14 21:14:17+08:00",
+      "first_seen_at": "2026-10-15 14:35:34.003826+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "Barclays Downgrades Hewlett Packard to Equal-Weight, Lowers Price Target to $77"
+    },
+    {
+      "info_id": "news:benzinga:62353171",
+      "kind": "barclays_downgrade",
+      "case_id": "openai-2026-10-14",
+      "published_at": "2026-10-14 21:23:01+08:00",
+      "first_seen_at": "2026-10-15 14:35:34.616529+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "Barclays Downgrades NetApp to Equal-Weight, Maintains Price Target to $219"
+    },
+    {
+      "info_id": "news:benzinga:62350981",
+      "kind": "cpi_hot",
+      "case_id": "openai-2026-10-14",
+      "published_at": "2026-10-14 20:30:15+08:00",
+      "first_seen_at": "2026-10-15 14:35:32.868356+08:00",
+      "source": "benzinga",
+      "source_level": 4,
+      "headline": "USA CPI (YoY) For September 3.7% Vs 3.6% Est."
+    }
+  ]
+}

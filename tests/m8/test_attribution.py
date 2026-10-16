@@ -1095,3 +1095,81 @@ def test_historical_case_report_keeps_citations_and_lists_gaps(tmp_path):
     assert quiet.calls == 0
     with pytest.raises(LLMUnavailable, match="待分析"):
         historical_report(anomaly, leads, read_on, Client(recordings=tmp_path))
+
+
+@pytest.mark.phase1_blocking
+def test_export_headlines_fill_known_categories_without_live_visibility():
+    from inves_cog.perception.attribution.cases import openai_labels
+    from inves_cog.perception.attribution.historical import headline_lead, historical_report, retrieval_items
+    from inves_cog.perception.attribution.manual import production_visible
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/export_headlines.json").read_text())
+    assert payload["evidence_mode"] == "后补录历史案例"
+    assert payload["closes_ac_m8_06"] is False
+    rows = payload["items"]
+    leads = [headline_lead(row) for row in rows]
+    by_kind = {}
+    for row in rows:
+        by_kind.setdefault(row["kind"], row["info_id"])
+    early = {item["info_id"] for item in retrieval_items(leads, "2026-10-02", "2026-10-16")}
+    assert by_kind["toshiba_supply"] in early
+    assert by_kind["tdk_second_hit"] not in early
+    later = {item["info_id"] for item in retrieval_items(leads, "2026-10-14", "2026-10-16")}
+    assert {by_kind["coreweave_debt"], by_kind["barclays_downgrade"], by_kind["cpi_hot"]} <= later
+    assert all(item["source_level"] == 4 for item in retrieval_items(leads, "2026-10-14", "2026-10-16"))
+    headlines = {row["kind"]: row["headline"] for row in rows}
+    assert openai_labels(headlines["coreweave_debt"]) == {"coreweave_debt"}
+    assert openai_labels(headlines["barclays_downgrade"]) == {"barclays_downgrade"}
+    assert openai_labels(headlines["cpi_hot"]) == {"cpi_hot"}
+
+    morning = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
+    seen = production_visible(
+        [
+            {
+                "info_id": row["info_id"],
+                "published_at": datetime.fromisoformat(row["published_at"]),
+                "first_seen_at": datetime.fromisoformat(row["first_seen_at"]),
+            }
+            for row in rows
+            if row["kind"] in {"coreweave_debt", "barclays_downgrade", "cpi_hot"}
+        ],
+        morning,
+    )
+    assert {row["info_id"] for row in seen} == {by_kind["coreweave_debt"]}
+
+    class Cite:
+        def __init__(self, ids):
+            self.ids = ids
+
+        def call(self, task, body):
+            return {"candidates": [{"mechanism": "估值倍数", "info_ids": self.ids, "affected": []}]}
+
+    opened = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "case_kind": "openai_arr",
+        "members": [{"ticker": "NVDA"}],
+        "baskets": ["OpenAI合作方"],
+    }
+    report = historical_report(
+        opened,
+        leads,
+        "2026-10-16",
+        Cite([by_kind["coreweave_debt"], by_kind["barclays_downgrade"], by_kind["cpi_hot"]]),
+    )
+    assert report["closes_case"] is True
+    assert report["closes_ac_m8_06"] is False
+    assert report["collected_then"] is False
+    disk = {
+        "anomaly_id": "2026-10-02:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-02",
+        "case_kind": "toshiba",
+        "members": [{"ticker": "WDC"}],
+        "baskets": ["HDD"],
+    }
+    toshiba = historical_report(disk, leads, "2026-10-16", Cite([by_kind["toshiba_supply"]]))
+    assert toshiba["closes_case"] is True
+    assert toshiba["closes_ac_m8_06"] is False
+    assert toshiba["collected_then"] is False

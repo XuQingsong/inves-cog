@@ -121,6 +121,9 @@ def historical_case(lead, anomaly_on, read_on):
         else:
             uncertainty = "只有日期，不能证明落入 72 小时主窗口，也不能改成 09-19"
         usable = True
+    elif kind in {"coreweave_debt", "barclays_downgrade", "cpi_hot", "toshiba_supply", "tdk_second_hit"}:
+        role, uncertainty = "案例材料", "四级转载；保留原始发布时间与后见时间"
+        usable = True
     else:
         raise ValueError("未知补证种类")
     result.update(usable=usable, role=role, uncertainty=uncertainty, replay=replay["mode"])
