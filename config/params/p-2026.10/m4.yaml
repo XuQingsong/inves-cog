@@ -1,0 +1,97 @@
+m4:
+  initial_cash: 1000000.0
+  cost_rate: 0.001
+  min_spend_fraction: 0.005
+  coverage_floor_pct: 95
+  cooldown_days: 10
+  replay_tickers: [AAPL, MSFT, NVDA, META, AMZN, AVGO, AMD, MRVL, PLTR, CRM, NOW, ORCL, NFLX, TSLA, COST, WMT, HD, UNH, LLY, JNJ, JPM, V, MA, XOM, CVX, CAT, GE, ADBE, MU, GOOGL]
+  entry_hold_min: 45
+  defensive_hold_min: 55
+  opening:
+    high: [0.20, 0.75]
+    medium: [0.08, 0.65]
+    low: [-0.08, 0.20]
+    reentry_multiplier: 0.8
+    low_investment: 0.55
+    low_investment_add: 0.10
+    max_fraction: 0.80
+    overheat_dev50: 15
+    officer_multiplier: 1.35
+    other_multiplier: 1.20
+    insider_days: 90
+  budget:
+    borrow_below: 0.85
+    borrow_fraction: 0.75
+  adds:
+    increment: 0.30
+    first_ceiling: 0.85
+    high_days: 3
+    other_days: 5
+    low_investment: 0.60
+    pullback_dev50: 3
+    full_held_days: 15
+    full_pass_days: 10
+    fraction_tolerance: 0.000000001
+  sell:
+    death_quality: {defense: 50, normal: 45, attack: 45}
+    death_growth: {defense: 35, normal: 40, attack: 40}
+    disaster_peak_fraction: 0.60
+    double_price: 2
+    double_dev50: 3
+    double_timing: 55
+    profit_interval: 20
+    profit_fraction: 0.25
+    minimum_age: 10
+    below_days: {defense: 10, normal: 3, attack: 7}
+    broken_fraction: {defense: 0.3333333333333333, normal: 0.5, attack: 0.3333333333333333}
+    clear_days: {defense: 5, normal: 3, attack: 5}
+    normal_alert_quality: 55
+    normal_alert_growth: 50
+    normal_alert_fraction: 0.25
+    normal_timing_days: 3
+    attack_timing_days: 5
+  swing:
+    dip_drawdown: [0.55, 10, 22]
+    dip_dev50: [0.18, 3, 7]
+    take_profit: [0.32, 8, 14]
+    attack_take_profit: [0.40, 10, 18]
+    core_fraction: 0.20
+    max_lots: 2
+    interval: 10
+    core_ma200_floor: -8
+    watch_slots: 3
+    watch_hold_min: 60
+    attack_hold_min: 65
+    attack_vol_ceiling: 60
+    accel_floor: -10
+    history_min: 12
+    ret5_floor: -2
+    rebound_fraction: 1.03
+    deep_drawdown: -35
+    confirm_min: 5
+    confirm_max: 15
+    confirm_price_fraction: 0.97
+    deep_ma200: -8
+    watch_fraction: 0.04
+    watch_deep_fraction: 0.025
+    attack_fraction: 0.03
+    attack_deep_fraction: 0.02
+    watch_cap: 0.08
+    attack_cap: 0.06
+    second_interval: 5
+    stop_fraction: 0.82
+    core_conversion_ceiling: 0.60
+  risk:
+    spy_ret1: -4
+    spy_ret5: -8
+    swan_interval: 10
+    swan_days: 3
+    swan_sell_fraction: 0.5
+    dd8_trigger: -8
+    dd8_release: -4
+    dd8_sell_fraction: 0.3333333333333333
+    dd12_trigger: -12
+    dd12_release: -6
+    vix_window: 252
+    vix_min_observations: 120
+    vix_quantile: 0.90

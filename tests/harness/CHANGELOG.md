@@ -182,3 +182,7 @@
 | tests/fixtures/phase1/m7/openai_bars.jsonl.gz | 84c84b76a4e59b9a9807d9928720ee6bf62db0ae404f39d92538bdc0d1f8f3f1 | 94da5992914631ddf682d203f12d5e3fef4a4e89dd97bb3fecc4c63b9bc087e8 | Add 450-session factor warmup before the OpenAI case so the 120-day residual is defined | FR-M7-02; FR-M0-08 |
 | tests/fixtures/phase1/m7/toshiba_bars.jsonl.gz | 82864ad133690c47a33668261b000efecc9ce358c90f3502a25d33b63f7512b7 | b015a206bd4f4ccedaea813d796838605bed58bf3351dc9e7b929b6d8a7b923d | Add 450-session factor warmup before the Toshiba case so the 120-day residual is defined | FR-M7-02; FR-M0-08 |
 | tests/fixtures/phase1/m2/a003/unh-cost-components.json | absent | 20ea1d172b03e6519b4cb1603058f1ddf4b73f36d816647dc394d95845c4acca | SEC UNH original cost components: medical benefits and product costs; D-27 regression | A-003; FR-M0-08 |
+
+- A-006/M4: tests/fixtures/phase1/m4/overlay.json d5cb6e3845b9c3a7cf0b8c3e734ffd0b00b9210d6b37947fca69d3f600e61182 — synthetic cooling and rejected-increase contract, before implementation.
+
+- M4 K04: tests/fixtures/phase1/m4/capacity_synthetic.json 3dcfa7f6e0dd06dff71e8725e075e5c1805e481eeb9653ee6b6a07c8581c0c8a — synthetic watch-slot omission regression; no behavior change before decision.

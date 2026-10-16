@@ -1,0 +1,3396 @@
+{
+  "mode": "replay_v18",
+  "start": "2026-01-02",
+  "end": "2026-10-07",
+  "extractor": "legacy",
+  "rule_set": "A",
+  "equity": 1494527.3397979997,
+  "return_pct": 49.452733979799966,
+  "max_drawdown_pct": -12.637018498686292,
+  "cash": 177346.0597979998,
+  "trades": [
+    {
+      "ticker": "NVDA",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-02",
+      "trade_date": "2026-01-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.6,
+      "certainty": "high",
+      "half": false,
+      "order_id": "b6f825127c9c726bf55393733df7a81e797584fe033f86476f3952472fc23fc8",
+      "qty": 250,
+      "cost": 47.94,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 250,
+      "side": "buy",
+      "fill_price": 191.76,
+      "notional": 47940.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-02",
+      "trade_date": "2026-01-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.6,
+      "certainty": "high",
+      "half": true,
+      "order_id": "22796b8b42b410c3af9765dfc4a221526a2046006c0fdc39f6b1274480f9f43c",
+      "qty": 73,
+      "cost": 23.734489999999997,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 73,
+      "side": "buy",
+      "fill_price": 325.13,
+      "notional": 23734.489999999998,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-02",
+      "trade_date": "2026-01-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.21999999999999997,
+      "certainty": "low",
+      "half": false,
+      "order_id": "2a5a6e244aeb5bd4fb5e1ad7492280dc00017ddb39b2dc0249b9b88c2445edbd",
+      "qty": 189,
+      "cost": 17.580402000000003,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 189,
+      "side": "buy",
+      "fill_price": 93.018,
+      "notional": 17580.402000000002,
+      "status": "filled"
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-02",
+      "trade_date": "2026-01-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.5800000000000001,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "02a1f606db9678b306dc7faeba08d7035babd2a3931e9541a9b5ee92f2b9c10c",
+      "qty": 219,
+      "cost": 69.56644499999999,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 219,
+      "side": "buy",
+      "fill_price": 317.655,
+      "notional": 69566.44499999999,
+      "status": "filled"
+    },
+    {
+      "ticker": "NVDA",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-05",
+      "trade_date": "2026-01-06",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "da335e6a978977be86cc07f5ff387a3459823941df6a1a587407b96eaab9ce91",
+      "qty": 106,
+      "cost": 20.195120000000003,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 106,
+      "side": "buy",
+      "fill_price": 190.52,
+      "notional": 20195.120000000003,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-05",
+      "trade_date": "2026-01-06",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.52,
+      "certainty": "low",
+      "half": false,
+      "order_id": "65d85883c9c2be79430b19eba3737f5590916e7c6ea5f133bf897c1cd1e24b3d",
+      "qty": 259,
+      "cost": 24.0093,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 259,
+      "side": "buy",
+      "fill_price": 92.7,
+      "notional": 24009.3,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-06",
+      "trade_date": "2026-01-07",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.6799999999999999,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "536bf6fe741969ceb10fdb3cf5dc2b5e294d8cfd3cf5c4a8aafafa29945b6221",
+      "qty": 232,
+      "cost": 80.96336000000001,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 232,
+      "side": "buy",
+      "fill_price": 348.98,
+      "notional": 80963.36,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-09",
+      "trade_date": "2026-01-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.6,
+      "certainty": "high",
+      "half": false,
+      "order_id": "a374eac095082833d3650676eef54eeb6ba1617d7900eb64d3c139287d51ca90",
+      "qty": 236,
+      "cost": 47.478480000000005,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 236,
+      "side": "buy",
+      "fill_price": 201.18,
+      "notional": 47478.48,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-12",
+      "trade_date": "2026-01-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "ad9086789883550a79fcb3078188cd3ebc0e35ca7f212cc3c499b79e766e301f",
+      "qty": 61,
+      "cost": 21.122469999999996,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 61,
+      "side": "buy",
+      "fill_price": 346.27,
+      "notional": 21122.469999999998,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-13",
+      "trade_date": "2026-01-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "fc8ea2f98ec837cfb82e2896d9939deab94b06ba9cf2937c871fca35b5afb362",
+      "qty": 34,
+      "cost": 11.38456,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 34,
+      "side": "buy",
+      "fill_price": 334.84,
+      "notional": 11384.56,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-14",
+      "trade_date": "2026-01-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "43ecd9e388ba7a868591041dbb14f3f1c35fa1b48f99d4777cd27f24de74ad3e",
+      "qty": 14,
+      "cost": 4.83455,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 14,
+      "side": "buy",
+      "fill_price": 345.325,
+      "notional": 4834.55,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-01-14",
+      "trade_date": "2026-01-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 15956.374373968,
+      "order_id": "40902e1977b67cc52fea4b93d1cd6ebd44e09a91073760467b4b2b52ce8a3175",
+      "qty": 192,
+      "cost": 15.88224,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 192,
+      "side": "buy",
+      "fill_price": 82.72,
+      "notional": 15882.24,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-22",
+      "trade_date": "2026-01-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "8d92223897817103ee5ee20300b8e95faf69a5f8dbe4bcea0326dc74d1bf93f1",
+      "qty": 62,
+      "cost": 21.965049999999998,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 62,
+      "side": "buy",
+      "fill_price": 354.275,
+      "notional": 21965.05,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-01-26",
+      "trade_date": "2026-01-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "3f2c6ddb68153c1edf184cf9be040947d24590f704e9e418ecc919fecd74d8ba",
+      "qty": 54,
+      "cost": 15.874380000000002,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 54,
+      "side": "buy",
+      "fill_price": 293.97,
+      "notional": 15874.380000000001,
+      "status": "filled"
+    },
+    {
+      "ticker": "ADBE",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-01-26",
+      "trade_date": "2026-01-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 25453.565913324997,
+      "watch_cap": 0.08,
+      "order_id": "5ec905b35a073af3e436d5531654dcb7840dc0c7c7ef1c2236411791819ea257",
+      "qty": 83,
+      "cost": 25.21623,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 83,
+      "side": "buy",
+      "fill_price": 303.81,
+      "notional": 25216.23,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2026-01-27",
+      "trade_date": "2026-01-28",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 1.0,
+      "certainty": "low",
+      "half": false,
+      "order_id": "ddb95bf61846279b19e8b79401b16cd0ced16626cecd74c24740427e7e7c3493",
+      "qty": 313,
+      "cost": 26.47354,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 313,
+      "side": "buy",
+      "fill_price": 84.58,
+      "notional": 26473.54,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-01-29",
+      "trade_date": "2026-01-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 30305.538671489994,
+      "watch_cap": 0.06,
+      "order_id": "5a4534f99559861d3dad8cf45d1574ac9819450a7ba168e36ff8ed15dbb8be3f",
+      "qty": 91,
+      "cost": 30.25204,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 91,
+      "side": "buy",
+      "fill_price": 332.44,
+      "notional": 30252.04,
+      "status": "filled"
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-30",
+      "trade_date": "2026-02-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.7999999999999999,
+      "certainty": "high",
+      "half": false,
+      "order_id": "896a64a9e9836ae7d0c73eb9630f3490cdb47f20fb614bdf2d5cf174587e1dc4",
+      "qty": 366,
+      "cost": 95.17098,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 366,
+      "side": "buy",
+      "fill_price": 260.03,
+      "notional": 95170.98,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-02-04",
+      "trade_date": "2026-02-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 15515.654869808,
+      "order_id": "c38cac44e390018a0247b64b349213f5037ca3fa3ecbd67cda46a87b17a59537",
+      "qty": 76,
+      "cost": 15.34098,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 76,
+      "side": "buy",
+      "fill_price": 201.855,
+      "notional": 15340.98,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-02-09",
+      "trade_date": "2026-02-10",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "d8796d1bbc6f96563fcb66dc7cf377fd6a33c171307e8e810ebef5a4f81293f2",
+      "qty": 116,
+      "cost": 32.19232,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 277.52,
+      "notional": 32192.32,
+      "status": "filled"
+    },
+    {
+      "ticker": "MSFT",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-02-10",
+      "trade_date": "2026-02-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 24566.805651574996,
+      "watch_cap": 0.08,
+      "order_id": "798cd1dad628c686eae5a863fca55905cc1717e0c5584c51411621219427bc09",
+      "qty": 59,
+      "cost": 24.554325000000002,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 59,
+      "side": "buy",
+      "fill_price": 416.175,
+      "notional": 24554.325,
+      "status": "filled"
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-02-18",
+      "trade_date": "2026-02-19",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 23499.319841712,
+      "order_id": "15be3e0e62bf865bfc2e477e28650981184188912279b6338fffc801fab1d5b2",
+      "qty": 77,
+      "cost": 23.24014,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 77,
+      "side": "buy",
+      "fill_price": 301.82,
+      "notional": 23240.14,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-02-20",
+      "trade_date": "2026-02-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "820a9a003d20fdd2d12a8ed5073f6340acaef01822a2384a33ece6709f443bcc",
+      "qty": 25,
+      "cost": 4.95225,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 25,
+      "side": "buy",
+      "fill_price": 198.09,
+      "notional": 4952.25,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-02-20",
+      "trade_date": "2026-02-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 15758.961225567997,
+      "order_id": "ca0cd25ae99c5abf047d77c003c0ac8cc5cb5cbef9a76704d790e955c200fd0b",
+      "qty": 79,
+      "cost": 15.64911,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 79,
+      "side": "buy",
+      "fill_price": 198.09,
+      "notional": 15649.11,
+      "status": "filled"
+    },
+    {
+      "ticker": "ADBE",
+      "action": "sell_all",
+      "label": "全部卖出",
+      "rule_ids": [
+        "M-52"
+      ],
+      "reason_zh": "M-52 全部卖出",
+      "signal_date": "2026-02-23",
+      "trade_date": "2026-02-24",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "exit_kind": "price",
+      "order_id": "0ce831ecb218b0e62793eb01b8db3455cf66bb52c4c46a5512fed56390872114",
+      "qty": 83,
+      "cost": 20.382309999999997,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 245.57,
+      "notional": 20382.309999999998,
+      "status": "filled"
+    },
+    {
+      "ticker": "CRM",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-02-27",
+      "trade_date": "2026-03-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 24424.6833232,
+      "watch_cap": 0.08,
+      "order_id": "ceddeebbbb96b8536bc07b207365fdf3523e6775aa06490cfed222515d4d3ff2",
+      "qty": 126,
+      "cost": 24.255,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 126,
+      "side": "buy",
+      "fill_price": 192.5,
+      "notional": 24255.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-03-06",
+      "trade_date": "2026-03-09",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 23256.297790271998,
+      "order_id": "a024968886161efdc19b6c0f0bef1637a53c618304ee985e3e0955f44ec44593",
+      "qty": 79,
+      "cost": 23.254440000000002,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 79,
+      "side": "buy",
+      "fill_price": 294.36,
+      "notional": 23254.440000000002,
+      "status": "filled"
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-03-09",
+      "trade_date": "2026-03-10",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "93ddef379d52b64abe3f8ceee59c933da5dd14e75241b898e99ef7de9f582ebd",
+      "qty": 24,
+      "cost": 6.183479999999999,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 24,
+      "side": "buy",
+      "fill_price": 257.645,
+      "notional": 6183.48,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2026-03-09",
+      "trade_date": "2026-03-10",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 27709.815209279994,
+      "order_id": "2341cc67532a0b66b81e66bfabbcb2934cd6adfbf1802c18dfc4b09ae8f7e897",
+      "qty": 79,
+      "cost": 27.549670000000003,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 79,
+      "side": "buy",
+      "fill_price": 348.73,
+      "notional": 27549.670000000002,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2026-03-11",
+      "trade_date": "2026-03-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 1.0,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "d63d6fa843d4300013d6e1721a5fd4608af9fd94a209c78f55cae90510f71a4d",
+      "qty": 63,
+      "cost": 21.27762,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 63,
+      "side": "buy",
+      "fill_price": 337.74,
+      "notional": 21277.62,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-03-25",
+      "trade_date": "2026-03-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "6658baa5e505ff07f8a6d15c5f25a448556f64f5b0af4f763da2cfc75c609037",
+      "qty": 192,
+      "cost": 18.80832,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 97.96,
+      "notional": 18808.32,
+      "status": "filled"
+    },
+    {
+      "ticker": "TSLA",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-03-25",
+      "trade_date": "2026-03-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 38957.213308720005,
+      "watch_cap": 0.08,
+      "order_id": "ad5f9f2601ee4404e04560608d90aa956f6be3841c6c51313b2131124f984a43",
+      "qty": 102,
+      "cost": 38.92320000000001,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 102,
+      "side": "buy",
+      "fill_price": 381.6,
+      "notional": 38923.200000000004,
+      "status": "filled"
+    },
+    {
+      "ticker": "TSLA",
+      "action": "sell_all",
+      "label": "全部卖出",
+      "rule_ids": [
+        "M-50"
+      ],
+      "reason_zh": "M-50 全部卖出",
+      "signal_date": "2026-03-26",
+      "trade_date": "2026-03-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "exit_kind": "fundamental",
+      "order_id": "f4a1e879fabb7cd54c3f0eaf8973867758010e5901a8506eafe5c9dd192bfb4f",
+      "qty": 102,
+      "cost": 37.70838,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 369.69,
+      "notional": 37708.38,
+      "status": "filled"
+    },
+    {
+      "ticker": "NVDA",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-03-27",
+      "trade_date": "2026-03-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 15006.709005088002,
+      "order_id": "040966f3b04fc502cd20a0e53568eb63003a969350b524476d2916087131b901",
+      "qty": 88,
+      "cost": 14.85264,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 88,
+      "side": "buy",
+      "fill_price": 168.78,
+      "notional": 14852.64,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-03-30",
+      "trade_date": "2026-03-31",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "9255f41da904c2b1ca5df6ef845e043b090f740f2c04e3516f69f47f02871042",
+      "qty": 15,
+      "cost": 4.82505,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 15,
+      "side": "buy",
+      "fill_price": 321.67,
+      "notional": 4825.05,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-03-30",
+      "trade_date": "2026-03-31",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 14737.370082848,
+      "order_id": "55420fd48fa086c804cc670e68e54d12f45a877c2994338768a43c2ed0ae54d6",
+      "qty": 45,
+      "cost": 14.475150000000001,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 45,
+      "side": "buy",
+      "fill_price": 321.67,
+      "notional": 14475.150000000001,
+      "status": "filled"
+    },
+    {
+      "ticker": "NVDA",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-04-01",
+      "trade_date": "2026-04-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "08d525d68ef9fd44260c30c35399c11d63e4b9661778b8262eee06af248a1792",
+      "qty": 148,
+      "cost": 25.48264,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 172.18,
+      "notional": 25482.64,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-04-01",
+      "trade_date": "2026-04-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "a67ec1595720c7e669e32ed57ffa3fed2edfa3932a32cb6bb059033914d650e8",
+      "qty": 77,
+      "cost": 23.44573,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 304.49,
+      "notional": 23445.73,
+      "status": "filled"
+    },
+    {
+      "ticker": "META",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-04-02",
+      "trade_date": "2026-04-06",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 24522.2432902,
+      "watch_cap": 0.08,
+      "order_id": "2aa0c5d758a9aa267a3418d7837bd68aeacedb9c034a16151b2b6916a2dbd87a",
+      "qty": 42,
+      "cost": 24.262980000000002,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 42,
+      "side": "buy",
+      "fill_price": 577.69,
+      "notional": 24262.980000000003,
+      "status": "filled"
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-04-10",
+      "trade_date": "2026-04-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "81b135663244c2bff8bbc2d8e67c197431cc553b4dea612156e6d9cf8832c744",
+      "qty": 21,
+      "cost": 5.45433,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 21,
+      "side": "buy",
+      "fill_price": 259.73,
+      "notional": 5454.33,
+      "status": "filled"
+    },
+    {
+      "ticker": "META",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2026-04-13",
+      "trade_date": "2026-04-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 58159.79634383999,
+      "order_id": "3d5ffdfe65d579789eb07f70bd0f54066a4dde23c1b83da032911f2eecbc86b8",
+      "qty": 90,
+      "cost": 57.8898,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 90,
+      "side": "buy",
+      "fill_price": 643.22,
+      "notional": 57889.8,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-04-14",
+      "trade_date": "2026-04-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "ecaba822145446710ce6288a40f67555e8f30471f6b4425fbe2be3ac438f471b",
+      "qty": 155,
+      "cost": 39.518800000000006,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 254.96,
+      "notional": 39518.8,
+      "status": "filled"
+    },
+    {
+      "ticker": "MSFT",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2026-04-14",
+      "trade_date": "2026-04-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 63597.15755984001,
+      "order_id": "166e7676e372729a16cf2f034897caf9b84ad9c2d2946efae23118a809b203bc",
+      "qty": 159,
+      "cost": 63.282000000000004,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 159,
+      "side": "buy",
+      "fill_price": 398.0,
+      "notional": 63282.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-04-15",
+      "trade_date": "2026-04-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "1939f74db56af03d93dc4e9d3741e9c1977e170e6dbf39dc5aed8a53c94fa893",
+      "qty": 93,
+      "cost": 36.735,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 395.0,
+      "notional": 36735.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "NVDA",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-04-17",
+      "trade_date": "2026-04-20",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "91f5cceb5c88f138adfafb8b5e8102dae127005d9c9cb107e4b40fd9276607c8",
+      "qty": 85,
+      "cost": 16.9983,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 85,
+      "side": "buy",
+      "fill_price": 199.98,
+      "notional": 16998.3,
+      "status": "filled"
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-04-21",
+      "trade_date": "2026-04-22",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "89d1c37c37a7c3c57f38c8f72046495751279468b8971411836832ffb07292c0",
+      "qty": 21,
+      "cost": 5.62422,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 21,
+      "side": "buy",
+      "fill_price": 267.82,
+      "notional": 5624.22,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-04-22",
+      "trade_date": "2026-04-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "0a6c430a952bbed38da23a4deb18f392a48d500a7430ab2db621775faef16a35",
+      "qty": 45,
+      "cost": 21.7026,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 482.28,
+      "notional": 21702.6,
+      "status": "filled"
+    },
+    {
+      "ticker": "MSFT",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-52"
+      ],
+      "reason_zh": "M-52 波段卖出",
+      "signal_date": "2026-04-22",
+      "trade_date": "2026-04-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "f35112b602674508ed2077e3f72fdd71d38de1455ce15adfadb89b078da92ecb",
+      "qty": 218,
+      "cost": 91.53492999999999,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 419.885,
+      "notional": 91534.93,
+      "status": "filled"
+    },
+    {
+      "ticker": "CRM",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2026-04-22",
+      "trade_date": "2026-04-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 68550.56689424001,
+      "order_id": "c059d9c5368037758402e181632cabf67b05cc26bedaa49ff8bdcaa5967292d8",
+      "qty": 386,
+      "cost": 68.53816,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 386,
+      "side": "buy",
+      "fill_price": 177.56,
+      "notional": 68538.16,
+      "status": "filled"
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-04-24",
+      "trade_date": "2026-04-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "cab29a4d789380432a26c39bff7041395e3a9d5f71f2fe8c47371ec26556363c",
+      "qty": 156,
+      "cost": 53.97288,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 345.98,
+      "notional": 53972.880000000005,
+      "status": "filled"
+    },
+    {
+      "ticker": "JNJ",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-04-27",
+      "trade_date": "2026-04-28",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.42,
+      "certainty": "low",
+      "half": false,
+      "order_id": "9bd198f2a02dc2ab80ad59f65b4c5313f172488377ff200ae700438d15015a0b",
+      "qty": 255,
+      "cost": 58.071149999999996,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 255,
+      "side": "buy",
+      "fill_price": 227.73,
+      "notional": 58071.149999999994,
+      "status": "filled"
+    },
+    {
+      "ticker": "LLY",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-05-05",
+      "trade_date": "2026-05-06",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.6000000000000001,
+      "certainty": "high",
+      "half": false,
+      "order_id": "7982b04749be1a21954ef5a3e0728a5735f9f04409dcffa4900528eca8a2a89d",
+      "qty": 89,
+      "cost": 88.23015000000001,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 89,
+      "side": "buy",
+      "fill_price": 991.35,
+      "notional": 88230.15000000001,
+      "status": "filled"
+    },
+    {
+      "ticker": "JNJ",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-05-07",
+      "trade_date": "2026-05-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.72,
+      "certainty": "low",
+      "half": false,
+      "order_id": "4c9836a12b3ca29a39ba84e292ea1836e86a3ac91b5403ee91659164ad9668e7",
+      "qty": 226,
+      "cost": 50.384440000000005,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 226,
+      "side": "buy",
+      "fill_price": 222.94,
+      "notional": 50384.44,
+      "status": "filled"
+    },
+    {
+      "ticker": "JNJ",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-05-07",
+      "trade_date": "2026-05-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 29575.006471392,
+      "order_id": "d64502b132f6a67b7788d148cee98cdc696b75d71872412a0411557b0b28d2d5",
+      "qty": 132,
+      "cost": 29.428079999999998,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 132,
+      "side": "buy",
+      "fill_price": 222.94,
+      "notional": 29428.079999999998,
+      "status": "filled"
+    },
+    {
+      "ticker": "CRM",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-52"
+      ],
+      "reason_zh": "M-52 波段卖出",
+      "signal_date": "2026-06-01",
+      "trade_date": "2026-06-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "1e0eaa51bfa7eef742ae38f0bd03899d0578f6eedc6e2c4faf8f0785988c4626",
+      "qty": 512,
+      "cost": 102.92224,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 201.02,
+      "notional": 102922.24,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-06-10",
+      "trade_date": "2026-06-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 22119.608504768,
+      "order_id": "24a78cb2968d1c0243faa4e5ce8dd50b1b095de30b62ef13d4944189dfdf9847",
+      "qty": 59,
+      "cost": 21.996380000000002,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 59,
+      "side": "buy",
+      "fill_price": 372.82,
+      "notional": 21996.38,
+      "status": "filled"
+    },
+    {
+      "ticker": "NVDA",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-06-18",
+      "trade_date": "2026-06-22",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "0026977f74c6f8c7489d3c9017909e90d9298d7d64cca94c39c7986fc65513dd",
+      "qty": 350,
+      "cost": 74.004,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 350,
+      "side": "buy",
+      "fill_price": 211.44,
+      "notional": 74004.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-06-18",
+      "trade_date": "2026-06-22",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "854505b79cd96c5106ab7d745716ac6fcbde622cb9da5a68b0df72f60cc15eee",
+      "qty": 212,
+      "cost": 75.88434,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 212,
+      "side": "buy",
+      "fill_price": 357.945,
+      "notional": 75884.34,
+      "status": "filled"
+    },
+    {
+      "ticker": "AAPL",
+      "action": "sell_frac",
+      "label": "警戒减仓",
+      "rule_ids": [
+        "M-56"
+      ],
+      "reason_zh": "M-56 警戒减仓",
+      "signal_date": "2026-06-25",
+      "trade_date": "2026-06-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "0ba0a9d0b222ee5675a5354f2f93832484cc17298c0db6e22015e2b8f975edef",
+      "qty": 108,
+      "cost": 29.7,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 275.0,
+      "notional": 29700.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "JNJ",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-06-26",
+      "trade_date": "2026-06-29",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "3ec7d6a4dd7ed29b268c9ce4c55c8f7ed470563fcc2941212ec705ed72444a2a",
+      "qty": 132,
+      "cost": 33.42108,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 253.19,
+      "notional": 33421.08,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-06-26",
+      "trade_date": "2026-06-29",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 23254.812429247995,
+      "order_id": "c4d732240ddc59f9b026a01890cc7fa84bc111936f85a2639458c32b6cd3cd4f",
+      "qty": 62,
+      "cost": 23.16413,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 62,
+      "side": "buy",
+      "fill_price": 373.615,
+      "notional": 23164.13,
+      "status": "filled"
+    },
+    {
+      "ticker": "MSFT",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-06-26",
+      "trade_date": "2026-06-29",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 36335.644420699995,
+      "watch_cap": 0.08,
+      "order_id": "0aba0c81dff62ca139306f9b2e1a6aab0801ecdafbcac9ff03de501922f7b485",
+      "qty": 96,
+      "cost": 36.24,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 96,
+      "side": "buy",
+      "fill_price": 377.5,
+      "notional": 36240.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-07-07",
+      "trade_date": "2026-07-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "47180c73aa07c0d1620696fde66e5f51ec2612624aaff50bba231ae411b90e50",
+      "qty": 190,
+      "cost": 42.7804,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 225.16,
+      "notional": 42780.4,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-07-15",
+      "trade_date": "2026-07-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "7e99921ce79f2cc729a545a463951d5571bb7fbc22ac6ecbae4b3d059f9dbe88",
+      "qty": 49,
+      "cost": 42.471485,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 866.765,
+      "notional": 42471.485,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "sell_frac",
+      "label": "回撤刹车减仓",
+      "rule_ids": [
+        "M-62"
+      ],
+      "reason_zh": "M-62 回撤刹车减仓",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "cfdbb11e257c139b3152e9b4fde81586b9edc11ae33f9dadd67ec8aa526d3a38",
+      "qty": 49,
+      "cost": 40.303725,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 822.525,
+      "notional": 40303.725,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "sell_frac",
+      "label": "回撤刹车减仓",
+      "rule_ids": [
+        "M-62"
+      ],
+      "reason_zh": "M-62 回撤刹车减仓",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "8f61600709db5e8352718f34ef1e19336686dbe52123b924720241654368d144",
+      "qty": 190,
+      "cost": 34.62275,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 182.225,
+      "notional": 34622.75,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_frac",
+      "label": "回撤刹车减仓",
+      "rule_ids": [
+        "M-62"
+      ],
+      "reason_zh": "M-62 回撤刹车减仓",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "893b8e199610e1766389b19b8c73bf33e86a890819e560b7637d435cfb44f885",
+      "qty": 87,
+      "cost": 41.48856,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 476.88,
+      "notional": 41488.56,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "sell_frac",
+      "label": "回撤刹车减仓",
+      "rule_ids": [
+        "M-62"
+      ],
+      "reason_zh": "M-62 回撤刹车减仓",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "a023ab4bb2653556aea4762a4e3cd99ed73072b7324c49670fd2ade72596813a",
+      "qty": 61,
+      "cost": 22.328745,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 366.045,
+      "notional": 22328.745000000003,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "41423e659a147ddf3d4e03509cabbe02bcc3678afa8fc27003f78a101f43ac0e",
+      "qty": 43,
+      "cost": 20.50584,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 476.88,
+      "notional": 20505.84,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-07-17",
+      "trade_date": "2026-07-20",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "c5bd019bb3650a9e34c9f8d916f1b4d0cd83824bdf3f62229598c7044b59a80a",
+      "qty": 98,
+      "cost": 41.8705,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 98,
+      "side": "buy",
+      "fill_price": 427.25,
+      "notional": 41870.5,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-07-17",
+      "trade_date": "2026-07-20",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 21954.367681808,
+      "order_id": "04a59dac6d59b7c931d5d6268e0cd24314b80f18052616e6cd9928adb6161eb3",
+      "qty": 24,
+      "cost": 21.25368,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 24,
+      "side": "buy",
+      "fill_price": 885.57,
+      "notional": 21253.68,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-07-17",
+      "trade_date": "2026-07-20",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 21954.367681808,
+      "order_id": "ef06030bd18b1a303cefe702e424e9b6181ab001381597888c1272e6514a775f",
+      "qty": 113,
+      "cost": 21.809565,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 113,
+      "side": "buy",
+      "fill_price": 193.005,
+      "notional": 21809.565,
+      "status": "filled"
+    },
+    {
+      "ticker": "MSFT",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2026-07-20",
+      "trade_date": "2026-07-21",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 71164.50610944003,
+      "order_id": "7f4c917faee98fd1de4985f8e6a9ae37a8b116cf2ed50e6cab8c4186db90f0dc",
+      "qty": 178,
+      "cost": 70.98729000000002,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 178,
+      "side": "buy",
+      "fill_price": 398.805,
+      "notional": 70987.29000000001,
+      "status": "filled"
+    },
+    {
+      "ticker": "MSFT",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-52"
+      ],
+      "reason_zh": "M-52 波段卖出",
+      "signal_date": "2026-07-31",
+      "trade_date": "2026-08-03",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "a9cca91bf31b1795487fa311a6c62cd62a0033a9482e0332151a8a7f40a5be5a",
+      "qty": 274,
+      "cost": 130.45825,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 476.125,
+      "notional": 130458.25,
+      "status": "filled"
+    },
+    {
+      "ticker": "V",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-08-03",
+      "trade_date": "2026-08-04",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.42,
+      "certainty": "low",
+      "half": false,
+      "order_id": "19ab513504467eae2dad9911023b766a4a7b93ba27ff6a6b3ba16934911858b3",
+      "qty": 194,
+      "cost": 70.18144000000001,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 194,
+      "side": "buy",
+      "fill_price": 361.76,
+      "notional": 70181.44,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-08-10",
+      "trade_date": "2026-08-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "34c5f67c6c674e380843280e8d6fc54e3357cf3d44d874c2a7c81a06241b8e27",
+      "qty": 23,
+      "cost": 9.407,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 23,
+      "side": "buy",
+      "fill_price": 409.0,
+      "notional": 9407.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "V",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-08-11",
+      "trade_date": "2026-08-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.72,
+      "certainty": "low",
+      "half": false,
+      "order_id": "212fa4769c14d2ccf4ce35fa5f5ac3c6410826577b6ec54e76c79f2b9d0affa2",
+      "qty": 145,
+      "cost": 52.345,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 145,
+      "side": "buy",
+      "fill_price": 361.0,
+      "notional": 52345.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-08-14",
+      "trade_date": "2026-08-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "753be942f40e831fc7a737c97a8b654675d165c0e83ddee0b61138731ad74e73",
+      "qty": 30,
+      "cost": 29.9865,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 999.55,
+      "notional": 29986.5,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-08-14",
+      "trade_date": "2026-08-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "84e332c95684ff3c2feb6c2d9d8d893b8ae2de804cfd9236b1de4d467353800f",
+      "qty": 32,
+      "cost": 16.45312,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 514.16,
+      "notional": 16453.12,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-08-17",
+      "trade_date": "2026-08-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "b4466654bfb0f085aaa35185c6c31b2460b9a4a8a194088fd54154b766780f41",
+      "qty": 123,
+      "cost": 27.123960000000004,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 220.52,
+      "notional": 27123.960000000003,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-08-18",
+      "trade_date": "2026-08-19",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 22599.233820927995,
+      "order_id": "2a545f0cf4d667687481ab4ebaab6563e2f9cdf1ac9df4133087491cfa22ea00",
+      "qty": 94,
+      "cost": 22.57222,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 94,
+      "side": "buy",
+      "fill_price": 240.13,
+      "notional": 22572.22,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-08-19",
+      "trade_date": "2026-08-20",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "5b6a5c7c1f18b221c969f666eab6dc755e4676c696d32f11c515377afaf4bbce",
+      "qty": 20,
+      "cost": 7.765000000000001,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 20,
+      "side": "buy",
+      "fill_price": 388.25,
+      "notional": 7765.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "V",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2026-08-25",
+      "trade_date": "2026-08-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 1.0,
+      "certainty": "low",
+      "half": false,
+      "order_id": "e81103aadb59e5a86a8167a4cfcef4e21145504ba3257baa723e1fda9fe7e5d9",
+      "qty": 106,
+      "cost": 40.71884,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 106,
+      "side": "buy",
+      "fill_price": 384.14,
+      "notional": 40718.84,
+      "status": "filled"
+    },
+    {
+      "ticker": "MU",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-08-31",
+      "trade_date": "2026-09-01",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "091886f362235d6c39c6c8f7f184db1964c4a736a79e63ca6aa7965986de2c3e",
+      "qty": 8,
+      "cost": 7.529,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 8,
+      "side": "buy",
+      "fill_price": 941.125,
+      "notional": 7529.0,
+      "status": "filled"
+    },
+    {
+      "ticker": "AVGO",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-09-11",
+      "trade_date": "2026-09-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "e4910026ab60841ee2a0d695d2af4204e751ba08a548612a0e159a8fa6b55cde",
+      "qty": 41,
+      "cost": 14.33483,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 349.63,
+      "notional": 14334.83,
+      "status": "filled"
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_frac",
+      "label": "分批止盈",
+      "rule_ids": [
+        "M-54"
+      ],
+      "reason_zh": "M-54 分批止盈",
+      "signal_date": "2026-09-15",
+      "trade_date": "2026-09-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.25,
+      "order_id": "32fe147465be3d2135c2f845240940e2d74828563f0a95491a5a43f481af64ed",
+      "qty": 24,
+      "cost": 12.41736,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 517.39,
+      "notional": 12417.36,
+      "status": "filled"
+    },
+    {
+      "ticker": "META",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-52"
+      ],
+      "reason_zh": "M-52 波段卖出",
+      "signal_date": "2026-09-15",
+      "trade_date": "2026-09-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "91718f300857a004174c236d920287ae640844249f8d13a264b6d08d5b4222ed",
+      "qty": 132,
+      "cost": 89.74745999999999,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 679.905,
+      "notional": 89747.45999999999,
+      "status": "filled"
+    },
+    {
+      "ticker": "LLY",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-09-16",
+      "trade_date": "2026-09-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "d7f3da54a9b03f60d694d625a894a601b7cbbadc0310af2f24231426a99a5c89",
+      "qty": 38,
+      "cost": 43.710260000000005,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 38,
+      "side": "buy",
+      "fill_price": 1150.27,
+      "notional": 43710.26,
+      "status": "filled"
+    },
+    {
+      "ticker": "UNH",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-09-17",
+      "trade_date": "2026-09-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "ca5eef8d0c38bf641e9d85d4e184806ff1c0bc53dd107e4224160a3a38d56b50",
+      "qty": 20,
+      "cost": 7.505800000000001,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 20,
+      "side": "buy",
+      "fill_price": 375.29,
+      "notional": 7505.8,
+      "status": "filled"
+    },
+    {
+      "ticker": "MRVL",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-09-21",
+      "trade_date": "2026-09-22",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "d4fc18be545386ec8b76e37cba3e28862322d41039801736316d5863f008e3e2",
+      "qty": 94,
+      "cost": 24.013240000000003,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 255.46,
+      "notional": 24013.24,
+      "status": "filled"
+    }
+  ],
+  "curve": [
+    {
+      "day": "2026-01-02",
+      "equity": 1000000.0,
+      "cash": 1000000.0
+    },
+    {
+      "day": "2026-01-05",
+      "equity": 997212.5216630001,
+      "cash": 841019.841663
+    },
+    {
+      "day": "2026-01-06",
+      "equity": 996866.547243,
+      "cash": 796771.217243
+    },
+    {
+      "day": "2026-01-07",
+      "equity": 995543.943883,
+      "cash": 715726.893883
+    },
+    {
+      "day": "2026-01-08",
+      "equity": 994599.753883,
+      "cash": 715726.893883
+    },
+    {
+      "day": "2026-01-09",
+      "equity": 995771.373883,
+      "cash": 715726.893883
+    },
+    {
+      "day": "2026-01-12",
+      "equity": 997113.305403,
+      "cash": 668200.935403
+    },
+    {
+      "day": "2026-01-13",
+      "equity": 998919.6329329999,
+      "cash": 647057.342933
+    },
+    {
+      "day": "2026-01-14",
+      "equity": 997273.398373,
+      "cash": 635661.398373
+    },
+    {
+      "day": "2026-01-15",
+      "equity": 999530.2115829999,
+      "cash": 614923.891583
+    },
+    {
+      "day": "2026-01-16",
+      "equity": 1002515.1915829999,
+      "cash": 614923.891583
+    },
+    {
+      "day": "2026-01-20",
+      "equity": 999585.6915829999,
+      "cash": 614923.891583
+    },
+    {
+      "day": "2026-01-21",
+      "equity": 1015381.851583,
+      "cash": 614923.891583
+    },
+    {
+      "day": "2026-01-22",
+      "equity": 1020776.071583,
+      "cash": 614923.891583
+    },
+    {
+      "day": "2026-01-23",
+      "equity": 1021672.4865329999,
+      "cash": 592936.8765329999
+    },
+    {
+      "day": "2026-01-26",
+      "equity": 1018142.6365329998,
+      "cash": 592936.8765329999
+    },
+    {
+      "day": "2026-01-27",
+      "equity": 1002468.1659229998,
+      "cash": 551805.1759229999
+    },
+    {
+      "day": "2026-01-28",
+      "equity": 1012814.0323829999,
+      "cash": 525305.1623829999
+    },
+    {
+      "day": "2026-01-29",
+      "equity": 1010184.6223829999,
+      "cash": 525305.1623829999
+    },
+    {
+      "day": "2026-01-30",
+      "equity": 998014.0403429999,
+      "cash": 495022.87034299993
+    },
+    {
+      "day": "2026-02-02",
+      "equity": 1006554.8193629999,
+      "cash": 399756.71936299995
+    },
+    {
+      "day": "2026-02-03",
+      "equity": 993064.449363,
+      "cash": 399756.71936299995
+    },
+    {
+      "day": "2026-02-04",
+      "equity": 969728.429363,
+      "cash": 399756.71936299995
+    },
+    {
+      "day": "2026-02-05",
+      "equity": 963655.7783829999,
+      "cash": 384400.39838299993
+    },
+    {
+      "day": "2026-02-06",
+      "equity": 985123.7783829999,
+      "cash": 384400.39838299993
+    },
+    {
+      "day": "2026-02-09",
+      "equity": 988655.0283829999,
+      "cash": 384400.39838299993
+    },
+    {
+      "day": "2026-02-10",
+      "equity": 982672.2260629998,
+      "cash": 416560.5260629999
+    },
+    {
+      "day": "2026-02-11",
+      "equity": 988508.9367379998,
+      "cash": 391981.6467379999
+    },
+    {
+      "day": "2026-02-12",
+      "equity": 977751.8467379999,
+      "cash": 391981.6467379999
+    },
+    {
+      "day": "2026-02-13",
+      "equity": 975349.396738,
+      "cash": 391981.6467379999
+    },
+    {
+      "day": "2026-02-17",
+      "equity": 974332.9867379998,
+      "cash": 391981.6467379999
+    },
+    {
+      "day": "2026-02-18",
+      "equity": 979138.3267379999,
+      "cash": 391981.6467379999
+    },
+    {
+      "day": "2026-02-19",
+      "equity": 978584.4365979999,
+      "cash": 368718.2665979999
+    },
+    {
+      "day": "2026-02-20",
+      "equity": 984935.0765979998,
+      "cash": 368718.2665979999
+    },
+    {
+      "day": "2026-02-23",
+      "equity": 977169.0252379999,
+      "cash": 348096.30523799994
+    },
+    {
+      "day": "2026-02-24",
+      "equity": 984610.392928,
+      "cash": 368458.2329279999
+    },
+    {
+      "day": "2026-02-25",
+      "equity": 993786.702928,
+      "cash": 368458.2329279999
+    },
+    {
+      "day": "2026-02-26",
+      "equity": 980570.7229279999,
+      "cash": 368458.2329279999
+    },
+    {
+      "day": "2026-02-27",
+      "equity": 976987.3329279999,
+      "cash": 368458.2329279999
+    },
+    {
+      "day": "2026-03-02",
+      "equity": 976813.2679279998,
+      "cash": 344178.9779279999
+    },
+    {
+      "day": "2026-03-03",
+      "equity": 961263.277928,
+      "cash": 344178.9779279999
+    },
+    {
+      "day": "2026-03-04",
+      "equity": 971435.8779279998,
+      "cash": 344178.9779279999
+    },
+    {
+      "day": "2026-03-05",
+      "equity": 968013.947928,
+      "cash": 344178.9779279999
+    },
+    {
+      "day": "2026-03-06",
+      "equity": 969012.4079279999,
+      "cash": 344178.9779279999
+    },
+    {
+      "day": "2026-03-09",
+      "equity": 986217.7534879999,
+      "cash": 320901.2834879999
+    },
+    {
+      "day": "2026-03-10",
+      "equity": 988840.800338,
+      "cash": 287134.4003379999
+    },
+    {
+      "day": "2026-03-11",
+      "equity": 991032.860338,
+      "cash": 287134.4003379999
+    },
+    {
+      "day": "2026-03-12",
+      "equity": 975569.6727179999,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-13",
+      "equity": 970784.972718,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-16",
+      "equity": 984235.1727179999,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-17",
+      "equity": 988318.4127180001,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-18",
+      "equity": 980609.0327179998,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-19",
+      "equity": 980348.282718,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-20",
+      "equity": 964841.0327179998,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-23",
+      "equity": 968413.792718,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-24",
+      "equity": 963083.472718,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-25",
+      "equity": 973930.332718,
+      "cash": 265835.5027179999
+    },
+    {
+      "day": "2026-03-26",
+      "equity": 951612.3361979999,
+      "cash": 245662.8911979999
+    },
+    {
+      "day": "2026-03-27",
+      "equity": 937919.3128180001,
+      "cash": 283333.5628179999
+    },
+    {
+      "day": "2026-03-30",
+      "equity": 921085.630178,
+      "cash": 268466.0701779999
+    },
+    {
+      "day": "2026-03-31",
+      "equity": 955407.639978,
+      "cash": 249146.56997799993
+    },
+    {
+      "day": "2026-04-01",
+      "equity": 977935.4899779998,
+      "cash": 249146.56997799993
+    },
+    {
+      "day": "2026-04-02",
+      "equity": 980889.7316079999,
+      "cash": 298026.0116079999
+    },
+    {
+      "day": "2026-04-06",
+      "equity": 989828.908628,
+      "cash": 273738.76862799993
+    },
+    {
+      "day": "2026-04-07",
+      "equity": 999300.7386279998,
+      "cash": 273738.76862799993
+    },
+    {
+      "day": "2026-04-08",
+      "equity": 1025278.048628,
+      "cash": 273738.76862799993
+    },
+    {
+      "day": "2026-04-09",
+      "equity": 1037415.0586279999,
+      "cash": 273738.76862799993
+    },
+    {
+      "day": "2026-04-10",
+      "equity": 1049312.528628,
+      "cash": 273738.76862799993
+    },
+    {
+      "day": "2026-04-13",
+      "equity": 1060125.7042979999,
+      "cash": 268278.98429799994
+    },
+    {
+      "day": "2026-04-14",
+      "equity": 1084883.094498,
+      "cash": 210331.29449799994
+    },
+    {
+      "day": "2026-04-15",
+      "equity": 1096881.163698,
+      "cash": 186465.29369799994
+    },
+    {
+      "day": "2026-04-16",
+      "equity": 1103215.7986979997,
+      "cash": 223163.55869799992
+    },
+    {
+      "day": "2026-04-17",
+      "equity": 1118078.828698,
+      "cash": 223163.55869799992
+    },
+    {
+      "day": "2026-04-20",
+      "equity": 1118068.450398,
+      "cash": 206148.26039799993
+    },
+    {
+      "day": "2026-04-21",
+      "equity": 1124396.5703979998,
+      "cash": 206148.26039799993
+    },
+    {
+      "day": "2026-04-22",
+      "equity": 1155817.086178,
+      "cash": 200518.41617799993
+    },
+    {
+      "day": "2026-04-23",
+      "equity": 1151337.0304879998,
+      "cash": 245036.0104879999
+    },
+    {
+      "day": "2026-04-24",
+      "equity": 1173604.160488,
+      "cash": 245036.0104879999
+    },
+    {
+      "day": "2026-04-27",
+      "equity": 1175354.547608,
+      "cash": 298954.91760799993
+    },
+    {
+      "day": "2026-04-28",
+      "equity": 1165722.0764579999,
+      "cash": 240825.69645799993
+    },
+    {
+      "day": "2026-04-29",
+      "equity": 1173810.106458,
+      "cash": 240825.69645799993
+    },
+    {
+      "day": "2026-04-30",
+      "equity": 1180454.506458,
+      "cash": 240825.69645799993
+    },
+    {
+      "day": "2026-05-01",
+      "equity": 1192866.2264579998,
+      "cash": 240825.69645799993
+    },
+    {
+      "day": "2026-05-04",
+      "equity": 1192181.116458,
+      "cash": 240825.69645799993
+    },
+    {
+      "day": "2026-05-05",
+      "equity": 1215235.506458,
+      "cash": 240825.69645799993
+    },
+    {
+      "day": "2026-05-06",
+      "equity": 1246179.466308,
+      "cash": 152507.31630799992
+    },
+    {
+      "day": "2026-05-07",
+      "equity": 1232291.936308,
+      "cash": 152507.31630799992
+    },
+    {
+      "day": "2026-05-08",
+      "equity": 1273380.283788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-11",
+      "equity": 1282109.2537880002,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-12",
+      "equity": 1273374.7737879998,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-13",
+      "equity": 1303233.733788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-14",
+      "equity": 1307088.0937879998,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-15",
+      "equity": 1279604.2537879997,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-18",
+      "equity": 1263701.483788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-19",
+      "equity": 1270084.4137880004,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-20",
+      "equity": 1295251.743788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-21",
+      "equity": 1305548.7837880002,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-22",
+      "equity": 1318712.0637879998,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-26",
+      "equity": 1361727.623788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-27",
+      "equity": 1365066.893788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-28",
+      "equity": 1379162.003788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-05-29",
+      "equity": 1387343.043788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-06-01",
+      "equity": 1413981.053788,
+      "cash": 72614.98378799992
+    },
+    {
+      "day": "2026-06-02",
+      "equity": 1471025.531548,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-03",
+      "equity": 1486480.2315480001,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-04",
+      "equity": 1489504.011548,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-05",
+      "equity": 1398130.591548,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-08",
+      "equity": 1440725.401548,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-09",
+      "equity": 1416463.526548,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-10",
+      "equity": 1382475.531548,
+      "cash": 175434.30154799993
+    },
+    {
+      "day": "2026-06-11",
+      "equity": 1440408.0751679998,
+      "cash": 153415.92516799993
+    },
+    {
+      "day": "2026-06-12",
+      "equity": 1440600.8851680001,
+      "cash": 153415.92516799993
+    },
+    {
+      "day": "2026-06-15",
+      "equity": 1502260.085168,
+      "cash": 153415.92516799993
+    },
+    {
+      "day": "2026-06-16",
+      "equity": 1452841.825168,
+      "cash": 153415.92516799993
+    },
+    {
+      "day": "2026-06-17",
+      "equity": 1456591.555168,
+      "cash": 153415.92516799993
+    },
+    {
+      "day": "2026-06-18",
+      "equity": 1500204.9451679997,
+      "cash": 153415.92516799993
+    },
+    {
+      "day": "2026-06-22",
+      "equity": 1508303.7068280003,
+      "cash": 3377.6968279999273
+    },
+    {
+      "day": "2026-06-23",
+      "equity": 1441776.406828,
+      "cash": 3377.6968279999273
+    },
+    {
+      "day": "2026-06-24",
+      "equity": 1438594.2768279999,
+      "cash": 3377.6968279999273
+    },
+    {
+      "day": "2026-06-25",
+      "equity": 1470343.066828,
+      "cash": 3377.6968279999273
+    },
+    {
+      "day": "2026-06-26",
+      "equity": 1453425.7768279996,
+      "cash": 33047.99682799993
+    },
+    {
+      "day": "2026-06-29",
+      "equity": 1480378.941618,
+      "cash": 6972.121617999932
+    },
+    {
+      "day": "2026-06-30",
+      "equity": 1511729.151618,
+      "cash": 6972.121617999932
+    },
+    {
+      "day": "2026-07-01",
+      "equity": 1466962.7016180002,
+      "cash": 6972.121617999932
+    },
+    {
+      "day": "2026-07-02",
+      "equity": 1432508.601618,
+      "cash": 6972.121617999932
+    },
+    {
+      "day": "2026-07-06",
+      "equity": 1450620.211618,
+      "cash": 6972.121617999932
+    },
+    {
+      "day": "2026-07-07",
+      "equity": 1429556.0716179998,
+      "cash": 6972.121617999932
+    },
+    {
+      "day": "2026-07-08",
+      "equity": 1432284.9662179998,
+      "cash": 49709.74121799993
+    },
+    {
+      "day": "2026-07-09",
+      "equity": 1459176.5312180002,
+      "cash": 49709.74121799993
+    },
+    {
+      "day": "2026-07-10",
+      "equity": 1460011.301218,
+      "cash": 49709.74121799993
+    },
+    {
+      "day": "2026-07-13",
+      "equity": 1425116.121218,
+      "cash": 49709.74121799993
+    },
+    {
+      "day": "2026-07-14",
+      "equity": 1444377.591218,
+      "cash": 49709.74121799993
+    },
+    {
+      "day": "2026-07-15",
+      "equity": 1424361.1712180001,
+      "cash": 49709.74121799993
+    },
+    {
+      "day": "2026-07-16",
+      "equity": 1386674.4347330001,
+      "cash": 92138.75473299992
+    },
+    {
+      "day": "2026-07-17",
+      "equity": 1372147.980113,
+      "cash": 251229.1251129999
+    },
+    {
+      "day": "2026-07-20",
+      "equity": 1372304.3263680004,
+      "cash": 166210.4463679999
+    },
+    {
+      "day": "2026-07-21",
+      "equity": 1406610.3190779998,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-22",
+      "equity": 1405142.9590779997,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-23",
+      "equity": 1387655.2890779998,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-24",
+      "equity": 1371773.8590779998,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-27",
+      "equity": 1362183.8290779996,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-28",
+      "equity": 1351246.5190779998,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-29",
+      "equity": 1320691.6590779999,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-30",
+      "equity": 1358669.1890779997,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-07-31",
+      "equity": 1362745.8190779998,
+      "cash": 95152.16907799988
+    },
+    {
+      "day": "2026-08-03",
+      "equity": 1382462.9008280002,
+      "cash": 225479.96082799986
+    },
+    {
+      "day": "2026-08-04",
+      "equity": 1416029.169388,
+      "cash": 155228.33938799985
+    },
+    {
+      "day": "2026-08-05",
+      "equity": 1414592.959388,
+      "cash": 155228.33938799985
+    },
+    {
+      "day": "2026-08-06",
+      "equity": 1411711.9843879999,
+      "cash": 155228.33938799985
+    },
+    {
+      "day": "2026-08-07",
+      "equity": 1418129.9793879997,
+      "cash": 155228.33938799985
+    },
+    {
+      "day": "2026-08-10",
+      "equity": 1409706.9393879997,
+      "cash": 155228.33938799985
+    },
+    {
+      "day": "2026-08-11",
+      "equity": 1401340.502388,
+      "cash": 145811.93238799984
+    },
+    {
+      "day": "2026-08-12",
+      "equity": 1412486.7173879996,
+      "cash": 93414.58738799984
+    },
+    {
+      "day": "2026-08-13",
+      "equity": 1424499.7173879999,
+      "cash": 93414.58738799984
+    },
+    {
+      "day": "2026-08-14",
+      "equity": 1424506.017388,
+      "cash": 93414.58738799984
+    },
+    {
+      "day": "2026-08-17",
+      "equity": 1427685.767768,
+      "cash": 139807.76776799985
+    },
+    {
+      "day": "2026-08-18",
+      "equity": 1412452.1138079998,
+      "cash": 166904.60380799984
+    },
+    {
+      "day": "2026-08-19",
+      "equity": 1421449.1665879998,
+      "cash": 144309.81158799984
+    },
+    {
+      "day": "2026-08-20",
+      "equity": 1420266.091588,
+      "cash": 136537.04658799982
+    },
+    {
+      "day": "2026-08-21",
+      "equity": 1420245.856588,
+      "cash": 136537.04658799982
+    },
+    {
+      "day": "2026-08-24",
+      "equity": 1414609.1415879999,
+      "cash": 136537.04658799982
+    },
+    {
+      "day": "2026-08-25",
+      "equity": 1426658.9165879998,
+      "cash": 136537.04658799982
+    },
+    {
+      "day": "2026-08-26",
+      "equity": 1422785.9377479998,
+      "cash": 95777.48774799982
+    },
+    {
+      "day": "2026-08-27",
+      "equity": 1427526.0277479996,
+      "cash": 95777.48774799982
+    },
+    {
+      "day": "2026-08-28",
+      "equity": 1412856.0177479999,
+      "cash": 95777.48774799982
+    },
+    {
+      "day": "2026-08-31",
+      "equity": 1406265.0877479997,
+      "cash": 95777.48774799982
+    },
+    {
+      "day": "2026-09-01",
+      "equity": 1403713.8787479997,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-02",
+      "equity": 1417207.678748,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-03",
+      "equity": 1427990.8187479998,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-04",
+      "equity": 1435239.1937479996,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-08",
+      "equity": 1426793.2687479998,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-09",
+      "equity": 1430822.7837479997,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-10",
+      "equity": 1416871.0987479996,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-11",
+      "equity": 1424101.3887479997,
+      "cash": 88240.95874799983
+    },
+    {
+      "day": "2026-09-14",
+      "equity": 1414800.9739179998,
+      "cash": 102561.45391799982
+    },
+    {
+      "day": "2026-09-15",
+      "equity": 1413693.7639179998,
+      "cash": 102561.45391799982
+    },
+    {
+      "day": "2026-09-16",
+      "equity": 1418000.3290979997,
+      "cash": 204624.1090979998
+    },
+    {
+      "day": "2026-09-17",
+      "equity": 1441044.0388379998,
+      "cash": 160870.1388379998
+    },
+    {
+      "day": "2026-09-18",
+      "equity": 1451174.683038,
+      "cash": 153356.8330379998
+    },
+    {
+      "day": "2026-09-21",
+      "equity": 1473981.913038,
+      "cash": 153356.8330379998
+    },
+    {
+      "day": "2026-09-22",
+      "equity": 1476567.059798,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-09-23",
+      "equity": 1459691.6597979995,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-09-24",
+      "equity": 1470464.4197979998,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-09-25",
+      "equity": 1475564.474798,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-09-28",
+      "equity": 1469577.9397979998,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-09-29",
+      "equity": 1466348.0897979997,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-09-30",
+      "equity": 1459219.789798,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-10-01",
+      "equity": 1457665.3997979998,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-10-02",
+      "equity": 1465718.5597979994,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-10-05",
+      "equity": 1474506.1297979993,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-10-06",
+      "equity": 1484160.8597980002,
+      "cash": 177346.0597979998
+    },
+    {
+      "day": "2026-10-07",
+      "equity": 1494527.3397979997,
+      "cash": 177346.0597979998
+    }
+  ],
+  "positions": {
+    "NVDA": {
+      "shares": 731,
+      "avg_cost": 200.17438212494298,
+      "tier_now": "normal",
+      "tier_entry": "attack",
+      "entry_index": 1,
+      "entry_state": "2025-12-31",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.6,
+      "certainty": "high",
+      "last_sell_index": 62,
+      "last_swing_index": 59,
+      "peak_price": 239.24,
+      "swing_shares": 0,
+      "swing_count": 1,
+      "swing_only": false
+    },
+    "MU": {
+      "shares": 101,
+      "avg_cost": 479.80447289850935,
+      "tier_now": "attack",
+      "tier_entry": "attack",
+      "entry_index": 1,
+      "entry_state": "2025-12-31",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.6,
+      "certainty": "high",
+      "last_sell_index": 155,
+      "last_swing_index": 135,
+      "peak_price": 1213.56,
+      "swing_shares": 0,
+      "swing_count": 1,
+      "swing_only": false
+    },
+    "MRVL": {
+      "shares": 371,
+      "avg_cost": 137.96960898376676,
+      "tier_now": "attack",
+      "tier_entry": "attack",
+      "entry_index": 1,
+      "entry_state": "2025-12-31",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 1.0,
+      "first_fraction": 0.21999999999999997,
+      "certainty": "low",
+      "last_sell_index": 156,
+      "last_swing_index": 180,
+      "peak_price": 316.43,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "GOOGL": {
+      "shares": 431,
+      "avg_cost": 333.3270965197215,
+      "tier_now": "normal",
+      "tier_entry": "normal",
+      "entry_index": 1,
+      "entry_state": "2025-12-31",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.5800000000000001,
+      "certainty": "medium",
+      "last_sell_index": -100,
+      "last_swing_index": 78,
+      "peak_price": 402.62,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "UNH": {
+      "shares": 393,
+      "avg_cost": 370.86554707379133,
+      "tier_now": "defense",
+      "tier_entry": "defense",
+      "entry_index": 3,
+      "entry_state": "2025-12-31",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.6799999999999999,
+      "certainty": "medium",
+      "last_sell_index": 26,
+      "last_swing_index": -100,
+      "peak_price": 436.35,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "AMD": {
+      "shares": 75,
+      "avg_cost": 200.53081730769233,
+      "tier_now": "attack",
+      "tier_entry": "attack",
+      "entry_index": 6,
+      "entry_state": "2025-12-31",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.6,
+      "certainty": "high",
+      "last_sell_index": 176,
+      "last_swing_index": 70,
+      "peak_price": 649.42,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "AVGO": {
+      "shares": 82,
+      "avg_cost": 361.6438845866766,
+      "tier_now": "attack",
+      "tier_entry": "attack",
+      "entry_index": 46,
+      "entry_state": "2025-12-31",
+      "stage": 2,
+      "clear_streak": 2,
+      "filled_fraction": 1.0,
+      "first_fraction": 0.0,
+      "certainty": "medium",
+      "last_sell_index": 174,
+      "last_swing_index": 121,
+      "peak_price": 481.57,
+      "swing_shares": 19,
+      "swing_count": 2,
+      "swing_only": false,
+      "watch_cap": 0.06
+    },
+    "AAPL": {
+      "shares": 324,
+      "avg_cost": 260.26159722222224,
+      "tier_now": "normal",
+      "tier_entry": "defense",
+      "entry_index": 20,
+      "entry_state": "2026-01-30",
+      "stage": 1,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.7999999999999999,
+      "certainty": "high",
+      "last_sell_index": 120,
+      "last_swing_index": -100,
+      "peak_price": 341.07,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "JNJ": {
+      "shares": 481,
+      "avg_cost": 224.93257748776506,
+      "tier_now": "defense",
+      "tier_entry": "defense",
+      "entry_index": 79,
+      "entry_state": "2026-04-22",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.72,
+      "first_fraction": 0.42,
+      "certainty": "low",
+      "last_sell_index": -100,
+      "last_swing_index": 121,
+      "peak_price": 278.43,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "LLY": {
+      "shares": 127,
+      "avg_cost": 1038.9008661417324,
+      "tier_now": "normal",
+      "tier_entry": "normal",
+      "entry_index": 85,
+      "entry_state": "2026-04-30",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 0.85,
+      "first_fraction": 0.6000000000000001,
+      "certainty": "high",
+      "last_sell_index": -100,
+      "last_swing_index": -100,
+      "peak_price": 1280.34,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    },
+    "V": {
+      "shares": 445,
+      "avg_cost": 366.84332584269663,
+      "tier_now": "defense",
+      "tier_entry": "defense",
+      "entry_index": 146,
+      "entry_state": "2026-04-29",
+      "stage": 0,
+      "clear_streak": 0,
+      "filled_fraction": 1.0,
+      "first_fraction": 0.42,
+      "certainty": "low",
+      "last_sell_index": -100,
+      "last_swing_index": -100,
+      "peak_price": 384.14,
+      "swing_shares": 0,
+      "swing_count": 0,
+      "swing_only": false
+    }
+  },
+  "comparison": {
+    "match_rate": 1.0,
+    "differences": [],
+    "expected_count": 90,
+    "actual_count": 90
+  },
+  "negative_cash_days": 0,
+  "minimum_cash": 3377.6968279999273,
+  "tier_changes": []
+}

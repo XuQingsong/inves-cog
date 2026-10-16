@@ -1,0 +1,123 @@
+{
+  "kind": "synthetic fixture demonstration; no database writes or real orders",
+  "input_fixture": "tests/fixtures/phase1/m4/overlay.json",
+  "orders_before_overlay": [
+    {
+      "ticker": "BBB",
+      "action": "buy_to"
+    },
+    {
+      "ticker": "AAA",
+      "action": "buy_to"
+    }
+  ],
+  "cancels": [
+    {
+      "ticker": "AAA",
+      "original_order": {
+        "ticker": "AAA",
+        "action": "buy_to",
+        "label": "试仓买入",
+        "rule_ids": [
+          "M-34",
+          "M-35",
+          "M-36",
+          "M-37"
+        ],
+        "reason_zh": "M-34 试仓买入",
+        "signal_date": "2026-01-09",
+        "trade_date": "2026-01-12",
+        "rule_set": "A",
+        "params_version": "p-2026.10",
+        "tier": "normal",
+        "fraction": 0.7000000000000001,
+        "certainty": "high",
+        "half": false,
+        "order_id": "edf7838b5ad95ed52d149cee00cb183fdb5edc92474c466ec91ca03a66478aac",
+        "kind": "open"
+      },
+      "n_code": "N5",
+      "overlay_event_ids": [
+        "synthetic-event-1"
+      ],
+      "reason_zh": "事件冷静期，撤销买单"
+    }
+  ],
+  "skips": [
+    {
+      "ticker": "AAA",
+      "n_code": "N5",
+      "rule_ids": [
+        "M-34"
+      ],
+      "reason_zh": "M-34 事件冷静期，暂停买入",
+      "params_version": "p-2026.10"
+    }
+  ],
+  "remaining_orders": [
+    {
+      "ticker": "BBB",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-09",
+      "trade_date": "2026-01-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.7000000000000001,
+      "certainty": "high",
+      "half": false,
+      "order_id": "b9edc2368b4390dfa087a9ded4c9d784230aa31a4fa5affd847132745f126578",
+      "kind": "open",
+      "side": "buy",
+      "qty": null,
+      "notional_est": 84000.0,
+      "overlay_version": "synthetic-cooling-v1"
+    }
+  ],
+  "fills": [
+    {
+      "ticker": "BBB",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-01-09",
+      "trade_date": "2026-01-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.7000000000000001,
+      "certainty": "high",
+      "half": false,
+      "order_id": "b9edc2368b4390dfa087a9ded4c9d784230aa31a4fa5affd847132745f126578",
+      "kind": "open",
+      "qty": 840,
+      "cost": 84.0,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 840,
+      "side": "buy",
+      "fill_price": 100,
+      "notional": 84000,
+      "status": "filled"
+    }
+  ],
+  "assertions": {
+    "AAA_canceled": true,
+    "AAA_not_filled": true,
+    "BBB_allowed": true,
+    "increase_ignored": true
+  }
+}
