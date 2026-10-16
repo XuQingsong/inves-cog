@@ -219,6 +219,12 @@ def test_shadow_rules_no_orders():
     from inves_cog.valuation_v1.shadows import shadow
 
     r = {"p": 1.31, "confidence": "高", "type": "稳定", "version": "x"}
+    # K01 official answer: delta-g coordinates, not the current-price p curve.
+    for dg, expected in [(-30, 95), (-10, 95), (-5, 82.5), (0, 70), (5, 55), (10, 40), (17.5, 25), (25, 10), (90, 10)]:
+        actual = shadow({**r, 'type': '成长', 'delta_g': dg, 'p': .001})
+        assert actual['v1_score'] == expected
+    unavailable = shadow({**r, 'type': '成长', 'delta_g': None, 'p': 0})
+    assert unavailable['v1_score'] is None and unavailable['v1_reason']
     a = shadow(r)
     assert a["vt1"] and a["vt2"] and a["v3_trim_flag"] and a["v2_coef"] == 0
     assert not shadow(r, seen_versions={"x"})["v3_trim_flag"]
