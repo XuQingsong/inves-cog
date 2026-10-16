@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 22:45 北京
+
+- 草稿 PR #18 head `ed694dc`。没有合并进 main。本地 `make phase1-test`：136 passed，10 deselected。
+- 感知表写入走调用方传入的连接，不打开数据库地址。广域异常只写回捞和报告，状态改成已记录。已评分但没有引用的候选会拒绝。一次性测试库里 `role_perception` 写入十张归因表成功，空引用被约束拦住，事务已回滚。`role_ingest` 插入被拒绝。没有 GRANT ingest，没有写共用库。真实补证入库仍停在 `Repository.put_info`。
+- `test_case_attribution` 和 `test_case_no_news_unexplained` 继续 pending。三处缺口仍缺冻结夹具。不开始下一条。
+
 ## B-008  进行中  2026-10-16 22:34 北京
 
 - 草稿 PR #18 head `f2ddf45`。没有合并进 main。本地 `make phase1-test`：134 passed，10 deselected。
