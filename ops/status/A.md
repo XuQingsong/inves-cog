@@ -2,6 +2,14 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-003  已收到  2026-10-16 12:08 北京
+- A-002 已由需求方验证通过；PR #7 不再改动，等待需求方取得用户批准后合并。
+- 将在新分支 phase1/m1m2-fixes-a003 建立单独 PR「[M1/M2] 遗留修复 A-003」，D-27、D-26、D-22、LLM 日用量各自单独提交；先补失败测试，再实现。
+- 当前步骤：只读核对 UNH 申报原件与 gross_margin_derived 全名单、SEC 失败日志/限速/续跑合同、三条健康记录及预算日界线；SEC 原因查实后先写回本文件。
+- 10-16 全天用量将在对应预算日完整结束后核验；当前不把部分日数据当作整日数据。
+- 规则变化已收到：B 线为云端只读 agent，不写共用库；A-003 明确授权本次 M1/M2 遗留修复与指定数据重算/清理，不开始 M4，不改 PR #7/#8。
+- 已自行决定：无。流程疑问：无。
+
 ## A-002  已完成  2026-10-16 11:35 北京
 - PR [#7](https://github.com/XuQingsong/inves-cog/pull/7)，新 head `2c93b5af2630e0d49ad3703a0239c63cff091735`；本地与 GitHub 完整 SHA 及代码树 `0cc283b5e3b480f4b8bdf993edc26052b94afe3b` 一致。
 - 当前 head 的 phase1-blocking CI 绿：[run 38845929760](https://github.com/XuQingsong/inves-cog/actions/runs/38845929760)。隔离环境 blocking、M0 CI 断言与破坏性自测步骤均成功。
