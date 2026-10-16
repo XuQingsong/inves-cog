@@ -52,3 +52,27 @@ def supplement_calls(requested, already_used, rules=None):
     if requested > room:
         return room, "补证未执行"
     return requested, None
+
+
+_SOURCE_WEIGHT = {1: 1.0, 2: 0.75, 3: 0.5, 4: 0.25}
+
+
+def overlap_ratio(item_entities, query_entities):
+    query = set(query_entities)
+    if not query:
+        return 0.0
+    return min(len(query & set(item_entities)) / len(query), 1.0)
+
+
+def relevance(item, query_entities):
+    overlap = overlap_ratio(item.get("entities") or [], query_entities)
+    similarity = item.get("similarity") or 0.0
+    level = item.get("source_level")
+    weight = _SOURCE_WEIGHT.get(int(level), 0.0) if level is not None else 0.0
+    return 0.5 * overlap + 0.3 * similarity + 0.2 * weight
+
+
+def rank_items(items, query_entities, limit=40):
+    scored = [{**item, "relevance": relevance(item, query_entities)} for item in items]
+    scored.sort(key=lambda row: row["relevance"], reverse=True)
+    return scored[:limit]

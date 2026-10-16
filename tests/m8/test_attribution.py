@@ -169,3 +169,180 @@ def test_verified_not_from_market_evidence():
 
     assert verified_from_evidence(["second_hit", "consensus"]) is False
     assert verified_from_evidence(["filing"]) is True
+
+
+@pytest.mark.phase1_blocking
+def test_retrieval_recovers_low_rank_item():
+    from inves_cog.perception.attribution.candidates import validate_candidates
+    from inves_cog.perception.attribution.retrieve import rank_items
+
+    noise = [
+        {
+            "info_id": f"noise-{index}",
+            "entities": [],
+            "similarity": 0.95,
+            "source_level": 1,
+            "rank": 1000 - index,
+        }
+        for index in range(45)
+    ]
+    chart = {
+        "info_id": "muse-chart",
+        "entities": ["CPU", "META", "Muse"],
+        "similarity": 0.2,
+        "source_level": 4,
+        "rank": 1,
+    }
+    ranked = rank_items([*noise, chart], {"CPU", "META"})
+    identifiers = {row["info_id"] for row in ranked}
+    assert "muse-chart" in identifiers
+    assert chart["rank"] < min(row["rank"] for row in noise)
+    kept = validate_candidates(
+        [{"mechanism": "需求", "info_ids": ["muse-chart"], "affected": [{"ticker": "META"}]}],
+        identifiers,
+        {"META"},
+    )
+    assert any(row["info_ids"] == ["muse-chart"] for row in kept)
+
+
+@pytest.mark.phase1_blocking
+def test_five_dims_rules():
+    from inves_cog.perception.attribution.dims import authenticity, narrative_states, trade_states
+
+    assert authenticity([{"level": 4, "action": "确认"}, {"level": 3, "action": "确认"}]) == "未核实"
+    assert authenticity([{"level": 2, "independent": False}, {"level": 4}]) == "未核实"
+    assert authenticity([{"level": 2, "independent": True}]) == "部分核实"
+    assert authenticity([{"level": 1, "action": "确认"}]) == "核实"
+    assert authenticity([{"level": 1, "action": "修订"}, {"level": 1, "action": "确认"}]) == "修订"
+    assert authenticity([{"level": 1, "action": "否认"}, {"level": 1, "action": "确认"}]) == "证伪"
+    assert authenticity([{"level": 1, "action": "矛盾"}]) == "证伪"
+
+    assert narrative_states([2]) == ["初现"]
+    assert narrative_states([2, 3]) == ["初现", "扩散"]
+    assert narrative_states([4, 5]) == ["初现", "稳定"]
+    assert narrative_states([10, 10, 4, 4]) == ["初现", "稳定", "稳定", "衰减"]
+    assert narrative_states([2, 1, 1, 2])[-1] == "重新活跃"
+
+    release = [{"cumulative": -10, "close": 100}, {"cumulative": -9, "close": 101}]
+    assert trade_states(release) == ["风险释放", "风险释放"]
+    early = [*release, {"cumulative": -7.2, "close": 102}]
+    assert trade_states(early)[-1] == "风险释放"
+    repair = [*release, {"cumulative": -7, "close": 103}]
+    assert trade_states(repair)[-1] == "初步修复"
+    held = [{"cumulative": -10, "close": 100}, {"cumulative": -9, "close": 101}]
+    held.extend({"cumulative": -5, "close": 110} for _ in range(5))
+    assert trade_states(held)[-1] == "持续确认"
+    assert trade_states(held)[-2] == "初步修复"
+    broken = [*repair, {"cumulative": -6, "close": 99}]
+    assert trade_states(broken)[-1] == "修复失效"
+
+
+@pytest.mark.phase1_blocking
+def test_tracks_and_deadline():
+    from inves_cog.perception.attribution.tracks import (
+        apply_deadline,
+        capital_state,
+        close_deadline,
+        deadline_offset,
+        reactivate,
+    )
+
+    assert deadline_offset(30, 12) == 12
+    assert deadline_offset(5, 12) == 5
+    assert deadline_offset(None, None) == 20
+    assert capital_state(1, -4, -10) == "冲击中"
+    assert capital_state(3, -12, -10) == "延续"
+    assert capital_state(3, 1, -10) == "反转"
+    assert capital_state(3, -4, -10) == "已消化"
+    assert capital_state(3, -10, -10) == "消化中"
+
+    supported = apply_deadline("支持")
+    assert supported["lifecycle"] == "已验证·有影响"
+    denied = apply_deadline("反证", level1_denial=True)
+    assert denied["lifecycle"] == "已证伪"
+    faded = apply_deadline("反证")
+    assert faded == {"lifecycle": "已衰减·无影响", "fundamental": "冲突", "deadline_outcome": "反证"}
+    unknown = apply_deadline("条件风险")
+    assert unknown["deadline_outcome"] == "条件风险"
+    assert unknown["fundamental"] == "失效"
+    with pytest.raises(ValueError):
+        close_deadline("观察")
+    with pytest.raises(ValueError):
+        apply_deadline("支持", renewed=True)
+    with pytest.raises(ValueError):
+        reactivate({"reprint": True, "source_level": 1, "original": True})
+    assert reactivate({"original": True, "source_level": 2}) == "假设中"
+
+
+@pytest.mark.phase1_blocking
+def test_divergence_labels():
+    from inves_cog.perception.attribution.labels import consensus_band, divergence_label
+
+    assert consensus_band(-0.019, 1, 1, 100) == "未下修"
+    assert consensus_band(-0.02, 0, 1, 100) == "其他"
+    assert consensus_band(-0.03, 0, 5, 100) == "显著下修"
+    assert consensus_band(0.0, 30, 0, 100) == "显著下修"
+
+    base = {"moment": "截止日", "price": "大跌", "consensus": "未下修", "fundamental": "未变", "linkage": "已衰减"}
+    assert divergence_label(**base) == "情绪性折价"
+    assert divergence_label(**{**base, "moment": "跟踪中"}) is None
+    assert divergence_label("已验证", "大跌", "未下修", "未变", "估值倍数类") == "情绪性折价"
+    assert divergence_label("截止日", "大跌", "显著下修", "支持不利", "已验证·有影响") == "合理重定价"
+    assert divergence_label("截止日", "大跌", "未下修", "支持不利", "已验证·有影响", guidance_cut=True) == "合理重定价"
+    assert divergence_label("截止日", "小跌或未跌", "显著下修", "支持不利", "已验证·有影响") == "滞后风险"
+    assert divergence_label("截止日", "大涨", "未上修", "未变", "估值倍数类") == "情绪性溢价"
+    assert divergence_label("已验证", "大涨", "显著上修", "支持有利", "已验证正向") == "基本面驱动上涨"
+
+
+@pytest.mark.phase1_blocking
+def test_systemic_event_tag_requires_level12():
+    from inves_cog.perception.attribution.systemic import resolve_systemic_tag
+
+    assert resolve_systemic_tag("关税冲击", ["only-wire"], {"only-wire": 4}) == "无"
+    assert resolve_systemic_tag("关税冲击", ["note"], {"note": 4, "filing": 1}) == "无"
+    assert resolve_systemic_tag("关税冲击", ["filing"], {"filing": 2}) == "关税冲击"
+
+
+@pytest.mark.phase1_blocking
+def test_unexplained_recheck_5d():
+    from inves_cog.perception.attribution.unexplained import attention_line, classify_unexplained, recheck_flags
+
+    assert classify_unexplained([0.49, 0.1]) == "已发现·原因未明"
+    assert classify_unexplained([]) == "已发现·原因未明"
+    assert classify_unexplained([0.5]) is None
+    assert recheck_flags(6) == [True, True, True, True, True, False]
+    assert attention_line(True, 4) == "请人工查看"
+    assert attention_line(True, 3.9) is None
+    assert attention_line(False, 5) is None
+
+
+@pytest.mark.phase1_blocking
+def test_anomaly_contract():
+    from inves_cog.perception.attribution.candidates import validate_candidates
+    from inves_cog.perception.attribution.impact import anomaly_status, decompose, require_anomaly_status
+
+    anomalies = [
+        {"anomaly_id": "pool", "universe": "pool", "status": anomaly_status("pool", [0.2])},
+        {"anomaly_id": "wide", "universe": "wide", "status": anomaly_status("wide", [])},
+    ]
+    require_anomaly_status(anomalies)
+    assert anomalies[0]["status"] == "已发现·原因未明"
+    assert anomalies[1]["status"] == "已记录"
+    with pytest.raises(ValueError):
+        require_anomaly_status([{"anomaly_id": "blank", "status": ""}])
+
+    kept = validate_candidates(
+        [{"mechanism": "供给", "info_ids": [], "affected": [{"ticker": "WDC"}]}],
+        {"nikkei"},
+        {"WDC"},
+    )
+    assert [row for row in kept if row["scored"]] == []
+
+    total = -0.08
+    parts = decompose(total, 2_000_000_000, 20, 1_000_000_000_000, "部分相容", 2, 4)
+    assert parts["event"] == -0.04
+    assert parts["amplification"] == -0.02
+    assert abs(parts["event"] + parts["amplification"] + parts["unexplained"] - total) <= 0.001
+    unknown = decompose(total, None, 20, 1_000_000_000_000, "无法检验", 2, 4)
+    assert unknown["event"] == 0.0
+    assert abs(sum(unknown.values()) - total) <= 0.001
