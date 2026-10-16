@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 04:52 北京
+
+- 草稿 PR #18 head `85152d5`。没有合并进 main。本地 `make phase1-test`：182 passed，18 deselected。
+- 解释报告把市场归因置信度和基本面成立度分开。市场分按最高候选：0.70 起为高，0.50 起为中，再低是低。供给、需求、竞争、客户融资达到 0.5 时，基本面先写待验证。估值倍数和不够 0.5 的候选不写基本面成立度。市场分高不能抄进基本面栏。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 04:41 北京
 
 - 草稿 PR #18 head `df013dd`。没有合并进 main。本地 `make phase1-test`：181 passed，18 deselected。
