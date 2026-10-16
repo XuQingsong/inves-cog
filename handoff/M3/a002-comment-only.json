@@ -1,0 +1,64 @@
+{
+  "base_sha": "73a25d03505513c1ce28c703d5abb9cf067a77b2",
+  "changed_python_files": [
+    {
+      "path": "src/inves_cog/trading/scoring/__init__.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 19
+    },
+    {
+      "path": "src/inves_cog/trading/scoring/books.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 12
+    },
+    {
+      "path": "src/inves_cog/trading/scoring/curves.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 7
+    },
+    {
+      "path": "src/inves_cog/trading/scoring/repository.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 2
+    },
+    {
+      "path": "src/inves_cog/trading/scoring/rules.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 23
+    },
+    {
+      "path": "src/inves_cog/trading/scoring/service.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 5
+    },
+    {
+      "path": "src/inves_cog/trading/scoring/technical.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 10
+    },
+    {
+      "path": "tests/m3/replay_support.py",
+      "ast_identical": true,
+      "non_comment_tokens_identical": true,
+      "existing_comments_preserved": true,
+      "comments_added": 4
+    }
+  ],
+  "behavior_unchanged": true,
+  "all_existing_comments_preserved": true,
+  "kickoff_detail_count": 21
+}

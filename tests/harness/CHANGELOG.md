@@ -169,3 +169,4 @@
 - `tests/fixtures/phase1/m2/interims/sources.json` SHA256 `4473ce2ef322e41f7e4f33592c20fc742fda854e8107b1724b386d5ac03aa5e3`: SEC accession, filing date and exact exhibit URLs.
 - `tests/fixtures/phase1/m2/interims/SKHY-full.html.gz` SHA256 `d1336b176f3ee5b1fca7ab27885429fff05574f3bc4a1d71da13095a9945cd2b`: SEC SKHY reviewed interim statements, distinguishes parent profit and comprehensive income.
 | tests/fixtures/phase1/m6/draft.json | absent | ef19bcecac16f65f6bb023bde450c64adb4c1b014e1807fb37e024bdf80d5688 | Handwritten synthetic frozen contract, first failing tests | FR-M6-01; FR-M0-08 |
+| tests/fixtures/phase1/m3/timeline.json | absent | db16d56182ec95a2c99136c43728f11106cc9761d148eff55b4f1282cf249b5d | Handwritten synthetic frozen contract, first failing tests | FR-M3-01; FR-M0-08 |
