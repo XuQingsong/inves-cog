@@ -502,3 +502,25 @@ def test_attribution_tables_do_not_grant_ingest():
         assert name in text
     assert "ingest." not in text
     assert "GRANT" not in text
+
+
+@pytest.mark.phase1_blocking
+def test_case_direction_on_synthetic_headlines():
+    from inves_cog.perception.attribution.cases import deepseek_source, muse_chart, openai_cover, openai_labels
+    from inves_cog.perception.attribution.second_hit import second_hit_conclusion
+
+    ranked = [
+        {"labels": openai_labels("CoreWeave bond yield hits 15%")},
+        {"labels": openai_labels("Barclays downgrades Dell to equal-weight")},
+        {"labels": openai_labels("CPI 3.7% vs 3.6% est")},
+        {"labels": openai_labels("Broadcom financing is not annualised revenue")},
+    ]
+    assert openai_cover(ranked) is True
+    assert openai_cover(ranked[:2]) is False
+    assert muse_chart("Muse topped the App Store chart") is True
+    assert muse_chart("Meta delays a model") is False
+    assert deepseek_source("DeepSeek R1 release") is True
+    assert deepseek_source("DeepSeek funding round") is False
+    start = datetime(2026, 10, 14, 13, 30)
+    early = [{"source_root": "ft", "outcome": "命中", "published_at": datetime(2026, 10, 9, 0, 45)}]
+    assert second_hit_conclusion(early, anomaly_start=start) == "未检验"
