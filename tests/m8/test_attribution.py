@@ -544,6 +544,54 @@ def test_type_candidates_follow_score_not_case_name():
 
 
 @pytest.mark.phase1_blocking
+def test_scope_is_a_relation_label_and_tracking_is_not_evidence():
+    from inves_cog.perception.attribution.report import CONSTRAINT_ITEMS, impact_scope, tracking_list
+    from inves_cog.perception.attribution.toshiba import midpoint_report
+
+    supply = [{"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}]
+    observed = impact_scope(supply, [{"ticker": "WDC", "exposure": "直接", "status": "观察到"}])
+    assert observed[0]["exposure"] == "直接"
+    candidate = impact_scope(supply, [{"ticker": "WDC", "exposure": "直接", "status": "候选"}])
+    assert candidate[0]["exposure"] == "概念关联"
+    assert candidate[0]["reason"] == "候选关系不是经营暴露"
+    exited = impact_scope(
+        supply, [{"ticker": "WDC", "exposure": "直接", "status": "已确立", "exit_reason": "关系退出"}]
+    )
+    assert exited[0]["exposure"] == "概念关联"
+    assert exited[0]["exit_reason"] == "关系退出"
+    bare = impact_scope(supply, [], direction="down")
+    assert bare[0]["exposure"] == "纯共振"
+    assert bare[0]["direction"] == "down"
+    multiple = [
+        {"scored": True, "score": 0.8, "mechanism": "估值倍数", "affected": [{"ticker": "MU"}]},
+    ]
+    theme = impact_scope(multiple, [{"ticker": "MU", "exposure": "直接", "status": "已确立"}])
+    assert theme[0]["exposure"] == "概念关联"
+    assert theme[0]["reason"] == "估值倍数停在市场层"
+    weak = [{"scored": True, "score": 0.4, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}]
+    assert impact_scope(weak, [{"ticker": "WDC", "exposure": "直接", "status": "观察到"}]) == []
+
+    tasks = tracking_list(["供给"], {"新增供给占需求增量"}, deadline_on="2026-10-20")
+    assert [row["item"] for row in tasks] == list(CONSTRAINT_ITEMS)
+    assert all(row["is_evidence"] is False and row["source"] is None for row in tasks)
+    assert tasks[0]["status"] == "有数据"
+    assert tasks[1]["status"] == "未知"
+    assert tracking_list(["竞争"]) == []
+    assert tracking_list(["估值倍数"]) == []
+
+    walked = midpoint_report()
+    report = walked["report"]
+    assert walked["lifecycle"] == "已验证·有影响"
+    assert report["type_candidates"] == ["事件冲击"]
+    assert report["scope"][0]["ticker"] == "WDC"
+    assert report["scope"][0]["exposure"] == "纯共振"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert [row["item"] for row in report["tracking"]] == list(CONSTRAINT_ITEMS)
+    assert all(row["is_evidence"] is False for row in report["tracking"])
+    assert report["tracking"][0]["status"] == "有数据"
+
+
+@pytest.mark.phase1_blocking
 def test_toshiba_midpoint_reaches_deadline():
     from inves_cog.perception.attribution.codes import n_code
     from inves_cog.perception.attribution.toshiba import NIKKEI, TDK, midpoint_report

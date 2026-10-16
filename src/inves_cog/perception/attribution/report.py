@@ -3,6 +3,8 @@
 from inves_cog.perception.attribution.impact import anomaly_status
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
+CONSTRAINT_ITEMS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
+_OBSERVED = {"观察到", "有支持", "已确立"}
 
 
 def type_candidates(candidates, prelim=(), *, operating_impact_proven=False):
@@ -23,8 +25,61 @@ def type_candidates(candidates, prelim=(), *, operating_impact_proven=False):
     return result
 
 
-def explanation_report(anomaly, decomposition, candidates, sources, deadline=None):
+def impact_scope(candidates, relations=(), *, direction=None):
+    """Exposure is a relation label. A price member without one stays 纯共振."""
+    by_ticker = {}
+    for rel in relations:
+        by_ticker.setdefault(rel.get("ticker"), []).append(rel)
+    rows = []
+    seen = set()
+    for row in _scored(candidates):
+        mechanism = row.get("mechanism")
+        for affected in row.get("affected") or []:
+            ticker = affected.get("ticker")
+            key = (ticker, mechanism)
+            if not ticker or key in seen:
+                continue
+            seen.add(key)
+            links = by_ticker.get(ticker) or []
+            exposure, reason = _exposure(mechanism, links)
+            rows.append(
+                {
+                    "ticker": ticker,
+                    "direction": affected.get("direction") or direction,
+                    "mechanism": mechanism,
+                    "exposure": exposure,
+                    "reason": reason,
+                    "exit_reason": next((rel.get("exit_reason") for rel in links if rel.get("exit_reason")), None),
+                }
+            )
+    return rows
+
+
+def tracking_list(mechanisms, known=(), *, deadline_on=None):
+    """A supply or demand checklist is a task list. Having a task is not evidence."""
+    if not {"供给", "需求"} & set(mechanisms):
+        return []
+    known_items = set(known)
+    return [
+        {
+            "item": name,
+            "question": name,
+            "metric": name,
+            "source": None,
+            "window": None,
+            "deadline": deadline_on,
+            "status": "有数据" if name in known_items else "未知",
+            "is_evidence": False,
+        }
+        for name in CONSTRAINT_ITEMS
+    ]
+
+
+def explanation_report(
+    anomaly, decomposition, candidates, sources, deadline=None, relations=(), known_constraints=(), deadline_on=None
+):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
+    mechanisms = [row.get("mechanism") for row in _scored(candidates)]
     report = {
         "anomaly_id": anomaly["anomaly_id"],
         "status": anomaly.get("status") or anomaly_status(anomaly.get("universe"), scores),
@@ -34,6 +89,8 @@ def explanation_report(anomaly, decomposition, candidates, sources, deadline=Non
         "trading": None,
         "sources": sources,
         "unknowns": [],
+        "scope": impact_scope(candidates, relations, direction=anomaly.get("direction")),
+        "tracking": tracking_list(mechanisms, known_constraints, deadline_on=deadline_on),
         "type_candidates": type_candidates(
             candidates,
             anomaly.get("type_candidates_prelim") or (),
@@ -48,3 +105,26 @@ def explanation_report(anomaly, decomposition, candidates, sources, deadline=Non
     report["unknowns"] = list(deadline.get("unknowns") or [])
     report["operating_impact_proven"] = deadline["operating_impact_proven"]
     return report
+
+
+def _scored(candidates):
+    allowed = _OPERATING | {"估值倍数"}
+    return [row for row in candidates if _counts(row) and row.get("mechanism") in allowed]
+
+
+def _counts(row):
+    return row.get("scored") and row.get("score") is not None and row["score"] >= 0.5
+
+
+def _exposure(mechanism, relations):
+    if mechanism == "估值倍数":
+        return "概念关联", "估值倍数停在市场层"
+    active = [rel for rel in relations if not rel.get("exit_reason")]
+    observed = [rel for rel in active if rel.get("exposure") in {"直接", "间接"} and rel.get("status") in _OBSERVED]
+    if any(rel.get("exposure") == "直接" for rel in observed):
+        return "直接", "状态至少观察到"
+    if observed:
+        return "间接", "状态至少观察到"
+    if relations:
+        return "概念关联", "候选关系不是经营暴露"
+    return "纯共振", "没有观察到的关系"

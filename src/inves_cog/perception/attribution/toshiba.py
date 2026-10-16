@@ -8,11 +8,11 @@ from inves_cog.perception.attribution.evidence import evidence_score, time_align
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.operating import operating_verdict
-from inves_cog.perception.attribution.report import explanation_report
+from inves_cog.perception.attribution.report import CONSTRAINT_ITEMS, explanation_report
 from inves_cog.perception.attribution.second_hit import classify_response, second_hit_conclusion
 from inves_cog.perception.attribution.tracks import apply_deadline, capital_state, deadline_offset
 
-SUPPLY_CHECKS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
+SUPPLY_CHECKS = CONSTRAINT_ITEMS
 NIKKEI = "nikkei-hdd"
 TDK = "tdk-heads"
 
@@ -115,10 +115,11 @@ def midpoint_report():
         candidates,
         {"retrieved": sorted(retrieved), "gap": "synthetic fixture, not frozen news"},
         deadline,
+        known_constraints={row["item"] for row in checks if row["status"] == "有数据"},
+        deadline_on="2026-10-20",
     )
     report["fixture"] = "synthetic"
     report["constraints"] = checks
-    report["type_candidates"] = ["事件冲击", "供给"]
     report["second_hit"] = second_hit_conclusion(followups, anomaly_start=start)
     report["second_hit_info_id"] = TDK
     report["deadline_sessions"] = deadline_offset(12, None)
