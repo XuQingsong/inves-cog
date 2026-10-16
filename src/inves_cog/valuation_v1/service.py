@@ -140,6 +140,18 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
     holdings = repository.holdings(as_of, cutoff=cutoff)
     by_ticker = {r["ticker"]: r for r in ranges}
     panel_rows = {}
+    if "cash" in holdings:
+        # Ledger equity can be from an older mark. Use the same current closes
+        # in both the numerator and cash-plus-position equity denominator.
+        marks = [by_ticker.get(h["ticker"], {}).get("price") for h in holdings["holdings"]]
+        complete = holdings["cash"] is not None and all(p is not None for p in marks)
+        equity = (
+            holdings["cash"] + sum(h["shares"] * p for h, p in zip(holdings["holdings"], marks, strict=True))
+            if complete
+            else None
+        )
+        holdings["equity"] = equity
+        holdings["holdings"] = [{**h, "equity": equity} for h in holdings["holdings"]]
     for holding in holdings["holdings"]:
         ticker = holding["ticker"]
         valuation = by_ticker.get(ticker)

@@ -208,9 +208,18 @@ def test_position_panel():
     assert_service()
     from inves_cog.valuation_v1.shadows import panel, summarize
 
-    missing = summarize([{'ticker': 'MISSING', 'valuation_at_risk_pct': None, 'shadow_suggested_weight_pct': None,
-                          'greyed': False, 'weight_pct': None}])
-    assert missing['valuation_at_risk_pct'] is None and missing['shadow_weight_pct'] is None
+    missing = summarize(
+        [
+            {
+                "ticker": "MISSING",
+                "valuation_at_risk_pct": None,
+                "shadow_suggested_weight_pct": None,
+                "greyed": False,
+                "weight_pct": None,
+            }
+        ]
+    )
+    assert missing["valuation_at_risk_pct"] is None and missing["shadow_weight_pct"] is None
     rows = []
     for c in load_golden("m5_valuation_synthetic.json")["valuation_position_panel"]:
         out = panel({"ticker": c["ticker"], **c["input"]})

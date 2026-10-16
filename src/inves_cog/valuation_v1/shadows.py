@@ -97,14 +97,18 @@ def summarize(rows):
         if row.get("valuation_at_risk_pct") is not None:
             l2[row.get("l2") or "未分类"] += row["valuation_at_risk_pct"]
             l3[row.get("l3") or "未分类"] += row["valuation_at_risk_pct"]
+    missing_risk = any(r.get("valuation_at_risk_pct") is None for r in rows)
+    missing_shadow = any(not r["greyed"] and r.get("shadow_suggested_weight_pct") is None for r in rows)
     return {
         "label": LABEL,
         "params_version": settings()["params_version"],
         "ticker": "__portfolio__",
-        "valuation_at_risk_pct": sum(
-            r["valuation_at_risk_pct"] for r in rows if r.get("valuation_at_risk_pct") is not None
-        ),
-        "shadow_weight_pct": sum(
+        "valuation_at_risk_pct": None
+        if missing_risk
+        else sum(r["valuation_at_risk_pct"] for r in rows if r.get("valuation_at_risk_pct") is not None),
+        "shadow_weight_pct": None
+        if missing_shadow
+        else sum(
             r["shadow_suggested_weight_pct"]
             for r in rows
             if not r["greyed"] and r.get("shadow_suggested_weight_pct") is not None
