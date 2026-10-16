@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 05:53 北京
+
+- 草稿 PR #18 head `8e539f9`。没有合并进 main。本地 `make phase1-test`：187 passed，18 deselected。
+- 市场确认的独立证据不是价格。两个不同来源根、带监控实体的搜索热度突增，或一二三级点评，满足一条即可。同一来源根只算一次。四级点评和没有监控实体的热度标记不算。这一条单独成立也不能进入市场确认，另外三项仍要同时满足。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 05:42 北京
 
 - 草稿 PR #18 head `7b80d3b`。没有合并进 main。本地 `make phase1-test`：186 passed，18 deselected。
