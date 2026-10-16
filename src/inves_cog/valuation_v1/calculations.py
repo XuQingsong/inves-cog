@@ -160,7 +160,8 @@ def calculate(kind, data):
             debt = require(d, "net_debt")
             values = [(v - debt) / (shares * (c["bear_dilution"] if i == 0 else 1)) for i, v in enumerate(ev)]
             fcf = require(d, "fcf_ttm")
-            runway = require(d, "cash") / abs(fcf) if fcf < 0 else None
+            runway = require(d, "cash") / abs(fcf) if fcf != 0 else None
+            out["runway_reason"] = "FCF为0，跑道比值无法计算" if fcf == 0 else None
             haircut = runway is not None and runway < c["runway_years"]
             if haircut:
                 values[0] *= c["runway_haircut"]

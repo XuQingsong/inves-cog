@@ -63,8 +63,8 @@ def test_growth_valuation_v11():
     assert r["details"]["neutral"]["exit_pe"] == 22.5
     assert evaluate("成长", {**cases()[1]["input"], "pe_p90": 20})["neutral"] < r["neutral"]
     assert evaluate("未盈利成长", {**cases()[5]["input"], "cash": 0.5e9})["confidence"] == "低"
-    positive_fcf = evaluate('未盈利成长', {**cases()[5]['input'], 'cash': .5e9, 'fcf_ttm': .5e9})
-    assert positive_fcf['runway_years'] == 1 and positive_fcf['runway_haircut'] is True
+    positive_fcf = evaluate("未盈利成长", {**cases()[5]["input"], "cash": 0.5e9, "fcf_ttm": 0.5e9})
+    assert positive_fcf["runway_years"] == 1 and positive_fcf["runway_haircut"] is True
 
 
 @pytest.mark.phase1_blocking
