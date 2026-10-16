@@ -119,3 +119,16 @@ def assert_service():
     assert by_ticker["AAA"]["weight_pct"] == 5
     assert by_ticker["AAA"]["target_weight_pct"] == 10
     assert by_ticker["BBB"]["weight_pct"] == 10
+
+
+def assert_schedule():
+    from inves_cog.clock import FrozenClock
+    from inves_cog.valuation_v1.cli import due, latest_closed_day
+
+    assert not due(FrozenClock(datetime(2026, 10, 16, 2, 29, tzinfo=timezone.utc)))
+    assert due(FrozenClock(datetime(2026, 10, 16, 2, 30, tzinfo=timezone.utc)))
+    assert not due(FrozenClock(datetime(2026, 11, 3, 2, 30, tzinfo=timezone.utc)))
+    winter = FrozenClock(datetime(2026, 11, 3, 3, 30, tzinfo=timezone.utc))
+    assert due(winter) and not due(winter, last=winter.now_utc())
+    assert latest_closed_day(FrozenClock(datetime(2026, 10, 16, 13, tzinfo=timezone.utc))) == date(2026, 10, 15)
+    assert latest_closed_day(FrozenClock(datetime(2026, 10, 16, 21, tzinfo=timezone.utc))) == date(2026, 10, 16)

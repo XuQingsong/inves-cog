@@ -83,7 +83,7 @@ def calculate(kind, data):
                 reasons.append("一致预期缺失")
                 e = ttm
             else:
-                e = 0.5 * ttm + 0.5 * require(d, "eps_ntm")
+                e = c["eps_weights"][0] * ttm + c["eps_weights"][1] * require(d, "eps_ntm")
             fcf = d.get("fcf_per_share")
             if fcf is None:
                 fcf = require(d, "fcf_ttm") / require(d, "diluted_shares", positive=True)
@@ -189,6 +189,8 @@ def calculate(kind, data):
         out["confidence"] = "中"
     if out.get("runway_haircut") or d.get("foreign_annual_only"):
         out["confidence"] = "低"
+    if out["status"] != "ok":
+        out["confidence"] = "低"
     return out
 
 
@@ -204,20 +206,23 @@ def mark_price(result, price):
         implied_exceeds_cap=False,
         implied_reason=None,
     )
-    if out["bear"] is not None and price is not None and price > 0:
+    bands = settings()["position"]
+    p_low, p_mid_low, p_mid_high, p_high = bands["p_label_limits"]
+    g_low, g_mid, g_high = bands["delta_label_limits_pp"]
+    if out["bear"] is not None and price is not None and math.isfinite(price) and price > 0:
         spread = out["bull"] - out["bear"]
         if spread != 0:
             p = (price - out["bear"]) / spread
             out["p"] = p
             out["p_label"] = (
                 "低于悲观"
-                if p < 0
+                if p < p_low
                 else "偏低"
-                if p <= 0.35
+                if p <= p_mid_low
                 else "中性"
-                if p <= 0.65
+                if p <= p_mid_high
                 else "偏高"
-                if p <= 1
+                if p <= p_high
                 else "高于乐观"
             )
         else:
@@ -246,11 +251,11 @@ def mark_price(result, price):
                     delta_g=delta,
                     implied_exceeds_cap=g > c["cap_pct"],
                     delta_g_label="现价隐含增速低于一致预期"
-                    if delta <= -10
+                    if delta <= g_low
                     else "与一致预期相当"
-                    if delta <= 10
+                    if delta <= g_mid
                     else "现价隐含增速高于一致预期"
-                    if delta <= 25
+                    if delta <= g_high
                     else "现价隐含增速远高于一致预期",
                 )
     else:

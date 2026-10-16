@@ -209,6 +209,7 @@ class ValuationBook:
                 "new_version": proposed["version"],
             }
         )
+        proposed["review_audit"] = deepcopy(self.audit[-1])
         proposed["pending_review"] = False
         self.published[ticker] = proposed
         return deepcopy(proposed)

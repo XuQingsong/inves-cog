@@ -83,11 +83,18 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                 book.types[ticker] = h
             inputs = financial_inputs(state, source["states"].get(ticker, []), entity)
             inputs.update(consensus_inputs(source["consensus"].get(ticker, []), as_of, cutoff=cutoff))
-            p = (
-                pe_percentiles([], as_of, peer_p50=[pe[t]["own_p50"] for t in peers.get(ticker, []) if t in pe])
-                if pe[ticker]["insufficient_pe_history"]
-                else pe[ticker]
-            )
+            p = dict(pe[ticker])
+            if p["insufficient_pe_history"]:
+                fallback = pe_percentiles(
+                    [], as_of, peer_p50=[pe[t]["own_p50"] for t in peers.get(ticker, []) if t in pe]
+                )
+                p.update(
+                    {
+                        key: value
+                        for key, value in fallback.items()
+                        if key.startswith("pe_p") or key in {"pe_basis", "pe_reason"}
+                    }
+                )
             inputs.update(p)
             kind = classify(inputs)
             row = book.update(
