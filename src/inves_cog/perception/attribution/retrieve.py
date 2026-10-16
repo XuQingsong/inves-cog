@@ -78,6 +78,80 @@ def rank_items(items, query_entities, limit=40):
     return scored[:limit]
 
 
+def vector_query(anomaly):
+    """Basket names, direction, and member names. Neighbors are not part of the query."""
+    parts = [*(anomaly.get("baskets") or []), anomaly.get("direction"), *(anomaly.get("members") or [])]
+    return " ".join(str(part) for part in parts if part)
+
+
+def retrieval_union(items, entities, rules=None, *, vector_limit=50):
+    """Rule hits and the top approved vectors, then one row per source root."""
+    rules = rules or m8_rules()
+    vector_ids = _top_vectors(items, rules, vector_limit)
+    entity_set = set(entities)
+    pooled = []
+    for item in items:
+        paths = _paths(item, entity_set, vector_ids)
+        if paths:
+            pooled.append({**item, "paths": paths})
+    return _dedup_roots(pooled, entity_set)
+
+
+def _top_vectors(items, rules, limit):
+    ranked = [item for item in items if _approved_similarity(item, rules)]
+    ranked.sort(key=lambda row: (-(row.get("similarity") or 0.0), row.get("info_id") or ""))
+    return {row["info_id"] for row in ranked[:limit]}
+
+
+def _approved_similarity(item, rules):
+    if item.get("similarity") is None:
+        return False
+    model = item.get("model") == rules["embedding_model"]
+    dimensions = item.get("dimensions") == rules["embedding_dimensions"]
+    return model and dimensions
+
+
+def _paths(item, entity_set, vector_ids):
+    paths = []
+    names = set(item.get("entities") or []) | set(item.get("tickers") or [])
+    if names & entity_set:
+        paths.append("rule")
+    if item.get("info_id") in vector_ids:
+        paths.append("vector")
+    return paths
+
+
+def _dedup_roots(items, entities):
+    groups = []
+    index = {}
+    for item in items:
+        root = item.get("source_root")
+        key = ("root", root) if root else ("id", item.get("info_id"))
+        if key not in index:
+            index[key] = len(groups)
+            groups.append([item])
+        else:
+            groups[index[key]].append(item)
+    kept = []
+    for group in groups:
+        group.sort(key=lambda row: _root_key(row, entities))
+        winner = dict(group[0])
+        paths = []
+        for row in group:
+            for path in row.get("paths") or []:
+                if path not in paths:
+                    paths.append(path)
+        winner["paths"] = paths
+        kept.append(winner)
+    return kept
+
+
+def _root_key(row, entities):
+    published = row.get("published_at")
+    stamp = published.isoformat() if hasattr(published, "isoformat") else str(published or "")
+    return (-relevance(row, entities), stamp, row.get("info_id") or "")
+
+
 def retrieval_entities(members, baskets, edges, monitored):
     """Members, their basket peers, one hop of any status, then monitors tied to that set."""
     seeds = _unique(members)

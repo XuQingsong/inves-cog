@@ -100,6 +100,56 @@ def test_retrieval_entities_stop_at_one_hop():
 
 
 @pytest.mark.phase1_blocking
+def test_retrieval_union_keeps_rule_hits_outside_the_vector_cap():
+    from inves_cog.perception.attribution.retrieve import retrieval_union, vector_query
+    from inves_cog.perception.attribution.rules import m8_rules
+
+    rules = m8_rules()
+    anomaly = {"baskets": ["hdd"], "direction": "down", "members": ["WDC"], "neighbors": ["toshiba"]}
+    assert vector_query(anomaly) == "hdd down WDC"
+    vectors = [
+        {
+            "info_id": f"vec-{index:02d}",
+            "source_root": f"root-{index:02d}",
+            "similarity": 1 - index / 100,
+            "model": rules["embedding_model"],
+            "dimensions": rules["embedding_dimensions"],
+            "entities": [],
+        }
+        for index in range(51)
+    ]
+    rule_only = {"info_id": "filing", "source_root": "sec", "tickers": ["WDC"], "entities": ["WDC"]}
+    wrong_model = {
+        "info_id": "old-embed",
+        "source_root": "old",
+        "similarity": 0.99,
+        "model": "other-model",
+        "dimensions": 1536,
+        "entities": [],
+    }
+    same_root = {
+        "info_id": "reprint",
+        "source_root": "sec",
+        "similarity": 0.99,
+        "model": rules["embedding_model"],
+        "dimensions": rules["embedding_dimensions"],
+        "entities": [],
+    }
+    blank_a = {"info_id": "blank-a", "tickers": ["WDC"], "entities": []}
+    blank_b = {"info_id": "blank-b", "tickers": ["WDC"], "entities": []}
+    rows = retrieval_union([*vectors, rule_only, wrong_model, same_root, blank_a, blank_b], ["WDC"])
+    identifiers = {row["info_id"] for row in rows}
+    assert "vec-50" not in identifiers
+    assert "vec-00" in identifiers
+    assert "old-embed" not in identifiers
+    assert "filing" in identifiers
+    assert "reprint" not in identifiers
+    filing = next(row for row in rows if row["source_root"] == "sec")
+    assert filing["paths"] == ["rule", "vector"]
+    assert {"blank-a", "blank-b"} <= identifiers
+
+
+@pytest.mark.phase1_blocking
 def test_retrieval_background_window():
     from inves_cog.perception.attribution.retrieve import window_items
 
