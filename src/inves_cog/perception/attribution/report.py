@@ -75,11 +75,34 @@ def tracking_list(mechanisms, known=(), *, deadline_on=None):
     ]
 
 
+def constraint_conclusion(items, *, impact=None):
+    """One of the four constraint labels. The label does not prove operating impact."""
+    if not items:
+        return None
+    if any(_cited_conflict(row) for row in items):
+        label = "关键约束冲突"
+    elif any(_usable_status(row) != "结论" for row in items):
+        label = "约束不清但有上下界"
+    elif impact == "有限":
+        label = "可计算且冲击有限"
+    elif impact == "实质":
+        label = "可计算且冲击实质"
+    else:
+        label = "约束不清但有上下界"
+    return {
+        "label": label,
+        "has_bounds": any(bool(row.get("bounds")) for row in items),
+        "operating_impact_proven": False,
+        "closes_case": False,
+    }
+
+
 def explanation_report(
     anomaly, decomposition, candidates, sources, deadline=None, relations=(), known_constraints=(), deadline_on=None
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
+    tracking = tracking_list(mechanisms, known_constraints, deadline_on=deadline_on)
     report = {
         "anomaly_id": anomaly["anomaly_id"],
         "status": anomaly.get("status") or anomaly_status(anomaly.get("universe"), scores),
@@ -90,7 +113,8 @@ def explanation_report(
         "sources": sources,
         "unknowns": [],
         "scope": impact_scope(candidates, relations, direction=anomaly.get("direction")),
-        "tracking": tracking_list(mechanisms, known_constraints, deadline_on=deadline_on),
+        "tracking": tracking,
+        "constraint_conclusion": constraint_conclusion(tracking),
         "type_candidates": type_candidates(
             candidates,
             anomaly.get("type_candidates_prelim") or (),
@@ -114,6 +138,22 @@ def _scored(candidates):
 
 def _counts(row):
     return row.get("scored") and row.get("score") is not None and row["score"] >= 0.5
+
+
+def _cited(row):
+    return bool(row.get("source")) and row.get("source_level") in (1, 2, 3)
+
+
+def _usable_status(row):
+    if row.get("status") == "结论" and _cited(row):
+        return "结论"
+    if row.get("status") == "结论":
+        return "有数据"
+    return row.get("status")
+
+
+def _cited_conflict(row):
+    return bool(row.get("conflict")) and _cited(row)
 
 
 def _exposure(mechanism, relations):

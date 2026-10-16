@@ -592,6 +592,56 @@ def test_scope_is_a_relation_label_and_tracking_is_not_evidence():
 
 
 @pytest.mark.phase1_blocking
+def test_constraint_conclusion_does_not_prove_operating_impact():
+    from inves_cog.perception.attribution.report import CONSTRAINT_ITEMS, constraint_conclusion, tracking_list
+    from inves_cog.perception.attribution.toshiba import midpoint_report
+
+    def concluded(level):
+        return [
+            {"item": name, "status": "结论", "source": name, "source_level": level, "is_evidence": False}
+            for name in CONSTRAINT_ITEMS
+        ]
+
+    unclear = constraint_conclusion(tracking_list(["供给"], {"新增供给占需求增量"}))
+    assert unclear["label"] == "约束不清但有上下界"
+    assert unclear["has_bounds"] is False
+    assert unclear["operating_impact_proven"] is False
+    assert unclear["closes_case"] is False
+    bounded = tracking_list(["需求"])
+    bounded[0]["bounds"] = True
+    assert constraint_conclusion(bounded)["has_bounds"] is True
+    assert constraint_conclusion(bounded)["label"] == "约束不清但有上下界"
+
+    rows = concluded(1)
+    assert constraint_conclusion(rows)["label"] == "约束不清但有上下界"
+    assert constraint_conclusion(rows, impact="有限")["label"] == "可计算且冲击有限"
+    material = constraint_conclusion(rows, impact="实质")
+    assert material == {
+        "label": "可计算且冲击实质",
+        "has_bounds": False,
+        "operating_impact_proven": False,
+        "closes_case": False,
+    }
+    assert constraint_conclusion(concluded(4), impact="实质")["label"] == "约束不清但有上下界"
+    conflict = concluded(1)
+    conflict[0]["conflict"] = True
+    assert constraint_conclusion(conflict, impact="实质")["label"] == "关键约束冲突"
+    reprint = concluded(4)
+    reprint[0]["conflict"] = True
+    assert constraint_conclusion(reprint, impact="实质")["label"] == "约束不清但有上下界"
+    assert constraint_conclusion([]) is None
+
+    walked = midpoint_report()
+    conclusion = walked["report"]["constraint_conclusion"]
+    assert walked["lifecycle"] == "已验证·有影响"
+    assert walked["report"]["operating_impact_proven"] is True
+    assert conclusion["label"] == "约束不清但有上下界"
+    assert conclusion["operating_impact_proven"] is False
+    assert conclusion["closes_case"] is False
+    assert "关键约束冲突" not in walked["report"]["type_candidates"]
+
+
+@pytest.mark.phase1_blocking
 def test_toshiba_midpoint_reaches_deadline():
     from inves_cog.perception.attribution.codes import n_code
     from inves_cog.perception.attribution.toshiba import NIKKEI, TDK, midpoint_report
