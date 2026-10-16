@@ -170,7 +170,17 @@
 - `tests/fixtures/phase1/m2/interims/SKHY-full.html.gz` SHA256 `d1336b176f3ee5b1fca7ab27885429fff05574f3bc4a1d71da13095a9945cd2b`: SEC SKHY reviewed interim statements, distinguishes parent profit and comprehensive income.
 | tests/fixtures/phase1/m6/draft.json | absent | ef19bcecac16f65f6bb023bde450c64adb4c1b014e1807fb37e024bdf80d5688 | Handwritten synthetic frozen contract, first failing tests | FR-M6-01; FR-M0-08 |
 | tests/fixtures/phase1/m3/timeline.json | absent | db16d56182ec95a2c99136c43728f11106cc9761d148eff55b4f1282cf249b5d | Handwritten synthetic frozen contract, first failing tests | FR-M3-01; FR-M0-08 |
-
+| tests/fixtures/phase1/m7/baskets.json | absent | b67842c0a16ec51b9a00840dd971ff3e300f3de7e4f96f809bf5b353feafb31b | M7 case basket definitions copied from the credential-free export | FR-M7-01; FR-M0-08 |
+| tests/fixtures/phase1/m7/case_20250127_bars.jsonl.gz | absent | eeb5209d012a00b58f528d3aed2f85169fbd5e2733a247239c311a71af9725d6 | Frozen DeepSeek case window 2024-07-19 to 2025-03-04 | FR-M7-01; FR-M0-08 |
+| tests/fixtures/phase1/m7/issuer_profiles.jsonl.gz | absent | 08d29ecd85d90e19698a4bdc2306e8a24d7239b5c5de532fb290adb59dc0ab45 | SIC profiles for the M7 case replay | FR-M7-10; FR-M0-08 |
+| tests/fixtures/phase1/m7/macro.jsonl.gz | absent | c0b7bcd1d8ab1f4ba7822ad5938d22f585039b166093cd1ee2abeae8b2555f10 | Macro observations for the M7 case replay | FR-M7-04; FR-M0-08 |
+| tests/fixtures/phase1/m7/meta_bars.jsonl.gz | absent | b1ac128a5aafa62fc924c7a96e4f10c688b4780c46f33cdaee4011791b144f77 | Frozen Meta Muse case window 2026-03-16 to 2026-10-14 | FR-M7-01; FR-M0-08 |
+| tests/fixtures/phase1/m7/openai_bars.jsonl.gz | absent | 84c84b76a4e59b9a9807d9928720ee6bf62db0ae404f39d92538bdc0d1f8f3f1 | Frozen OpenAI case window 2026-04-02 to 2026-10-14 | FR-M7-01; FR-M0-08 |
+| tests/fixtures/phase1/m7/toshiba_bars.jsonl.gz | absent | 82864ad133690c47a33668261b000efecc9ce358c90f3502a25d33b63f7512b7 | Frozen Toshiba HDD case window 2026-03-27 to 2026-10-14 | FR-M7-01; FR-M0-08 |
+| tests/fixtures/phase1/m7/case_20250127_bars.jsonl.gz | eeb5209d012a00b58f528d3aed2f85169fbd5e2733a247239c311a71af9725d6 | f72c8dd2da4ef8fbd3bb525f63e2ff7d8e5329ed4595930f83ae6a9a0a498318 | Add 450-session factor warmup before the DeepSeek case so the 120-day residual is defined | FR-M7-02; FR-M0-08 |
+| tests/fixtures/phase1/m7/meta_bars.jsonl.gz | b1ac128a5aafa62fc924c7a96e4f10c688b4780c46f33cdaee4011791b144f77 | d3ebad37867cc42a6e6fe0b1089f58a7edaefb93caabc0bbbefdeda1c6db6257 | Add 450-session factor warmup before the Meta case so the 120-day residual is defined | FR-M7-02; FR-M0-08 |
+| tests/fixtures/phase1/m7/openai_bars.jsonl.gz | 84c84b76a4e59b9a9807d9928720ee6bf62db0ae404f39d92538bdc0d1f8f3f1 | 94da5992914631ddf682d203f12d5e3fef4a4e89dd97bb3fecc4c63b9bc087e8 | Add 450-session factor warmup before the OpenAI case so the 120-day residual is defined | FR-M7-02; FR-M0-08 |
+| tests/fixtures/phase1/m7/toshiba_bars.jsonl.gz | 82864ad133690c47a33668261b000efecc9ce358c90f3502a25d33b63f7512b7 | b015a206bd4f4ccedaea813d796838605bed58bf3351dc9e7b929b6d8a7b923d | Add 450-session factor warmup before the Toshiba case so the 120-day residual is defined | FR-M7-02; FR-M0-08 |
 | tests/fixtures/phase1/m2/a003/unh-cost-components.json | absent | 20ea1d172b03e6519b4cb1603058f1ddf4b73f36d816647dc394d95845c4acca | SEC UNH original cost components: medical benefits and product costs; D-27 regression | A-003; FR-M0-08 |
 
 - A-006/M4: tests/fixtures/phase1/m4/overlay.json d5cb6e3845b9c3a7cf0b8c3e734ffd0b00b9210d6b37947fca69d3f600e61182 — synthetic cooling and rejected-increase contract, before implementation.

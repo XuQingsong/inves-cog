@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.153" timestamp="2026-10-16T18:15:17.241219+08:00" hostname="test-runner"><testcase classname="tests.m2.test_cik_history" name="test_successor_companyfacts_history_uses_visible_registrant" time="0.026"><failure message="assert 1000000000.0 == 2000000000.0">def test_successor_companyfacts_history_uses_visible_registrant():
+        calls, inputs = [], []
+        records = {
+            '34088': [{'filed': '2015-02-20', 'val': 1e9, 'accn': 'old'}],
+            '2115436': [{'filed': '2026-08-03', 'val': 2e9, 'accn': 'new'}],
+        }
+    
+        class SEC:
+            def companyfacts(self, cik):
+                key = str(int(cik))
+                calls.append(key)
+                return {'cik': key, 'facts': {'us-gaap': {'Revenues': {'units': {'USD': deepcopy(records[key])}}}}}
+    
+        repo = MemoryRepository()
+        repo.shared_filings['XOM'] = [
+            {'accession': 'old', 'form': '10-K', 'filing_date': date(2015, 2, 20), 'cik': '0000034088'},
+            # SEC publishes the same accession under both CIKs. The local index may retain the old CIK.
+            {'accession': 'new', 'form': '10-Q', 'filing_date': date(2026, 8, 3), 'cik': '34088'},
+            {'accession': '8k', 'form': '8-K', 'filing_date': date(2026, 9, 25), 'cik': '0002115436'},
+        ]
+    
+        def compute(data, **kwargs):
+            inputs.append((kwargs['extractor'], deepcopy(data)))
+            state = extract()
+            state.ticker = 'XOM'
+            visible = [r for r in data['facts']['us-gaap']['Revenues']['units']['USD'] if r['filed'] &lt;= str(kwargs['as_of'])]
+            state.values['rev_ttm'] = max(visible, key=lambda r: r['filed'])['val'] if visible else None
+            return state
+    
+        service = FinancialService(
+            clock=FrozenClock(datetime(2026, 10, 16, 1, tzinfo=timezone.utc)), repository=repo,
+            sec=SEC(), llm=None, universe=[{'ticker': 'XOM', 'foreign': False, 'sector': '能源'}],
+            ciks={'XOM': '0002115436'},
+        )
+        with patch('inves_cog.ingest.fundamentals.service.extract_state', side_effect=compute):
+            assert service.collect_financials()['processed_count'] == 1
+        assert repo.state_asof('XOM', date(2015, 2, 20), 'fixed').values['rev_ttm'] == 1e9
+&gt;       assert repo.state_asof('XOM', date(2026, 10, 16), 'fixed').values['rev_ttm'] == 2e9
+E       assert 1000000000.0 == 2000000000.0
+
+tests/m2/test_cik_history.py:53: AssertionError</failure></testcase><testcase classname="tests.m2.test_cik_history" name="test_current_and_historical_quarters_survive_registered_cik_merge" time="0.007" /></testsuite></testsuites>
