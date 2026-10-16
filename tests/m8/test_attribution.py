@@ -661,6 +661,54 @@ def test_weak_signal_only_raises_research_priority():
 
 
 @pytest.mark.phase1_blocking
+def test_review_queue_keeps_authenticity_off_the_rank():
+    from inves_cog.perception.attribution.propose import review_queue
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert review_queue(None) is None
+    assert review_queue([]) == []
+    held = {"info_id": "h", "held": True, "falsified": True, "authenticity": "未核实"}
+    risk = {"info_id": "r", "held": True, "risk_breach": True}
+    number = {"info_id": "n", "quantity": 0, "kind": "statement"}
+    price = {"info_id": "p", "quantity": 1, "kind": "price"}
+    fresh = {"info_id": "f", "anomaly_id": "a1"}
+    reprint = {"info_id": "rp", "anomaly_id": "a1", "reprint": True}
+    edge = {"info_id": "e", "mechanism": "供给", "relation_status": "候选"}
+    copied = {"info_id": "c", "mechanism": "供给", "relation_status": "候选", "reprint": True}
+    official = {"info_id": "o", "source_level": 1, "propagation": 0, "authenticity": "未核实"}
+    loud = {"info_id": "l", "source_level": 4, "propagation": 9, "authenticity": "核实"}
+    queued = review_queue([loud, official, copied, edge, reprint, fresh, price, number, risk, held])
+    assert [(row["info_id"], row["rank"], row["reason"]) for row in queued] == [
+        ("r", 1, "持仓的经营证伪或风险越限"),
+        ("h", 1, "持仓的经营证伪或风险越限"),
+        ("n", 2, "直接量化的经营变化"),
+        ("f", 3, "异常中的新解释"),
+        ("e", 4, "可能改变产业关系的新机制"),
+        ("l", 5, "普通重复背景"),
+        ("o", 5, "普通重复背景"),
+        ("c", 5, "普通重复背景"),
+        ("rp", 5, "普通重复背景"),
+        ("p", 5, "普通重复背景"),
+    ]
+    by_id = {row["info_id"]: row for row in queued}
+    assert by_id["o"]["must_verify"] is True
+    assert by_id["h"]["must_verify"] is False
+    assert by_id["l"]["must_verify"] is False
+    assert "authenticity" not in by_id["h"]
+    assert review_queue([{"info_id": "a", "held": False, "falsified": True}])[0]["rank"] == 5
+    anomaly = {"anomaly_id": "queue", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["review_queue"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], queue=[official, number])
+    assert [row["rank"] for row in report["review_queue"]] == [2, 5]
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
