@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.717" timestamp="2026-10-16T17:58:06.003499+08:00" hostname="test-runner"><testcase classname="tests.m4.test_closeout" name="test_plan_zero_amount_becomes_explained_skip" time="0.516"><failure message="AssertionError: assert ([{'ticker': '...'M-40'], ...}] == []&#10;  &#10;  Left contains one more item: {'ticker': 'AAA', 'action': 'buy_to', 'label': '确认加仓', 'rule_ids': ['M-40'], ...}&#10;  Use -v to get more diff)">def test_plan_zero_amount_becomes_explained_skip():
+        e = engine()
+        e.positions["AAA"] = position(shares=1000)
+        e.decide(DAY, {"AAA": signal(entry_pass=False)}, prices={"AAA": 100})
+        e.queue("AAA", "buy_to", "M-40", "确认加仓", tier="normal", fraction=0.1)
+        plan = e.plan(NEXT)
+&gt;       assert plan["orders"] == [] and e.pending == []
+E       AssertionError: assert ([{'ticker': '...'M-40'], ...}] == []
+E         
+E         Left contains one more item: {'ticker': 'AAA', 'action': 'buy_to', 'label': '确认加仓', 'rule_ids': ['M-40'], ...}
+E         Use -v to get more diff)
+
+tests/m4/test_closeout.py:16: AssertionError</failure></testcase><testcase classname="tests.m4.test_closeout" name="test_plan_skip_identifies_one_actual_gate" time="0.000"><failure message="assert False&#10; +  where False = any(&lt;generator object test_plan_skip_identifies_one_actual_gate.&lt;locals&gt;.&lt;genexpr&gt; at 0x10e831e00&gt;)">def test_plan_skip_identifies_one_actual_gate():
+        e = engine()
+        e.dd12 = True
+        e.decide(DAY, {"AAA": signal()}, prices={"AAA": 100})
+&gt;       assert any("12%" in s["reason_zh"] for s in e.skips)
+E       assert False
+E        +  where False = any(&lt;generator object test_plan_skip_identifies_one_actual_gate.&lt;locals&gt;.&lt;genexpr&gt; at 0x10e831e00&gt;)
+
+tests/m4/test_closeout.py:28: AssertionError</failure></testcase><testcase classname="tests.m2.test_cik_history" name="test_successor_companyfacts_history_uses_visible_registrant" time="0.032"><failure message="assert 2000000000.0 == 1000000000.0">def test_successor_companyfacts_history_uses_visible_registrant():
+        calls = []
+    
+        class SEC:
+            def companyfacts(self, cik):
+                calls.append(str(int(cik)))
+                return {"cik": str(int(cik)), "facts": {}}
+    
+        repo = MemoryRepository()
+        repo.shared_filings["XOM"] = [
+            {"accession": "old", "form": "10-K", "filing_date": date(2015, 2, 20), "cik": "0000034088"},
+            {"accession": "old-q", "form": "10-Q", "filing_date": date(2026, 5, 1), "cik": "34088"},
+            {"accession": "new", "form": "10-Q", "filing_date": date(2026, 8, 3), "cik": "0002115436"},
+        ]
+        source_at_cutoff = []
+    
+        def compute(data, **kwargs):
+            source_at_cutoff.append((kwargs["extractor"], kwargs["as_of"], data["cik"]))
+            state = extract()
+            state.ticker = "XOM"
+            state.values["rev_ttm"] = 1e9 if data["cik"] == "34088" else 2e9
+            return state
+    
+        service = FinancialService(
+            clock=FrozenClock(datetime(2026, 10, 16, 1, tzinfo=timezone.utc)),
+            repository=repo,
+            sec=SEC(),
+            llm=None,
+            universe=[{"ticker": "XOM", "foreign": False, "sector": "能源"}],
+            ciks={"XOM": "0002115436"},
+        )
+        with patch("inves_cog.ingest.fundamentals.service.extract_state", side_effect=compute):
+            assert service.collect_financials()["processed_count"] == 1
+&gt;       assert repo.state_asof("XOM", date(2015, 2, 20), "fixed").values["rev_ttm"] == 1e9
+E       assert 2000000000.0 == 1000000000.0
+
+tests/m2/test_cik_history.py:48: AssertionError</failure></testcase></testsuite></testsuites>
