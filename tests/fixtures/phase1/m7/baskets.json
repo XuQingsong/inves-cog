@@ -1,0 +1,1261 @@
+[
+ {
+  "basket_id": "l2_00",
+  "level": "L2",
+  "name": "AI 算力芯片",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "NVDA",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AMD",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AVGO",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MRVL",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_01",
+  "level": "L2",
+  "name": "存储",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "MU",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SKHY",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "WDC",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "STX",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SNDK",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_02",
+  "level": "L2",
+  "name": "CPU 与代工",
+  "benchmark": "SOXX",
+  "members": [
+   {
+    "ticker": "INTC",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "QCOM",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ARM",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "TSM",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_03",
+  "level": "L2",
+  "name": "AI 网络与光通信",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "NOK",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "LITE",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ANET",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CIEN",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "COHR",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_04",
+  "level": "L2",
+  "name": "软件与平台",
+  "benchmark": "IGV",
+  "members": [
+   {
+    "ticker": "MSFT",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ORCL",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CRM",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "NOW",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ADBE",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "PLTR",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_05",
+  "level": "L2",
+  "name": "互联网",
+  "benchmark": "XLC",
+  "members": [
+   {
+    "ticker": "META",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "GOOGL",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AMZN",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "NFLX",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_06",
+  "level": "L2",
+  "name": "消费硬件与汽车",
+  "benchmark": "XLY",
+  "members": [
+   {
+    "ticker": "AAPL",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "TSLA",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_07",
+  "level": "L2",
+  "name": "零售",
+  "benchmark": "XLY",
+  "members": [
+   {
+    "ticker": "COST",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "WMT",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "HD",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_08",
+  "level": "L2",
+  "name": "医疗",
+  "benchmark": "XLV",
+  "members": [
+   {
+    "ticker": "UNH",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "LLY",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "JNJ",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_09",
+  "level": "L2",
+  "name": "金融与支付",
+  "benchmark": "XLF",
+  "members": [
+   {
+    "ticker": "JPM",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "V",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MA",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_10",
+  "level": "L2",
+  "name": "能源",
+  "benchmark": "XLE",
+  "members": [
+   {
+    "ticker": "XOM",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CVX",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_11",
+  "level": "L2",
+  "name": "工业",
+  "benchmark": "XLI",
+  "members": [
+   {
+    "ticker": "CAT",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "GE",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_12",
+  "level": "L2",
+  "name": "半导体设备",
+  "benchmark": "SOXX",
+  "members": [
+   {
+    "ticker": "AMAT",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "LRCX",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "KLAC",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ASML",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_13",
+  "level": "L2",
+  "name": "数据中心电力与散热",
+  "benchmark": "XLU/XLI",
+  "members": [
+   {
+    "ticker": "VRT",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ETN",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "GEV",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CEG",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "BE",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_14",
+  "level": "L2",
+  "name": "AI 服务器与算力云",
+  "benchmark": "XLK",
+  "members": [
+   {
+    "ticker": "DELL",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SMCI",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CRWV",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "l2_15",
+  "level": "L2",
+  "name": "网络安全",
+  "benchmark": "IGV",
+  "members": [
+   {
+    "ticker": "CRWD",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "PANW",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "FTNT",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ZS",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "market_only"
+  }
+ },
+ {
+  "basket_id": "ai_accelerators",
+  "level": "L3",
+  "name": "AI 加速芯片",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "NVDA",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AMD",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AVGO",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MRVL",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "AI 算力芯片"
+  }
+ },
+ {
+  "basket_id": "ai_capex_chain",
+  "level": "L3",
+  "name": "AI 资本开支链",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "AMD",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ANET",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AVGO",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "BE",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CEG",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CIEN",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "COHR",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "DELL",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ETN",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "GEV",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "LITE",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MRVL",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MU",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "NVDA",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SKHY",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SMCI",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SNDK",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "STX",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "TSM",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "VRT",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "WDC",
+    "weight": 0.047619047619047616,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "benchmark",
+   "tickers": [
+    "SMH"
+   ]
+  }
+ },
+ {
+  "basket_id": "ai_network",
+  "level": "L3",
+  "name": "AI 网络与光",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "ANET",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CIEN",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "COHR",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "LITE",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AVGO",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MRVL",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "benchmark",
+   "tickers": [
+    "SMH"
+   ]
+  }
+ },
+ {
+  "basket_id": "ai_servers",
+  "level": "L3",
+  "name": "AI 服务器",
+  "benchmark": "XLK",
+  "members": [
+   {
+    "ticker": "DELL",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SMCI",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "AI 服务器与算力云"
+  }
+ },
+ {
+  "basket_id": "cloud",
+  "level": "L3",
+  "name": "云厂商",
+  "benchmark": "QQQ",
+  "members": [
+   {
+    "ticker": "MSFT",
+    "weight": 0.2,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "GOOGL",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AMZN",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "META",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ORCL",
+    "weight": 0.2,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "benchmark",
+   "tickers": [
+    "QQQ"
+   ]
+  }
+ },
+ {
+  "basket_id": "cpu",
+  "level": "L3",
+  "name": "CPU",
+  "benchmark": "SOXX",
+  "members": [
+   {
+    "ticker": "AMD",
+    "weight": 0.25,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "INTC",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ARM",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "QCOM",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "benchmark",
+   "tickers": [
+    "SOXX"
+   ]
+  }
+ },
+ {
+  "basket_id": "cybersecurity",
+  "level": "L3",
+  "name": "网络安全",
+  "benchmark": "IGV",
+  "members": [
+   {
+    "ticker": "CRWD",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "PANW",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "FTNT",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ZS",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "网络安全"
+  }
+ },
+ {
+  "basket_id": "dc_power",
+  "level": "L3",
+  "name": "数据中心电力",
+  "benchmark": "XLU/XLI",
+  "members": [
+   {
+    "ticker": "VRT",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ETN",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "GEV",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CEG",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "BE",
+    "weight": 0.2,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "数据中心电力与散热"
+  }
+ },
+ {
+  "basket_id": "enterprise_software",
+  "level": "L3",
+  "name": "企业软件",
+  "benchmark": "IGV",
+  "members": [
+   {
+    "ticker": "MSFT",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ORCL",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CRM",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "NOW",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ADBE",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "PLTR",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "软件与平台"
+  }
+ },
+ {
+  "basket_id": "hdd",
+  "level": "L3",
+  "name": "HDD",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "WDC",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "STX",
+    "weight": 0.5,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "存储"
+  }
+ },
+ {
+  "basket_id": "memory",
+  "level": "L3",
+  "name": "NAND / DRAM / HBM",
+  "benchmark": "SMH",
+  "members": [
+   {
+    "ticker": "SNDK",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "MU",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "SKHY",
+    "weight": 0.3333333333333333,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "存储"
+  }
+ },
+ {
+  "basket_id": "openai_partners",
+  "level": "L3",
+  "name": "OpenAI 合作方",
+  "benchmark": "QQQ",
+  "members": [
+   {
+    "ticker": "MSFT",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ORCL",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "NVDA",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AMD",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "AVGO",
+    "weight": 0.16666666666666666,
+    "primary": false,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "CRWV",
+    "weight": 0.16666666666666666,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "benchmark",
+   "tickers": [
+    "QQQ"
+   ]
+  }
+ },
+ {
+  "basket_id": "semi_equipment",
+  "level": "L3",
+  "name": "半导体设备",
+  "benchmark": "SOXX",
+  "members": [
+   {
+    "ticker": "AMAT",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "LRCX",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "KLAC",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   },
+   {
+    "ticker": "ASML",
+    "weight": 0.25,
+    "primary": true,
+    "effective_to": null,
+    "effective_from": "2015-01-01"
+   }
+  ],
+  "factor_basis": {
+   "kind": "l2",
+   "sector": "半导体设备"
+  }
+ }
+]

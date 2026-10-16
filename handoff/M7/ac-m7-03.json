@@ -1,0 +1,277 @@
+{
+ "2026-10-08": {
+  "close": [],
+  "post": []
+ },
+ "2026-10-09": {
+  "close": [],
+  "post": []
+ },
+ "2026-10-12": {
+  "close": [],
+  "post": []
+ },
+ "2026-10-13": {
+  "close": [
+   {
+    "trade_date": "2026-10-13",
+    "session": "close",
+    "entry_paths": [
+     "B"
+    ],
+    "severity": "alert",
+    "layer": "L4",
+    "baskets": [],
+    "basket_ids": [],
+    "tickers": [
+     "JNJ"
+    ],
+    "members": [
+     {
+      "ticker": "JNJ",
+      "ret": -0.05733136161983854,
+      "resid": -0.05373928026870063,
+      "resid_z": -4.93107564437872,
+      "vol_mult": 2.4107969386129215
+     }
+    ],
+    "direction": "down",
+    "max_abs_z": 4.93107564437872,
+    "data_quality": [],
+    "universe": "pool",
+    "status": "已发现·原因未明",
+    "params_version": "p-2026.10",
+    "amplification": {
+     "stampede": false,
+     "short_squeeze": false,
+     "short_squeeze_reason": null,
+     "publish_date_inferred": true,
+     "leverage_passive": null,
+     "leverage_passive_reason": "指数调整未接通",
+     "sentiment": null,
+     "implied_vol": null,
+     "implied_vol_reason": "未接通"
+    },
+    "type_candidates_prelim": [
+     "待定"
+    ],
+    "coverage": {
+     "members": 1
+    },
+    "anomaly_id": "2026-10-13:close:001"
+   }
+  ],
+  "post": []
+ },
+ "2026-10-14": {
+  "close": [
+   {
+    "trade_date": "2026-10-14",
+    "session": "close",
+    "entry_paths": [
+     "A_watch",
+     "B_basket",
+     "A_linked"
+    ],
+    "severity": "alert",
+    "layer": "L2",
+    "baskets": [
+     "AI 服务器与算力云",
+     "AI 加速芯片",
+     "AI 服务器",
+     "OpenAI 合作方"
+    ],
+    "basket_ids": [
+     "l2_14",
+     "ai_accelerators",
+     "ai_servers",
+     "openai_partners"
+    ],
+    "tickers": [
+     "AMD",
+     "AVGO",
+     "CRWV",
+     "DELL",
+     "MRVL",
+     "MSFT",
+     "NVDA",
+     "ORCL",
+     "SMCI"
+    ],
+    "members": [
+     {
+      "ticker": "AMD",
+      "ret": -0.057321685135335865,
+      "resid": -0.007565389491042386,
+      "resid_z": -0.23263463395906095,
+      "vol_mult": 1.0287479162097355
+     },
+     {
+      "ticker": "AVGO",
+      "ret": -0.030953513755562434,
+      "resid": -0.00041996890167082107,
+      "resid_z": -0.018699898333635164,
+      "vol_mult": 1.012866982226452
+     },
+     {
+      "ticker": "CRWV",
+      "ret": -0.15460737694383753,
+      "resid": -0.0871442439577781,
+      "resid_z": -1.8512901707246654,
+      "vol_mult": 3.5993111031222003
+     },
+     {
+      "ticker": "DELL",
+      "ret": -0.11273953220256083,
+      "resid": -0.056580586690356524,
+      "resid_z": -1.246807374024989,
+      "vol_mult": 1.66097064672127
+     },
+     {
+      "ticker": "MRVL",
+      "ret": -0.08724532514652528,
+      "resid": -0.037883267289277885,
+      "resid_z": -0.8217805274078197,
+      "vol_mult": 1.328647507395537
+     },
+     {
+      "ticker": "MSFT",
+      "ret": -0.017959333885361972,
+      "resid": -0.003964651762604602,
+      "resid_z": -0.20468497380472644,
+      "vol_mult": 0.9942941861635616
+     },
+     {
+      "ticker": "NVDA",
+      "ret": -0.03159460878697706,
+      "resid": -0.008640240491106777,
+      "resid_z": -0.43730240077070304,
+      "vol_mult": 1.1169325483489145
+     },
+     {
+      "ticker": "ORCL",
+      "ret": -0.08833798882681554,
+      "resid": -0.05466888254071167,
+      "resid_z": -1.7993926772972018,
+      "vol_mult": 1.7722203584870853
+     },
+     {
+      "ticker": "SMCI",
+      "ret": -0.0842078320962375,
+      "resid": 0.011546288524516085,
+      "resid_z": 0.23288161771550983,
+      "vol_mult": 0.9363115504769686
+     }
+    ],
+    "direction": "down",
+    "max_abs_z": 4.745399349022003,
+    "data_quality": [],
+    "universe": "pool",
+    "status": "已发现·原因未明",
+    "params_version": "p-2026.10",
+    "amplification": {
+     "stampede": true,
+     "short_squeeze": false,
+     "short_squeeze_reason": null,
+     "publish_date_inferred": true,
+     "leverage_passive": null,
+     "leverage_passive_reason": "指数调整未接通",
+     "sentiment": null,
+     "implied_vol": null,
+     "implied_vol_reason": "未接通"
+    },
+    "type_candidates_prelim": [
+     "踩踏"
+    ],
+    "coverage": {
+     "members": 9
+    },
+    "anomaly_id": "2026-10-14:close:001"
+   },
+   {
+    "trade_date": "2026-10-14",
+    "session": "close",
+    "entry_paths": [
+     "B_basket"
+    ],
+    "severity": "alert",
+    "layer": "L3",
+    "baskets": [
+     "数据中心电力"
+    ],
+    "basket_ids": [
+     "dc_power"
+    ],
+    "tickers": [
+     "BE",
+     "CEG",
+     "ETN",
+     "GEV",
+     "VRT"
+    ],
+    "members": [
+     {
+      "ticker": "BE",
+      "ret": -0.0915164167773771,
+      "resid": -0.00974916701638305,
+      "resid_z": -0.1782705068596219,
+      "vol_mult": 1.115763858928425
+     },
+     {
+      "ticker": "CEG",
+      "ret": -0.054937624666148266,
+      "resid": -0.03337276302319109,
+      "resid_z": -1.2464496859357745,
+      "vol_mult": 0.8448767590718574
+     },
+     {
+      "ticker": "ETN",
+      "ret": -0.04543438163946667,
+      "resid": -0.0021363620848588796,
+      "resid_z": -0.12497288639036995,
+      "vol_mult": 1.6240238115483947
+     },
+     {
+      "ticker": "GEV",
+      "ret": -0.06200948169395637,
+      "resid": -0.020171336391294523,
+      "resid_z": -0.9708344140054901,
+      "vol_mult": 1.6308651582831577
+     },
+     {
+      "ticker": "VRT",
+      "ret": -0.06093809262927208,
+      "resid": -0.0020560330414772926,
+      "resid_z": -0.06996209626438361,
+      "vol_mult": 1.658442642453024
+     }
+    ],
+    "direction": "down",
+    "max_abs_z": 3.052437267263259,
+    "data_quality": [],
+    "universe": "pool",
+    "status": "已发现·原因未明",
+    "params_version": "p-2026.10",
+    "amplification": {
+     "stampede": false,
+     "short_squeeze": false,
+     "short_squeeze_reason": null,
+     "publish_date_inferred": true,
+     "leverage_passive": null,
+     "leverage_passive_reason": "指数调整未接通",
+     "sentiment": null,
+     "implied_vol": null,
+     "implied_vol_reason": "未接通"
+    },
+    "type_candidates_prelim": [
+     "待定"
+    ],
+    "coverage": {
+     "members": 5
+    },
+    "anomaly_id": "2026-10-14:close:002"
+   }
+  ],
+  "post": []
+ }
+}
