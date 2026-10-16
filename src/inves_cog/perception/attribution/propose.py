@@ -32,6 +32,8 @@ def _item_view(item):
 def propose_candidates(anomaly, items, neighbors, client, universe):
     if anomaly.get("universe") == "wide":
         return []
+    if not items:
+        return validate_candidates([], set(), universe)
     result = client.call("anomaly_candidates", candidate_payload(anomaly, items, neighbors))
     raw = [row for row in result.get("candidates") or [] if row.get("mechanism") in MECHANISMS][:5]
     return validate_candidates(raw, {item["info_id"] for item in items}, universe)

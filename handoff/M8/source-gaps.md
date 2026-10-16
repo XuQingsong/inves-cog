@@ -22,4 +22,4 @@
 - Meta Muse 在 09-19 至 09-21、开盘前的榜单或登顶：导出里没有。最早的「Muse Hits No. 1」是 2026-09-22 04:02+08（`news:benzinga:61908373`），而且 `first_seen_at` 在 10-14。
 - DeepSeek 的 R1 发布或 App Store 登顶：2025-01-13 至 02-10 只有 1 条 FRED CPI，`first_seen_at` 在 2026-10-14。没有 R1，没有登顶。
 
-`test_case_attribution` 和 `test_case_no_news_unexplained` 继续等冻结夹具。上面这些 id 还不是冻结案例。
+`test_case_no_news_unexplained` 用标明 synthetic 的空新闻。四个案例都是「已发现·原因未明」，不调用模型。这不是真实源判定。`test_case_attribution` 继续等冻结夹具。上面这些 id 还不是冻结案例。
