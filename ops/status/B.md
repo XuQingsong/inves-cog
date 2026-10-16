@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-002  阻塞  2026-10-16 11:59 北京
+
+- PR #8，head `d5d0587`。CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/38848165567 （push 同头：https://github.com/XuQingsong/inves-cog/actions/runs/38848160877）。本地 `make phase1-test`：53 passed，6 deselected，1 warning，19.53s，退出码 0。
+- 新增测试：`test_l3_same_as_l2_drops_theme_factor`（相同成员 → `m+s`、`l3_same_as_l2`、`beta_t` 为空；不同 → `m+s+t`）、`test_sic_review_additions`、`test_draft_all_does_not_share_one_connection`（复现原来 3 个线程叠在一条连接上，修完后深度为 1；有连接工厂时每个线程一条新连接）。
+- 冲突：`src/inves_cog/llm/transport.py` 按任务名分开保留。`segment_mapping_draft` 仍是 `max_tokens=4096`、`reasoning_effort=low`；`graph_seed_draft` 和 `exposure_draft` 仍是 `8192` 和 `low`。模型名没改。分支已合入 `origin/main` `0035c26`。
+- 第 6 项：阻塞：等待数据库连接信息。要重算 2026-10-12、13、14 并写入共用库的 `marketstate`。这台环境到不了 Mac 上的 `127.0.0.1:25432`，现有 `inves_cog_review` 又只能读。需要一份能写 `marketstate`、不写 `ingest` / `fundamentals` / `trading` 的连接，放在未跟踪的 `.env`，不提交。
+- 已自行决定：无。没有连接工厂时 `draft_all` 改为串行；命令行传入工厂后才并行，每个线程自己的连接。
+- 变更：无新表、无新数据源。因子口径和 SIC 映射按已经写进文档的 Q-M6-18、Q-M6-19。
+- 下一步：1–5 已在 PR #8，不合并。等连接到位后只做第 6 项，不重做前面的修复。
+
 ## B-002  已收到  2026-10-16 11:40 北京
 
 - 任务：M6 合并前修复（PR #8，分支 `phase1/m6-graph-baskets-marketstate`）。不合并 PR。
