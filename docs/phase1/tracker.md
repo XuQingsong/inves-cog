@@ -55,7 +55,7 @@
 | D-29 | M3 打分任务 `rule_a_scores` 注册进每日调度（美东 22:30，FR-M3-12），随 M4 一起核对按时运行 | M3 报告第 5 节 | 否（M4 验收前） | 🔄 调度已写进 PR #13（已合并 7c5d5ba），A-006 安装上线 |
 | D-30 | M6 合并后：①用 main 代码重算 2026-10-12/13/14 的 `marketstate` 写库（原 B-002 第 6 项，A 线执行）；②M6 的新采集（VIX、VIX3M、7 只 ETF、SIC 月度）和每日价格结构任务注册进定时服务 | M6 报告第 6 节、Q-M6-20 | 是（M7 开工复述答复前） | 🔄 ①✅ marketstate 2026-07-01 至 10-15 已用 main 代码补算（23,209 行，A-005）；②调度 PR #13 已合并，A-006 安装上线（先修 D-32） |
 | D-31 | `ingest.short_interest` 只有 27 只、`publish_date` 全空：补全池内 59 只并记录发布日期 | M7 Q-M7-12 | 否（M8 开工前） | 🔄 |
-| D-32 | main 上 M6 `MarketService.run` 把参数 `tickers` 覆盖成 `sic_to_etf.yaml` 的按公司改正（只算 BKNG、SHW），B-002 引入、测试没覆盖入口。A 线在 A-006 开头热修复并加回归测试（跨线例外），合并后再切换调度 | A-005 status、需求方核实 | 是（调度切换前） | 🔄 |
+| D-32 | main 上 M6 `MarketService.run` 把参数 `tickers` 覆盖成 `sic_to_etf.yaml` 的按公司改正（只算 BKNG、SHW），B-002 引入、测试没覆盖入口。A 线在 A-006 开头热修复并加回归测试（跨线例外），合并后再切换调度 | A-005 status、需求方核实 | 是（调度切换前） | ✅ 2026-10-16 PR #14 合并（回归测试 `test_market_service_preserves_requested_tickers`）；服务切换在 A-006 |
 
 ## 三、已关闭
 
