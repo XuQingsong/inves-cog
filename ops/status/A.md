@@ -2,7 +2,7 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-006  进行中  2026-10-16 14:49 北京
+## A-006  进行中  2026-10-16 15:35 北京
 - 已读 main 7c312bf8c0b1e826bbda3737f7417b2dae57cbc9 的 A-006（blob db1dd29f659f47f902b7b416cda2e58d8d4ddf0e）；A-005 已由需求方验证通过，PR #13 已合并 7c5d5ba。本轮只执行 A-006，不重复 A-005。
 - 顺序：D-32 先提交失败回归，再作限定变量改名，独立热修复 PR 待需求方合并；期间继续准备。合并后按授权快进 Mac main、安装/重启每日服务，记录运行 SHA/时间和预计 ET 首次时段；核对并注册 M2 正式财报日更新。
 - 权限例外来自 A-006 第二部分：仅允许既有 role_trading 和实际 marketstate 写入角色开启登录，密码留 Mac 私有环境，不建其他权限，不输出凭据。未实施前先核对角色和配置。
@@ -12,7 +12,11 @@
 - 变更准备：M2 现有 schedule 循环未按 --tasks 过滤，直接注册会连带启用 consensus/Yahoo；因此将仅封装现有 run --tasks financials 的正式入口和日窗/每日一次门禁，提交独立 ops PR 后才上线，不修改 M2 代码或切换来源。
 - 热修复 PR #14 当前 head **0c5e0e8457f0943adc3364182852aec0e68b0a27** 的 [CI 38863229785](https://github.com/XuQingsong/inves-cog/actions/runs/38863229785) 已绿，待需求方审核合并。
 - 进行中：M2 正式财报日更新独立 [PR #15](https://github.com/XuQingsong/inves-cog/pull/15)，head **73789edbab9d8c82d0db93680ef02b1427f8150e**，[CI 38863699107](https://github.com/XuQingsong/inves-cog/actions/runs/38863699107) 已绿；先红 8 failed 后 tests/ops 19 passed、全仓 97 blocking passed。只调用既有 M2 build/run_tasks 的 financials，21:15–21:45 ET、每日一次，不启用 Yahoo；证据 handoff/ops/A-006/financials-*.xml。两 PR 未合并前均未部署。
-- M4 已合入最新 main，已先提交失败测试/合成覆盖夹具及 MANIFEST/CHANGELOG：本机 12 failed、2 replay setup errors（尚无实现），live 按显式条件排除；提交 1926a18。接着实现执行/回放主链并先交检查点。无新增用户决定，不新建自动化。
+- **进行中：M4 检查点已提交**，PR #12 当前 head **4a22fdb358972b3b3d81ac7567314ffae2057446**，本地/GitHub 相同 SHA/代码树 d2238a0e3a5568d9bf40e9245325ef590205a58f。先失败测试 f02bd7bf1220652887dbaedc0ceee16e0543dbe5，再实现；当前 SHA 的 [CI 38867893697](https://github.com/XuQingsong/inves-cog/actions/runs/38867893697) phase1-blocking 绿；nightly 条件 skipped，不冒称云回放。
+- 检查点：[handoff/M4/checkpoint.md](https://github.com/XuQingsong/inves-cog/blob/4a22fdb358972b3b3d81ac7567314ffae2057446/handoff/M4/checkpoint.md)。前三个月 36 笔、收益 **−4.4592360022%**、回撤 **−9.8453132174%**，日期/代码/动作/整数股 **100% 一致**；完整 90 笔也是 **100%、零差异**，收益 **49.4527339798%**、回撤 **−12.6370184987%**。Q-M4-9：全年负现金 0 天，最低 **3377.696828**；Q-M4-10：90 笔中计划层与成交日层不同 **0 笔**，改变股数 **0 笔**。完整交易/权益/比较在 checkpoint.json、replay.json，标准答案仅在产生全部交易后用于比较。
+- 本机 M4 14 offline/replay passed；全仓 blocking+replay **105 passed、0 skipped**。只删通过的 14 条 M4 pending，live 保留；Ruff 通过。首轮自行纠正了误套到 legacy watch 的健康门禁和波段转核心后重置首笔比例，已按原 v18 分支注明源码；paper 仍保留健康门禁，没有改规则/上游/golden。检查点按 A-006 不等待回复，继续日常计划/持久化/live 自测。
+- 最近 5 日真实输入的历史计划只读回放已经跑通：目标 10-09/12/13/14/15，每天 54/54、覆盖率 100%，订单 13/5/4/1/5、跳过 10/9/9/12/13；尚在完成最终输入核对，不冒称真实准时调度。临时隔离测试库验证所有迁移、订单/账本重跑各 1 行、恢复后成交幂等、role_web 写入被拒，随后已删除该临时库；生产迁移 0 次、新角色 0 个。证据待最终补进 M4 PR。
+- PR #14/#15 仍未获需求方合并；未切换生产、未启用角色登录/写入连接。上线准备完成后继续其他可做项，不自动合并、不创建自动化；A-006 尚未完成。
 
 ## A-005  已完成  2026-10-16 14:31 北京
 - 已完成 A-005 三项运维/修复，提交正式待审 PR [#13](https://github.com/XuQingsong/inves-cog/pull/13)“[ops] 每日调度注册（A-005）”，分支 ops/a005-daily-scheduling。完整 head **8d3aa5a762f564ecfd6263a0dee6c9d9f0bc9241**，本地/GitHub 完整 SHA 与代码树 **70b54b2f06abbb7c6711b75b209e79f6fb770b2d** 一致，工作树干净。
