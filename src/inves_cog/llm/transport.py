@@ -64,6 +64,9 @@ class OpenAICompatibleTransport:
         }
         if spec.model == "deepseek-v4.1-flash":
             request["enable_thinking"] = False
+        if spec.task == "segment_mapping_draft":
+            request["max_tokens"] = 4096
+            request["reasoning_effort"] = "low"
         try:
             response = http.request(
                 "POST",

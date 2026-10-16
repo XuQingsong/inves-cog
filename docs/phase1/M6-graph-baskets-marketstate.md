@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v5（按验证报告修改警戒规则、加入 VIX 期限结构和新分组，见 [`validation/M7-validation-report.md`](validation/M7-validation-report.md)） |
+| 文档版本 | v6（答复开工复述 K01–K02；答复后冻结，见阶段任务书 §4.7） |
 | 规格章节 | 3.1、3.5、6.11、11.3 |
 | 依赖 | M1（行情、全量库）、M2（10-K 原文、分部） |
 | 关闭的不变量 | 无（为 M7、M8、M9 提供基础） |
@@ -143,3 +143,6 @@
 | Q-M6-9 | AC-M6-03 的分部暴露依赖什么？ | 依赖 M2 的 `fundamentals.segments`。WDC 分拆 SanDisk 后只剩 HDD 业务，可能是单一分部，这时用合并营收作为 HDD 暴露，`exposure_basis = 分部收入`。M2 的分部映射草稿（AC-M2-08）还没生成，M6 起草暴露时直接读分部原名，不等映射审核 |
 | Q-M6-10 | 为什么在 M6 加资金流向图？ | 需求方回放 2024-07 至 2026-10 的数据发现：2024-07-11（CPI 回落后小盘 +3.6%、科技 −2.2%）这类风格轮动，以及 2026-10-14 这类多因素叠加的抛售，单看某个篮子是看不全的，需要同一天把大盘、风格、行业、篮子放在一起比。这张图只用价格，不依赖 M7 的阈值，所以不必等 M7 的验证集 |
 | Q-M6-11 | 为什么改警戒规则？ | 需求方回放 2019-01 至 2026-10：v4 规则下全部日子 32% 是警戒，平静期也有 15–25%；v5 规则下平静期 88–98% 为正常，2022 熊市 84% 为警戒或危机，急性冲击的判定不变；全部日子正常 71%、警戒 20%、危机 8%。VIX 期限倒挂在新冠期间 95%、关税期间 100% 的天数出现，平静期 0–5%。`golden/m6_marketstate.json` 已按 v5 重新生成 |
+| Q-M6-12（K01） | 缺失原因和轮动汇总存在哪里？ | 采用 A：`marketstate.daily`、`marketstate.baskets`、`marketstate.rotation` 各加 `health_codes text[]`、`null_reason text`；`marketstate.daily` 加 `factor_set text`（实际使用的因子组合）；`marketstate.market` 加 `null_reason`、`sector_spread_z`（数值）、`style_spread_z jsonb`（键 `iwm_qqq`、`mtum_vlue`、`rsp_spy`）。缺 β 时为 `NULL`，不得用 0。第 4 节已有字段不改名 |
+| Q-M6-13（K02） | 两只股票的篮子留一后只剩 1 只；跨多个 L2 的篮子用哪个行业因子？ | 采用 A：篮子自身的行仍要求至少 2 只有效成员；个股的留一篮子因子剩 1 只也照样使用，剩 0 只时退化为少一个因子的模型并在 `factor_set`、`null_reason` 里写明。个股的行业因子始终来自它唯一的主 L2；跨 L2 的篮子（AI 资本开支链、云厂商等）的行业因子用它配置的基准 ETF 对 SPY 正交化；数据中心电力篮子用 XLU、XLI 等权。篮子的 `factor_basis` 存进 `graph.baskets` |
+| Q-M6-14 | 代码放哪个包？AMD 的主篮子？ | 图谱放 **`inves_cog.perception.graph`**（M0 已建；README §3.7），价格结构放 `inves_cog.marketstate`，不得新建顶层包 `inves_cog.graph`，否则绕开导入防火墙。AMD 的主 L3 篮子默认为 **AI 加速芯片**（2026 年的主要增量来自数据中心 GPU），同时是 CPU 篮子的成员；用户在图谱审核时可以改 |

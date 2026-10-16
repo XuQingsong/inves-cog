@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.208" timestamp="2026-10-15T23:32:50.984999+08:00" hostname="192.168.1.101"><testcase classname="tests.m1.test_market_info" name="test_earnings_reaction_day" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.ingest.earnings_history'">def test_earnings_reaction_day():
+        from inves_cog.clock import FrozenClock
+        from tests.m1.history_cases import assert_historical_events
+    
+&gt;       assert_historical_events(FrozenClock(instant("2026-10-15T00:00:00Z")))
+
+tests/m1/test_market_info.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = FrozenClock(instant=datetime.datetime(2026, 10, 15, 0, 0, tzinfo=datetime.timezone.utc))
+
+    def assert_historical_events(clock):
+&gt;       from inves_cog.ingest.earnings_history import backfill_events
+E       ModuleNotFoundError: No module named 'inves_cog.ingest.earnings_history'
+
+tests/m1/history_cases.py:7: ModuleNotFoundError</failure></testcase><testcase classname="tests.m2.test_fundamentals" name="test_health_contract" time="0.019"><failure message="ImportError: cannot import name 'current_ciks' from 'inves_cog.ingest.fundamentals.cli' (/private/tmp/inves-cog-m2-closeout/src/inves_cog/ingest/fundamentals/cli.py)">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10ada5310&gt;
+
+    def test_health_contract(monkeypatch):
+        from tests.m2.extreme_cases import assert_verified_extremes
+    
+&gt;       assert_verified_extremes()
+
+tests/m2/test_fundamentals.py:694: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_verified_extremes():
+&gt;       from inves_cog.ingest.fundamentals.cli import current_ciks
+E       ImportError: cannot import name 'current_ciks' from 'inves_cog.ingest.fundamentals.cli' (/private/tmp/inves-cog-m2-closeout/src/inves_cog/ingest/fundamentals/cli.py)
+
+tests/m2/extreme_cases.py:8: ImportError</failure></testcase><testcase classname="tests.m2.test_fundamentals" name="test_fin_state_pit" time="0.009"><failure message="TypeError: FinancialService.collect_financials() got an unexpected keyword argument 'history'">def test_fin_state_pit():
+        from inves_cog.ingest.fundamentals.service import FinancialService, MemoryRepository
+    
+        calls = []
+    
+        class SEC:
+            def companyfacts(self, cik):
+                calls.append(cik)
+                return input_facts()
+    
+        clock = FrozenClock(datetime(2026, 10, 13, 1, tzinfo=timezone.utc))
+        repository = MemoryRepository()
+        repository.shared_filings["FIXTURE"] = [
+            {"accession": "q8", "form": "10-Q", "filing_date": date(2026, 8, 1), "report_date": date(2026, 6, 30)}
+        ]
+        service = FinancialService(
+            clock=clock,
+            repository=repository,
+            sec=SEC(),
+            llm=None,
+            universe=[{"ticker": "FIXTURE", "foreign": False, "sector": "fixture"}],
+            ciks={"FIXTURE": "1"},
+        )
+        report = service.collect_financials()
+        assert report["processed_count"] == 1 and repository.health["FIXTURE"]["can_score"]
+        assert repository.state_asof("FIXTURE", date(2026, 7, 31), "fixed") is None
+        assert repository.state_asof("FIXTURE", date(2026, 8, 1), "fixed").accession == "q8"
+        assert calls == ["1"] and "FIXTURE" in repository.profiles
+        from unittest.mock import patch
+    
+        from inves_cog.ingest.fundamentals.extractors import extract_state
+    
+        with patch("inves_cog.ingest.fundamentals.service.extract_state", wraps=extract_state) as compute:
+&gt;           fresh = service.collect_financials(history=False)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: FinancialService.collect_financials() got an unexpected keyword argument 'history'
+
+tests/m2/test_fundamentals.py:199: TypeError</failure></testcase><testcase classname="tests.m2.test_fundamentals" name="test_q4_derived_from_annual" time="0.002"><failure message="AssertionError">def test_q4_derived_from_annual():
+        from tests.m2.round3_cases import assert_source_selection, assert_split_basis
+    
+        assert_source_selection()
+&gt;       assert_split_basis()
+
+tests/m2/test_fundamentals.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_split_basis():
+        from inves_cog.ingest.fundamentals.extractors import Facts
+    
+        rows = [
+            {"start": "2025-01-01", "end": "2025-03-31", "filed": "2025-05-01", "form": "10-Q", "val": -0.4},
+            {"start": "2025-04-01", "end": "2025-06-30", "filed": "2025-08-01", "form": "10-Q", "val": 0.2},
+        ]
+        data = {
+            "facts": {
+                "us-gaap": {
+                    "EarningsPerShareDiluted": {"units": {"USD/shares": rows}},
+                    "StockholdersEquityNoteStockSplitConversionRatio1": {
+                        "units": {"pure": [{"end": "2025-06-01", "filed": "2025-08-01", "form": "10-Q", "val": 4}]}
+                    },
+                }
+            }
+        }
+        before = Facts(data, date(2025, 5, 2), fixed=True).quarterly(["EarningsPerShareDiluted"])
+        assert before[date(2025, 3, 31)]["val"] == -0.4
+        after = Facts(data, date(2025, 8, 2), fixed=True).quarterly(["EarningsPerShareDiluted"])
+        assert after[date(2025, 3, 31)]["val"] == -0.1
+        assert after[date(2025, 6, 30)]["val"] == 0.2
+        assert after[date(2025, 3, 31)]["split_adjustment"][0]["ratio"] == 4
+        assert Facts(data, date(2025, 8, 2)).quarterly(["EarningsPerShareDiluted"])[date(2025, 3, 31)]["val"] == -0.4
+    
+        import json
+        from pathlib import Path
+    
+        from inves_cog.ingest.fundamentals.extractors import extract_state
+    
+        official = json.loads((Path(__file__).parents[1] / "fixtures/phase1/m2/round3_official.json").read_text())
+        lite = extract_state(official["LITE"], ticker="LITE", as_of=date(2026, 10, 15))
+        assert lite.values["ni_ttm"] == -6_935_100_000
+        assert lite.values["eps_ttm"] == -92.96
+&gt;       assert "extreme_value_verified" in lite.health_codes and "implausible_value" not in lite.health_codes
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m2/round3_cases.py:66: AssertionError</failure></testcase></testsuite></testsuites>
