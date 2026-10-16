@@ -2,16 +2,19 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-005  进行中  2026-10-16 14:05 北京
-- 已确认主线 M6 入口缺陷，先通知需求方分派 B 修复（本任务禁止 A 改 M6）：main 2307132 的 marketstate/service.py::MarketService.run 将参数 tickers 覆盖为 load_sic 的 overrides，仅剩 BKNG/SHW；无写入只读探针请求 NVDA/AMD/MSFT/WIDE，calculate 实收到 BKNG/SHW。文件 blob e4eececd3d41a6143dd296e80223591f8922234a，证据暂存 /private/tmp/inves-a005-ops/preflight.json。不是数据源或 key 猜测。
-- 不修改 M6 文件。补算拟直接复用 main 的 calculate 与 MarketService.put，显式传当日 PIT 成员，只写 marketstate；不会用遮蔽后的入口伪称完成。调度 PR 将复用正式命令并标明此入口修复是 A-006 上线前置；请需求方安排 B 修复，避免上线后只处理两个代码。
-- 前置真实数据：日线最新 10-15；广域快照仅 10-14/15（1294/1292），7 月至 10-13 不倒灌未来广域成员；10-14 三只当前均 m+s+t（旧行），待覆盖。分钟缺窗当前确为 0 行。继续完成其余已授权工作。
-- 已读 A-005（blob ee6141e68d294cfd7d1f45ab7f88e7dc55f4d072），期限今天；本轮仅做其三项运维与修复，不开始 M4，实现留 A-006。
-- 将用最新 main 的现有 M6 代码，按明确授权只写 marketstate，补算 2026-07-01 至最近已收盘交易日，报告行数、10-14 NVDA/AMD/MSFT 的 factor_set 以及广域 SPY 单因子数。
-- 调度如需仓库代码/配置，开 [ops] 每日调度注册（A-005）PR；**合并前不在服务生效**，按任务留到 A-006 切换。不修改 M6/M7 代码或执行 M7 迁移。
-- 将仅重取 Alpaca 10-15 美东 12:57–14:10 的缺失窗口：有数据才入库；仍无数据则保留缺口并写真实健康记录，不编造或换源。
-- 规则承接：A-004 验证通过；M4 K01–K03 已在 v4 Q-M4-8–10 答复并冻结，但本任务不开发 M4。A-003 的时间证据仍由需求方接手，不手动重跑。
-- 下一步：核对 main/数据库与现有命令，分别完成补算、调度 PR 和分钟窗复查；无新增用户决定，不新建自动化、不合并 PR。
+## A-005  已完成  2026-10-16 14:31 北京
+- 已完成 A-005 三项运维/修复，提交正式待审 PR [#13](https://github.com/XuQingsong/inves-cog/pull/13)“[ops] 每日调度注册（A-005）”，分支 ops/a005-daily-scheduling。完整 head **8d3aa5a762f564ecfd6263a0dee6c9d9f0bc9241**，本地/GitHub 完整 SHA 与代码树 **70b54b2f06abbb7c6711b75b209e79f6fb770b2d** 一致，工作树干净。
+- 当前 SHA 的 phase1-blocking CI 绿：[run 38861471796](https://github.com/XuQingsong/inves-cog/actions/runs/38861471796)，隔离容器测试和 CI 断言成功；nightly 按条件 skipped，不冒称夜间回放。本机 **89 blocking passed、0 skipped**；新增调度合同先 **11 failed**（363bd2da7c7f2df0e67a2a4e6b272f5895284750），后实现 **11 passed**（f8ed6ddf9d3109ea92dbd601a4ab7db7375f66ec）。Ruff、diff 检查通过。
+- 价格结构：复用任务开始 main **230713222019d8da6ea384135f4ca4fb239f0450** 未改动的 calculate/MarketService.put，只写 marketstate，完成 **2026-07-01 至 10-15、75 个交易日**。daily **13,834**、baskets **4,350**、rotation **4,950**、market **75**，合计 **23,209 行**，覆盖旧 10-12/13/14；耗时 **937.869 秒**。独立只读查库计数与逐日写入累计一致；原行备份保存在仓库外。
+- 指定核对：10-14 **NVDA、AMD、MSFT 的 close/post 六行均 m+s**；当日广域按 close 统计，仅 SPY（m）由原备份实测 **216** 降至 **143**，其余 m+s 1,139、m+s+t 12。10-14 总覆盖 1,306 只、10-15 总覆盖 1,304 只；更早没有历史广域快照，只算当时可见 59 只种子，不倒灌未来成员。
+- 调度变更：仅改 scripts/install_ingest_service.py、新增 scripts/schedule_daily_modules.py 和 tests/ops/。保留现有 bars/广域/SEC 注册，追加日常 m6_market_inputs（CBOE VIX/VIX3M、7 ETF）及每月 issuer_profiles；M6 ≥20:45 ET 且日线/输入已完成，M3 ≥22:30 ET 且正式 financials/m2_financials 已完成，保留模块每日一次门禁；XNYS/美东含 DST，单模块失败隔离。正反断言覆盖正常放行、错误时段/缺前置阻拦。
+- **新调度没有安装或生效**，生产原四程序配置 SHA256 写后仍为 77e71fe4d5b20363019749f89d9465ea8c23b2357ed5e2f61c9bfd22953a34dd；没有重启生产服务、改 .env、运行 M7 迁移或开新权限。合并后按 A-006 切换，不能把本 PR 当今晚已生效。
+- 已核实的 A-006 上线前置：① M6 正式 MarketService.run 的 tickers 被 load_sic overrides 覆盖为 BKNG/SHW，无写入探针已证明；本任务禁止改 M6，已先回报。**需求方已在 main 7b907ba692952845215faa7cd77e43204860c779 登记 D-32，明确交 A-006 开头修复**（取代此前请求 B 修复的阶段建议）。② 私有环境缺 INVES_COG_TRADING_DATABASE_URL / INVES_COG_MARKETSTATE_DATABASE_URL，既有对应角色 NOLOGIN；未用管理员作长期账号，需部署时配妥写入连接。③ 库未见正式 financials/m2_financials 完成记录，部署时确认 M2 正式更新调度及首轮记录，历史 live 冒烟不算前置；未擅自启用 M2 全套采集或 Yahoo 重试。
+- Alpaca 缺窗：真实 SIP/raw 重取 **73 只、10-15 ET12:57–14:10**（UTC [16:57,18:11)），完整请求 **0 行**，库内前后 0、新增 0。已写真实 source_health **AlpacaMinuteGap:2026-10-15:12:57-14:10ET**，degraded，明确“数据源仍缺”、窗口/代码数。没有造数、前值填充、换源或换 feed。
+- 证据：[handoff/ops/A-005/self-test.md](https://github.com/XuQingsong/inves-cog/blob/8d3aa5a762f564ecfd6263a0dee6c9d9f0bc9241/handoff/ops/A-005/self-test.md)，同目录 marketstate-backfill.json（逐日及独立核对）、minute-gap.json、deployment-preflight.json、marketstate-entrypoint-probe.json、scheduling-red/green.xml、blocking.xml。
+- 已自行决定：独立日期并行计算、父进程按日期串行事务写入；为避开已证实入口遮蔽，补算组合原 main 的 calculate/put 并显式传 PIT universe，没有改公式或另建模型。未新增接口/结构/依赖/来源/用户决定；调度变更已如上同步。不改 docs/golden/milestones、M6/M7 代码、不开始 M4；A-003 两项时间证据仍由需求方处理，未手动重跑。
+- 同步：状态写入前已尝试 git pull --rebase（直连超时），经官方连接器按当前 A.md blob 安全更新，只改本文件并保留 B.md；代码分支原生 fetch 成功，已同步为远端相同完整 SHA，红绿历史保留。
+- 下一步：**等待需求方验收 A-005 和用户批准合并 PR #13**；部署/入口 D-32/M4 实现留给之后下发的 A-006。本轮停止，不合并 PR、不创建后续自动化。
 
 ## A-004  已完成  2026-10-16 13:35 北京
 - 已按 A-004 提交草稿 PR [#12](https://github.com/XuQingsong/inves-cog/pull/12)“[M4] 开工复述”，分支 phase1/m4-paper-execution。当前完整 head **e55361d5ec8ad5a7c827dd7a81102afd11427af9**，本地/GitHub SHA 与代码树 ad49f118f7d3202b32fac595f978e8a34730a5d6 一致；差异严格只有 handoff/M4/kickoff.md（162 行），没有实现、测试或迁移。
