@@ -1,0 +1,94 @@
+{
+  "task": "A-003 D-26",
+  "historical_jobs": [
+    {
+      "id": 5309,
+      "task_name": "sec_submissions",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-16 08:56:27.087581+08:00",
+      "ended_at": "2026-10-16 08:58:55.657333+08:00",
+      "status": "failed",
+      "processed_count": 1744,
+      "error_summary": "SourceError: HTTP transport failed after bounded retries"
+    },
+    {
+      "id": 5285,
+      "task_name": "sec_submissions",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-16 08:45:27.908119+08:00",
+      "ended_at": "2026-10-16 08:45:55.496641+08:00",
+      "status": "failed",
+      "processed_count": 0,
+      "error_summary": "SourceError: HTTP transport failed after bounded retries"
+    }
+  ],
+  "proven_application_failure": "Only collect_submissions was inside the per-company exception boundary. 8-K body and Form 4 network/parser failures escaped and stopped the whole job. No durable company checkpoint meant the next run restarted the universe.",
+  "historical_boundary": {
+    "ticker": "NVDA",
+    "persisted_filings": 1559,
+    "last_successful_body": "0001045810-15-000131",
+    "following_missing_bodies": [
+      "0001045810-15-000087",
+      "0001045810-15-000013"
+    ]
+  },
+  "transport_cause": "Historical job error_summary discarded the original transport exception type and endpoint. It cannot establish whether the interruption was ReadTimeout, ConnectTimeout or a server disconnect. New code preserves endpoint, status, error code and exception-type chain in the company cursor. No evidence of HTTP 429/403 or SEC rate rejection was observed.",
+  "readonly_probes": {
+    "mode": "read_only_endpoint_diagnostic_not_a_formal_job",
+    "rows": [
+      {
+        "url": "https://www.sec.gov/files/company_tickers.json",
+        "shared_sec_rate_limit": "5 requests/second",
+        "attempts": 1,
+        "status": "success",
+        "response_type": "dict",
+        "duration_seconds": 3.237
+      },
+      {
+        "url": "https://data.sec.gov/submissions/CIK0001045810.json",
+        "shared_sec_rate_limit": "5 requests/second",
+        "attempts": 1,
+        "status": "success",
+        "response_type": "dict",
+        "duration_seconds": 1.659
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/731766/000073176626000197/0000731766-26-000197-index.html",
+        "shared_sec_rate_limit": "5 requests/second",
+        "attempts": 1,
+        "status": "success",
+        "response_type": "str",
+        "duration_seconds": 1.76
+      }
+    ]
+  },
+  "specific_body_probe": {
+    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581015000087/form8-kq116.htm",
+    "mode": "read_only_specific_failure_boundary_probe",
+    "configured_max_attempts": 4,
+    "configured_timeout_seconds": 30,
+    "status": "success",
+    "response_type": "str",
+    "bytes": 29697,
+    "duration_seconds": 1.3755405829870142
+  },
+  "fixes": [
+    "Keep the one process-wide SEC budget of 5 requests per second, including retries.",
+    "Reuse SEC HTTP connections.",
+    "Record completed and failed companies in existing ingest.source_cursors; unfinished cycles survive restarts and date rollover.",
+    "Isolate body/Form 4 source or parse failures per company; permission/database errors propagate.",
+    "Use original per-filing info/Form4 identities to avoid duplicate writes when retrying an issuer."
+  ],
+  "regressions": {
+    "initial_red": "3 failed, 2 passed; handoff/M1/a003-d26-red.xml",
+    "cross_day_red": "1 failed, 6 passed; handoff/M1/a003-d26-crossday-red.xml",
+    "green": "7 passed; handoff/M1/a003-d26-green.xml"
+  },
+  "full_real_run": {
+    "complete": false,
+    "next_formal_window_ET": "2026-10-16 20:45–21:15 America/New_York",
+    "next_formal_window_Beijing": "2026-10-17 08:45–09:15",
+    "reason": "The current time is outside the authorized SEC slot. Endpoint diagnostics are not counted as a complete production collection.",
+    "guard": "Use actual SystemClock and Runtime window; check native scheduler job has ended before a branch validation run. No production service restart or timer change."
+  }
+}

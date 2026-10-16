@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.382" timestamp="2026-10-16T14:45:02.472405+08:00" hostname="192.168.1.101"><testcase classname="tests.m6.test_service" name="test_market_service_preserves_requested_tickers" time="0.003"><failure message="AssertionError: SIC overrides must not replace the requested universe&#10;assert ['BKNG', 'SHW'] == ['NVDA', 'AMD', 'MSFT']&#10;  &#10;  At index 0 diff: 'BKNG' != 'NVDA'&#10;  Right contains one more item: 'MSFT'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b362ed0&gt;
+
+    @pytest.mark.phase1_blocking
+    def test_market_service_preserves_requested_tickers(monkeypatch):
+        requested = ["NVDA", "AMD", "MSFT"]
+        seen = {}
+    
+        class Rows:
+            def __init__(self, rows):
+                self.rows = rows
+    
+            def fetchall(self):
+                return self.rows
+    
+        class Repository:
+            def query(self, sql, params=None):
+                if "issuer_profiles" in sql:
+                    return Rows([{"ticker": "SHW", "sic": 3674}, {"ticker": "BKNG", "sic": 3674}])
+                if "bars_daily" in sql:
+                    seen["queried_tickers"] = params[2]
+                return Rows([])
+    
+            def vix(self):
+                return []
+    
+        def calculate(bars, baskets, vix, *, day, tickers, sic_etfs):
+            seen["tickers"] = list(tickers)
+            seen["sic_etfs"] = sic_etfs
+            return {"daily": [{"ticker": t} for t in tickers], "baskets": [], "rotation": [], "market": {}}
+    
+        monkeypatch.setattr(service, "calculate", calculate)
+        clock = FrozenClock(datetime(2026, 10, 16, 1, tzinfo=timezone.utc))
+        runner = service.MarketService(repository=Repository(), clock=clock)
+        written = []
+        monkeypatch.setattr(runner, "put", lambda table, row: written.append((table, row)))
+        result = runner.run(date(2026, 10, 15), tickers=requested)
+    
+&gt;       assert seen["tickers"] == requested, "SIC overrides must not replace the requested universe"
+E       AssertionError: SIC overrides must not replace the requested universe
+E       assert ['BKNG', 'SHW'] == ['NVDA', 'AMD', 'MSFT']
+E         
+E         At index 0 diff: 'BKNG' != 'NVDA'
+E         Right contains one more item: 'MSFT'
+E         Use -v to get more diff
+
+tests/m6/test_service.py:46: AssertionError</failure></testcase></testsuite></testsuites>

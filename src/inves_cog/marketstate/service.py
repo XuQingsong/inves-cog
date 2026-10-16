@@ -54,8 +54,8 @@ class MarketService:
             (day - timedelta(days=800), day, sorted(needed)),
         ).fetchall()
         profiles = self.repo.query("SELECT ticker,sic FROM ingest.issuer_profiles").fetchall()
-        rules, tickers = load_sic()
-        sectors = {r["ticker"]: sector_etf(r["sic"], rules, ticker=r["ticker"], tickers=tickers) for r in profiles}
+        rules, overrides = load_sic()
+        sectors = {r["ticker"]: sector_etf(r["sic"], rules, ticker=r["ticker"], tickers=overrides) for r in profiles}
         result = calculate(bars, baskets, self.repo.vix(), day=day, tickers=tickers, sic_etfs=sectors)
         for table in FIELDS:
             for row in [result[table]] if table == "market" else result[table]:

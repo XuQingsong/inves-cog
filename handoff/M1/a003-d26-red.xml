@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="5" time="0.463" timestamp="2026-10-16T12:39:12.468574+08:00" hostname="192.168.1.101"><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_issuer_failure_isolated_and_next_run_only_resumes_failed_issuer" time="0.000"><failure message="inves_cog.ingest.http.SourceError: Alpha Vantage key absent: 等待 R5">sec = &lt;object object at 0x103bc7d50&gt;, ticker = 'ONE'
+kwargs = {'cik': '1', 'clock': FrozenClock(instant=datetime.datetime(2026, 10, 17, 0, 50, tzinfo=datetime.timezone.utc)), 'existing': {}, 'persist': &lt;function Pipeline.submissions.&lt;locals&gt;.&lt;lambda&gt; at 0x108c83c40&gt;, ...}
+
+    def collect(sec, *, ticker, **kwargs):
+        calls.append(ticker)
+        if ticker in failing:
+&gt;           raise SourceError("recorded connection interruption", error_code="ReadTimeout")
+E           inves_cog.ingest.http.SourceError: recorded connection interruption
+
+tests/m1/test_a003_sec_resume.py:57: SourceError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x108fe9dd0&gt;
+
+    def test_sec_issuer_failure_isolated_and_next_run_only_resumes_failed_issuer(monkeypatch):
+        calls = []
+        failing = {"ONE"}
+    
+        def collect(sec, *, ticker, **kwargs):
+            calls.append(ticker)
+            if ticker in failing:
+                raise SourceError("recorded connection interruption", error_code="ReadTimeout")
+            return []
+    
+        p = pipeline(monkeypatch, collect)
+&gt;       result = p.submissions()
+                 ^^^^^^^^^^^^^^^
+
+tests/m1/test_a003_sec_resume.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/inves_cog/ingest/pipeline.py:325: in submissions
+    calendar = alpha_calendar(HTTPClient(), key=self.values.get("ALPHA_VANTAGE_API_KEY"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+http = &lt;inves_cog.ingest.http.HTTPClient object at 0x1092e3c50&gt;, key = None
+
+    def alpha_calendar(http, *, key):
+        if not key:
+&gt;           raise SourceError("Alpha Vantage key absent: 等待 R5", confirmed_unavailable=True)
+E           inves_cog.ingest.http.SourceError: Alpha Vantage key absent: 等待 R5
+
+src/inves_cog/ingest/providers.py:359: SourceError</failure></testcase><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_document_failure_is_inside_company_boundary" time="0.366"><failure message="inves_cog.ingest.http.SourceError: recorded body transport failure">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10962d810&gt;
+
+    def test_sec_document_failure_is_inside_company_boundary(monkeypatch):
+        calls = []
+    
+        class SEC:
+            def get(self, url):
+                raise SourceError("recorded body transport failure", error_code="ConnectTimeout")
+    
+        def collect(sec, *, ticker, **kwargs):
+            calls.append(ticker)
+            if ticker == "TWO":
+                return []
+            return [
+                {
+                    "accession": "0000000001-26-000001",
+                    "ticker": "ONE",
+                    "cik": "1",
+                    "form": "8-K",
+                    "filing_date": date(2026, 10, 15),
+                    "report_date": None,
+                    "items": ["2.02"],
+                    "accepted_at": datetime(2026, 10, 15, 20, tzinfo=timezone.utc),
+                    "primary_document": "report.htm",
+                    "raw": {},
+                }
+            ]
+    
+        p = pipeline(monkeypatch, collect)
+        p.sec = SEC()
+&gt;       result = p.submissions()
+                 ^^^^^^^^^^^^^^^
+
+tests/m1/test_a003_sec_resume.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/inves_cog/ingest/pipeline.py:358: in submissions
+    body = sec.get(self.document_url(row))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;test_a003_sec_resume.test_sec_document_failure_is_inside_company_boundary.&lt;locals&gt;.SEC object at 0x10962ddd0&gt;
+url = 'https://www.sec.gov/Archives/edgar/data/1/000000000126000001/report.htm'
+
+    def get(self, url):
+&gt;       raise SourceError("recorded body transport failure", error_code="ConnectTimeout")
+E       inves_cog.ingest.http.SourceError: recorded body transport failure
+
+tests/m1/test_a003_sec_resume.py:84: SourceError</failure></testcase><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_completed_cycle_refreshes_on_next_trade_date" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_permission_failure_is_not_misreported_as_a_company_gap" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_reuses_transport_without_splitting_the_shared_rate_budget" time="0.001"><failure message="assert (False)&#10; +  where False = &lt;inves_cog.ingest.http.HTTPClient object at 0x10be56250&gt;.pool&#10; +    where &lt;inves_cog.ingest.http.HTTPClient object at 0x10be56250&gt; = &lt;inves_cog.ingest.sec_client.SECClient object at 0x1096c74d0&gt;.http">def test_sec_reuses_transport_without_splitting_the_shared_rate_budget():
+        from inves_cog.ingest.sec_client import SECClient
+    
+        first = SECClient(user_agent="offline fixture fixture@example.invalid")
+        second = SECClient(user_agent="offline fixture fixture@example.invalid")
+&gt;       assert first.http.pool and second.http.pool
+E       assert (False)
+E        +  where False = &lt;inves_cog.ingest.http.HTTPClient object at 0x10be56250&gt;.pool
+E        +    where &lt;inves_cog.ingest.http.HTTPClient object at 0x10be56250&gt; = &lt;inves_cog.ingest.sec_client.SECClient object at 0x1096c74d0&gt;.http
+
+tests/m1/test_a003_sec_resume.py:143: AssertionError</failure></testcase></testsuite></testsuites>

@@ -3,6 +3,7 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from xml.etree.ElementTree import ParseError
 
 import yaml
 
@@ -30,6 +31,7 @@ from inves_cog.ingest.providers import (
 from inves_cog.ingest.repository import identity
 from inves_cog.ingest.runtime import Runtime, complete_adv20
 from inves_cog.ingest.sec import collect_submissions, earnings_event, earnings_fallback, parse_form4
+from inves_cog.ingest.sec_progress import SECProgress
 from inves_cog.ingest.signals import rank_jumps, trend_event
 from inves_cog.ingest.sources import macro_items, parse_finra, website_change
 from inves_cog.ingest.triage import NewsTriage
@@ -301,16 +303,16 @@ class Pipeline:
 
     def submissions(self):
         sec = self.require(self.sec, "SEC")
+        progress = SECProgress(self.repo, self.clock, self.day, self.stocks)
         mapping = cik_mapping(sec)
-        count, gaps, unavailable = 0, [], []
-        calendar = None
-        for ticker in self.stocks:
+        count = 0
+        for ticker in progress.pending:
             check()
-            cik = mapping.get(ticker)
-            if not cik:
-                unavailable.append(ticker + ": no SEC CIK")
-                continue
+            progress.start(ticker)
             try:
+                cik = mapping.get(ticker)
+                if not cik:
+                    raise SourceError("No SEC CIK for " + ticker)
                 rows = collect_submissions(
                     sec,
                     cik=cik,
@@ -320,94 +322,106 @@ class Pipeline:
                     persist=lambda r: self.repo.write("sec_filings", r, update=tuple(k for k in r if k != "accession")),
                     verify_limit=20,
                 )
-            except SourceError:
-                if calendar is None:
-                    calendar = alpha_calendar(HTTPClient(), key=self.values.get("ALPHA_VANTAGE_API_KEY"))
-                for event in calendar:
-                    if event.get("symbol") == ticker and event["reportDate"] >= self.day.isoformat():
-                        row = earnings_fallback(ticker, event, clock=self.clock)
-                        row["event_id"] = "fallback:" + ticker + ":" + event["reportDate"]
-                        self.repo.write("earnings_events", row)
-                continue
-            closes = self.repo.closes(ticker)
-            for row in rows:
+                count += len(rows)
+                gaps = self._submission_rows(sec, ticker, rows)
+            except (SourceError, ValueError, ParseError) as exc:
+                progress.fail(ticker, exc)
+                # Persist the issuer cursor before propagating an expired slot.
                 check()
-                count += 1
-                if row["form"] == "8-K" and "2.02" in row["items"]:
-                    if row["accepted_at"] is None:
-                        gaps.append(row["accession"])
-                        continue
-                    event = earnings_event(row, closes=closes, clock=self.clock)
-                    event["event_id"] = "SEC:" + row["accession"]
-                    if event["ref_close"] is None:
-                        event["flags"].append("ref_close_missing")
-                    future_periods = [
-                        f
-                        for f in rows
-                        if f["form"] in {"10-Q", "10-K"}
-                        and f["report_date"]
-                        and row["filing_date"] <= f["filing_date"] <= row["filing_date"] + timedelta(days=60)
-                    ]
-                    if future_periods:
-                        event["fiscal_period"] = min(future_periods, key=lambda f: f["filing_date"])[
-                            "report_date"
-                        ].isoformat()
-                    self.repo.write("earnings_events", event, update=("ref_close", "fiscal_period", "flags"))
-                    self.repo.supersede_fallback(ticker, row["accepted_at"].astimezone(NY).date(), self.clock.now_utc())
-                    if not self.repo.info_signature("sec_8k:SEC:" + row["accession"]):
-                        body = sec.get(self.document_url(row))
-                        self.info(
-                            [
-                                make_item(
-                                    "sec_8k",
-                                    "SEC",
-                                    row["accession"],
-                                    headline=ticker + " 8-K",
-                                    body=body,
-                                    url=self.document_url(row),
-                                    tickers=[ticker],
-                                    published_at=row["accepted_at"],
-                                    clock=self.clock,
-                                    payload=row["raw"],
-                                )
-                            ]
-                        )
-                if (
-                    row["form"] in {"4", "4/A"}
-                    and row["accepted_at"] is not None
-                    and not self.repo.get_cursor("form4:" + row["accession"])
-                ):
-                    document = sec.get(self.document_url(row, raw_xml=True))
-                    events = parse_form4(document, accession=row["accession"], filed_at=row["accepted_at"])
-                    for event in events:
-                        event.update(
-                            event_id=row["accession"] + ":" + str(event["transaction_index"]),
-                            source="SEC",
-                            raw={"xml": document},
-                        )
-                        self.repo.write("form4_events", event)
-                        self.info(
-                            [
-                                make_item(
-                                    "form4",
-                                    "SEC",
-                                    event["event_id"],
-                                    headline=ticker + " Form 4",
-                                    body=document,
-                                    tickers=[ticker],
-                                    published_at=row["accepted_at"],
-                                    clock=self.clock,
-                                    payload=event,
-                                )
-                            ]
-                        )
-                    self.repo.set_cursor("form4:" + row["accession"], {"parsed": True}, self.clock.now_utc())
-        return {
-            "processed_count": count,
-            "status": "degraded" if gaps or unavailable else "ok",
-            "note": f"Unverified earnings accessions: {len(gaps)}; " + "; ".join(unavailable),
-            "acceptance_gaps": gaps,
-        }
+                self._submission_fallback(ticker)
+                continue
+            progress.complete(ticker, gaps)
+        return progress.result(count)
+
+    def _submission_fallback(self, ticker):
+        key = self.values.get("ALPHA_VANTAGE_API_KEY")
+        if not key:
+            return
+        try:
+            calendar = alpha_calendar(HTTPClient(), key=key)
+        except SourceError:
+            return
+        for event in calendar:
+            if event.get("symbol") == ticker and event["reportDate"] >= self.day.isoformat():
+                row = earnings_fallback(ticker, event, clock=self.clock)
+                row["event_id"] = "fallback:" + ticker + ":" + event["reportDate"]
+                self.repo.write("earnings_events", row)
+
+    def _submission_rows(self, sec, ticker, rows):
+        gaps = []
+        closes = self.repo.closes(ticker)
+        for row in rows:
+            check()
+            if row["form"] == "8-K" and "2.02" in row["items"]:
+                if row["accepted_at"] is None:
+                    gaps.append(row["accession"])
+                    continue
+                event = earnings_event(row, closes=closes, clock=self.clock)
+                event["event_id"] = "SEC:" + row["accession"]
+                if event["ref_close"] is None:
+                    event["flags"].append("ref_close_missing")
+                future_periods = [
+                    f
+                    for f in rows
+                    if f["form"] in {"10-Q", "10-K"}
+                    and f["report_date"]
+                    and row["filing_date"] <= f["filing_date"] <= row["filing_date"] + timedelta(days=60)
+                ]
+                if future_periods:
+                    event["fiscal_period"] = min(future_periods, key=lambda f: f["filing_date"])[
+                        "report_date"
+                    ].isoformat()
+                self.repo.write("earnings_events", event, update=("ref_close", "fiscal_period", "flags"))
+                self.repo.supersede_fallback(ticker, row["accepted_at"].astimezone(NY).date(), self.clock.now_utc())
+                if not self.repo.info_signature("sec_8k:SEC:" + row["accession"]):
+                    body = sec.get(self.document_url(row))
+                    self.info(
+                        [
+                            make_item(
+                                "sec_8k",
+                                "SEC",
+                                row["accession"],
+                                headline=ticker + " 8-K",
+                                body=body,
+                                url=self.document_url(row),
+                                tickers=[ticker],
+                                published_at=row["accepted_at"],
+                                clock=self.clock,
+                                payload=row["raw"],
+                            )
+                        ]
+                    )
+            if (
+                row["form"] in {"4", "4/A"}
+                and row["accepted_at"] is not None
+                and not self.repo.get_cursor("form4:" + row["accession"])
+            ):
+                document = sec.get(self.document_url(row, raw_xml=True))
+                events = parse_form4(document, accession=row["accession"], filed_at=row["accepted_at"])
+                for event in events:
+                    event.update(
+                        event_id=row["accession"] + ":" + str(event["transaction_index"]),
+                        source="SEC",
+                        raw={"xml": document},
+                    )
+                    self.repo.write("form4_events", event)
+                    self.info(
+                        [
+                            make_item(
+                                "form4",
+                                "SEC",
+                                event["event_id"],
+                                headline=ticker + " Form 4",
+                                body=document,
+                                tickers=[ticker],
+                                published_at=row["accepted_at"],
+                                clock=self.clock,
+                                payload=event,
+                            )
+                        ]
+                    )
+                self.repo.set_cursor("form4:" + row["accession"], {"parsed": True}, self.clock.now_utc())
+        return gaps
 
     @staticmethod
     def document_url(row, raw_xml=False):

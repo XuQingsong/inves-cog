@@ -1,0 +1,100 @@
+{
+  "configuration_present_only": {
+    "INVES_COG_DATABASE_URL": true,
+    "INVES_COG_TRADING_DATABASE_URL": false,
+    "INVES_COG_MARKETSTATE_DATABASE_URL": false,
+    "SEC_USER_AGENT": true,
+    "APCA_API_KEY_ID": true,
+    "APCA_API_SECRET_KEY": true
+  },
+  "latest_upstream_jobs": [
+    {
+      "id": 5171,
+      "task_name": "market_structure",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15 22:07:11.868101+08:00",
+      "ended_at": "2026-10-15 22:08:44.532255+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5165,
+      "task_name": "market_structure",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15 22:00:23.580746+08:00",
+      "ended_at": "2026-10-15 22:01:57.921319+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5166,
+      "task_name": "issuer_profiles",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-15 21:59:10.849950+08:00",
+      "ended_at": "2026-10-15 22:03:48.407968+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5162,
+      "task_name": "market_structure",
+      "trade_date": "2026-10-13",
+      "started_at": "2026-10-15 21:58:55.542451+08:00",
+      "ended_at": "2026-10-15 22:00:23.561466+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5160,
+      "task_name": "issuer_profiles",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-15 21:58:15.283876+08:00",
+      "ended_at": "2026-10-15 21:58:23.034439+08:00",
+      "status": "failed"
+    },
+    {
+      "id": 5161,
+      "task_name": "market_structure",
+      "trade_date": "2026-10-12",
+      "started_at": "2026-10-15 21:57:41.882188+08:00",
+      "ended_at": "2026-10-15 21:58:55.523264+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5159,
+      "task_name": "issuer_profiles",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-15 21:54:38.942000+08:00",
+      "ended_at": "2026-10-15 21:55:07.008686+08:00",
+      "status": "failed"
+    },
+    {
+      "id": 5156,
+      "task_name": "rule_a_scores",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15 21:48:54.490390+08:00",
+      "ended_at": "2026-10-15 21:48:55.471250+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5155,
+      "task_name": "rule_a_scores",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15 21:46:53.798225+08:00",
+      "ended_at": "2026-10-15 21:46:54.963435+08:00",
+      "status": "ok"
+    },
+    {
+      "id": 5060,
+      "task_name": "m6_market_inputs",
+      "trade_date": "2026-10-14",
+      "started_at": "2026-10-15 21:03:10.540621+08:00",
+      "ended_at": "2026-10-15 21:03:19.800516+08:00",
+      "status": "ok"
+    }
+  ],
+  "production_service_config_sha256": "77e71fe4d5b20363019749f89d9465ea8c23b2357ed5e2f61c9bfd22953a34dd",
+  "production_services_unchanged": {
+    "scheduler": "/Users/xuqingsong/workspace/inves-cog/.venv/bin/python -u -m inves_cog.ingest.cli schedule --tasks bars_prefill bars_full wide_universe sec_submissions sec_index sec_atom",
+    "watchdog": "/Users/xuqingsong/workspace/inves-cog/.venv/bin/python -u -m inves_cog.ingest.service",
+    "embedding": "/Users/xuqingsong/workspace/inves-cog/.venv/bin/python -u -m inves_cog.ingest.embedding_backfill --model text-embedding-async-v1",
+    "awake": "/usr/bin/caffeinate -i -s"
+  },
+  "new_registration_activated": false
+}
