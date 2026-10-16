@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 23:41 北京
+
+- 已读 main `a5991c9`。UD-COORD-02 已把 PR #11 和 PR #16 合并进 main。草稿 PR #18 head `15479f3`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：154 passed，13 deselected。
+- M7 已实现的测试留在套件里，没有退回 pending。三条人工补证仍不关闭第 7.1 节缺口。`test_case_attribution` 继续 pending。不开始下一条，也不开始 M9/M10。
+
 ## B-008  进行中  2026-10-16 23:37 北京
 
 - 草稿 PR #18 head `b2ea6cd`。已合入 main `2247520`。没有合并进 main。本地 `make phase1-test`：138 passed，11 deselected。
