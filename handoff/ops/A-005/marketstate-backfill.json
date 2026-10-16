@@ -1,0 +1,1010 @@
+{
+  "task": "A-005 marketstate recompute",
+  "main": "230713222019d8da6ea384135f4ca4fb239f0450",
+  "source_files": [
+    {
+      "path": "src/inves_cog/marketstate/engine.py",
+      "sha": "c9894a83f0416b2dd80647fa427d942747259d2c"
+    },
+    {
+      "path": "src/inves_cog/marketstate/service.py",
+      "sha": "e4eececd3d41a6143dd296e80223591f8922234a"
+    },
+    {
+      "path": "src/inves_cog/marketstate/repository.py",
+      "sha": "6504b946d7eb9ed3666ca0ab6249ea01d6846fd6"
+    },
+    {
+      "path": "src/inves_cog/marketstate/sic.py",
+      "sha": "0ef745b5d8b74fe70a1af7e1749b6566d74c815f"
+    },
+    {
+      "path": "src/inves_cog/ingest/market_structure.py",
+      "sha": "780018835013b1f7c5aeeec5f1e2fce3b654e4ac"
+    }
+  ],
+  "started_at_utc": "2026-10-16T06:08:30.328905+00:00",
+  "first": "2026-07-01",
+  "last": "2026-10-15",
+  "write_role": "role_marketstate",
+  "write_schemas": [
+    "marketstate"
+  ],
+  "no_migration": true,
+  "backup_outside_repository": "/private/tmp/inves-a005-ops/marketstate-before.json.gz",
+  "membership_note": "PIT wide snapshots exist only 10-14/15; earlier dates use seeds, never future wide membership.",
+  "entrypoint_note": "Use unchanged main calculate plus MarketService.put with explicit PIT universe; run() shadows tickers. Owner recorded D-32 in main 7b907ba692952845215faa7cd77e43204860c779 for A-006, not changed in A-005.",
+  "days": [
+    {
+      "day": "2026-07-01",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 20.943
+    },
+    {
+      "day": "2026-07-02",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.404
+    },
+    {
+      "day": "2026-07-06",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.63
+    },
+    {
+      "day": "2026-07-07",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.016
+    },
+    {
+      "day": "2026-07-08",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.717
+    },
+    {
+      "day": "2026-07-09",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.769
+    },
+    {
+      "day": "2026-07-10",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.668
+    },
+    {
+      "day": "2026-07-13",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.687
+    },
+    {
+      "day": "2026-07-14",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.847
+    },
+    {
+      "day": "2026-07-15",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.887
+    },
+    {
+      "day": "2026-07-16",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.316
+    },
+    {
+      "day": "2026-07-17",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.829
+    },
+    {
+      "day": "2026-07-20",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.714
+    },
+    {
+      "day": "2026-07-21",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.925
+    },
+    {
+      "day": "2026-07-22",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.871
+    },
+    {
+      "day": "2026-07-23",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.86
+    },
+    {
+      "day": "2026-07-24",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 21.795
+    },
+    {
+      "day": "2026-07-27",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.935
+    },
+    {
+      "day": "2026-07-28",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.995
+    },
+    {
+      "day": "2026-07-29",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.017
+    },
+    {
+      "day": "2026-07-30",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 24.33
+    },
+    {
+      "day": "2026-07-31",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 24.374
+    },
+    {
+      "day": "2026-08-03",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 24.375
+    },
+    {
+      "day": "2026-08-04",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.85
+    },
+    {
+      "day": "2026-08-05",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.871
+    },
+    {
+      "day": "2026-08-06",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.875
+    },
+    {
+      "day": "2026-08-07",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.154
+    },
+    {
+      "day": "2026-08-10",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.198
+    },
+    {
+      "day": "2026-08-11",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.21
+    },
+    {
+      "day": "2026-08-12",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.514
+    },
+    {
+      "day": "2026-08-13",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.517
+    },
+    {
+      "day": "2026-08-14",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.497
+    },
+    {
+      "day": "2026-08-17",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.58
+    },
+    {
+      "day": "2026-08-18",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.543
+    },
+    {
+      "day": "2026-08-19",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.589
+    },
+    {
+      "day": "2026-08-20",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.495
+    },
+    {
+      "day": "2026-08-21",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.505
+    },
+    {
+      "day": "2026-08-24",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.546
+    },
+    {
+      "day": "2026-08-25",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.69
+    },
+    {
+      "day": "2026-08-26",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.703
+    },
+    {
+      "day": "2026-08-27",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.718
+    },
+    {
+      "day": "2026-08-28",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.515
+    },
+    {
+      "day": "2026-08-31",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.55
+    },
+    {
+      "day": "2026-09-01",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.582
+    },
+    {
+      "day": "2026-09-02",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.534
+    },
+    {
+      "day": "2026-09-03",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.495
+    },
+    {
+      "day": "2026-09-04",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.575
+    },
+    {
+      "day": "2026-09-08",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.574
+    },
+    {
+      "day": "2026-09-09",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.556
+    },
+    {
+      "day": "2026-09-10",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.596
+    },
+    {
+      "day": "2026-09-11",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.779
+    },
+    {
+      "day": "2026-09-14",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.762
+    },
+    {
+      "day": "2026-09-15",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.79
+    },
+    {
+      "day": "2026-09-16",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.592
+    },
+    {
+      "day": "2026-09-17",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.61
+    },
+    {
+      "day": "2026-09-18",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.658
+    },
+    {
+      "day": "2026-09-21",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.879
+    },
+    {
+      "day": "2026-09-22",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.851
+    },
+    {
+      "day": "2026-09-23",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.854
+    },
+    {
+      "day": "2026-09-24",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.687
+    },
+    {
+      "day": "2026-09-25",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.676
+    },
+    {
+      "day": "2026-09-28",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.691
+    },
+    {
+      "day": "2026-09-29",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.006
+    },
+    {
+      "day": "2026-09-30",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.01
+    },
+    {
+      "day": "2026-10-01",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 23.026
+    },
+    {
+      "day": "2026-10-02",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.955
+    },
+    {
+      "day": "2026-10-05",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.935
+    },
+    {
+      "day": "2026-10-06",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 22.942
+    },
+    {
+      "day": "2026-10-07",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 31.659
+    },
+    {
+      "day": "2026-10-08",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 40.551
+    },
+    {
+      "day": "2026-10-09",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 50.46
+    },
+    {
+      "day": "2026-10-12",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 59.75
+    },
+    {
+      "day": "2026-10-13",
+      "expected_tickers": 59,
+      "coverage_tickers": 59,
+      "upserted": {
+        "daily": 118,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 68.774
+    },
+    {
+      "day": "2026-10-14",
+      "expected_tickers": 1306,
+      "coverage_tickers": 1306,
+      "upserted": {
+        "daily": 2612,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 75.323
+    },
+    {
+      "day": "2026-10-15",
+      "expected_tickers": 1304,
+      "coverage_tickers": 1304,
+      "upserted": {
+        "daily": 2608,
+        "baskets": 58,
+        "rotation": 66,
+        "market": 1
+      },
+      "seconds": 72.475
+    }
+  ],
+  "complete": true,
+  "parallel_compute_workers": 3,
+  "writes_remain_serial_transactions": true,
+  "oct14_factor_set": {
+    "AMD": "m+s",
+    "MSFT": "m+s",
+    "NVDA": "m+s"
+  },
+  "oct14_wide_spy_only": 143,
+  "oct14_wide_factor_sets": {
+    "m+s": 1139,
+    "m": 143,
+    "m+s+t": 12
+  },
+  "ended_at_utc": "2026-10-16T06:24:08.195674+00:00",
+  "duration_seconds": 937.869,
+  "upserted_totals": {
+    "daily": 13834,
+    "baskets": 4350,
+    "rotation": 4950,
+    "market": 75
+  },
+  "stored_counts": {
+    "daily": 13834,
+    "baskets": 4350,
+    "rotation": 4950,
+    "market": 75
+  },
+  "independent_readback": {
+    "oct14_factor_sessions": [
+      {
+        "ticker": "AMD",
+        "session": "close",
+        "factor_set": "m+s"
+      },
+      {
+        "ticker": "AMD",
+        "session": "post",
+        "factor_set": "m+s"
+      },
+      {
+        "ticker": "MSFT",
+        "session": "close",
+        "factor_set": "m+s"
+      },
+      {
+        "ticker": "MSFT",
+        "session": "post",
+        "factor_set": "m+s"
+      },
+      {
+        "ticker": "NVDA",
+        "session": "close",
+        "factor_set": "m+s"
+      },
+      {
+        "ticker": "NVDA",
+        "session": "post",
+        "factor_set": "m+s"
+      }
+    ],
+    "oct14_wide_spy_only_before": 216,
+    "oct14_wide_spy_only_after": 143,
+    "stored_counts": {
+      "daily": 13834,
+      "baskets": 4350,
+      "rotation": 4950,
+      "market": 75
+    },
+    "production_service_config_sha256_unchanged": "77e71fe4d5b20363019749f89d9465ea8c23b2357ed5e2f61c9bfd22953a34dd"
+  }
+}
