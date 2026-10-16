@@ -66,6 +66,17 @@ def _expected_baskets(candidate):
     return found
 
 
+def _seen_before_response(event):
+    """A page pulled from the later price move counts only if it was already on file."""
+    if not event.get("from_price_anomaly"):
+        return True
+    seen = event.get("first_seen_at")
+    response_at = event.get("response_at")
+    if seen is None or response_at is None:
+        return False
+    return seen < response_at
+
+
 def later_event(published_at, anomaly_start, *, source_root, outcome=None):
     """A later page is only eligible. Without a measured response it stays untested."""
     if published_at <= anomaly_start:
@@ -82,6 +93,8 @@ def second_hit_conclusion(events, anomaly_start=None):
     for event in events:
         published = event.get("published_at")
         if anomaly_start is not None and (published is None or published <= anomaly_start):
+            continue
+        if not _seen_before_response(event):
             continue
         root = event["source_root"]
         if root in seen:

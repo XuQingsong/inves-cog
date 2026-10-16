@@ -600,6 +600,29 @@ def test_second_hit():
 
 
 @pytest.mark.phase1_blocking
+def test_price_retrieval_must_be_seen_before_the_response():
+    from inves_cog.perception.attribution.second_hit import second_hit_conclusion
+
+    start = datetime(2026, 10, 2, 13, 30)
+    response = datetime(2026, 10, 6, 20, 0)
+    event = {
+        "source_root": "tdk",
+        "outcome": "命中",
+        "published_at": datetime(2026, 10, 6, 9, 0),
+        "from_price_anomaly": True,
+        "first_seen_at": datetime(2026, 10, 6, 14, 0),
+        "response_at": response,
+    }
+    assert second_hit_conclusion([event], anomaly_start=start) == "确认"
+    same_time = {**event, "first_seen_at": response}
+    assert second_hit_conclusion([same_time], anomaly_start=start) == "未检验"
+    missing = {**event, "first_seen_at": None}
+    assert second_hit_conclusion([missing], anomaly_start=start) == "未检验"
+    plain = {"source_root": "tdk", "outcome": "命中", "published_at": datetime(2026, 10, 6, 9, 0)}
+    assert second_hit_conclusion([plain], anomaly_start=start) == "确认"
+
+
+@pytest.mark.phase1_blocking
 def test_fingerprint_registers_only_a_medium_market_score():
     from inves_cog.perception.attribution.second_hit import later_matches_fingerprint, prediction_fingerprint
 
