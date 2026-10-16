@@ -25,20 +25,11 @@ test_no_news_dependency | M7 | 等待 M7 实现
 test_case_detection | M7 | 等待 M7 实现
 test_anomaly_live_smoke | M7 | 等待 R5
 test_anomaly_contract | M8 | 等待 M8 实现
-test_implied_magnitude_rules | M8 | 等待 M8 实现
-test_evidence_scores | M8 | 等待 M8 实现
-test_time_alignment_late_news | M8 | 等待 M8 实现
 test_retrieval_recovers_low_rank_item | M8 | 等待 M8 实现
-test_candidate_validation | M8 | 等待 M8 实现
-test_market_confirmation_four_conditions | M8 | 等待 M8 实现
-test_second_hit | M8 | 等待 M8 实现
-test_lifecycle_transitions | M8 | 等待 M8 实现
 test_five_dims_rules | M8 | 等待 M8 实现
 test_tracks_and_deadline | M8 | 等待 M8 实现
-test_verified_not_from_market_evidence | M8 | 等待 M8 实现
 test_divergence_labels | M8 | 等待 M8 实现
 test_systemic_event_tag_requires_level12 | M8 | 等待 M8 实现
-test_search_budget | M8 | 等待 M8 实现
 test_unexplained_recheck_5d | M8 | 等待 M8 实现
 test_case_attribution | M8 | 等待 M8 实现
 test_case_no_news_unexplained | M8 | 等待 M8 实现
