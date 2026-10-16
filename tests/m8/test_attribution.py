@@ -361,6 +361,33 @@ def test_supplement_runs_only_below_five_items():
 
 
 @pytest.mark.phase1_blocking
+def test_skipped_supplement_is_named_on_the_report():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.retrieve import supplement_plan
+
+    now = datetime(2026, 10, 14, 21, 0)
+    anomaly = {"anomaly_id": "pool-1", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    quiet = explanation_report(anomaly, impact, [], [], supplement=supplement_plan(5, 2, 0, now=now))
+    assert quiet["supplement"] is None
+    assert "补证未执行" not in quiet["unknowns"]
+    assert quiet["type_candidates"] == ["原因未明"]
+    blocked = supplement_plan(2, 2, 200, now=now)
+    deadline = {
+        "lifecycle": "已衰减·无影响",
+        "deadline_outcome": "条件风险",
+        "closing_reason": "截止日仍未知",
+        "unknowns": ["eps_consensus"],
+        "operating_impact_proven": False,
+    }
+    report = explanation_report(anomaly, impact, [], [], deadline, supplement=blocked)
+    assert report["supplement"] == "补证未执行"
+    assert report["unknowns"] == ["eps_consensus", "补证未执行"]
+    assert report["operating_impact_proven"] is False
+    assert report["lifecycle"] == "已衰减·无影响"
+
+
+@pytest.mark.phase1_blocking
 def test_verified_not_from_market_evidence():
     from inves_cog.perception.attribution.candidates import verified_from_evidence
     from inves_cog.perception.attribution.operating import Verdict

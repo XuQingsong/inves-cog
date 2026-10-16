@@ -98,11 +98,21 @@ def constraint_conclusion(items, *, impact=None):
 
 
 def explanation_report(
-    anomaly, decomposition, candidates, sources, deadline=None, relations=(), known_constraints=(), deadline_on=None
+    anomaly,
+    decomposition,
+    candidates,
+    sources,
+    deadline=None,
+    relations=(),
+    known_constraints=(),
+    deadline_on=None,
+    *,
+    supplement=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
     tracking = tracking_list(mechanisms, known_constraints, deadline_on=deadline_on)
+    note = supplement.get("note") if supplement else None
     report = {
         "anomaly_id": anomaly["anomaly_id"],
         "status": anomaly.get("status") or anomaly_status(anomaly.get("universe"), scores),
@@ -115,19 +125,21 @@ def explanation_report(
         "scope": impact_scope(candidates, relations, direction=anomaly.get("direction")),
         "tracking": tracking,
         "constraint_conclusion": constraint_conclusion(tracking),
+        "supplement": note,
         "type_candidates": type_candidates(
             candidates,
             anomaly.get("type_candidates_prelim") or (),
             operating_impact_proven=bool(deadline and deadline.get("operating_impact_proven")),
         ),
     }
-    if deadline is None:
-        return report
-    report["lifecycle"] = deadline["lifecycle"]
-    report["deadline_outcome"] = deadline["deadline_outcome"]
-    report["closing_reason"] = deadline["closing_reason"]
-    report["unknowns"] = list(deadline.get("unknowns") or [])
-    report["operating_impact_proven"] = deadline["operating_impact_proven"]
+    if deadline is not None:
+        report["lifecycle"] = deadline["lifecycle"]
+        report["deadline_outcome"] = deadline["deadline_outcome"]
+        report["closing_reason"] = deadline["closing_reason"]
+        report["unknowns"] = list(deadline.get("unknowns") or [])
+        report["operating_impact_proven"] = deadline["operating_impact_proven"]
+    if note and note not in report["unknowns"]:
+        report["unknowns"].append(note)
     return report
 
 
