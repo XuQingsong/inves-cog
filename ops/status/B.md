@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 21:59 北京
+
+- 规则切片已推到草稿 PR #18，head `dc78efe`。没有合并。本地 `make phase1-test`：128 passed，10 deselected。
+- 新转绿：`test_retrieval_recovers_low_rank_item`、`test_five_dims_rules`、`test_tracks_and_deadline`、`test_divergence_labels`、`test_systemic_event_tag_requires_level12`、`test_unexplained_recheck_5d`、`test_anomaly_contract`。低排序榜单按实体重合进入前 40，并被候选引用。截止日结果按复述第 6 节落入生命周期。只有四级信源时系统性标签为「无」。
+- 仍在 pending：`test_case_attribution`、`test_case_no_news_unexplained`。等冻结新闻和录音，不编造现场调用，不连接共用库。
+- 下一步：说法抽取、候选生成和解释报告。不开始下一条。不等这条 head 的 CI 才写下一阶段。
+
 ## B-008  进行中  2026-10-16 21:44 北京
 
 - 规则切片已推到草稿 PR #18，head `7eb7614`。没有合并。本地 `make phase1-test`：121 passed，10 deselected。
