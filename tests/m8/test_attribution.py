@@ -164,6 +164,40 @@ def test_missing_exposure_is_a_fill_task_and_not_incompatible():
 
 
 @pytest.mark.phase1_blocking
+def test_market_confidence_and_fundamental_standing_stay_separate():
+    from inves_cog.perception.attribution.report import explanation_report, split_conclusions
+
+    anomaly = {"anomaly_id": "muse", "universe": "pool", "direction": "up"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "AMD"}]}
+    report = explanation_report(anomaly, impact, [supply], [])
+    assert report["market_confidence"] == "高"
+    assert report["fundamental_standing"] == "待验证"
+    multiple = {"scored": True, "score": 0.9, "mechanism": "估值倍数", "affected": [{"ticker": "META"}]}
+    narrative = explanation_report(anomaly, impact, [multiple], [])
+    assert narrative["market_confidence"] == "高"
+    assert narrative["fundamental_standing"] is None
+    weak = {"scored": True, "score": 0.4, "mechanism": "供给", "affected": [{"ticker": "AMD"}]}
+    quiet = explanation_report(anomaly, impact, [weak], [])
+    assert quiet["market_confidence"] == "低"
+    assert quiet["fundamental_standing"] is None
+    deadline = {
+        "fundamental": "支持",
+        "lifecycle": "已验证·有影响",
+        "deadline_outcome": "支持",
+        "closing_reason": "截止日证据支持",
+        "operating_impact_proven": True,
+    }
+    closed = explanation_report(anomaly, impact, [supply], [], deadline)
+    assert closed["market_confidence"] == "高"
+    assert closed["fundamental_standing"] == "支持"
+    copied = split_conclusions([supply], "高")
+    assert copied["fundamental_standing"] == "待验证"
+    medium = split_conclusions([{"scored": True, "score": 0.69, "mechanism": "需求"}], "局部支持")
+    assert medium == {"market_confidence": "中", "fundamental_standing": "局部支持"}
+
+
+@pytest.mark.phase1_blocking
 def test_implied_magnitude_rules():
     from inves_cog.perception.attribution.magnitude import implied_magnitude
 

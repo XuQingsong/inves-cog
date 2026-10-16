@@ -6,6 +6,7 @@ from inves_cog.perception.attribution.impact import anomaly_status
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
 CONSTRAINT_ITEMS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
 _OBSERVED = {"观察到", "有支持", "已确立"}
+_FUNDAMENTAL = {"待验证", "局部支持", "支持", "冲突", "失效"}
 
 
 def type_candidates(candidates, prelim=(), *, operating_impact_proven=False):
@@ -98,6 +99,14 @@ def constraint_conclusion(items, *, impact=None):
     }
 
 
+def split_conclusions(candidates, fundamental=None):
+    """Market confidence and fundamental standing stay in separate fields."""
+    return {
+        "market_confidence": _market_confidence(candidates),
+        "fundamental_standing": _fundamental_standing(candidates, fundamental),
+    }
+
+
 def explanation_report(
     anomaly,
     decomposition,
@@ -116,6 +125,7 @@ def explanation_report(
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
     tracking = tracking_list(mechanisms, known_constraints, deadline_on=deadline_on)
     note = supplement.get("note") if supplement else None
+    conclusions = split_conclusions(candidates, _stated_fundamental(deadline))
     report = {
         "anomaly_id": anomaly["anomaly_id"],
         "status": anomaly.get("status") or anomaly_status(anomaly.get("universe"), scores),
@@ -129,6 +139,8 @@ def explanation_report(
         "tracking": tracking,
         "constraint_conclusion": constraint_conclusion(tracking),
         "supplement": note,
+        "market_confidence": conclusions["market_confidence"],
+        "fundamental_standing": conclusions["fundamental_standing"],
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
@@ -150,6 +162,36 @@ def explanation_report(
     if note and note not in report["unknowns"]:
         report["unknowns"].append(note)
     return report
+
+
+def _market_confidence(candidates):
+    scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
+    if not scores:
+        return "低"
+    best = max(scores)
+    if best >= 0.70:
+        return "高"
+    if best >= 0.50:
+        return "中"
+    return "低"
+
+
+def _fundamental_standing(candidates, fundamental):
+    operating = [row for row in _scored(candidates) if row.get("mechanism") in _OPERATING]
+    if not operating:
+        return None
+    if fundamental in _FUNDAMENTAL:
+        return fundamental
+    return "待验证"
+
+
+def _stated_fundamental(deadline):
+    if not deadline:
+        return None
+    stated = deadline.get("fundamental")
+    if stated in _FUNDAMENTAL:
+        return stated
+    return None
 
 
 def _scored(candidates):
