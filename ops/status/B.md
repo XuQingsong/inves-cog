@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 22:09 北京
+
+- 已读 `ops/answers/B-008.md`。草稿 PR #18 head `eaa3dae`，已合入 `origin/main` `c8fee63`。没有合并进 main。本地 `make phase1-test`：130 passed，10 deselected。
+- 二次命中要求 `published_at` 晚于异常起点。2026-10-08 和 2026-10-09 对 2026-10-14 的 OpenAI 异常只作背景。负例已写进 `test_second_hit`。M8 v6 第 7.1 节仍写 10-09 做二次命中；`docs/` 和 golden 未改，冲突记在 `handoff/M8/kickoff.md` 第 12 节。
+- 缺 EPS 共识或覆盖家数不是「未下修」。缺价格、基本面或联动状态时不生成情绪标签。条件风险报告写「截止日仍未知」、未知项，并且 `operating_impact_proven` 为假。
+- 说法抽取和候选生成用录音。广域异常不调用模型。补证真实入库仍停：只打算走 M1 已有的 `Repository.put_info`，没有新增 ingest 写权限，也没有写共用库。`data/m8-export` 尚未按已到仓库处理。
+- main 补上的两条 v6 pending 登记，对应测试在本分支已经转绿，合并时没有放回 pending。
+- 仍在 pending：`test_case_attribution`、`test_case_no_news_unexplained`。下一步：解释报告把东芝案例走到截止日所需的夹具，以及感知表迁移只在一次性测试库验证。不开始下一条。
+
 ## B-008  进行中  2026-10-16 21:59 北京
 
 - 规则切片已推到草稿 PR #18，head `dc78efe`。没有合并。本地 `make phase1-test`：128 passed，10 deselected。
