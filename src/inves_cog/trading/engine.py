@@ -214,17 +214,7 @@ class ExecutionEngine:
             "cancels": canceled,
             "skips": copy.deepcopy(self.skips),
             "health_codes": self.health_codes,
-            "holdings": [
-                {
-                    "ticker": t,
-                    "qty": p["shares"],
-                    "tier": p["tier_now"],
-                    "status": "M-59 持有",
-                    "n_code": None,
-                    "reason_zh": "M-59 未触发卖出规则，继续持有",
-                }
-                for t, p in self.positions.items()
-            ],
+            "holdings": [self.holding_status(t, p) for t, p in self.positions.items()],
             "portfolio": {
                 "equity": self.last_equity,
                 "invested_pct": (self.last_equity - self.cash) / self.last_equity * 100,
@@ -249,6 +239,32 @@ class ExecutionEngine:
             "sell_all": "exit",
             "sell_frac": "reduce",
         }[order["action"]]
+
+    def holding_status(self, ticker, position):
+        score = self.scores.get(ticker)
+        missing = (
+            ["score"]
+            if not score
+            else [key for key in ("quality", "growth", "valuation", "timing") if score["books"].get(key) is None]
+        )
+        orders = [o for o in self.pending if o["ticker"] == ticker]
+        order = next((o for o in orders if o["action"].startswith("sell")), orders[0] if orders else None)
+        reason = (
+            order["reason_zh"]
+            if order
+            else "N8 缺失账本的卖出条款未判定"
+            if missing
+            else "M-59 未触发卖出规则，继续持有"
+        )
+        detail = "；N8 缺少 " + ",".join(missing) + "，相关条款未判定" if missing else ""
+        return {
+            "ticker": ticker,
+            "qty": position["shares"],
+            "tier": position["tier_now"],
+            "status": reason + detail,
+            "n_code": "N8" if missing else None,
+            "reason_zh": reason + detail,
+        }
 
     def estimated_notional(self, order):
         position = self.positions.get(order["ticker"])
