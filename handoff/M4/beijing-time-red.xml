@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.597" timestamp="2026-10-16T16:58:43.602251+08:00" hostname="192.168.1.101"><testcase classname="tests.m4.test_execution" name="test_overlay_missing_marked" time="0.454"><failure message="AssertionError: assert 'stale' == 'ok'&#10;  &#10;  - ok&#10;  + stale">def test_overlay_missing_marked():
+        for overlay, status in (
+            (None, "missing"),
+            ({"generated_at": "2026-01-12T09:59:59Z"}, "stale"),
+            ({"generated_at": "2026-01-12T10:00:00Z"}, "ok"),
+            ({"generated_at": "2026-01-12T10:30:00Z"}, "ok"),
+            ({"generated_at": "2026-01-12T13:01:00Z"}, "missing"),
+        ):
+            e = engine()
+            e.decide(DAY, {"AAA": signal()}, prices={"AAA": 100})
+            plan = e.plan(NEXT, overlay=overlay)
+&gt;           assert plan["overlay"]["status"] == status
+E           AssertionError: assert 'stale' == 'ok'
+E             
+E             - ok
+E             + stale
+
+tests/m4/test_execution.py:206: AssertionError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.006"><failure message="assert False is True&#10; +  where False = &lt;function due at 0x10e6565c0&gt;(FrozenClock(instant=datetime.datetime(2026, 1, 12, 12, 0, tzinfo=datetime.timezone.utc)))&#10; +    where FrozenClock(instant=datetime.datetime(2026, 1, 12, 12, 0, tzinfo=datetime.timezone.utc)) = FrozenClock(datetime.datetime(2026, 1, 12, 12, 0, tzinfo=datetime.timezone.utc))">def test_plan_json_contract():
+        from inves_cog.trading.execution.cli import due
+    
+        # The stated 20:00 Beijing slot stays fixed across US daylight-saving changes.
+        for month, day in ((1, 12), (7, 13)):
+            for hour, minute, expected in ((11, 59, False), (12, 0, True), (12, 29, True), (12, 30, False)):
+                stamp = datetime(2026, month, day, hour, minute, tzinfo=timezone.utc)
+&gt;               assert due(FrozenClock(stamp)) is expected
+E               assert False is True
+E                +  where False = &lt;function due at 0x10e6565c0&gt;(FrozenClock(instant=datetime.datetime(2026, 1, 12, 12, 0, tzinfo=datetime.timezone.utc)))
+E                +    where FrozenClock(instant=datetime.datetime(2026, 1, 12, 12, 0, tzinfo=datetime.timezone.utc)) = FrozenClock(datetime.datetime(2026, 1, 12, 12, 0, tzinfo=datetime.timezone.utc))
+
+tests/m4/test_execution.py:226: AssertionError</failure></testcase></testsuite></testsuites>

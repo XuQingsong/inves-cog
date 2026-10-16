@@ -193,7 +193,13 @@ def test_overlay_cooling_skip_and_cancel():
 
 
 def test_overlay_missing_marked():
-    for overlay, status in ((None, "missing"), ({"generated_at": "2026-01-12T10:00:00Z"}, "stale")):
+    for overlay, status in (
+        (None, "missing"),
+        ({"generated_at": "2026-01-12T09:59:59Z"}, "stale"),
+        ({"generated_at": "2026-01-12T10:00:00Z"}, "ok"),
+        ({"generated_at": "2026-01-12T10:30:00Z"}, "ok"),
+        ({"generated_at": "2026-01-12T13:01:00Z"}, "missing"),
+    ):
         e = engine()
         e.decide(DAY, {"AAA": signal()}, prices={"AAA": 100})
         plan = e.plan(NEXT, overlay=overlay)
@@ -211,6 +217,15 @@ def test_plan_unpublished_low_coverage():
 
 
 def test_plan_json_contract():
+    from inves_cog.trading.execution.cli import due
+
+    # The stated 20:00 Beijing slot stays fixed across US daylight-saving changes.
+    for month, day in ((1, 12), (7, 13)):
+        for hour, minute, expected in ((11, 59, False), (12, 0, True), (12, 29, True), (12, 30, False)):
+            stamp = datetime(2026, month, day, hour, minute, tzinfo=timezone.utc)
+            assert due(FrozenClock(stamp)) is expected
+        stamp = datetime(2026, month, day, 12, tzinfo=timezone.utc)
+        assert not due(FrozenClock(stamp), last=stamp)
     e = engine()
     s = signal(entry_pass=False, red_lines=["短线过热"])
     e.decide(DAY, {"AAA": signal(), "NO": {**s, "ticker": "NO"}}, prices={"AAA": 100, "NO": 100})
@@ -234,7 +249,7 @@ def test_plan_json_contract():
     ) <= set(plan)
     assert plan["rule_set"] == "A" and all(s["ticker"] != "NO" for s in plan["skips"])
     json.dumps(plan, default=str, allow_nan=False)
-    # K04: a pending watch opening also consumes one of M-34's twelve portfolio slots.
+    # Q-M4-11 adopts v18: pending watch openings have a separate three-name limit.
     case = json.loads((ROOT / "tests/fixtures/phase1/m4/capacity_synthetic.json").read_text())
     candidates = {t: signal(ticker=t, tier=tier) for tier in ("attack", "normal") for t in case[tier]}
     control = engine()
@@ -250,7 +265,27 @@ def test_plan_json_contract():
         DAY, candidates, prices={t: 100 for t in candidates}, history={case["watch"]: case["watch_history"]}
     )
     with_watch.fill(NEXT, {t: 100 for t in candidates})
-    assert len(with_watch.positions) <= 12, "K04: pending watch opening is omitted from the M-34 slot count"
+    assert sum(not p["swing_only"] for p in with_watch.positions.values()) == 12
+    assert sum(p["swing_only"] for p in with_watch.positions.values()) == 1
+    assert len(with_watch.positions) == 13  # Valid 10-09 identity: twelve core + HD watch.
+    # Both limits still reject their own overflow, without rejecting valid watch buys.
+    candidates["EXTRA_CORE"] = signal(ticker="EXTRA_CORE", tier="defense", rank_score=-1)
+    watch_score = candidates[case["watch"]]
+    for ticker in ("WATCH2", "WATCH3", "WATCH4"):
+        candidates[ticker] = {**watch_score, "ticker": ticker}
+    capped = engine()
+    capped.decide(
+        DAY,
+        candidates,
+        prices={t: 100 for t in candidates},
+        history={t: case["watch_history"] for t in (case["watch"], "WATCH2", "WATCH3", "WATCH4")},
+    )
+    assert len({o["ticker"] for o in capped.pending if o["action"] == "buy_to"}) == 12
+    assert len({o["ticker"] for o in capped.pending if o["action"] == "buy_watch"}) == 3
+    assert any(s["ticker"] == "EXTRA_CORE" and s["n_code"] == "N7" for s in capped.skips)
+    capped.fill(NEXT, {t: 100 for t in candidates})
+    assert sum(not p["swing_only"] for p in capped.positions.values()) <= 12
+    assert sum(p["swing_only"] for p in capped.positions.values()) == 3
 
 
 def test_vix_missing_not_panic():

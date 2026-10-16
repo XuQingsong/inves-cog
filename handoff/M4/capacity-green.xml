@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.599" timestamp="2026-10-16T16:57:51.152457+08:00" hostname="192.168.1.101"><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.510" /></testsuite></testsuites>
