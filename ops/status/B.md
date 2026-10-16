@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 21:44 北京
+
+- 规则切片已推到草稿 PR #18，head `7eb7614`。没有合并。本地 `make phase1-test`：121 passed，10 deselected。
+- 已转绿：`test_implied_magnitude_rules`、`test_evidence_scores`、`test_time_alignment_late_news`、`test_candidate_validation`、`test_retrieval_background_window`、`test_embedding_model_isolation`、`test_market_confirmation_four_conditions`、`test_lifecycle_transitions`、`test_second_hit`、`test_search_budget`、`test_verified_not_from_market_evidence`。golden 的隐含幅度和证据分全部命中。阈值在 `config/params/p-2026.10/m8.yaml`。
+- 仍在 pending：`test_anomaly_contract`、`test_retrieval_recovers_low_rank_item`、`test_five_dims_rules`、`test_tracks_and_deadline`、`test_divergence_labels`、`test_systemic_event_tag_requires_level12`、`test_unexplained_recheck_5d`、`test_case_attribution`、`test_case_no_news_unexplained`。
+- 下一步：继续这些测试和实现。不开始下一条。不等这条 head 的 CI 才写下一阶段。
+
 ## B-008  进行中  2026-10-16 21:34 北京
 
 - 草稿 PR #18：https://github.com/XuQingsong/inves-cog/pull/18 ，分支 `phase1/m8-attribution-tracking`，head `bdb5ad8`。复述在 `handoff/M8/kickoff.md`。没有合并。没有改 `docs/`、golden、milestones，没有连接或写入共用库。
