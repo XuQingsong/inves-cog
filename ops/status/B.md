@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 05:21 北京
+
+- 草稿 PR #18 head `632f8c2`。没有合并进 main。本地 `make phase1-test`：184 passed，18 deselected。
+- 没有向量、或向量不是批准的模型和维度时，检索降到规则，报告写「向量检索降到规则检索」。没有传入向量材料时不写这句。这句不改变经营结论，也不改变市场分和基本面栏。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 05:12 北京
 
 - 草稿 PR #18 head `945a4c6`。没有合并进 main。本地 `make phase1-test`：183 passed，18 deselected。
