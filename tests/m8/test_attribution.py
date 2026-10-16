@@ -1132,6 +1132,49 @@ def test_explore_quota_is_not_operating_evidence():
 
 
 @pytest.mark.phase1_blocking
+def test_discard_review_stops_at_twenty():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.retrieve import discard_review
+
+    assert discard_review(None) is None
+    empty = discard_review([])
+    assert empty["selected"] == []
+    assert empty["limit"] == 20
+    assert empty["shuffled"] is False
+    rows = [
+        {"info_id": "kept", "discarded": False, "later_important": True},
+        {"discarded": True},
+        {"info_id": "repeat", "discarded": False},
+        {"info_id": "repeat", "discarded": True, "later_important": True},
+        {"info_id": "miss", "discarded": True, "later_important": True},
+        {"info_id": "plain", "discarded": True},
+        {"info_id": "not-miss", "discarded": True, "later_important": False},
+    ]
+    rows.extend({"info_id": f"drop-{index}", "discarded": True} for index in range(20))
+    picked = discard_review(rows)
+    expected = ["miss", "plain", "not-miss", *[f"drop-{index}" for index in range(17)]]
+    assert [row["info_id"] for row in picked["selected"]] == expected
+    assert picked["selected"][0]["counts_as_miss"] is True
+    assert picked["selected"][1]["counts_as_miss"] is None
+    assert picked["selected"][2]["counts_as_miss"] is False
+    assert all(row["human_review"] is True for row in picked["selected"])
+    assert all(row["operating_evidence"] is False for row in picked["selected"])
+    assert picked["shuffled"] is False
+    assert "drop-17" not in {row["info_id"] for row in picked["selected"]}
+    anomaly = {"anomaly_id": "discard", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["discard_review"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], discarded=rows)
+    assert report["discard_review"]["selected"][0]["operating_evidence"] is False
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

@@ -262,6 +262,43 @@ def explore_quota(items):
     }
 
 
+_DISCARD_WEEKLY = 20
+
+
+def discard_review(items):
+    """At most 20 discarded items go to review, in the order given. This function does not shuffle."""
+    if items is None:
+        return None
+    selected = []
+    seen = set()
+    for row in items:
+        if len(selected) >= _DISCARD_WEEKLY:
+            break
+        info_id = row.get("info_id")
+        if not info_id or info_id in seen:
+            continue
+        seen.add(info_id)
+        if row.get("discarded") is not True:
+            continue
+        later = row.get("later_important")
+        selected.append(
+            {
+                "info_id": info_id,
+                "human_review": True,
+                "counts_as_miss": later if later in {True, False} else None,
+                "operating_evidence": False,
+                "fundamental_standing": None,
+            }
+        )
+    return {
+        "selected": selected,
+        "limit": _DISCARD_WEEKLY,
+        "shuffled": False,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
 def _monitors(present, monitored):
     found = []
     for row in monitored:

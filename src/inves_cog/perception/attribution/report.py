@@ -8,7 +8,7 @@ from inves_cog.perception.attribution.impact import anomaly_status
 from inves_cog.perception.attribution.lifecycle import weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.propose import review_queue
-from inves_cog.perception.attribution.retrieve import explore_quota, retrieval_gap
+from inves_cog.perception.attribution.retrieve import discard_review, explore_quota, retrieval_gap
 from inves_cog.perception.attribution.second_hit import denial_response
 from inves_cog.perception.attribution.tracks import local_support, track_reading
 
@@ -145,6 +145,7 @@ def explanation_report(
     tracks_view=None,
     fingerprint=None,
     explore=None,
+    discarded=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -179,6 +180,7 @@ def explanation_report(
         "track_reading": track_reading(tracks_view),
         "market_fingerprint": market_fingerprint(fingerprint),
         "explore_quota": explore_quota(explore),
+        "discard_review": discard_review(discarded),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
