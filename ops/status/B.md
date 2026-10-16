@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 04:22 北京
+
+- 草稿 PR #18 head `29e521e`。没有合并进 main。本地 `make phase1-test`：179 passed，18 deselected。
+- 市场归因至少为中的候选才登记指纹。字段是关联实体、预期篮子和方向、对照篮子。结论留在市场层。低于中、或不打分的默认候选不登记。后续信息要晚于起点并且实体相交才对得上这枚指纹。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 04:14 北京
 
 - 草稿 PR #18 head `e874546`。没有合并进 main。本地 `make phase1-test`：178 passed，18 deselected。
