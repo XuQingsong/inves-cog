@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 01:23 北京
+
+- 草稿 PR #18 head `52d36b0`。没有合并进 main。本地 `make phase1-test`：161 passed，17 deselected。新的案例测试单独通过。
+- 2026-10-02 的 HDD 对象成员是 STX 和 WDC，没有 MU。截止日只能看见东芝扩产这条四级转载。机制不是供给时结构清单不通过。机制写成供给后，只表示标题对上了日经转载，不能当成经营证据。TDK 时间上可以做二次命中，夹具没有价格响应，结论保持未检验。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 01:12 北京
 
 - 草稿 PR #18 head `5d43332`。没有合并进 main。本地 `make phase1-test`：161 passed，16 deselected。新的案例测试单独通过。
