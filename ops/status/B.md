@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 00:13 北京
+
+- 已读 main `c5b7e96` 的 M8 v8（Q-M8-11）。草稿 PR #18 head `1f0011a`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：157 passed，14 deselected。
+- 三条人工补证可以进入「后补录历史案例」：发布页走发布路径，Reuters 转述只作背景且不是 FT 原文，Axios 停在 09-18、不能证明 72 小时主窗口，角色标成背景。这不表示案例已通过，也不关闭 AC-M8-06。
+- 生产路径不接受案例模式。`first_seen_at` 晚于回放时点的材料仍然不可见。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 00:02 北京
 
 - 草稿 PR #18 head `4539b31`。没有合并进 main。本地 `make phase1-test`：156 passed，14 deselected。
