@@ -7,6 +7,31 @@ COUNTERPARTY = "融资/对手方"
 MULTIPLE = "估值倍数"
 
 
+def market_move(members):
+    """Prior market cap times residual return over TTM PE. Non-positive EPS stays out."""
+    total = 0.0
+    counted = 0
+    for member in members:
+        piece = _member_move(member)
+        if piece is None:
+            continue
+        total += piece
+        counted += 1
+    if counted == 0:
+        return {"delta_e_mkt": None, "verdict": "无法检验"}
+    return {"delta_e_mkt": total, "verdict": None}
+
+
+def _member_move(member):
+    eps = member.get("eps_ttm")
+    pe = member.get("pe_ttm")
+    cap = member.get("market_cap_prev")
+    resid = member.get("resid")
+    if eps is None or eps <= 0 or not pe or cap is None or resid is None:
+        return None
+    return cap * resid / pe
+
+
 def implied_magnitude(payload, rules=None):
     rules = rules or m8_rules()
     income_cap = {int(level): value for level, value in rules["income_change_cap"].items()}

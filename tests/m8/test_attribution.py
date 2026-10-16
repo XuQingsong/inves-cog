@@ -16,6 +16,24 @@ def _golden():
 
 
 @pytest.mark.phase1_blocking
+def test_market_move_uses_residual_return_and_positive_eps():
+    from inves_cog.perception.attribution.magnitude import market_move
+
+    members = [
+        {"ticker": "LOSS", "eps_ttm": -1.0, "pe_ttm": 10, "market_cap_prev": 500, "resid": -0.2, "ret": -0.8},
+        {"ticker": "ZERO", "eps_ttm": 0.0, "pe_ttm": 10, "market_cap_prev": 500, "resid": -0.2, "ret": -0.8},
+        {"ticker": "OK", "eps_ttm": 2.0, "pe_ttm": 10, "market_cap_prev": 100, "resid": -0.1, "ret": -0.9},
+    ]
+    assert market_move(members) == {"delta_e_mkt": -1.0, "verdict": None}
+    blocked = [
+        {"ticker": "LOSS", "eps_ttm": -1.0, "pe_ttm": 10, "market_cap_prev": 100, "resid": -0.2, "ret": -0.9},
+        {"ticker": "FLAT", "eps_ttm": 2.0, "pe_ttm": 0, "market_cap_prev": 100, "resid": -0.2, "ret": -0.9},
+        {"ticker": "PRICE", "eps_ttm": 2.0, "pe_ttm": 10, "market_cap_prev": 100, "ret": -0.9},
+    ]
+    assert market_move(blocked) == {"delta_e_mkt": None, "verdict": "无法检验"}
+
+
+@pytest.mark.phase1_blocking
 def test_implied_magnitude_rules():
     from inves_cog.perception.attribution.magnitude import implied_magnitude
 
