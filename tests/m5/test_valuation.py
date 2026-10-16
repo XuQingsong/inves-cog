@@ -22,6 +22,9 @@ def stable():
 
 @pytest.mark.phase1_blocking
 def test_valuation_synthetic():
+    from tests.m5.inputs_cases import assert_inputs
+
+    assert_inputs()
     from inves_cog.valuation_v1.calculations import evaluate, pe_percentiles
 
     for case in cases():
@@ -216,6 +219,10 @@ def test_position_panel():
 
 @pytest.mark.phase1_blocking
 def test_shadow_rules_no_orders():
+    from inves_cog.valuation_v1.shadows import shadow
+
+    missing = shadow({"type": "成长", "confidence": "低", "p": None, "delta_g": None})
+    assert missing["vt1"] is None and missing["vt2"] is None and missing["v3_trim_flag"] is None
     from inves_cog.valuation_v1.shadows import shadow
 
     r = {"p": 1.31, "confidence": "高", "type": "稳定", "version": "x"}

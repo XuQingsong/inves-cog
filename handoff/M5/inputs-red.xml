@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.092" timestamp="2026-10-16T21:14:54.091247+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_valuation_synthetic" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.inputs'">tests/m5/test_valuation.py:27: in test_valuation_synthetic
+    assert_inputs()
+tests/m5/inputs_cases.py:7: in assert_inputs
+    from inves_cog.valuation_v1.inputs import consensus_inputs, diluted_shares
+E   ModuleNotFoundError: No module named 'inves_cog.valuation_v1.inputs'</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_shadow_rules_no_orders" time="0.006"><failure message="assert (False is None)">tests/m5/test_valuation.py:225: in test_shadow_rules_no_orders
+    assert missing["vt1"] is None and missing["vt2"] is None and missing["v3_trim_flag"] is None
+E   assert (False is None)</failure></testcase></testsuite></testsuites>
