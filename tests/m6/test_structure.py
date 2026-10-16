@@ -47,7 +47,7 @@ def test_l3_same_as_l2_drops_theme_factor():
     from inves_cog.marketstate.engine import stock_rows
     from inves_cog.marketstate.factors import stock_factors
 
-    count = 80
+    count = 200
     index = pd.bdate_range("2024-01-02", periods=count)
     step = np.arange(count, dtype=float)
     spy = np.sin(step / 4) / 100

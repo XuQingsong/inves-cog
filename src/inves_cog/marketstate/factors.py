@@ -50,6 +50,18 @@ def orthogonalize(series, factors):
     return pd.Series(residual_series(series, factors), index=series.index, dtype=float)
 
 
+def leave_one_out_members(basket, day, ticker):
+    return set(member_tickers(basket, day)) - {ticker}
+
+
+def theme_duplicates_sector(returns, ticker, l2, l3):
+    if l2 is None or l3 is None:
+        return False
+    return all(
+        leave_one_out_members(l2, day, ticker) == leave_one_out_members(l3, day, ticker) for day in returns.index
+    )
+
+
 def stock_factors(returns, *, ticker, l2=None, l3=None, sector_etf=None):
     factors = pd.DataFrame({"m": returns["SPY"]})
     reasons = []
@@ -64,7 +76,9 @@ def stock_factors(returns, *, ticker, l2=None, l3=None, sector_etf=None):
         factors["s"] = orthogonalize(sector, factors[["m"]])
     elif l2:
         reasons.append("empty_l2_after_leave_one_out")
-    if l3:
+    if l3 and theme_duplicates_sector(returns, ticker, l2, l3):
+        reasons.append("l3_same_as_l2")
+    elif l3:
         theme = effective_basket_return(returns, l3, exclude=ticker)
         if theme.notna().any():
             factors["t"] = orthogonalize(theme, factors.copy())
