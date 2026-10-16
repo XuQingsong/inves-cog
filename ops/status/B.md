@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 00:02 北京
+
+- 草稿 PR #18 head `4539b31`。没有合并进 main。本地 `make phase1-test`：156 passed，14 deselected。
+- 三条 2026-10-16 人工补证接到对应案例日之后仍是后补录。发布页没有榜单快照，Reuters 转述不是已冻结的 FT 原文，Axios 停在 09-18。标题方向对得上也不关闭第 7.1 节。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-16 23:55 北京
 
 - 草稿 PR #18 head `9b66ae4`。没有合并进 main。本地 `make phase1-test`：155 passed，14 deselected。`make phase1-cases`：3 passed，166 deselected。
