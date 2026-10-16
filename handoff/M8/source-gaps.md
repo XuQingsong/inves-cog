@@ -26,7 +26,7 @@
 
 ## 2026-10-16 人工补证
 
-读取时间是 2026-10-16。短摘录在 `tests/fixtures/phase1/m8/manual_leads_2026-10-16.json`，标签是「后补录历史复盘」。这不是系统当时采集，也没有向量时间戳。链接记在这里，不放进扫描目录。
+读取时间是 2026-10-16。短摘录在 `tests/fixtures/phase1/m8/manual_leads_2026-10-16.json`。可见性标签仍是「后补录历史复盘」；证据模式按 v8 标成「后补录历史案例」。这不是系统当时采集，也没有向量时间戳，不关闭 AC-M8-06。链接记在这里，不放进扫描目录。
 
 | 入口 | 页面上能核对的事实 | 仍然开着的缺口 |
 |---|---|---|
@@ -34,4 +34,4 @@
 | Reuters 转述 https://www.investing.com/news/stock-market-news/openais-annualized-revenue-20-billion-less-than-previously-signaled-ft-reports-4939854 | 页面印着 Published Oct 08, 2026, 05:12 PM，Updated Oct 09, 2026, 02:49 AM，没有时区。9 月年化收入接近 500 亿美元，早前口径接近 700 亿美元。来源根是 Reuters，文中写该数字最先由 Financial Times 报道 | FT 原文 https://www.ft.com/content/b66a9858-f8fb-46cb-b506-44bfe26fca2a 仍未冻结。10-08 和 10-09 都早于 10-14，只作背景，不做二次命中 |
 | Axios https://www.axios.com/2026/09/18/meta-muse-personal-agent-make-money | 日期是 2026-09-18。文中写 Muse 是美国免费 iPhone 应用榜第一 | 不能改成 09-19。09-19 至 09-21 开盘前的榜单夹具仍缺。09-25 的回顾不能注入 09-21 开盘前 |
 
-这三条都不关闭 `test_case_attribution`。
+v8 之后，这三条可以进入后补录历史案例：发布页走发布路径，不必再等榜单；Reuters 转述可作背景，不能冒充 FT 原文；Axios 按 09-18 使用，角色保守标成背景，因为没有分钟，不能证明落在 72 小时主窗口。生产路径仍按 `first_seen_at` 拒绝这些迟到材料。这三条仍不关闭 `test_case_attribution`。

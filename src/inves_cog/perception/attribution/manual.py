@@ -6,6 +6,8 @@ is not a minute, and a later read is not a collection that existed then.
 
 from datetime import date, datetime, timedelta
 
+from inves_cog.perception.attribution.replay import then_visible
+
 
 def _day(value):
     if isinstance(value, datetime):
@@ -76,3 +78,50 @@ def attach_backfill(anomaly, lead, read_on):
         "aligned": aligned,
         "case_clause_met": gap is None and aligned and replay["collected_then"] and replay["vectors_then"],
     }
+
+
+def production_visible(items, as_of, mode="严格当时可见"):
+    """Production visibility ignores the historical-case switch."""
+    if mode != "严格当时可见":
+        raise ValueError("生产路径不接受案例模式")
+    return then_visible(items, as_of)
+
+
+def historical_case(lead, anomaly_on, read_on):
+    """A later real page may enter the historical case. It was not collected then."""
+    anomaly = _day(anomaly_on)
+    published = _day(lead["published_on"])
+    result = {
+        "evidence_mode": "后补录历史案例",
+        "collected_then": False,
+        "vectors_then": False,
+        "closes_case": False,
+        "closes_ac_m8_06": False,
+        "usable": False,
+        "role": None,
+        "uncertainty": "晚于案例截止，不能进入候选",
+    }
+    if published > anomaly:
+        return result
+    replay = supplement_replay(read_on, lead["published_on"], anomaly)
+    if replay["collected_then"]:
+        raise ValueError("人工补证不能标成当时可见")
+    kind = lead["kind"]
+    if kind == "r1_release":
+        role, uncertainty = "发布", "只有日期，没有分钟，没有榜单快照"
+        usable = lead.get("published_precision") == "date"
+    elif kind == "openai_arr":
+        role = "背景"
+        uncertainty = "FT 原文未冻结；页面没有时区；更新日仍早于异常，不是二次命中"
+        usable = lead.get("source_root") == "reuters" and strictly_before_primary(lead["updated_on"], anomaly)
+    elif kind == "muse_rank":
+        role = "背景"
+        if strictly_before_primary(lead["published_on"], anomaly):
+            uncertainty = "早于 72 小时主窗口"
+        else:
+            uncertainty = "只有日期，不能证明落入 72 小时主窗口，也不能改成 09-19"
+        usable = True
+    else:
+        raise ValueError("未知补证种类")
+    result.update(usable=usable, role=role, uncertainty=uncertainty, replay=replay["mode"])
+    return result

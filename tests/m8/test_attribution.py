@@ -986,3 +986,37 @@ def test_backfill_leads_do_not_close_m7_case_days():
     )
     assert crossed["aligned"] is False
     assert crossed["case_clause_met"] is False
+
+
+@pytest.mark.phase1_blocking
+def test_historical_case_mode_does_not_open_production_path():
+    from inves_cog.perception.attribution.manual import historical_case, production_visible
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/manual_leads_2026-10-16.json").read_text())
+    assert payload["evidence_mode"] == "后补录历史案例"
+    assert payload["closes_ac_m8_06"] is False
+    leads = {row["kind"]: row for row in payload["leads"]}
+    read_on = payload["read_on"]
+    release = historical_case(leads["r1_release"], "2025-01-20", read_on)
+    revenue = historical_case(leads["openai_arr"], "2026-10-14", read_on)
+    muse = historical_case(leads["muse_rank"], "2026-09-21", read_on)
+    assert release["usable"] is True and release["role"] == "发布"
+    assert revenue["usable"] is True and revenue["role"] == "背景"
+    assert muse["usable"] is True and muse["role"] == "背景"
+    assert "72" in muse["uncertainty"]
+    for row in (release, revenue, muse):
+        assert row["collected_then"] is False
+        assert row["vectors_then"] is False
+        assert row["closes_case"] is False
+        assert row["closes_ac_m8_06"] is False
+    late = {**leads["openai_arr"], "published_on": "2026-10-20", "updated_on": "2026-10-20"}
+    assert historical_case(late, "2026-10-14", read_on)["usable"] is False
+    as_of = datetime(2026, 10, 14, 21, 0)
+    item = {
+        "info_id": leads["openai_arr"]["id"],
+        "published_at": datetime(2026, 10, 8, 17, 12),
+        "first_seen_at": datetime(2026, 10, 16, 12, 0),
+    }
+    assert production_visible([item], as_of) == []
+    with pytest.raises(ValueError, match="案例模式"):
+        production_visible([item], as_of, mode="后补录历史案例")
