@@ -43,6 +43,57 @@ def test_residual_exact_linear():
 
 
 @pytest.mark.phase1_blocking
+def test_l3_same_as_l2_drops_theme_factor():
+    from inves_cog.marketstate.engine import stock_rows
+    from inves_cog.marketstate.factors import stock_factors
+
+    count = 80
+    index = pd.bdate_range("2024-01-02", periods=count)
+    step = np.arange(count, dtype=float)
+    spy = np.sin(step / 4) / 100
+    sector = np.cos(step / 5) / 80
+    idiosyncratic = np.sin(step / 9) / 90
+    returns = pd.DataFrame(
+        {
+            "SPY": spy,
+            "A": 0.001 + 1.1 * spy + 0.4 * sector + idiosyncratic,
+            "B": 0.001 + 0.9 * spy + 0.6 * sector,
+            "C": 0.001 + 1.0 * spy + 0.5 * sector,
+            "D": 0.001 + 0.8 * spy + idiosyncratic * 2,
+        },
+        index=index,
+    )
+    post = pd.DataFrame(0.0, index=index, columns=returns.columns)
+    same_members = [{"ticker": name, "primary": True} for name in ("A", "B", "C")]
+    l2 = {"basket_id": "semis", "members": same_members}
+    l3_same = {"basket_id": "ai-chips", "members": same_members}
+    l3_different = {"basket_id": "ai-servers", "members": [{"ticker": name, "primary": True} for name in ("A", "B", "D")]}
+
+    same_factors, same_reasons = stock_factors(returns, ticker="A", l2=l2, l3=l3_same)
+    assert list(same_factors.columns) == ["m", "s"]
+    assert "l3_same_as_l2" in same_reasons
+    different_factors, different_reasons = stock_factors(returns, ticker="A", l2=l2, l3=l3_different)
+    assert list(different_factors.columns) == ["m", "s", "t"]
+    assert "l3_same_as_l2" not in different_reasons
+
+    same_rows, _proof = stock_rows(
+        returns, post, ticker="A", l2=l2, l3=l3_same, sector_etf=None, day=index[-1]
+    )
+    same_close = same_rows[0]
+    assert same_close["factor_set"] == "m+s"
+    assert "l3_same_as_l2" in same_close["health_codes"]
+    assert same_close["beta_t"] is None
+
+    different_rows, _proof = stock_rows(
+        returns, post, ticker="A", l2=l2, l3=l3_different, sector_etf=None, day=index[-1]
+    )
+    different_close = different_rows[0]
+    assert different_close["factor_set"] == "m+s+t"
+    assert "l3_same_as_l2" not in different_close["health_codes"]
+    assert different_close["beta_t"] is not None
+
+
+@pytest.mark.phase1_blocking
 def test_residual_leave_one_out():
     from inves_cog.marketstate.factors import basket_return
 
