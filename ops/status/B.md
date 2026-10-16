@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 05:32 北京
+
+- 草稿 PR #18 head `805deeb`。没有合并进 main。本地 `make phase1-test`：185 passed，18 deselected。
+- 隐含幅度按渠道各写一条。缺金额的渠道是无法检验。单条渠道用同一套 1.5 和 5 的界限，不相容仍写不相容，不写成情绪。没有传入隐含幅度时不写渠道行。这不改变基本面栏。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 05:21 北京
 
 - 草稿 PR #18 head `632f8c2`。没有合并进 main。本地 `make phase1-test`：184 passed，18 deselected。
