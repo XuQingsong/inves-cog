@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-006  已完成  2026-10-16 17:12 北京
+
+- PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `b529480`。没有合并。已合入 `origin/main` `3f5d476`，冲突只在 `MANIFEST.sha256` 和 `CHANGELOG.md`，两边都保留。没有改 `docs/`、golden、milestones，没有改 M6，没有连接或写入共用库。
+- CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/38878632674 （PR，phase1-blocking，109 passed，9 deselected，32.69s）。同头 push：https://github.com/XuQingsong/inves-cog/actions/runs/38878624666 。本地 `make phase1-test` 同样 109 passed、9 deselected。M7 blocking 11 个（含别名测试），`test_case_detection` 通过。`test_anomaly_live_smoke` 仍等待 R5。
+- Q-M7-15：路径 B 不再用 4 个百分点分支，`m7.yaml` 已去掉 `path_b_gap`。其余阈值没改。
+- AC-M7-07（`--source file`，`handoff/M7/ac-m7-07.json`）：非温和查全率 0.9459（70/74），样本外 0.9512（39/41），对照日篮子异常 0，平均每天对象 2.327（2208 个交易日，5139 条）。四项都过线。
+- 别名表：`NAND/DRAM` → `memory`。写在复跑代码和报告 `summary.basket_aliases`。`sector:XLF` 没有改判成 KRE。2026-07-27、07-29 仍未命中，因为当天 2 条和 5 条异常里没有 `basket_id = memory`。2023-03-10、03-13 的 `sector:XLF` 仍未命中。
+- AC-M7-03 已按新结果重出，在 `handoff/M7/ac-m7-03.json`。自测在 `handoff/M7/self-test.md`。
+- 已删除：本机 `/tmp/m7-export` 已删除。整份导出没有进入 PR 分支。
+- 已自行决定：无。
+- 下一步：无。不合并。不开始下一条。
+
 ## B-006  进行中  2026-10-16 17:10 北京
 
 - 实现已推到 PR #11，head `b529480`（先合入 `origin/main` `3f5d476`，冲突只在 `MANIFEST.sha256` 和 `CHANGELOG.md`，两边都保留）。路径 B 不再用 4 个百分点分支，`m7.yaml` 已去掉 `path_b_gap`。别名表只有 `NAND/DRAM` → `memory`，写在复跑代码和 `handoff/M7/ac-m7-07.json` 的 `summary.basket_aliases`。`sector:XLF` 没有改判。
