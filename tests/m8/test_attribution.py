@@ -32,6 +32,45 @@ def test_evidence_scores():
 
 
 @pytest.mark.phase1_blocking
+def test_exposure_gradient_needs_three_observed_relations():
+    from inves_cog.perception.attribution.evidence import exposure_gradient
+
+    members = [
+        {"ticker": "AAA", "resid_z": -3.0},
+        {"ticker": "BBB", "resid_z": -1.0},
+        {"ticker": "CCC", "resid_z": 2.0},
+    ]
+    relations = [
+        {"ticker": "AAA", "exposure": "直接", "status": "观察到"},
+        {"ticker": "BBB", "exposure": "间接", "status": "有支持"},
+        {"ticker": "CCC", "exposure": "概念关联", "status": "已确立"},
+    ]
+    assert exposure_gradient(members, relations, direction="down") == 1.0
+    flipped = [
+        {"ticker": "AAA", "resid_z": 3.0},
+        {"ticker": "BBB", "resid_z": 1.0},
+        {"ticker": "CCC", "resid_z": -2.0},
+    ]
+    assert exposure_gradient(flipped, relations, direction="down") == 0.0
+    assert exposure_gradient(members[:2], relations, direction="down") is None
+    candidate = [{"ticker": "AAA", "exposure": "直接", "status": "候选"}]
+    assert exposure_gradient(members, candidate, direction="down") is None
+    flat = [
+        {"ticker": "AAA", "exposure": "直接", "status": "观察到"},
+        {"ticker": "BBB", "exposure": "直接", "status": "观察到"},
+        {"ticker": "CCC", "exposure": "直接", "status": "观察到"},
+    ]
+    assert exposure_gradient(members, flat, direction="down") is None
+    missing = [{"ticker": "AAA", "resid_z": -3.0}, {"ticker": "BBB", "resid_z": -1.0}, {"ticker": "CCC"}]
+    assert exposure_gradient(missing, relations, direction="down") is None
+    exited = [
+        {"ticker": name, "exposure": "直接", "status": "已确立", "exit_reason": "关系退出"}
+        for name in ("AAA", "BBB", "CCC")
+    ]
+    assert exposure_gradient(members, exited, direction="down") is None
+
+
+@pytest.mark.phase1_blocking
 def test_time_alignment_late_news():
     from inves_cog.perception.attribution.evidence import time_alignment
 
