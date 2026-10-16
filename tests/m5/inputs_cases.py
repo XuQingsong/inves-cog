@@ -90,7 +90,10 @@ def assert_service():
             return {
                 "holdings": [{"ticker": "AAA", "shares": 10, "equity": 10000}],
                 "candidates": [
-                    {"ticker": "BBB", "side": "buy", "notional_est": 1000},
+                    {"ticker": "AAA", "side": "buy", "notional_est": 200},
+                    {"ticker": "AAA", "side": "buy", "notional_est": 300},
+                    {"ticker": "BBB", "side": "buy", "notional_est": 100},
+                    {"ticker": "BBB", "side": "buy", "notional_est": 900},
                     {"ticker": "CCC", "side": "sell", "notional_est": 1000},
                 ],
                 "equity": 10000,
@@ -111,3 +114,8 @@ def assert_service():
     assert len(out["ranges"]) == 4 and out["ranges"][-1]["status"] == "failed"
     assert [r["ticker"] for r in out["panel"]] == ["AAA", "BBB"]
     assert out["summary"]["row_count"] == 2 and repo.saved is None
+
+    by_ticker={r['ticker']:r for r in out['panel']}
+    assert by_ticker['AAA']['weight_pct']==5
+    assert by_ticker['AAA']['target_weight_pct']==10
+    assert by_ticker['BBB']['weight_pct']==10
