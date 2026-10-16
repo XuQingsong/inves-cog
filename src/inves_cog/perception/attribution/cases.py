@@ -30,6 +30,6 @@ def muse_chart(text):
     return "muse" in lowered and any(word in lowered for word in ("app store", "no. 1", "chart"))
 
 
-def deepseek_source(text):
+def r1_or_store(text):
     lowered = text.lower()
     return "deepseek" in lowered and any(word in lowered for word in ("r1", "app store"))
