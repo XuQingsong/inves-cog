@@ -191,6 +191,20 @@ def test_fin_state_pit():
     assert repository.state_asof("FIXTURE", date(2026, 7, 31), "fixed") is None
     assert repository.state_asof("FIXTURE", date(2026, 8, 1), "fixed").accession == "q8"
     assert calls == ["1"] and "FIXTURE" in repository.profiles
+    from unittest.mock import patch
+
+    from inves_cog.ingest.fundamentals.extractors import extract_state
+
+    with patch("inves_cog.ingest.fundamentals.service.extract_state", wraps=extract_state) as compute:
+        fresh = service.collect_financials(history=False)
+        assert fresh["processed_count"] == 1 and compute.call_count == 2
+    assert calls == ["1", "1"]  # Incremental still fetches fresh companyfacts.
+    service.draft_mappings = False
+    rows = [{"ticker": "FIXTURE", "axis": "business", "segment_raw": "New segment", "health_codes": []}]
+    with patch.object(service.queue, "draft", side_effect=AssertionError("LLM must not block collection")):
+        result = service.apply_mappings("FIXTURE", rows)
+    assert "segment_unmapped" in result[0]["health_codes"]
+    assert "queued" in result[0]["evidence"]["mapping_gap"]
     from inves_cog.ingest.fundamentals.state import StateStore
 
     before, after = extract(), extract()
@@ -675,6 +689,9 @@ def test_consensus_import_idempotent(tmp_path):
 
 
 def test_health_contract(monkeypatch):
+    from tests.m2.extreme_cases import assert_verified_extremes
+
+    assert_verified_extremes()
     from tests.m2.round3_cases import assert_plausibility
 
     assert_plausibility()

@@ -90,6 +90,9 @@ class OpenAICompatibleTransport:
         }
         if spec.model == "deepseek-v4.1-flash":
             request["enable_thinking"] = False
+        if spec.task == "segment_mapping_draft":
+            request["max_tokens"] = 4096
+            request["reasoning_effort"] = "low"
         if spec.task in {"graph_seed_draft", "exposure_draft"}:
             request["max_tokens"] = 8192
             request["reasoning_effort"] = "low"

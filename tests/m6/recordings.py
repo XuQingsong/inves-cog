@@ -27,6 +27,9 @@ def assert_graph_request_bounds():
         client.call(task, {"source_texts": []})
         assert requests[-1]["model"] == "glm-5.3"
         assert requests[-1]["max_tokens"] == 8192 and requests[-1]["reasoning_effort"] == "low"
+    client.call("segment_mapping_draft", {})
+    assert requests[-1]["model"] == "glm-5.3"
+    assert requests[-1]["max_tokens"] == 4096 and requests[-1]["reasoning_effort"] == "low"
     client.call("anomaly_candidates", {})
     assert "reasoning_effort" not in requests[-1] and "max_tokens" not in requests[-1]
 
