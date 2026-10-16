@@ -76,3 +76,64 @@ def rank_items(items, query_entities, limit=40):
     scored = [{**item, "relevance": relevance(item, query_entities)} for item in items]
     scored.sort(key=lambda row: row["relevance"], reverse=True)
     return scored[:limit]
+
+
+def retrieval_entities(members, baskets, edges, monitored):
+    """Members, their basket peers, one hop of any status, then monitors tied to that set."""
+    seeds = _unique(members)
+    peers = _basket_peers(seeds, baskets)
+    neighbors = _one_hop(set(seeds) | set(peers), edges)
+    present = set(seeds) | set(peers) | set(neighbors)
+    monitors = _monitors(present, monitored)
+    return {
+        "members": seeds,
+        "basket_peers": peers,
+        "neighbors": neighbors,
+        "monitored": monitors,
+        "entities": seeds + peers + neighbors + monitors,
+    }
+
+
+def _unique(names):
+    found = []
+    for name in names or []:
+        if name and name not in found:
+            found.append(name)
+    return found
+
+
+def _basket_peers(seeds, baskets):
+    seed_set = set(seeds)
+    peers = []
+    for basket in baskets:
+        names = _unique(basket.get("members") or [])
+        if not seed_set & set(names):
+            continue
+        for name in names:
+            if name not in seed_set and name not in peers:
+                peers.append(name)
+    return peers
+
+
+def _one_hop(core, edges):
+    neighbors = []
+    for edge in edges:
+        ends = (edge.get("from_entity"), edge.get("to_entity"))
+        if any(end is None for end in ends):
+            continue
+        outside = [end for end in ends if end not in core]
+        inside = [end for end in ends if end in core]
+        if len(inside) == 1 and len(outside) == 1 and outside[0] not in neighbors:
+            neighbors.append(outside[0])
+    return neighbors
+
+
+def _monitors(present, monitored):
+    found = []
+    for row in monitored:
+        entity_id = row.get("entity_id")
+        if not entity_id or entity_id in present or entity_id in found:
+            continue
+        if set(row.get("tickers") or []) & present:
+            found.append(entity_id)
+    return found

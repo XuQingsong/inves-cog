@@ -68,6 +68,38 @@ def test_candidate_validation():
 
 
 @pytest.mark.phase1_blocking
+def test_retrieval_entities_stop_at_one_hop():
+    from inves_cog.perception.attribution.retrieve import retrieval_entities
+
+    baskets = [
+        {"name": "hdd", "members": ["WDC", "STX"]},
+        {"name": "memory", "members": ["STX", "MU"]},
+        {"name": "cpu", "members": ["NVDA"]},
+    ]
+    edges = [
+        {"from_entity": "WDC", "to_entity": "toshiba", "status": "驳回"},
+        {"from_entity": "toshiba", "to_entity": "flash", "status": "已确立"},
+        {"from_entity": "NVDA", "to_entity": "tsmc", "status": "观察到"},
+    ]
+    monitored = [
+        {"entity_id": "hdd_watch", "tickers": ["STX", "INTC"]},
+        {"entity_id": "flash_watch", "tickers": ["flash"]},
+        {"entity_id": "WDC", "tickers": ["WDC"]},
+    ]
+    found = retrieval_entities(["WDC"], baskets, edges, monitored)
+    assert found["members"] == ["WDC"]
+    assert found["basket_peers"] == ["STX"]
+    assert found["neighbors"] == ["toshiba"]
+    assert found["monitored"] == ["hdd_watch"]
+    assert found["entities"] == ["WDC", "STX", "toshiba", "hdd_watch"]
+    assert "MU" not in found["entities"]
+    assert "NVDA" not in found["entities"]
+    assert "flash" not in found["entities"]
+    assert "INTC" not in found["entities"]
+    assert retrieval_entities([], baskets, edges, monitored)["entities"] == []
+
+
+@pytest.mark.phase1_blocking
 def test_retrieval_background_window():
     from inves_cog.perception.attribution.retrieve import window_items
 
