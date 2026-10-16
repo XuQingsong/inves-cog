@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 03:22 北京
+
+- 草稿 PR #18 head `dd9672d`。没有合并进 main。本地 `make phase1-test`：173 passed，18 deselected。新的检查在原有说法测试里。
+- 说法抽取只接受前 40 条。已经有说法字段的材料不再送去抽取，空说法也算已经抽过。多出来的一条不会调用模型。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 03:11 北京
 
 - 草稿 PR #18 head `9a26521`。没有合并进 main。本地 `make phase1-test`：173 passed，18 deselected。
