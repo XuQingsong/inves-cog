@@ -9,7 +9,7 @@ from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.propose import review_queue
 from inves_cog.perception.attribution.retrieve import retrieval_gap
 from inves_cog.perception.attribution.second_hit import denial_response
-from inves_cog.perception.attribution.tracks import local_support
+from inves_cog.perception.attribution.tracks import local_support, track_reading
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
 CONSTRAINT_ITEMS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
@@ -141,6 +141,7 @@ def explanation_report(
     timing=None,
     audit=None,
     denial=None,
+    tracks_view=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -172,6 +173,7 @@ def explanation_report(
         "later_report": later_report(timing),
         "source_check": source_check(audit),
         "denial_response": denial_response(denial),
+        "track_reading": track_reading(tracks_view),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

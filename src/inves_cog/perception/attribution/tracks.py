@@ -96,6 +96,35 @@ def _quantitative(row, as_of):
     return max(published, seen) <= as_of
 
 
+def track_reading(tracks):
+    """Two published combinations only. A half retrace is not digested, and valuation stays put."""
+    if tracks is None:
+        return None
+    narrative = tracks.get("narrative")
+    fundamental = tracks.get("fundamental")
+    if narrative is None or fundamental is None:
+        return None
+    capital = tracks.get("capital")
+    retrace = tracks.get("retrace")
+    if narrative == "衰减" and fundamental == "冲突" and capital is None:
+        return None
+    if narrative == "衰减" and fundamental == "未变" and retrace is None:
+        return None
+    reading = None
+    if narrative == "衰减" and fundamental == "未变" and retrace > 0.5:
+        reading = "冲击已消化"
+    elif narrative == "衰减" and capital == "延续" and fundamental == "冲突":
+        reading = "价格和基本面背离"
+    return {
+        "reading": reading,
+        "research_priority": False,
+        "valuation": None,
+        "divergence_label": None,
+        "fundamental_standing": None,
+        "operating_impact_proven": False,
+    }
+
+
 def reactivate(evidence):
     if evidence.get("reprint"):
         raise ValueError("转载不能重新激活")

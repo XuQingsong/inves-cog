@@ -939,6 +939,51 @@ def test_official_denial_response_uses_absolute_residual():
 
 
 @pytest.mark.phase1_blocking
+def test_two_track_rows_do_not_move_valuation():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.tracks import track_reading
+
+    assert track_reading(None) is None
+    assert track_reading({"narrative": "衰减"}) is None
+    assert track_reading({"narrative": "衰减", "fundamental": "未变"}) is None
+    assert track_reading({"narrative": "衰减", "fundamental": "冲突"}) is None
+    digested = track_reading({"narrative": "衰减", "fundamental": "未变", "retrace": 0.51})
+    assert digested["reading"] == "冲击已消化"
+    assert digested["research_priority"] is False
+    assert digested["valuation"] is None
+    assert digested["divergence_label"] is None
+    assert digested["operating_impact_proven"] is False
+    half = track_reading({"narrative": "衰减", "fundamental": "未变", "retrace": 0.5})
+    assert half["reading"] is None
+    split = track_reading({"narrative": "衰减", "capital": "延续", "fundamental": "冲突"})
+    assert split["reading"] == "价格和基本面背离"
+    assert split["divergence_label"] is None
+    assert split["fundamental_standing"] is None
+    early = track_reading({"narrative": "扩散", "capital": "延续", "fundamental": "开始修订", "retrace": 0.1})
+    assert early["reading"] is None
+    assert early["valuation"] is None
+    assert early["research_priority"] is False
+    anomaly = {"anomaly_id": "tracks", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["track_reading"] is None
+    assert quiet["valuation"] == "不变 / 待基本面轨道"
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        tracks_view={"narrative": "衰减", "capital": "延续", "fundamental": "冲突"},
+    )
+    assert report["track_reading"]["reading"] == "价格和基本面背离"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
