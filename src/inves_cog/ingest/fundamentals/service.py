@@ -176,18 +176,24 @@ class FinancialService:
                 cik = self.ciks.get(ticker)
                 if not cik:
                     raise ValueError("SEC CIK missing for " + ticker)
-                data = self.sec.companyfacts(cik)
-                # A successor's current facts cannot reconstruct its predecessor's PIT dates.
-                # Canonical identifiers avoid downloading zero-padded aliases twice.
-                facts_by_cik = {str(int(cik)): data}
-                sic = data.get("sic", entity.get("sic"))
-                foreign = entity.get("foreign", False)
                 relevant = [
                     f
                     for f in filings
                     if str(f["form"]).removesuffix("/A") in {"10-Q", "10-K", "20-F", "40-F", "6-K"}
                     and day(f["filing_date"]) <= self.as_of
                 ]
+                current_filing = max(
+                    relevant,
+                    key=lambda f: (day(f["filing_date"]), str(f.get("accepted_at") or ""), f["accession"]),
+                    default=None,
+                )
+                # The latest 8-K/S-8 registrant need not yet file financial statements.
+                # Follow the issuer of the effective financial filing, then its PIT lineage.
+                cik = (current_filing.get("cik") if current_filing else None) or cik
+                data = self.sec.companyfacts(cik)
+                facts_by_cik = {str(int(cik)): data}
+                sic = data.get("sic", entity.get("sic"))
+                foreign = entity.get("foreign", False)
                 d9_facts = self.d9_facts(ticker, relevant, facts_by_cik=facts_by_cik)
                 fixed_dates = sorted(
                     {day(f["filing_date"]) for f in relevant if day(f["filing_date"]) >= date(2015, 1, 1)}
@@ -215,7 +221,7 @@ class FinancialService:
                             key=lambda f: (day(f["filing_date"]), str(f.get("accepted_at") or ""), f["accession"]),
                             default=None,
                         )
-                        source_cik = str(int(latest.get("cik") or cik)) if history and latest else str(int(cik))
+                        source_cik = str(int(latest.get("cik") or cik)) if latest else str(int(cik))
                         if source_cik not in facts_by_cik:
                             self._budget()
                             facts_by_cik[source_cik] = self.sec.companyfacts(source_cik)
