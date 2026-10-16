@@ -1,17 +1,3 @@
-test_order_reason_tokens | M4 | 等待 M4 实现
-test_orders_only_from_engine | M4 | 等待 M4 实现
-test_fill_timing_and_cost | M4 | 等待 M4 实现
-test_membership_asof | M4 | 等待 M4 实现
-test_sell_priority | M4 | 等待 M4 实现
-test_panic_gate_scope | M4 | 等待 M4 实现
-test_cooldown_m58 | M4 | 等待 M4 实现
-test_overlay_cooling_skip_and_cancel | M4 | 等待 M4 实现
-test_overlay_missing_marked | M4 | 等待 M4 实现
-test_plan_unpublished_low_coverage | M4 | 等待 M4 实现
-test_plan_json_contract | M4 | 等待 M4 实现
-test_vix_missing_not_panic | M4 | 等待 M4 实现
-test_v18_replay | M4 | 等待 M4 实现
-test_amd_entry_2026_01_12 | M4 | 等待 M4 实现
 test_paper_live_smoke | M4 | 等待 R5
 test_valuation_synthetic | M5 | 等待 M5 实现
 test_growth_valuation_v11 | M5 | 等待 M5 实现
