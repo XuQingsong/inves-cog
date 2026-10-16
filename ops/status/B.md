@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 05:42 北京
+
+- 草稿 PR #18 head `7b80d3b`。没有合并进 main。本地 `make phase1-test`：186 passed，18 deselected。
+- 一条当时可见的一二级定量说法把基本面写成局部支持。四级来源、没有数量、价格、热度、二次命中、共识，以及截止后才见到的材料，仍是待验证。局部支持不是支持，也不证明经营影响。估值倍数仍不写基本面栏。截止日已经写出的支持、冲突或失效保持不变。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 05:32 北京
 
 - 草稿 PR #18 head `805deeb`。没有合并进 main。本地 `make phase1-test`：185 passed，18 deselected。
