@@ -136,6 +136,27 @@ def test_lifecycle_transitions():
     assert history[0]["old"] is None
     assert history[1]["evidence_ids"] == ["b"]
     assert state == "假设中"
+    state, history = transition(state, "市场确认", history, when="t2", trigger="four", evidence_ids=["c"])
+    with pytest.raises(ValueError, match="市场层"):
+        transition(
+            state,
+            "基本面核查中",
+            history,
+            when="t3",
+            trigger="multiple",
+            evidence_ids=["c"],
+            mechanism="估值倍数",
+        )
+    state, history = transition(
+        state,
+        "基本面核查中",
+        history,
+        when="t3",
+        trigger="supply",
+        evidence_ids=["c"],
+        mechanism="供给",
+    )
+    assert state == "基本面核查中"
 
 
 @pytest.mark.phase1_blocking

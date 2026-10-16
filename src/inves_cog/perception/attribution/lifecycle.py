@@ -12,11 +12,14 @@ ALLOWED = {
     ("已衰减·无影响", "假设中"),
     ("已证伪", "假设中"),
 }
+_FUNDAMENTAL = {"供给", "需求", "竞争", "客户融资"}
 
 
-def transition(current, new, history, *, when, trigger, evidence_ids):
+def transition(current, new, history, *, when, trigger, evidence_ids, mechanism=None):
     if (current, new) not in ALLOWED:
         raise ValueError(f"不允许从 {current} 进入 {new}")
+    if new == "基本面核查中" and mechanism not in _FUNDAMENTAL:
+        raise ValueError("估值倍数停在市场层")
     history = list(history)
     history.append(
         {

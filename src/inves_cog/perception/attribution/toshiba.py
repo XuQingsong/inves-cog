@@ -71,6 +71,7 @@ def midpoint_report():
             when="2026-10-02T20:05:00Z",
             trigger="供给机制进入核查",
             evidence_ids=[NIKKEI],
+            mechanism="供给",
         )
     checks = supply_constraints({"新增供给占需求增量"})
     unknowns = [row["item"] for row in checks if row["status"] == "未知"]
