@@ -2,7 +2,16 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-003  进行中  2026-10-16 12:55 北京
+## A-004  已收到  2026-10-16 13:20 北京
+- 已读 main 的 A-004（blob 43ede3bf55f4f7cb3b89ccbe44fe029dd450ab23），G1 已由用户批准。仅做 M4 开工复述，提交草稿 PR 后停下，不写实现。
+- PR #10 已确认 merged=true，合并 sha 61a97e139d80c1b43b4a5a72b30c7f2fa678483a；接下来先核对并按本任务明确授权将 Mac 定时服务切到最新 main，记录实际提交与重启时间。
+- 将完整阅读 T04、M4 v3、适用任务书/规格，登记固定 Muse aacea04 的只读源码文件和行号，包含中期 v18 回放检查点、trading 表及迁移名、分级疑问。
+- 规则变化：仅剩等时间的证据可按需求方转交先收口；B 线真实数据申请由需求方转成 A 线任务后导出，不自行处理 B 线申请。无新用户待答，未改产品代码或服务。
+- 下一步：完成服务核验与 handoff/M4/kickoff.md，分支 phase1/m4-paper-execution，开草稿 PR；不合并、不修改 docs/golden/milestones。
+
+## A-003  已完成  2026-10-16 13:20 北京
+- 按 main A-004 开头的需求方验证及用户批准例外收口：代码部分通过；PR #10 已由需求方合并，merge commit 61a97e139d80c1b43b4a5a72b30c7f2fa678483a。以下保留上一阶段代码/离线证据记录。
+- 两项剩余证据已转交需求方查库：10-17 08:45 SEC 正式运行、10-16 全天 LLM 用量；A 不再为 A-003 手动运行任务。后文“待补/下一步”是转交前记录，以本条为准。
 - 草稿 PR [#10](https://github.com/XuQingsong/inves-cog/pull/10)，分支 phase1/m1m2-fixes-a003。当前完整 head **481e0248944f5791cabdc111d681afed619e51bc**，本地/GitHub SHA 一致，代码树 2ef1e23e72bfb5c44a9dc5556619d6f07432d5b1。当前 SHA 的 phase1-blocking CI 绿：[run 38852874067](https://github.com/XuQingsong/inves-cog/actions/runs/38852874067)，隔离容器测试及 CI 断言均成功；nightly 按条件 skipped，不冒称本次云端回放。
 - D-27 已修：UNH 原件 0000731766-26-000197 把医疗赔付与产品成本分列，旧 D4 漏扣医疗赔付。fixed 毛利率 88.571276% → **19.514184%**；医疗成本缺失/期间不匹配时 NULL 并记录 gross_margin_costs_incomplete，披露毛利、其他发行人、legacy 不误伤。先红 3 failed/3 passed（e6f3250a3532fbcd0cac7dfe4e76d7e195a229aa），再实现 a8b02437f19a399df7a1527476f5a6daf490755e；联合 M2 回归 21 passed。19 只审计已完成：17 只数字对照，GE/ORCL 原有 NULL 的具体原件成本口径缺口已说明，不编造数字。证据 handoff/M2/a003-gross-margin.json。
 - D-27 实际写库：按 A-003 明确授权，以既有 role_ingest / role_trading 重算 **47** 份 UNH fixed 状态；其余核心字段一致。PR #7 已由需求方合并 9bbf15156a7a1a5beeba0ca692b986a4d9312025，因此用 main 未改动的 M3 重算 **198** 条 UNH fixed 分数（2026-01-02 至 2026-10-15），剩余 split_suspect **0 日**。证据 handoff/M2/a003-unh-rebuild.json，原状态备份留仓库外。
