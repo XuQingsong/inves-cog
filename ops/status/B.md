@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 00:22 北京
+
+- 草稿 PR #18 head `478e93c`。没有合并进 main。本地 `make phase1-test`：158 passed，14 deselected。
+- 后补录历史案例的候选只引用截止前可用的材料。不在这批材料里的引用会被丢掉。没有录音时调用失败，不编造成功。
+- 案例仍未通过：发布材料还缺加速芯片篮子，Reuters 只占一类背景，Axios 不能证明早于开盘，东芝仍缺日经扩产原文。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 00:13 北京
 
 - 已读 main `c5b7e96` 的 M8 v8（Q-M8-11）。草稿 PR #18 head `1f0011a`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：157 passed，14 deselected。
