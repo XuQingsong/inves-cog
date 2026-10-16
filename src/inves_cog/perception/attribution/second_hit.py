@@ -9,6 +9,58 @@ def classify_response(expected_z, control_z):
     return "无响应"
 
 
+def prediction_fingerprint(candidate):
+    """A medium or high market score records the fingerprint. It stays on the market layer."""
+    if candidate.get("scored") is False or not _at_least_medium(candidate):
+        return None
+    return {
+        "entities": _chain_entities(candidate),
+        "baskets": _expected_baskets(candidate),
+        "control_baskets": list(candidate.get("control_baskets") or []),
+        "layer": "市场",
+    }
+
+
+def later_matches_fingerprint(fingerprint, item, anomaly_start):
+    """A later page counts only when it shares an entity and was published after the start."""
+    published = None if item is None else item.get("published_at")
+    if not fingerprint or published is None or published <= anomaly_start:
+        return False
+    linked = set(fingerprint.get("entities") or [])
+    return bool(linked & set(item.get("entities") or []))
+
+
+def _at_least_medium(candidate):
+    confidence = candidate.get("confidence")
+    if confidence in {"高", "中"}:
+        return True
+    if confidence == "低":
+        return False
+    score = candidate.get("score")
+    return score is not None and score >= 0.5
+
+
+def _chain_entities(candidate):
+    found = []
+    for row in candidate.get("chain") or []:
+        entity = row.get("entity_id")
+        if entity and entity not in found:
+            found.append(entity)
+    return found
+
+
+def _expected_baskets(candidate):
+    found = []
+    for row in candidate.get("affected") or []:
+        basket = row.get("basket_id")
+        if not basket:
+            continue
+        item = {"basket_id": basket, "direction": row.get("direction")}
+        if item not in found:
+            found.append(item)
+    return found
+
+
 def later_event(published_at, anomaly_start, *, source_root, outcome=None):
     """A later page is only eligible. Without a measured response it stays untested."""
     if published_at <= anomaly_start:

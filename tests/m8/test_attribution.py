@@ -498,6 +498,43 @@ def test_second_hit():
 
 
 @pytest.mark.phase1_blocking
+def test_fingerprint_registers_only_a_medium_market_score():
+    from inves_cog.perception.attribution.second_hit import later_matches_fingerprint, prediction_fingerprint
+
+    candidate = {
+        "scored": True,
+        "score": 0.5,
+        "confidence": "中",
+        "mechanism": "供给",
+        "chain": [{"entity_id": "toshiba"}, {"entity_id": "toshiba"}, {"entity_id": "tdk"}],
+        "affected": [
+            {"basket_id": "hdd", "ticker": "WDC", "direction": "down"},
+            {"ticker": "STX", "direction": "down"},
+        ],
+        "control_baskets": ["memory"],
+    }
+    fingerprint = prediction_fingerprint(candidate)
+    assert fingerprint == {
+        "entities": ["toshiba", "tdk"],
+        "baskets": [{"basket_id": "hdd", "direction": "down"}],
+        "control_baskets": ["memory"],
+        "layer": "市场",
+    }
+    assert "operating_impact_proven" not in fingerprint
+    assert prediction_fingerprint({**candidate, "confidence": "低", "score": 0.8}) is None
+    assert prediction_fingerprint({**candidate, "confidence": None, "score": 0.49}) is None
+    assert prediction_fingerprint({**candidate, "scored": False, "confidence": "高"}) is None
+    start = datetime(2026, 10, 2, 13, 30)
+    later = {"published_at": datetime(2026, 10, 6, 9), "entities": ["tdk", "other"]}
+    assert later_matches_fingerprint(fingerprint, later, start) is True
+    early = {"published_at": datetime(2026, 10, 1, 9), "entities": ["tdk"]}
+    assert later_matches_fingerprint(fingerprint, early, start) is False
+    unrelated = {"published_at": datetime(2026, 10, 6, 9), "entities": ["cpi"]}
+    assert later_matches_fingerprint(fingerprint, unrelated, start) is False
+    assert later_matches_fingerprint(None, later, start) is False
+
+
+@pytest.mark.phase1_blocking
 def test_search_budget():
     from inves_cog.perception.attribution.retrieve import supplement_calls
 
