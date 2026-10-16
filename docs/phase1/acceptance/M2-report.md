@@ -123,3 +123,15 @@
 | 共享 LLM 客户端 | 仅对 `segment_mapping_draft` 加了 `max_tokens` 和 `reasoning_effort = low`，模型仍为 `glm-5.3`，没有降级换模型 |
 
 遗留（不阻塞，已进 tracker）：ASML、TSM 的 `stale_fundamentals` 没有算上 6-K 季度业绩（M5 前）；一致预期第二次完整采集（AC-M2-06b，M5 前）；分部映射真实草稿（AC-M2-08，backlog）。
+
+---
+
+## 8. 遗留修复（A-003，PR #10，481e024，2026-10-16）
+
+**代码部分通过**，等用户批准合并。
+
+| 项 | 结果 |
+|---|---|
+| D-27 UNH 毛利率 | 原件把医疗赔付和产品成本分列，旧 D4 只扣了后者。修复后 `fixed` 毛利率 19.51%（2026-06-30）、18.80%（2026-03-31）；医疗成本缺失或期间不符时为 `NULL` 并记 `gross_margin_costs_incomplete`。需求方查库：UNH 198 天打分已重算，`split_suspect` 0 天，10-15 估值账 59.8。19 只推算毛利率的标的已逐只对照，见 `handoff/M2/a003-gross-margin.json` |
+| 回归 | PR #10 合到当前 main 上，需求方本机 78 passed；CI success |
+| 范围 | 只改 `ingest`（含 `fundamentals` 提取器、SEC 客户端）、M1/M2 测试和 `handoff`；没有改 `docs/`、golden、milestones 或别的模块 |
