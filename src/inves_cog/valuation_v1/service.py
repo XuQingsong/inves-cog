@@ -38,6 +38,34 @@ def first_session(day):
     return cal.date_to_session(day.replace(day=1), direction="next").date() == day
 
 
+def describe_actual(shadows, holdings):
+    # A missing M4 feed is unknown, not an assertion that no actual buys exist.
+    actual_buys = {}
+    for order in holdings["candidates"]:
+        if order.get("side") == "buy":
+            actual_buys[order["ticker"]] = actual_buys.get(order["ticker"], 0) + 1
+    for record in shadows:
+        available = not holdings.get("reason")
+        count = actual_buys.get(record["ticker"], 0) if available else None
+        record.update(actual_comparison_available=available, actual_buy_count=count)
+        if not available:
+            record["difference"] = "无法比较规则A实际计划：" + holdings["reason"]
+        elif count:
+            effects = ["规则A当日" + str(count) + "笔买入"]
+            if record["vt1"]:
+                effects.append("若V-T1生效会禁止这些买入")
+            if record["vt2"]:
+                effects.append("若V-T2生效会将单票买入上限减半")
+            if record["v2_coef"] is not None:
+                effects.append("V2影子目标系数" + str(record["v2_coef"]))
+            if record["v3_trim_flag"]:
+                effects.append("V3达到单版本一次减持三分之一条件")
+            effects.append("仅记录假设差异，实际订单不变")
+            record["difference"] = "；".join(effects)
+        else:
+            record["difference"] = "规则A当日无买入计划；记录影子分与系数，实际订单不变"
+
+
 def build(*, clock, repository, universe, as_of, persist=True, book=None, source=None):
     tickers = [e["ticker"] for e in universe]
     source = source or repository.inputs(as_of, tickers)
@@ -139,6 +167,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
         shadows.append(shadow(row, bear_30d=bear_past.get(ticker), seen_versions=seen.get(ticker, set())))
     holdings = repository.holdings(as_of, cutoff=cutoff)
     by_ticker = {r["ticker"]: r for r in ranges}
+    describe_actual(shadows, holdings)
     panel_rows = {}
     if "cash" in holdings:
         # Ledger equity can be from an older mark. Use the same current closes
