@@ -4,11 +4,12 @@ FIELDS = ("subject", "variable", "mechanism", "direction", "quantity", "horizon"
 
 
 def claim_payload(items):
+    _require_shortlist(items)
     return {
         "items": [
             {"info_id": item["info_id"], "headline": item.get("headline"), "summary": item.get("summary")}
             for item in items
-            if not item.get("claims")
+            if "claims" not in item
         ]
     }
 
@@ -18,7 +19,8 @@ def normalize_claim(row):
 
 
 def attach_claims(items, client):
-    pending = [item for item in items if not item.get("claims")]
+    _require_shortlist(items)
+    pending = [item for item in items if "claims" not in item]
     if not pending:
         return [dict(item) for item in items]
     result = client.call("claim_extraction", claim_payload(pending))
@@ -33,3 +35,8 @@ def attach_claims(items, client):
             continue
         attached.append({**item, "claims": by_id.get(item["info_id"], [])})
     return attached
+
+
+def _require_shortlist(items):
+    if len(items) > 40:
+        raise ValueError("说法抽取只接受前 40 条")

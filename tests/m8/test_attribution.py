@@ -662,6 +662,23 @@ def test_claim_fields_omit_unsupported(tmp_path):
     kept = attach_claims([{"info_id": "n1", "claims": [{"subject": "Toshiba"}]}], Client(recordings=tmp_path))
     assert kept[0]["claims"] == [{"subject": "Toshiba"}]
 
+    class Once:
+        def __init__(self):
+            self.calls = 0
+
+        def call(self, task, payload):
+            self.calls += 1
+            raise AssertionError(task)
+
+    idle = Once()
+    already = attach_claims([{"info_id": "n1", "claims": [], "role": "background"}], idle)
+    assert idle.calls == 0
+    assert already[0]["role"] == "background"
+    assert already[0]["claims"] == []
+    with pytest.raises(ValueError, match="40"):
+        attach_claims([{"info_id": str(index)} for index in range(41)], idle)
+    assert idle.calls == 0
+
 
 @pytest.mark.phase1_blocking
 def test_wide_anomaly_skips_candidates(tmp_path):
