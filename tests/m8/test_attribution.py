@@ -1,7 +1,7 @@
 """M8 rule tests. Recorded model output stays out of this file."""
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -524,3 +524,38 @@ def test_case_direction_on_synthetic_headlines():
     start = datetime(2026, 10, 14, 13, 30)
     early = [{"source_root": "ft", "outcome": "命中", "published_at": datetime(2026, 10, 9, 0, 45)}]
     assert second_hit_conclusion(early, anomaly_start=start) == "未检验"
+
+
+@pytest.mark.phase1_blocking
+def test_replay_labels_later_recorded_items():
+    from inves_cog.perception.attribution.replay import replay_mode, then_visible
+
+    cst = timezone(timedelta(hours=8))
+    toshiba = {
+        "info_id": "news:benzinga:62130092",
+        "published_at": datetime(2026, 10, 2, 19, 56, tzinfo=cst),
+        "first_seen_at": datetime(2026, 10, 14, 17, 19, tzinfo=cst),
+    }
+    day = datetime(2026, 10, 2, 23, 59, tzinfo=cst)
+    later = datetime(2026, 10, 15, 9, 15, tzinfo=cst)
+    assert replay_mode([toshiba], day)["mode"] == "后补录历史复盘"
+    assert replay_mode([toshiba], day)["collected_then"] is False
+    assert replay_mode([toshiba], day)["vectors_then"] is False
+    assert then_visible([toshiba], day) == []
+    seen = replay_mode([toshiba], later)
+    assert seen == {"mode": "当时可见", "late_ids": [], "collected_then": True, "vectors_then": False}
+    assert then_visible([toshiba], later) == [toshiba]
+
+    cpi = {
+        "info_id": "news:benzinga:62350981",
+        "published_at": datetime(2026, 10, 14, 20, 30, tzinfo=cst),
+        "first_seen_at": datetime(2026, 10, 15, 14, 35, tzinfo=cst),
+    }
+    morning = replay_mode([cpi], later)
+    assert morning["mode"] == "后补录历史复盘"
+    assert morning["late_ids"] == ["news:benzinga:62350981"]
+    assert then_visible([cpi], later) == []
+
+    stamped = {**toshiba, "embedding_created_at": datetime(2026, 10, 14, 18, 0, tzinfo=cst)}
+    assert replay_mode([stamped], later)["vectors_then"] is True
+    assert replay_mode([stamped], datetime(2026, 10, 14, 17, 30, tzinfo=cst))["vectors_then"] is False
