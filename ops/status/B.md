@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 03:11 北京
+
+- 草稿 PR #18 head `9a26521`。没有合并进 main。本地 `make phase1-test`：173 passed，18 deselected。
+- 短名单已满 5 条时，报告不写「补证未执行」。预算用完时，这句话写入报告的补证栏和未知项，不改变经营结论，也不改变生命周期。这一步仍不发起搜索。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 03:01 北京
 
 - 草稿 PR #18 head `78e6b0b`。没有合并进 main。本地 `make phase1-test`：172 passed，18 deselected。
