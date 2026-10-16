@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 04:41 北京
+
+- 草稿 PR #18 head `df013dd`。没有合并进 main。本地 `make phase1-test`：181 passed，18 deselected。
+- 状态至少「观察到」但没有美元暴露的边，登记一条补暴露任务，原因是缺美元暴露。候选边不登记，估值倍数不登记。这条任务不把结论改成不相容，也不写金额 0。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 04:32 北京
 
 - 草稿 PR #18 head `95ffffe`。没有合并进 main。本地 `make phase1-test`：180 passed，18 deselected。
