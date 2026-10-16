@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-005  已完成  2026-10-16 14:48 北京
+
+- PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `ea089ff`。标题改为「[M7] 提交验收」，已取消草稿。没有合并。没有改 `docs/`、golden、milestones，没有改 M6，没有连接或写入共用库。迁移文件 `migrations/phase1_m7_0001_anomalies.sql` 只在一次性测试库里应用过，共用库留给 A 线在合并后执行。
+- CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/38863086547 （phase1-blocking，75 passed，9 deselected，31.51s）。本地 `make phase1-test` 同样 75 passed、9 deselected。M7 的 10 个 blocking 测试通过，`test_case_detection` 通过。`test_anomaly_live_smoke` 仍留在 `pending.txt`，等待 R5。
+- AC-M7-07（`--source file`，`handoff/M7/ac-m7-07.json`）：非温和查全率 0.9459（70/74），样本外 0.9512（39/41），对照日篮子异常 0，平均每天对象 3.328（2208 个交易日，7349 条）。前三项过线。3.328 高于每天 2.5 的上限。多出来的主要是路径 B 的 4 个百分点分支，约每天 1.3 条只因个股和主 L3 留一收益差达到 4 个百分点、自身涨跌达到 3%。阈值没有下调。
+- AC-M7-03：最近 5 个交易日 2026-10-08、10-09、10-12、10-13、10-14 的收盘和盘后清单在 `handoff/M7/ac-m7-03.json`。AC-M7-05：盘后价只从 2026-10-07 起，序列只有 6 个交易日，自身 120 日 z 为空，没有合适的盘后例子，留给 A 线在合并后补。自测逐条写在 `handoff/M7/self-test.md`。
+- 已删除：本机 `/tmp/m7-export` 已删除。整份导出没有进入 PR 分支。四个案例窗口留在 `tests/fixtures/phase1/m7/`。
+- 已自行决定：无新决定。HDD、CPU、2026-10-14 的收益 z 落在关注级，又和 `|resid_z|≥3` 或路径 B 成员合并，严重级别按规则成为 `alert`，入口仍保留 `A_watch`。这是按冻结阈值改期望，不是改阈值。
+- 下一步：无。不合并。不开始下一条。
+
 ## B-005  进行中  2026-10-16 13:48 北京
 
 - 测试先红：`8f0f7ed` 提交了失败的 blocking 测试和四个案例窗口夹具。检测代码还没写。
