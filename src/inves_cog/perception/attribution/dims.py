@@ -184,3 +184,39 @@ def weakest_link(chain):
         "fundamental_standing": None,
         "operating_impact_proven": False,
     }
+
+
+_AUDIT = (
+    ("原始出处", "source_root"),
+    ("完整表述", "body"),
+    ("发布时间", "published_at"),
+    ("首次取得时间", "first_seen_at"),
+    ("是否旧闻重发", "reprint"),
+    ("传播关系", "relays"),
+    ("独立来源数", "source_roots"),
+    ("反方材料", "counter_items"),
+)
+
+
+def source_check(item):
+    """Eight falsification fields. A filled checklist does not make the claim true."""
+    if item is None:
+        return None
+    return {
+        "checks": [_audit_row(item, label, key) for label, key in _AUDIT],
+        "authenticity": None,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _audit_row(item, label, key):
+    if key == "source_roots":
+        roots = item.get("source_roots")
+        if not isinstance(roots, (list, tuple)):
+            return {"item": label, "status": "未知", "value": None, "is_evidence": False}
+        unique = {root for root in roots if root}
+        return {"item": label, "status": "有数据", "value": len(unique), "is_evidence": False}
+    value = item.get(key)
+    present = value is not None and value != ""
+    return {"item": label, "status": "有数据" if present else "未知", "is_evidence": False}

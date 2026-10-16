@@ -844,6 +844,62 @@ def test_a_later_report_cannot_explain_the_prior_drop():
 
 
 @pytest.mark.phase1_blocking
+def test_source_check_does_not_make_the_claim_true():
+    from inves_cog.perception.attribution.dims import source_check
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert source_check(None) is None
+    empty = source_check({})
+    assert [row["status"] for row in empty["checks"]] == ["未知"] * 8
+    assert all(row["is_evidence"] is False for row in empty["checks"])
+    assert empty["authenticity"] is None
+    assert empty["operating_evidence"] is False
+    filled = source_check(
+        {
+            "source_root": "nikkei",
+            "body": "",
+            "published_at": datetime(2026, 10, 14, 13, 30),
+            "first_seen_at": datetime(2026, 10, 14, 14, 0),
+            "reprint": False,
+            "relays": [],
+            "source_roots": ["nikkei", "nikkei", "", "reuters"],
+            "counter_items": [],
+        }
+    )
+    by_name = {row["item"]: row for row in filled["checks"]}
+    assert by_name["完整表述"]["status"] == "未知"
+    assert by_name["是否旧闻重发"]["status"] == "有数据"
+    assert by_name["传播关系"]["status"] == "有数据"
+    assert by_name["反方材料"]["status"] == "有数据"
+    assert by_name["独立来源数"] == {"item": "独立来源数", "status": "有数据", "value": 2, "is_evidence": False}
+    assert filled["authenticity"] is None
+    assert filled["operating_evidence"] is False
+    audit = {
+        "source_root": "nikkei",
+        "body": "全文",
+        "published_at": datetime(2026, 10, 14, 13, 30),
+        "first_seen_at": datetime(2026, 10, 14, 14, 0),
+        "reprint": False,
+        "relays": ["wire"],
+        "source_roots": ["nikkei"],
+        "counter_items": ["sec-denial"],
+    }
+    complete = source_check(audit)
+    assert all(row["status"] == "有数据" for row in complete["checks"])
+    assert complete["authenticity"] is None
+    anomaly = {"anomaly_id": "audit", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["source_check"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], audit=audit)
+    assert report["source_check"]["authenticity"] is None
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

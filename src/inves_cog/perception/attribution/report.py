@@ -1,7 +1,7 @@
 """Explanation report. A closed lifecycle still names the reason and the open unknowns."""
 
 from inves_cog.perception.attribution.codes import ticker_codes
-from inves_cog.perception.attribution.dims import rumor_split, sentiment_amplification, weakest_link
+from inves_cog.perception.attribution.dims import rumor_split, sentiment_amplification, source_check, weakest_link
 from inves_cog.perception.attribution.evidence import later_report
 from inves_cog.perception.attribution.impact import anomaly_status
 from inves_cog.perception.attribution.lifecycle import weak_signal
@@ -138,6 +138,7 @@ def explanation_report(
     verifiers=(),
     chain=None,
     timing=None,
+    audit=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -167,6 +168,7 @@ def explanation_report(
         "rumor_split": None if rumor is None else rumor_split(rumor, verifiers),
         "weakest_link": weakest_link(chain),
         "later_report": later_report(timing),
+        "source_check": source_check(audit),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
