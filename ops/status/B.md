@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 23:22 北京
+
+- 草稿 PR #18 head `38e8471`。没有合并进 main。本地 `make phase1-test`：137 passed，11 deselected。
+- 估值倍数类联动停在市场层，进入基本面核查会拒绝。供给、需求、竞争、客户融资仍可进入。东芝走查以供给进入核查。
+- 经营证据的四项反例仍在 `f559023`，等需求方独立复核。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-16 23:12 北京
 
 - 已读 main `31e8ceb` 对 `a028e59` 的四项反例。草稿 PR #18 head `f559023`，已合入这份 main。没有合并进 main。本地 `make phase1-test`：137 passed，11 deselected。
