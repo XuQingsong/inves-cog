@@ -115,7 +115,7 @@ def assert_service():
     assert [r["ticker"] for r in out["panel"]] == ["AAA", "BBB"]
     assert out["summary"]["row_count"] == 2 and repo.saved is None
 
-    by_ticker={r['ticker']:r for r in out['panel']}
-    assert by_ticker['AAA']['weight_pct']==5
-    assert by_ticker['AAA']['target_weight_pct']==10
-    assert by_ticker['BBB']['weight_pct']==10
+    by_ticker = {r["ticker"]: r for r in out["panel"]}
+    assert by_ticker["AAA"]["weight_pct"] == 5
+    assert by_ticker["AAA"]["target_weight_pct"] == 10
+    assert by_ticker["BBB"]["weight_pct"] == 10

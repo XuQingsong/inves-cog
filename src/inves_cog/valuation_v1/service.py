@@ -143,20 +143,29 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
             else None
         )
         panel_rows[ticker] = panel({**valuation, "weight_pct": weight}, bear_30d=bear_past.get(ticker))
+    candidates = {}
     for candidate in holdings["candidates"]:
-        if candidate.get("side") != "buy":
-            continue
-        ticker = candidate["ticker"]
+        if candidate.get("side") == "buy":
+            candidates.setdefault(candidate["ticker"], []).append(candidate.get("notional_est"))
+    for ticker, amounts in candidates.items():
         valuation = by_ticker.get(ticker)
         if valuation is None:
             continue
         equity = holdings.get("equity")
-        amount = candidate.get("notional_est")
-        target = amount / equity * 100 if amount is not None and equity is not None and equity > 0 else None
+        amount = sum(amounts) if all(v is not None for v in amounts) else None
+        increment = amount / equity * 100 if amount is not None and equity is not None and equity > 0 else None
         old = panel_rows.get(ticker)
-        # Candidates are compared at the plan's first amount, existing positions
-        # at their actual marked value. An add does not redefine actual exposure.
-        row = {**valuation, "weight_pct": old["weight_pct"] if old else target, "target_weight_pct": target}
+        actual = old["weight_pct"] if old else increment
+        target = (
+            (old["weight_pct"] + increment)
+            if old and old["weight_pct"] is not None and increment is not None
+            else increment
+            if not old
+            else None
+        )
+        # M4 notional_est is an incremental buy. The comparison uses the total
+        # target (existing exposure plus all planned buys), never a last-order overwrite.
+        row = {**valuation, "weight_pct": actual, "target_weight_pct": target}
         panel_rows[ticker] = panel(row, bear_30d=bear_past.get(ticker))
     summary = summarize(list(panel_rows.values()))
     summary["date"] = as_of
