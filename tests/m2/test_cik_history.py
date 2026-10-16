@@ -52,6 +52,10 @@ def test_successor_companyfacts_history_uses_visible_registrant():
     )
     assert calls.count("34088") == 1 and calls.count("2115436") == 1
     calls.clear()
+    source_at_cutoff.clear()
     with patch("inves_cog.ingest.fundamentals.service.extract_state", side_effect=compute):
         service.collect_financials(history=False)
-    assert calls == ["2115436"]  # Daily refresh does not download predecessor history again.
+    # The existing D9 repair still needs predecessor evidence, once; the daily
+    # snapshots themselves remain the current registrant rather than a history rebuild.
+    assert calls == ["2115436", "34088"]
+    assert all(cik == "2115436" for _, _, cik in source_at_cutoff)

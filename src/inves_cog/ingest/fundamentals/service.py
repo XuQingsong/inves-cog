@@ -177,6 +177,9 @@ class FinancialService:
                 if not cik:
                     raise ValueError("SEC CIK missing for " + ticker)
                 data = self.sec.companyfacts(cik)
+                # A successor's current facts cannot reconstruct its predecessor's PIT dates.
+                # Canonical identifiers avoid downloading zero-padded aliases twice.
+                facts_by_cik = {str(int(cik)): data}
                 sic = data.get("sic", entity.get("sic"))
                 foreign = entity.get("foreign", False)
                 relevant = [
@@ -185,7 +188,7 @@ class FinancialService:
                     if str(f["form"]).removesuffix("/A") in {"10-Q", "10-K", "20-F", "40-F", "6-K"}
                     and day(f["filing_date"]) <= self.as_of
                 ]
-                d9_facts = self.d9_facts(ticker, relevant)
+                d9_facts = self.d9_facts(ticker, relevant, facts_by_cik=facts_by_cik)
                 fixed_dates = sorted(
                     {day(f["filing_date"]) for f in relevant if day(f["filing_date"]) >= date(2015, 1, 1)}
                 )
@@ -212,9 +215,14 @@ class FinancialService:
                             key=lambda f: (day(f["filing_date"]), str(f.get("accepted_at") or ""), f["accession"]),
                             default=None,
                         )
+                        source_cik = str(int(latest.get("cik") or cik)) if history and latest else str(int(cik))
+                        if source_cik not in facts_by_cik:
+                            self._budget()
+                            facts_by_cik[source_cik] = self.sec.companyfacts(source_cik)
+                        visible_data = facts_by_cik[source_cik]
                         accessions = {
                             r.get("accn")
-                            for tax in data.get("facts", {}).values()
+                            for tax in visible_data.get("facts", {}).values()
                             for node in tax.values()
                             for rows in node.get("units", {}).values()
                             for r in rows
@@ -238,7 +246,7 @@ class FinancialService:
                                     }
                                 )
                         state = extract_state(
-                            data,
+                            visible_data,
                             ticker=ticker,
                             as_of=cutoff,
                             extractor=extractor,
@@ -250,6 +258,7 @@ class FinancialService:
                             available_as_of=self.as_of,
                         )
                         state.filed = cutoff
+                        state.field_sources["companyfacts_cik"] = {"cik": source_cik, "as_of": cutoff.isoformat()}
                         self.repo.put_state(state)
                 current = self.repo.state_asof(ticker, self.as_of, "fixed")
                 if current is None:
@@ -422,13 +431,18 @@ class FinancialService:
 
         return merge_facts(extra, parsed or {}) if extra else parsed
 
-    def d9_facts(self, ticker, filings):
+    def d9_facts(self, ticker, filings, *, facts_by_cik=None):
         from inves_cog.ingest.fundamentals.repairs import merge_facts, settings
 
         rules = settings().get("d9", {})
         extra = {}
         for cik in rules.get("predecessor_ciks", {}).get(ticker, []):
-            evidence = self.sec.companyfacts(cik)
+            key = str(int(cik))
+            cache = facts_by_cik if facts_by_cik is not None else {}
+            if key not in cache:
+                cache[key] = self.sec.companyfacts(cik)
+            # D9 annotations must not mutate the primary historical source.
+            evidence = deepcopy(cache[key])
             for tags in evidence.get("facts", {}).values():
                 for node in tags.values():
                     for rows in node.get("units", {}).values():

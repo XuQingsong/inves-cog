@@ -185,6 +185,15 @@ class ExecutionEngine:
                 self.skip(intent["ticker"], "M-34", "N5", "事件冷静期，暂停买入")
                 continue
             if published:
+                estimated = self.estimated_notional(intent)
+                if estimated is not None and estimated <= 0:
+                    text = (
+                        "持仓已达到本次目标金额，预计新增金额为0"
+                        if intent["action"] == "buy_to"
+                        else "当前持仓按计划股数计算的金额为0"
+                    )
+                    self.skip(intent["ticker"], intent["rule_ids"][0], "N7", text)
+                    continue
                 multiplier = item.get("first_lot_multiplier", 1)
                 if not selling and isinstance(multiplier, (int, float)) and 0 <= multiplier <= 1:
                     intent["overlay_multiplier"] = min(intent.get("overlay_multiplier", 1), multiplier)
@@ -195,7 +204,7 @@ class ExecutionEngine:
                         "side": "sell" if selling else "buy",
                         "kind": self.order_kind(intent),
                         "qty": None,
-                        "notional_est": self.estimated_notional(intent),
+                        "notional_est": estimated,
                         "overlay_version": layer["version"],
                     }
                 )
