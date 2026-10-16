@@ -452,3 +452,53 @@ def test_wide_anomaly_skips_candidates(tmp_path):
     assert report["unknowns"] == ["eps_consensus", "coverage"]
     assert report["operating_impact_proven"] is False
     assert report["valuation"] == "不变 / 待基本面轨道"
+
+
+@pytest.mark.phase1_blocking
+def test_toshiba_midpoint_reaches_deadline():
+    from inves_cog.perception.attribution.codes import n_code
+    from inves_cog.perception.attribution.toshiba import NIKKEI, TDK, midpoint_report
+
+    walked = midpoint_report()
+    report = walked["report"]
+    assert walked["lifecycle"] == "已验证·有影响"
+    states = [row["new"] for row in walked["history"]]
+    assert states == ["已发现", "假设中", "市场确认", "基本面核查中", "已验证·有影响"]
+    scored = [row for row in report["candidates"] if row["scored"]]
+    assert scored[0]["mechanism"] == "供给"
+    assert scored[0]["info_ids"] == [NIKKEI]
+    assert report["second_hit"] == "确认"
+    assert report["second_hit_info_id"] == TDK
+    assert report["operating_evidence_from_market"] is False
+    assert report["fixture"] == "synthetic"
+    assert report["closing_reason"] == "截止日证据支持"
+    assert "投产与良率" in report["unknowns"]
+    parts = report["impact"]
+    total = parts["event"] + parts["amplification"] + parts["unexplained"]
+    assert abs(total - (-0.05)) <= 0.001
+    assert report["n_code"] is None
+    assert report["deadline_sessions"] == 12
+    assert report["tracks"][0]["capital"] == "冲击中"
+    assert n_code(mechanism="估值倍数", narrative_shock=False, fundamental_unchanged=False, unexplained=False) == "N2"
+    assert n_code(mechanism="供给", narrative_shock=True, fundamental_unchanged=True, unexplained=False) == "N1"
+    assert n_code(mechanism="估值倍数", narrative_shock=False, fundamental_unchanged=False, unexplained=True) == "N6"
+
+
+@pytest.mark.phase1_blocking
+def test_attribution_tables_do_not_grant_ingest():
+    text = (ROOT / "migrations/phase1_m8_0001_attribution.sql").read_text()
+    for name in (
+        "perception.retrievals",
+        "perception.claims",
+        "perception.candidates",
+        "perception.linkage_events",
+        "perception.tracks",
+        "perception.second_hits",
+        "perception.impact_decomposition",
+        "perception.market_day",
+        "perception.ticker_status",
+        "perception.reports",
+    ):
+        assert name in text
+    assert "ingest." not in text
+    assert "GRANT" not in text
