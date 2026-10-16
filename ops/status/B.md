@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 04:32 北京
+
+- 草稿 PR #18 head `95ffffe`。没有合并进 main。本地 `make phase1-test`：180 passed，18 deselected。
+- 隐含幅度证据分只认三档：相容 1.0、部分相容 0.6、不相容 0.2。无法检验是缺失，按剩余权重重配，不记成 0。情绪这两个字不进分数。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 04:22 北京
 
 - 草稿 PR #18 head `29e521e`。没有合并进 main。本地 `make phase1-test`：179 passed，18 deselected。
