@@ -1,6 +1,6 @@
 {
   "kind": "historical replay using actual database inputs, not scheduled runs",
-  "captured_at": "2026-10-16 07:41:21.238856+00:00",
+  "captured_at": "2026-10-16 09:05:43.148638+00:00",
   "targets": [
     "2026-10-09",
     "2026-10-12",
@@ -743,7 +743,7 @@
           "ticker": "HD",
           "qty": 84,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -751,15 +751,15 @@
           "ticker": "SNDK",
           "qty": 29,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "MU",
           "qty": 45,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -767,15 +767,15 @@
           "ticker": "WDC",
           "qty": 120,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-60 波段买入",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-60 波段买入"
         },
         {
           "ticker": "AVGO",
           "qty": 131,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -783,15 +783,15 @@
           "ticker": "STX",
           "qty": 61,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-60 波段买入",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-60 波段买入"
         },
         {
           "ticker": "PLTR",
           "qty": 238,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -799,7 +799,7 @@
           "ticker": "NVDA",
           "qty": 359,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -807,7 +807,7 @@
           "ticker": "CVX",
           "qty": 386,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -815,7 +815,7 @@
           "ticker": "JPM",
           "qty": 210,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -823,23 +823,23 @@
           "ticker": "LLY",
           "qty": 72,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "GOOGL",
           "qty": 198,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "XOM",
           "qty": 300,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         }
@@ -1094,7 +1094,7 @@
           "ticker": "HD",
           "qty": 84,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1102,7 +1102,7 @@
           "ticker": "SNDK",
           "qty": 44,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1110,15 +1110,15 @@
           "ticker": "MU",
           "qty": 45,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "WDC",
           "qty": 160,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1126,7 +1126,7 @@
           "ticker": "AVGO",
           "qty": 131,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1134,7 +1134,7 @@
           "ticker": "STX",
           "qty": 81,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1142,7 +1142,7 @@
           "ticker": "PLTR",
           "qty": 238,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1150,15 +1150,15 @@
           "ticker": "NVDA",
           "qty": 359,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "CVX",
           "qty": 386,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1166,7 +1166,7 @@
           "ticker": "JPM",
           "qty": 210,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1174,23 +1174,23 @@
           "ticker": "LLY",
           "qty": 86,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "GOOGL",
           "qty": 288,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "XOM",
           "qty": 300,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         }
@@ -1400,7 +1400,7 @@
           "ticker": "HD",
           "qty": 84,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1408,7 +1408,7 @@
           "ticker": "SNDK",
           "qty": 44,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1416,15 +1416,15 @@
           "ticker": "MU",
           "qty": 71,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "WDC",
           "qty": 160,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1432,7 +1432,7 @@
           "ticker": "AVGO",
           "qty": 131,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1440,7 +1440,7 @@
           "ticker": "STX",
           "qty": 81,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1448,7 +1448,7 @@
           "ticker": "PLTR",
           "qty": 238,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1456,7 +1456,7 @@
           "ticker": "NVDA",
           "qty": 444,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1464,7 +1464,7 @@
           "ticker": "CVX",
           "qty": 386,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1472,7 +1472,7 @@
           "ticker": "JPM",
           "qty": 210,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1480,7 +1480,7 @@
           "ticker": "LLY",
           "qty": 86,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1488,7 +1488,7 @@
           "ticker": "GOOGL",
           "qty": 288,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1496,7 +1496,7 @@
           "ticker": "XOM",
           "qty": 300,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         }
@@ -1809,7 +1809,7 @@
           "ticker": "HD",
           "qty": 84,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1817,23 +1817,23 @@
           "ticker": "SNDK",
           "qty": 44,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "MU",
           "qty": 71,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "WDC",
           "qty": 160,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1841,7 +1841,7 @@
           "ticker": "AVGO",
           "qty": 131,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1849,23 +1849,23 @@
           "ticker": "STX",
           "qty": 81,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "PLTR",
           "qty": 238,
           "tier": "attack",
-          "status": "M-59 持有",
+          "status": "M-40 确认加仓",
           "n_code": null,
-          "reason_zh": "M-59 未触发卖出规则，继续持有"
+          "reason_zh": "M-40 确认加仓"
         },
         {
           "ticker": "NVDA",
           "qty": 444,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1873,7 +1873,7 @@
           "ticker": "CVX",
           "qty": 386,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1881,7 +1881,7 @@
           "ticker": "JPM",
           "qty": 210,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1889,7 +1889,7 @@
           "ticker": "LLY",
           "qty": 86,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1897,7 +1897,7 @@
           "ticker": "GOOGL",
           "qty": 288,
           "tier": "normal",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         },
@@ -1905,7 +1905,7 @@
           "ticker": "XOM",
           "qty": 300,
           "tier": "defense",
-          "status": "M-59 持有",
+          "status": "M-59 未触发卖出规则，继续持有",
           "n_code": null,
           "reason_zh": "M-59 未触发卖出规则，继续持有"
         }
