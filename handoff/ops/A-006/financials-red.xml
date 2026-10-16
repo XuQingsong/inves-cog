@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="8" time="0.085" timestamp="2026-10-16T14:49:36.490500+08:00" hostname="192.168.1.101"><testcase classname="tests.ops.test_financials_scheduling" name="test_installer_registers_restarting_financials_only_service" time="0.001"><failure message="configparser.NoSectionError: No section: 'program:financials'">def test_installer_registers_restarting_financials_only_service():
+        config = ConfigParser(interpolation=None)
+        config.read_string(configuration(Path('/fixture/root'), Path('/fixture/python')))
+&gt;       assert 'schedule_financials.py' in config.get('program:financials', 'command')
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_financials_scheduling.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/configparser.py:803: in get
+    d = self._unify_values(section, vars)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;configparser.ConfigParser object at 0x109497d10&gt;
+section = 'program:financials', vars = None
+
+    def _unify_values(self, section, vars):
+        """Create a sequence of lookups with 'vars' taking priority over
+        the 'section' which takes priority over the DEFAULTSECT.
+    
+        """
+        sectiondict = {}
+        try:
+            sectiondict = self._sections[section]
+        except KeyError:
+            if section != self.default_section:
+&gt;               raise NoSectionError(section) from None
+E               configparser.NoSectionError: No section: 'program:financials'
+
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/configparser.py:1178: NoSectionError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:14:59+00:00-False]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">stamp = '2026-10-17T01:14:59+00:00', ready = False
+
+    @pytest.mark.parametrize('stamp,ready', [
+        ('2026-10-17T01:14:59+00:00', False),
+        ('2026-10-17T01:15:00+00:00', True),
+        ('2026-10-17T01:44:59+00:00', True),
+        ('2026-10-17T01:45:00+00:00', False),
+        ('2026-11-03T02:15:00+00:00', True),
+        ('2026-10-18T01:15:00+00:00', False),
+    ])
+    def test_financials_slot_et_dst_and_no_repeat(stamp, ready):
+&gt;       from scripts.schedule_financials import due
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:32: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:15:00+00:00-True]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">stamp = '2026-10-17T01:15:00+00:00', ready = True
+
+    @pytest.mark.parametrize('stamp,ready', [
+        ('2026-10-17T01:14:59+00:00', False),
+        ('2026-10-17T01:15:00+00:00', True),
+        ('2026-10-17T01:44:59+00:00', True),
+        ('2026-10-17T01:45:00+00:00', False),
+        ('2026-11-03T02:15:00+00:00', True),
+        ('2026-10-18T01:15:00+00:00', False),
+    ])
+    def test_financials_slot_et_dst_and_no_repeat(stamp, ready):
+&gt;       from scripts.schedule_financials import due
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:32: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:44:59+00:00-True]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">stamp = '2026-10-17T01:44:59+00:00', ready = True
+
+    @pytest.mark.parametrize('stamp,ready', [
+        ('2026-10-17T01:14:59+00:00', False),
+        ('2026-10-17T01:15:00+00:00', True),
+        ('2026-10-17T01:44:59+00:00', True),
+        ('2026-10-17T01:45:00+00:00', False),
+        ('2026-11-03T02:15:00+00:00', True),
+        ('2026-10-18T01:15:00+00:00', False),
+    ])
+    def test_financials_slot_et_dst_and_no_repeat(stamp, ready):
+&gt;       from scripts.schedule_financials import due
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:32: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:45:00+00:00-False]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">stamp = '2026-10-17T01:45:00+00:00', ready = False
+
+    @pytest.mark.parametrize('stamp,ready', [
+        ('2026-10-17T01:14:59+00:00', False),
+        ('2026-10-17T01:15:00+00:00', True),
+        ('2026-10-17T01:44:59+00:00', True),
+        ('2026-10-17T01:45:00+00:00', False),
+        ('2026-11-03T02:15:00+00:00', True),
+        ('2026-10-18T01:15:00+00:00', False),
+    ])
+    def test_financials_slot_et_dst_and_no_repeat(stamp, ready):
+&gt;       from scripts.schedule_financials import due
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:32: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-11-03T02:15:00+00:00-True]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">stamp = '2026-11-03T02:15:00+00:00', ready = True
+
+    @pytest.mark.parametrize('stamp,ready', [
+        ('2026-10-17T01:14:59+00:00', False),
+        ('2026-10-17T01:15:00+00:00', True),
+        ('2026-10-17T01:44:59+00:00', True),
+        ('2026-10-17T01:45:00+00:00', False),
+        ('2026-11-03T02:15:00+00:00', True),
+        ('2026-10-18T01:15:00+00:00', False),
+    ])
+    def test_financials_slot_et_dst_and_no_repeat(stamp, ready):
+&gt;       from scripts.schedule_financials import due
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:32: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-18T01:15:00+00:00-False]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">stamp = '2026-10-18T01:15:00+00:00', ready = False
+
+    @pytest.mark.parametrize('stamp,ready', [
+        ('2026-10-17T01:14:59+00:00', False),
+        ('2026-10-17T01:15:00+00:00', True),
+        ('2026-10-17T01:44:59+00:00', True),
+        ('2026-10-17T01:45:00+00:00', False),
+        ('2026-11-03T02:15:00+00:00', True),
+        ('2026-10-18T01:15:00+00:00', False),
+    ])
+    def test_financials_slot_et_dst_and_no_repeat(stamp, ready):
+&gt;       from scripts.schedule_financials import due
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:32: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_dispatch_uses_existing_m2_runner_and_only_financials" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_financials'">def test_financials_dispatch_uses_existing_m2_runner_and_only_financials():
+&gt;       from scripts.schedule_financials import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_financials'
+
+tests/ops/test_financials_scheduling.py:40: ModuleNotFoundError</failure></testcase></testsuite></testsuites>
