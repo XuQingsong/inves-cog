@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 02:17 北京
+
+- 草稿 PR #18 head `be94cb9`。没有合并进 main。本地 `make phase1-test`：167 passed，18 deselected。
+- 解释报告带影响范围和跟踪清单。暴露只跟关系走。候选关系、已退出的关系降成概念关联。没有关系的价格成员是纯共振。估值倍数停在概念关联。供给或需求的清单上，「有数据」不是证据。东芝合成走查已验证之后，WDC 仍是纯共振，类型候选只有事件冲击。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 02:03 北京
 
 - 草稿 PR #18 head `bd4da67`。没有合并进 main。本地 `make phase1-test`：166 passed，18 deselected。新的案例测试单独通过。
