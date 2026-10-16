@@ -71,6 +71,21 @@ def channel_rows(mechanism, citations, exposures, *, years_to_realize=None):
     return [_channel_row(name, level, exposures, years_to_realize) for name in names]
 
 
+def channel_lines(result):
+    """Each channel gets its own verdict. The word 情绪 is not one of them."""
+    lines = []
+    for row in result["channels"]:
+        delta = row["delta_e_evt"]
+        lines.append(
+            {
+                "channel": row["channel"],
+                "delta_e_evt": delta,
+                "verdict": _one_channel_verdict(result["delta_e_mkt"], delta),
+            }
+        )
+    return lines
+
+
 def implied_magnitude(payload, rules=None):
     rules = rules or m8_rules()
     income_cap = {int(level): value for level, value in rules["income_change_cap"].items()}
@@ -173,6 +188,13 @@ def _uncomputable(channels):
         row["channel"] != MULTIPLE and row.get("exposure_usd") is not None and row["delta_e_evt"] is None
         for row in channels
     )
+
+
+def _one_channel_verdict(delta_market, delta):
+    if delta is None:
+        return "无法检验"
+    _ratio, verdict = _verdict(delta_market, delta, False, True)
+    return verdict
 
 
 def _verdict(delta_market, total, partial, has_number):

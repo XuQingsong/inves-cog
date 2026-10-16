@@ -646,6 +646,60 @@ def test_missing_vectors_are_named_as_a_rule_fallback():
 
 
 @pytest.mark.phase1_blocking
+def test_magnitude_channels_keep_their_own_verdicts():
+    from inves_cog.perception.attribution.magnitude import implied_magnitude
+    from inves_cog.perception.attribution.report import explanation_report
+
+    anomaly = {"anomaly_id": "openai", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    direct = implied_magnitude(
+        {
+            "delta_mktcap": -800000000000.0,
+            "pe": 32.0,
+            "channels": [
+                {"channel": "直接收入", "exposure_usd": 10000000000.0, "source_level": 4, "incremental_margin": 0.3}
+            ],
+        }
+    )
+    backlog = implied_magnitude(
+        {
+            "delta_mktcap": -60000000000.0,
+            "pe": 30.0,
+            "channels": [
+                {
+                    "channel": "订单/积压",
+                    "exposure_usd": 150000000000.0,
+                    "source_level": 4,
+                    "years_to_realize": 5,
+                    "incremental_margin": 0.3,
+                }
+            ],
+        }
+    )
+    partial = implied_magnitude(
+        {
+            "delta_mktcap": -10000000000.0,
+            "pe": 20.0,
+            "channels": [
+                {"channel": "直接收入", "exposure_usd": 4000000000.0, "source_level": 2, "incremental_margin": 0.5},
+                {"channel": "融资/对手方", "exposure_usd": None, "source_level": 2},
+            ],
+        }
+    )
+    direct["verdict"] = "情绪"
+    report = explanation_report(anomaly, impact, [], [], magnitude=direct)
+    assert report["magnitude_channels"] == [{"channel": "直接收入", "delta_e_evt": 300000000.0, "verdict": "不相容"}]
+    assert report["fundamental_standing"] is None
+    assert "operating_impact_proven" not in report
+    assert "情绪" not in json.dumps(report["magnitude_channels"], ensure_ascii=False)
+    listed = explanation_report(anomaly, impact, [], [], magnitude=backlog)
+    assert listed["magnitude_channels"][0]["verdict"] == "部分相容"
+    split = explanation_report(anomaly, impact, [], [], magnitude=partial)
+    assert [row["verdict"] for row in split["magnitude_channels"]] == ["相容", "无法检验"]
+    assert explanation_report(anomaly, impact, [], [])["magnitude_channels"] is None
+
+
+@pytest.mark.phase1_blocking
 def test_fingerprint_registers_only_a_medium_market_score():
     from inves_cog.perception.attribution.second_hit import later_matches_fingerprint, prediction_fingerprint
 
