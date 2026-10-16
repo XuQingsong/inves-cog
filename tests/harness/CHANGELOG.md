@@ -172,3 +172,5 @@
 | tests/fixtures/phase1/m3/timeline.json | absent | db16d56182ec95a2c99136c43728f11106cc9761d148eff55b4f1282cf249b5d | Handwritten synthetic frozen contract, first failing tests | FR-M3-01; FR-M0-08 |
 
 | tests/fixtures/phase1/m2/a003/unh-cost-components.json | absent | 20ea1d172b03e6519b4cb1603058f1ddf4b73f36d816647dc394d95845c4acca | SEC UNH original cost components: medical benefits and product costs; D-27 regression | A-003; FR-M0-08 |
+
+- A-006/M4: tests/fixtures/phase1/m4/overlay.json d5cb6e3845b9c3a7cf0b8c3e734ffd0b00b9210d6b37947fca69d3f600e61182 — synthetic cooling and rejected-increase contract, before implementation.

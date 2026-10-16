@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="12" skipped="0" tests="14" time="0.108" timestamp="2026-10-16T14:54:23.324252+08:00" hostname="192.168.1.101"><testcase classname="tests.m4.test_execution" name="test_order_reason_tokens" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.execution'">def test_order_reason_tokens():
+&gt;       from inves_cog.trading.execution.contracts import validate_order
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:47: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_orders_only_from_engine" time="0.000"><failure message="ImportError: cannot import name 'engine' from 'inves_cog.trading' (/private/tmp/inves-cog-m4-kickoff/src/inves_cog/trading/__init__.py)">def test_orders_only_from_engine():
+&gt;       from inves_cog.trading import engine as module
+E       ImportError: cannot import name 'engine' from 'inves_cog.trading' (/private/tmp/inves-cog-m4-kickoff/src/inves_cog/trading/__init__.py)
+
+tests/m4/test_execution.py:60: ImportError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_fill_timing_and_cost" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.engine'">def test_fill_timing_and_cost():
+&gt;       e = engine(5000)
+            ^^^^^^^^^^^^
+
+tests/m4/test_execution.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cash = 5000
+
+    def engine(cash=1_000_000):
+&gt;       from inves_cog.trading.engine import ExecutionEngine
+E       ModuleNotFoundError: No module named 'inves_cog.trading.engine'
+
+tests/m4/test_execution.py:33: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_membership_asof" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.execution'">def test_membership_asof():
+&gt;       from inves_cog.trading.execution.contracts import members_asof
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:90: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_sell_priority" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.execution'">def test_sell_priority():
+&gt;       from inves_cog.trading.execution.sells import sell_signal
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:99: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_panic_gate_scope" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.execution'">def test_panic_gate_scope():
+&gt;       from inves_cog.trading.execution.sells import sell_signal
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:110: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_cooldown_m58" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.engine'">def test_cooldown_m58():
+&gt;       e = engine()
+            ^^^^^^^^
+
+tests/m4/test_execution.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cash = 1000000
+
+    def engine(cash=1_000_000):
+&gt;       from inves_cog.trading.engine import ExecutionEngine
+E       ModuleNotFoundError: No module named 'inves_cog.trading.engine'
+
+tests/m4/test_execution.py:33: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_overlay_cooling_skip_and_cancel" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.engine'">def test_overlay_cooling_skip_and_cancel():
+&gt;       e = engine()
+            ^^^^^^^^
+
+tests/m4/test_execution.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cash = 1000000
+
+    def engine(cash=1_000_000):
+&gt;       from inves_cog.trading.engine import ExecutionEngine
+E       ModuleNotFoundError: No module named 'inves_cog.trading.engine'
+
+tests/m4/test_execution.py:33: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_overlay_missing_marked" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.engine'">def test_overlay_missing_marked():
+        for overlay, status in ((None, "missing"), ({"generated_at": "2026-01-12T10:00:00Z"}, "stale")):
+&gt;           e = engine()
+                ^^^^^^^^
+
+tests/m4/test_execution.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cash = 1000000
+
+    def engine(cash=1_000_000):
+&gt;       from inves_cog.trading.engine import ExecutionEngine
+E       ModuleNotFoundError: No module named 'inves_cog.trading.engine'
+
+tests/m4/test_execution.py:33: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_plan_unpublished_low_coverage" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.engine'">def test_plan_unpublished_low_coverage():
+&gt;       e = engine()
+            ^^^^^^^^
+
+tests/m4/test_execution.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cash = 1000000
+
+    def engine(cash=1_000_000):
+&gt;       from inves_cog.trading.engine import ExecutionEngine
+E       ModuleNotFoundError: No module named 'inves_cog.trading.engine'
+
+tests/m4/test_execution.py:33: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.engine'">def test_plan_json_contract():
+&gt;       e = engine()
+            ^^^^^^^^
+
+tests/m4/test_execution.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cash = 1000000
+
+    def engine(cash=1_000_000):
+&gt;       from inves_cog.trading.engine import ExecutionEngine
+E       ModuleNotFoundError: No module named 'inves_cog.trading.engine'
+
+tests/m4/test_execution.py:33: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_vix_missing_not_panic" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.trading.execution'">def test_vix_missing_not_panic():
+&gt;       from inves_cog.trading.execution.risk import vix_panic
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:179: ModuleNotFoundError</failure></testcase><testcase classname="tests.m4.test_execution" name="test_v18_replay" time="0.000"><error message="failed on setup with &quot;ModuleNotFoundError: No module named 'inves_cog.trading.execution'&quot;">@pytest.fixture(scope="session")
+    def replay():
+&gt;       from inves_cog.trading.execution.replay import run_frozen
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:189: ModuleNotFoundError</error></testcase><testcase classname="tests.m4.test_execution" name="test_amd_entry_2026_01_12" time="0.000"><error message="failed on setup with &quot;ModuleNotFoundError: No module named 'inves_cog.trading.execution'&quot;">@pytest.fixture(scope="session")
+    def replay():
+&gt;       from inves_cog.trading.execution.replay import run_frozen
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution'
+
+tests/m4/test_execution.py:189: ModuleNotFoundError</error></testcase></testsuite></testsuites>
