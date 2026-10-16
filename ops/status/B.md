@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  已收到  2026-10-16 21:30 北京
+
+- 任务：M8 建连归因与三轨跟踪。先写开工复述和草稿 PR，分支 `phase1/m8-attribution-tracking`。没有「必须停」就直接开发。
+- 依据：`origin/main` `2165c29`；`ops/control.md` 中 B 为「运行」。M8 用 v6。不连共用库，不改 `docs/`、golden、milestones，不合并。M7 尚未进 main，按已验收契约和夹具开发，不把未合并的 M7 实现混进本分支。
+- 下一步：读 T08、M8 v6、M7 输出契约和 M6 图谱接口，写 `handoff/M8/kickoff.md`。
+
 ## B-007  已完成  2026-10-16 18:08 北京
 
 - PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `3102373`。没有合并。已合入 `origin/main` `e2c223c`，`MANIFEST.sha256` 和 `CHANGELOG.md` 自动合并，两边都保留。没有改阈值，没有改 M6，没有改 `docs/`、golden、milestones，没有连接或写入共用库。
