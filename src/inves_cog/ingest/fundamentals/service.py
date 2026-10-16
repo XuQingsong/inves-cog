@@ -176,16 +176,26 @@ class FinancialService:
                 cik = self.ciks.get(ticker)
                 if not cik:
                     raise ValueError("SEC CIK missing for " + ticker)
-                data = self.sec.companyfacts(cik)
-                sic = data.get("sic", entity.get("sic"))
-                foreign = entity.get("foreign", False)
                 relevant = [
                     f
                     for f in filings
                     if str(f["form"]).removesuffix("/A") in {"10-Q", "10-K", "20-F", "40-F", "6-K"}
                     and day(f["filing_date"]) <= self.as_of
                 ]
-                d9_facts = self.d9_facts(ticker, relevant)
+                data = self.sec.companyfacts(cik)
+                facts_by_cik = {str(int(cik)): data}
+                sic = data.get("sic", entity.get("sic"))
+                foreign = entity.get("foreign", False)
+                d9_facts = self.d9_facts(ticker, relevant, facts_by_cik=facts_by_cik)
+                from inves_cog.ingest.fundamentals.repairs import merge_facts, settings
+
+                # Only explicitly registered predecessors supplement fixed financial history.
+                # A shared accession can appear under both CIKs; do not replace the current
+                # registrant with the CIK of a local filing-index row. Legacy stays unchanged.
+                fixed_data = data
+                predecessors = settings().get("d9", {}).get("predecessor_ciks", {}).get(ticker, [])
+                for predecessor in predecessors:
+                    fixed_data = merge_facts(fixed_data, facts_by_cik[str(int(predecessor))])
                 fixed_dates = sorted(
                     {day(f["filing_date"]) for f in relevant if day(f["filing_date"]) >= date(2015, 1, 1)}
                 )
@@ -212,9 +222,10 @@ class FinancialService:
                             key=lambda f: (day(f["filing_date"]), str(f.get("accepted_at") or ""), f["accession"]),
                             default=None,
                         )
+                        visible_data = fixed_data if extractor == "fixed" else data
                         accessions = {
                             r.get("accn")
-                            for tax in data.get("facts", {}).values()
+                            for tax in visible_data.get("facts", {}).values()
                             for node in tax.values()
                             for rows in node.get("units", {}).values()
                             for r in rows
@@ -238,7 +249,7 @@ class FinancialService:
                                     }
                                 )
                         state = extract_state(
-                            data,
+                            visible_data,
                             ticker=ticker,
                             as_of=cutoff,
                             extractor=extractor,
@@ -250,6 +261,11 @@ class FinancialService:
                             available_as_of=self.as_of,
                         )
                         state.filed = cutoff
+                        state.field_sources["companyfacts_cik"] = {
+                            "primary_cik": str(int(cik)),
+                            "predecessor_ciks": [str(int(c)) for c in predecessors] if extractor == "fixed" else [],
+                            "as_of": cutoff.isoformat(),
+                        }
                         self.repo.put_state(state)
                 current = self.repo.state_asof(ticker, self.as_of, "fixed")
                 if current is None:
@@ -422,13 +438,18 @@ class FinancialService:
 
         return merge_facts(extra, parsed or {}) if extra else parsed
 
-    def d9_facts(self, ticker, filings):
+    def d9_facts(self, ticker, filings, *, facts_by_cik=None):
         from inves_cog.ingest.fundamentals.repairs import merge_facts, settings
 
         rules = settings().get("d9", {})
         extra = {}
         for cik in rules.get("predecessor_ciks", {}).get(ticker, []):
-            evidence = self.sec.companyfacts(cik)
+            key = str(int(cik))
+            cache = facts_by_cik if facts_by_cik is not None else {}
+            if key not in cache:
+                cache[key] = self.sec.companyfacts(cik)
+            # D9 annotations must not mutate the primary historical source.
+            evidence = deepcopy(cache[key])
             for tags in evidence.get("facts", {}).values():
                 for node in tags.values():
                     for rows in node.get("units", {}).values():

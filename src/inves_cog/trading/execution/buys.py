@@ -80,8 +80,11 @@ def core_adds(engine, scores, values, equity, sold):
         if engine.index - position["last_sell_index"] < PARAMS["cooldown_days"]:
             engine.skip(ticker, "M-58", "N7", "核心卖出后冷却期，暂不加仓")
             continue
-        if engine.dd12 and tier != "defense" or limit(engine, tier, values, equity) <= values[tier]:
-            engine.skip(ticker, "M-40", "N7", "组合闸门或层额度不足，暂不加仓")
+        if engine.dd12 and tier != "defense":
+            engine.skip(ticker, "M-40", "N7", "回撤 −12% 闸门生效，暂停非防守层加仓")
+            continue
+        if limit(engine, tier, values, equity) <= values[tier]:
+            engine.skip(ticker, "M-40", "N7", f"{tier}层买入额度已满，暂不加仓")
             continue
         target = add_target(position, score, engine.index, (equity - engine.cash) / equity)
         if target:
@@ -260,11 +263,17 @@ def entries(engine, scores, values, equity):
         score, tier = scores[ticker], scores[ticker]["tier"]
         # Q-M4-11 / Muse aacea04 L649–674: pending buy_watch has its own three-name gate.
         slots = sum(o["action"] == "buy_to" for o in engine.pending) + len(engine.positions)
-        constrained = counts[tier] >= TIERS[tier]["max_positions"] or slots >= RULE_A["max_positions"]
-        constrained |= engine.dd12 and tier != "defense"
-        constrained |= tier == "defense" and not reentry and score["hold_score"] < PARAMS["defensive_hold_min"]
-        if constrained:
-            engine.skip(ticker, "M-34", "N7", "组合只数或闸门约束，暂不开仓")
+        reasons = []
+        if counts[tier] >= TIERS[tier]["max_positions"]:
+            reasons.append(f"{tier}层持仓已达{TIERS[tier]['max_positions']}只")
+        if slots >= RULE_A["max_positions"]:
+            reasons.append(f"规则A开仓名额已满{RULE_A['max_positions']}只（当前计数{slots}）")
+        if engine.dd12 and tier != "defense":
+            reasons.append("回撤 −12% 闸门生效，暂停非防守层新开仓")
+        if tier == "defense" and not reentry and score["hold_score"] < PARAMS["defensive_hold_min"]:
+            reasons.append(f"防守层持有评分低于{PARAMS['defensive_hold_min']}分")
+        if reasons:
+            engine.skip(ticker, "M-34", "N7", "；".join(reasons))
             continue
         fraction = first_fraction(
             tier,

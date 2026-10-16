@@ -1,14 +1,3 @@
-test_path_a_total_shock | M7 | 等待 M7 实现
-test_path_b_relative | M7 | 等待 M7 实现
-test_path_c_factor | M7 | 等待 M7 实现
-test_multi_day_cumulative | M7 | 等待 M7 实现
-test_merge_and_layer | M7 | 等待 M7 实现
-test_data_quality_gates | M7 | 等待 M7 实现
-test_amplification_features | M7 | 等待 M7 实现
-test_type_candidates_prelim | M7 | 等待 M7 实现
-test_premarket_review_scope | M7 | 等待 M7 实现
-test_no_news_dependency | M7 | 等待 M7 实现
-test_case_detection | M7 | 等待 M7 实现
 test_anomaly_live_smoke | M7 | 等待 R5
 test_anomaly_contract | M8 | 等待 M8 实现
 test_implied_magnitude_rules | M8 | 等待 M8 实现
