@@ -700,6 +700,45 @@ def test_magnitude_channels_keep_their_own_verdicts():
 
 
 @pytest.mark.phase1_blocking
+def test_one_level12_quantity_is_local_support_only():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.tracks import local_support
+
+    as_of = datetime(2026, 10, 6, 21, 0)
+    statement = {
+        "source_level": 2,
+        "quantity": "产能增加 20%",
+        "published_at": datetime(2026, 10, 6, 9, 0),
+        "first_seen_at": datetime(2026, 10, 6, 10, 0),
+    }
+    assert local_support([statement], as_of) == "局部支持"
+    assert local_support([{**statement, "source_level": 4}], as_of) == "待验证"
+    assert local_support([{**statement, "quantity": None}], as_of) == "待验证"
+    assert local_support([{**statement, "kind": "price"}], as_of) == "待验证"
+    later = {**statement, "first_seen_at": datetime(2026, 10, 7, 9, 0)}
+    assert local_support([later], as_of) == "待验证"
+    anomaly = {"anomaly_id": "toshiba", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    report = explanation_report(anomaly, impact, [supply], [], statements=[statement], as_of=as_of)
+    assert report["fundamental_standing"] == "局部支持"
+    assert report["market_confidence"] == "高"
+    assert "operating_impact_proven" not in report
+    multiple = {"scored": True, "score": 0.9, "mechanism": "估值倍数", "affected": [{"ticker": "MU"}]}
+    narrative = explanation_report(anomaly, impact, [multiple], [], statements=[statement], as_of=as_of)
+    assert narrative["fundamental_standing"] is None
+    deadline = {
+        "fundamental": "支持",
+        "lifecycle": "已验证·有影响",
+        "deadline_outcome": "支持",
+        "closing_reason": "截止日证据支持",
+        "operating_impact_proven": True,
+    }
+    closed = explanation_report(anomaly, impact, [supply], [], deadline, statements=[statement], as_of=as_of)
+    assert closed["fundamental_standing"] == "支持"
+
+
+@pytest.mark.phase1_blocking
 def test_fingerprint_registers_only_a_medium_market_score():
     from inves_cog.perception.attribution.second_hit import later_matches_fingerprint, prediction_fingerprint
 

@@ -74,6 +74,28 @@ def apply_deadline(verdict, *, level1_denial=False, renewed=False):
     return _deadline_result(verdict.outcome, level1_denial=level1_denial, unknowns=verdict.unknowns)
 
 
+_BLOCKED = {"price", "social_heat", "second_hit", "consensus", "flow"}
+
+
+def local_support(statements, as_of):
+    """One visible level-1 or level-2 quantity. This label is not 支持."""
+    if any(_quantitative(row, as_of) for row in statements):
+        return "局部支持"
+    return "待验证"
+
+
+def _quantitative(row, as_of):
+    if row.get("kind") in _BLOCKED or row.get("source_level") not in (1, 2):
+        return False
+    if row.get("quantity") is None:
+        return False
+    published = row.get("published_at")
+    if published is None or as_of is None:
+        return False
+    seen = row.get("first_seen_at") or published
+    return max(published, seen) <= as_of
+
+
 def reactivate(evidence):
     if evidence.get("reprint"):
         raise ValueError("转载不能重新激活")

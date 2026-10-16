@@ -4,6 +4,7 @@ from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.impact import anomaly_status
 from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.retrieve import retrieval_gap
+from inves_cog.perception.attribution.tracks import local_support
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
 CONSTRAINT_ITEMS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
@@ -124,12 +125,14 @@ def explanation_report(
     fundamental_unchanged=False,
     embeddings=None,
     magnitude=None,
+    statements=(),
+    as_of=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
     tracking = tracking_list(mechanisms, known_constraints, deadline_on=deadline_on)
     note = supplement.get("note") if supplement else None
-    conclusions = split_conclusions(candidates, _stated_fundamental(deadline))
+    conclusions = split_conclusions(candidates, _stated_fundamental(deadline, statements, as_of))
     report = {
         "anomaly_id": anomaly["anomaly_id"],
         "status": anomaly.get("status") or anomaly_status(anomaly.get("universe"), scores),
@@ -191,12 +194,13 @@ def _fundamental_standing(candidates, fundamental):
     return "待验证"
 
 
-def _stated_fundamental(deadline):
-    if not deadline:
-        return None
-    stated = deadline.get("fundamental")
-    if stated in _FUNDAMENTAL:
-        return stated
+def _stated_fundamental(deadline, statements, as_of):
+    if deadline:
+        stated = deadline.get("fundamental")
+        if stated in _FUNDAMENTAL:
+            return stated
+    if statements and local_support(statements, as_of) == "局部支持":
+        return "局部支持"
     return None
 
 
