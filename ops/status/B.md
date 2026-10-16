@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-003  已收到  2026-10-16 12:21 北京
+
+- 任务：把最新 `origin/main` 再合进 PR #8。不合并 PR，不改别的文件。
+- 依据：`ops/control.md` 中 B 为「运行」。B-003 写明 B-002 第 1–5 项已通过，第 6 项取消。
+- 下一步：解决 `pyproject.toml`、`tests/fixtures/phase1/MANIFEST.sha256`、`tests/harness/CHANGELOG.md`，跑 blocking。
+
+## B-002  已完成  2026-10-16 12:21 北京
+
+- 需求方在 B-003 中确认第 1–5 项通过。第 6 项按 Q-M6-20 取消：B 线不写共用库，三天重算改由 A 线在 PR #8 合并后执行。
+- 交付仍是 PR #8，head `d5d0587`，CI https://github.com/XuQingsong/inves-cog/actions/runs/38848165567
+- 已自行决定：无。
+
 ## B-002  阻塞  2026-10-16 11:59 北京
 
 - PR #8，head `d5d0587`。CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/38848165567 （push 同头：https://github.com/XuQingsong/inves-cog/actions/runs/38848160877）。本地 `make phase1-test`：53 passed，6 deselected，1 warning，19.53s，退出码 0。
