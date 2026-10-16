@@ -2,15 +2,19 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-003  进行中  2026-10-16 12:30 北京
-- 草稿 PR [#10](https://github.com/XuQingsong/inves-cog/pull/10)，分支 phase1/m1m2-fixes-a003，基线 main c1970adcda88305eb8800f1d1c65be6bae59dd78。远端先红提交 e6f3250a3532fbcd0cac7dfe4e76d7e195a229aa：D-27 3 failed、3 passed；后续实现尚未发布，当前红灯属于先测试历史，不冒称 CI 已绿。
-- D-27 已查明：UNH 原件 0000731766-26-000197 的 XBRL 计算关系显示 PolicyholderBenefitsAndClaimsIncurredNet（医疗赔付）与 CostOfGoodsAndServicesSold（产品成本）是独立成本项；旧 D4 只扣后者。真实原件夹具复现 88.571276%→应为 19.514184%；本机实现回归 21 passed。19 只曾出现 gross_margin_derived 的标的正在逐只核对。PR #7 已合并 9bbf151，后续按任务重算 UNH fixed 历史分数。
-- D-26 诊断事实（先登记再修）：原 job 5309 仅更新 NVDA 的 1559 条申报，最后成功正文为 2015-000131；紧接着尚未入库的正文为 2015-000087 与 2015-000013。旧实现对 collect_submissions 外的正文/Form 4 读取异常没有公司级隔离，也没有公司级续跑游标，单请求失败会终止整任务并下次从头来。原日志只保存泛化 SourceError，无法据此还原当时具体底层 transport 类型；本次三个基础端点及 2015-000087 正文实际复核成功，无 429/403 或请求过快的证据，不将限流猜测当结论。接下来为已证实的异常传播、续跑缺口加失败测试，并保留具体异常链与 URL（去 query）供下一真实时段核对。
-- D-22 已只读核验：CompanyIR 不存在；演示 EntitySites 行不存在；DashScope=ok，已有真实 embedding 记账成功证据，因此不制造无意义写操作。将独立提交 handoff/M1/a003-health-cleanup.json。
-- LLM 预算日界为 America/New_York。文档 FR-M1-18 的 150 万是非标的池条目的排队阈值，超过后仍允许标的池完整处理；现有 full() 保留这一例外。正在按 purpose、模型和任务核对实际日常/回补贡献，未把超过阈值自动判断为预算失效。
-- 待真实证据窗口：M1 SEC 正式运行仍只在美东 20:45–21:15；10-16 完整预算日截至北京时间 10-17 12:00。继续先完成其余代码和离线验收，再用现有定时检查补齐，不改时钟或生产定时服务。
-- 变更：D-27 仅 fixed 的 UNH 成本基准与缺医疗成本原因码；D-26 拟用既有 ingest.source_cursors 存公司进度，无新表/迁移/依赖/数据源。无新用户决策，未改 PR #7/#8、docs、golden 或 milestones。
-- 下一步：完成 19 只审计、指定 fixed/UNH 数据重算、SEC 回归及隔离续跑实现；四项证据齐备前保持草稿，不合并。
+## A-003  进行中  2026-10-16 12:55 北京
+- 草稿 PR [#10](https://github.com/XuQingsong/inves-cog/pull/10)，分支 phase1/m1m2-fixes-a003。当前完整 head **481e0248944f5791cabdc111d681afed619e51bc**，本地/GitHub SHA 一致，代码树 2ef1e23e72bfb5c44a9dc5556619d6f07432d5b1。当前 SHA 的 phase1-blocking CI 绿：[run 38852874067](https://github.com/XuQingsong/inves-cog/actions/runs/38852874067)，隔离容器测试及 CI 断言均成功；nightly 按条件 skipped，不冒称本次云端回放。
+- D-27 已修：UNH 原件 0000731766-26-000197 把医疗赔付与产品成本分列，旧 D4 漏扣医疗赔付。fixed 毛利率 88.571276% → **19.514184%**；医疗成本缺失/期间不匹配时 NULL 并记录 gross_margin_costs_incomplete，披露毛利、其他发行人、legacy 不误伤。先红 3 failed/3 passed（e6f3250a3532fbcd0cac7dfe4e76d7e195a229aa），再实现 a8b02437f19a399df7a1527476f5a6daf490755e；联合 M2 回归 21 passed。19 只审计已完成：17 只数字对照，GE/ORCL 原有 NULL 的具体原件成本口径缺口已说明，不编造数字。证据 handoff/M2/a003-gross-margin.json。
+- D-27 实际写库：按 A-003 明确授权，以既有 role_ingest / role_trading 重算 **47** 份 UNH fixed 状态；其余核心字段一致。PR #7 已由需求方合并 9bbf15156a7a1a5beeba0ca692b986a4d9312025，因此用 main 未改动的 M3 重算 **198** 条 UNH fixed 分数（2026-01-02 至 2026-10-15），剩余 split_suspect **0 日**。证据 handoff/M2/a003-unh-rebuild.json，原状态备份留仓库外。
+- D-26 原因已于 12:30、状态提交 0073c74f820c0e30d229e8e94e21b39ce44494ae 先登记再修：旧 collect_submissions 之外的正文/Form 4 请求没有公司级异常隔离，也没有完成游标，一次源故障终止全任务并从头重跑。历史最后成功正文为 NVDA 2015-000131，后两份 2015-000087/000013 未入库；旧泛化日志无法还原当时底层 transport 类型。本次基础端点与具体缺失正文探针成功，无 429/403 证据，不把“请求过快”当已证实原因。
+- D-26 代码已提交：共享 SEC 客户端仍 ≤5 次/秒（含重试），复用连接；既有 source_cursors 存已完成/失败公司和去 query 的端点、HTTP 状态、异常类型链；未完成周期跨日恢复，完整周期次日刷新。单公司正文/解析失败隔离，权限/数据库错误仍抛出。先红 3 failed/2 passed（838fb6a576a1054bad042e03ddd8a5cd04fac7ad），跨日再先红 1 failed/6 passed（a045bf5ec69edecc13a4d7140a3fb6dac888efe1），最终 **7 passed**。证据 handoff/M1/a003-sec-diagnosis.json、a003-d26-*.xml。
+- D-22 已完成核验：CompanyIR 不存在；EntitySites 无效演示行不存在；DashScope=ok 且有真实 embedding 成功记账。无需重复写库，证据 handoff/M1/a003-health-cleanup.json。以后演示只在测试库做。
+- LLM：按美东预算日拆分，10-15 DeepSeek 已知 **6,902,548 token**；其中 3,206,900 来自更早发布条目，另 3,507,594 来自更早入库但缺发布时间的条目，两种历史处理依据分别登记；当天发布条目 188,054。缺 token 的调用仍单列为未知，GLM/embedding 分开统计。FR-M1-18 超 150 万后非池条目排队、池内继续是明确例外；现有正反回归通过，真实库约 1.3 万 daily_budget 排队条目。当前 10-16 只有部分日数据，**不冒称完整一天或稳态成本**。证据 handoff/M1/a003-llm-usage.json，oct16_complete=false。
+- 全仓离线：**64 blocking + 2 replay passed、0 skipped**，Ruff 通过，包含 600 行/16,200 字段规则 A 回放。首轮因新增夹具缺 CHANGELOG 登记失败，输出保留；补登记后同一集合全绿，未改断言。阶段报告 handoff/M1/a003-self-test.md。
+- 尚待两项真实证据：①美东 **10-16 20:45–21:15**（北京 **10-17 08:45–09:15**）完整 SEC job_runs；只读探针不算完整任务。验证前先查原服务任务结束，避免双进程并发，使用真实 SystemClock/Runtime 窗口，不改生产定时服务。②美东 10-16 预算日北京时间 **10-17 12:00** 结束后补全全天用量。输入未到窗口时不重复执行或打扰，不把 A-003 标已完成。
+- 变更/自行决定：SEC 内部持久游标复用现有表、连接池复用现有传输；无新接口/表/迁移/依赖/数据源/权限/定时任务。按明确授权重算 UNH，不触碰其他模块。未改 PR #7/#8、docs、golden、milestones，未运行 Muse/stock-pm。无新用户决定或待答口径。
+- 同步：推送前已成功 git pull --rebase 更新 agent-status；只改本文件、保留 B.md。代码通过官方连接器保留红绿提交历史发布，随后 Git fetch 成功，本地同步到相同完整 SHA。
+- 下一步：复用既有自动化在真实窗口继续本任务，补齐 SEC 全跑和完整预算日后再提交验收。保持草稿，不合并，不开始 M4。
 
 ## A-002  已完成  2026-10-16 11:35 北京
 - PR [#7](https://github.com/XuQingsong/inves-cog/pull/7)，新 head `2c93b5af2630e0d49ad3703a0239c63cff091735`；本地与 GitHub 完整 SHA 及代码树 `0cc283b5e3b480f4b8bdf993edc26052b94afe3b` 一致。
