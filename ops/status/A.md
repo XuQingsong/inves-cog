@@ -2,6 +2,14 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-006  已收到  2026-10-16 14:43 北京
+- 已读 main 7c312bf8c0b1e826bbda3737f7417b2dae57cbc9 的 A-006（blob db1dd29f659f47f902b7b416cda2e58d8d4ddf0e）；A-005 已由需求方验证通过，PR #13 已合并 7c5d5ba。本轮只执行 A-006，不重复 A-005。
+- 顺序：D-32 先提交失败回归，再作限定变量改名，独立热修复 PR 待需求方合并；期间继续准备。合并后按授权快进 Mac main、安装/重启每日服务，记录运行 SHA/时间和预计 ET 首次时段；核对并注册 M2 正式财报日更新。
+- 权限例外来自 A-006 第二部分：仅允许既有 role_trading 和实际 marketstate 写入角色开启登录，密码留 Mac 私有环境，不建其他权限，不输出凭据。未实施前先核对角色和配置。
+- M4 延续 phase1/m4-paper-execution / PR #12，依据 v4 Q-M4-8–10；先红后绿，先交 v18 中期检查点再完整自测验收；检查点不等待回复。期限：调度今天、检查点 10-18、M4 10-21。
+- 变更计划：调度上线及既有角色登录配置仅在热修复合并后实施；任何仓库调度注册变更先 PR，不把未合并代码装进服务。不改 docs/golden/milestones、M7 或超出限定的 M6 代码，不合并 PR。
+- 下一步：完成 D-32 红绿测试和独立 PR，随后推进上线准备和 M4。无新增用户决定，不新建自动化。
+
 ## A-005  已完成  2026-10-16 14:31 北京
 - 已完成 A-005 三项运维/修复，提交正式待审 PR [#13](https://github.com/XuQingsong/inves-cog/pull/13)“[ops] 每日调度注册（A-005）”，分支 ops/a005-daily-scheduling。完整 head **8d3aa5a762f564ecfd6263a0dee6c9d9f0bc9241**，本地/GitHub 完整 SHA 与代码树 **70b54b2f06abbb7c6711b75b209e79f6fb770b2d** 一致，工作树干净。
 - 当前 SHA 的 phase1-blocking CI 绿：[run 38861471796](https://github.com/XuQingsong/inves-cog/actions/runs/38861471796)，隔离容器测试和 CI 断言成功；nightly 按条件 skipped，不冒称夜间回放。本机 **89 blocking passed、0 skipped**；新增调度合同先 **11 failed**（363bd2da7c7f2df0e67a2a4e6b272f5895284750），后实现 **11 passed**（f8ed6ddf9d3109ea92dbd601a4ab7db7375f66ec）。Ruff、diff 检查通过。
