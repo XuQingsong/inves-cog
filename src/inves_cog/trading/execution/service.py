@@ -95,13 +95,12 @@ def historical_plans(*, clock, connection, universe, targets):
     engine.insiders = repository.insider_events(last_signal)
     plans = []
     for target in targets:
-        visible = clock
         from datetime import datetime
+        from zoneinfo import ZoneInfo
 
         from inves_cog.clock import FrozenClock
-        from inves_cog.ingest.market import NY
 
-        visible = FrozenClock(datetime.combine(target, datetime.min.time(), NY).replace(hour=8))
+        visible = FrozenClock(datetime.combine(target, datetime.min.time(), ZoneInfo("Asia/Shanghai")).replace(hour=20))
         engine.clock = visible
         plans.append(prepare(engine, target, inputs, universe))
     return plans

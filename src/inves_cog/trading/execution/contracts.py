@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from inves_cog.trading.execution.state import PARAMS
 
-NY = ZoneInfo("America/New_York")
+BEIJING = ZoneInfo("Asia/Shanghai")
 
 
 def validate_order(order):
@@ -35,7 +35,7 @@ def overlay_state(overlay, day, *, asof=None):
         return {"version": None, "status": "missing", "errors": []}, {}
     stamp = overlay["generated_at"]
     stamp = datetime.fromisoformat(stamp.replace("Z", "+00:00")) if isinstance(stamp, str) else stamp
-    floor = datetime.combine(day, datetime.min.time(), NY).replace(hour=6)
+    floor = datetime.combine(day, datetime.min.time(), BEIJING).replace(hour=18)
     if stamp.tzinfo is not None and asof is not None and stamp > asof:
         return {"version": overlay.get("version"), "status": "missing", "errors": ["future_overlay"]}, {}
     if stamp.tzinfo is None or stamp < floor:

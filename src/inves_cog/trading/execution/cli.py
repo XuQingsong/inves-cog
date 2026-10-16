@@ -5,13 +5,14 @@ import json
 import time
 from datetime import date
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import yaml
 
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.cli import connect
 from inves_cog.ingest.jobs import HealthBook, JobRunner
-from inves_cog.ingest.market import NY, trading_day
+from inves_cog.ingest.market import trading_day
 from inves_cog.ingest.repository import Repository as OperationalRepository
 from inves_cog.ingest.settings import read_environment
 from inves_cog.trading.execution.service import daily_plan
@@ -20,11 +21,11 @@ ROOT = Path(__file__).resolve().parents[4]
 
 
 def due(clock, last=None):
-    local = clock.now_utc().astimezone(NY)
+    local = clock.now_utc().astimezone(ZoneInfo("Asia/Shanghai"))
     return (
         trading_day(local.date())
-        and (8, 0) <= (local.hour, local.minute) < (8, 30)
-        and (last is None or last.astimezone(NY).date() < local.date())
+        and (20, 0) <= (local.hour, local.minute) < (20, 30)
+        and (last is None or last.astimezone(ZoneInfo("Asia/Shanghai")).date() < local.date())
     )
 
 

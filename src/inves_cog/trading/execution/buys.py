@@ -258,6 +258,7 @@ def entries(engine, scores, values, equity):
     planned = dict(values)
     for reentry, _, ticker in candidates:
         score, tier = scores[ticker], scores[ticker]["tier"]
+        # Q-M4-11 / Muse aacea04 L649–674: pending buy_watch has its own three-name gate.
         slots = sum(o["action"] == "buy_to" for o in engine.pending) + len(engine.positions)
         constrained = counts[tier] >= TIERS[tier]["max_positions"] or slots >= RULE_A["max_positions"]
         constrained |= engine.dd12 and tier != "defense"
