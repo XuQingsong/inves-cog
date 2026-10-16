@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 01:04 北京
+
+- 草稿 PR #18 head `744bc39`。没有合并进 main。本地 `make phase1-test`：161 passed，15 deselected。新的案例测试单独通过。
+- 2025-01-27 的 M7 异常对象里，方向向下、成员含 NVDA 的篮子名含「加速」。后补录发布页在这个截止日可用，更晚的 Reuters 和 Axios 进不了候选。没有录音时调用失败。临时引用能消掉加速芯片篮子这条结构缺口，这只表示结构清单空了。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 00:54 北京
 
 - 草稿 PR #18 head `79e49ef`。没有合并进 main。本地 `make phase1-test`：161 passed，14 deselected。
