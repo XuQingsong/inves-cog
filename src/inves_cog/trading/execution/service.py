@@ -40,7 +40,12 @@ def prepare(engine, target, inputs, universe, overlay=None):
     signal_day = exchange(target.year).previous_session(str(target)).date()
     if engine.signal_date != signal_day:
         decide_day(engine, signal_day, inputs)
-    included = members_asof([r for r in universe if not r.get("foreign", False)], signal_day)
+    known_members = [
+        {**r, "first_trade_date": inputs.get("first_trade_dates", {}).get(r["ticker"])}
+        for r in universe
+        if not r.get("foreign", False)
+    ]
+    included = members_asof(known_members, signal_day)
     available = [
         t
         for t in included
@@ -56,6 +61,8 @@ def prepare(engine, target, inputs, universe, overlay=None):
         portfolio_id=engine.portfolio_id,
         missing_scores=sorted(set(included) - set(engine.scores)),
     )
+    if plan["missing_scores"]:
+        plan["health_codes"] = sorted((set(plan["health_codes"]) - {"ok"}) | {"upstream_scores_missing"})
     return plan
 
 

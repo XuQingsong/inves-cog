@@ -1,0 +1,121 @@
+{
+  "trade_date": "2026-10-16",
+  "signal_date": "2026-10-15",
+  "rule_set": "A",
+  "params_version": "p-2026.10",
+  "overlay": {
+    "version": null,
+    "status": "missing",
+    "errors": []
+  },
+  "data_coverage": {
+    "tradable": 54,
+    "with_bars": 54,
+    "pct": 100.0
+  },
+  "published": true,
+  "unpublished_reason": null,
+  "orders": [],
+  "cancels": [],
+  "skips": [],
+  "health_codes": [
+    "upstream_scores_missing"
+  ],
+  "holdings": [],
+  "portfolio": {
+    "equity": 1000000.0,
+    "invested_pct": 0.0,
+    "holdings_count": 0,
+    "tier_usage": {
+      "defense": {
+        "market_value": 0,
+        "weight_pct": 0.0,
+        "buy_limit": 750000.0,
+        "holdings_count": 0
+      },
+      "normal": {
+        "market_value": 0,
+        "weight_pct": 0.0,
+        "buy_limit": 750000.0,
+        "holdings_count": 0
+      },
+      "attack": {
+        "market_value": 0,
+        "weight_pct": 0.0,
+        "buy_limit": 500000.0,
+        "holdings_count": 0
+      }
+    },
+    "gates": {
+      "panic": false,
+      "black_swan": false,
+      "drawdown_brake": false,
+      "vix": {
+        "status": "missing",
+        "threshold": null,
+        "source": null,
+        "observation_date": null
+      }
+    }
+  },
+  "missing_tickers": [],
+  "score_source": "trading.daily_scores",
+  "input_asof": "2026-10-15",
+  "generated_at": "2026-10-16 07:44:47.622546+00:00",
+  "portfolio_id": "paper-fixed",
+  "missing_scores": [
+    "AAPL",
+    "ADBE",
+    "AMAT",
+    "AMD",
+    "AMZN",
+    "ANET",
+    "AVGO",
+    "BE",
+    "CAT",
+    "CEG",
+    "CIEN",
+    "COHR",
+    "COST",
+    "CRM",
+    "CRWD",
+    "CRWV",
+    "CVX",
+    "DELL",
+    "ETN",
+    "FTNT",
+    "GE",
+    "GEV",
+    "GOOGL",
+    "HD",
+    "INTC",
+    "JNJ",
+    "JPM",
+    "KLAC",
+    "LITE",
+    "LLY",
+    "LRCX",
+    "MA",
+    "META",
+    "MRVL",
+    "MSFT",
+    "MU",
+    "NFLX",
+    "NOW",
+    "NVDA",
+    "ORCL",
+    "PANW",
+    "PLTR",
+    "QCOM",
+    "SMCI",
+    "SNDK",
+    "STX",
+    "TSLA",
+    "V",
+    "VRT",
+    "WDC",
+    "WMT",
+    "XOM",
+    "ZS"
+  ]
+}

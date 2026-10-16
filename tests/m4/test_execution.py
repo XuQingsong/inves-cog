@@ -274,7 +274,13 @@ def test_paper_live_smoke():
     from inves_cog.trading.execution.cli import run_daily
 
     result = run_daily(clock=SystemClock(), values=read_environment(), persist=False)
+    (ROOT / "handoff/M4/live-plan.json").write_text(
+        json.dumps(result, default=str, ensure_ascii=False, indent=2) + "\n"
+    )
     assert result["published"] and result["rule_set"] == "A"
+    assert result["score_source"] == "trading.daily_scores"
+    assert result["data_coverage"]["pct"] >= 95
+    assert set(result["portfolio"]["tier_usage"]) == {"defense", "normal", "attack"}
 
 
 for _name, _function in list(globals().items()):

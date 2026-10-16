@@ -27,12 +27,8 @@ class Repository:
             "AND ticker=ANY(%s) ORDER BY ticker,trade_date",
             (through - timedelta(days=1100), through, tickers + ["SPY"]),
         ).fetchall():
-            adjusted = dict(row)
-            for field in ("open", "close"):
-                adjusted[field] = (
-                    row[field] * row["adj_factor"] if row[field] is not None and row["adj_factor"] is not None else None
-                )
-            bars[row["ticker"]][row["trade_date"]] = adjusted
+            # Accepted M3 applies adj_factor itself; settlement marks are raw executable quotes.
+            bars[row["ticker"]][row["trade_date"]] = dict(row)
         states = StateStore(
             [
                 state_from_row(r)
@@ -94,12 +90,21 @@ class Repository:
                 day not in vix or row["series_id"] == "VIX_CBOE" or source[day] != "VIX_CBOE"
             ):
                 vix[day], source[day] = row["value"], row["series_id"]
+        first_dates = {
+            r["ticker"]: r["first_trade_date"]
+            for r in self.connection.execute(
+                "SELECT ticker,min(trade_date) AS first_trade_date FROM ingest.bars_daily "
+                "WHERE ticker=ANY(%s) GROUP BY ticker",
+                (tickers,),
+            ).fetchall()
+        }
         return {
             "bars": bars,
             "signals": signals,
             "vix": vix,
             "vix_sources": source,
             "score_source": "M3 pure historical replay" if historical else "trading.daily_scores",
+            "first_trade_dates": first_dates,
         }
 
     def insider_events(self, through):

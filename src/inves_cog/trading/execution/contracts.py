@@ -30,12 +30,14 @@ def members_asof(universe, day):
     return result
 
 
-def overlay_state(overlay, day):
+def overlay_state(overlay, day, *, asof=None):
     if not overlay or not overlay.get("generated_at"):
         return {"version": None, "status": "missing", "errors": []}, {}
     stamp = overlay["generated_at"]
     stamp = datetime.fromisoformat(stamp.replace("Z", "+00:00")) if isinstance(stamp, str) else stamp
     floor = datetime.combine(day, datetime.min.time(), NY).replace(hour=6)
+    if stamp.tzinfo is not None and asof is not None and stamp > asof:
+        return {"version": overlay.get("version"), "status": "missing", "errors": ["future_overlay"]}, {}
     if stamp.tzinfo is None or stamp < floor:
         return {"version": overlay.get("version"), "status": "stale", "errors": []}, {}
     errors = []

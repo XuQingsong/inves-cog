@@ -22,6 +22,7 @@ def buy(engine, order, day, price, equity, execution_scores):
             amount *= 0.5
     else:
         amount = order["value"]
+    amount *= order.get("overlay_multiplier", 1)
     spend = min(amount, engine.cash)
     quantity = int(spend // price)
     planned_quantity = quantity

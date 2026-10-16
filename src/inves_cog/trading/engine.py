@@ -167,7 +167,7 @@ class ExecutionEngine:
         n = len(self.scores) if tradable is None else tradable
         bars = sum(self.last_prices.get(t) is not None for t in self.scores) if with_bars is None else with_bars
         data, published = coverage(n, bars)
-        layer, rows = overlay_state(overlay, day)
+        layer, rows = overlay_state(overlay, day, asof=self.clock.now_utc())
         canceled, orders, keep = list(self.cancels), [], []
         for intent in self.pending:
             selling = intent["action"].startswith("sell")
@@ -185,6 +185,9 @@ class ExecutionEngine:
                 self.skip(intent["ticker"], "M-34", "N5", "事件冷静期，暂停买入")
                 continue
             if published:
+                multiplier = item.get("first_lot_multiplier", 1)
+                if not selling and isinstance(multiplier, (int, float)) and 0 <= multiplier <= 1:
+                    intent["overlay_multiplier"] = min(intent.get("overlay_multiplier", 1), multiplier)
                 keep.append(intent)
                 orders.append(
                     {
@@ -192,7 +195,7 @@ class ExecutionEngine:
                         "side": "sell" if selling else "buy",
                         "kind": self.order_kind(intent),
                         "qty": None,
-                        "notional_est": intent.get("value"),
+                        "notional_est": self.estimated_notional(intent),
                         "overlay_version": layer["version"],
                     }
                 )
@@ -226,7 +229,7 @@ class ExecutionEngine:
                 "equity": self.last_equity,
                 "invested_pct": (self.last_equity - self.cash) / self.last_equity * 100,
                 "holdings_count": len(self.positions),
-                "tier_usage": {},
+                "tier_usage": self.tier_usage(),
                 "gates": {
                     "panic": self.panic,
                     "black_swan": self.index - 1 <= self.swan_until,
@@ -246,6 +249,50 @@ class ExecutionEngine:
             "sell_all": "exit",
             "sell_frac": "reduce",
         }[order["action"]]
+
+    def estimated_notional(self, order):
+        position = self.positions.get(order["ticker"])
+        price = self.last_prices.get(order["ticker"])
+        if order["action"].startswith("sell"):
+            if position is None or price is None:
+                return None
+            qty = (
+                position["shares"]
+                if order["action"] == "sell_all"
+                else position["swing_shares"]
+                if order["action"] == "sell_swing"
+                else int(position["shares"] * order["fraction"])
+            )
+            return qty * price
+        amount = order.get("value")
+        if order["action"] == "buy_to":
+            amount = order["fraction"] * TIERS[order["tier"]]["cap"] * self.last_equity
+            if position:
+                if price is None:
+                    return None
+                amount -= position["shares"] * price
+            if order.get("half"):
+                amount *= 0.5
+        return max(0.0, amount) * order.get("overlay_multiplier", 1) if amount is not None else None
+
+    def tier_usage(self):
+        values = {
+            tier: sum(
+                p["shares"] * self.last_prices[t]
+                for t, p in self.positions.items()
+                if p["tier_now"] == tier and self.last_prices.get(t) is not None
+            )
+            for tier in TIERS
+        }
+        return {
+            tier: {
+                "market_value": value,
+                "weight_pct": value / self.last_equity * 100,
+                "buy_limit": buys.limit(self, tier, values, self.last_equity),
+                "holdings_count": sum(p["tier_now"] == tier for p in self.positions.values()),
+            }
+            for tier, value in values.items()
+        }
 
     def persist_orders(self, connection, orders):
         for order in orders:

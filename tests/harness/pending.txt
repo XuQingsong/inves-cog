@@ -1,4 +1,3 @@
-test_paper_live_smoke | M4 | 等待 R5
 test_valuation_synthetic | M5 | 等待 M5 实现
 test_growth_valuation_v11 | M5 | 等待 M5 实现
 test_valuation_ignores_price | M5 | 等待 M5 实现
