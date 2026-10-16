@@ -830,6 +830,77 @@ def test_case_no_news_unexplained():
         statuses_without_news([labeled], Boom())
 
 
+class _Boom:
+    def call(self, task, payload):
+        raise AssertionError(task)
+
+
+@pytest.mark.phase1_blocking
+def test_m7_anomalies_without_visible_news_stay_unexplained():
+    from inves_cog.perception.attribution.session import reports_without_visible_news
+
+    as_of = datetime(2026, 10, 14, 21, 0)
+    pool = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "members": [{"ticker": "NVDA"}],
+    }
+    wide = {
+        "anomaly_id": "2026-10-14:close:002",
+        "universe": "wide",
+        "trade_date": "2026-10-14",
+        "members": [{"ticker": "ZZZZ"}],
+    }
+    late = {
+        "info_id": "later",
+        "published_at": datetime(2026, 10, 2, 12, 0),
+        "first_seen_at": datetime(2026, 10, 16, 12, 0),
+    }
+    reports = reports_without_visible_news([pool, wide], [late], as_of, _Boom())
+    assert reports[0]["status"] == "已发现·原因未明"
+    assert reports[0]["case_clause_met"] is False
+    assert reports[0]["sources"] == []
+    assert reports[0]["candidates"][0]["scored"] is False
+    assert reports[1]["status"] == "已记录"
+    assert reports[1]["candidates"] == []
+    seen = {
+        "info_id": "seen",
+        "published_at": datetime(2026, 10, 14, 15, 0),
+        "first_seen_at": datetime(2026, 10, 14, 16, 0),
+    }
+    with pytest.raises(ValueError, match="当时可见"):
+        reports_without_visible_news([pool], [seen], as_of, _Boom())
+    with pytest.raises(ValueError, match="编号或范围"):
+        reports_without_visible_news([{"anomaly_id": "x"}], [], as_of, _Boom())
+
+
+@pytest.mark.phase1_cases
+def test_m7_case_days_have_status_without_claiming_the_clause():
+    from datetime import date
+
+    from inves_cog.perception.anomaly.cases import case_anomalies
+    from inves_cog.perception.anomaly.replay import _identify
+    from inves_cog.perception.attribution.session import reports_without_visible_news
+
+    fixture = ROOT / "tests/fixtures/phase1/m7"
+    windows = (
+        ("toshiba_bars.jsonl.gz", "2026-10-02"),
+        ("openai_bars.jsonl.gz", "2026-10-14"),
+        ("meta_bars.jsonl.gz", "2026-09-21"),
+        ("case_20250127_bars.jsonl.gz", "2025-01-27"),
+    )
+    for filename, day in windows:
+        anomalies = _identify(date.fromisoformat(day), case_anomalies(fixture, filename, day))
+        reports = reports_without_visible_news(anomalies, [], date.fromisoformat(day), _Boom())
+        assert [row["anomaly_id"] for row in reports] == [row["anomaly_id"] for row in anomalies]
+        pool = [row for row in reports if row["universe"] == "pool"]
+        assert pool
+        assert {row["status"] for row in pool} == {"已发现·原因未明"}
+        assert all(row["case_clause_met"] is False for row in reports)
+        assert all(row["status"] == "已记录" for row in reports if row["universe"] == "wide")
+
+
 @pytest.mark.phase1_blocking
 def test_manual_public_leads_leave_case_gaps():
     from datetime import date
