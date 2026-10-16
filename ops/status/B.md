@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 06:42 北京
+
+- 草稿 PR #18 head `3c53a64`。没有合并进 main。本地 `make phase1-test`：192 passed，18 deselected。
+- 链条上市场确认、消息真实性和盈利传导分开。市场确认不把未核实改成核实。核实或修订也不自动写成盈利传导。发现异常的那次价格不能再当作传导。证伪和部分核实仍缺消息真实性。三条都齐时仍不证明经营影响，也不改基本面栏。没有传入链条时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 06:32 北京
 
 - 草稿 PR #18 head `d2c1281`。没有合并进 main。本地 `make phase1-test`：191 passed，18 deselected。
