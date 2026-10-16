@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 03:41 北京
+
+- 草稿 PR #18 head `1436f12`。没有合并进 main。本地 `make phase1-test`：175 passed，18 deselected。
+- 暴露梯度用状态至少「观察到」的关系：直接 3、间接 2、概念关联 1，再和按预期方向取号的残差做 Spearman，负相关记 0。成员少于 3、残差缺失、候选或已退出的关系，以及暴露全部相同，都是缺失而不是 0。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 03:31 北京
 
 - 草稿 PR #18 head `17dcffe`。没有合并进 main。本地 `make phase1-test`：174 passed，18 deselected。
