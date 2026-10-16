@@ -1020,3 +1020,78 @@ def test_historical_case_mode_does_not_open_production_path():
     assert production_visible([item], as_of) == []
     with pytest.raises(ValueError, match="案例模式"):
         production_visible([item], as_of, mode="后补录历史案例")
+
+
+@pytest.mark.phase1_blocking
+def test_historical_case_report_keeps_citations_and_lists_gaps(tmp_path):
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.attribution.historical import historical_report, retrieval_items
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/manual_leads_2026-10-16.json").read_text())
+    leads = payload["leads"]
+    by_kind = {row["kind"]: row for row in leads}
+    read_on = payload["read_on"]
+    visible = {row["info_id"] for row in retrieval_items(leads, "2026-10-14", read_on)}
+    assert by_kind["openai_arr"]["id"] in visible
+    late = {**by_kind["openai_arr"], "id": "after-cutoff", "published_on": "2026-10-20", "updated_on": "2026-10-20"}
+    assert retrieval_items([late], "2026-10-14", read_on) == []
+
+    class Stub:
+        def __init__(self):
+            self.calls = 0
+
+        def call(self, task, body):
+            self.calls += 1
+            assert task == "anomaly_candidates"
+            return {
+                "candidates": [
+                    {"mechanism": "估值倍数", "info_ids": ["missing-id"], "affected": []},
+                    {"mechanism": "需求", "info_ids": [by_kind["openai_arr"]["id"]], "affected": []},
+                ]
+            }
+
+    client = Stub()
+    anomaly = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "case_kind": "openai_arr",
+        "members": [{"ticker": "NVDA"}],
+        "baskets": ["OpenAI合作方"],
+    }
+    report = historical_report(anomaly, leads, read_on, client)
+    assert client.calls == 1
+    assert report["closes_case"] is False
+    assert report["closes_ac_m8_06"] is False
+    assert report["collected_then"] is False
+    assert report["missing"] == ["前 4 名未含至少 3 类"]
+    assert [row["info_ids"] for row in report["candidates"] if row["scored"]] == [[by_kind["openai_arr"]["id"]]]
+    release = {
+        "anomaly_id": "2025-01-20:close:001",
+        "universe": "pool",
+        "trade_date": "2025-01-20",
+        "case_kind": "r1_release",
+        "members": [{"ticker": "NVDA"}],
+        "baskets": ["软件"],
+    }
+
+    class Cite:
+        def call(self, task, body):
+            return {"candidates": [{"mechanism": "竞争", "info_ids": [by_kind["r1_release"]["id"]], "affected": []}]}
+
+    release_report = historical_report(release, leads, read_on, Cite())
+    assert release_report["closes_case"] is False
+    assert "受影响篮子未含 AI 加速芯片" in release_report["missing"]
+    toshiba = {
+        "anomaly_id": "2026-10-02:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-02",
+        "case_kind": "toshiba",
+        "members": [{"ticker": "WDC"}],
+        "baskets": ["HDD"],
+    }
+    quiet = Stub()
+    assert historical_report(toshiba, [], read_on, quiet)["missing"] == ["日经扩产原文未冻结"]
+    assert quiet.calls == 0
+    with pytest.raises(LLMUnavailable, match="待分析"):
+        historical_report(anomaly, leads, read_on, Client(recordings=tmp_path))
