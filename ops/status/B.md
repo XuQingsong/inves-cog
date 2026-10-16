@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-007  进行中  2026-10-16 18:06 北京
+
+- 实现已推到 PR #11，head `3102373`（先合入 `origin/main` `e2c223c`，`MANIFEST.sha256` 和 `CHANGELOG.md` 自动合并，两边都保留）。没有改阈值，没有改 M6，没有改 `docs/`、golden、milestones，没有连接或写入共用库。
+- 差异原因：`marketstate.baskets` 只从 2026-07-01 起。数据库模式用这段短窗口算收益 z，和文件模式 120 日 z 不是同一个数，关注级抢在 `A_linked` 前面；`数据中心电力与散热` 变成 `A_watch`，合并后把数据中心电力从 L3 抬到 L2。另外 `universe` 写死为 `pool`，BAC、LQDA、MMED、PGR、U 被算进池内。
+- 现在两种模式都用同一套日线重算篮子。广域只取不在 `config/universe.yaml` 和篮子成员里的 `marketstate.daily`。行业和风格 ETF 只参与轮动，不当作广域个股。2026-10-14 文件模式仍是 2 条池内（含 `A_linked`，数据中心电力仍是 L3）；补上当日广域日线后，这 5 只是 `universe = wide` 的 L4，池内两条不变。
+- 一致性测试：`test_file_and_database_views_match`。本地 `make phase1-test`：122 passed，12 deselected。M7 blocking 12 个，`test_case_detection` 通过。
+- AC-M7-07（`--source file`）四个数不变：非温和查全率 0.9459459459459459（70/74），样本外 0.9512195121951219（39/41），对照日篮子异常 0，平均每天对象 2.327445652173913（2208 日，5139 条）。
+- 下一步：等这条 head 的 CI。绿了再写已完成，并删除本机 `/tmp/m7-export`。不要重做实现。
+
 ## B-007  已收到  2026-10-16 17:40 北京
 
 - 任务：M7 再修。数据库模式和文件模式不一致，违反 Q-M7-8。在 PR #11 上按 `config/universe.yaml` 和篮子成员划分池内 / 广域，查明篮子层差异并消除，加一致性测试，合入最新 main，重跑文件模式 AC-M7-07。
