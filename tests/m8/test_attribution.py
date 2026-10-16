@@ -1081,7 +1081,7 @@ def test_historical_case_report_keeps_citations_and_lists_gaps(tmp_path):
 
     release_report = historical_report(release, leads, read_on, Cite())
     assert release_report["closes_case"] is False
-    assert "受影响篮子未含 AI 加速芯片" in release_report["missing"]
+    assert "候选未连接加速芯片范围" in release_report["missing"]
     toshiba = {
         "anomaly_id": "2026-10-02:close:001",
         "universe": "pool",
@@ -1159,7 +1159,8 @@ def test_export_headlines_fill_known_categories_without_live_visibility():
         "2026-10-16",
         Cite([by_kind["coreweave_debt"], by_kind["barclays_downgrade"], by_kind["cpi_hot"]]),
     )
-    assert report["closes_case"] is True
+    assert report["missing"] == []
+    assert report["closes_case"] is False
     assert report["closes_ac_m8_06"] is False
     assert report["collected_then"] is False
     disk = {
@@ -1174,7 +1175,8 @@ def test_export_headlines_fill_known_categories_without_live_visibility():
     assert multiple["closes_case"] is False
     assert multiple["missing"] == ["机制不是供给"]
     toshiba = historical_report(disk, leads, "2026-10-16", Cite([by_kind["toshiba_supply"]], "供给"))
-    assert toshiba["closes_case"] is True
+    assert toshiba["missing"] == []
+    assert toshiba["closes_case"] is False
     assert toshiba["closes_ac_m8_06"] is False
     assert toshiba["collected_then"] is False
 
@@ -1289,9 +1291,9 @@ def test_r1_accelerator_basket_still_needs_a_recording(tmp_path):
             return {"candidates": [{"mechanism": "竞争", "info_ids": ids, "affected": [{"ticker": "NVDA"}]}]}
 
     report = historical_report(anomaly, leads, read_on, Cite())
-    assert "受影响篮子未含 AI 加速芯片" not in report["missing"]
+    assert "候选未连接加速芯片范围" not in report["missing"]
     assert report["missing"] == []
-    assert report["closes_case"] is True
+    assert report["closes_case"] is False
     assert report["closes_ac_m8_06"] is False
     assert report["collected_then"] is False
     assert report["vectors_then"] is False
@@ -1341,7 +1343,7 @@ def test_muse_case_keeps_the_september_18_date(tmp_path):
 
     for found in (cpu, meta):
         report = historical_report({**found, "case_kind": "muse_rank"}, leads, read_on, Cite())
-        assert report["missing"] == ["不能证明早于开盘"]
+        assert report["missing"] == []
         assert "受影响范围未含 CPU 或 META" not in report["missing"]
         assert report["closes_case"] is False
         assert report["closes_ac_m8_06"] is False
@@ -1391,7 +1393,8 @@ def test_toshiba_reprint_is_not_operating_evidence(tmp_path):
             }
 
     report = historical_report(anomaly, leads, "2026-10-16", Cite())
-    assert report["closes_case"] is True
+    assert report["missing"] == []
+    assert report["closes_case"] is False
     assert report["closes_ac_m8_06"] is False
     assert report["collected_then"] is False
     assert report["candidates"][0]["affected"] == [{"ticker": "WDC"}]
@@ -1419,3 +1422,197 @@ def test_toshiba_reprint_is_not_operating_evidence(tmp_path):
         "eligible": True,
         "conclusion": "未检验",
     }
+
+
+def _cite(rows):
+    class Cite:
+        def call(self, task, body):
+            assert task == "anomaly_candidates"
+            return {"candidates": rows}
+
+    return Cite()
+
+
+@pytest.mark.phase1_blocking
+def test_muse_open_uses_the_cited_date_interval():
+    from inves_cog.perception.attribution.historical import historical_report
+    from inves_cog.perception.attribution.manual import open_relation
+
+    assert open_relation("2026-09-18", "2026-09-21") == "早于开盘"
+    assert open_relation("2026-09-21", "2026-09-21") == "未知"
+    assert open_relation("2026-09-23", "2026-09-21") == "晚于开盘"
+    anomaly = {
+        "anomaly_id": "2026-09-21:close:001",
+        "universe": "pool",
+        "trade_date": "2026-09-21",
+        "case_kind": "muse_rank",
+        "members": [{"ticker": "META"}],
+        "baskets": ["CPU"],
+    }
+    axios = {
+        "id": "axios",
+        "kind": "muse_rank",
+        "case_id": "muse-2026-09-21",
+        "published_on": "2026-09-18",
+        "published_precision": "date",
+        "before_open": False,
+        "source_root": "axios",
+        "excerpt": "Dated Sep 18, 2026. Muse is the No. 1 free iPhone app in America.",
+    }
+    same_day = {
+        **axios,
+        "id": "same-day",
+        "published_on": "2026-09-21",
+        "published_precision": "minute",
+        "before_open": True,
+    }
+    cited = historical_report(
+        anomaly,
+        [axios, same_day],
+        "2026-10-16",
+        _cite(
+            [
+                {"mechanism": "需求", "info_ids": ["axios"], "affected": [{"ticker": "META"}]},
+            ]
+        ),
+    )
+    assert cited["missing"] == []
+    assert cited["closes_case"] is False
+    unknown = historical_report(
+        anomaly,
+        [axios, same_day],
+        "2026-10-16",
+        _cite(
+            [
+                {"mechanism": "需求", "info_ids": ["same-day"], "affected": [{"ticker": "META"}]},
+            ]
+        ),
+    )
+    assert unknown["missing"] == ["不能证明早于开盘"]
+    assert unknown["closes_case"] is False
+
+
+@pytest.mark.phase1_blocking
+def test_r1_citation_must_name_the_release():
+    from inves_cog.perception.attribution.historical import historical_report
+
+    anomaly = {
+        "anomaly_id": "2025-01-27:close:001",
+        "universe": "pool",
+        "trade_date": "2025-01-27",
+        "case_kind": "r1_release",
+        "members": [{"ticker": "NVDA"}],
+        "baskets": ["AI加速芯片"],
+    }
+    release = {
+        "id": "release",
+        "kind": "r1_release",
+        "case_id": "r1-release-2025-01-20",
+        "published_on": "2025-01-20",
+        "published_precision": "date",
+        "source_root": "official-site",
+        "excerpt": "The page says DeepSeek R1 was released that day.",
+    }
+    other = {
+        "id": "unrelated-cpi",
+        "kind": "cpi_hot",
+        "case_id": "other",
+        "published_on": "2025-01-20",
+        "published_precision": "date",
+        "excerpt": "CPI 3.7% vs 3.6%.",
+    }
+    leads = [release, other]
+    noise = {"mechanism": "竞争", "info_ids": ["unrelated-cpi"], "affected": [{"ticker": "NVDA"}]}
+    unrelated = historical_report(anomaly, leads, "2026-10-16", _cite([noise]))
+    assert "候选未引用发布材料" in unrelated["missing"]
+    assert unrelated["closes_case"] is False
+    unlinked = historical_report(
+        anomaly,
+        leads,
+        "2026-10-16",
+        _cite(
+            [
+                {"mechanism": "竞争", "info_ids": ["release"], "affected": []},
+            ]
+        ),
+    )
+    assert unlinked["missing"] == ["候选未连接加速芯片范围"]
+    fourth = historical_report(
+        anomaly,
+        leads,
+        "2026-10-16",
+        _cite(
+            [
+                noise,
+                noise,
+                noise,
+                {
+                    "mechanism": "竞争",
+                    "info_ids": ["release"],
+                    "affected": [{"ticker": "NVDA"}],
+                },
+            ]
+        ),
+    )
+    assert "候选未引用发布材料" in fourth["missing"]
+    linked = historical_report(
+        anomaly,
+        leads,
+        "2026-10-16",
+        _cite(
+            [
+                {"mechanism": "竞争", "info_ids": ["release"], "affected": [{"ticker": "NVDA"}]},
+            ]
+        ),
+    )
+    assert linked["missing"] == []
+    assert linked["closes_case"] is False
+
+
+@pytest.mark.phase1_blocking
+def test_openai_rank_counts_candidates_not_citations():
+    from inves_cog.perception.attribution.historical import historical_report
+
+    anomaly = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "case_kind": "openai_arr",
+        "members": [{"ticker": "NVDA"}],
+        "baskets": ["OpenAI合作方"],
+    }
+
+    def lead(info_id, kind, excerpt):
+        return {
+            "id": info_id,
+            "kind": kind,
+            "case_id": "openai-2026-10-14",
+            "published_on": "2026-10-14",
+            "published_precision": "minute",
+            "excerpt": excerpt,
+            "source_level": 4,
+        }
+
+    cores = [lead(f"cw-{index}", "coreweave_debt", "CoreWeave bond yield hits 15%") for index in range(5)]
+    barclays = lead("bar", "barclays_downgrade", "Barclays downgrades Dell to Equal-Weight")
+    prices = lead("cpi", "cpi_hot", "CPI 3.7% vs 3.6%")
+    leads = [*cores, barclays, prices]
+    covered = historical_report(
+        anomaly,
+        leads,
+        "2026-10-16",
+        _cite(
+            [
+                {"mechanism": "估值倍数", "info_ids": [row["id"] for row in cores], "affected": []},
+                {"mechanism": "估值倍数", "info_ids": ["bar"], "affected": []},
+                {"mechanism": "估值倍数", "info_ids": ["cpi"], "affected": []},
+            ]
+        ),
+    )
+    assert covered["missing"] == []
+    assert covered["closes_case"] is False
+    fillers = [{"mechanism": "估值倍数", "info_ids": [f"cw-{index}"], "affected": []} for index in range(4)]
+    fillers.append({"mechanism": "估值倍数", "info_ids": ["bar", "cpi"], "affected": []})
+    parked = historical_report(anomaly, leads, "2026-10-16", _cite(fillers))
+    assert parked["missing"] == ["前 4 名未含至少 3 类"]
+    assert parked["closes_case"] is False

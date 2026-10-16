@@ -4,7 +4,7 @@ A matching headline does not close a case. A printed date without a timezone
 is not a minute, and a later read is not a collection that existed then.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from inves_cog.perception.attribution.replay import then_visible
 
@@ -35,6 +35,26 @@ def remaining_gap(lead):
             return None
         return "日期不在 09-19 至 09-21 开盘前"
     raise ValueError("未知补证种类")
+
+
+def open_relation(published_on, anomaly_on):
+    """Compare a date-only civil day with the US open at 13:30 UTC.
+
+    Unknown clock and timezone use the same offset span as the primary-window
+    check, UTC-12 through UTC+14. A whole interval before the open is early.
+    Overlap stays unknown. Do not invent a minute.
+    """
+    published = _day(published_on)
+    anomaly = _day(anomaly_on)
+    open_at = datetime(anomaly.year, anomaly.month, anomaly.day, 13, 30, tzinfo=timezone.utc)
+    start = datetime(published.year, published.month, published.day, tzinfo=timezone.utc)
+    earliest = start - timedelta(hours=14)
+    latest = start + timedelta(days=1, hours=12)
+    if latest < open_at:
+        return "早于开盘"
+    if earliest > open_at:
+        return "晚于开盘"
+    return "未知"
 
 
 def strictly_before_primary(latest_on, anomaly_on):
