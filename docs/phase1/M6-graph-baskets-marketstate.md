@@ -146,3 +146,9 @@
 | Q-M6-12（K01） | 缺失原因和轮动汇总存在哪里？ | 采用 A：`marketstate.daily`、`marketstate.baskets`、`marketstate.rotation` 各加 `health_codes text[]`、`null_reason text`；`marketstate.daily` 加 `factor_set text`（实际使用的因子组合）；`marketstate.market` 加 `null_reason`、`sector_spread_z`（数值）、`style_spread_z jsonb`（键 `iwm_qqq`、`mtum_vlue`、`rsp_spy`）。缺 β 时为 `NULL`，不得用 0。第 4 节已有字段不改名 |
 | Q-M6-13（K02） | 两只股票的篮子留一后只剩 1 只；跨多个 L2 的篮子用哪个行业因子？ | 采用 A：篮子自身的行仍要求至少 2 只有效成员；个股的留一篮子因子剩 1 只也照样使用，剩 0 只时退化为少一个因子的模型并在 `factor_set`、`null_reason` 里写明。个股的行业因子始终来自它唯一的主 L2；跨 L2 的篮子（AI 资本开支链、云厂商等）的行业因子用它配置的基准 ETF 对 SPY 正交化；数据中心电力篮子用 XLU、XLI 等权。篮子的 `factor_basis` 存进 `graph.baskets` |
 | Q-M6-14 | 代码放哪个包？AMD 的主篮子？ | 图谱放 **`inves_cog.perception.graph`**（M0 已建；README §3.7），价格结构放 `inves_cog.marketstate`，不得新建顶层包 `inves_cog.graph`，否则绕开导入防火墙。AMD 的主 L3 篮子默认为 **AI 加速芯片**（2026 年的主要增量来自数据中心 GPU），同时是 CPU 篮子的成员；用户在图谱审核时可以改 |
+| Q-M6-15（RD-M6-01） | FR-M6-08 的"回归的残差"用什么窗口？ | **逐日滚动**：每个交易日 d 的 `f_s(d)` = d 的行业等权收益 − 用 d 之前 120 个交易日（不含 d，有效样本 ≥ 60）回归 `f_m` 得到的截距和斜率算出的拟合值；`f_t(d)` 同理，对 (`f_m`, `f_s`) 回归。因子值算出后不再改。个股 OLS 再用这些逐日因子，按 FR-M6-09 计算。需求方验收时按此独立复算一致（M6 验收报告 3.1） |
+| Q-M6-16（用户决定） | SKHY 没有年报业务原文、季度拼不出四季，AC-M6-02 怎么算？ | 不阻塞。关系不编造；季度数据读 M2 `interim_results`，拼不出连续四季就标"无法检验"并写明缺哪几个季度 |
+| Q-M6-17（用户决定） | STX 没有 HDD 分部数据怎么办？ | STX 只有 HDD 一项业务，用 `fixed` 年报的合并营收作为 HDD 暴露，`exposure_basis = 分部收入`，并保留"单一业务，合并营收"的标记。只对配置里明确列为单一业务的公司这样做 |
+| Q-M6-18 | 主 L3 和主 L2 的成员相同怎么办？ | 个股的主 L3 留一后的成员集合与主 L2 留一后的完全相同时，不用主题因子：`factor_set = m+s`，`health_codes` 加 `l3_same_as_l2`，`beta_t` 为 `NULL`。篮子自身的行不受影响 |
+| Q-M6-19 | `config/sic_to_etf.yaml` 审核意见 | 批准现有规则，并补充：3714 汽车零部件、5500–5599 汽车零售、5810–5812 餐饮 → XLY；3812 国防电子、7340、8742 → XLI；3823、3825 测量仪器 → XLK；3826 实验室仪器、8731 商业研究 → XLV；7990 娱乐 → XLC；8200 教育 → XLY。按公司改正：BKNG → XLY，SHW → XLB（规则之前用 ticker 覆盖）。7389（商业服务，PYPL、UBER 等）行业太杂，仍用 SPY 单因子 |
+
