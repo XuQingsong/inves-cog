@@ -10,7 +10,7 @@ def curve(x, nodes):
         return None
     if x <= nodes[0][0]:
         return nodes[0][1]
-    for (a, av), (b, bv) in zip(nodes, nodes[1:]):
+    for (a, av), (b, bv) in zip(nodes, nodes[1:], strict=False):
         if x <= b:
             return av + (bv - av) * (x - a) / (b - a)
     return nodes[-1][1]

@@ -65,8 +65,8 @@ shadow:
   vt2_p: 1.0
   vt2_cap_multiplier: 0.5
   v1_p_nodes: [[0, 95], [0.5, 70], [1.0, 40], [1.3, 10]]
-  # Growth delta-g nodes await K01; no substitute curve.
-  v1_growth_nodes: null
+  # K01, main 37ee8fb: percentage-point nodes; shadow research only.
+  v1_growth_nodes: [[-10, 95], [0, 70], [10, 40], [25, 10]]
   v2_nodes: [[0.5, 1.0], [0.8, 0.7], [1.0, 0.4]]
   bear_revision_pct: -10
   bear_lookback_days: 30

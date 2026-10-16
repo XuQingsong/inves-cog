@@ -105,7 +105,7 @@ def calculate(kind, data):
                 method_divergence_pct=divergence,
                 confidence_downgrade_divergence=downgrade,
             )
-            values = [c["pe_weight"] * a + (1 - c["pe_weight"]) * b for a, b in zip(pe, cash)]
+            values = [c["pe_weight"] * a + (1 - c["pe_weight"]) * b for a, b in zip(pe, cash, strict=False)]
         elif kind == "成长":
             c = cfg["growth"]
             ntm = d.get("eps_ntm")
@@ -120,9 +120,9 @@ def calculate(kind, data):
             g = min(require(d, growth_key), require(d, "rev_cagr_3y"), c["cap_pct"])
             detail = [
                 growth_value(e, min(f * g, c["bull_cap_pct"]) if i == 2 else f * g, cap, d.get("pe_p90"))
-                for i, (f, cap) in enumerate(zip(c["scenario_factors"], c["exit_pe_caps"]))
+                for i, (f, cap) in enumerate(zip(c["scenario_factors"], c["exit_pe_caps"], strict=False))
             ]
-            out.update(E=e, g=g, details=dict(zip(SCENARIOS, detail)))
+            out.update(E=e, g=g, details=dict(zip(SCENARIOS, detail, strict=False)))
             values = [r["value"] for r in detail]
         elif kind == "周期":
             c = cfg["cyclical"]
@@ -135,7 +135,7 @@ def calculate(kind, data):
             industry = d.get("subindustry")
             if industry not in c["pe"]:
                 raise ValueError("缺少周期子行业PE参数：" + str(industry))
-            values = [e * f * pe for f, pe in zip(c["scenario_factors"], c["pe"][industry])]
+            values = [e * f * pe for f, pe in zip(c["scenario_factors"], c["pe"][industry], strict=False)]
             out.update(
                 normal_eps=e,
                 normal_net_margin=margin,
@@ -172,7 +172,7 @@ def calculate(kind, data):
             tbv = require(d, "tbv_per_share", positive=True)
             values = [
                 tbv * clamp((rote + adj - c["perpetual_growth_pct"]) / (r - c["perpetual_growth_pct"]), *c["pb_bounds"])
-                for adj, r in zip(c["rote_adjustments_pp"], c["discount_pct"])
+                for adj, r in zip(c["rote_adjustments_pp"], c["discount_pct"], strict=False)
             ]
         else:
             raise ValueError("未知估值类型：" + str(kind))
@@ -181,7 +181,7 @@ def calculate(kind, data):
         out["method_anomaly"] = values != sorted(values)
         if out["method_anomaly"]:
             out.update(pending_review=True, reason="方法异常：三档已升序重排")
-        out.update(zip(SCENARIOS, sorted(values)))
+        out.update(zip(SCENARIOS, sorted(values), strict=False))
     except (ValueError, TypeError, OverflowError) as exc:
         out.update(status="unvalued", reason=str(exc), **dict.fromkeys(SCENARIOS))
     out["confidence"] = ("高", "中", "低")[min(len(reasons), 2)]
@@ -226,7 +226,10 @@ def mark_price(result, price):
             c = settings()["growth"]
             lo, hi = c["implied_bounds"]
             p90 = out["inputs"].get("pe_p90")
-            value = lambda g: growth_value(out["E"], g, c["exit_pe_caps"][1], p90)["value"]
+
+            def value(g):
+                return growth_value(out["E"], g, c["exit_pe_caps"][1], p90)["value"]
+
             if not value(lo) <= price <= value(hi):
                 out["implied_reason"] = "无法反解：价格不在[-50,200]增速对应的价值区间"
             else:

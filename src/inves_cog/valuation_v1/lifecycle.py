@@ -55,7 +55,7 @@ def classify(data):
     annual_eps = data.get("annual_eps", [])
     collapses = sum(
         previous > 0 and (current / previous - 1) * 100 < c["eps_collapse_pct"]
-        for previous, current in zip(annual_eps, annual_eps[1:])
+        for previous, current in zip(annual_eps, annual_eps[1:], strict=False)
         if previous is not None and current is not None
     )
     margins = [m for m in data.get("annual_gross_margins", []) if m is not None]
