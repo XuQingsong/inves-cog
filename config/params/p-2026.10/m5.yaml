@@ -2,6 +2,7 @@ m5:
   params_version: p-2026.10
   method_version: v1.1
   stable:
+    eps_weights: [0.5, 0.5]
     pe_bear: 0.90
     pe_bull: 1.05
     pe_weight: 0.70

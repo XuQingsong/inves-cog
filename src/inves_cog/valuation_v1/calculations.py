@@ -184,10 +184,15 @@ def calculate(kind, data):
         out.update(zip(SCENARIOS, sorted(values), strict=False))
     except (ValueError, TypeError, OverflowError) as exc:
         out.update(status="unvalued", reason=str(exc), **dict.fromkeys(SCENARIOS))
+    return confidence(out, kind, d)
+
+
+def confidence(out, kind, inputs):
+    reasons = out["downgrade_reasons"]
     out["confidence"] = ("高", "中", "低")[min(len(reasons), 2)]
     if kind == "未盈利成长" and out["confidence"] == "高":
         out["confidence"] = "中"
-    if out.get("runway_haircut") or d.get("foreign_annual_only"):
+    if out.get("runway_haircut") or inputs.get("foreign_annual_only"):
         out["confidence"] = "低"
     if out["status"] != "ok":
         out["confidence"] = "低"
