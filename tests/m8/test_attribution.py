@@ -1293,3 +1293,53 @@ def test_r1_accelerator_basket_still_needs_a_recording(tmp_path):
     assert report["vectors_then"] is False
     assert report["evidence_mode"] == "后补录历史案例"
     assert report["sources"] == ["manual-r1-2025-01-20"]
+
+
+@pytest.mark.phase1_cases
+def test_muse_case_keeps_the_september_18_date(tmp_path):
+    from datetime import date
+
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.anomaly.cases import case_anomalies
+    from inves_cog.perception.anomaly.replay import _identify
+    from inves_cog.perception.attribution.historical import historical_report
+
+    day = date.fromisoformat("2026-09-21")
+    fixture = ROOT / "tests/fixtures/phase1/m7"
+    rows = _identify(day, case_anomalies(fixture, "meta_bars.jsonl.gz", day.isoformat()))
+    cpu = next(row for row in rows if "CPU" in " ".join(row["baskets"]) and row["universe"] == "pool")
+    meta = next(
+        row
+        for row in rows
+        if any(member["ticker"] == "META" for member in row["members"]) and row["severity"] == "alert"
+    )
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/manual_leads_2026-10-16.json").read_text())
+    leads = payload["leads"]
+    read_on = payload["read_on"]
+    quiet = {**meta, "case_kind": "muse_rank"}
+    with pytest.raises(LLMUnavailable, match="待分析"):
+        historical_report(quiet, leads, read_on, Client(recordings=tmp_path))
+
+    class Cite:
+        def call(self, task, body):
+            assert task == "anomaly_candidates"
+            items = body["items"]
+            assert [item["info_id"] for item in items] == [
+                "manual-r1-2025-01-20",
+                "manual-axios-muse-2026-09-18",
+            ]
+            chart = items[1]
+            assert chart["published_at"] == "2026-09-18"
+            assert chart["role"] == "背景"
+            return {
+                "candidates": [{"mechanism": "需求", "info_ids": [chart["info_id"]], "affected": [{"ticker": "META"}]}]
+            }
+
+    for found in (cpu, meta):
+        report = historical_report({**found, "case_kind": "muse_rank"}, leads, read_on, Cite())
+        assert report["missing"] == ["不能证明早于开盘"]
+        assert "受影响范围未含 CPU 或 META" not in report["missing"]
+        assert report["closes_case"] is False
+        assert report["closes_ac_m8_06"] is False
+        assert report["collected_then"] is False
+        assert report["sources"] == ["manual-r1-2025-01-20", "manual-axios-muse-2026-09-18"]

@@ -40,6 +40,6 @@ v8 之后，这三条可以进入后补录历史案例：发布页走发布路�
 
 TDK 标题的发布时间晚于 2026-10-02 的开盘，时间上可以做二次命中。夹具里没有价格响应，所以结论保持未检验。它的 `first_seen_at` 在 2026-10-14，发布当天的严格路径看不见。
 
-`tests/fixtures/phase1/m8/export_headlines.json` 是导出 `cd02bdd` 的标题短摘录，没有把导出文件放进本分支。CoreWeave、巴克莱三条和 CPI 能对上 OpenAI 的三类；东芝扩产标题是日经转载。这些标题在规则上可以补上对应缺口，但仍是后补录，北京 10-15 09:15 只能看见 CoreWeave，看不见巴克莱和 CPI。没有现场录音。`test_case_attribution` 继续 pending。仍缺能证明早于开盘的 Muse 分钟。
+`tests/fixtures/phase1/m8/export_headlines.json` 是导出 `cd02bdd` 的标题短摘录，没有把导出文件放进本分支。CoreWeave、巴克莱三条和 CPI 能对上 OpenAI 的三类；东芝扩产标题是日经转载。这些标题在规则上可以补上对应缺口，但仍是后补录，北京 10-15 09:15 只能看见 CoreWeave，看不见巴克莱和 CPI。没有现场录音。`test_case_attribution` 继续 pending。2026-09-21 的池内对象已经分别含有 CPU 篮子和 META。Axios 仍停在 09-18，角色是背景，不能证明早于开盘，所以案例不关闭。
 
 2025-01-27 的 M7 异常对象里，方向向下、成员含 NVDA 的那条篮子名含「加速」。后补录发布页在这个截止日可用，更晚的 Reuters 和 Axios 进不了候选。没有录音时调用失败。用临时引用把发布页放进候选后，加速芯片篮子这条结构缺口消失，`closes_case` 只表示结构清单空了，不关闭 AC-M8-06，也不是现场通过。
