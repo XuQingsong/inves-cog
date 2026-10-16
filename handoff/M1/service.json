@@ -45,5 +45,60 @@
         "note": "M1 SEC slot is 20:45–21:15 ET"
       }
     }
+  },
+  "one_time_followup": {
+    "checked_at": "2026-10-16T01:01:35.563698+00:00",
+    "supervisor_status": "awake                            RUNNING   pid 3392, uptime 20:48:10\nembedding                        EXITED    Oct 15 12:14 PM\nscheduler                        RUNNING   pid 14313, uptime 17:48:49\nwatchdog                         RUNNING   pid 98185, uptime 22:05:12",
+    "embedding_exit": "expected clean completion of previous full backfill; not restarted",
+    "power_source": "AC Power",
+    "prevent_user_idle_system_sleep": true,
+    "prevent_system_sleep": true,
+    "formal_scheduler_job": {
+      "id": 5280,
+      "task_name": "bars_full",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-16 08:20:04.533465+08:00",
+      "ended_at": "2026-10-16 08:20:58.848415+08:00",
+      "status": "degraded",
+      "processed_count": 224193,
+      "error_summary": null,
+      "params_version": "p-2026.10",
+      "llm_input_tokens": 0,
+      "llm_output_tokens": 0,
+      "llm_usage_missing_calls": 0,
+      "started_at_et": "2026-10-15T20:20:04.533465-04:00",
+      "ended_at_et": "2026-10-15T20:20:58.848415-04:00",
+      "elapsed_seconds": 54.31495
+    },
+    "watchdog_at_20_30": [
+      {
+        "consecutive_failures": 0,
+        "items_last_run": 1,
+        "last_attempt_at": "2026-10-16T00:30:16.946934+00:00",
+        "last_success_at": "2026-10-16T00:30:16.946934+00:00",
+        "latency_sec": null,
+        "note": "2026-10-15 bars_full started at 2026-10-16 08:20:04.533465+08:00",
+        "source": "Scheduler:bars_full",
+        "status": "ok"
+      },
+      {
+        "consecutive_failures": 0,
+        "items_last_run": 1,
+        "last_attempt_at": "2026-10-16T00:30:47.153007+00:00",
+        "last_success_at": "2026-10-16T00:30:47.153007+00:00",
+        "latency_sec": null,
+        "note": "2026-10-15 bars_full started at 2026-10-16 08:20:04.533465+08:00",
+        "source": "Scheduler:bars_full",
+        "status": "ok"
+      }
+    ],
+    "AC-M1-02b_timing_passed": true,
+    "live_smoke": {
+      "output": "live-smoke.xml",
+      "passed": true,
+      "seconds": 79.424
+    },
+    "source_data_caveat": "Formal bars job degraded due to real minute gaps; SEC submissions remains degraded after a bounded retry. Neither marked recovered.",
+    "future_automation": "No additional automation created; this is the one authorized followup."
   }
 }

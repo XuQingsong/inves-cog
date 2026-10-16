@@ -1,62 +1,52 @@
-# M1 自测报告
+# M1 收尾自测报告
 
-基线：main c52fcc0，M1 v7 / T01-T02-round3；2026-10-15。需求方已在 `docs/phase1/acceptance/M1-report.md` 有条件验收通过。全部阻塞条款完成；AC-M1-02b 的下一次准时调度仍待真实窗口，AC-M1-08 全量补齐现已完成。最新完整 SHA 和 CI 链接在 PR #3 核验，不用旧提交的绿灯代替。
+基线：main 3d7db6980c7898139a13c17636dcdbb761eb752c；冻结需求 M1 v8；日期：2026-10-16。本次为用户授权的北京时间 08:50 一次核对，沿用既有 PR #5，原 PR #3 已合并。
 
-## 1. 测试与工程证据
+## 1. 本次实际检查
 
-本地 M0+M1 blocking：24 passed，8.42 秒，0 skipped，见 blocking.xml。原测试名、网络/Clock/权限/模型/golden 门禁保留；正反断言均测。用临时副本执行九项破坏性自测，全部命中预期红灯，真实 golden 不变。先失败测试后实现的 Git 历史保留。
+- 全仓 blocking：39 passed、5 deselected、0 skipped，9.64 秒，blocking.xml。
+- 显式 INVES_COG_LIVE=1、-m phase1_live，且仅对 test_ingest_live_smoke 使用 --runxfail：1 passed、0 skipped，79.424 秒，live-smoke.xml。只在实际通过后删除 M1 这行 pending。
+- 真实冒烟通过正式 Pipeline.runtime 执行：bars_full job 5288（交易日 2026-10-14），news_full job 5289（1,891 条）。它们属于显式冒烟，不计为 10-15 的准时调度。
+- 原名测试、时钟注入、断网、包防火墙、模型白名单、权限及 golden 门禁通过；本次未修改实现、测试或门禁。先失败测试后实现的原历史保留。
 
-最新 main 新增 golden/v18 目录使旧完整性快照把目录当文件，CI 因 IsADirectoryError 中断；24 项测试及干净环境断言本身已通过。失败测试 c3c0da1、修复 753dbea：递归计算相对文件名与哈希，仍检查前后完全一致，不改任何 golden 或 MANIFEST。Ruff 只查本 PR 改动文件，E/F/B/W/I/C901、行宽120、复杂度25；已有 M2 复杂函数由 M2 登记。
+## 2. 不变量与范围
 
-## 2. 不变量
+I22 常规/半日市及缺交易正反断言、I28 官方索引 Accepted 契约保留。golden 通过 load_golden；没有修改 docs、golden、milestones，没有运行 Muse、连接其他项目数据库、增加账号或隧道。其他模块 pending 保留。
 
-I22 的常规/半日市和缺交易双向断言通过；I28 只认官方索引 Accepted，缺索引不生成未经核实的反应日。十次真实核对见 sec-earnings.json。测试不用真实 key、外网或系统时间；LLM 用录音。M1 十四项已退出 pending，只保留原 live 测试；未修改真实 milestones。
+## 3. 验收条款
 
-## 3. 逐条验收
-
-| 条款 | 结果 | 唯一最终证据 |
+| 条款 | 当前结果 | 唯一最终证据 |
 |---|---|---|
-| AC-M1-01 | 本地24项通过；最新完整SHA的干净容器结果见PR | blocking.xml |
-| AC-M1-02 | 正式回补5个交易日，每日73/73日线，分钟覆盖满足99%/95%，24–116秒/日 | market-bars.json |
-| AC-M1-02b，非阻塞 | 尚待10月15日美东20:20真实窗口；旧21:02补采不算准时 | market-bars.json、service.json |
-| AC-M1-03 | 正式startup_baseline：13,227候选、1,294入选、六类排除原因，165.37秒 | wide-universe.json |
-| AC-M1-04 | 10条原文时间、5组真实转载审计完成；不同日期财报日历短模板已分根 | news-identity.json |
-| AC-M1-05 | 10次Accepted/session/reaction_day核对完成，59只submissions持久化 | sec-earnings.json |
-| AC-M1-06 | 真实断源/恢复、坏一个官网URL其余4个继续、5站恢复；Fed/EIA三源分别20/12/16条、等级1 | source-failure.json |
-| AC-M1-07 | 不按重要性删信息；新增/去重及R7幂等核对通过，过期同根结论已移除 | info-archive.json |
-| AC-M1-08，非阻塞 | GET /models=200，DASHSCOPE_API_KEY与Token Plan key比较不相等，10条真实样本通过；当前166,685/166,685条全部有向量，缺失0；全量165,369个去重输入失败0 | embedding.json |
-| AC-M1-09 | 7交易日6,694条：第2层2,975、第3层3,719、初筛5,207；累计2,951,723 token，新闻日日均421,674.71；需求方30+30抽查及3,719条关键词扫描已通过 | news-tier-report.json |
+| AC-M1-01 | 本次全仓 39 项阻塞通过；干净容器 CI 以 PR #5 当前完整 SHA 为准 | blocking.xml |
+| AC-M1-02 | 已验收的正式五日历史回补证据保留：73/73 日线，常规分钟合计及逐码达到原阈值，每日 24–116 秒。今日来源缺口单独披露，不将 81% 写成该门槛通过 | market-bars.json 的 formal_five_session_backfill |
+| AC-M1-02b（非阻塞） | 时效通过：调度器 10-15 美东 20:20:04.533465 开始、20:20:58.848415 结束，耗时 54.31495 秒；20:30 看门狗实际为 ok。job 5280 原状态 degraded 保留 | market-bars.json 的 scheduler_evidence、service.json |
+| AC-M1-03 | 原正式 startup_baseline 13,227 候选、1,294 入选保留；本次调度日常剔除后 1,292，startup_baseline=false、monthly=false，不冒称重新启动基线 | wide-universe.json |
+| AC-M1-04 | 已验收的原文时间及五组真实转载审计保留，不同日期模板不误归根 | news-identity.json |
+| AC-M1-05 | 已验收的十次 Accepted/session/reaction_day 对照保留；本次 submissions 实源任务失败如实列第 5 节 | sec-earnings.json |
+| AC-M1-06 | 原真实断源/恢复及单站故障隔离证据保留；本次未写生产演示故障 | source-failure.json |
+| AC-M1-07 | 不按重要性删信息，新增/去重及 R7 幂等原证据保留 | info-archive.json |
+| AC-M1-08（非阻塞） | 原全量 166,685/166,685 有向量、去重输入失败 0；用户已决定 async-v1，未为耗额度重复处理 | embedding.json |
+| AC-M1-09 | 七交易日 6,694 条分级及需求方抽查已验收；原证据保留 | news-tier-report.json |
 
-## 4. 常驻运行
+## 4. 准时运行与真实分钟缺口
 
-Supervisor 管理 scheduler、watchdog 和可恢复 embedding worker；LaunchAgent 登录自启，异常退出自动拉起。已实际杀掉旧 scheduler，4秒内恢复新PID，证据见 service.json。独立 watchdog 在交易日美东20:30检查 bars_full 是否已有20:20后的开始记录，缺失在 source_health 标红；开始记录在业务运行前即持久化。
+job 5280 的原始时间、状态、处理数和报告完整保存在 market-bars.json：日线 73/73、分页耗尽，常规分钟平均覆盖率 81.0151%、最低 80.2564%，因此数据质量状态仍为 degraded。只判 AC-M1-02b 的按时触发与完成通过，没有把缺失分钟补零、前填或改写成 99%。
 
-本机为macOS，当前自动启动范围是用户登录后；无人登录的冷启动不在当前安装范围，不能冒称系统级开机服务。caffeinate 防止通电时闲置休眠。下一次真实窗口为北京10月16日08:20，08:45前完成；用户已授权08:50一次自动核对、更新和推送。
+数据库中 AAPL 常规分钟 316/390，缺美东 12:57–14:10 共 74 分钟。另一次直接请求同一官方 Alpaca SIP 端点，返回 HTTP 200、next_page_token=null，并同样缺这些时间戳；原始时间戳已冻结在 scheduler_evidence。未将未经核实的停牌原因当作结论。该运行缺口进入 backlog，不改已冻结的历史五日覆盖证据。
 
-## 5. 嵌入模型、用量与预算
+Supervisor 的 scheduler/watchdog 持续运行，caffeinate -i -s 进程在、AC 供电且两种防睡眠断言为 1。美东 20:30:16.946934 的真实看门狗日志为 ok。macOS 当前为登录自启，非无人登录冷启动；嵌入 worker 的 EXITED 是先前批量正常结束，不在本次重新启动。
 
-按用户最新授权验证六个替代模型，未再消耗已耗尽的v3，也未关闭用完即停。v1/v2/v4/qwen在同一98文档、8查询小样本均命中第1名，样本不足以宣布质量胜者。qwen批量结果的index重复，现严格单条调用；async-v2两次小样本均逐条InternalError，不交付无效向量。async-v1完成全量两批，实际12,090,797输入token，全部成功；另10条探针690 token。
+## 5. SEC 时段核对：失败不冒充恢复
 
-替代模型放在 ingest.info_embeddings，按模型、维数和输入哈希隔离；旧info_items.embedding继续仅代表v3/1024维，不能跨模型混算。所有新调用记入 ingest.llm_calls，task=embedding，条数、token、耗时和状态可分开汇总；缺usage如实为NULL。全库七种信息均覆盖，不按新闻层级筛选。
+- sec_atom：正式 job 5287 成功处理 100 条。
+- sec_index：正式 job 5286 在窗口内完成，状态 ok、0 条，保留实际零返回。
+- sec_submissions：正式 job 5285 在美东 20:45:27 开始，HTTP transport failed after bounded retries，失败 0 行。
+- 单条 Apple 官方 submissions 探针返回 HTTP 200。随后仅在允许窗口内做一次正式任务重试（job 5309，美东 20:56:27–20:58:55），已处理 1,744 行，但仍连接失败；source_health.SEC 为 degraded，last_success_at 仍 NULL。
 
-历史v3抵扣前估算0.6589435元不是账单。原每月20元、历史另20元预算仍为方案，没有自动付费授权；实际免费额度由供应商停止开关约束。库存已补齐，不为了清空免费余额制造重复调用。自动v3开关继续关闭，后续新增数据的免费模型批量补齐与付费生产模型选择留待运行配置确认。
+全部原失败、部分进度和实际健康状态保留在 market-bars.json；没有用单条 200 或通过的 live 冒烟宣称完整 SEC 任务成功。没有超出美东 21:15 再发任务。当前 live 契约要求来源健康记录存在，不能将其测试通过解释为所有来源本日全部成功。SEC 运行缺口进入 backlog 供需求方复核。
 
-## 6. 已知限制与合并
+## 6. 使用量及遗留
 
-除非阻塞AC-M1-02b外，关闭模块前还必须通过真实 live smoke 并退出 pending；本次不得把迟到补采改写为准时。M1按main中验收授权，在最新CI通过后用merge commit合并；milestones由需求方填写。M2已按用户新授权合入M1并完成第二轮六项，不再等待M1合并才开发。没有新的待答复问题。
+用户既有 key 保存在仓库外 .env，本次只读入进程环境，不输出 key、不索要新 key、不新增付费授权。嵌入使用量按 task=embedding 独立记账，缺 usage 仍为 NULL。D-14 主线已有实现，D-22 清理见 next-stage-audit.json；D-23 停止旧 embedding 列增量写仍为 M8 前待办，未冒称关闭。
 
-## 7. 第三轮收尾现状（未冒充完成）
-
-- 第10项：显式 `-m phase1_live` / `INVES_COG_LIVE=1` 的真实冒烟于北京时间14:41执行，日线73只、新闻938条；32.22秒后因 SEC/SECAtom/SECDailyIndex 健康记录不全失败，见 live-smoke.xml。pending 的 xfail 不算通过，未删除该行。之后正式 SECAtom 任务真实处理100条，另两项因尚未到20:45–21:15 ET窗口返回not_due；未伪造时钟、健康码或来源成功。pending原因已更正。
-- 第11项：常驻scheduler已补入sec_submissions/sec_index/sec_atom。15:12现场确认caffeinate两项防睡眠断言均有效，AC供电；覆盖本次20:15–21:00 ET窗口，详见service.json。真实 bars_full 尚须在北京10月16日08:20触发并于08:45前完成；本报告不新增虚构job_runs。Mac需保持供电和开盖，登录自启不等于无人登录的冷启动。
-- 第12项：独立数据库已创建继承role_web的inves_cog_review，只读登录和写权限否定检查通过；连接说明及凭据已在仓库外单独交付，不写入Git。
-- 已授权10月16日08:50只执行一次自动核对；须等真实SEC健康记录和live smoke通过后才删除pending，再更新唯一market-bars.json并在PR #3留言。尚未完成的这两项不写成验收通过；milestones仍由需求方填写。
-
-## 8. next-stage数据库核查补充
-
-基线为PR #4/#6合并后的main 1f121fa，含需求方62e4b48的核查清单和M1 v8。证据：next-stage-audit.json；没有修改docs、golden或milestones。
-
-- D-22已完成：仓库外备份后删除CompanyIR和无效演示URL，DashScope根据真实llm_calls成功时间、条数、耗时更新为ok；不是用检查当前时间伪造一次新调用。正式EntitySites记录保留。
-- 对话回补成本为2,951,723 token；新闻对应七个交易日，按真实调用日集中记账。日常按美东预算日汇总，150万后仅保留标的池处理，其他项次日排队；核查时有8条daily_budget队列记录。复跑test_info_item_contract（包含超预算的正反断言及录音）为1 passed/0 skipped，0.18秒，无真实模型调用。不能将预算描述成所有场景硬封顶。
-- D-14主线已实现，实库task=embedding各模型记账见同一JSON；无需重复迁移。D-23决定已写入需求方M1 v8 Q-M1-29，唯一来源是info_embeddings，旧列弃用；停止旧列增量写入的后续代码工作未在此宣称完成。
-- D-17/D-21、M1/M2 live与次晨调度仍列遗留，不在本轮开工复述中冒充完成。
+本次收尾提交准时调度与真实 live 的证据；上述新实源缺口按冻结规则如实进 backlog，是否通过由需求方复核。milestones 仍由需求方填写。M2 收尾已通过并合并 PR #9，未重复实跑 M2；M3/M6 的验收和 M7 开工不属于本次自动核对。未创建后续自动化。
