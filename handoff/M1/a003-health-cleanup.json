@@ -1,0 +1,32 @@
+{
+  "task": "A-003 D-22",
+  "mode": "actual_read_only_verification_existing_clean_state",
+  "rows": [
+    {
+      "source": "CompanyIR",
+      "state": "absent",
+      "row": null
+    },
+    {
+      "source": "DashScope",
+      "state": "ok",
+      "row": {
+        "source": "DashScope",
+        "last_success_at": "2026-10-15 12:14:43.231287+08:00",
+        "last_attempt_at": "2026-10-15 12:14:43.231287+08:00",
+        "status": "ok",
+        "latency_sec": 1435.192966,
+        "items_last_run": 65369,
+        "note": "Actual embedding success from ingest.llm_calls; model=text-embedding-async-v1; call_id=70c023c8-65e7-4a87-a42f-7f7c40f51098; vectors in ingest.info_embeddings",
+        "consecutive_failures": 0
+      }
+    },
+    {
+      "source": "EntitySites:https://round2-invalid-site.example.invalid/rss.xml",
+      "state": "absent",
+      "row": null
+    }
+  ],
+  "writes_needed": false,
+  "reason": "Two obsolete/demo rows were already removed; DashScope already records actual embedding success. No simulated failure written to production."
+}

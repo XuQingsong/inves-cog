@@ -1,0 +1,950 @@
+{
+  "task": "A-003 D-27",
+  "as_of": "2026-10-16",
+  "scope": "All tickers with gross_margin_derived in any fixed PIT state",
+  "expected_tickers": [
+    "AMZN",
+    "CAT",
+    "COHR",
+    "COST",
+    "CRWV",
+    "CVX",
+    "ETN",
+    "GE",
+    "GOOGL",
+    "KLAC",
+    "LLY",
+    "META",
+    "NFLX",
+    "ORCL",
+    "QCOM",
+    "STX",
+    "UNH",
+    "VRT",
+    "WMT"
+  ],
+  "count": 19,
+  "verified_count": 17,
+  "rows": [
+    {
+      "ticker": "AMZN",
+      "previous_ttm_gross_margin_pct": 50.769647277227726,
+      "fixed_ttm_gross_margin_pct": 50.769647277227726,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "3baefcae6d63ed1b730d0a46a8180b3264f77e8f700d502585882fdd419dbb23",
+      "filing": {
+        "ticker": "AMZN",
+        "cik": "0001018724",
+        "accession": "0001018724-26-000026",
+        "form": "10-Q",
+        "filing_date": "2026-07-31",
+        "report_date": "2026-06-30",
+        "primary_document": "amzn-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 200606000000,
+        "gross_profit_usd": 104828000000,
+        "gross_margin_pct": 52.25566533403787,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 200606000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 95778000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "28cbec6d6a191a9cd561ede66f9c7d373884dc580550f147ab6e1d31d2c4a50a",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "CAT",
+      "previous_ttm_gross_margin_pct": 34.34008216355097,
+      "fixed_ttm_gross_margin_pct": 34.34008216355097,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "04a0cc75f751c22fcc76367b4bb5545674b88774ce6c44d6371e254944767660",
+      "filing": {
+        "ticker": "CAT",
+        "cik": "0000018230",
+        "accession": "0000018230-26-000046",
+        "form": "10-Q",
+        "filing_date": "2026-08-05",
+        "report_date": "2026-06-30",
+        "primary_document": "cat-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000046/cat-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 20543000000,
+        "gross_profit_usd": 7762000000,
+        "gross_margin_pct": 37.78416005451979,
+        "component_checks": [
+          {
+            "tag": "Revenues",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 20543000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 12781000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "15252d1a8b291e1686a188b8872652288453b86bec3079cfc84cd52f1275b5b2",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "COHR",
+      "previous_ttm_gross_margin_pct": 37.49609626391911,
+      "fixed_ttm_gross_margin_pct": 37.49609626391911,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "a124d39b9d630ef916e5590c6ed00b3a579de4fcb5dca1dbf6db9ec50a7b2be9",
+      "filing": {
+        "ticker": "COHR",
+        "cik": "0000820318",
+        "accession": "0000820318-26-000020",
+        "form": "10-K",
+        "filing_date": "2026-08-14",
+        "report_date": "2026-06-30",
+        "primary_document": "iivi-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000020/iivi-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2025-07-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 7118181000,
+        "gross_profit_usd": 2669040000,
+        "gross_margin_pct": 37.49609626391911,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2025-07-01",
+            "end": "2026-06-30",
+            "value_usd": 7118181000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2025-07-01",
+            "end": "2026-06-30",
+            "value_usd": 4449141000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "d0dd943590f068f948be28350e32c949a474647464dd45932b40257d40911ebd",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "COST",
+      "previous_ttm_gross_margin_pct": 12.823515440996985,
+      "fixed_ttm_gross_margin_pct": 12.823515440996985,
+      "ttm_period_end": "2026-08-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "a27204836118704dce065d14562b01ed37c09fcdd14a547677306c272d70d4b7",
+      "filing": {
+        "ticker": "COST",
+        "cik": "0000909832",
+        "accession": "0000909832-26-000093",
+        "form": "10-K",
+        "filing_date": "2026-10-07",
+        "report_date": "2026-08-30",
+        "primary_document": "cost-20260830.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000093/cost-20260830.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2025-09-01",
+        "end": "2026-08-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 303154000000,
+        "gross_profit_usd": 38875000000,
+        "gross_margin_pct": 12.823515440996985,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2025-09-01",
+            "end": "2026-08-30",
+            "value_usd": 303154000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2025-09-01",
+            "end": "2026-08-30",
+            "value_usd": 264279000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "560a81c9e4ba70e0d66f2c2f654f5385636b63c49e9017dfab334cc040d9e3c9",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "CRWV",
+      "previous_ttm_gross_margin_pct": 67.41765480895916,
+      "fixed_ttm_gross_margin_pct": 67.41765480895916,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "37cb10dd2f47980d67a64c77d2f68f25c1cab181e920c22b27d4fd22aca4de26",
+      "filing": {
+        "ticker": "CRWV",
+        "cik": "0001769628",
+        "accession": "0001769628-26-000366",
+        "form": "10-Q",
+        "filing_date": "2026-08-12",
+        "report_date": "2026-06-30",
+        "primary_document": "crwv-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 2575000000,
+        "gross_profit_usd": 1696000000,
+        "gross_margin_pct": 65.86407766990291,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 2575000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 879000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "f18940af95b5f67a23ee9d64f1d85e3f47a526ae0690df380003f0b3318ad110",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "CVX",
+      "previous_ttm_gross_margin_pct": 43.64551940242728,
+      "fixed_ttm_gross_margin_pct": 43.64551940242728,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "8fbf61c940b2c65b847cbd7f553f305b2460a90b4ffb1ff80683eefb4678ac96",
+      "filing": {
+        "ticker": "CVX",
+        "cik": "0000093410",
+        "accession": "0000093410-26-000167",
+        "form": "10-Q",
+        "filing_date": "2026-08-06",
+        "report_date": "2026-06-30",
+        "primary_document": "cvx-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000167/cvx-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 67199000000,
+        "gross_profit_usd": 30592000000,
+        "gross_margin_pct": 45.52448697153231,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 67199000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 36607000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "7ed0cd1c2b4339d39f625a6d65e09177e1b4a3ec7195b372a8de77b7038f50f8",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "ETN",
+      "previous_ttm_gross_margin_pct": 35.90341382181516,
+      "fixed_ttm_gross_margin_pct": 35.90341382181516,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "0fb1b74f3dfd5796cc5a5fe1f298ed4f6e19f172d83e695d084afd91277c3102",
+      "filing": {
+        "ticker": "ETN",
+        "cik": "0001551182",
+        "accession": "0001551182-26-000030",
+        "form": "10-Q",
+        "filing_date": "2026-07-31",
+        "report_date": "2026-06-30",
+        "primary_document": "etn-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1551182/000155118226000030/etn-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 8531000000,
+        "gross_profit_usd": 2855000000,
+        "gross_margin_pct": 33.46618215918416,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 8531000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 5676000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "d84368c3aa2b1af845d03e0905d030f5ec0994191f49bb411e09a1bc24de2190",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "GE",
+      "previous_ttm_gross_margin_pct": null,
+      "fixed_ttm_gross_margin_pct": null,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "67a64a92832d3b6695d69f06e41507d9e603e3515da88fcbbae9807eb72a53f3",
+      "filing": {
+        "ticker": "GE",
+        "cik": "0000040545",
+        "accession": "0000040545-26-000049",
+        "form": "10-Q",
+        "filing_date": "2026-07-16",
+        "report_date": "2026-06-30",
+        "primary_document": "ge-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/40545/000004054526000049/ge-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "verified": false,
+        "verification_kind": "existing_missing_value_confirmed",
+        "missing_value_confirmed": true,
+        "reason": "Current consolidated filing has no aligned, supported CostOfRevenue/CostOfGoodsAndServicesSold series for gross profit; Companyfacts last supplies those cost tags at 2025-02-03. Latest value was already NULL before A-003.",
+        "latest_consolidated_cost_or_expense_tags": [
+          "BenefitCostIncomeNonoperating",
+          "CostsAndExpenses",
+          "IncomeTaxExpenseBenefit",
+          "NonoperatingIncomeExpense",
+          "OperatingLeaseCost",
+          "PensionExpenseReversalOfExpenseNoncash",
+          "ResearchAndDevelopmentExpense",
+          "RestructuringAndRelatedCostIncurredCost",
+          "RestructuringAndRelatedCostsCashExpenditures",
+          "ScheduleOfLiabilityForUnpaidClaimsAndClaimsAdjustmentExpense",
+          "ScheduleOfNetBenefitCostsTableTextBlock",
+          "ScheduleOfRestructuringAndRelatedCostsTextBlock",
+          "SellingGeneralAndAdministrativeExpense"
+        ],
+        "official_instance_sha256": "820134672a5b9ec66b9c6b91fbd978ec2366d272f1c13021efe79df337d11142",
+        "comparison_note": "Historical gross_margin_derived flag does not mean latest margin is derived. Current NULL is reported explicitly; no numeric comparison claimed."
+      }
+    },
+    {
+      "ticker": "GOOGL",
+      "previous_ttm_gross_margin_pct": 60.89654739316297,
+      "fixed_ttm_gross_margin_pct": 60.89654739316297,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "97baddc6bac26eccd11b4d63007504cb959f123c69945465e1c55a4b1dd86eaa",
+      "filing": {
+        "ticker": "GOOGL",
+        "cik": "0001652044",
+        "accession": "0001652044-26-000071",
+        "form": "10-Q",
+        "filing_date": "2026-07-23",
+        "report_date": "2026-06-30",
+        "primary_document": "goog-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 119796000000,
+        "gross_profit_usd": 73853000000,
+        "gross_margin_pct": 61.648969915523054,
+        "component_checks": [
+          {
+            "tag": "Revenues",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 119796000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 45943000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "1376c154c799dd52e1c2be723bfaf269fc204191d2205eaab7a54122a23b8f4b",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "KLAC",
+      "previous_ttm_gross_margin_pct": 61.301452279896516,
+      "fixed_ttm_gross_margin_pct": 61.301452279896516,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "f7308235a9d0ef8a08ebef81978215b03aca61acc35aed94c9d9ffb361a37566",
+      "filing": {
+        "ticker": "KLAC",
+        "cik": "0000319201",
+        "accession": "0000319201-26-000027",
+        "form": "10-K",
+        "filing_date": "2026-08-06",
+        "report_date": "2026-06-30",
+        "primary_document": "klac-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/319201/000031920126000027/klac-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2025-07-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 13579476000,
+        "gross_profit_usd": 8324416000,
+        "gross_margin_pct": 61.301452279896516,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2025-07-01",
+            "end": "2026-06-30",
+            "value_usd": 13579476000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2025-07-01",
+            "end": "2026-06-30",
+            "value_usd": 5255060000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "8af35563158f5bf275f38799229fca7ad67065e2559c81d68c6afa8ace412fc7",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "LLY",
+      "previous_ttm_gross_margin_pct": 83.40048954999058,
+      "fixed_ttm_gross_margin_pct": 83.40048954999058,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "edb7e86ec2bbcd1755accb2d670623ca09de22e2427c1eded507b9b315082903",
+      "filing": {
+        "ticker": "LLY",
+        "cik": "0000059478",
+        "accession": "0000059478-26-000081",
+        "form": "10-Q",
+        "filing_date": "2026-08-05",
+        "report_date": "2026-06-30",
+        "primary_document": "lly-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000081/lly-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 22974000000,
+        "gross_profit_usd": 19706000000,
+        "gross_margin_pct": 85.77522416644902,
+        "component_checks": [
+          {
+            "tag": "Revenues",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 22974000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 3268000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "75f0aed7408555a9fd7746bbaad0f713dd0e6f9bcd438ab354157b4138b9e8f4",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "META",
+      "previous_ttm_gross_margin_pct": 81.74792331148575,
+      "fixed_ttm_gross_margin_pct": 81.74792331148575,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "077a83e716eefe8a7b4c0051b7232531945e6577ac14f676b1cb716ad55926a3",
+      "filing": {
+        "ticker": "META",
+        "cik": "0001326801",
+        "accession": "0001628280-26-050705",
+        "form": "10-Q",
+        "filing_date": "2026-07-30",
+        "report_date": "2026-06-30",
+        "primary_document": "meta-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 60801000000,
+        "gross_profit_usd": 49471000000,
+        "gross_margin_pct": 81.36543806845282,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 60801000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 11330000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "6716e6b0f4978717e019177bc8275ac8ea17fea03b9db7c08a0c4818e7866ba8",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "NFLX",
+      "previous_ttm_gross_margin_pct": 49.11787210969006,
+      "fixed_ttm_gross_margin_pct": 49.11787210969006,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "ce92e6f154dfa3a91924eb267402f6b7ec6275da7cb9b66c12963a2f3fda69b9",
+      "filing": {
+        "ticker": "NFLX",
+        "cik": "0001065280",
+        "accession": "0001065280-26-000212",
+        "form": "10-Q",
+        "filing_date": "2026-07-17",
+        "report_date": "2026-06-30",
+        "primary_document": "nflx-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000212/nflx-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 12559938000,
+        "gross_profit_usd": 6522973000,
+        "gross_margin_pct": 51.93475477347101,
+        "component_checks": [
+          {
+            "tag": "Revenues",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 12559938000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 6036965000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "6a36c7c65635c73c06f364ccd7116320d2d0f59b6f33900dbce1be8f7ea56cc7",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "ORCL",
+      "previous_ttm_gross_margin_pct": null,
+      "fixed_ttm_gross_margin_pct": null,
+      "ttm_period_end": "2026-08-31",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "3dd1eead54fd6eb78737a3f683f20a8caedfcdba42b38ab31a3e87623398286c",
+      "filing": {
+        "ticker": "ORCL",
+        "cik": "0001341439",
+        "accession": "0001193125-26-389274",
+        "form": "10-Q",
+        "filing_date": "2026-09-11",
+        "report_date": "2026-08-31",
+        "primary_document": "orcl-20260831.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526389274/orcl-20260831.htm"
+      },
+      "latest_filing_basis": {
+        "verified": false,
+        "verification_kind": "existing_missing_value_confirmed",
+        "missing_value_confirmed": true,
+        "reason": "Current filing splits direct costs into issuer tags CloudAndSoftwareExpenses/HardwareExpenses/ServicesExpense; supported generic cost tags are historical (latest CostOfRevenue filed 2011-06-28). Latest value was already NULL before A-003; no unsupported aggregation is invented.",
+        "latest_consolidated_cost_or_expense_tags": [
+          "CloudAndSoftwareExpenses",
+          "CostsAndExpenses",
+          "DeferredIncomeTaxExpenseBenefit",
+          "ExpenseAllocationsAndOtherNet",
+          "FinanceLeaseCost",
+          "FinanceLeaseInterestExpense",
+          "GeneralAndAdministrativeExpense",
+          "HardwareExpenses",
+          "IncomeTaxExpenseBenefit",
+          "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+          "InitialRestructuringCosts",
+          "InterestExpense",
+          "LeaseCostTableTextBlock",
+          "NonOperatingIncomeExpenseAttributableToMinorityInterest",
+          "NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests",
+          "OperatingLeaseCost",
+          "OtherNonOperatingIncomeAndExpensePolicyTextBlock",
+          "OtherNoncashIncomeExpense",
+          "OtherNonoperatingIncomeExpense",
+          "OtherOperatingExpensesNet",
+          "ResearchAndDevelopmentExpense",
+          "RestructuringAndOtherExpenses",
+          "ScheduleOfEmployeeServiceShareBasedCompensationAllocationOfRecognizedPeriodCostsTextBlock",
+          "ScheduleOfOtherNonoperatingIncomeExpenseTableTextBlock",
+          "ScheduleOfRestructuringAndOtherExpensesTableTextBlock",
+          "ScheduleOfRestructuringAndRelatedCostsTextBlock",
+          "SellingAndMarketingExpense",
+          "ServicesExpense"
+        ],
+        "official_instance_sha256": "b060531e631ff72dd633b7926e5ee81aaebdea83db49388b4ac9ba07554d7fb0",
+        "comparison_note": "Historical gross_margin_derived flag does not mean latest margin is derived. Current NULL is reported explicitly; no numeric comparison claimed."
+      }
+    },
+    {
+      "ticker": "QCOM",
+      "previous_ttm_gross_margin_pct": 54.226326896457834,
+      "fixed_ttm_gross_margin_pct": 54.226326896457834,
+      "ttm_period_end": "2026-06-28",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "7c793220e71da22992f50bfd88bf69b95b2c2518046a5294236626009f573db0",
+      "filing": {
+        "ticker": "QCOM",
+        "cik": "0000804328",
+        "accession": "0000804328-26-000086",
+        "form": "10-Q",
+        "filing_date": "2026-07-29",
+        "report_date": "2026-06-28",
+        "primary_document": "qcom-20260628.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/804328/000080432826000086/qcom-20260628.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-03-30",
+        "end": "2026-06-28",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 9947000000,
+        "gross_profit_usd": 5277000000,
+        "gross_margin_pct": 53.051171207399214,
+        "component_checks": [
+          {
+            "tag": "Revenues",
+            "start": "2026-03-30",
+            "end": "2026-06-28",
+            "value_usd": 9947000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-03-30",
+            "end": "2026-06-28",
+            "value_usd": 4670000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "97a3896647e1301aaf876ae15c36648b1fad9a1bcba45a07df68486f72570385",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "STX",
+      "previous_ttm_gross_margin_pct": 45.5760557605576,
+      "fixed_ttm_gross_margin_pct": 45.5760557605576,
+      "ttm_period_end": "2026-07-03",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "adb2c2e360ceba017bd78bd9b865e6099ed6d8d90543dccf25385cea53a1af1a",
+      "filing": {
+        "ticker": "STX",
+        "cik": "0001137789",
+        "accession": "0001137789-26-000159",
+        "form": "10-K",
+        "filing_date": "2026-08-04",
+        "report_date": "2026-07-03",
+        "primary_document": "stx-20260703.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1137789/000113778926000159/stx-20260703.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2025-06-28",
+        "end": "2026-07-03",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 12195000000,
+        "gross_profit_usd": 5558000000,
+        "gross_margin_pct": 45.5760557605576,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2025-06-28",
+            "end": "2026-07-03",
+            "value_usd": 12195000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2025-06-28",
+            "end": "2026-07-03",
+            "value_usd": 6637000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "746da27a0d323f77b013e86ff9d6a2f6e4712ade4b531e7f424f2774cf478f17",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "UNH",
+      "previous_ttm_gross_margin_pct": 88.57127623414621,
+      "fixed_ttm_gross_margin_pct": 19.5141837117804,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "07d5fba2a79411b03725acf2ee084e6c0fe923da45a75ca323eeda1f4d850ba3",
+      "filing": {
+        "ticker": "UNH",
+        "cik": "0000731766",
+        "accession": "0000731766-26-000197",
+        "form": "10-Q",
+        "filing_date": "2026-08-10",
+        "report_date": "2026-06-30",
+        "primary_document": "unh-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/731766/000073176626000197/unh-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_medical_and_product_costs",
+        "revenue_usd": 112032000000,
+        "gross_profit_usd": 23299000000,
+        "gross_margin_pct": 20.79673664667238,
+        "component_checks": [
+          {
+            "tag": "Revenues",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 112032000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 13375000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "PolicyholderBenefitsAndClaimsIncurredNet",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 75358000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "99fd53b0f007fd000fc008dd7bcc1d0fc4107998a0659f7abfdae905a18d76a9",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "VRT",
+      "previous_ttm_gross_margin_pct": 38.03878183908847,
+      "fixed_ttm_gross_margin_pct": 38.03878183908847,
+      "ttm_period_end": "2026-06-30",
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "companyfacts_sha256": "5f771a234556a960bf2d47287ec9021439defc71dabbfe70c2fbd18871aa0a74",
+      "filing": {
+        "ticker": "VRT",
+        "cik": "0001674101",
+        "accession": "0001628280-26-050609",
+        "form": "10-Q",
+        "filing_date": "2026-07-29",
+        "report_date": "2026-06-30",
+        "primary_document": "vrt-20260630.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1674101/000162828026050609/vrt-20260630.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-04-01",
+        "end": "2026-06-30",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 3274300000,
+        "gross_profit_usd": 1234900000,
+        "gross_margin_pct": 37.714931435726726,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 3274300000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfGoodsAndServicesSold",
+            "start": "2026-04-01",
+            "end": "2026-06-30",
+            "value_usd": 2039400000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "9cdd69c97e57c9e0bcff29451293ee7e9e2a3f0841c71de14f28af41dc8efc64",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    },
+    {
+      "ticker": "WMT",
+      "previous_ttm_gross_margin_pct": 24.473757182902155,
+      "fixed_ttm_gross_margin_pct": 24.473757182902155,
+      "ttm_period_end": "2026-07-31",
+      "health_codes": [
+        "gross_margin_derived",
+        "ni_tag_fallback"
+      ],
+      "companyfacts_sha256": "dba615b212adc198591c6a814960e696033e33b99ba6ec2be569dedd9b6479fd",
+      "filing": {
+        "ticker": "WMT",
+        "cik": "0000104169",
+        "accession": "0000104169-26-000154",
+        "form": "10-Q",
+        "filing_date": "2026-08-28",
+        "report_date": "2026-07-31",
+        "primary_document": "wmt-20260731.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000154/wmt-20260731.htm"
+      },
+      "latest_filing_basis": {
+        "start": "2026-05-01",
+        "end": "2026-07-31",
+        "basis": "revenue_minus_cost_of_revenue",
+        "revenue_usd": 186100000000,
+        "gross_profit_usd": 47296000000,
+        "gross_margin_pct": 25.41429339065019,
+        "component_checks": [
+          {
+            "tag": "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "start": "2026-05-01",
+            "end": "2026-07-31",
+            "value_usd": 186100000000,
+            "present_in_official_instance": true
+          },
+          {
+            "tag": "CostOfRevenue",
+            "start": "2026-05-01",
+            "end": "2026-07-31",
+            "value_usd": 138804000000,
+            "present_in_official_instance": true
+          }
+        ],
+        "official_instance_sha256": "2e39345b995eb8cdc9675225f308bdf3c49dc0ae05787c7d1c61a3291eab2ba5",
+        "verified": true,
+        "comparison_note": "Latest filing period is shown separately from TTM; identical period/components are compared, not different windows."
+      }
+    }
+  ],
+  "unh_reason": "CostOfGoodsAndServicesSold covers products; the separate PolicyholderBenefitsAndClaimsIncurredNet (medical costs) was omitted. Latest original calculation linkbase confirms both are separate positive children of total costs, together with separate SG&A and depreciation.",
+  "missingness_verified_count": 2,
+  "reviewed_count": 19,
+  "unreviewed_tickers": []
+}

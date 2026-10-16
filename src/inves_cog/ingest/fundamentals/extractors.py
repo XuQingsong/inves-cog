@@ -185,6 +185,31 @@ def ratio(a, b, multiplier=1):
     return a / b * multiplier if a is not None and b is not None and b != 0 else None
 
 
+def derived_gross_profit(revenue, product_cost, *, medical_cost=None, insurer=False):
+    if product_cost is None:
+        return None, "medical/product direct cost component missing"
+    inputs = [revenue, product_cost]
+    if insurer:
+        # UNH 2026 Q2 consolidated operations and its calculation linkbase identify
+        # medical claims and product costs as separate siblings, not alternative tags.
+        # SG&A and depreciation remain operating expenses; do not use total expenses.
+        if medical_cost is None:
+            return None, "medical cost component missing"
+        inputs.append(medical_cost)
+        if product_cost["tag"] != "us-gaap:CostOfGoodsAndServicesSold" or any(
+            (row.get("start"), row["end"], row.get("unit"))
+            != (revenue.get("start"), revenue["end"], revenue.get("unit"))
+            for row in inputs[1:]
+        ):
+            return None, "medical/product cost period, unit or component basis unaligned"
+    return {
+        **revenue,
+        "val": revenue["val"] - sum(row["val"] for row in inputs[1:]),
+        "derivation": "gross_margin_derived",
+        "inputs": [source(row) for row in inputs],
+    }, None
+
+
 def month_after(start, n):
     value = start.year * 12 + start.month - 1 + n
     year, month = divmod(value, 12)
@@ -443,17 +468,20 @@ def extract_state(
             )
             if missing:
                 gaps[name] = missing
+    gross_issues = {}
     if enabled["D4"]:
+        medical = facts.quarterly(["PolicyholderBenefitsAndClaimsIncurredNet"], taxonomy) if ticker == "UNH" else {}
+        if ticker == "UNH" and enabled["D2"]:
+            repair_flow(facts, ["PolicyholderBenefitsAndClaimsIncurredNet"], medical, taxonomy=taxonomy)
         for end, rev in series["rev"].items():
             cost = series["cost"].get(end)
-            if end not in series["gp"] and cost:
-                series["gp"][end] = {
-                    **rev,
-                    "val": rev["val"] - cost["val"],
-                    "derivation": "gross_margin_derived",
-                    "inputs": [source(rev), source(cost)],
-                }
-                codes.append("gross_margin_derived")
+            if end not in series["gp"]:
+                derived, issue = derived_gross_profit(rev, cost, medical_cost=medical.get(end), insurer=ticker == "UNH")
+                if derived is not None:
+                    series["gp"][end] = derived
+                    codes.append("gross_margin_derived")
+                elif ticker == "UNH":
+                    gross_issues[end] = issue
     if enabled["D5"] and any(r["tag"].split(":")[-1] != "NetIncomeLoss" for r in series["ni"].values()):
         codes.append("ni_tag_fallback")
     if (
@@ -483,6 +511,13 @@ def extract_state(
     totals = {key: sum_tail(value, n) for key, value in series.items()}
     out = {"rev_growth": None, "rev_q_yoy": None, "rev_accel_pp": None, "eps_growth": None}
     sources = {}
+    active_gross_issues = {str(end): gross_issues[end] for end in sorted(series["rev"])[-n:] if end in gross_issues}
+    if active_gross_issues:
+        codes.append("gross_margin_costs_incomplete")
+        sources["gross_margin"] = {
+            "reason": "Medical direct costs incomplete or unaligned",
+            "periods": active_gross_issues,
+        }
     if gaps:
         sources["quarter_gaps"] = {name: [str(end) for end in ends] for name, ends in gaps.items()}
         if scoring_gaps(gaps, series, derive_gross=enabled["D4"]):

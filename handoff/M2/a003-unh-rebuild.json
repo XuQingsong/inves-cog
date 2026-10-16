@@ -1,0 +1,24 @@
+{
+  "task": "A-003 D-27",
+  "mode": "actual_shared_database_recalculation",
+  "source_main": "c1970adcda88305eb8800f1d1c65be6bae59dd78",
+  "M3_merge_commit": "9bbf15156a7a1a5beeba0ca692b986a4d9312025",
+  "financial_scope": "UNH fixed affected PIT states only; other 18 audited numeric/missing bases unchanged",
+  "fixed_states_recomputed": 47,
+  "first_filed": "2015-02-10",
+  "last_filed": "2026-08-10",
+  "before_latest_gross_margin_pct": 88.57127623414621,
+  "after_latest_gross_margin_pct": 19.5141837117804,
+  "unrelated_core_fields_identical": true,
+  "scoring_source": "unmodified M3 source inherited from main",
+  "score_rows_recomputed": 198,
+  "score_first": "2026-01-02",
+  "score_last": "2026-10-15",
+  "remaining_split_suspect_dates": [],
+  "backup_location": "outside repository in /private/tmp/inves-a003-sync; not published",
+  "write_roles": [
+    "role_ingest",
+    "role_trading"
+  ],
+  "no_migrations_or_role_changes": true
+}

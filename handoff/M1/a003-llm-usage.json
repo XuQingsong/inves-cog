@@ -1,0 +1,261 @@
+{
+  "task": "A-003 LLM usage",
+  "observed_at_utc": "2026-10-16T04:47:54.845755+00:00",
+  "budget_timezone": "America/New_York",
+  "budget_tokens": 1500000,
+  "oct16_complete": false,
+  "oct16_budget_day_ends_at": "2026-10-17T00:00:00-04:00",
+  "policy": "FR-M1-18: after the standard-model threshold or missing usage, defer untracked work; tracked-pool full extraction remains allowed. This is not a hard cap across all models.",
+  "backlog_definition": "all_backlog: every linked publication predates the call day. backlog_first_seen_publication_incomplete: publication missing, but every linked record was already in the database before the call day. These are separate proofs of backlog processing; same-day publication is only a proxy for fresh work.",
+  "incomplete_usage_policy": "Known totals exclude missing token usage, which remains missing and is counted separately; these totals are lower bounds.",
+  "budget_regression": "tests/m1/test_market_info.py::test_info_item_contract (via tests/m1/triage_cases.py): untracked items defer beyond threshold, tracked items continue; embedding remains separate.",
+  "results": {
+    "dialogue_by_day_model_task_status": [
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "task": "entity_tagging",
+        "status": "failed",
+        "calls": 336,
+        "input_tokens": "61620",
+        "output_tokens": "5390",
+        "known_tokens": "67010",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "task": "entity_tagging",
+        "status": "failed_usage_missing",
+        "calls": 4,
+        "input_tokens": null,
+        "output_tokens": null,
+        "known_tokens": null,
+        "usage_missing_calls": 4
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "task": "entity_tagging",
+        "status": "ok",
+        "calls": 27195,
+        "input_tokens": "4706193",
+        "output_tokens": "569637",
+        "known_tokens": "5275830",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "task": "info_fields_extraction",
+        "status": "failed_usage_missing",
+        "calls": 1,
+        "input_tokens": null,
+        "output_tokens": null,
+        "known_tokens": null,
+        "usage_missing_calls": 1
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "task": "info_fields_extraction",
+        "status": "ok",
+        "calls": 3576,
+        "input_tokens": "1452831",
+        "output_tokens": "106877",
+        "known_tokens": "1559708",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "task": "exposure_draft",
+        "status": "ok",
+        "calls": 72,
+        "input_tokens": "582028",
+        "output_tokens": "7478",
+        "known_tokens": "589506",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "task": "graph_seed_draft",
+        "status": "failed",
+        "calls": 3,
+        "input_tokens": "29000",
+        "output_tokens": "196608",
+        "known_tokens": "225608",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "task": "graph_seed_draft",
+        "status": "ok",
+        "calls": 63,
+        "input_tokens": "567283",
+        "output_tokens": "54824",
+        "known_tokens": "622107",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "task": "segment_mapping_draft",
+        "status": "failed_usage_missing",
+        "calls": 1,
+        "input_tokens": null,
+        "output_tokens": null,
+        "known_tokens": null,
+        "usage_missing_calls": 1
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "task": "segment_mapping_draft",
+        "status": "ok",
+        "calls": 18,
+        "input_tokens": "78812",
+        "output_tokens": "40828",
+        "known_tokens": "119640",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-16",
+        "model": "deepseek-v4.1-flash",
+        "task": "entity_tagging",
+        "status": "failed",
+        "calls": 5,
+        "input_tokens": "877",
+        "output_tokens": "156",
+        "known_tokens": "1033",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-16",
+        "model": "deepseek-v4.1-flash",
+        "task": "entity_tagging",
+        "status": "ok",
+        "calls": 1792,
+        "input_tokens": "1178715",
+        "output_tokens": "265654",
+        "known_tokens": "1444369",
+        "usage_missing_calls": 0
+      },
+      {
+        "budget_day": "2026-10-16",
+        "model": "deepseek-v4.1-flash",
+        "task": "info_fields_extraction",
+        "status": "ok",
+        "calls": 196,
+        "input_tokens": "54674",
+        "output_tokens": "5785",
+        "known_tokens": "60459",
+        "usage_missing_calls": 0
+      }
+    ],
+    "dialogue_by_purpose": [
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "purpose": "info_enrichment|M1:layer2",
+        "calls": 31024,
+        "known_tokens": "6601825"
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "deepseek-v4.1-flash",
+        "purpose": "info_enrichment|M1:layer1",
+        "calls": 88,
+        "known_tokens": "300723"
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "purpose": "graph_seed_draft",
+        "calls": 66,
+        "known_tokens": "847715"
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "purpose": "exposure_draft",
+        "calls": 72,
+        "known_tokens": "589506"
+      },
+      {
+        "budget_day": "2026-10-15",
+        "model": "glm-5.3",
+        "purpose": "m2_live_financials|segment_mapping_draft",
+        "calls": 19,
+        "known_tokens": "119640"
+      },
+      {
+        "budget_day": "2026-10-16",
+        "model": "deepseek-v4.1-flash",
+        "purpose": "info_enrichment|M1:layer1",
+        "calls": 304,
+        "known_tokens": "1257342"
+      },
+      {
+        "budget_day": "2026-10-16",
+        "model": "deepseek-v4.1-flash",
+        "purpose": "info_enrichment|M1:layer2",
+        "calls": 1689,
+        "known_tokens": "248519"
+      }
+    ],
+    "standard_backlog_classification": [
+      {
+        "budget_day": "2026-10-15",
+        "category": "all_backlog",
+        "calls": 6945,
+        "known_tokens": "3206900"
+      },
+      {
+        "budget_day": "2026-10-15",
+        "category": "all_same_day",
+        "calls": 442,
+        "known_tokens": "188054"
+      },
+      {
+        "budget_day": "2026-10-15",
+        "category": "backlog_first_seen_publication_incomplete",
+        "calls": 23725,
+        "known_tokens": "3507594"
+      },
+      {
+        "budget_day": "2026-10-16",
+        "category": "all_backlog",
+        "calls": 437,
+        "known_tokens": "260133"
+      },
+      {
+        "budget_day": "2026-10-16",
+        "category": "backlog_first_seen_publication_incomplete",
+        "calls": 1556,
+        "known_tokens": "1245728"
+      }
+    ],
+    "budget_deferred_rows": [
+      {
+        "extraction_status": "pending",
+        "items": 12948,
+        "first_seen_min": "2026-10-14 17:15:05.744898+08:00",
+        "first_seen_max": "2026-10-16 08:54:01.580823+08:00",
+        "earliest_retry": "2026-10-16T04:00:00+00:00",
+        "latest_retry": "2026-10-17T04:00:00+00:00"
+      }
+    ],
+    "embedding_separate": [
+      {
+        "budget_day": "2026-10-15",
+        "calls": 2,
+        "items": 65379,
+        "known_tokens": "4781523"
+      }
+    ]
+  },
+  "conclusion": "The Oct15 excess is dominated by historical publication backlog. Complete Oct16 totals still pending until the ET day closes; no daily-budget effectiveness claim based solely on this partial interval."
+}

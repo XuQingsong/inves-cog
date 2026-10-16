@@ -170,3 +170,5 @@
 - `tests/fixtures/phase1/m2/interims/SKHY-full.html.gz` SHA256 `d1336b176f3ee5b1fca7ab27885429fff05574f3bc4a1d71da13095a9945cd2b`: SEC SKHY reviewed interim statements, distinguishes parent profit and comprehensive income.
 | tests/fixtures/phase1/m6/draft.json | absent | ef19bcecac16f65f6bb023bde450c64adb4c1b014e1807fb37e024bdf80d5688 | Handwritten synthetic frozen contract, first failing tests | FR-M6-01; FR-M0-08 |
 | tests/fixtures/phase1/m3/timeline.json | absent | db16d56182ec95a2c99136c43728f11106cc9761d148eff55b4f1282cf249b5d | Handwritten synthetic frozen contract, first failing tests | FR-M3-01; FR-M0-08 |
+
+| tests/fixtures/phase1/m2/a003/unh-cost-components.json | absent | 20ea1d172b03e6519b4cb1603058f1ddf4b73f36d816647dc394d95845c4acca | SEC UNH original cost components: medical benefits and product costs; D-27 regression | A-003; FR-M0-08 |
