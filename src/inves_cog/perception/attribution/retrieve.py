@@ -228,6 +228,40 @@ def _one_hop(core, edges):
     return neighbors
 
 
+_EXPLORE_DAILY = 3
+
+
+def explore_quota(items):
+    """Three flagged low-heat, new-mechanism items enter research. They are not operating evidence."""
+    if items is None:
+        return None
+    selected = []
+    seen = set()
+    for row in items:
+        if len(selected) >= _EXPLORE_DAILY:
+            break
+        info_id = row.get("info_id")
+        if not info_id or info_id in seen:
+            continue
+        seen.add(info_id)
+        if row.get("low_heat") is not True or row.get("new_mechanism") is not True:
+            continue
+        selected.append(
+            {
+                "info_id": info_id,
+                "enters_research": True,
+                "operating_evidence": False,
+                "fundamental_standing": None,
+            }
+        )
+    return {
+        "selected": selected,
+        "limit": _EXPLORE_DAILY,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
 def _monitors(present, monitored):
     found = []
     for row in monitored:

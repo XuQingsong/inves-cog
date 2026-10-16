@@ -1093,6 +1093,45 @@ def test_market_fingerprint_does_not_name_the_only_cause():
 
 
 @pytest.mark.phase1_blocking
+def test_explore_quota_is_not_operating_evidence():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.retrieve import explore_quota
+
+    assert explore_quota(None) is None
+    empty = explore_quota([])
+    assert empty["selected"] == []
+    assert empty["limit"] == 3
+    assert empty["operating_evidence"] is False
+    flagged = {"low_heat": True, "new_mechanism": True}
+    rows = [
+        {"info_id": "hot", "low_heat": False, "new_mechanism": True},
+        {"info_id": "old", "low_heat": True, "new_mechanism": False},
+        {"low_heat": True, "new_mechanism": True},
+        {"info_id": "quiet-1", **flagged},
+        {"info_id": "quiet-1", **flagged},
+        {"info_id": "quiet-2", **flagged},
+        {"info_id": "quiet-3", **flagged},
+        {"info_id": "quiet-4", **flagged},
+    ]
+    picked = explore_quota(rows)
+    assert [row["info_id"] for row in picked["selected"]] == ["quiet-1", "quiet-2", "quiet-3"]
+    assert all(row["enters_research"] is True for row in picked["selected"])
+    assert all(row["operating_evidence"] is False for row in picked["selected"])
+    assert all(row["fundamental_standing"] is None for row in picked["selected"])
+    anomaly = {"anomaly_id": "explore", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["explore_quota"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], explore=rows)
+    assert [row["info_id"] for row in report["explore_quota"]["selected"]] == ["quiet-1", "quiet-2", "quiet-3"]
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
