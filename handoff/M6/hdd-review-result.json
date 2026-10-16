@@ -1,0 +1,101 @@
+{
+  "basket": "hdd",
+  "confirmed": [
+    {
+      "exposure_basis": null,
+      "exposure_usd": null,
+      "relation_id": "04d33a48195d0cff75a327ca8b1dbcd6124585a11e23b90069635541aae7d2e0",
+      "reviewed_at": "2026-10-15T23:07:42.112452+08:00",
+      "status": "观察到"
+    },
+    {
+      "exposure_basis": null,
+      "exposure_usd": null,
+      "relation_id": "079a8f3326b3b85ba68c905e500e4be15441e94a15c60b9ced253dc725c98fd2",
+      "reviewed_at": "2026-10-15T23:07:42.112915+08:00",
+      "status": "观察到"
+    },
+    {
+      "exposure_basis": null,
+      "exposure_usd": null,
+      "relation_id": "0f7f6b429742246e914cf9c3e9625c6a3c207f7e87989d327aabbba145d5fe59",
+      "reviewed_at": "2026-10-15T23:07:42.112914+08:00",
+      "status": "观察到"
+    },
+    {
+      "exposure_basis": null,
+      "exposure_usd": null,
+      "relation_id": "1f26acbd80398d55a845973540ed8ec9d8831cd6afd3ad492bc1b23b0e2fd5a8",
+      "reviewed_at": "2026-10-15T23:07:42.112915+08:00",
+      "status": "观察到"
+    },
+    {
+      "exposure_basis": null,
+      "exposure_usd": null,
+      "relation_id": "24b2f4c782eb28490f9e8235bee37bfed62c43a2dfff514a169dcdf91f624f14",
+      "reviewed_at": "2026-10-15T23:07:42.112914+08:00",
+      "status": "观察到"
+    },
+    {
+      "exposure_basis": null,
+      "exposure_usd": null,
+      "relation_id": "5bd4f96cf2d7e18a266b9e6fa33c10b210eaf1f84873ffb7b5efe6dc476b18ae",
+      "reviewed_at": "2026-10-15T23:07:42.112915+08:00",
+      "status": "观察到"
+    },
+    {
+      "exposure_basis": "分部收入",
+      "exposure_usd": 12919000000.0,
+      "relation_id": "c096bf2de7370fb78f0183b211c2d74b0dd05b1e1a2b07c74e57b62bfba67341",
+      "reviewed_at": "2026-10-15T23:07:42.112915+08:00",
+      "status": "观察到"
+    }
+  ],
+  "human_authorization": "用户明确答复：确认这7条候选",
+  "requested_ids": [
+    "04d33a48195d0cff75a327ca8b1dbcd6124585a11e23b90069635541aae7d2e0",
+    "0f7f6b429742246e914cf9c3e9625c6a3c207f7e87989d327aabbba145d5fe59",
+    "24b2f4c782eb28490f9e8235bee37bfed62c43a2dfff514a169dcdf91f624f14",
+    "079a8f3326b3b85ba68c905e500e4be15441e94a15c60b9ced253dc725c98fd2",
+    "1f26acbd80398d55a845973540ed8ec9d8831cd6afd3ad492bc1b23b0e2fd5a8",
+    "5bd4f96cf2d7e18a266b9e6fa33c10b210eaf1f84873ffb7b5efe6dc476b18ae",
+    "c096bf2de7370fb78f0183b211c2d74b0dd05b1e1a2b07c74e57b62bfba67341"
+  ],
+  "review_log": [
+    {
+      "action": "confirm",
+      "relation_id": "04d33a48195d0cff75a327ca8b1dbcd6124585a11e23b90069635541aae7d2e0",
+      "reviewed_at": "2026-10-15T23:07:42.115453+08:00"
+    },
+    {
+      "action": "confirm",
+      "relation_id": "079a8f3326b3b85ba68c905e500e4be15441e94a15c60b9ced253dc725c98fd2",
+      "reviewed_at": "2026-10-15T23:07:42.118697+08:00"
+    },
+    {
+      "action": "confirm",
+      "relation_id": "0f7f6b429742246e914cf9c3e9625c6a3c207f7e87989d327aabbba145d5fe59",
+      "reviewed_at": "2026-10-15T23:07:42.118970+08:00"
+    },
+    {
+      "action": "confirm",
+      "relation_id": "1f26acbd80398d55a845973540ed8ec9d8831cd6afd3ad492bc1b23b0e2fd5a8",
+      "reviewed_at": "2026-10-15T23:07:42.119144+08:00"
+    },
+    {
+      "action": "confirm",
+      "relation_id": "24b2f4c782eb28490f9e8235bee37bfed62c43a2dfff514a169dcdf91f624f14",
+      "reviewed_at": "2026-10-15T23:07:42.119281+08:00"
+    },
+    {
+      "action": "confirm",
+      "relation_id": "5bd4f96cf2d7e18a266b9e6fa33c10b210eaf1f84873ffb7b5efe6dc476b18ae",
+      "reviewed_at": "2026-10-15T23:07:42.119425+08:00"
+    },
+    {
+      "action": "confirm",
+      "relation_id": "c096bf2de7370fb78f0183b211c2d74b0dd05b1e1a2b07c74e57b62bfba67341",
+      "reviewed_at": "2026-10-15T23:07:42.119620+08:00"
+    }
+  ]
+}

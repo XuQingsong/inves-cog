@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.407" timestamp="2026-10-15T21:01:36.261701+08:00" hostname="192.168.1.101"><testcase classname="tests.m6.test_structure" name="test_graph_draft_requires_citation" time="0.008"><failure message="KeyError: 'max_tokens'">clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-200/test_graph_draft_requires_cita0')
+
+    @pytest.mark.phase1_blocking
+    def test_graph_draft_requires_citation(clock, tmp_path):
+        from tests.m6.recordings import assert_graph_request_bounds, recorded_draft
+    
+&gt;       assert_graph_request_bounds()
+
+tests/m6/test_structure.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_graph_request_bounds():
+        from inves_cog.ingest.http import Response
+    
+        requests = []
+    
+        def send(method, url, **kwargs):
+            requests.append(kwargs["json"])
+            return Response(200, {"choices": [{"message": {"content": "{}"}}]})
+    
+        client = Client.from_environment(
+            {
+                "LLM_HARD_API_KEY": "fixture",
+                "LLM_HARD_BASE_URL": "https://fixture.invalid/v1",
+                "LLM_HARD_API_STYLE": "openai",
+            },
+            send=send,
+        )
+        for task in ["graph_seed_draft", "exposure_draft"]:
+            client.call(task, {"source_texts": []})
+            assert requests[-1]["model"] == "glm-5.3"
+&gt;           assert requests[-1]["max_tokens"] == 8192 and requests[-1]["reasoning_effort"] == "low"
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'max_tokens'
+
+tests/m6/recordings.py:29: KeyError</failure></testcase></testsuite></testsuites>

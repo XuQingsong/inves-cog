@@ -1,0 +1,87 @@
+{
+  "method": "independent unscaled QR; consumes saved source factors, no production regression call",
+  "rows": [
+    {
+      "ticker": "AMD",
+      "trade_date": "2026-10-12",
+      "independent_resid": -0.016764030010570717,
+      "actual_resid": -0.016764030010570728,
+      "absolute_error": 1.0408340855860843e-17,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "ANET",
+      "trade_date": "2026-10-12",
+      "independent_resid": -0.0021278171906814504,
+      "actual_resid": -0.00212781719068144,
+      "absolute_error": 1.0408340855860843e-17,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "WDC",
+      "trade_date": "2026-10-12",
+      "independent_resid": 0.011832020321643516,
+      "actual_resid": 0.011832020321643516,
+      "absolute_error": 0.0,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "AMD",
+      "trade_date": "2026-10-13",
+      "independent_resid": 0.0029846206538403537,
+      "actual_resid": 0.002984620653840359,
+      "absolute_error": 5.204170427930421e-18,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "ANET",
+      "trade_date": "2026-10-13",
+      "independent_resid": -0.03193886703960417,
+      "actual_resid": -0.03193886703960417,
+      "absolute_error": 0.0,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "WDC",
+      "trade_date": "2026-10-13",
+      "independent_resid": -0.005809839892629228,
+      "actual_resid": -0.005809839892629252,
+      "absolute_error": 2.42861286636753e-17,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "AMD",
+      "trade_date": "2026-10-14",
+      "independent_resid": -0.02082928748272358,
+      "actual_resid": -0.02082928748272367,
+      "absolute_error": 9.020562075079397e-17,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "ANET",
+      "trade_date": "2026-10-14",
+      "independent_resid": -0.008533943019170598,
+      "actual_resid": -0.008533943019170605,
+      "absolute_error": 6.938893903907228e-18,
+      "within_1e_6": true,
+      "nobs": 120
+    },
+    {
+      "ticker": "WDC",
+      "trade_date": "2026-10-14",
+      "independent_resid": 0.012696145003547814,
+      "actual_resid": 0.012696145003547807,
+      "absolute_error": 6.938893903907228e-18,
+      "within_1e_6": true,
+      "nobs": 120
+    }
+  ],
+  "max_error": 9.020562075079397e-17
+}

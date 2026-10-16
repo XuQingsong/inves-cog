@@ -1,0 +1,374 @@
+"""Frozen market-state rules plus independent numerical/graph counterexamples."""
+
+import json
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from tests.harness.tools.golden import load_golden
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def linear_sample(n=162):
+    x = np.arange(n, dtype=float)
+    factors = pd.DataFrame({"m": np.sin(x / 4) / 100, "s": np.cos(x / 7) / 150, "t": np.sin(x / 11) / 200})
+    y = 0.001 + factors @ np.array([1.2, 0.5, 0.8])
+    return y, factors
+
+
+@pytest.mark.phase1_blocking
+def test_marketstate_flags():
+    from inves_cog.marketstate.market import market_flags
+
+    for row in load_golden("m6_marketstate.json")["cases"]:
+        result = market_flags(**row["input"])
+        assert {key: result[key] for key in row["expected"]} == row["expected"]
+    assert not market_flags(spy_5d_pct=-2, down_share_5d_pct=70)["shock_flag"]
+    assert market_flags(spy_5d_pct=-5, down_share_5d_pct=70)["shock_flag"]
+
+
+@pytest.mark.phase1_blocking
+def test_residual_exact_linear():
+    from inves_cog.marketstate.regression import fit_predict
+
+    y, factors = linear_sample()
+    result = fit_predict(y, factors, signal_index=160)
+    assert result["alpha"] == pytest.approx(0.001, abs=1e-12)
+    assert list(result["betas"].values()) == pytest.approx([1.2, 0.5, 0.8], abs=1e-9)
+    assert result["resid"] == pytest.approx(0, abs=1e-12)
+    assert result["nobs"] == 120 and result["dof"] == 116
+
+
+@pytest.mark.phase1_blocking
+def test_sic_review_additions():
+    from inves_cog.marketstate.sic import load_sic, sector_etf
+
+    rules, tickers = load_sic()
+    expected = {
+        3714: "XLY",
+        5500: "XLY",
+        5599: "XLY",
+        5810: "XLY",
+        5812: "XLY",
+        3812: "XLI",
+        7340: "XLI",
+        8742: "XLI",
+        3823: "XLK",
+        3824: None,
+        3825: "XLK",
+        3826: "XLV",
+        8731: "XLV",
+        7990: "XLC",
+        8200: "XLY",
+        7389: None,
+    }
+    assert {code: sector_etf(code, rules) for code in expected} == expected
+    assert sector_etf(7372, rules) == "IGV"
+    assert sector_etf(7372, rules, ticker="SHW", tickers=tickers) == "XLB"
+    assert sector_etf(3674, rules) == "SMH"
+    assert sector_etf(3674, rules, ticker="BKNG", tickers=tickers) == "XLY"
+
+
+@pytest.mark.phase1_blocking
+def test_l3_same_as_l2_drops_theme_factor():
+    from inves_cog.marketstate.engine import stock_rows
+    from inves_cog.marketstate.factors import stock_factors
+
+    count = 200
+    index = pd.bdate_range("2024-01-02", periods=count)
+    step = np.arange(count, dtype=float)
+    spy = np.sin(step / 4) / 100
+    sector = np.cos(step / 5) / 80
+    idiosyncratic = np.sin(step / 9) / 90
+    returns = pd.DataFrame(
+        {
+            "SPY": spy,
+            "A": 0.001 + 1.1 * spy + 0.4 * sector + idiosyncratic,
+            "B": 0.001 + 0.9 * spy + 0.6 * sector,
+            "C": 0.001 + 1.0 * spy + 0.5 * sector,
+            "D": 0.001 + 0.8 * spy + idiosyncratic * 2,
+        },
+        index=index,
+    )
+    post = pd.DataFrame(0.0, index=index, columns=returns.columns)
+    same_members = [{"ticker": name, "primary": True} for name in ("A", "B", "C")]
+    l2 = {"basket_id": "semis", "members": same_members}
+    l3_same = {"basket_id": "ai-chips", "members": same_members}
+    l3_different = {
+        "basket_id": "ai-servers",
+        "members": [{"ticker": name, "primary": True} for name in ("A", "B", "D")],
+    }
+
+    same_factors, same_reasons = stock_factors(returns, ticker="A", l2=l2, l3=l3_same)
+    assert list(same_factors.columns) == ["m", "s"]
+    assert "l3_same_as_l2" in same_reasons
+    different_factors, different_reasons = stock_factors(returns, ticker="A", l2=l2, l3=l3_different)
+    assert list(different_factors.columns) == ["m", "s", "t"]
+    assert "l3_same_as_l2" not in different_reasons
+
+    same_rows, _proof = stock_rows(returns, post, ticker="A", l2=l2, l3=l3_same, sector_etf=None, day=index[-1])
+    same_close = same_rows[0]
+    assert same_close["factor_set"] == "m+s"
+    assert "l3_same_as_l2" in same_close["health_codes"]
+    assert same_close["beta_t"] is None
+
+    different_rows, _proof = stock_rows(
+        returns, post, ticker="A", l2=l2, l3=l3_different, sector_etf=None, day=index[-1]
+    )
+    different_close = different_rows[0]
+    assert different_close["factor_set"] == "m+s+t"
+    assert "l3_same_as_l2" not in different_close["health_codes"]
+    assert different_close["beta_t"] is not None
+
+
+@pytest.mark.phase1_blocking
+def test_residual_leave_one_out():
+    from inves_cog.marketstate.factors import basket_return
+
+    sample = pd.DataFrame({"A": [0.1, 0.2], "B": [-0.1, 0.3]})
+    expected = basket_return(sample, ["A", "B"], exclude="A")
+    sample["A"] *= 10
+    pd.testing.assert_series_equal(basket_return(sample, ["A", "B"], exclude="A"), expected)
+    assert list(expected) == [-0.1, 0.3]  # Q-M6-13: a single remaining member is valid.
+    assert basket_return(sample, ["A"], exclude="A").isna().all()
+    assert basket_return(sample, ["A"]).isna().all()  # Standalone basket still needs two.
+
+
+@pytest.mark.phase1_blocking
+def test_residual_window_excludes_today():
+    from inves_cog.marketstate.regression import fit_predict
+
+    y, factors = linear_sample()
+    before = fit_predict(y, factors, signal_index=160)
+    y.iloc[160] += 10
+    after = fit_predict(y, factors, signal_index=160)
+    assert before["betas"] == after["betas"] and before["alpha"] == after["alpha"]
+    assert after["resid"] - before["resid"] == pytest.approx(10)
+
+
+@pytest.mark.phase1_blocking
+def test_insufficient_history_null():
+    from inves_cog.marketstate.regression import fit_predict
+
+    y, factors = linear_sample()
+    result = fit_predict(y, factors, signal_index=59)
+    assert result["resid"] is None and result["null_reason"] == "insufficient_history"
+    assert fit_predict(y, factors, signal_index=60)["resid"] is not None
+    duplicate = factors.assign(duplicate=factors["m"])
+    assert fit_predict(y, duplicate, signal_index=160)["null_reason"] == "rank_deficient"
+
+
+@pytest.mark.phase1_blocking
+def test_post_session_null_when_missing():
+    from tests.m6.post_cases import assert_post_outputs
+
+    assert_post_outputs()
+    from inves_cog.marketstate.factors import adjusted_returns, post_return
+
+    assert post_return(100, None) is None and post_return(100, 101) == pytest.approx(0.01)
+    frame = pd.DataFrame({"close": [100, 50], "adj_factor": [0.5, 1]})
+    assert adjusted_returns(frame).iloc[-1] == 0
+
+
+@pytest.mark.phase1_blocking
+def test_beta_share_bounds():
+    from inves_cog.marketstate.market import beta_share
+
+    assert beta_share(0.01, 0.00499) is None
+    assert beta_share(0, 0.005) == 1
+    assert beta_share(0.02, 0.01) == 0
+    assert beta_share(0.001, -0.01) == pytest.approx(0.9)
+    assert beta_share(None, 0.1) is None
+
+
+@pytest.mark.phase1_blocking
+def test_marketstate_price_only(tmp_path):
+    from inves_cog.marketstate.repository import assert_price_query
+
+    for table in ("ingest.bars_daily", "graph.baskets", "ingest.issuer_profiles", "ingest.macro_observations"):
+        assert_price_query("SELECT * FROM " + table)
+    for table in ("ingest.info_items", "fundamentals.fin_state", "graph.relations", "trading.daily_scores"):
+        with pytest.raises(ValueError):
+            assert_price_query("SELECT * FROM " + table)
+    from tests.harness.tools.checks import scan_imports
+
+    scan_imports(ROOT)
+
+
+@pytest.mark.phase1_blocking
+def test_graph_draft_requires_citation(clock, tmp_path):
+    from tests.m6.source_cases import assert_source_exceptions
+
+    assert_source_exceptions(clock)
+    from inves_cog.perception.graph.repository import entity_id
+
+    assert entity_id("金融竞争者") and entity_id("金融竞争者") != entity_id("其他竞争者")
+    from inves_cog.perception.graph.texts import extract_sections
+
+    original = (
+        "<html><p>Item 1. Business</p><p>Actual business sells to customers. "
+        "See Item 7. Management’s Discussion and Analysis for details.</p>"
+        "<p>Item 1A. Risk Factors</p><p>Actual risk warning.</p>"
+        "<p>Item 7. Management’s Discussion and Analysis</p><p>Operating results. "
+        "Item 1A. “Risk Factors.” " + "Results. " * 50 + "</p>"
+        "<p>Item 8. Financial Statements and Supplementary Data</p></html>"
+    )
+    sections = extract_sections(
+        original,
+        filing={"ticker": "TEST", "accession": "filing", "form": "10-K"},
+        clock=clock,
+        source_url="https://www.sec.gov/Archives/test",
+    )
+    by_name = {row["section"]: row for row in sections}
+    assert "Actual risk warning." in by_name["1A"]["text"]
+    assert "Operating results." not in by_name["1A"]["text"]
+    assert "for details." in by_name["1"]["text"]
+    assert "full_filing" in by_name
+
+    from tests.m6.recordings import assert_graph_request_bounds, recorded_draft
+
+    assert_graph_request_bounds()
+
+    fixture = json.loads((ROOT / "tests/fixtures/phase1/m6/draft.json").read_text())
+    result = recorded_draft(fixture, clock=clock, recordings=tmp_path)
+    assert len(result["relations"]) == 1 and len(result["exposures"]) == 1
+    assert result["relations"][0]["status"] == "候选"
+    assert result["exposures"][0]["exposure_usd"] == 123
+    fixture["source"]["text"] = "Changed evidence with no valid cited passage."
+    result = recorded_draft(fixture, clock=clock, recordings=tmp_path)
+    assert result["relations"] == [] and result["exposures"] == []
+    from inves_cog.perception.graph.segments import validate_segment_draft
+
+    source = {
+        "row_id": "seg",
+        "ticker": "WDC",
+        "accession": "filing",
+        "period_end": "2026-06-30",
+        "revenue": 123,
+        "segment_raw": "HDD",
+        "evidence": {"currency": "USD"},
+    }
+    draft = {"segment_id": "seg", "exposure_usd": 123, "exposure_basis": "分部收入", "accession": "filing"}
+    assert validate_segment_draft(draft, [source], clock=clock)["structured_source"]["row_id"] == "seg"
+    assert validate_segment_draft({**draft, "exposure_usd": 999}, [source], clock=clock) is None
+    assert validate_segment_draft(draft, [{**source, "evidence": {"currency": "EUR"}}], clock=clock) is None
+
+
+@pytest.mark.phase1_blocking
+def test_candidate_edges_not_used(clock):
+    from tests.m6.post_cases import assert_review_edits
+
+    assert_review_edits(clock)
+    from inves_cog.perception.graph.review import ReviewQueue
+
+    queue = ReviewQueue(clock=clock)
+    queue.add({"relation_id": "r1", "status": "候选", "basket_ids": ["hdd"], "exposure_usd": 123})
+    assert queue.confirmed() == [] and len(queue.candidates("hdd")) == 1
+    queue.review(["r1"], action="confirm")
+    assert len(queue.confirmed()) == 1 and queue.confirmed()[0]["reviewed_at"] == clock.now_utc()
+    queue.review(["r1"], action="confirm")
+    assert len(queue.confirmed()) == 1
+    queue.add({"relation_id": "r2", "status": "候选", "basket_ids": ["hdd"]})
+    queue.review(["r2"], action="reject")
+    assert len(queue.confirmed()) == 1 and queue.candidates("hdd") == []
+
+
+@pytest.mark.phase1_blocking
+def test_auto_cluster_suggestion():
+    from inves_cog.marketstate.clustering import suggestions
+
+    y, factors = linear_sample(60)
+    returns = pd.DataFrame({"A": y, "B": y * 2, "C": y * 3, "D": factors["s"]})
+    found = suggestions(returns, existing=[])
+    assert ["A", "B", "C"] in [row["members"] for row in found]
+    assert suggestions(returns, existing=[{"members": ["A", "B", "C"]}]) == []
+    assert suggestions(returns.iloc[:59], existing=[]) == []
+
+
+@pytest.mark.phase1_blocking
+def test_draft_all_does_not_share_one_connection():
+    import threading
+    import time
+
+    from inves_cog.perception.graph.service import GraphService
+
+    class Connection:
+        def __init__(self):
+            self.active = 0
+            self.max_active = 0
+            self.lock = threading.Lock()
+
+        def execute(self, *_args, **_kwargs):
+            with self.lock:
+                self.active += 1
+                self.max_active = max(self.max_active, self.active)
+            time.sleep(0.05)
+            with self.lock:
+                self.active -= 1
+
+            class Result:
+                def fetchone(self):
+                    return None
+
+            return Result()
+
+    class Repository:
+        def __init__(self, connection):
+            self.connection = connection
+
+    class Probe(GraphService):
+        def draft_ticker(self, ticker):
+            self.repo.connection.execute("SELECT 1")
+            return {"ticker": ticker, "status": "ok", "relations": 3, "exposures": 0}
+
+    connection = Connection()
+    service = Probe(repository=Repository(connection), sec=None, llm=None, clock=None, universe=[])
+    result = service.draft_all(["AAA", "BBB", "CCC"], workers=3)
+    assert result["status"] == "ok"
+    assert connection.max_active == 1
+
+    opened = []
+
+    class Owned:
+        def __init__(self):
+            self.used = False
+
+        def execute(self, *_args, **_kwargs):
+            self.used = True
+
+            class Result:
+                def fetchone(self):
+                    return None
+
+            return Result()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+    def factory():
+        item = Owned()
+        opened.append(item)
+        return item
+
+    shared = Owned()
+    separate = Probe(
+        repository=Repository(shared), sec=None, llm=None, clock=None, universe=[], connection_factory=factory
+    )
+    separate.draft_all(["AAA", "BBB"], workers=2)
+    assert shared.used is False
+    assert len(opened) == 2 and all(item.used for item in opened)
+
+
+@pytest.mark.phase1_live
+def test_marketstate_live_smoke(clock):
+    from inves_cog.marketstate.live import run_smoke
+
+    result = run_smoke(clock=clock)
+    assert result["coverage"] == result["expected"]
+    assert result["expected"] >= 59

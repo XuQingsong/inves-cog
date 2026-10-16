@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.390" timestamp="2026-10-15T22:55:04.698964+08:00" hostname="192.168.1.101"><testcase classname="tests.m6.test_structure" name="test_graph_draft_requires_citation" time="0.066"><failure message="AssertionError: assert 'Actual risk warning.' in 'Item 1A. â\x80\x9cRisk Factors.â\x80\x9d Results. Results. Results. Results. Results. Results. Results. Results. Resu... Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. '">clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-216/test_graph_draft_requires_cita0')
+
+    @pytest.mark.phase1_blocking
+    def test_graph_draft_requires_citation(clock, tmp_path):
+        from inves_cog.perception.graph.repository import entity_id
+    
+        assert entity_id("金融竞争者") and entity_id("金融竞争者") != entity_id("其他竞争者")
+        from inves_cog.perception.graph.texts import extract_sections
+    
+        original = (
+            "&lt;html&gt;&lt;p&gt;Item 1. Business&lt;/p&gt;&lt;p&gt;Actual business sells to customers. "
+            "See Item 7. Management’s Discussion and Analysis for details.&lt;/p&gt;"
+            "&lt;p&gt;Item 1A. Risk Factors&lt;/p&gt;&lt;p&gt;Actual risk warning.&lt;/p&gt;"
+            "&lt;p&gt;Item 7. Management’s Discussion and Analysis&lt;/p&gt;&lt;p&gt;Operating results. "
+            "Item 1A. “Risk Factors.” " + "Results. " * 50 + "&lt;/p&gt;"
+            "&lt;p&gt;Item 8. Financial Statements and Supplementary Data&lt;/p&gt;&lt;/html&gt;"
+        )
+        sections = extract_sections(
+            original,
+            filing={"ticker": "TEST", "accession": "filing", "form": "10-K"},
+            clock=clock,
+            source_url="https://www.sec.gov/Archives/test",
+        )
+        by_name = {row["section"]: row for row in sections}
+&gt;       assert "Actual risk warning." in by_name["1A"]["text"]
+E       AssertionError: assert 'Actual risk warning.' in 'Item 1A. â\x80\x9cRisk Factors.â\x80\x9d Results. Results. Results. Results. Results. Results. Results. Results. Resu... Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. Results. '
+
+tests/m6/test_structure.py:141: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.806" timestamp="2026-10-15T21:48:25.630898+08:00" hostname="192.168.1.101"><testcase classname="tests.m6.test_structure" name="test_post_session_null_when_missing" time="0.478"><failure message="AssertionError">@pytest.mark.phase1_blocking
+    def test_post_session_null_when_missing():
+        from tests.m6.post_cases import assert_post_outputs
+    
+&gt;       assert_post_outputs()
+
+tests/m6/test_structure.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_post_outputs():
+        from inves_cog.marketstate.engine import calculate
+    
+        first = date(2025, 1, 1)
+        tickers = ["SPY", "A", "B", "C"]
+        bars = []
+        for j, ticker in enumerate(tickers):
+            price = 100.0
+            for i in range(200):
+                price *= 1 + 0.004 * np.sin(i / (3 + j)) + 0.001 * j
+                bars.append(
+                    {
+                        "ticker": ticker,
+                        "trade_date": first + timedelta(days=i),
+                        "close": price,
+                        "adj_factor": 1.0,
+                        "post_close": price * (1 + 0.001 * np.cos(i / (4 + j))),
+                    }
+                )
+        basket = {
+            "basket_id": "test",
+            "level": "L2",
+            "name": "test",
+            "members": [{"ticker": "A"}, {"ticker": "B"}, {"ticker": "C"}],
+            "factor_basis": {"kind": "market"},
+            "benchmark": "SPY",
+        }
+        day = first + timedelta(days=199)
+        result = calculate(bars, [basket], [], day=day, tickers=["A", "B", "C"], sic_etfs={})
+&gt;       assert {r["session"] for r in result["baskets"]} == {"close", "post"}
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m6/post_cases.py:38: AssertionError</failure></testcase><testcase classname="tests.m6.test_structure" name="test_candidate_edges_not_used" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+
+    @pytest.mark.phase1_blocking
+    def test_candidate_edges_not_used(clock):
+        from tests.m6.post_cases import assert_review_edits
+    
+&gt;       assert_review_edits(clock)
+
+tests/m6/test_structure.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+clock = FrozenClock(instant=datetime.datetime(2026, 10, 13, 0, 0, tzinfo=datetime.timezone.utc))
+
+    def assert_review_edits(clock):
+        from inves_cog.perception.graph.review import ReviewQueue
+    
+        queue = ReviewQueue(clock=clock, rows=[{"relation_id": "edit", "status": "候选", "exposure_usd": 123}])
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+tests/m6/post_cases.py:57: Failed</failure></testcase></testsuite></testsuites>

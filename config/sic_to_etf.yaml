@@ -1,0 +1,148 @@
+# Ordered first-match rules from the approved kickoff; unknown codes are SPY-only.
+# Q-M6-19: ticker overrides win before ranges. 5810-5812 already map to XLY via 5600-5999.
+# 7389 (commercial services, including PYPL and UBER) stays unmapped and uses SPY only.
+version: m6-v6
+tickers:
+  BKNG: XLY
+  SHW: XLB
+rules:
+- etf: SMH
+  ranges:
+  - - 3674
+    - 3674
+- etf: IGV
+  ranges:
+  - - 7372
+    - 7372
+- etf: XLRE
+  ranges:
+  - - 6500
+    - 6599
+  - - 6798
+    - 6798
+- etf: XLV
+  ranges:
+  - - 2833
+    - 2836
+  - - 3826
+    - 3826
+  - - 3840
+    - 3851
+  - - 8000
+    - 8099
+  - - 8731
+    - 8731
+- etf: XLP
+  ranges:
+  - - 2840
+    - 2844
+  - - 5331
+    - 5331
+  - - 5400
+    - 5499
+- etf: XLE
+  ranges:
+  - - 1311
+    - 1311
+  - - 1381
+    - 1382
+  - - 1389
+    - 1389
+  - - 2911
+    - 2911
+  - - 2990
+    - 2990
+- etf: XLB
+  ranges:
+  - - 1000
+    - 1099
+  - - 1400
+    - 1499
+  - - 2600
+    - 2699
+  - - 2800
+    - 2899
+  - - 3080
+    - 3399
+- etf: XLP
+  ranges:
+  - - 2000
+    - 2199
+- etf: XLY
+  ranges:
+  - - 2200
+    - 2399
+  - - 2510
+    - 2519
+  - - 3711
+    - 3711
+  - - 3714
+    - 3714
+  - - 3751
+    - 3751
+  - - 5200
+    - 5399
+  - - 5500
+    - 5599
+  - - 5600
+    - 5999
+  - - 7000
+    - 7099
+  - - 8200
+    - 8200
+- etf: XLI
+  ranges:
+  - - 1520
+    - 1799
+  - - 3400
+    - 3569
+  - - 3580
+    - 3599
+  - - 3720
+    - 3749
+  - - 3760
+    - 3799
+  - - 3812
+    - 3812
+  - - 4000
+    - 4799
+  - - 7340
+    - 7340
+  - - 8742
+    - 8742
+- etf: XLK
+  ranges:
+  - - 3570
+    - 3579
+  - - 3660
+    - 3699
+  - - 3823
+    - 3823
+  - - 3825
+    - 3825
+  - - 7370
+    - 7379
+- etf: XLC
+  ranges:
+  - - 2711
+    - 2711
+  - - 2721
+    - 2721
+  - - 2731
+    - 2731
+  - - 2741
+    - 2741
+  - - 4800
+    - 4899
+  - - 7990
+    - 7990
+- etf: XLU
+  ranges:
+  - - 4900
+    - 4999
+- etf: XLF
+  ranges:
+  - - 6000
+    - 6499
+  - - 6700
+    - 6799

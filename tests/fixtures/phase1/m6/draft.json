@@ -1,0 +1,57 @@
+{
+  "classification": "handwritten synthetic recording, not a real SEC statement",
+  "source": {
+    "ticker": "SYN",
+    "accession": "SYN-ACCESSION",
+    "section": "Item 1",
+    "text": "Customer Alpha has a $123 contract.",
+    "char_start": 0
+  },
+  "graph_seed_draft": {
+    "relations": [
+      {
+        "from_entity": "SYN",
+        "to_entity": "Alpha",
+        "connection_type": "业务关系",
+        "mechanism": "需求",
+        "citation": {
+          "accession": "SYN-ACCESSION",
+          "section": "Item 1",
+          "char_start": 0,
+          "char_end": 14,
+          "quote": "Customer Alpha"
+        }
+      },
+      {
+        "from_entity": "SYN",
+        "to_entity": "Unproven",
+        "connection_type": "业务关系",
+        "mechanism": "需求"
+      }
+    ]
+  },
+  "exposure_draft": {
+    "exposures": [
+      {
+        "from_entity": "SYN",
+        "to_entity": "Alpha",
+        "exposure_usd": 123,
+        "exposure_basis": "合同",
+        "accession": "SYN-ACCESSION",
+        "citation": {
+          "accession": "SYN-ACCESSION",
+          "section": "Item 1",
+          "char_start": 0,
+          "char_end": 35,
+          "quote": "Customer Alpha has a $123 contract."
+        }
+      },
+      {
+        "from_entity": "SYN",
+        "to_entity": "Unproven",
+        "exposure_usd": 999,
+        "exposure_basis": "合同"
+      }
+    ]
+  }
+}
