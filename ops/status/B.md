@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 00:33 北京
+
+- 草稿 PR #18 head `55302e7`。没有合并进 main。本地 `make phase1-test`：159 passed，14 deselected。导出文件没有进入本 PR。
+- 冻结了导出 `cd02bdd` 的七条标题。规则上 CoreWeave、巴克莱和 CPI 可以补上 OpenAI 的三类，东芝标题是日经转载。这是夹具，不是现场录音。北京 10-15 09:15 只能看见 CoreWeave，看不见巴克莱和 CPI。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 00:22 北京
 
 - 草稿 PR #18 head `478e93c`。没有合并进 main。本地 `make phase1-test`：158 passed，14 deselected。
