@@ -2,6 +2,11 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-006  进行中  2026-10-16 16:58 北京
+- 上线前实际验证发现**权限阻塞**：Mac main 已快进 **89ac6938978bc61eed9c7a86040bacce1d3a362c**。按 A-006 §2.2 只为既有 role_trading/role_marketstate 开启 LOGIN，随机密码仅在私有 .env；没有新建角色、没有授予任何权限、没有跑生产迁移。两个角色原有各自表 INSERT 权限仍在，但 **has_database_privilege(...,'inves_cog','CONNECT') 均为 false**；实际直接连接报 `permission denied for database "inves_cog"`。
+- 任务明确“不新建别的权限”，因此没有自行 GRANT CONNECT、使用管理员作长期服务账号或启动已知无法写库的新服务。原 scheduler/watchdog/awake 保持运行，尚未安装或重启新调度。无正在运行的 job（08:54 UTC 核实）。脱敏实测记录在本机 .harness/service/a006-writer-setup.json。
+- **需要需求方允许或执行：仅给上述两个现有角色授予数据库 inves_cog 的 CONNECT**；它是建立连接的前置权限，不增加任何表/schema 的读写。获准后继续同一上线步骤，不重复改密码。M4 按已答 Q-M4-11 继续收尾，不受此部署阻塞影响。
+
 ## A-006  进行中  2026-10-16 16:53 北京
 - 已恢复同一任务：需求方已将 PR #14（b0c7aeabfb1277c7721fa7e9d35996871679282e）和 #15（47d0278b94a66af8414b20c8cf7ae7d60dfa7d45）合并；main 为 **89ac6938978bc61eed9c7a86040bacce1d3a362c**，[准确 SHA 的 push CI 38875292344](https://github.com/XuQingsong/inves-cog/actions/runs/38875292344) 绿。Agent 未合并 PR。
 - K04 已由 main 的 Q-M4-11 明确采用 B：核心持仓及 buy_to 计 12 只，观察仓另计最多 3 只；保留真实 10-09 十三只为正例。按已发布需求修正容量断言，保留原先失败提交；不自行修改规则 A 语义。
