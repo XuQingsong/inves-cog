@@ -58,7 +58,13 @@ class Repository:
             if self.exists("graph", "baskets")
             else []
         )
+        profiles = (
+            self.connection.execute("SELECT ticker,sic FROM ingest.issuer_profiles").fetchall()
+            if self.exists("ingest", "issuer_profiles")
+            else []
+        )
         return {
+            "sic": {r["ticker"]: r["sic"] for r in profiles},
             "store": StateStore(states),
             "states": dict(grouped),
             "bars": dict(bars),
@@ -108,19 +114,21 @@ class Repository:
                 past[r["ticker"]] = r["bear"]
         return dict(seen), past
 
-    def holdings(self, through, *, portfolio=None):
+    def holdings(self, through, *, portfolio=None, cutoff=None):
         if not self.exists("trading", "ledger") or not self.exists("trading", "plan"):
             return {"holdings": [], "candidates": [], "reason": "M4持仓/计划表未部署，不能判断实际仓位"}
         portfolio = portfolio or settings()["inputs"]["portfolio_id"]
         ledger = self.connection.execute(
             "SELECT * FROM trading.ledger WHERE portfolio_id=%s AND trade_date<=%s "
-            "AND extractor='fixed' AND rule_set='A' ORDER BY trade_date DESC,observed_at DESC LIMIT 1",
-            (portfolio, through),
+            "AND extractor='fixed' AND rule_set='A' AND (%s::timestamptz IS NULL OR observed_at<=%s) "
+            "ORDER BY trade_date DESC,observed_at DESC LIMIT 1",
+            (portfolio, through, cutoff, cutoff),
         ).fetchone()
         plan = self.connection.execute(
             "SELECT * FROM trading.plan WHERE portfolio_id=%s AND signal_date<=%s "
-            "AND extractor='fixed' AND rule_set='A' ORDER BY signal_date DESC,generated_at DESC LIMIT 1",
-            (portfolio, through),
+            "AND extractor='fixed' AND rule_set='A' AND published "
+            "AND (%s::timestamptz IS NULL OR generated_at<=%s) ORDER BY signal_date DESC,generated_at DESC LIMIT 1",
+            (portfolio, through, cutoff, cutoff),
         ).fetchone()
         if not ledger:
             return {"holdings": [], "candidates": [], "reason": "M4未发布实际持仓快照"}
@@ -135,6 +143,7 @@ class Repository:
             "candidates": plan["payload"].get("orders", []) if plan else [],
             "equity": equity,
             "ledger_date": ledger["trade_date"],
+            "cash": ledger["cash"],
             "reason": None,
         }
 

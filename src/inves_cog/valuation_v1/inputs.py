@@ -71,6 +71,7 @@ def financial_inputs(state, states, entity):
     out = {
         **values,
         "ticker": state.ticker,
+        "sic": entity.get("sic"),
         "financial_filed": str(state.filed),
         "financial_period": str(state.period_end),
         "financial_health_codes": state.health_codes,

@@ -67,6 +67,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
     shadows = []
     for entity in universe:
         ticker = entity["ticker"]
+        entity = {**entity, "sic": source.get("sic", {}).get(ticker, entity.get("sic"))}
         state = source["store"].state_asof(ticker, as_of, "fixed")
         bars = [r for r in source["bars"].get(ticker, []) if r["trade_date"] == as_of]
         price = bars[-1]["close"] if bars else None
@@ -125,7 +126,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
             )
         ranges.append(row)
         shadows.append(shadow(row, bear_30d=bear_past.get(ticker), seen_versions=seen.get(ticker, set())))
-    holdings = repository.holdings(as_of)
+    holdings = repository.holdings(as_of, cutoff=cutoff)
     by_ticker = {r["ticker"]: r for r in ranges}
     panel_rows = {}
     for holding in holdings["holdings"]:
@@ -143,6 +144,8 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
         )
         panel_rows[ticker] = panel({**valuation, "weight_pct": weight}, bear_30d=bear_past.get(ticker))
     for candidate in holdings["candidates"]:
+        if candidate.get("side") != "buy":
+            continue
         ticker = candidate["ticker"]
         valuation = by_ticker.get(ticker)
         if valuation is None:
