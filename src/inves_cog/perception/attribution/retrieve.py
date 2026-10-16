@@ -54,6 +54,19 @@ def supplement_calls(requested, already_used, rules=None):
     return requested, None
 
 
+def supplement_plan(found_count, requested, already_used, *, now, rules=None):
+    """Search only under five hits. This plans the call and does not make it."""
+    if found_count >= 5:
+        return {"calls": 0, "note": None, "first_seen_at": None}
+    calls, note = supplement_calls(requested, already_used, rules)
+    return {"calls": calls, "note": note, "first_seen_at": now if calls else None}
+
+
+def stamp_supplement(item, now):
+    """A search result is first seen now. Alignment still reads published_at."""
+    return {**item, "first_seen_at": now, "supplement": True}
+
+
 _SOURCE_WEIGHT = {1: 1.0, 2: 0.75, 3: 0.5, 4: 0.25}
 
 

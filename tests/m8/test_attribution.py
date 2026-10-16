@@ -337,6 +337,30 @@ def test_search_budget():
 
 
 @pytest.mark.phase1_blocking
+def test_supplement_runs_only_below_five_items():
+    from inves_cog.perception.attribution.evidence import time_alignment
+    from inves_cog.perception.attribution.retrieve import shortlist, stamp_supplement, supplement_plan
+
+    start = datetime(2026, 10, 14, 13, 30)
+    now = datetime(2026, 10, 14, 21, 0)
+    assert supplement_plan(5, 3, 0, now=now) == {"calls": 0, "note": None, "first_seen_at": None}
+    blocked = supplement_plan(4, 3, 200, now=now)
+    assert blocked == {"calls": 0, "note": "补证未执行", "first_seen_at": None}
+    assert supplement_plan(4, 2, 10, now=now) == {"calls": 2, "note": None, "first_seen_at": now}
+    published = start - timedelta(days=6)
+    item = stamp_supplement(
+        {"info_id": "search-1", "published_at": published, "entities": ["WDC"], "source_root": "search"},
+        now,
+    )
+    assert item["supplement"] is True
+    assert time_alignment(item["published_at"], start, now) == 1.0
+    assert shortlist([item], ["WDC"], start, now - timedelta(minutes=1)) == []
+    visible = shortlist([item], ["WDC"], start, now)
+    assert visible[0]["role"] == "background"
+    assert visible[0]["info_id"] == "search-1"
+
+
+@pytest.mark.phase1_blocking
 def test_verified_not_from_market_evidence():
     from inves_cog.perception.attribution.candidates import verified_from_evidence
     from inves_cog.perception.attribution.operating import Verdict
