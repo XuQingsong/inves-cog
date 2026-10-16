@@ -900,6 +900,45 @@ def test_source_check_does_not_make_the_claim_true():
 
 
 @pytest.mark.phase1_blocking
+def test_official_denial_response_uses_absolute_residual():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.second_hit import denial_response, second_hit_conclusion
+
+    assert denial_response(None) is None
+    assert denial_response({"denial_z": 2.0, "later_z": 0.4}) is None
+    level2 = {"denial": {"source_level": 2, "action": "否认"}, "denial_z": 2.0, "later_z": 0.4}
+    assert denial_response(level2) is None
+    confirmed = {"denial": {"source_level": 1, "action": "确认"}, "denial_z": 2.0, "later_z": 0.4}
+    assert denial_response(confirmed) is None
+    missing = {"denial": {"source_level": 1, "action": "否认"}, "denial_z": 2.0}
+    assert denial_response(missing) is None
+    smaller = denial_response({"denial": {"source_level": 1, "action": "否认"}, "denial_z": 2.0, "later_z": -0.5})
+    assert smaller["weakened"] is True
+    assert smaller["operating_evidence"] is False
+    assert smaller["fundamental_standing"] is None
+    same = denial_response({"denial": {"source_level": 1, "action": "矛盾"}, "denial_z": -1.5, "later_z": 1.5})
+    assert same["weakened"] is False
+    larger = denial_response({"denial": {"source_level": 1, "action": "否认"}, "denial_z": 1.0, "later_z": -1.2})
+    assert larger["weakened"] is False
+    quiet_move = denial_response({"denial": {"source_level": 1, "action": "否认"}, "denial_z": 0.0, "later_z": 0.0})
+    assert quiet_move["weakened"] is False
+    start = datetime(2026, 10, 2, 13, 30)
+    hit = {"source_root": "nikkei", "published_at": start, "outcome": "命中"}
+    assert second_hit_conclusion([hit], start - timedelta(days=1)) == "确认"
+    anomaly = {"anomaly_id": "denial", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["denial_response"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    reading = {"denial": {"source_level": 1, "action": "否认"}, "denial_z": 2.0, "later_z": 0.4}
+    report = explanation_report(anomaly, impact, [supply], [], denial=reading)
+    assert report["denial_response"]["weakened"] is True
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

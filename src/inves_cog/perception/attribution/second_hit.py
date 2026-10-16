@@ -113,3 +113,22 @@ def second_hit_conclusion(events, anomaly_start=None):
     if outcomes.count("命中") >= 1:
         return "确认"
     return "未检验"
+
+
+def denial_response(reading):
+    """After an official denial, a smaller absolute residual is a weakened response."""
+    if reading is None:
+        return None
+    denial = reading.get("denial") or {}
+    official = denial.get("source_level") == 1 and denial.get("action") in {"否认", "矛盾"}
+    if not official:
+        return None
+    denial_z = reading.get("denial_z")
+    later_z = reading.get("later_z")
+    if denial_z is None or later_z is None:
+        return None
+    return {
+        "weakened": abs(later_z) < abs(denial_z),
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }

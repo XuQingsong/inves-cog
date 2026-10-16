@@ -8,6 +8,7 @@ from inves_cog.perception.attribution.lifecycle import weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.propose import review_queue
 from inves_cog.perception.attribution.retrieve import retrieval_gap
+from inves_cog.perception.attribution.second_hit import denial_response
 from inves_cog.perception.attribution.tracks import local_support
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
@@ -139,6 +140,7 @@ def explanation_report(
     chain=None,
     timing=None,
     audit=None,
+    denial=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -169,6 +171,7 @@ def explanation_report(
         "weakest_link": weakest_link(chain),
         "later_report": later_report(timing),
         "source_check": source_check(audit),
+        "denial_response": denial_response(denial),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
