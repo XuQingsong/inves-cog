@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-005  已收到  2026-10-16 13:40 北京
+
+- 任务：在 PR #11 上开发 M7。先红后绿。不连库，不执行迁移，不改 M6、`docs/`、golden、milestones，不合并。
+- 依据：`origin/main` `344deab`；`ops/control.md` 中 B 为「运行」。M7 v8 已冻结。K01 只计 `close`+`pool` 合并后对象；K02 迁移只授予 `job_runs` 的 INSERT/UPDATE；K03 轮动按答复 A，主题轮动是 `alert`。
+- 下一步：读 `data/m7-export` 的 README，先提交失败测试和四个案例夹具。
+
 ## B-004  已完成  2026-10-16 13:16 北京
 
 - 草稿 PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `ac7c252`。复述在 `handoff/M7/kickoff.md`。没有写实现，没有改 `docs/`、golden、milestones，没有改 M6，没有合并。
