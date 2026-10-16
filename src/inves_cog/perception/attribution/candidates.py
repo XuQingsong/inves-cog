@@ -19,6 +19,8 @@ def market_confirmed(*, claim_time, response, independent, alternative):
     return bool(claim_time and response and independent and alternative is not None and alternative >= 0.5)
 
 
-def verified_from_evidence(kinds):
-    allowed = set(kinds) - {"second_hit", "consensus"}
-    return bool(allowed)
+def verified_from_evidence(records, *, as_of, expected_direction):
+    from inves_cog.perception.attribution.operating import operating_verdict
+
+    verdict = operating_verdict(records, as_of=as_of, expected_direction=expected_direction)
+    return verdict.outcome == "支持"

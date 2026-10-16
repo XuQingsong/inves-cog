@@ -7,6 +7,7 @@ from inves_cog.perception.attribution.codes import n_code
 from inves_cog.perception.attribution.evidence import evidence_score, time_alignment
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
+from inves_cog.perception.attribution.operating import operating_verdict
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.second_hit import classify_response, second_hit_conclusion
 from inves_cog.perception.attribution.tracks import apply_deadline, capital_state, deadline_offset
@@ -73,15 +74,30 @@ def midpoint_report():
         )
     checks = supply_constraints({"新增供给占需求增量"})
     unknowns = [row["item"] for row in checks if row["status"] == "未知"]
-    deadline = apply_deadline("支持", unknowns=unknowns)
-    if verified_from_evidence(["filing"]) and deadline["lifecycle"] == "已验证·有影响":
+    as_of = datetime(2026, 10, 20, 13, 30)
+    filing = {
+        "kind": "company_primary",
+        "info_id": "synthetic-8k-guidance",
+        "source_level": 1,
+        "source_root": "sec",
+        "citation": "synthetic 8-K accession 0000000000-26-000001",
+        "form": "8-K",
+        "guidance_change": True,
+        "direction": "down",
+        "published_at": datetime(2026, 10, 20, 12, 0),
+        "first_seen_at": datetime(2026, 10, 20, 12, 0),
+        "fixture": "synthetic",
+    }
+    verdict = operating_verdict([filing], as_of=as_of, expected_direction="down", unknowns=unknowns)
+    deadline = apply_deadline(verdict)
+    if verdict.outcome == "支持" and deadline["lifecycle"] == "已验证·有影响":
         state, history = transition(
             state,
             "已验证·有影响",
             history,
             when="2026-10-20T13:30:00Z",
             trigger=deadline["closing_reason"],
-            evidence_ids=["filing-8k"],
+            evidence_ids=[filing["info_id"]],
         )
     followups = [
         {"source_root": "nikkei", "outcome": "命中", "published_at": nikkei_at, "info_id": NIKKEI},
@@ -107,7 +123,12 @@ def midpoint_report():
     report["deadline_sessions"] = deadline_offset(12, None)
     report["tracks"] = _tracks()
     report["n_code"] = n_code(mechanism="供给", narrative_shock=False, fundamental_unchanged=False, unexplained=False)
-    report["operating_evidence_from_market"] = verified_from_evidence(["second_hit", "consensus"])
+    report["operating_evidence_from_market"] = verified_from_evidence(
+        [{"kind": "second_hit"}, {"kind": "consensus"}],
+        as_of=as_of,
+        expected_direction="down",
+    )
+    report["operating_evidence_id"] = filing["info_id"]
     return {"lifecycle": state, "history": history, "report": report}
 
 

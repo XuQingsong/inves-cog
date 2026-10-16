@@ -176,9 +176,31 @@ def test_search_budget():
 @pytest.mark.phase1_blocking
 def test_verified_not_from_market_evidence():
     from inves_cog.perception.attribution.candidates import verified_from_evidence
+    from inves_cog.perception.attribution.operating import Verdict
 
-    assert verified_from_evidence(["second_hit", "consensus"]) is False
-    assert verified_from_evidence(["filing"]) is True
+    as_of = datetime(2026, 10, 20, 13, 30)
+    blocked = ["price", "social_heat", "unverified", "filing", "second_hit", "consensus", "flow"]
+    for kind in blocked:
+        assert verified_from_evidence([kind], as_of=as_of, expected_direction="down") is False
+    assert verified_from_evidence(["second_hit", "consensus"], as_of=as_of, expected_direction="down") is False
+    label = {
+        "kind": "company_primary",
+        "source_level": 1,
+        "published_at": as_of,
+        "direction": "down",
+    }
+    assert verified_from_evidence([label], as_of=as_of, expected_direction="down") is False
+    consensus = {
+        "kind": "consensus",
+        "coverage": 10,
+        "same_direction_revisions": 10,
+        "eps_change": -0.06,
+        "published_at": as_of,
+        "direction": "down",
+    }
+    assert verified_from_evidence([consensus], as_of=as_of, expected_direction="down") is False
+    with pytest.raises(ValueError, match="经营证据规则"):
+        Verdict("支持", [], object())
 
 
 @pytest.mark.phase1_blocking
@@ -266,16 +288,35 @@ def test_tracks_and_deadline():
     assert capital_state(3, -4, -10) == "已消化"
     assert capital_state(3, -10, -10) == "消化中"
 
-    supported = apply_deadline("支持")
+    from inves_cog.perception.attribution.operating import operating_verdict
+
+    as_of = datetime(2026, 10, 20, 13, 30)
+    guidance = {
+        "kind": "company_primary",
+        "source_level": 1,
+        "citation": "8-K accession",
+        "form": "8-K",
+        "guidance_change": True,
+        "direction": "down",
+        "published_at": as_of,
+    }
+    opposed = {
+        "kind": "eps_revision",
+        "coverage": 10,
+        "same_direction_revisions": 3,
+        "eps_change": 0.03,
+        "published_at": as_of,
+    }
+    supported = apply_deadline(operating_verdict([guidance], as_of=as_of, expected_direction="down"))
     assert supported["lifecycle"] == "已验证·有影响"
-    denied = apply_deadline("反证", level1_denial=True)
+    denied = apply_deadline(operating_verdict([opposed], as_of=as_of, expected_direction="down"), level1_denial=True)
     assert denied["lifecycle"] == "已证伪"
-    faded = apply_deadline("反证")
+    faded = apply_deadline(operating_verdict([opposed], as_of=as_of, expected_direction="down"))
     assert faded["lifecycle"] == "已衰减·无影响"
     assert faded["fundamental"] == "冲突"
     assert faded["deadline_outcome"] == "反证"
     assert faded["closing_reason"] == "截止日证据指向失效"
-    unknown = apply_deadline("条件风险", unknowns=["eps_consensus"])
+    unknown = apply_deadline(operating_verdict([], as_of=as_of, expected_direction="down", unknowns=["eps_consensus"]))
     assert unknown["deadline_outcome"] == "条件风险"
     assert unknown["fundamental"] == "失效"
     assert unknown["closing_reason"] == "截止日仍未知"
@@ -411,6 +452,7 @@ def test_claim_fields_omit_unsupported(tmp_path):
 @pytest.mark.phase1_blocking
 def test_wide_anomaly_skips_candidates(tmp_path):
     from inves_cog.llm.client import Client
+    from inves_cog.perception.attribution.operating import operating_verdict
     from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
     from inves_cog.perception.attribution.report import explanation_report
     from inves_cog.perception.attribution.tracks import apply_deadline
@@ -446,7 +488,14 @@ def test_wide_anomaly_skips_candidates(tmp_path):
     scored = [row for row in rows if row["scored"]]
     assert [row["mechanism"] for row in scored] == ["供给"]
     assert scored[0]["info_ids"] == ["nikkei"]
-    deadline = apply_deadline("条件风险", unknowns=["eps_consensus", "coverage"])
+    deadline = apply_deadline(
+        operating_verdict(
+            [],
+            as_of=datetime(2026, 10, 20, 13, 30),
+            expected_direction="down",
+            unknowns=["eps_consensus", "coverage"],
+        )
+    )
     impact = {"event": 0.0, "amplification": 0.0, "unexplained": -0.02}
     report = explanation_report(anomaly, impact, rows, "rules", deadline)
     assert report["closing_reason"] == "截止日仍未知"
@@ -525,6 +574,71 @@ def test_case_direction_on_synthetic_headlines():
     start = datetime(2026, 10, 14, 13, 30)
     early = [{"source_root": "ft", "outcome": "命中", "published_at": datetime(2026, 10, 9, 0, 45)}]
     assert second_hit_conclusion(early, anomaly_start=start) == "未检验"
+
+
+@pytest.mark.phase1_blocking
+def test_operating_evidence_thresholds():
+    from inves_cog.perception.attribution.operating import operating_verdict
+
+    as_of = datetime(2026, 10, 20, 13, 30)
+
+    def verdict(records, unknowns=()):
+        return operating_verdict(records, as_of=as_of, expected_direction="down", unknowns=unknowns).outcome
+
+    def seen(**kwargs):
+        row = {"published_at": as_of, "first_seen_at": as_of}
+        row.update(kwargs)
+        return row
+
+    guidance = seen(
+        kind="company_primary",
+        source_level=1,
+        citation="8-K accession",
+        form="8-K",
+        guidance_change=True,
+        direction="down",
+    )
+    assert verdict([guidance], unknowns=["投产与良率"]) == "支持"
+    kept = operating_verdict([guidance], as_of=as_of, expected_direction="down", unknowns=["投产与良率"])
+    assert kept.unknowns == ["投产与良率"]
+    assert verdict([]) == "条件风险"
+    assert verdict([seen(**{**guidance, "citation": ""})]) == "条件风险"
+    assert verdict([seen(**{**guidance, "guidance_change": False})]) == "条件风险"
+    assert verdict([seen(**{**guidance, "falsified": True})]) == "条件风险"
+    assert verdict([seen(**{**guidance, "published_at": as_of + timedelta(minutes=1)})]) == "条件风险"
+    call = seen(
+        kind="company_primary",
+        source_level=1,
+        citation="call transcript p.4",
+        call_quantitative=True,
+        direction="down",
+    )
+    assert verdict([call]) == "支持"
+    exact = seen(kind="eps_revision", coverage=10, same_direction_revisions=3, eps_change=-0.03)
+    assert verdict([exact]) == "支持"
+    assert verdict([seen(**{**exact, "same_direction_revisions": 2})]) == "条件风险"
+    assert verdict([seen(**{**exact, "eps_change": -0.029})]) == "条件风险"
+    assert verdict([seen(**{**exact, "coverage": None})]) == "条件风险"
+    assert verdict([seen(**{**exact, "eps_change": 0.03})]) == "反证"
+    industry = [
+        seen(kind="industry", source_level=2, quantitative=True, source_root="nikkei", direction="down"),
+        seen(kind="industry", source_level=3, quantitative=True, source_root="reuters", direction="down"),
+    ]
+    assert verdict(industry) == "支持"
+    assert verdict([industry[0], {**industry[1], "source_root": "nikkei"}]) == "条件风险"
+    assert verdict([industry[0]]) == "条件风险"
+    assert verdict([{**industry[0], "source_level": 4}, industry[1]]) == "条件风险"
+    competitor = seen(
+        kind="competitor_primary",
+        source_level=1,
+        citation="peer 8-K",
+        mapped_to_driver=True,
+        direction="down",
+    )
+    assert verdict([competitor]) == "支持"
+    assert verdict([seen(**{**competitor, "mapped_to_driver": False})]) == "条件风险"
+    both = operating_verdict([guidance, {**exact, "eps_change": 0.03}], as_of=as_of, expected_direction="down")
+    assert both.outcome == "条件风险"
 
 
 @pytest.mark.phase1_blocking

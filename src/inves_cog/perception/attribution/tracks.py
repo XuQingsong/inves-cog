@@ -1,7 +1,5 @@
 """Capital track and the deadline clock. A reprint does not start the clock again."""
 
-_OUTCOMES = {"支持", "反证", "条件风险"}
-
 
 def capital_state(sessions_elapsed, cumulative, first):
     if sessions_elapsed <= 1:
@@ -25,12 +23,8 @@ def deadline_offset(earnings_sessions, mechanism_sessions, cap=20):
     return min(candidates)
 
 
-def close_deadline(outcome, *, renewed=False):
-    if renewed:
-        raise ValueError("截止日不能续期")
-    if outcome not in _OUTCOMES:
-        raise ValueError("到期必须落到支持、反证或条件风险")
-    return _deadline_result(outcome, level1_denial=False, unknowns=())
+def close_deadline(verdict, *, renewed=False):
+    return apply_deadline(verdict, renewed=renewed)
 
 
 def _deadline_result(outcome, *, level1_denial, unknowns):
@@ -70,12 +64,14 @@ def _deadline_result(outcome, *, level1_denial, unknowns):
     return result
 
 
-def apply_deadline(outcome, *, level1_denial=False, renewed=False, unknowns=()):
+def apply_deadline(verdict, *, level1_denial=False, renewed=False):
+    from inves_cog.perception.attribution.operating import Verdict
+
     if renewed:
         raise ValueError("截止日不能续期")
-    if outcome not in _OUTCOMES:
-        raise ValueError("到期必须落到支持、反证或条件风险")
-    return _deadline_result(outcome, level1_denial=level1_denial, unknowns=unknowns)
+    if not isinstance(verdict, Verdict):
+        raise ValueError("截止日结果必须来自经营证据规则")
+    return _deadline_result(verdict.outcome, level1_denial=level1_denial, unknowns=verdict.unknowns)
 
 
 def reactivate(evidence):
