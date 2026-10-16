@@ -41,6 +41,7 @@ serverurl=unix://{state}/supervisor.sock
             "issuer_profiles",
         ],
         "daily_modules": [str(root / "scripts/schedule_daily_modules.py")],
+        "financials": [str(root / "scripts/schedule_financials.py")],
         "watchdog": ["-m", "inves_cog.ingest.service"],
         "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
     }
