@@ -8,7 +8,7 @@
 
 ## 结论
 
-**有条件通过。** 6 条阻塞条款全部满足；合并前要做 4 项修复（B-002，第 4 节）：合入最新 main 并解决冲突、L3 与 L2 成员相同时去掉主题因子、补全行业映射、修复图谱起草的多线程共用连接。
+**有条件通过 → 复验通过（第 6 节）。** 6 条阻塞条款全部满足；合并前要做 4 项修复（B-002，第 4 节）：合入最新 main 并解决冲突、L3 与 L2 成员相同时去掉主题因子、补全行业映射、修复图谱起草的多线程共用连接。
 
 剩余涨跌的计算经需求方独立脚本复算，12 组与生产结果一致，最大误差 1.5e-16。
 
@@ -60,3 +60,19 @@ AI 加速芯片、企业软件、网络安全、数据中心电力、半导体�
 ## 5. 遗留（不阻塞）
 
 - `draft_ticker` 把所有异常都记成 `degraded`，和"没有年报"区分不开；同一 ticker 有多个 L2 时 `active_baskets` 后写覆盖先写（现在每只只有一个 L2，是潜在问题）；STX、SKHY 的特殊处理写死在图谱服务里，应该移到配置。这三项进 tracker，M8 开工前处理。
+
+---
+
+## 6. 复验（B-002、B-003，c144899，2026-10-16）
+
+**结论：通过，可以合并。**
+
+| 项 | 结果 |
+|---|---|
+| Q-M6-18 | 按留一后的成员集合逐日比较；相同 → `m+s`、`l3_same_as_l2`、`beta_t` 为空；正反测试 `test_l3_same_as_l2_drops_theme_factor` |
+| Q-M6-19 | 映射补充和 BKNG、SHW 改正已进 `config/sic_to_etf.yaml`，测试 `test_sic_review_additions` |
+| `draft_all` 连接 | 先用测试复现 3 个线程共用一条连接，再修复；没有连接工厂时串行 |
+| 冲突 | `transport.py` 按任务名分开保留，模型名不变；M3 合并后的 `pyproject.toml`、`MANIFEST.sha256`、`CHANGELOG.md` 已解决，夹具校验通过 |
+| 复跑 | 需求方本机 docker：65 passed；CI success |
+| 范围 | 相对 main 只改 M6 的代码、测试、迁移、`handoff/M6`、`config/sic_to_etf.yaml`；`ingest` 只有 M6 文档授权的采集（`market_structure.py` 及接线）；没有改 `docs/`、golden、milestones、`trading` |
+| 第 6 项 | 按 Q-M6-20 取消，合并后由 A 线用 main 代码重算 2026-10-12/13/14 并写库 |
