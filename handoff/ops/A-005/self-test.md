@@ -1,14 +1,16 @@
 # A-005 运维与修复
 
-任务：main `230713222019d8da6ea384135f4ca4fb239f0450` 的 ops/inbox/A/A-005.md。当前为阶段报告，历史补算仍执行中；未开始 M4 实现。
+任务：main `230713222019d8da6ea384135f4ca4fb239f0450` 的 ops/inbox/A/A-005.md。三项工作完成，交付 PR #13 待需求方验收；未开始 M4 实现。需求方后续 main `7b907ba692952845215faa7cd77e43204860c779` 已登记 D-32，安排 A-006 开头修复入口遮蔽。
 
 ## 1. 价格结构补算
 
-只读探针确认 main 的 MarketService.run 把传入 universe 覆盖为 SIC ticker overrides（BKNG、SHW），见 marketstate-entrypoint-probe.json。已先在 agent-status 告知需求方，请安排 B 修复；本 PR 不修改 M6/M7 文件。
+只读探针确认 main 的 MarketService.run 把传入 universe 覆盖为 SIC ticker overrides（BKNG、SHW），见 marketstate-entrypoint-probe.json。已先在 agent-status 告知需求方；需求方将其登记为 D-32，交 A-006 修复，本 PR 不修改 M6/M7 文件。
 
 本次数据补算直接复用同一 main 的 calculate 和 MarketService.put，显式传入各日可见成员；不是另写模型或修改公式。只以 role_marketstate 写 marketstate.daily/baskets/rotation/market，原 10-12 至 10-14 行已在仓库外备份，按日期事务覆盖。无共享库迁移。7 月至 10-13 没有历史广域快照，只使用种子集合；10-14/15 使用当日已存在快照，不倒灌未来成员。
 
-完整行数和 10-14 的三个因子检查、SPY 单因子数，待计算完成写 marketstate-backfill.json。部分日期的结果不冒称完整覆盖。
+marketstate-backfill.json：2026-07-01 至 2026-10-15 的 **75 个交易日**全部完成，耗时 937.869 秒。daily 13,834 行、baskets 4,350 行、rotation 4,950 行、market 75 行，共 **23,209 行**；写后独立只读查库与各日事务累计数一致。
+
+10-14 NVDA、AMD、MSFT 的 close/post 六行均为 **m+s**；广域 1,294 只按 close 统计，SPY 单因子由原备份实际 **216** 只降为 **143** 只（m+s 1,139、m+s+t 12）。10-14 总覆盖 1,306 只、10-15 总覆盖 1,304 只；更早各日覆盖当时可见的 59 只种子，不冒称已有历史广域成员快照。计算复用未改动 main 模块；独立日期并行计算，父进程按日期串行事务写入。
 
 ## 2. 每日调度注册 PR
 
@@ -23,7 +25,7 @@
 
 ### A-006 上线前置（实际核对，未擅自处理）
 
-1. B 需修正上述 M6 正式入口参数遮蔽；注册代码复用其正式入口，不把只算两只的结果当健康成功。
+1. 需求方已将上述 M6 正式入口参数遮蔽登记 D-32，并明确在 A-006 开头修正；注册代码复用正式入口，不把只算两只的结果当健康成功。
 2. 当前私有环境缺 INVES_COG_TRADING_DATABASE_URL、INVES_COG_MARKETSTATE_DATABASE_URL，既有 role_trading/role_marketstate 为 NOLOGIN。未新建账号、授权或用管理员登录替代长期服务账号；需需求方安排安全的写入连接配置。这是内部数据库连接，不是向用户再索取模型 key。
 3. 当前库未见 financials/m2_financials 正式任务记录，仅见历史 m2_live_financials 等验收任务。上线时需确认 M2 的正式财报更新调度，不能把 live 冒烟冒充 M3 的前置日常任务。本 PR 不擅自开启 M2 全套采集，尤其不启用被禁止重试的 Yahoo 一致预期。
 
