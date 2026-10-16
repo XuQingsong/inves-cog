@@ -88,7 +88,7 @@ def assert_service():
 
         def holdings(self, *args, **kwargs):
             return {
-                "holdings": [{"ticker": "AAA", "shares": 10, "equity": 10000}],
+                "holdings": [{"ticker": "AAA", "shares": 10, "equity": 20000}],
                 "candidates": [
                     {"ticker": "AAA", "side": "buy", "notional_est": 200},
                     {"ticker": "AAA", "side": "buy", "notional_est": 300},
@@ -96,7 +96,8 @@ def assert_service():
                     {"ticker": "BBB", "side": "buy", "notional_est": 900},
                     {"ticker": "CCC", "side": "sell", "notional_est": 1000},
                 ],
-                "equity": 10000,
+                "equity": 20000,
+                "cash": 9500,
                 "reason": None,
             }
 
