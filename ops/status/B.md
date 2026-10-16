@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-16 22:34 北京
+
+- 草稿 PR #18 head `f2ddf45`。没有合并进 main。本地 `make phase1-test`：134 passed，10 deselected。
+- 回放打标：`published_at` 不晚于回放时点、但 `first_seen_at` 更晚，标成「后补录历史复盘」，当时未采集，也不把向量算成当时已有。东芝 10-02 发布、10-14 才见到，在 10-02 当天是后补录；到北京 10-15 09:15 已可见，但没有向量时间戳时 `vectors_then` 为假。CPI 的 `first_seen_at` 在 10-15 14:35+08，09:15 的回放仍是后补录。
+- `test_case_attribution` 和 `test_case_no_news_unexplained` 继续 pending。三处缺口仍缺冻结夹具。下一步：感知表写入只在一次性测试库验证。真实补证入库仍停在 `Repository.put_info`。不开始下一条。
+
 ## B-008  进行中  2026-10-16 22:24 北京
 
 - 草稿 PR #18 head `bb5fc2f`。没有合并进 main。本地 `make phase1-test`：133 passed，10 deselected。
