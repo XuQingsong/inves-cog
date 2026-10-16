@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 02:42 北京
+
+- 草稿 PR #18 head `ad48446`。没有合并进 main。本地 `make phase1-test`：170 passed，18 deselected。
+- 规则命中和批准向量的前 50 条取并集，再按来源根留一条。第 51 条向量、未批准的模型，都不能靠相似度进来。同一来源根的转载并进那一条，路径仍记下规则和向量。向量查询只拼篮子名、方向和成员名。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 02:32 北京
 
 - 草稿 PR #18 head `234b149`。没有合并进 main。本地 `make phase1-test`：169 passed，18 deselected。
