@@ -2,6 +2,14 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-005  已收到  2026-10-16 14:00 北京
+- 已读 A-005（blob ee6141e68d294cfd7d1f45ab7f88e7dc55f4d072），期限今天；本轮仅做其三项运维与修复，不开始 M4，实现留 A-006。
+- 将用最新 main 的现有 M6 代码，按明确授权只写 marketstate，补算 2026-07-01 至最近已收盘交易日，报告行数、10-14 NVDA/AMD/MSFT 的 factor_set 以及广域 SPY 单因子数。
+- 调度如需仓库代码/配置，开 [ops] 每日调度注册（A-005）PR；**合并前不在服务生效**，按任务留到 A-006 切换。不修改 M6/M7 代码或执行 M7 迁移。
+- 将仅重取 Alpaca 10-15 美东 12:57–14:10 的缺失窗口：有数据才入库；仍无数据则保留缺口并写真实健康记录，不编造或换源。
+- 规则承接：A-004 验证通过；M4 K01–K03 已在 v4 Q-M4-8–10 答复并冻结，但本任务不开发 M4。A-003 的时间证据仍由需求方接手，不手动重跑。
+- 下一步：核对 main/数据库与现有命令，分别完成补算、调度 PR 和分钟窗复查；无新增用户决定，不新建自动化、不合并 PR。
+
 ## A-004  已完成  2026-10-16 13:35 北京
 - 已按 A-004 提交草稿 PR [#12](https://github.com/XuQingsong/inves-cog/pull/12)“[M4] 开工复述”，分支 phase1/m4-paper-execution。当前完整 head **e55361d5ec8ad5a7c827dd7a81102afd11427af9**，本地/GitHub SHA 与代码树 ad49f118f7d3202b32fac595f978e8a34730a5d6 一致；差异严格只有 handoff/M4/kickoff.md（162 行），没有实现、测试或迁移。
 - 该 SHA 的 phase1-blocking CI 绿：[run 38856417633](https://github.com/XuQingsong/inves-cog/actions/runs/38856417633)。隔离容器 make phase1-test 与 CI 断言成功；nightly 按条件 skipped，不冒称已做 M4 回放。文档 diff 检查通过，工作树干净。
