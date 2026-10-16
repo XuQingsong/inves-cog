@@ -2,6 +2,12 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-006  进行中  2026-10-16 16:53 北京
+- 已恢复同一任务：需求方已将 PR #14（b0c7aeabfb1277c7721fa7e9d35996871679282e）和 #15（47d0278b94a66af8414b20c8cf7ae7d60dfa7d45）合并；main 为 **89ac6938978bc61eed9c7a86040bacce1d3a362c**，[准确 SHA 的 push CI 38875292344](https://github.com/XuQingsong/inves-cog/actions/runs/38875292344) 绿。Agent 未合并 PR。
+- K04 已由 main 的 Q-M4-11 明确采用 B：核心持仓及 buy_to 计 12 只，观察仓另计最多 3 只；保留真实 10-09 十三只为正例。按已发布需求修正容量断言，保留原先失败提交；不自行修改规则 A 语义。
+- 下一步：快进 Mac main、仅开启任务授权的既有 role_trading/role_marketstate 登录、私有配置写入连接，安装已合并调度并核实运行 SHA/重启时间；随后合入 M4 分支最新 main，完成测试和最终自测。尚未执行上线，不能把计划时段当实际证据。
+- 变更：本阶段将按 A-006 第二部分上线日常 M3/M6/M2 注册及既有角色登录；不增加权限、数据源或新账号，不做 M4 生产迁移。状态推送前已尝试 git pull --rebase（12 秒直连超时），按当前文件 blob 安全更新，只改 A.md，保留 B.md。
+
 ## A-006  阻塞  2026-10-16 15:57 北京
 - **未完成 A-006，两个明确等待条件**：① M4 K04 的规则冲突须需求方裁定（详见下文）；② PR #14/#15 尚未合并，A-006 第二部分明确要求热修复合并后才能切换服务。未自动合并、未部署、未启用角色登录或改私有连接，未新建自动化。后续只在对应输入变化时继续已解锁部分，不重复测试或打扰。
 - D-32 热修复正式 [PR #14](https://github.com/XuQingsong/inves-cog/pull/14)，head **0c5e0e8457f0943adc3364182852aec0e68b0a27**；[CI 38863229785](https://github.com/XuQingsong/inves-cog/actions/runs/38863229785) 绿。仅将 SIC 覆盖映射变量改名，两行产品差异。test_market_service_preserves_requested_tickers 先 1 failed 再 1 passed；全仓 90 blocking passed。代码/红绿证据在 handoff/ops/A-006/d32-*.xml。本地与 GitHub SHA 一致，待需求方审核合并。
