@@ -2,29 +2,36 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-006  进行中  2026-10-16 17:18 北京
-- 已读 main **47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a** 的 [ops/answers/A-006.md](https://github.com/XuQingsong/inves-cog/blob/47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a/ops/answers/A-006.md)，blob **de99ea7da9231af94e0f74fd4c9f70881a6f69bd**。需求方明确批准只给既有 role_trading、role_marketstate 授予 inves_cog 的 CONNECT；此处原权限阻塞已解除，不再等待或索要确认。
-- 下一步：快进最新 main，执行这两项 CONNECT 并验证原 schema/table 权限未变，安装已合并 PR13/15 调度、重启并核对新进程；在本任务最终回报列语句/时间、服务 SHA/重启时间和今晚预计时段。
-- 变更：仅已批准的数据库 CONNECT 和 A-006 服务切换；不做其他权限变更或生产迁移。M4 已正式提交验收，head459d91e、CI38878686128保持，不重复跑其测试、不开始 M5。状态推送前已尝试 git pull --rebase（超时），只改 A.md、保留 B.md。
+## A-006  已完成  2026-10-16 17:25 北京
+- **三部分已交付**：D-32 独立热修复由需求方合并；新调度已上线并验证；M4 已正式提交验收。本轮完成后停止，等待需求方验收/下一条 A 任务，不开始 M5、不合并 PR、不新建自动化。
+- **实际运行基线**：Mac 主仓库已快进 **47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a**，工作树干净；[该完整 SHA 的 main CI 38878899115](https://github.com/XuQingsong/inves-cog/actions/runs/38878899115) 绿。Git 直连超时后经官方连接器校验完整 Git 对象同步，未重置或覆盖其他修改，docs 仅继承 main。
+- **权限答复已执行**：依据 main 的 [ops/answers/A-006.md](https://github.com/XuQingsong/inves-cog/blob/47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a/ops/answers/A-006.md)（blob de99ea7da9231af94e0f74fd4c9f70881a6f69bd），在 **2026-10-16 09:20:04.003882 UTC / 北京 17:20:04** 执行：
+  `GRANT CONNECT ON DATABASE inves_cog TO role_trading, role_marketstate`
+  两个现有角色均已直接连接成功，current_user 与角色一致，原有各自表 INSERT 权限正常；schema/table grants 与角色 memberships 前后完全一致。未授其他权限、未新建角色、未运行生产迁移；密码只在 Mac 私有 .env，不入仓库/状态/聊天，不用管理员作长期服务账号。原 CONNECT 阻塞已关闭。
+- **服务切换时间**：**09:21:11.643229–09:21:16.036513 UTC / 北京 17:21:11–17:21:16**。按已合并 PR13/15 执行原安装器，Supervisor update 重启已改变参数的 scheduler、启动 daily_modules 和 financials，并重启 watchdog；登录自启 RunAtLoad/KeepAlive 和各常驻程序 autorestart=true 已核实。嵌入原 EXITED 保持不动，没有恢复调用；awake 原 caffeinate 继续运行。
+- **09:22:41 UTC 稳定复核**：scheduler **PID74526**、daily_modules **74527**、financials **74528**、watchdog **74530** 均 RUNNING，已连续运行 1 分29秒；awake **3392** RUNNING。两个新程序日志 Traceback/failed 均为 0。模块加载路径为本项目 native src，关键源文件 blob 与运行 SHA 完全一致，操作记录使用既有 inves_cog_ingest 连接。
+- 配置 hash 已从 77e71fe4d5b20363019749f89d9465ea8c23b2357ed5e2f61c9bfd22953a34dd 切换为 **87d7f0c583da2e58d4ccff19281992612b020077e3956adcacf3bee90a877cb3**。脱敏完整证据在 Mac `.harness/service/a006-connect-grant.json`、`a006-deployment.json`、`a006-deployment-verify.json`；旧配置有私有备份。09:20 授权前及 09:22 验证时均没有运行中的 job；没有为制造证据在窗口外强制采集。
 
-## A-006  阻塞  2026-10-16 17:15 北京
-- **M4 已完成开发并正式提交验收；A-006 整体仅部署尚未完成**。部署实际连接被数据库拒绝，需要需求方允许或执行给既有 role_trading、role_marketstate 授予 **inves_cog 数据库 CONNECT**。A-006 只授权 LOGIN 且明确不增加别的权限，故未自行授予 CONNECT、用管理员作长期账号或启动已知无法写库的新服务。未自动合并任何 PR。
-- **[PR #12「[M4] 提交验收」](https://github.com/XuQingsong/inves-cog/pull/12) 已转正式**，完整 head **459d91ed407e945227e726a84cd3291898afc977**；本地/GitHub 完整 SHA 和代码树 **ca2b0aae3a355461087483bba94f7da64d59f5a4** 一致，工作树干净。[当前 SHA 的 CI 38878686128](https://github.com/XuQingsong/inves-cog/actions/runs/38878686128) **绿**，准确 head_sha 已核对；干净容器 make phase1-test、M0 CI 断言及破坏性自测成功。nightly 按条件未运行，不冒称夜间回放。
-- M4 最终全仓离线 **114 passed、0 skipped（45.82 秒，含 4 replay）**，本模块 12 blocking/2 replay/1 live 全部规定名称存在；真实只读 live 已 **1 passed**，不是临时 TCP 服务。15 项 M4 pending 已在实际通过后删除，milestones 未动。最后代码 700bdbbcf264a3294c0a4c7f4f39ff94abe1d47d；完整报告 [handoff/M4/self-test.md](https://github.com/XuQingsong/inves-cog/blob/459d91ed407e945227e726a84cd3291898afc977/handoff/M4/self-test.md)，同目录 blocking-replay-final.xml、live-smoke.xml、database.json、overlay-demo.json。
-- AC-M4-02：冻结区间 **90 笔日期/代码/动作/股数全部一致，匹配率 100%**；收益 **49.4527339798%**、最大回撤 **−12.6370184987%**、终值 **1,494,527.339798 美元**。replay.json 保留逐笔/权益，差异为空。前三个月 **36 笔、100% 一致**，收益 −4.4592360022%、回撤 −9.8453132174%，checkpoint.md/json 已交。Q-M4-9 全年负现金 0 天、最低 3377.696828 美元；Q-M4-10 因成交日分层选择不同的笔数/股数变化均 0。没有运行或导入 Muse，golden 只经 load_golden。
-- **K04 已按 Q-M4-11 关闭**，不再等待答复：采用需求方选择 B，保留 v18 观察挂单独立名额。真实 10-09 十二核心 + HD 观察仓共十三只保留为合法正例；合成测试同时验证核心第十三名和观察第四名被拦。未自行采用原建议 A，未改 frozen 90 笔或核心计数公式。原容量失败提交 5258363 保留，questions.md 已改为已答复。
-- 本轮先红后修两处本模块实现缺陷：北京 20:00–20:30 发布/18:00 覆盖层新鲜度曾用纽约固定小时近似，冬令时错一小时，先 **2 failed**（b04c09b）后 e5818e9 修复；缺账本持仓原本笼统显示 M-59，先 **1 failed**（aa6eb21）后 700bdbb 修正为 N8 缺失字段及已选价格退出理由，不改变交易决策。最终 114 项全绿，Ruff check/format 通过。全仓最初一次格式红灯和本机缺 Docker 的实际限制如实写进自测，没有跳过测试。
-- AC-M4-05：five-day-plans.json 是**真实库输入的历史回放**，目标 10-09/12/13/14/15，每天 54/54 可交易美股行情、100% 覆盖；订单 **13/5/4/1/5**、跳过 **10/9/9/12/13**。M2 fixed PIT → 本项目 M3 历史纯函数；模拟北京 20:00，仅用于回放，不冒充准时调度。AC-M4-06 待需求方抽三天复核；1 次准时发布为合并后运维项，不挡 M4 合并。
-- 实际 live 的生产源为 trading.daily_scores：10-15 只有 UNH 已发布快照，**53 只缺 M3 快照**明确列在 live-plan.json / upstream_scores_missing；没有用历史重算冒充已发布源。M4 生产迁移 0；持久化/幂等/恢复和 role_web 拒写在新建后已删除的独立测试库完成。没有新账号、没有生产 M4 表写入。
-- D-32 [PR #14](https://github.com/XuQingsong/inves-cog/pull/14) 已由需求方合并 **b0c7aeabfb1277c7721fa7e9d35996871679282e**；原 head **0c5e0e8457f0943adc3364182852aec0e68b0a27**，[CI 38863229785](https://github.com/XuQingsong/inves-cog/actions/runs/38863229785) 绿。test_market_service_preserves_requested_tickers 先 1 failed 后 1 passed；仅两行产品修复，真实 requested tickers 不被 SIC 覆盖。
-- M2 正式财报调度 [PR #15](https://github.com/XuQingsong/inves-cog/pull/15) 已由需求方合并 **47d0278b94a66af8414b20c8cf7ae7d60dfa7d45**；原 head **73789edbab9d8c82d0db93680ef02b1427f8150e**，[CI 38863699107](https://github.com/XuQingsong/inves-cog/actions/runs/38863699107) 绿。先 8 failed，再 ops 19 passed、全仓 97 blocking passed；只调原 M2 financials，不调用忽略 --tasks 且会启动 Yahoo 的 schedule 循环，不改 M2 源。
-- **已完成部署准备、未切换服务**：Mac main 已从 a6dfeeefe784f51b4e5155b96712a7320bc9d4a1 快进到 **89ac6938978bc61eed9c7a86040bacce1d3a362c**，[该 SHA 的 main CI 38875292344](https://github.com/XuQingsong/inves-cog/actions/runs/38875292344) 绿。08:54 UTC 核无运行中 job。按授权仅给原有 role_trading/role_marketstate 开 LOGIN，随机密码只存私有 .env，未打印凭据；未建角色、未授新权限或跑生产迁移。
-- **09:13:57 UTC 再次实测**：两个角色 LOGIN=true、database CONNECT=false；原有各自表 INSERT 权限正常。直接连接实际报 permission denied for database inves_cog。脱敏记录本机 .harness/service/a006-writer-setup.json；私有备份不入库。需要的最小补充仅为这两个角色的数据库 CONNECT，不加任何 schema/table 权限，未执行。
-- 原服务尚未重启：scheduler **PID 51341**、watchdog **51364**、awake **3392** 仍 RUNNING，embedding 仍原 EXITED；进程启动基线仍为原 a6dfee，由于未切换不能声称新调度已运行。当前配置 hash 不变 **77e71fe4d5b20363019749f89d9465ea8c23b2357ed5e2f61c9bfd22953a34dd**。尚无 A-006 新服务重启时间。
-- 条件满足并在窗口前部署后，ET 10-16 预计：bars/m6_market_inputs 20:20（北京 10-17 08:20），M6 ≥20:45 且输入完成（08:45 起），M2 21:15–21:45（09:15–09:45），M3 ≥22:30 且正式 M2 完成（10:30 起）。这些仍是预计时段，不是实际证据；issuer_profiles 本月已有成功，遵守月度门禁。
-- 已自行决定：修本模块明确北京时段和持仓解释的实现错误；保留 v18 名额、成交和分层兼容语义，工程项不再重复提问。无新增用户直接决策。变更同步如上：既有角色 LOGIN 与私有写库连接已配置，CONNECT 尚缺；调度尚未安装。docs/golden/milestones 只继承 main，未改 M6 其他代码、M7、其他项目或生产服务。
-- 输入指纹：最新 GitHub main **463470dc248b3dc16aad61fba8ddac420b332bd3**（相对部署基线仅 M7 文档/任务与阶段流程更新）；A-006 blob **db1dd29f659f47f902b7b416cda2e58d8d4ddf0e**；M4 含 Q-M4-11 blob **394308433316157932df12449cd124f3766b5a40**；PR #14/#15 均已合并；角色 CONNECT=false。本地与 GitHub 通过完整对象 SHA 校验同步，状态更新前已尝试 git pull --rebase（直连超时），只改 A.md、保留 B.md。
-- 下一步：**需求方验收 M4；允许或执行两个既有角色的 CONNECT 后，A 执行剩余上线并补运行 SHA/重启时间**。A-006 未满足服务切换完成标准，保持阻塞；相同输入不重跑测试或反复打扰，不开始 M5、不自动合并或新建定时任务。
+**美东 2026-10-16 的预计运行时段（已注册；尚未当成实际完成证据）**
+
+| 任务 | 预计美东时间 | 对应北京时间/条件 |
+|---|---|---|
+| 原 bars_prefill | 08:00 开始 | 10-16 20:00；保留原日内门禁 |
+| bars_full、wide_universe、m6_market_inputs | 20:20 起，bars_full 目标20:45前完成 | 10-17 08:20 起 |
+| SEC submissions/index | 20:45–21:15 | 10-17 08:45–09:15；atom 保留10分钟轮询，M2窗口暂停 |
+| M6 market_structure | ≥20:45，bars_full 和 m6_market_inputs 都结束后 | 10-17 08:45 起，依赖未好则等待 |
+| M2 m2_financials | 21:15–21:45 内首次触发，每日一次 | 10-17 09:15–09:45；只调用既有 financials，不启动 Yahoo consensus |
+| M3 rule_a_scores | ≥22:30，正式 financials/m2_financials 完成后 | 10-17 10:30 起，依赖未好则等待 |
+| issuer_profiles | 按既有月度窗口 | 已注册，不在10-16强制重跑 |
+
+- **M4 交付**：[PR #12「[M4] 提交验收」](https://github.com/XuQingsong/inves-cog/pull/12) 正式、未合并；head **459d91ed407e945227e726a84cd3291898afc977**，本地/GitHub SHA 和树 **ca2b0aae3a355461087483bba94f7da64d59f5a4** 一致。[准确 head 的 CI 38878686128](https://github.com/XuQingsong/inves-cog/actions/runs/38878686128) 绿，干净容器 make phase1-test/M0断言/破坏性自测成功，nightly按条件未跑。最终离线 **114 passed、0 skipped，含4项replay**；12个M4 blocking+2 replay 和实际 live **1 passed** 都有输出，15项M4 pending 已删，milestones未改。
+- **AC-M4-02 三项**：收益 **49.4527339798%**、最大回撤 **−12.6370184987%**、交易匹配 **100%（90笔日期/代码/动作/股数零差异）**。前三个月36笔也100%一致。Q-M4-9全年负现金0天/最低3377.696828美元；Q-M4-10因分层不同的笔数/股数差均0。证据 [handoff/M4/self-test.md](https://github.com/XuQingsong/inves-cog/blob/459d91ed407e945227e726a84cd3291898afc977/handoff/M4/self-test.md)、同目录 replay.json、checkpoint.md/json、blocking-replay-final.xml、live-smoke.xml。
+- M4 的 Q-M4-11 已按需求方采用B关闭：保留10-09十二核心+HD观察共十三只正例，两类超限分别被拦；冻结计数语义不擅改。北京固定时段/覆盖层冬夏边界及缺账本持仓说明均先提交失败测试再修复，红灯历史完整。五日真实输入历史计划覆盖54/54=100%，订单13/5/4/1/5，未冒充准时调度；AC-M4-06由需求方抽三日手核，1次准时发布为合并后运维项。M4生产迁移/部署仍为0，不能把本次M3/M6/M2上线说成M4已上线。
+- M4 live 当时的已发布上游仍只有UNH，53只缺M3快照已列名单和 upstream_scores_missing，未用历史重算冒充真实发布。持久化、恢复/幂等及role_web拒写在新建后删除的独立测试库验证；无Muse/stock-pm执行、导入或数据库访问。
+- **D-32**：[PR #14](https://github.com/XuQingsong/inves-cog/pull/14)，head **0c5e0e8457f0943adc3364182852aec0e68b0a27**，[CI38863229785](https://github.com/XuQingsong/inves-cog/actions/runs/38863229785)绿，由需求方合并 **b0c7aeabfb1277c7721fa7e9d35996871679282e**。test_market_service_preserves_requested_tickers 先1failed后1passed；仅两行产品修复，requested tickers与SIC覆盖映射同时正确；证据handoff/ops/A-006/d32-*.xml。
+- **M2正式调度**：[PR #15](https://github.com/XuQingsong/inves-cog/pull/15)，head **73789edbab9d8c82d0db93680ef02b1427f8150e**，[CI38863699107](https://github.com/XuQingsong/inves-cog/actions/runs/38863699107)绿，由需求方合并 **47d0278b94a66af8414b20c8cf7ae7d60dfa7d45**。先8failed，再ops19passed/当时全仓97blocking通过；仅调用原M2 build/run_tasks 的 financials，保留其实现，不启动会忽略--tasks的原循环。现已实际注册运行，不再是待安装。
+- 变更：仅授权范围内角色LOGIN（上轮已完成）+本轮明确批准的数据库CONNECT、Mac私有写库连接以及已合并调度服务切换；没有其他权限/数据源/依赖变更、没有生产迁移。无新增直接用户决策；授权来源是GitHub答复，不伪造UD编号。状态推送前已尝试git pull --rebase（12秒直连超时），按当前文件blob安全更新，只改A.md、保留B.md。
+- 下一步：**等待需求方验收M4，并按任务约定明早查job_runs核实实际运行**；A-006开发与上线标准已完成，本轮结束。未把预计窗口写成成功；后续只有新信箱任务才继续，不自行追加工作或重复测试。
 
 ## A-005  已完成  2026-10-16 14:31 北京
 - 已完成 A-005 三项运维/修复，提交正式待审 PR [#13](https://github.com/XuQingsong/inves-cog/pull/13)“[ops] 每日调度注册（A-005）”，分支 ops/a005-daily-scheduling。完整 head **8d3aa5a762f564ecfd6263a0dee6c9d9f0bc9241**，本地/GitHub 完整 SHA 与代码树 **70b54b2f06abbb7c6711b75b209e79f6fb770b2d** 一致，工作树干净。
