@@ -882,6 +882,34 @@ def test_toshiba_midpoint_reaches_deadline():
 
 
 @pytest.mark.phase1_blocking
+def test_ticker_codes_follow_the_scored_candidate():
+    from inves_cog.perception.attribution.codes import ticker_codes
+    from inves_cog.perception.attribution.report import explanation_report
+
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    multiple = {"scored": True, "score": 0.8, "mechanism": "估值倍数", "affected": [{"ticker": "MU"}]}
+    weak = {"scored": True, "score": 0.4, "mechanism": "估值倍数", "affected": [{"ticker": "MU"}]}
+    pool = {"anomaly_id": "pool-1", "universe": "pool", "members": ["WDC", "MU"]}
+    wide = {"anomaly_id": "wide-1", "universe": "wide", "members": ["WDC"]}
+    assert ticker_codes(wide, [supply], narrative_shock=True, fundamental_unchanged=True) == []
+    assert ticker_codes(pool, [weak]) == [
+        {"ticker": "WDC", "n_code": "N6", "mechanism": None},
+        {"ticker": "MU", "n_code": "N6", "mechanism": None},
+    ]
+    assert ticker_codes(pool, [supply]) == []
+    assert ticker_codes(pool, [supply], narrative_shock=True, fundamental_unchanged=False) == []
+    narrative = ticker_codes(pool, [supply], narrative_shock=True, fundamental_unchanged=True)
+    assert narrative == [{"ticker": "WDC", "n_code": "N1", "mechanism": "供给"}]
+    both = ticker_codes(pool, [multiple, supply], narrative_shock=True, fundamental_unchanged=True)
+    assert both == [
+        {"ticker": "MU", "n_code": "N2", "mechanism": "估值倍数"},
+        {"ticker": "WDC", "n_code": "N1", "mechanism": "供给"},
+    ]
+    report = explanation_report(pool, {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}, [multiple], [])
+    assert report["ticker_status"] == [{"ticker": "MU", "n_code": "N2", "mechanism": "估值倍数"}]
+
+
+@pytest.mark.phase1_blocking
 def test_attribution_tables_do_not_grant_ingest():
     text = (ROOT / "migrations/phase1_m8_0001_attribution.sql").read_text()
     for name in (

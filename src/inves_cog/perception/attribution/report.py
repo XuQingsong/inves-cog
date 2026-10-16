@@ -1,5 +1,6 @@
 """Explanation report. A closed lifecycle still names the reason and the open unknowns."""
 
+from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.impact import anomaly_status
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
@@ -108,6 +109,8 @@ def explanation_report(
     deadline_on=None,
     *,
     supplement=None,
+    narrative_shock=False,
+    fundamental_unchanged=False,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -126,6 +129,12 @@ def explanation_report(
         "tracking": tracking,
         "constraint_conclusion": constraint_conclusion(tracking),
         "supplement": note,
+        "ticker_status": ticker_codes(
+            anomaly,
+            candidates,
+            narrative_shock=narrative_shock,
+            fundamental_unchanged=fundamental_unchanged,
+        ),
         "type_candidates": type_candidates(
             candidates,
             anomaly.get("type_candidates_prelim") or (),
