@@ -115,6 +115,9 @@ def assert_service():
     assert len(out["ranges"]) == 4 and out["ranges"][-1]["status"] == "failed"
     assert [r["ticker"] for r in out["panel"]] == ["AAA", "BBB"]
     assert out["summary"]["row_count"] == 2 and repo.saved is None
+    shadows={r['ticker']:r for r in out['shadows']}
+    assert shadows['BBB']['actual_buy_count']==2 and '2笔' in shadows['BBB']['difference']
+    assert shadows['CCC']['actual_buy_count']==0 and '无买入' in shadows['CCC']['difference']
 
     by_ticker = {r["ticker"]: r for r in out["panel"]}
     assert by_ticker["AAA"]["weight_pct"] == 5
