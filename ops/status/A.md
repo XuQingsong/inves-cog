@@ -2,6 +2,12 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## A-002  已收到  2026-10-16 11:23 北京
+- 依据 main `a070164115f3910e056728963720ec5d13871b1e` 的 A-002，A-001 已由需求方验证通过。
+- 在 PR #7 原分支补齐 handoff/M3/kickoff.md §7 每条细节的 Muse aacea04 文件/行号出处，保留已有注释；只改注释及自测映射表，不改行为、常量、断言或夹具。
+- 下一步：逐条核对只读源码，完成注释和对照表，运行 blocking/replay 并核对新 head 的 CI。
+- 已自行决定：无。流程疑问：无。
+
 ## A-001  已完成  2026-10-16 11:13 北京
 - PR [#7](https://github.com/XuQingsong/inves-cog/pull/7)（[M3] 提交验收）已合入最新 main `273be4a966909145aa1be8dc293887d85562805a`；当前完整 head `73a25d03505513c1ce28c703d5abb9cf067a77b2`，本地 M3 分支与 GitHub 一致。
 - 当前 head 的 phase1-blocking CI 绿：[run 38844008192](https://github.com/XuQingsong/inves-cog/actions/runs/38844008192)。隔离环境 make phase1-test、M0 CI 断言及破坏性自测步骤全部成功；nightly 按触发条件未运行，不冒称本次回放重跑。
