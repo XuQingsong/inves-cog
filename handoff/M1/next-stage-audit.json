@@ -1,0 +1,171 @@
+{
+  "observed_at": "2026-10-15T09:15:51.927603+00:00",
+  "database": "inves_cog",
+  "baseline": "1f121fa0084f27a33ecaf85958722fdb027df7eb",
+  "D22": {
+    "deleted_sources": [
+      {
+        "source": "EntitySites:https://round2-invalid-site.example.invalid/rss.xml"
+      },
+      {
+        "source": "CompanyIR"
+      }
+    ],
+    "updated_rows": [
+      {
+        "source": "DashScope",
+        "last_success_at": "2026-10-15 12:14:43.231287+08:00",
+        "last_attempt_at": "2026-10-15 12:14:43.231287+08:00",
+        "status": "ok",
+        "latency_sec": 1435.192966,
+        "items_last_run": 65369,
+        "note": "Actual embedding success from ingest.llm_calls; model=text-embedding-async-v1; call_id=70c023c8-65e7-4a87-a42f-7f7c40f51098; vectors in ingest.info_embeddings",
+        "consecutive_failures": 0
+      }
+    ],
+    "backup_outside_git": "/private/tmp/inves-next-stage/source-health-before.json",
+    "no_new_vendor_calls": true,
+    "remaining_obsolete_rows": 0
+  },
+  "usage_by_et_day": [
+    {
+      "trade_day": "2026-10-14",
+      "purpose": "llm_usage_probe|M1:usage_probe",
+      "model": "deepseek-v4.1-flash",
+      "task": "entity_tagging",
+      "status": "ok",
+      "calls": 6,
+      "input_tokens": "2215",
+      "output_tokens": "9894"
+    },
+    {
+      "trade_day": "2026-10-14",
+      "purpose": "news_tier_backfill|M1:layer1",
+      "model": "deepseek-v4.1-flash",
+      "task": "entity_tagging",
+      "status": "ok",
+      "calls": 209,
+      "input_tokens": "698196",
+      "output_tokens": "114354"
+    },
+    {
+      "trade_day": "2026-10-14",
+      "purpose": "news_tier_backfill|M1:layer2",
+      "model": "deepseek-v4.1-flash",
+      "task": "entity_tagging",
+      "status": "failed",
+      "calls": 9,
+      "input_tokens": "4396",
+      "output_tokens": "614"
+    },
+    {
+      "trade_day": "2026-10-14",
+      "purpose": "news_tier_backfill|M1:layer2",
+      "model": "deepseek-v4.1-flash",
+      "task": "entity_tagging",
+      "status": "ok",
+      "calls": 3628,
+      "input_tokens": "885413",
+      "output_tokens": "126681"
+    },
+    {
+      "trade_day": "2026-10-14",
+      "purpose": "news_tier_backfill|M1:layer2",
+      "model": "deepseek-v4.1-flash",
+      "task": "info_fields_extraction",
+      "status": "ok",
+      "calls": 3629,
+      "input_tokens": "1012956",
+      "output_tokens": "109113"
+    },
+    {
+      "trade_day": "2026-10-15",
+      "purpose": "info_enrichment|M1:layer2",
+      "model": "deepseek-v4.1-flash",
+      "task": "entity_tagging",
+      "status": "failed",
+      "calls": 8,
+      "input_tokens": "591",
+      "output_tokens": "48"
+    },
+    {
+      "trade_day": "2026-10-15",
+      "purpose": "info_enrichment|M1:layer2",
+      "model": "deepseek-v4.1-flash",
+      "task": "entity_tagging",
+      "status": "ok",
+      "calls": 5147,
+      "input_tokens": "329914",
+      "output_tokens": "39600"
+    }
+  ],
+  "D14_embedding_accounting": [
+    {
+      "model": "qwen3.7-text-embedding-flash",
+      "status": "failed",
+      "calls": 1,
+      "item_count": 10,
+      "input_tokens": "1343",
+      "output_tokens": "0"
+    },
+    {
+      "model": "qwen3.7-text-embedding-flash",
+      "status": "ok",
+      "calls": 106,
+      "item_count": 106,
+      "input_tokens": "21559",
+      "output_tokens": "0"
+    },
+    {
+      "model": "text-embedding-async-v1",
+      "status": "ok",
+      "calls": 3,
+      "item_count": 165379,
+      "input_tokens": "12091487",
+      "output_tokens": "0"
+    },
+    {
+      "model": "text-embedding-async-v2",
+      "status": "failed_usage_missing",
+      "calls": 1,
+      "item_count": 10,
+      "input_tokens": null,
+      "output_tokens": "0"
+    },
+    {
+      "model": "text-embedding-v1",
+      "status": "ok",
+      "calls": 11,
+      "item_count": 106,
+      "input_tokens": "19148",
+      "output_tokens": "0"
+    },
+    {
+      "model": "text-embedding-v2",
+      "status": "ok",
+      "calls": 11,
+      "item_count": 106,
+      "input_tokens": "19148",
+      "output_tokens": "0"
+    },
+    {
+      "model": "text-embedding-v3",
+      "status": "failed_usage_missing",
+      "calls": 1,
+      "item_count": 10,
+      "input_tokens": null,
+      "output_tokens": "0"
+    },
+    {
+      "model": "text-embedding-v4",
+      "status": "ok",
+      "calls": 12,
+      "item_count": 116,
+      "input_tokens": "20815",
+      "output_tokens": "0"
+    }
+  ],
+  "queued_by_budget": {
+    "items": 8
+  }
+}

@@ -151,5 +151,39 @@
       2000
     ],
     "notes": "This is a late recovery and is not counted as AC-M1-02 on-time evidence. Prior 13,228/1,302 diagnostic was rolled back; its evidence remains in Git history."
+  },
+  "latest_scheduled_daily_run": {
+    "job": {
+      "id": 5281,
+      "task_name": "wide_universe",
+      "trade_date": "2026-10-15",
+      "started_at": "2026-10-16 08:20:58.858359+08:00",
+      "ended_at": "2026-10-16 08:23:17.619349+08:00",
+      "status": "ok",
+      "processed_count": 13227,
+      "error_summary": null,
+      "params_version": "p-2026.10",
+      "llm_input_tokens": 0,
+      "llm_output_tokens": 0,
+      "llm_usage_missing_calls": 0,
+      "started_at_et": "2026-10-15T20:20:58.858359-04:00",
+      "ended_at_et": "2026-10-15T20:23:17.619349-04:00",
+      "elapsed_seconds": 138.76099
+    },
+    "report": {
+      "exclusions": {
+        "below_adv": 65,
+        "below_mktcap": 2093,
+        "no_cik": 126,
+        "no_price": 39,
+        "no_shares": 1813,
+        "non_common": 7799
+      },
+      "included": 1292,
+      "monthly": false,
+      "processed_count": 13227,
+      "startup_baseline": false
+    },
+    "note": "Daily exclusion run; original startup baseline of 1294 retained above, now1292. Not a new startup baseline."
   }
 }
