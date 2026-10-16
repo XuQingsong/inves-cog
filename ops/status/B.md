@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 01:37 北京
+
+- 已读 main `158f056` 的 Q-M8-12。草稿 PR #18 head `b0f9ddf`。没有合并进 main。本地 `make phase1-test`：164 passed，17 deselected。
+- Muse 按被引用材料的日期区间和开盘比较：09-18 早于 09-21 开盘，同一天是未知。不靠 `before_open`。R1 的前 3 名必须引用发布材料，并让受影响标的连到成员。OpenAI 的前 4 名按候选计，第 5 名不能补。结构清单空也不把 `closes_case` 设为真。
+- blob：`historical.py` `0e87a6c1d117f8f7ccc0f637e18b8bffa7a34772`，`manual.py` `7d32147a2b123dd4dbe2fd14f089ed70e7ce5c85`。`cases.py` 未改。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 01:23 北京
 
 - 草稿 PR #18 head `52d36b0`。没有合并进 main。本地 `make phase1-test`：161 passed，17 deselected。新的案例测试单独通过。
