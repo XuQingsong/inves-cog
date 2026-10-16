@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 03:31 北京
+
+- 草稿 PR #18 head `17dcffe`。没有合并进 main。本地 `make phase1-test`：174 passed，18 deselected。
+- 标的代码只写在池内。广域不写。没有达到 0.5 的候选时，异常成员写成 N6。达到 0.5 的估值倍数写成 N2，同一名字不再写成 N1。供给要同时是叙事冲击且基本面未变才写成 N1，否则留空。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 03:22 北京
 
 - 草稿 PR #18 head `dd9672d`。没有合并进 main。本地 `make phase1-test`：173 passed，18 deselected。新的检查在原有说法测试里。
