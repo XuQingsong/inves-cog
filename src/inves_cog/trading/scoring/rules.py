@@ -4,12 +4,17 @@ from pathlib import Path
 
 import yaml
 
+# Muse aacea04 code/paper_trade_v18_full30.py L45–48: executable tier entry thresholds.
 ENTRY = {"defense": (70, 45, 50, 50), "normal": (60, 55, 45, 55), "attack": (50, 70, 30, 50)}
 BOOK_KEYS = ("quality", "growth", "valuation", "timing")
+# Muse aacea04 code/paper_trade_2026.py L189–210: only the first three red lines exclude;
+# liquidity, expensive/slow growth and overheating remain labels in M3.
 EXCLUDED = {"趋势破位", "现金流为负且营收下滑", "营收与EPS同时明显下滑"}
 
 
 def load_rule_a(path=None):
+    # Muse aacea04 code/paper_trade_v18_full30.py L45–55: validate the executable constants,
+    # not the old prose header; M4 consumes these budgets/caps/first lots after M3 validates them.
     path = Path(path) if path is not None else Path(__file__).resolve().parents[4] / "config/params/rule_a_v18.yaml"
     params = yaml.safe_load(path.read_text())
     if set(params) != {"rule_set", "a_plus_enabled", "tiers", "max_positions"}:
@@ -30,6 +35,7 @@ def load_rule_a(path=None):
 
 
 def red_lines(fields, tech, derived):
+    # Muse aacea04 code/paper_trade_2026.py L189–207: preserve strict comparisons and labels.
     result = []
 
     def less(value, bound):
@@ -47,12 +53,15 @@ def red_lines(fields, tech, derived):
     pe = derived.get("pe")
     if pe and pe > 80 and ((fields.get("rev_growth") or 0) < 15 or (fields.get("rev_accel_pp") or 0) < -10):
         result.append("高估值与增长不匹配")
+    # Muse aacea04 code/paper_trade_2026.py L205–207: both overheating bounds are strictly >.
     if tech.get("rsi") is not None and tech.get("dev50") is not None and tech["rsi"] > 80 and tech["dev50"] > 15:
         result.append("短线过热")
     return result
 
 
 def assign_tier(books, fields, volatility):
+    # Muse aacea04 code/paper_trade_v18_full30.py L61–72: missing quality/growth denies a tier;
+    # attack precedes defense, and the loss trigger needs both NI and FCF strictly negative.
     quality, growth = books["quality"], books["growth"]
     if quality is None or growth is None or volatility is None:
         return None
@@ -75,6 +84,8 @@ def assign_tier(books, fields, volatility):
 
 
 def certainty(books, fields):
+    # Muse aacea04 code/paper_trade_v18_full30.py L75–84: additive points, negative EPS
+    # growth subtracts one, missing inputs add/subtract nothing, high/medium start at 4/2.
     def at_least(key, bound):
         return fields.get(key) is not None and fields[key] >= bound
 
@@ -90,6 +101,8 @@ def certainty(books, fields):
     return points, "high" if points >= 4 else "medium" if points >= 2 else "low"
 
 
+# Muse aacea04 code/paper_trade_v18_full30.py L87–109: six maxima sum to 90 (not 100);
+# missing-value points in order are 8/0/8/8/8/5 and differ from real zero.
 HOLD = {
     "rev_q_yoy": ([(20, 15), (10, 12), (0, 8), (-5, 4)], 0, 8, False),
     "rev_accel_pp": ([(0, 15), (-10, 10), (-20, 5)], 0, 0, False),
@@ -101,6 +114,8 @@ HOLD = {
 
 
 def holding(fields):
+    # Muse aacea04 code/paper_trade_v18_full30.py L87–109, L221–222: apply HOLD's exact
+    # cutoffs/fallbacks without normalization; hold_ok starts at 55.
     total = 0
     for key, (cuts, floor, missing, inverse) in HOLD.items():
         value = fields.get(key)
@@ -111,22 +126,30 @@ def holding(fields):
             (points for threshold, points in cuts if (value <= threshold if inverse else value >= threshold)), floor
         )
     qy, gm, conv = (fields.get(k) for k in ("rev_q_yoy", "gross_margin_change_pp", "fcf_conversion"))
+    # Muse aacea04 code/paper_trade_v18_full30.py L223–224: low score OR the three-part decline.
     bad = total < 40 or (qy is not None and qy < 0 and gm is not None and gm < 0 and (conv is None or conv < 0.3))
+    # Muse aacea04 code/paper_trade_v18_full30.py L219–220: missing/nonnegative FCF passes;
+    # negative FCF needs one year's cash runway, and absent cash cannot prove it (Q-M3-11).
     fcf, cash = fields.get("fcf_ttm"), fields.get("cash")
     runway = fcf is None or fcf >= 0 or (cash is not None and cash >= abs(fcf))
     return {"hold_score": total, "hold_ok": total >= 55, "fund_bad": bool(bad), "runway_ok": bool(runway)}
 
 
 def entry_rules(books, fields, tier, lines):
+    # Muse aacea04 code/paper_trade_v18_full30.py L229–235: M-31 changes gate valuation only,
+    # for attack growth >=70, with a 65 cap; leave the original valuation book untouched.
     value, adjusted = books["valuation"], None
     if tier == "attack" and (books["growth"] or 0) >= 70 and value is not None and fields.get("rev_growth") is not None:
         adjusted = min(65.0, value + max(0.0, min(20.0, (fields["rev_growth"] - 15) / 3)))
     effective = {**books, "valuation": adjusted if adjusted is not None else value}
+    # Muse aacea04 code/paper_trade_v18_full30.py L45–48, L225–235: inclusive tier book minima.
     gate = tier in ENTRY and all(
         effective[k] is not None and effective[k] >= bound for k, bound in zip(BOOK_KEYS, ENTRY[tier], strict=True)
     )
     fcf = fields.get("fcf_ttm")
     guard = True
+    # Muse aacea04 code/paper_trade_v18_full30.py L236–240: M-32's negative-FCF attack guard;
+    # missing growth/cash cannot pass it; M-18 overheating is handled downstream by M4.
     if tier == "attack" and fcf is not None and fcf < 0:
         guard = (fields.get("rev_growth") or 0) >= 30 and (fields.get("cash") or 0) >= 1.5 * abs(fcf)
     return {

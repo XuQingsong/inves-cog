@@ -47,6 +47,8 @@ class Repository:
         ).fetchall()
 
     def previous(self, ticker, before, extractor, params_version):
+        # Muse aacea04 code/paper_trade_v18_full30.py L193–213, L240–245: persist its
+        # in-memory tier/streak state across jobs; extraction/version streams remain separate.
         return self.connection.execute(
             "SELECT signal_date,tier,tier_changed_on,consec_pass FROM trading.daily_scores "
             "WHERE ticker=%s AND signal_date<%s AND extractor=%s AND rule_set='A' "

@@ -42,6 +42,8 @@ def states_for(ticker, last, expected_hash):
     assert hashlib.sha256(raw).hexdigest() == expected_hash
     data = json.loads(raw)
     nodes = data.get("facts", data).get("us-gaap", {})
+    # Muse aacea04 code/paper_trade_2026.py L60–83: initial 2025-12-31 state, then filed dates;
+    # only this project's M2 extractor is called, with price-derived values rebuilt by M3.
     days = {date(2025, 12, 31)}
     for tag in TAGS:
         for entries in nodes.get(tag, {}).get("units", {}).values():
@@ -67,6 +69,8 @@ def compare_frozen():
     for ticker, days in oracle["scores"].items():
         last = date.fromisoformat(max(days))
         states = states_for(ticker, last, hashes[ticker])
+        # Muse aacea04 code/paper_trade_v18_full30.py L193–245: run full 2026 chronology
+        # before selecting the frozen 20 comparison dates, preserving tier and streak state.
         rows = score_history(
             ticker,
             price_rows(ticker),

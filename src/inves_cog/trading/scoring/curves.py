@@ -2,6 +2,7 @@
 
 import math
 
+# Muse aacea04 code/paper_trade_2026.py L127–173: book and timing interpolation knots.
 CURVES = {
     "gross_margin": [(5, 5), (15, 30), (25, 50), (40, 75), (60, 95)],
     "roe": [(-10, 0), (0, 25), (5, 45), (15, 75), (25, 95)],
@@ -31,10 +32,12 @@ CURVES = {
 
 
 def finite(value):
+    # Muse aacea04 code/factor_framework_v3.py L32–37: None/NaN/Inf are missing; zero is valid.
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def interp(value, points):
+    # Muse aacea04 code/factor_framework_v3.py L32–37: linear interpolation, endpoint clamping.
     if not finite(value):
         return None
     if value <= points[0][0]:
@@ -46,6 +49,8 @@ def interp(value, points):
 
 
 def weighted_book(items):
+    # Muse aacea04 code/factor_framework_v3.py L40–48: reweight usable scores, including zero;
+    # an empty book stays None, and only the completed book is rounded (Q-M3-10).
     valid = [(score, weight) for score, weight in items if finite(score)]
     weight = sum(w for _, w in valid)
     # Muse aacea04 factor_framework_v3.py L40–48; Q-M3-10 applies to both extractors.
@@ -53,5 +58,7 @@ def weighted_book(items):
 
 
 def mean_available(values):
+    # Muse aacea04 code/paper_trade_2026.py L149–173: equal weights within each timing group;
+    # Q-M3-6 specifies this project's missing-input reweighting at that same boundary.
     valid = [value for value in values if finite(value)]
     return sum(valid) / len(valid) if valid else None

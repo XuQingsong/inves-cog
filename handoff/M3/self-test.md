@@ -26,7 +26,38 @@ M3 的 13 行在测试实际通过后删除；其他模块的行保留。`milest
 |---|---|---|
 | AC-M3-01 | 通过 | 12 blocking 全绿；合成三例、全部插值断点/中点/越界均经 load_golden 读取并命中。 |
 | AC-M3-02 | 通过 | 600 行、16,200 项零差异，`tests/m3/replay_support.py`、replay.xml；滚动状态从初始财报逐日推进，不仅计算抽样日。 |
-| AC-M3-03 | 通过 | kickoff §7 源码位置已登记；Q-M3-10–13 的舍入、真值例外、gate_pass、包路径均实现。technical.py、books.py、rules.py 逐项注释对应固定 aacea04；原始数据库缺项仍为 NULL。 |
+| AC-M3-03 | 通过（A-002 补齐） | kickoff §7 全部 21 条按原顺序对应下表；原有 5 处注释保留，分散实现均补充固定 aacea04 的文件和行号。只读源码作参照，没有运行或导入 Muse。注释以外的 Python token 和 AST 与修复前完全一致，见 [a002-comment-only.json](a002-comment-only.json)。 |
+
+以下代码路径除另注外均相对 `src/inves_cog/trading/scoring/`；每处注释中的 Muse 源码固定为 `aacea04e4562f70854d69330fe724aa2799f2858`、`code/` 下相应文件。序号严格对应 kickoff §7，M2/M4 的归属项只在 M3 消费入口或边界注明，不新增实现。
+
+| 细节（kickoff §7 顺序） | 本项目代码位置（文件:函数或常量） |
+|---|---|
+| 1. 财报初始状态与生效 | `__init__.py:score_day`（逐信号日查询 M2 PIT）；`books.py:derivatives`（重算价格派生）；`tests/m3/replay_support.py:states_for`（2025-12-31 初始状态和 filed 日期）。 |
+| 2. MA 与动量 | `technical.py:technical_series`（完整均线窗口及 shift(20/63/126)）。 |
+| 3. RSI | `technical.py:technical_series`（14 日涨跌均值与 RSI 输出，保留既有注释）。 |
+| 4. 量能 | `technical.py:technical_series`（20/60 日量比，close>=open，60 日上涨量占比）。 |
+| 5. 波动与回撤 | `technical.py:technical_series`（vol20/vol60、252 日回撤）；`__init__.py:score_fields`（分层使用 vol60 回退 vol20）。 |
+| 6. 当前价格派生 | `books.py:derivatives`（正 EPS 的 PE、当日市值、PS、FCF 收益率和 PEG，覆盖旧价格派生）。 |
+| 7. FCF/净利润、EPS 增速 | `__init__.py:score_day`（消费 M2 状态）；`books.py:WEIGHTS`、`books.py:build_books`（消费负 NI 仍有效的 FCF/NI、正 TTM EPS 的增速合同；提取仍归 M2）。 |
+| 8. 插值和端点 | `curves.py:finite`、`interp`、`weighted_book`（有限值、端点、有效 0、重配权与账本 round(1)，保留既有注释）。 |
+| 9. 账本曲线及权重 | `curves.py:CURVES`；`books.py:WEIGHTS`、`build_books`（三本账曲线及固定权重）。 |
+| 10. 时机内层 | `curves.py:mean_available`；`books.py:TIMING`、`build_books`（组内等权后再用五组权重；Q-M3-6 缺项重配）。 |
+| 11. 过期/拆股 | `books.py:split_suspect`；`__init__.py:score_fields`（严格 >180 天清三账，拆股疑似只清估值；fixed 消费 M2 健康码）。 |
+| 12. 红线、排名 | `rules.py:EXCLUDED`、`red_lines`（严格比较、M-16/17 标签与 M-18）；`__init__.py:score_fields`（固定排名权重和 round(1)）；原真值兼容注释保留。 |
+| 13. 分层优先级 | `rules.py:assign_tier`（质量/成长缺项、先进攻再防守、NI/FCF 双负，保留估值 0 的兼容注释）；`__init__.py:score_fields`（波动输入）。 |
+| 14. 分层重估 | `__init__.py:score_fields`（新 filed 状态或层级空才重估，保留沿用层级的既有注释）；`repository.py:Repository.previous`、`service.py:ScoringService.run`（保存和接续层级状态）。 |
+| 15. 确定性 | `rules.py:certainty`（加减点、缺失不加减及 4/2 分界）。 |
+| 16. 持有资格 | `rules.py:HOLD`、`holding`（满分 90、不归一化、六项缺项保底及 hold_ok>=55）。 |
+| 17. fund_bad 与跑道 | `rules.py:holding`（资格分/三项衰退组合、FCF 缺失或非负、负 FCF 的一年现金跑道）。 |
+| 18. 入场与 M-31/32 | `rules.py:ENTRY`、`entry_rules`（三层门槛、M-31 上限 65 且不改原账、M-32 增速/现金要求及 M-18 归 M4）。 |
+| 19. 连续过线状态 | `__init__.py:score_fields`、`score_history`（MA200 历史门禁、逐日累加/归零）；`repository.py:Repository.previous`、`service.py:ScoringService.run`（跨任务接续）；`tests/m3/replay_support.py:compare_frozen`（完整 2026 日序推进后抽取 20 日）。 |
+| 20. VIX 分位方法（归属边界） | `service.py:ScoringService.run`（注明 Muse 含当日 252 日、min_periods=120 的 90% 线性分位归 M4；M3 不实现，也不替换为 M6 的前一日百分位秩）。 |
+| 21. 常量的权威位置 | `rules.py:ENTRY`、`load_rule_a`（以 v18 执行常量验证门槛、cap、首笔、预算、buffer 和只数，M4 后续消费）。 |
+
+A-002 回归：blocking **51 passed、0 skipped**（11.51 秒）；replay **2 passed、0 skipped**（14.38 秒），其中 `test_scores_match_muse` 对比 **600 行、16,200 字段，零差异**。证据：[a002-blocking.xml](a002-blocking.xml)、[a002-replay.xml](a002-replay.xml)、[a002-replay-diff.json](a002-replay-diff.json)。首轮执行沙箱禁止 AF_UNIX 本地通信，原始失败保存在 [a002-blocking-sandbox.xml](a002-blocking-sandbox.xml)；以正常本机权限复跑同一离线测试集后全绿，未改测试或门禁。Ruff 通过。修复仅补注释及本对照，不改变计算、常量、断言、夹具或标准答案。
+
+| 条款 | 自评 | 证据 |
+|---|---|---|
 | AC-M3-04 | 通过 | real-comparison.json 与 real-scores.json；下表。 |
 | AC-M3-05 | 通过 | daily-task.json 中 2026-10-14 fixed 为 59 行，空质量账本均有原因；2026-10-09 两套提取器各 59 行；JSON 保留 null。任务覆盖对无行情单独记录 no_bar，不填造分数。 |
 

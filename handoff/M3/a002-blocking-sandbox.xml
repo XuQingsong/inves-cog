@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="51" time="9.291" timestamp="2026-10-16T11:28:35.995853+08:00" hostname="192.168.1.101"><testcase classname="tests.harness.test_m0" name="test_harness_no_network" time="4.691"><failure message="AssertionError: F                                                                        [100%]&#10;  =================================== FAILURES ===================================&#10;  __________________________________ test_probe __________________________________&#10;  &#10;      def test_probe():&#10;          # macOS limits AF_UNIX paths to 104 bytes; pytest's nested temp path is longer.&#10;          with tempfile.TemporaryDirectory(dir='/tmp', prefix='m0-') as directory:&#10;              address = directory + '/local.sock'&#10;              with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as client:&#10;  &gt;               server.bind(address)&#10;  E               PermissionError: [Errno 1] Operation not permitted&#10;  &#10;  ../../var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-237/test_harness_no_network0/probe-12/test_probe.py:7: PermissionError&#10;  =========================== short test summary info ============================&#10;  FAILED ::test_probe - PermissionError: [Errno 1] Operation not permitted&#10;  1 failed in 0.21s&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['/private/tmp/inves-cog-m3-kickoff/.venv/bin/python', '-m', 'pytest', '-p', 'tests.harness.plug...===========\nFAILED ::test_probe - PermissionError: [Errno 1] Operation not permitted\n1 failed in 0.21s\n&quot;, stderr='').returncode">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-237/test_harness_no_network0')
+
+    def test_harness_no_network(tmp_path):
+        from tests.harness.tools.network import NetworkGuard
+    
+        assert NetworkGuard
+        attempts = (
+            'socket.create_connection(("example.com", 80))',
+            'socket.create_connection(("127.0.0.1", 1))',
+            'socket.create_connection(("::1", 1))',
+            'socket.getaddrinfo("example.com", 80)',
+            'requests.get("https://example.com", timeout=1)',
+        )
+        for operation in attempts:
+            code = (
+                "import socket, requests\ndef test_probe():\n"
+                f"    try:\n        {operation}\n"
+                "    except Exception:\n        pass\n"
+            )
+            result = run_probe(tmp_path, code)
+            assert result.returncode == 1, output(result)
+            assert "FR-M0-03" in output(result)
+            assert "test_probe.py:" in output(result)
+        result = run_probe(
+            tmp_path,
+            "import socket\ndef test_bar_window_to_20et():\n"
+            '    try:\n        socket.getaddrinfo("example.com", 80)\n'
+            "    except Exception:\n        pass\n    assert False\n",
+        )
+        assert result.returncode == 1 and "FR-M0-03" in output(result)
+        result = run_probe(
+            tmp_path,
+            "import pytest\n@pytest.mark.phase1_live\n"
+            'def test_probe(clock):\n    assert clock.__class__.__name__ == "SystemClock"\n',
+            arguments=("-m", "phase1_live"),
+            environment={"INVES_COG_LIVE": "1", "CI": ""},
+        )
+        assert result.returncode == 0, output(result)
+        for env in ({"INVES_COG_LIVE": "0"}, {"INVES_COG_LIVE": "1", "CI": "true"}):
+            result = run_probe(
+                tmp_path, "def test_probe():\n    assert True\n", arguments=("-m", "phase1_live"), environment=env
+            )
+            assert result.returncode != 0 and "FR-M0-03" in output(result)
+        # The same offline guard must allow asyncio and in-process ASGI requests.
+        from tests.harness.tools.probes import LOCAL_COMMUNICATION_PROBES
+    
+        failures = []
+        for label, code in LOCAL_COMMUNICATION_PROBES.items():
+            try:
+                result = run_probe(tmp_path, code, arguments=("-s",))
+                if result.returncode:
+                    failures.append(f"{label}: {output(result)}")
+            except subprocess.TimeoutExpired:
+                failures.append(f"{label}: TIMEOUT after 30 seconds")
+        assert not failures, "\n".join(failures)
+        result = run_probe(
+            tmp_path,
+            """import socket, tempfile
+    def test_probe():
+        # macOS limits AF_UNIX paths to 104 bytes; pytest's nested temp path is longer.
+        with tempfile.TemporaryDirectory(dir='/tmp', prefix='m0-') as directory:
+            address = directory + '/local.sock'
+            with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as client:
+                server.bind(address)
+                server.listen(1)
+                client.connect(address)
+                peer, _ = server.accept()
+                with peer:
+                    client.sendall(b'ok')
+                    assert peer.recv(2) == b'ok'
+    """,
+        )
+&gt;       assert result.returncode == 0, output(result)
+E       AssertionError: F                                                                        [100%]
+E         =================================== FAILURES ===================================
+E         __________________________________ test_probe __________________________________
+E         
+E             def test_probe():
+E                 # macOS limits AF_UNIX paths to 104 bytes; pytest's nested temp path is longer.
+E                 with tempfile.TemporaryDirectory(dir='/tmp', prefix='m0-') as directory:
+E                     address = directory + '/local.sock'
+E                     with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as client:
+E         &gt;               server.bind(address)
+E         E               PermissionError: [Errno 1] Operation not permitted
+E         
+E         ../../var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-237/test_harness_no_network0/probe-12/test_probe.py:7: PermissionError
+E         =========================== short test summary info ============================
+E         FAILED ::test_probe - PermissionError: [Errno 1] Operation not permitted
+E         1 failed in 0.21s
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/private/tmp/inves-cog-m3-kickoff/.venv/bin/python', '-m', 'pytest', '-p', 'tests.harness.plug...===========\nFAILED ::test_probe - PermissionError: [Errno 1] Operation not permitted\n1 failed in 0.21s\n", stderr='').returncode
+
+tests/harness/test_m0.py:84: AssertionError</failure></testcase><testcase classname="tests.harness.test_m0" name="test_injected_clock_only" time="0.146" /><testcase classname="tests.harness.test_m0" name="test_pending_registry" time="1.814" /><testcase classname="tests.harness.test_m0" name="test_milestones_consistency" time="0.063" /><testcase classname="tests.harness.test_m0" name="test_requirements_golden_unchanged" time="0.088" /><testcase classname="tests.harness.test_m0" name="test_frozen_fixtures_changelog" time="0.022" /><testcase classname="tests.harness.test_m0" name="test_import_firewall" time="0.496" /><testcase classname="tests.harness.test_m0" name="test_llm_models_allowed" time="0.046" /><testcase classname="tests.harness.test_m0" name="test_schema_roles_migration" time="0.005" /><testcase classname="tests.harness.test_m0" name="test_markers_registered" time="0.357" /><testcase classname="tests.m1.test_market_info" name="test_bar_window_to_20et" time="0.325" /><testcase classname="tests.m1.test_market_info" name="test_bar_window_from_04et" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_post_close_null_when_no_trade" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_wide_universe_rules" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_news_dedupe_and_times" time="0.003" /><testcase classname="tests.m1.test_market_info" name="test_earnings_reaction_day" time="0.059" /><testcase classname="tests.m1.test_market_info" name="test_earnings_fallback_flag" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_form4_parse_code_p" time="0.003" /><testcase classname="tests.m1.test_market_info" name="test_app_rank_jump" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_trends_unavailable_marked" time="0.003" /><testcase classname="tests.m1.test_market_info" name="test_source_level_mapping" time="0.013" /><testcase classname="tests.m1.test_market_info" name="test_info_item_contract" time="0.038" /><testcase classname="tests.m1.test_market_info" name="test_info_fields_extraction" time="0.006" /><testcase classname="tests.m1.test_market_info" name="test_llm_extraction_failure_degrades" time="0.128" /><testcase classname="tests.m2.test_fundamentals" name="test_revenue_tag_gap" time="0.017" /><testcase classname="tests.m2.test_fundamentals" name="test_q4_derived_from_annual" time="0.009" /><testcase classname="tests.m2.test_fundamentals" name="test_companyfacts_lag" time="0.242" /><testcase classname="tests.m2.test_fundamentals" name="test_stale_fundamentals_code" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_gross_margin_derived" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_ni_tag_fallback" time="0.003" /><testcase classname="tests.m2.test_fundamentals" name="test_industry_basis_na" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_fin_state_pit" time="0.010" /><testcase classname="tests.m2.test_fundamentals" name="test_extractor_fixed_toggles" time="0.010" /><testcase classname="tests.m2.test_fundamentals" name="test_segment_extraction" time="0.302" /><testcase classname="tests.m2.test_fundamentals" name="test_segment_recast" time="0.001" /><testcase classname="tests.m2.test_fundamentals" name="test_segment_mapping_pending" time="0.001" /><testcase classname="tests.m2.test_fundamentals" name="test_consensus_derived_pit" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_consensus_import_idempotent" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_health_contract" time="0.208" /><testcase classname="tests.m3.test_scoring" name="test_interp_points" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_books_synthetic" time="0.004" /><testcase classname="tests.m3.test_scoring" name="test_red_line_boundaries" time="0.007" /><testcase classname="tests.m3.test_scoring" name="test_tier_reassess_only_on_filing" time="0.004" /><testcase classname="tests.m3.test_scoring" name="test_m31_m32" time="0.000" /><testcase classname="tests.m3.test_scoring" name="test_stale_books_are_null" time="0.008" /><testcase classname="tests.m3.test_scoring" name="test_split_suspect_valuation_null" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_pit_filed_date" time="0.002" /><testcase classname="tests.m3.test_scoring" name="test_foreign_filers_not_tradable" time="0.010" /><testcase classname="tests.m3.test_scoring" name="test_rule_set_a_locked" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_v18_constants" time="0.001" /><testcase classname="tests.m3.test_scoring" name="test_no_tracker_stops_in_rule_a" time="0.002" /></testsuite></testsuites>
