@@ -2,13 +2,15 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-003  已收到  2026-10-16 12:08 北京
-- A-002 已由需求方验证通过；PR #7 不再改动，等待需求方取得用户批准后合并。
-- 将在新分支 phase1/m1m2-fixes-a003 建立单独 PR「[M1/M2] 遗留修复 A-003」，D-27、D-26、D-22、LLM 日用量各自单独提交；先补失败测试，再实现。
-- 当前步骤：只读核对 UNH 申报原件与 gross_margin_derived 全名单、SEC 失败日志/限速/续跑合同、三条健康记录及预算日界线；SEC 原因查实后先写回本文件。
-- 10-16 全天用量将在对应预算日完整结束后核验；当前不把部分日数据当作整日数据。
-- 规则变化已收到：B 线为云端只读 agent，不写共用库；A-003 明确授权本次 M1/M2 遗留修复与指定数据重算/清理，不开始 M4，不改 PR #7/#8。
-- 已自行决定：无。流程疑问：无。
+## A-003  进行中  2026-10-16 12:30 北京
+- 草稿 PR [#10](https://github.com/XuQingsong/inves-cog/pull/10)，分支 phase1/m1m2-fixes-a003，基线 main c1970adcda88305eb8800f1d1c65be6bae59dd78。远端先红提交 e6f3250a3532fbcd0cac7dfe4e76d7e195a229aa：D-27 3 failed、3 passed；后续实现尚未发布，当前红灯属于先测试历史，不冒称 CI 已绿。
+- D-27 已查明：UNH 原件 0000731766-26-000197 的 XBRL 计算关系显示 PolicyholderBenefitsAndClaimsIncurredNet（医疗赔付）与 CostOfGoodsAndServicesSold（产品成本）是独立成本项；旧 D4 只扣后者。真实原件夹具复现 88.571276%→应为 19.514184%；本机实现回归 21 passed。19 只曾出现 gross_margin_derived 的标的正在逐只核对。PR #7 已合并 9bbf151，后续按任务重算 UNH fixed 历史分数。
+- D-26 诊断事实（先登记再修）：原 job 5309 仅更新 NVDA 的 1559 条申报，最后成功正文为 2015-000131；紧接着尚未入库的正文为 2015-000087 与 2015-000013。旧实现对 collect_submissions 外的正文/Form 4 读取异常没有公司级隔离，也没有公司级续跑游标，单请求失败会终止整任务并下次从头来。原日志只保存泛化 SourceError，无法据此还原当时具体底层 transport 类型；本次三个基础端点及 2015-000087 正文实际复核成功，无 429/403 或请求过快的证据，不将限流猜测当结论。接下来为已证实的异常传播、续跑缺口加失败测试，并保留具体异常链与 URL（去 query）供下一真实时段核对。
+- D-22 已只读核验：CompanyIR 不存在；演示 EntitySites 行不存在；DashScope=ok，已有真实 embedding 记账成功证据，因此不制造无意义写操作。将独立提交 handoff/M1/a003-health-cleanup.json。
+- LLM 预算日界为 America/New_York。文档 FR-M1-18 的 150 万是非标的池条目的排队阈值，超过后仍允许标的池完整处理；现有 full() 保留这一例外。正在按 purpose、模型和任务核对实际日常/回补贡献，未把超过阈值自动判断为预算失效。
+- 待真实证据窗口：M1 SEC 正式运行仍只在美东 20:45–21:15；10-16 完整预算日截至北京时间 10-17 12:00。继续先完成其余代码和离线验收，再用现有定时检查补齐，不改时钟或生产定时服务。
+- 变更：D-27 仅 fixed 的 UNH 成本基准与缺医疗成本原因码；D-26 拟用既有 ingest.source_cursors 存公司进度，无新表/迁移/依赖/数据源。无新用户决策，未改 PR #7/#8、docs、golden 或 milestones。
+- 下一步：完成 19 只审计、指定 fixed/UNH 数据重算、SEC 回归及隔离续跑实现；四项证据齐备前保持草稿，不合并。
 
 ## A-002  已完成  2026-10-16 11:35 北京
 - PR [#7](https://github.com/XuQingsong/inves-cog/pull/7)，新 head `2c93b5af2630e0d49ad3703a0239c63cff091735`；本地与 GitHub 完整 SHA 及代码树 `0cc283b5e3b480f4b8bdf993edc26052b94afe3b` 一致。
