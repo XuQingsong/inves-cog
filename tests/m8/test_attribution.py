@@ -828,3 +828,51 @@ def test_case_no_news_unexplained():
     labeled = {**cases[0], "fixture": "recording"}
     with pytest.raises(ValueError, match="synthetic"):
         statuses_without_news([labeled], Boom())
+
+
+@pytest.mark.phase1_blocking
+def test_manual_public_leads_leave_case_gaps():
+    from datetime import date
+
+    from inves_cog.perception.attribution.cases import muse_chart, openai_labels, r1_or_store
+    from inves_cog.perception.attribution.manual import (
+        calendar_after,
+        remaining_gap,
+        strictly_before_primary,
+        supplement_replay,
+    )
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/manual_leads_2026-10-16.json").read_text())
+    assert payload["label"] == "后补录历史复盘"
+    assert payload["read_on"] == "2026-10-16"
+    assert payload["collected_then"] is False
+    assert payload["vectors_then"] is False
+    leads = {row["kind"]: row for row in payload["leads"]}
+    assert set(leads) == {"r1_release", "openai_arr", "muse_rank"}
+
+    release = leads["r1_release"]
+    assert release["published_on"] == "2025-01-20"
+    assert release["published_precision"] == "date"
+    assert release["app_store_snapshot"] is False
+    assert r1_or_store(release["excerpt"]) is True
+    assert remaining_gap(release) == "只有发布日期，没有榜单快照"
+    replay = supplement_replay(payload["read_on"], release["published_on"], "2025-01-20")
+    assert replay == {"mode": "后补录历史复盘", "collected_then": False, "vectors_then": False}
+
+    revenue = leads["openai_arr"]
+    assert revenue["source_root"] == "reuters"
+    assert revenue["timezone"] is None
+    assert revenue["ft_original_frozen"] is False
+    assert openai_labels(revenue["excerpt"]) == {"arr_background"}
+    assert remaining_gap(revenue) == "FT 原文未冻结"
+    anomaly = date(2026, 10, 14)
+    assert strictly_before_primary(revenue["updated_on"], anomaly) is True
+    assert calendar_after(revenue["published_on"], revenue["updated_on"], anomaly) is False
+    assert supplement_replay(payload["read_on"], revenue["published_on"], anomaly)["vectors_then"] is False
+
+    muse = leads["muse_rank"]
+    assert muse["published_on"] == "2026-09-18"
+    assert muse["before_open"] is False
+    assert muse_chart(muse["excerpt"]) is True
+    assert remaining_gap(muse) == "日期不在 09-19 至 09-21 开盘前"
+    assert supplement_replay(payload["read_on"], muse["published_on"], "2026-09-21")["collected_then"] is False

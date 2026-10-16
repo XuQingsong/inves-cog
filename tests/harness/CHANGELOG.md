@@ -176,3 +176,4 @@
 - A-006/M4: tests/fixtures/phase1/m4/overlay.json d5cb6e3845b9c3a7cf0b8c3e734ffd0b00b9210d6b37947fca69d3f600e61182 — synthetic cooling and rejected-increase contract, before implementation.
 
 - M4 K04: tests/fixtures/phase1/m4/capacity_synthetic.json 3dcfa7f6e0dd06dff71e8725e075e5c1805e481eeb9653ee6b6a07c8581c0c8a — synthetic watch-slot omission regression; no behavior change before decision.
+| tests/fixtures/phase1/m8/manual_leads_2026-10-16.json | absent | b0336dbd071438994e7a113843879d0d7da609fbeaddbbf3d29b6e702f744dff | Manual 2026-10-16 public-lead excerpts; backfill label, case gaps stay open | FR-M8-01; FR-M0-08 |

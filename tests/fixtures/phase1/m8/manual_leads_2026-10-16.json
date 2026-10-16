@@ -1,0 +1,44 @@
+{
+  "label": "后补录历史复盘",
+  "read_on": "2026-10-16",
+  "collected_then": false,
+  "vectors_then": false,
+  "note": "2026-10-16 人工读取的公开页短摘录。不是系统当时采集，不是原始录音，不关闭案例判定。",
+  "leads": [
+    {
+      "id": "manual-r1-2025-01-20",
+      "kind": "r1_release",
+      "case_id": "r1-release-2025-01-20",
+      "source_root": "official-site",
+      "published_on": "2025-01-20",
+      "published_precision": "date",
+      "timezone": null,
+      "app_store_snapshot": false,
+      "excerpt": "The page is dated 2025-01-20 and says DeepSeek R1 was released that day, with weights open-sourced. The official site and app were updated the same day. The page has no App Store chart snapshot."
+    },
+    {
+      "id": "manual-reuters-arr-2026-10-08",
+      "kind": "openai_arr",
+      "case_id": "openai-2026-10-14",
+      "source_root": "reuters",
+      "published_on": "2026-10-08",
+      "published_clock": "05:12 PM",
+      "updated_on": "2026-10-09",
+      "updated_clock": "02:49 AM",
+      "timezone": null,
+      "ft_original_frozen": false,
+      "excerpt": "Reuters says September annualized revenue was almost $50 billion, versus an earlier signal approaching $70 billion. The latest revenue figure was first reported by the Financial Times. The page prints Published Oct 08, 2026, 05:12 PM and Updated Oct 09, 2026, 02:49 AM, and does not state a timezone."
+    },
+    {
+      "id": "manual-axios-muse-2026-09-18",
+      "kind": "muse_rank",
+      "case_id": "muse-2026-09-21",
+      "source_root": "axios",
+      "published_on": "2026-09-18",
+      "published_precision": "date",
+      "timezone": null,
+      "before_open": false,
+      "excerpt": "Dated Sep 18, 2026. Ten days after launch, Muse is the No. 1 free iPhone app in America."
+    }
+  ]
+}

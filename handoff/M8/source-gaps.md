@@ -23,3 +23,15 @@
 - DeepSeek 的 R1 发布或 App Store 登顶：2025-01-13 至 02-10 只有 1 条 FRED CPI，`first_seen_at` 在 2026-10-14。没有 R1，没有登顶。
 
 `test_case_no_news_unexplained` 用标明 synthetic 的空新闻。四个案例都是「已发现·原因未明」，不调用模型。这不是真实源判定。`test_case_attribution` 继续等冻结夹具。上面这些 id 还不是冻结案例。
+
+## 2026-10-16 人工补证
+
+读取时间是 2026-10-16。短摘录在 `tests/fixtures/phase1/m8/manual_leads_2026-10-16.json`，标签是「后补录历史复盘」。这不是系统当时采集，也没有向量时间戳。链接记在这里，不放进扫描目录。
+
+| 入口 | 页面上能核对的事实 | 仍然开着的缺口 |
+|---|---|---|
+| 官方发布页 https://deepseek.com/news/deepseek-r1/ | 日期只有 2025-01-20。正文写当天正式发布并开源权重，官网与 App 即日起更新。没有榜单快照，也没有分钟。 | 不能当作 App Store 登顶。第 7.1 节的发布或登顶引用仍未关闭 |
+| Reuters 转述 https://www.investing.com/news/stock-market-news/openais-annualized-revenue-20-billion-less-than-previously-signaled-ft-reports-4939854 | 页面印着 Published Oct 08, 2026, 05:12 PM，Updated Oct 09, 2026, 02:49 AM，没有时区。9 月年化收入接近 500 亿美元，早前口径接近 700 亿美元。来源根是 Reuters，文中写该数字最先由 Financial Times 报道 | FT 原文 https://www.ft.com/content/b66a9858-f8fb-46cb-b506-44bfe26fca2a 仍未冻结。10-08 和 10-09 都早于 10-14，只作背景，不做二次命中 |
+| Axios https://www.axios.com/2026/09/18/meta-muse-personal-agent-make-money | 日期是 2026-09-18。文中写 Muse 是美国免费 iPhone 应用榜第一 | 不能改成 09-19。09-19 至 09-21 开盘前的榜单夹具仍缺。09-25 的回顾不能注入 09-21 开盘前 |
+
+这三条都不关闭 `test_case_attribution`。
