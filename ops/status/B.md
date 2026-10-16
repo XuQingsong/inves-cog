@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 02:52 北京
+
+- 草稿 PR #18 head `38c798f`。没有合并进 main。本地 `make phase1-test`：171 passed，18 deselected。
+- 短名单先按可见窗口过滤，再用检索分取前 40 条，不沿用原来的 rank。对不上检索实体、也没有批准向量的材料不占名额。窗口外和当时还看不见的材料进不了说法抽取。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 02:42 北京
 
 - 草稿 PR #18 head `ad48446`。没有合并进 main。本地 `make phase1-test`：170 passed，18 deselected。
