@@ -1,8 +1,12 @@
 """Historical-case candidates. A missing recording is not a successful call."""
 
+import hashlib
+from pathlib import Path
+
+from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.attribution.cases import openai_cover, openai_labels
 from inves_cog.perception.attribution.manual import historical_case
-from inves_cog.perception.attribution.propose import propose_candidates
+from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 
 
 def retrieval_items(leads, anomaly_on, read_on):
@@ -40,6 +44,17 @@ def historical_report(anomaly, leads, read_on, client):
         "candidates": candidates,
         "sources": [item["info_id"] for item in items],
     }
+
+
+def recording_path(task, payload, root):
+    digest = hashlib.sha256(canonical_payload(payload).encode("utf-8")).hexdigest()
+    return Path(root) / task / f"{digest}.json"
+
+
+def candidate_capture(anomaly, leads, read_on, root):
+    items = retrieval_items(leads, anomaly["trade_date"], read_on)
+    payload = candidate_payload(anomaly, items, [])
+    return recording_path("anomaly_candidates", payload, root)
 
 
 def _cited(candidates):

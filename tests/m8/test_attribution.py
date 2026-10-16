@@ -1173,3 +1173,51 @@ def test_export_headlines_fill_known_categories_without_live_visibility():
     assert toshiba["closes_case"] is True
     assert toshiba["closes_ac_m8_06"] is False
     assert toshiba["collected_then"] is False
+
+
+@pytest.mark.phase1_blocking
+def test_candidate_capture_path_is_the_recording_file(tmp_path):
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.attribution.historical import candidate_capture, historical_report
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/export_headlines.json").read_text())
+    leads = [
+        {
+            "id": row["info_id"],
+            "kind": row["kind"],
+            "case_id": row["case_id"],
+            "published_on": row["published_at"][:10],
+            "excerpt": row["headline"],
+            "source_level": row["source_level"],
+        }
+        for row in payload["items"]
+        if row["kind"] in {"coreweave_debt", "barclays_downgrade", "cpi_hot"}
+    ]
+    anomaly = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "case_kind": "openai_arr",
+        "members": [{"ticker": "NVDA"}],
+        "baskets": ["OpenAI合作方"],
+    }
+    path = candidate_capture(anomaly, leads, "2026-10-16", tmp_path)
+    assert path.parent == tmp_path / "anomaly_candidates"
+    with pytest.raises(LLMUnavailable, match="待分析"):
+        historical_report(anomaly, leads, "2026-10-16", Client(recordings=tmp_path))
+    cited = [row["id"] for row in leads if row["kind"] != "barclays_downgrade" or "Dell" in row["excerpt"]]
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "task": "anomaly_candidates",
+                "payload_sha256": path.stem,
+                "result": {"candidates": [{"mechanism": "估值倍数", "info_ids": cited[:3], "affected": []}]},
+            }
+        ),
+        encoding="utf-8",
+    )
+    report = historical_report(anomaly, leads, "2026-10-16", Client(recordings=tmp_path))
+    assert report["closes_ac_m8_06"] is False
+    assert report["collected_then"] is False
+    assert report["evidence_mode"] == "后补录历史案例"
