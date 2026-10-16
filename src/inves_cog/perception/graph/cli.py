@@ -47,6 +47,7 @@ def run(*, action, values, clock, basket=None, identifiers=(), edits=None, revis
             llm=Client.from_environment(values, clock=clock),
             clock=clock,
             universe=yaml.safe_load((ROOT / "config/universe.yaml").read_text())["stocks"],
+            connection_factory=lambda: connect(writer),
         )
         with connect(values) as operational:
             op = OperationalRepository(operational)

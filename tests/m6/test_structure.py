@@ -97,7 +97,10 @@ def test_l3_same_as_l2_drops_theme_factor():
     same_members = [{"ticker": name, "primary": True} for name in ("A", "B", "C")]
     l2 = {"basket_id": "semis", "members": same_members}
     l3_same = {"basket_id": "ai-chips", "members": same_members}
-    l3_different = {"basket_id": "ai-servers", "members": [{"ticker": name, "primary": True} for name in ("A", "B", "D")]}
+    l3_different = {
+        "basket_id": "ai-servers",
+        "members": [{"ticker": name, "primary": True} for name in ("A", "B", "D")],
+    }
 
     same_factors, same_reasons = stock_factors(returns, ticker="A", l2=l2, l3=l3_same)
     assert list(same_factors.columns) == ["m", "s"]
@@ -328,6 +331,40 @@ def test_draft_all_does_not_share_one_connection():
     result = service.draft_all(["AAA", "BBB", "CCC"], workers=3)
     assert result["status"] == "ok"
     assert connection.max_active == 1
+
+    opened = []
+
+    class Owned:
+        def __init__(self):
+            self.used = False
+
+        def execute(self, *_args, **_kwargs):
+            self.used = True
+
+            class Result:
+                def fetchone(self):
+                    return None
+
+            return Result()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+    def factory():
+        item = Owned()
+        opened.append(item)
+        return item
+
+    shared = Owned()
+    separate = Probe(
+        repository=Repository(shared), sec=None, llm=None, clock=None, universe=[], connection_factory=factory
+    )
+    separate.draft_all(["AAA", "BBB"], workers=2)
+    assert shared.used is False
+    assert len(opened) == 2 and all(item.used for item in opened)
 
 
 @pytest.mark.phase1_live

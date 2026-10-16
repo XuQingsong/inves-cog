@@ -11,8 +11,9 @@ from inves_cog.perception.graph.texts import extract_sections
 
 
 class GraphService:
-    def __init__(self, *, repository, sec, llm, clock, universe):
+    def __init__(self, *, repository, sec, llm, clock, universe, connection_factory=None):
         self.repo, self.sec, self.llm, self.clock, self.universe = repository, sec, llm, clock, universe
+        self.connection_factory = connection_factory
 
     def seed_config(self):
         baskets = initial_baskets(self.universe)
@@ -125,10 +126,24 @@ class GraphService:
                 "exposures": 0,
             }
 
+    def _draft_on_own_connection(self, ticker):
+        with self.connection_factory() as connection:
+            worker = type(self)(
+                repository=type(self.repo)(connection),
+                sec=self.sec,
+                llm=self.llm,
+                clock=self.clock,
+                universe=self.universe,
+            )
+            return worker.draft_ticker(ticker)
+
     def draft_all(self, tickers=None, *, workers=3):
         selected = tickers or [row["ticker"] for row in self.universe]
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            rows = list(executor.map(self.draft_ticker, selected))
+        if self.connection_factory is None or workers <= 1 or len(selected) <= 1:
+            rows = [self.draft_ticker(ticker) for ticker in selected]
+        else:
+            with ThreadPoolExecutor(max_workers=min(workers, len(selected))) as executor:
+                rows = list(executor.map(self._draft_on_own_connection, selected))
         return {
             "processed_count": sum(row["relations"] + row["exposures"] for row in rows),
             "coverage": rows,
