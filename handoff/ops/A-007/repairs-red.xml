@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.717" timestamp="2026-10-16T17:58:06.003499+08:00" hostname="test-runner"><testcase classname="tests.m4.test_closeout" name="test_plan_zero_amount_becomes_explained_skip" time="0.516"><failure message="AssertionError: assert ([{'ticker': '...'M-40'], ...}] == []&#10;  &#10;  Left contains one more item: {'ticker': 'AAA', 'action': 'buy_to', 'label': '确认加仓', 'rule_ids': ['M-40'], ...}&#10;  Use -v to get more diff)">def test_plan_zero_amount_becomes_explained_skip():
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.623" timestamp="2026-10-16T17:59:09.395738+08:00" hostname="test-runner"><testcase classname="tests.m4.test_closeout" name="test_plan_zero_amount_becomes_explained_skip" time="0.475"><failure message="AssertionError: assert ([{'ticker': '...'M-40'], ...}] == []&#10;  &#10;  Left contains one more item: {'ticker': 'AAA', 'action': 'buy_to', 'label': '确认加仓', 'rule_ids': ['M-40'], ...}&#10;  Use -v to get more diff)">def test_plan_zero_amount_becomes_explained_skip():
         e = engine()
         e.positions["AAA"] = position(shares=1000)
         e.decide(DAY, {"AAA": signal(entry_pass=False)}, prices={"AAA": 100})
@@ -10,15 +10,16 @@ E
 E         Left contains one more item: {'ticker': 'AAA', 'action': 'buy_to', 'label': '确认加仓', 'rule_ids': ['M-40'], ...}
 E         Use -v to get more diff)
 
-tests/m4/test_closeout.py:16: AssertionError</failure></testcase><testcase classname="tests.m4.test_closeout" name="test_plan_skip_identifies_one_actual_gate" time="0.000"><failure message="assert False&#10; +  where False = any(&lt;generator object test_plan_skip_identifies_one_actual_gate.&lt;locals&gt;.&lt;genexpr&gt; at 0x10e831e00&gt;)">def test_plan_skip_identifies_one_actual_gate():
+tests/m4/test_closeout.py:16: AssertionError</failure></testcase><testcase classname="tests.m4.test_closeout" name="test_plan_skip_identifies_one_actual_gate" time="0.000"><failure message="assert False&#10; +  where False = any(&lt;generator object test_plan_skip_identifies_one_actual_gate.&lt;locals&gt;.&lt;genexpr&gt; at 0x10cfb57e0&gt;)">def test_plan_skip_identifies_one_actual_gate():
         e = engine()
+        e.peak_equity = 2_000_000
         e.dd12 = True
         e.decide(DAY, {"AAA": signal()}, prices={"AAA": 100})
 &gt;       assert any("12%" in s["reason_zh"] for s in e.skips)
 E       assert False
-E        +  where False = any(&lt;generator object test_plan_skip_identifies_one_actual_gate.&lt;locals&gt;.&lt;genexpr&gt; at 0x10e831e00&gt;)
+E        +  where False = any(&lt;generator object test_plan_skip_identifies_one_actual_gate.&lt;locals&gt;.&lt;genexpr&gt; at 0x10cfb57e0&gt;)
 
-tests/m4/test_closeout.py:28: AssertionError</failure></testcase><testcase classname="tests.m2.test_cik_history" name="test_successor_companyfacts_history_uses_visible_registrant" time="0.032"><failure message="assert 2000000000.0 == 1000000000.0">def test_successor_companyfacts_history_uses_visible_registrant():
+tests/m4/test_closeout.py:29: AssertionError</failure></testcase><testcase classname="tests.m2.test_cik_history" name="test_successor_companyfacts_history_uses_visible_registrant" time="0.028"><failure message="assert 2000000000.0 == 1000000000.0">def test_successor_companyfacts_history_uses_visible_registrant():
         calls = []
     
         class SEC:

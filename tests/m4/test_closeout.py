@@ -23,11 +23,13 @@ def test_plan_zero_amount_becomes_explained_skip():
 
 def test_plan_skip_identifies_one_actual_gate():
     e = engine()
+    e.peak_equity = 2_000_000
     e.dd12 = True
     e.decide(DAY, {"AAA": signal()}, prices={"AAA": 100})
     assert any("12%" in s["reason_zh"] for s in e.skips)
     assert all("或" not in s["reason_zh"] for s in e.skips)
     e = engine()
+    e.peak_equity = 2_000_000
     e.positions["AAA"] = position(filled_fraction=0.1, first_fraction=0.4)
     e.index = 20
     e.dd12 = True
