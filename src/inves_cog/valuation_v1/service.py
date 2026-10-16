@@ -108,12 +108,16 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                 month_refresh=first_session(as_of),
             )
             if row["status"] != "ok":
-                extra = [
-                    inputs.get("input_reason"),
-                    inputs.get("diluted_shares_reason") if inputs.get("diluted_shares") is None else None,
-                    inputs.get("normal_margin_reason") if row["type"] == "周期" else None,
-                    inputs.get("consensus_reason"),
-                ]
+                extra = [inputs.get("input_reason")]
+                if row["type"] in {"稳定", "周期", "未盈利成长"} and inputs.get("diluted_shares") is None:
+                    extra.append(inputs.get("diluted_shares_reason"))
+                if row["type"] == "周期":
+                    extra.append(inputs.get("normal_margin_reason"))
+                if row["type"] in {"稳定", "成长", "未盈利成长"}:
+                    extra.append(inputs.get("consensus_reason"))
+                if row["type"] == "金融":
+                    missing = [key for key in ("rote_5y_avg", "tbv_per_share") if inputs.get(key) is None]
+                    extra.append("M2未提供金融估值字段：" + ", ".join(missing) if missing else None)
                 row["reason"] = "; ".join(filter(None, [row["reason"], *extra]))
             row.update(membership.get(ticker, {}))
         except Exception as exc:
