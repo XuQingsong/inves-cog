@@ -143,3 +143,40 @@ def test_sec_reuses_transport_without_splitting_the_shared_rate_budget():
     assert first.http.pool and second.http.pool
     assert first.budget is second.budget
     assert first.budget.count == 5 and first.budget.seconds == 1
+
+
+def test_sec_unfinished_cycle_resumes_across_day_boundary(monkeypatch):
+    calls = []
+    failing = {"ONE"}
+
+    def collect(sec, *, ticker, **kwargs):
+        calls.append(ticker)
+        if ticker in failing:
+            raise SourceError("recorded interruption")
+        return []
+
+    p = pipeline(monkeypatch, collect)
+    p.submissions()
+    calls.clear()
+    failing.clear()
+    p.clock = FrozenClock(datetime(2026, 10, 18, 0, 50, tzinfo=timezone.utc))
+    result = p.submissions()
+    assert calls == ["ONE"]
+    assert result["completed_companies"] == 2
+
+
+def test_sec_transport_failure_keeps_safe_endpoint_and_concrete_cause():
+    from inves_cog.ingest.sec_client import SECClient
+
+    class HTTP:
+        def get(self, *args, **kwargs):
+            try:
+                raise TimeoutError("recorded timeout")
+            except TimeoutError as exc:
+                raise SourceError("HTTP transport failed after bounded retries") from exc
+
+    client = SECClient(HTTP(), user_agent="offline fixture fixture@example.invalid")
+    with pytest.raises(SourceError) as failure:
+        client.get("https://www.sec.gov/Archives/example.htm?private=must-not-persist")
+    assert failure.value.error_code == "TimeoutError"
+    assert failure.value.request_url == "https://www.sec.gov/Archives/example.htm"

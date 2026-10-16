@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="0.525" timestamp="2026-10-16T12:44:39.030784+08:00" hostname="192.168.1.101"><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_issuer_failure_isolated_and_next_run_only_resumes_failed_issuer" time="0.001" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_document_failure_is_inside_company_boundary" time="0.420" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_completed_cycle_refreshes_on_next_trade_date" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_permission_failure_is_not_misreported_as_a_company_gap" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_reuses_transport_without_splitting_the_shared_rate_budget" time="0.001" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_unfinished_cycle_resumes_across_day_boundary" time="0.000"><failure message="AssertionError: assert ['ONE', 'TWO'] == ['ONE']&#10;  &#10;  Left contains one more item: 'TWO'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x109d4bb10&gt;
+
+    def test_sec_unfinished_cycle_resumes_across_day_boundary(monkeypatch):
+        calls = []
+        failing = {"ONE"}
+    
+        def collect(sec, *, ticker, **kwargs):
+            calls.append(ticker)
+            if ticker in failing:
+                raise SourceError("recorded interruption")
+            return []
+    
+        p = pipeline(monkeypatch, collect)
+        p.submissions()
+        calls.clear()
+        failing.clear()
+        p.clock = FrozenClock(datetime(2026, 10, 18, 0, 50, tzinfo=timezone.utc))
+        result = p.submissions()
+&gt;       assert calls == ["ONE"]
+E       AssertionError: assert ['ONE', 'TWO'] == ['ONE']
+E         
+E         Left contains one more item: 'TWO'
+E         Use -v to get more diff
+
+tests/m1/test_a003_sec_resume.py:164: AssertionError</failure></testcase><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_transport_failure_keeps_safe_endpoint_and_concrete_cause" time="0.000" /></testsuite></testsuites>
