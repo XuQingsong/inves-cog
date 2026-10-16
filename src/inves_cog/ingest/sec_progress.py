@@ -9,7 +9,8 @@ class SECProgress:
         previous = repo.get_cursor(self.key) or {}
         self.state = (
             previous
-            if previous.get("day") == day.isoformat() and previous.get("universe") == self.tickers
+            if previous.get("universe") == self.tickers
+            and (previous.get("day") == day.isoformat() or len(previous.get("completed", [])) < len(self.tickers))
             else {"day": day.isoformat(), "universe": self.tickers, "completed": [], "failures": {}, "gaps": {}}
         )
         self.pending = [ticker for ticker in self.tickers if ticker not in self.state["completed"]]
