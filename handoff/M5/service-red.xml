@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.091" timestamp="2026-10-16T21:21:16.550650+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.014"><failure message="KeyError: 'sic'">tests/m5/test_valuation.py:204: in test_position_panel
+    assert_service()
+tests/m5/inputs_cases.py:48: in assert_service
+    assert financial_inputs(states[0],[],{'ticker':'AAA','sector':'金融','sic':6021})['sic']==6021
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'sic'</failure></testcase></testsuite></testsuites>

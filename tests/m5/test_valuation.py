@@ -199,6 +199,9 @@ def test_implied_growth_no_solution():
 
 @pytest.mark.phase1_blocking
 def test_position_panel():
+    from tests.m5.inputs_cases import assert_service
+
+    assert_service()
     from inves_cog.valuation_v1.shadows import panel, summarize
 
     rows = []
