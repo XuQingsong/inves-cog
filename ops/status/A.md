@@ -2,12 +2,17 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-004  已收到  2026-10-16 13:20 北京
-- 已读 main 的 A-004（blob 43ede3bf55f4f7cb3b89ccbe44fe029dd450ab23），G1 已由用户批准。仅做 M4 开工复述，提交草稿 PR 后停下，不写实现。
-- PR #10 已确认 merged=true，合并 sha 61a97e139d80c1b43b4a5a72b30c7f2fa678483a；接下来先核对并按本任务明确授权将 Mac 定时服务切到最新 main，记录实际提交与重启时间。
-- 将完整阅读 T04、M4 v3、适用任务书/规格，登记固定 Muse aacea04 的只读源码文件和行号，包含中期 v18 回放检查点、trading 表及迁移名、分级疑问。
-- 规则变化：仅剩等时间的证据可按需求方转交先收口；B 线真实数据申请由需求方转成 A 线任务后导出，不自行处理 B 线申请。无新用户待答，未改产品代码或服务。
-- 下一步：完成服务核验与 handoff/M4/kickoff.md，分支 phase1/m4-paper-execution，开草稿 PR；不合并、不修改 docs/golden/milestones。
+## A-004  已完成  2026-10-16 13:35 北京
+- 已按 A-004 提交草稿 PR [#12](https://github.com/XuQingsong/inves-cog/pull/12)“[M4] 开工复述”，分支 phase1/m4-paper-execution。当前完整 head **e55361d5ec8ad5a7c827dd7a81102afd11427af9**，本地/GitHub SHA 与代码树 ad49f118f7d3202b32fac595f978e8a34730a5d6 一致；差异严格只有 handoff/M4/kickoff.md（162 行），没有实现、测试或迁移。
+- 该 SHA 的 phase1-blocking CI 绿：[run 38856417633](https://github.com/XuQingsong/inves-cog/actions/runs/38856417633)。隔离容器 make phase1-test 与 CI 断言成功；nightly 按条件 skipped，不冒称已做 M4 回放。文档 diff 检查通过，工作树干净。
+- 复述位置：[handoff/M4/kickoff.md](https://github.com/XuQingsong/inves-cog/blob/e55361d5ec8ad5a7c827dd7a81102afd11427af9/handoff/M4/kickoff.md)。已全文读 M4 v3、T04、整体/阶段任务书及适用 README/规格。逐条列出 15 项 FR、输入输出/降级、7 项 AC、15 个测试证明方案；含 trading.ledger/orders/plan 与 phase1_m4_0001_paper_ledger_orders_plan.sql 计划，以及前三个月 v18 收益/回撤/匹配率/逐笔差异中期检查点。
+- 固定 Muse aacea04e4562f70854d69330fe724aa2799f2858 只读源码登记 **32 条**（文件/行号/结论），包含整数股 floor/int、信号收盘权益检查/次日开盘权益成交、稳定先卖后买、个股短路及组合队列顺序、同股多笔、M-58、含当日 252 窗口/min120/linear 的 VIX 90% 分位。仅通过 load_golden 预读 90 笔答案，明确不是新引擎回放通过；没有运行或导入 Muse。
+- “必须停”三项（kickoff §6，未自行裁定）：**K01**：M-58“任何卖出”与 frozen 90 笔中的次日波段回买冲突，已举 MU/MRVL 07-17→07-20、MRVL 08-18→08-19 的实际答案；**K02**：源码按取整前 spend 检查 0.5% 且手续费不预留，和实际成交额/非负现金边界不同，附可手算边界；**K03**：源码成交时使用成交日完整 signals 的 tier，可能包含开盘时未知的分层，和实时 PIT 需裁定。各附 A/B 与倾向。其他工程项按保守/可逆记录为已自行决定，不反复提问。
+- 服务前置项已实际完成：PR #10 经需求方合并为 61a97e139d80c1b43b4a5a72b30c7f2fa678483a 后，本地主仓库从 c1970ad 快进到本任务开始时最新 origin/main **a6dfeeefe784f51b4e5155b96712a7320bc9d4a1**。重启前只读核对无 running 采集任务；**北京 2026-10-16 13:23:52–13:23:58**（UTC 05:23:52–05:23:58）按既有 Supervisor 重启 scheduler 14313→51341、watchdog 98185→51364，再次检查均 RUNNING；实际 SECClient/Pipeline 模块路径与文件 blob 匹配 main。记录在仓库外 /private/tmp/inves-m4-sync/service.json。
+- 变更：本次仅将现有两个常驻进程切到已合并 main；服务配置、任务参数、登录自启/自动拉起和 caffeinate 不变；embedding 已退出，未重启。没有手动采集/回填/用量调用/共享库迁移或新权限，未改 docs/golden/milestones、M6/M7 或其他 PR。
+- A-003 已按本任务开头的用户批准例外收口，两项时间证据由需求方自行查库，本线**不再为 A-003 手动运行任何任务**。B 的数据申请只在需求方转成 A 任务后处理。无新增直接用户决定；规则变化来源为 A-004，不自行编辑 ops/README。
+- 同步：状态推送前已尝试 git pull --rebase，Git 直连超时；经官方连接器按当前 A.md blob 安全写入，只改 A.md、保留 B.md。M4 已校验本地/远端完全一致；产品 main 用官方 Git 对象完整 SHA 校验同步后快进，未覆盖用户改动。
+- 下一步：**停止，等需求方回答复述单 K01–K03 并发下一条任务**。本轮“已完成”仅指 A-004 开工复述，不代表 M4 实现或验收完成。不开始实现，不合并 PR，不新建自动化。
 
 ## A-003  已完成  2026-10-16 13:20 北京
 - 按 main A-004 开头的需求方验证及用户批准例外收口：代码部分通过；PR #10 已由需求方合并，merge commit 61a97e139d80c1b43b4a5a72b30c7f2fa678483a。以下保留上一阶段代码/离线证据记录。
