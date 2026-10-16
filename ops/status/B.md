@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-007  已收到  2026-10-16 17:40 北京
+
+- 任务：M7 再修。数据库模式和文件模式不一致，违反 Q-M7-8。在 PR #11 上按 `config/universe.yaml` 和篮子成员划分池内 / 广域，查明篮子层差异并消除，加一致性测试，合入最新 main，重跑文件模式 AC-M7-07。
+- 依据：`origin/main` `d339bff`；`ops/control.md` 中 B 为「运行」。不改阈值，不改 M6，不连库，不改 `docs/`、golden、milestones，不合并。
+- 下一步：读 `data/m7-export` 的 `stored-marketstate/`，对照 2026-10-14 的两种快照。
+
 ## B-006  已完成  2026-10-16 17:12 北京
 
 - PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `b529480`。没有合并。已合入 `origin/main` `3f5d476`，冲突只在 `MANIFEST.sha256` 和 `CHANGELOG.md`，两边都保留。没有改 `docs/`、golden、milestones，没有改 M6，没有连接或写入共用库。
