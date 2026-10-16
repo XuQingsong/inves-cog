@@ -1249,3 +1249,47 @@ def test_tdk_headline_is_eligible_but_untested_without_a_response():
         after,
     )
     assert visible == []
+
+
+@pytest.mark.phase1_cases
+def test_r1_accelerator_basket_still_needs_a_recording(tmp_path):
+    from datetime import date
+
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.anomaly.cases import case_anomalies
+    from inves_cog.perception.anomaly.replay import _identify
+    from inves_cog.perception.attribution.historical import historical_report
+
+    day = date.fromisoformat("2025-01-27")
+    fixture = ROOT / "tests/fixtures/phase1/m7"
+    rows = _identify(day, case_anomalies(fixture, "case_20250127_bars.jsonl.gz", day.isoformat()))
+    found = next(
+        row
+        for row in rows
+        if "加速" in " ".join(row["baskets"])
+        and row["direction"] == "down"
+        and any(member["ticker"] == "NVDA" for member in row["members"])
+    )
+    anomaly = {**found, "case_kind": "r1_release"}
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/manual_leads_2026-10-16.json").read_text())
+    leads = payload["leads"]
+    read_on = payload["read_on"]
+    with pytest.raises(LLMUnavailable, match="待分析"):
+        historical_report(anomaly, leads, read_on, Client(recordings=tmp_path))
+
+    class Cite:
+        def call(self, task, body):
+            assert task == "anomaly_candidates"
+            ids = [item["info_id"] for item in body["items"]]
+            assert ids == ["manual-r1-2025-01-20"]
+            return {"candidates": [{"mechanism": "竞争", "info_ids": ids, "affected": [{"ticker": "NVDA"}]}]}
+
+    report = historical_report(anomaly, leads, read_on, Cite())
+    assert "受影响篮子未含 AI 加速芯片" not in report["missing"]
+    assert report["missing"] == []
+    assert report["closes_case"] is True
+    assert report["closes_ac_m8_06"] is False
+    assert report["collected_then"] is False
+    assert report["vectors_then"] is False
+    assert report["evidence_mode"] == "后补录历史案例"
+    assert report["sources"] == ["manual-r1-2025-01-20"]
