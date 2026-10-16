@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 03:51 北京
+
+- 草稿 PR #18 head `a34efe2`。没有合并进 main。本地 `make phase1-test`：176 passed，18 deselected。
+- 篮子特异性是预期篮子绝对残差均值减去对照篮子，再除以 3，限制在 0 到 1。没有对照篮子是缺失。叙事证据按同时提到事件和受影响名字的独立来源根计数，同一来源根只算一次，5 个封顶。替代解释排除只减掉自身财报反应、8-K 指引或评级变化的成员，价格本身不减。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 03:41 北京
 
 - 草稿 PR #18 head `1436f12`。没有合并进 main。本地 `make phase1-test`：175 passed，18 deselected。
