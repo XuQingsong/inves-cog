@@ -1,5 +1,6 @@
 """Explanation report. A closed lifecycle still names the reason and the open unknowns."""
 
+from inves_cog.perception.attribution.candidates import market_fingerprint
 from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.dims import rumor_split, sentiment_amplification, source_check, weakest_link
 from inves_cog.perception.attribution.evidence import later_report
@@ -142,6 +143,7 @@ def explanation_report(
     audit=None,
     denial=None,
     tracks_view=None,
+    fingerprint=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -174,6 +176,7 @@ def explanation_report(
         "source_check": source_check(audit),
         "denial_response": denial_response(denial),
         "track_reading": track_reading(tracks_view),
+        "market_fingerprint": market_fingerprint(fingerprint),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

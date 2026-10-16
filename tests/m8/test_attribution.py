@@ -984,6 +984,115 @@ def test_two_track_rows_do_not_move_valuation():
 
 
 @pytest.mark.phase1_blocking
+def test_market_fingerprint_does_not_name_the_only_cause():
+    from datetime import datetime
+
+    from inves_cog.perception.attribution.candidates import market_fingerprint
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert market_fingerprint(None) is None
+    direct = {"ticker": "WDC", "status": "已确立", "exposure": "直接"}
+    indirect = {"ticker": "STX", "status": "观察到", "exposure": "间接"}
+    concept = {"ticker": "MU", "status": "有支持", "exposure": "概念关联"}
+    aligned = {
+        "members": [
+            {"ticker": "WDC", "resid_z": -2.0},
+            {"ticker": "STX", "resid_z": -1.0},
+            {"ticker": "MU", "resid_z": 0.0},
+        ],
+        "relations": [direct, indirect, concept],
+        "direction": "down",
+        "expected": [2.0, 2.0],
+        "control": [0.0],
+        "published": datetime(2026, 10, 2, 8, 0),
+        "session_start": datetime(2026, 10, 2, 9, 30),
+        "session_end": datetime(2026, 10, 2, 16, 0),
+        "denial": {"denial": {"source_level": 1, "action": "否认"}, "denial_z": 2.0, "later_z": 0.4},
+    }
+    fit = market_fingerprint(aligned)
+    assert fit["checks"] == {
+        "exposure_gradient": True,
+        "unexposed_control": True,
+        "time_order": True,
+        "denial_response": True,
+    }
+    assert fit["incompatible"] == []
+    assert fit["identifies_unique_cause"] is False
+    assert fit["market_association"] is None
+    assert fit["fundamental_standing"] is None
+    assert fit["operating_impact_proven"] is False
+    blank = market_fingerprint({})
+    assert blank["checks"] == {
+        "exposure_gradient": None,
+        "unexposed_control": None,
+        "time_order": None,
+        "denial_response": None,
+    }
+    assert blank["incompatible"] == []
+    short = market_fingerprint(
+        {
+            "members": [{"ticker": "WDC", "resid_z": -2.0}, {"ticker": "STX", "resid_z": -1.0}],
+            "relations": [direct, indirect],
+            "direction": "down",
+        }
+    )
+    assert short["checks"]["exposure_gradient"] is None
+    inverted = market_fingerprint(
+        {
+            "members": [
+                {"ticker": "WDC", "resid_z": 0.0},
+                {"ticker": "STX", "resid_z": -1.0},
+                {"ticker": "MU", "resid_z": -2.0},
+            ],
+            "relations": [direct, indirect, concept],
+            "direction": "down",
+            "expected": [1.0],
+            "control": [1.0],
+            "published": datetime(2026, 10, 2, 18, 0),
+            "session_start": datetime(2026, 10, 2, 9, 30),
+            "session_end": datetime(2026, 10, 2, 16, 0),
+            "denial": {"denial": {"source_level": 1, "action": "否认"}, "denial_z": 1.0, "later_z": -1.2},
+        }
+    )
+    assert inverted["checks"] == {
+        "exposure_gradient": False,
+        "unexposed_control": False,
+        "time_order": False,
+        "denial_response": False,
+    }
+    assert inverted["incompatible"] == [
+        "exposure_gradient",
+        "unexposed_control",
+        "time_order",
+        "denial_response",
+    ]
+    assert inverted["identifies_unique_cause"] is False
+    same_time = market_fingerprint(
+        {
+            "published": datetime(2026, 10, 2, 16, 0),
+            "session_start": datetime(2026, 10, 2, 9, 30),
+            "session_end": datetime(2026, 10, 2, 16, 0),
+        }
+    )
+    assert same_time["checks"]["time_order"] is True
+    level_two = {"denial": {"source_level": 2, "action": "否认"}, "denial_z": 2.0, "later_z": 0.2}
+    quiet_denial = market_fingerprint({"denial": level_two})
+    assert quiet_denial["checks"]["denial_response"] is None
+    anomaly = {"anomaly_id": "fingerprint", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["market_fingerprint"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], fingerprint=aligned)
+    assert report["market_fingerprint"]["identifies_unique_cause"] is False
+    assert report["market_fingerprint"]["market_association"] is None
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
