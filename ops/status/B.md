@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 02:03 北京
+
+- 草稿 PR #18 head `bd4da67`。没有合并进 main。本地 `make phase1-test`：166 passed，18 deselected。新的案例测试单独通过。
+- 捕获命令同时打印候选路径和说法抽取路径。两条路径不同，不调用模型，也不写文件。缺候选文件时状态是待分析，缺说法文件时状态是抽取失败。截止后没有可用材料时不打印说法路径。没有编造成功录音。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 01:54 北京
 
 - 已读 main `7768fc9`。Q-M8-12 的 13 项复核已关闭，没有重做，也没有重做 17 项经营门槛。草稿 PR #18 head `fd99d88`。没有合并进 main。本地 `make phase1-test`：165 passed，18 deselected。
