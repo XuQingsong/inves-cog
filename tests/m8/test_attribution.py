@@ -1,6 +1,7 @@
 """M8 rule tests. Recorded model output stays out of this file."""
 
 import json
+import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -559,3 +560,98 @@ def test_replay_labels_later_recorded_items():
     stamped = {**toshiba, "embedding_created_at": datetime(2026, 10, 14, 18, 0, tzinfo=cst)}
     assert replay_mode([stamped], later)["vectors_then"] is True
     assert replay_mode([stamped], datetime(2026, 10, 14, 17, 30, tzinfo=cst))["vectors_then"] is False
+
+
+class _Calls:
+    def __init__(self):
+        self.rows = []
+
+    def execute(self, sql, params=None):
+        self.rows.append((sql, params))
+
+
+def _pool_bundle():
+    return {
+        "anomaly_id": "toshiba-2026-10-02",
+        "universe": "pool",
+        "retrievals": [{"info_id": "nikkei-hdd", "role": "primary", "retrieval_mode": "rules"}],
+        "candidates": [
+            {"mechanism": "供给", "info_ids": ["nikkei-hdd"], "scored": True, "affected": [{"ticker": "WDC"}]},
+            {"mechanism": "无事件/资金面", "info_ids": [], "scored": False},
+        ],
+        "linkage": {"event_id": "evt-1", "lifecycle": "已验证·有影响", "unknowns": ["投产与良率"]},
+        "tracks": [{"trade_date": "2026-10-02", "emotion": "初现", "capital": "冲击中", "fundamental": "待验证"}],
+        "impact": {"total_residual": -0.05, "event": -0.05, "amplification": 0.0, "unexplained": 0.0},
+        "report": {"status": "已验证·有影响", "fixture": "synthetic"},
+    }
+
+
+@pytest.mark.phase1_blocking
+def test_store_writes_perception_rows_only():
+    from inves_cog.perception.attribution.store import Store
+
+    calls = _Calls()
+    Store(calls).save(_pool_bundle())
+    sql = "\n".join(row[0] for row in calls.rows)
+    assert "perception.retrievals" in sql
+    assert "perception.candidates" in sql
+    assert "perception.reports" in sql
+    assert "ingest." not in sql
+    scored = [params for statement, params in calls.rows if "perception.candidates" in statement]
+    assert scored[0][6] == ["nikkei-hdd"]
+    assert scored[1][6] == []
+    assert scored[1][12] is False
+
+    refused = _Calls()
+    wide = {"anomaly_id": "wide-1", "universe": "wide", "candidates": [{"mechanism": "供给", "info_ids": ["x"]}]}
+    with pytest.raises(ValueError, match="广域异常"):
+        Store(refused).save(wide)
+    assert refused.rows == []
+    report_only = _Calls()
+    Store(report_only).save(
+        {
+            "anomaly_id": "wide-1",
+            "universe": "wide",
+            "retrievals": [{"info_id": "late", "role": "background", "retrieval_mode": "rules"}],
+            "report": {"status": "假设中"},
+        }
+    )
+    saved = report_only.rows[-1][1][1]
+    assert saved.obj["status"] == "已记录"
+    empty = {"anomaly_id": "pool-1", "candidates": [{"mechanism": "供给", "info_ids": [], "scored": True}]}
+    with pytest.raises(ValueError, match="必须引用"):
+        Store(_Calls()).save(empty)
+
+
+@pytest.mark.phase1_blocking
+def test_attribution_rows_round_trip_on_disposable_database():
+    listed = subprocess.run(
+        ["docker", "ps", "--filter", "name=inves-cog-test-", "--format", "{{.Names}}"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    names = [line for line in listed.stdout.splitlines() if line.endswith("-database-1")]
+    assert len(names) == 1
+    probe = Path(__file__).with_name("disposable_probe.sql").read_text()
+    result = subprocess.run(
+        [
+            "docker",
+            "exec",
+            "-i",
+            names[0],
+            "psql",
+            "-X",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-U",
+            "inves_cog_admin",
+            "-d",
+            "inves_cog",
+        ],
+        input=probe,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
