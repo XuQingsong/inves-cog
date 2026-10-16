@@ -1,0 +1,37 @@
+{
+  "kind": "actual database inputs, historical replay; not scheduled",
+  "production_writes": 0,
+  "summary": [
+    {
+      "trade_date": "2026-10-09",
+      "before_orders": 13,
+      "after_orders": 13,
+      "positive_orders_unchanged": true
+    },
+    {
+      "trade_date": "2026-10-12",
+      "before_orders": 5,
+      "after_orders": 5,
+      "positive_orders_unchanged": true
+    },
+    {
+      "trade_date": "2026-10-13",
+      "before_orders": 4,
+      "after_orders": 2,
+      "positive_orders_unchanged": true
+    },
+    {
+      "trade_date": "2026-10-14",
+      "before_orders": 1,
+      "after_orders": 0,
+      "positive_orders_unchanged": true
+    },
+    {
+      "trade_date": "2026-10-15",
+      "before_orders": 5,
+      "after_orders": 5,
+      "positive_orders_unchanged": true
+    }
+  ],
+  "privacy": "Only aggregate comparison published; complete production-input replay retained outside GitHub."
+}
