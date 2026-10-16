@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-007  已完成  2026-10-16 18:08 北京
+
+- PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `3102373`。没有合并。已合入 `origin/main` `e2c223c`，`MANIFEST.sha256` 和 `CHANGELOG.md` 自动合并，两边都保留。没有改阈值，没有改 M6，没有改 `docs/`、golden、milestones，没有连接或写入共用库。
+- CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/38885054082 （PR，phase1-blocking，122 passed，12 deselected，33.46s）。同头 push：https://github.com/XuQingsong/inves-cog/actions/runs/38885047902 。本地 `make phase1-test` 同样 122 passed、12 deselected。M7 blocking 12 个，含一致性测试 `test_file_and_database_views_match`。`test_case_detection` 通过。`test_anomaly_live_smoke` 仍等待 R5。
+- 差异原因：`marketstate.baskets` 只从 2026-07-01 起。数据库模式用这段短窗口算收益 z，和文件模式 120 日 z 不是同一个数，关注级抢在 `A_linked` 前面；`数据中心电力与散热` 变成 `A_watch`，合并后把数据中心电力从 L3 抬到 L2。另外 `universe` 写死为 `pool`，BAC、LQDA、MMED、PGR、U 被算进池内。现在两种模式都用同一套日线重算篮子。广域只取不在 `config/universe.yaml` 和篮子成员里的 `marketstate.daily`。行业和风格 ETF 只参与轮动。
+- AC-M7-07（`--source file`，`handoff/M7/ac-m7-07.json`）四个数不变：非温和查全率 0.9459459459459459（70/74），样本外 0.9512195121951219（39/41），对照日篮子异常 0，平均每天对象 2.327445652173913（2208 个交易日，5139 条）。
+- 已删除：本机 `/tmp/m7-export` 已删除。整份导出没有进入 PR 分支。
+- 已自行决定：无。
+- 下一步：无。不合并。不开始下一条。
+
 ## B-007  进行中  2026-10-16 18:06 北京
 
 - 实现已推到 PR #11，head `3102373`（先合入 `origin/main` `e2c223c`，`MANIFEST.sha256` 和 `CHANGELOG.md` 自动合并，两边都保留）。没有改阈值，没有改 M6，没有改 `docs/`、golden、milestones，没有连接或写入共用库。
