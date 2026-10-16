@@ -152,6 +152,15 @@ def test_second_hit():
     assert second_hit_conclusion(events) == "确认"
     quiet = [{"source_root": "a", "outcome": "无响应"}, {"source_root": "b", "outcome": "无响应"}]
     assert second_hit_conclusion(quiet) == "否定"
+    start = datetime(2026, 10, 14, 13, 30)
+    early = [
+        {"source_root": "ft", "outcome": "命中", "published_at": datetime(2026, 10, 8, 12)},
+        {"source_root": "desk", "outcome": "命中", "published_at": datetime(2026, 10, 9, 15)},
+        {"source_root": "same", "outcome": "命中", "published_at": start},
+    ]
+    assert second_hit_conclusion(early, anomaly_start=start) == "未检验"
+    later = [*early, {"source_root": "wire", "outcome": "命中", "published_at": datetime(2026, 10, 15, 14)}]
+    assert second_hit_conclusion(later, anomaly_start=start) == "确认"
 
 
 @pytest.mark.phase1_blocking
@@ -261,10 +270,16 @@ def test_tracks_and_deadline():
     denied = apply_deadline("反证", level1_denial=True)
     assert denied["lifecycle"] == "已证伪"
     faded = apply_deadline("反证")
-    assert faded == {"lifecycle": "已衰减·无影响", "fundamental": "冲突", "deadline_outcome": "反证"}
-    unknown = apply_deadline("条件风险")
+    assert faded["lifecycle"] == "已衰减·无影响"
+    assert faded["fundamental"] == "冲突"
+    assert faded["deadline_outcome"] == "反证"
+    assert faded["closing_reason"] == "截止日证据指向失效"
+    unknown = apply_deadline("条件风险", unknowns=["eps_consensus"])
     assert unknown["deadline_outcome"] == "条件风险"
     assert unknown["fundamental"] == "失效"
+    assert unknown["closing_reason"] == "截止日仍未知"
+    assert unknown["unknowns"] == ["eps_consensus"]
+    assert unknown["operating_impact_proven"] is False
     with pytest.raises(ValueError):
         close_deadline("观察")
     with pytest.raises(ValueError):
@@ -282,10 +297,16 @@ def test_divergence_labels():
     assert consensus_band(-0.02, 0, 1, 100) == "其他"
     assert consensus_band(-0.03, 0, 5, 100) == "显著下修"
     assert consensus_band(0.0, 30, 0, 100) == "显著下修"
+    assert consensus_band(None, 0, 1, 100) is None
+    assert consensus_band(None, 30, 0, 100) == "显著下修"
+    assert consensus_band(-0.019, 0, 1, None) is None
+    assert consensus_band(-0.03, None, None, None) == "显著下修"
 
     base = {"moment": "截止日", "price": "大跌", "consensus": "未下修", "fundamental": "未变", "linkage": "已衰减"}
     assert divergence_label(**base) == "情绪性折价"
     assert divergence_label(**{**base, "moment": "跟踪中"}) is None
+    assert divergence_label(**{**base, "consensus": None}) is None
+    assert divergence_label(**{**base, "fundamental": None}) is None
     assert divergence_label("已验证", "大跌", "未下修", "未变", "估值倍数类") == "情绪性折价"
     assert divergence_label("截止日", "大跌", "显著下修", "支持不利", "已验证·有影响") == "合理重定价"
     assert divergence_label("截止日", "大跌", "未下修", "支持不利", "已验证·有影响", guidance_cut=True) == "合理重定价"
@@ -346,3 +367,88 @@ def test_anomaly_contract():
     unknown = decompose(total, None, 20, 1_000_000_000_000, "无法检验", 2, 4)
     assert unknown["event"] == 0.0
     assert abs(sum(unknown.values()) - total) <= 0.001
+
+
+def _recording(root, task, payload, result):
+    import hashlib
+
+    from inves_cog.llm.client import canonical_payload
+
+    digest = hashlib.sha256(canonical_payload(payload).encode("utf-8")).hexdigest()
+    folder = root / task
+    folder.mkdir(parents=True, exist_ok=True)
+    body = {"task": task, "payload_sha256": digest, "result": result}
+    (folder / f"{digest}.json").write_text(json.dumps(body), encoding="utf-8")
+
+
+@pytest.mark.phase1_blocking
+def test_claim_fields_omit_unsupported(tmp_path):
+    from inves_cog.llm.client import Client
+    from inves_cog.perception.attribution.claims import attach_claims, claim_payload
+
+    items = [{"info_id": "n1", "headline": "Toshiba expands", "summary": "HDD"}]
+    payload = claim_payload(items)
+    _recording(
+        tmp_path,
+        "claim_extraction",
+        payload,
+        {
+            "items": [
+                {
+                    "info_id": "n1",
+                    "claims": [{"subject": "Toshiba", "variable": "capacity", "quantity": None, "note": "drop"}],
+                }
+            ]
+        },
+    )
+    attached = attach_claims(items, Client(recordings=tmp_path))
+    assert attached[0]["claims"] == [{"subject": "Toshiba", "variable": "capacity"}]
+    kept = attach_claims([{"info_id": "n1", "claims": [{"subject": "Toshiba"}]}], Client(recordings=tmp_path))
+    assert kept[0]["claims"] == [{"subject": "Toshiba"}]
+
+
+@pytest.mark.phase1_blocking
+def test_wide_anomaly_skips_candidates(tmp_path):
+    from inves_cog.llm.client import Client
+    from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.tracks import apply_deadline
+
+    class Boom:
+        def call(self, task, payload):
+            raise AssertionError(task)
+
+    assert propose_candidates({"anomaly_id": "w", "universe": "wide"}, [], [], Boom(), set()) == []
+    anomaly = {
+        "anomaly_id": "hdd",
+        "universe": "pool",
+        "direction": "down",
+        "baskets": ["hdd"],
+        "members": ["WDC"],
+    }
+    items = [{"info_id": "nikkei", "published_at": "2026-10-01T00:00:00", "headline": "expand", "source_level": 2}]
+    payload = candidate_payload(anomaly, items, [])
+    _recording(
+        tmp_path,
+        "anomaly_candidates",
+        payload,
+        {
+            "candidates": [
+                {"mechanism": "供给", "info_ids": ["nikkei"], "affected": [{"ticker": "WDC"}]},
+                {"mechanism": "供给", "info_ids": [], "affected": [{"ticker": "WDC"}]},
+                {"mechanism": "谣言", "info_ids": ["nikkei"], "affected": [{"ticker": "WDC"}]},
+                {"mechanism": "需求", "info_ids": ["missing"], "affected": [{"ticker": "WDC"}]},
+            ]
+        },
+    )
+    rows = propose_candidates(anomaly, items, [], Client(recordings=tmp_path), {"WDC"})
+    scored = [row for row in rows if row["scored"]]
+    assert [row["mechanism"] for row in scored] == ["供给"]
+    assert scored[0]["info_ids"] == ["nikkei"]
+    deadline = apply_deadline("条件风险", unknowns=["eps_consensus", "coverage"])
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": -0.02}
+    report = explanation_report(anomaly, impact, rows, "rules", deadline)
+    assert report["closing_reason"] == "截止日仍未知"
+    assert report["unknowns"] == ["eps_consensus", "coverage"]
+    assert report["operating_impact_proven"] is False
+    assert report["valuation"] == "不变 / 待基本面轨道"

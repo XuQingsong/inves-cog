@@ -9,10 +9,13 @@ def classify_response(expected_z, control_z):
     return "无响应"
 
 
-def second_hit_conclusion(events):
+def second_hit_conclusion(events, anomaly_start=None):
     seen = set()
     outcomes = []
     for event in events:
+        published = event.get("published_at")
+        if anomaly_start is not None and (published is None or published <= anomaly_start):
+            continue
         root = event["source_root"]
         if root in seen:
             continue

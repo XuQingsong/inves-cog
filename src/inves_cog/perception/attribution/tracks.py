@@ -30,25 +30,52 @@ def close_deadline(outcome, *, renewed=False):
         raise ValueError("截止日不能续期")
     if outcome not in _OUTCOMES:
         raise ValueError("到期必须落到支持、反证或条件风险")
-    return _deadline_result(outcome, level1_denial=False)
+    return _deadline_result(outcome, level1_denial=False, unknowns=())
 
 
-def _deadline_result(outcome, *, level1_denial):
+def _deadline_result(outcome, *, level1_denial, unknowns):
     if outcome == "支持":
-        return {"lifecycle": "已验证·有影响", "fundamental": "支持", "deadline_outcome": "支持"}
-    if outcome == "反证" and level1_denial:
-        return {"lifecycle": "已证伪", "fundamental": "冲突", "deadline_outcome": "反证"}
-    if outcome == "反证":
-        return {"lifecycle": "已衰减·无影响", "fundamental": "冲突", "deadline_outcome": "反证"}
-    return {"lifecycle": "已衰减·无影响", "fundamental": "失效", "deadline_outcome": "条件风险"}
+        result = {
+            "lifecycle": "已验证·有影响",
+            "fundamental": "支持",
+            "deadline_outcome": "支持",
+            "closing_reason": "截止日证据支持",
+            "operating_impact_proven": True,
+        }
+    elif outcome == "反证" and level1_denial:
+        result = {
+            "lifecycle": "已证伪",
+            "fundamental": "冲突",
+            "deadline_outcome": "反证",
+            "closing_reason": "一级否认或事实矛盾",
+            "operating_impact_proven": True,
+        }
+    elif outcome == "反证":
+        result = {
+            "lifecycle": "已衰减·无影响",
+            "fundamental": "冲突",
+            "deadline_outcome": "反证",
+            "closing_reason": "截止日证据指向失效",
+            "operating_impact_proven": True,
+        }
+    else:
+        result = {
+            "lifecycle": "已衰减·无影响",
+            "fundamental": "失效",
+            "deadline_outcome": "条件风险",
+            "closing_reason": "截止日仍未知",
+            "operating_impact_proven": False,
+        }
+    result["unknowns"] = list(unknowns)
+    return result
 
 
-def apply_deadline(outcome, *, level1_denial=False, renewed=False):
+def apply_deadline(outcome, *, level1_denial=False, renewed=False, unknowns=()):
     if renewed:
         raise ValueError("截止日不能续期")
     if outcome not in _OUTCOMES:
         raise ValueError("到期必须落到支持、反证或条件风险")
-    return _deadline_result(outcome, level1_denial=level1_denial)
+    return _deadline_result(outcome, level1_denial=level1_denial, unknowns=unknowns)
 
 
 def reactivate(evidence):
