@@ -84,3 +84,40 @@ def _retrace(cumulative, first_residual):
     if not first_residual:
         return 0.0
     return 1 - cumulative / first_residual
+
+
+_FUNDAMENTAL_EVIDENCE = {"局部支持", "支持", "冲突"}
+
+
+def sentiment_amplification(heat, fundamental):
+    """Narrative heat outran fundamental evidence. The flag only describes amplification."""
+    if heat is None:
+        return None
+    rising = _heat_rising(heat)
+    if rising is None:
+        return None
+    if not rising:
+        return False
+    return fundamental not in _FUNDAMENTAL_EVIDENCE
+
+
+def _heat_rising(heat):
+    known = []
+    today = heat.get("sources_today")
+    yesterday = heat.get("sources_yesterday")
+    if today is not None or yesterday is not None:
+        if today is None or yesterday is None:
+            known.append(None)
+        else:
+            known.append(today >= 3 and today >= 1.5 * yesterday)
+    if heat.get("search_ratio") is not None:
+        known.append(heat["search_ratio"] > 3)
+    if heat.get("rank_jump") is not None:
+        known.append(heat["rank_jump"] > 20)
+    if not known or all(item is None for item in known):
+        return None
+    if any(item is True for item in known):
+        return True
+    if any(item is None for item in known):
+        return None
+    return False

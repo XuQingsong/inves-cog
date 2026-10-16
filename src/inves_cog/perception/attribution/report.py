@@ -1,6 +1,7 @@
 """Explanation report. A closed lifecycle still names the reason and the open unknowns."""
 
 from inves_cog.perception.attribution.codes import ticker_codes
+from inves_cog.perception.attribution.dims import sentiment_amplification
 from inves_cog.perception.attribution.impact import anomaly_status
 from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.retrieve import retrieval_gap
@@ -127,6 +128,7 @@ def explanation_report(
     magnitude=None,
     statements=(),
     as_of=None,
+    heat=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -150,6 +152,7 @@ def explanation_report(
         "fundamental_standing": conclusions["fundamental_standing"],
         "retrieval_gap": retrieval_gap(embeddings),
         "magnitude_channels": None if magnitude is None else channel_lines(magnitude),
+        "sentiment_amplification": sentiment_amplification(heat, conclusions["fundamental_standing"]),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

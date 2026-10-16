@@ -560,6 +560,51 @@ def test_independent_evidence_is_not_the_price_move():
 
 
 @pytest.mark.phase1_blocking
+def test_sentiment_amplification_does_not_change_the_fundamental():
+    from inves_cog.perception.attribution.dims import sentiment_amplification
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert sentiment_amplification(None, "待验证") is None
+    assert sentiment_amplification({}, "待验证") is None
+    assert sentiment_amplification({"sources_today": 3}, "待验证") is None
+    rising = {"sources_today": 3, "sources_yesterday": 2}
+    assert sentiment_amplification(rising, "待验证") is True
+    assert sentiment_amplification(rising, None) is True
+    assert sentiment_amplification(rising, "失效") is True
+    assert sentiment_amplification(rising, "局部支持") is False
+    assert sentiment_amplification(rising, "支持") is False
+    assert sentiment_amplification(rising, "冲突") is False
+    flat = {"sources_today": 3, "sources_yesterday": 3}
+    assert sentiment_amplification(flat, "待验证") is False
+    assert sentiment_amplification({"search_ratio": 3}, "待验证") is False
+    assert sentiment_amplification({"search_ratio": 3.1}, "待验证") is True
+    assert sentiment_amplification({"rank_jump": 20}, "待验证") is False
+    assert sentiment_amplification({"rank_jump": 21}, "待验证") is True
+    anomaly = {"anomaly_id": "heat", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["sentiment_amplification"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in quiet
+    hot = explanation_report(anomaly, impact, [supply], [], heat=rising)
+    assert hot["sentiment_amplification"] is True
+    assert hot["fundamental_standing"] == "待验证"
+    assert hot["magnitude_channels"] is None
+    assert "operating_impact_proven" not in hot
+    as_of = datetime(2026, 10, 6, 21, 0)
+    statement = {
+        "source_level": 1,
+        "quantity": "产能增加 20%",
+        "published_at": datetime(2026, 10, 6, 9, 0),
+        "first_seen_at": datetime(2026, 10, 6, 10, 0),
+    }
+    held = explanation_report(anomaly, impact, [supply], [], heat=rising, statements=[statement], as_of=as_of)
+    assert held["fundamental_standing"] == "局部支持"
+    assert held["sentiment_amplification"] is False
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
