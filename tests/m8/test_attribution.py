@@ -947,3 +947,42 @@ def test_manual_public_leads_leave_case_gaps():
     assert muse_chart(muse["excerpt"]) is True
     assert remaining_gap(muse) == "日期不在 09-19 至 09-21 开盘前"
     assert supplement_replay(payload["read_on"], muse["published_on"], "2026-09-21")["collected_then"] is False
+
+
+@pytest.mark.phase1_blocking
+def test_backfill_leads_do_not_close_m7_case_days():
+    from inves_cog.perception.attribution.cases import muse_chart, openai_cover, openai_labels, r1_or_store
+    from inves_cog.perception.attribution.manual import attach_backfill
+
+    payload = json.loads((ROOT / "tests/fixtures/phase1/m8/manual_leads_2026-10-16.json").read_text())
+    leads = {row["kind"]: row for row in payload["leads"]}
+    read_on = payload["read_on"]
+    paired = {
+        "r1_release": ("2025-01-20", "2025-01-20:close:001"),
+        "openai_arr": ("2026-10-14", "2026-10-14:close:001"),
+        "muse_rank": ("2026-09-21", "2026-09-21:close:001"),
+    }
+    for kind, (day, anomaly_id) in paired.items():
+        lead = leads[kind]
+        attached = attach_backfill(
+            {"anomaly_id": anomaly_id, "trade_date": datetime.fromisoformat(day + "T21:00:00")},
+            lead,
+            read_on,
+        )
+        assert attached["mode"] == "后补录历史复盘"
+        assert attached["collected_then"] is False
+        assert attached["vectors_then"] is False
+        assert attached["aligned"] is True
+        assert attached["gap"]
+        assert attached["case_clause_met"] is False
+    revenue = leads["openai_arr"]
+    assert openai_cover([{"labels": openai_labels(revenue["excerpt"])}]) is False
+    assert muse_chart(leads["muse_rank"]["excerpt"]) is True
+    assert r1_or_store(leads["r1_release"]["excerpt"]) is True
+    crossed = attach_backfill(
+        {"anomaly_id": "2026-10-14:close:001", "trade_date": "2026-10-14"},
+        leads["muse_rank"],
+        read_on,
+    )
+    assert crossed["aligned"] is False
+    assert crossed["case_clause_met"] is False
