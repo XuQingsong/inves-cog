@@ -5,6 +5,7 @@ from pathlib import Path
 
 from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.attribution.cases import muse_chart, openai_cover, openai_labels, r1_or_store
+from inves_cog.perception.attribution.claims import claim_payload
 from inves_cog.perception.attribution.manual import historical_case, open_relation
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.report import type_candidates
@@ -61,6 +62,15 @@ def candidate_capture(anomaly, leads, read_on, root):
     items = retrieval_items(leads, anomaly["trade_date"], read_on)
     payload = candidate_payload(anomaly, items, [])
     return recording_path("anomaly_candidates", payload, root)
+
+
+def claim_capture(anomaly, leads, read_on, root):
+    """Path for items that still have no claims. Nothing is written and no model is called."""
+    items = retrieval_items(leads, anomaly["trade_date"], read_on)
+    payload = claim_payload(items)
+    if not payload["items"]:
+        return None
+    return recording_path("claim_extraction", payload, root)
 
 
 def _ranked(candidates, limit):

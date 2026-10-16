@@ -8,7 +8,7 @@ from pathlib import Path
 
 from inves_cog.perception.anomaly.cases import case_anomalies
 from inves_cog.perception.anomaly.replay import _identify
-from inves_cog.perception.attribution.historical import candidate_capture, headline_lead, retrieval_items
+from inves_cog.perception.attribution.historical import candidate_capture, claim_capture, headline_lead, retrieval_items
 
 READ_ON = "2026-10-16"
 
@@ -53,6 +53,7 @@ def case_plans(fixture_dir, root, read_on=READ_ON):
     plans = []
     for bundle in case_bundles(fixture_dir, read_on):
         path = candidate_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], root)
+        claim = claim_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], root)
         plans.append(
             {
                 "case_kind": bundle["case_kind"],
@@ -60,6 +61,7 @@ def case_plans(fixture_dir, root, read_on=READ_ON):
                 "trade_date": str(bundle["anomaly"]["trade_date"])[:10],
                 "sources": bundle["sources"],
                 "recording": str(path),
+                "claim_recording": None if claim is None else str(claim),
                 "evidence_mode": "后补录历史案例",
                 "collected_then": False,
                 "closes_case": False,

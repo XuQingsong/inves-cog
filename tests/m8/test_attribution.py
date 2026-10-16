@@ -1636,6 +1636,41 @@ def test_openai_rank_counts_candidates_not_citations():
     assert parked["closes_case"] is False
 
 
+@pytest.mark.phase1_blocking
+def test_claim_capture_is_separate_from_the_candidate_file(tmp_path):
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.attribution.claims import attach_claims
+    from inves_cog.perception.attribution.historical import candidate_capture, claim_capture, retrieval_items
+
+    anomaly = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "case_kind": "openai_arr",
+    }
+    lead = {
+        "id": "note",
+        "kind": "cpi_hot",
+        "case_id": "openai-2026-10-14",
+        "published_on": "2026-10-14",
+        "published_precision": "minute",
+        "excerpt": "CPI 3.7% vs 3.6%.",
+        "source_level": 4,
+    }
+    claim = claim_capture(anomaly, [lead], "2026-10-16", tmp_path)
+    candidate = candidate_capture(anomaly, [lead], "2026-10-16", tmp_path)
+    assert claim.parent == tmp_path / "claim_extraction"
+    assert candidate.parent == tmp_path / "anomaly_candidates"
+    assert claim != candidate
+    assert not claim.exists()
+    assert not candidate.exists()
+    items = retrieval_items([lead], anomaly["trade_date"], "2026-10-16")
+    with pytest.raises(LLMUnavailable, match="抽取失败"):
+        attach_claims(items, Client(recordings=tmp_path))
+    late = {**lead, "id": "late", "published_on": "2026-10-20"}
+    assert claim_capture(anomaly, [late], "2026-10-16", tmp_path) is None
+
+
 @pytest.mark.phase1_cases
 def test_case_capture_plan_prints_paths_without_calling(tmp_path, capsys):
     from inves_cog.llm.client import Client, LLMUnavailable
@@ -1653,8 +1688,12 @@ def test_case_capture_plan_prints_paths_without_calling(tmp_path, capsys):
         assert row["collected_then"] is False
         assert row["evidence_mode"] == "后补录历史案例"
         recording = Path(row["recording"])
+        claim = Path(row["claim_recording"])
         assert recording.parent == tmp_path / "anomaly_candidates"
+        assert claim.parent == tmp_path / "claim_extraction"
+        assert claim != recording
         assert not recording.exists()
+        assert not claim.exists()
     assert set(by_kind) == {"r1_release", "muse_rank", "toshiba", "openai_arr"}
     assert by_kind["r1_release"][0]["sources"] == ["manual-r1-2025-01-20"]
     muse_sources = {tuple(row["sources"]) for row in by_kind["muse_rank"]}

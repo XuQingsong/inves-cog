@@ -48,8 +48,8 @@ TDK 标题的发布时间晚于 2026-10-02 的开盘，时间上可以做二次�
 
 OpenAI 的前 4 名按候选计。同一个候选里的多条 CoreWeave 引用不占掉后面的名次。第 5 名才出现的因素不能补进前 4 名。
 
-现场录音还没有文件。下面的命令只打印四个案例的载荷路径，不调用模型，也不写录音：
+现场录音还没有文件。下面的命令只打印四个案例的候选路径和说法抽取路径，不调用模型，也不写录音：
 
 `PYTHONPATH=src python -m inves_cog.perception.attribution.capture_plan --fixture tests/fixtures/phase1 --root recordings`
 
-缺文件时，用 `Client(recordings=...)` 调用 `historical_report` 会失败，状态是待分析。不要编造成功录音。需求方用批准的客户端把结果写成 `recordings/anomaly_candidates/<sha256>.json`，字段是 `task`、`payload_sha256`、`result`。
+缺候选文件时，调用状态是待分析。缺说法文件时，调用状态是抽取失败。两条路径不同。截止后没有可用材料时，不打印说法路径。不要编造成功录音。需求方用批准的客户端把结果写成对应目录下的 `<sha256>.json`，字段是 `task`、`payload_sha256`、`result`。
