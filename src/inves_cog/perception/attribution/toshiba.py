@@ -106,9 +106,7 @@ def midpoint_report():
     report["second_hit_info_id"] = TDK
     report["deadline_sessions"] = deadline_offset(12, None)
     report["tracks"] = _tracks()
-    report["n_code"] = n_code(
-        mechanism="供给", narrative_shock=False, fundamental_unchanged=False, unexplained=False
-    )
+    report["n_code"] = n_code(mechanism="供给", narrative_shock=False, fundamental_unchanged=False, unexplained=False)
     report["operating_evidence_from_market"] = verified_from_evidence(["second_hit", "consensus"])
     return {"lifecycle": state, "history": history, "report": report}
 
