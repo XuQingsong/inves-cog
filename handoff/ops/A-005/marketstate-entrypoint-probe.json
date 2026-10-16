@@ -1,0 +1,18 @@
+{
+  "main": "230713222019d8da6ea384135f4ca4fb239f0450",
+  "service_blob": "e4eececd3d41a6143dd296e80223591f8922234a",
+  "probe": {
+    "requested": [
+      "NVDA",
+      "AMD",
+      "MSFT",
+      "WIDE"
+    ],
+    "passed_tickers": [
+      "BKNG",
+      "SHW"
+    ],
+    "writes": 0,
+    "cause": "MarketService.run assigns load_sic ticker overrides to its tickers parameter before calling calculate."
+  }
+}
