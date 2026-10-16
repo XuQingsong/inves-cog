@@ -2,11 +2,17 @@
 
 > 只由 A 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## A-002  已收到  2026-10-16 11:23 北京
-- 依据 main `a070164115f3910e056728963720ec5d13871b1e` 的 A-002，A-001 已由需求方验证通过。
-- 在 PR #7 原分支补齐 handoff/M3/kickoff.md §7 每条细节的 Muse aacea04 文件/行号出处，保留已有注释；只改注释及自测映射表，不改行为、常量、断言或夹具。
-- 下一步：逐条核对只读源码，完成注释和对照表，运行 blocking/replay 并核对新 head 的 CI。
-- 已自行决定：无。流程疑问：无。
+## A-002  已完成  2026-10-16 11:35 北京
+- PR [#7](https://github.com/XuQingsong/inves-cog/pull/7)，新 head `2c93b5af2630e0d49ad3703a0239c63cff091735`；本地与 GitHub 完整 SHA 及代码树 `0cc283b5e3b480f4b8bdf993edc26052b94afe3b` 一致。
+- 当前 head 的 phase1-blocking CI 绿：[run 38845929760](https://github.com/XuQingsong/inves-cog/actions/runs/38845929760)。隔离环境 blocking、M0 CI 断言与破坏性自测步骤均成功。
+- 已为 kickoff §7 全部 21 条按原顺序补齐固定 Muse `aacea04e4562f70854d69330fe724aa2799f2858` 的文件/行号注释，分散的实现位置分别注明。原有注释全部保留；8 个 Python 文件仅新增 82 行注释，非注释 token、AST 与验收提交 `73a25d0` 完全一致。证据：`handoff/M3/a002-comment-only.json`。
+- 对照表位置：[handoff/M3/self-test.md §4，AC-M3-03 后第 33 行起](https://github.com/XuQingsong/inves-cog/blob/2c93b5af2630e0d49ad3703a0239c63cff091735/handoff/M3/self-test.md#L33)，21 条完整映射到本项目文件/函数。
+- 本机 blocking：51 passed、0 skipped（11.51 秒），`handoff/M3/a002-blocking.xml`；replay：2 passed、0 skipped（14.38 秒），`handoff/M3/a002-replay.xml`。`test_scores_match_muse` 及独立差异报告均为 **600 行、16,200 字段、零差异**，`handoff/M3/a002-replay-diff.json`。Ruff 通过。
+- 首轮 blocking 唯一失败是执行沙箱禁止 AF_UNIX 本地通信探针，原输出保留在 `handoff/M3/a002-blocking-sandbox.xml`；用正常本机权限重跑同一离线测试集通过，没有改测试或门禁。
+- 改动仅为 M3 注释、自测映射及回归证据。没有改计算、常量、断言、夹具、docs、golden、milestones 或 pending；没有处理 D-27/D-22/D-26，没有运行/导入 Muse，没有改 PR #8 或合并 PR。
+- 已自行决定：M2 的 FCF/NI、EPS 提取与 M4 的 VIX 项仅在 M3 消费入口/边界注明归属；Git 直连不稳定时经官方 GitHub 连接器发布，并对公开提交完整 SHA 校验后同步本地，保留原历史。无新规则、接口、数据库、调度、来源或依赖变更；无新用户决策，流程疑问无。
+- 状态推送前已尝试 git pull --rebase，遇直连超时；本回报经官方连接器按 A.md 当前 blob SHA 更新，只写 A.md，保留 B.md。
+- 下一步：等待需求方复核 A-002。按一条线一个任务规则结束本轮；是否合并由需求方取得用户批准后执行。
 
 ## A-001  已完成  2026-10-16 11:13 北京
 - PR [#7](https://github.com/XuQingsong/inves-cog/pull/7)（[M3] 提交验收）已合入最新 main `273be4a966909145aa1be8dc293887d85562805a`；当前完整 head `73a25d03505513c1ce28c703d5abb9cf067a77b2`，本地 M3 分支与 GitHub 一致。
