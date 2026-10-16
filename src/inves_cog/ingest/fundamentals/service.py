@@ -182,19 +182,20 @@ class FinancialService:
                     if str(f["form"]).removesuffix("/A") in {"10-Q", "10-K", "20-F", "40-F", "6-K"}
                     and day(f["filing_date"]) <= self.as_of
                 ]
-                current_filing = max(
-                    relevant,
-                    key=lambda f: (day(f["filing_date"]), str(f.get("accepted_at") or ""), f["accession"]),
-                    default=None,
-                )
-                # The latest 8-K/S-8 registrant need not yet file financial statements.
-                # Follow the issuer of the effective financial filing, then its PIT lineage.
-                cik = (current_filing.get("cik") if current_filing else None) or cik
                 data = self.sec.companyfacts(cik)
                 facts_by_cik = {str(int(cik)): data}
                 sic = data.get("sic", entity.get("sic"))
                 foreign = entity.get("foreign", False)
                 d9_facts = self.d9_facts(ticker, relevant, facts_by_cik=facts_by_cik)
+                from inves_cog.ingest.fundamentals.repairs import merge_facts, settings
+
+                # Only explicitly registered predecessors supplement fixed financial history.
+                # A shared accession can appear under both CIKs; do not replace the current
+                # registrant with the CIK of a local filing-index row. Legacy stays unchanged.
+                fixed_data = data
+                predecessors = settings().get("d9", {}).get("predecessor_ciks", {}).get(ticker, [])
+                for predecessor in predecessors:
+                    fixed_data = merge_facts(fixed_data, facts_by_cik[str(int(predecessor))])
                 fixed_dates = sorted(
                     {day(f["filing_date"]) for f in relevant if day(f["filing_date"]) >= date(2015, 1, 1)}
                 )
@@ -221,11 +222,7 @@ class FinancialService:
                             key=lambda f: (day(f["filing_date"]), str(f.get("accepted_at") or ""), f["accession"]),
                             default=None,
                         )
-                        source_cik = str(int(latest.get("cik") or cik)) if latest else str(int(cik))
-                        if source_cik not in facts_by_cik:
-                            self._budget()
-                            facts_by_cik[source_cik] = self.sec.companyfacts(source_cik)
-                        visible_data = facts_by_cik[source_cik]
+                        visible_data = fixed_data if extractor == "fixed" else data
                         accessions = {
                             r.get("accn")
                             for tax in visible_data.get("facts", {}).values()
@@ -264,7 +261,11 @@ class FinancialService:
                             available_as_of=self.as_of,
                         )
                         state.filed = cutoff
-                        state.field_sources["companyfacts_cik"] = {"cik": source_cik, "as_of": cutoff.isoformat()}
+                        state.field_sources["companyfacts_cik"] = {
+                            "primary_cik": str(int(cik)),
+                            "predecessor_ciks": [str(int(c)) for c in predecessors] if extractor == "fixed" else [],
+                            "as_of": cutoff.isoformat(),
+                        }
                         self.repo.put_state(state)
                 current = self.repo.state_asof(ticker, self.as_of, "fixed")
                 if current is None:
