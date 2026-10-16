@@ -1,0 +1,66 @@
+{
+  "kind": "read-only upstream completeness evidence; counts only, no account or deployment data",
+  "consensus_jobs": [
+    {
+      "task_name": "m2_consensus_round2_fixed",
+      "status": "degraded",
+      "processed_count": 59
+    },
+    {
+      "task_name": "m2_consensus_round2",
+      "status": "degraded",
+      "processed_count": 0
+    },
+    {
+      "task_name": "m2_acceptance_consensus_2",
+      "status": "degraded",
+      "processed_count": 0
+    },
+    {
+      "task_name": "m2_acceptance_consensus_1",
+      "status": "degraded",
+      "processed_count": 0
+    }
+  ],
+  "daily_snapshot_coverage": [
+    {
+      "as_of": "2026-10-15",
+      "source": "yahoo_page",
+      "tickers": 59
+    },
+    {
+      "as_of": "2026-10-13",
+      "source": "muse_import",
+      "tickers": 30
+    },
+    {
+      "as_of": "2026-10-12",
+      "source": "muse_import",
+      "tickers": 30
+    },
+    {
+      "as_of": "2026-10-11",
+      "source": "muse_import",
+      "tickers": 30
+    },
+    {
+      "as_of": "2026-10-10",
+      "source": "muse_import",
+      "tickers": 30
+    },
+    {
+      "as_of": "2026-10-09",
+      "source": "muse_import",
+      "tickers": 30
+    },
+    {
+      "as_of": "2026-10-08",
+      "source": "muse_import",
+      "tickers": 30
+    }
+  ],
+  "note": "The accepted first collection has 59 Yahoo snapshots even though its job status is degraded. Imported historical snapshots are listed separately and do not prove a second real 59-ticker collection.",
+  "verified_complete_real_snapshot_dates": 1,
+  "d15_required_complete_collections": 2,
+  "d15_evidence_status": "Second complete collection not proven by the available evidence; M2 report still records 1/2. Job attempt counts or imported history do not close D-15."
+}
