@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-006  已收到  2026-10-16 17:00 北京
+
+- 任务：M7 验收修复。在 PR #11 的分支上删除路径 B 的 4 个百分点分支（Q-M7-15，`m7.yaml` 去掉 `path_b_gap`），复跑程序加验证集篮子别名表（至少 `NAND/DRAM` → `memory`，Q-M7-16），合入最新 main，重跑 blocking、`test_case_detection`、`--source file` 的 AC-M7-07 和最近 5 天清单。
+- 依据：`origin/main` `3f5d476`；`ops/control.md` 中 B 为「运行」。B-005 验收不通过是因为每天 3.33 个对象。不改别的阈值，不改 M6，不连库，不改 `docs/`、golden、milestones，不合并。
+- 下一步：先改 `test_path_b_relative`，让 4 个百分点不再命中，确认测试失败后再改实现。
+
 ## B-005  已完成  2026-10-16 14:48 北京
 
 - PR #11：https://github.com/XuQingsong/inves-cog/pull/11 ，分支 `phase1/m7-anomaly-detection`，head `ea089ff`。标题改为「[M7] 提交验收」，已取消草稿。没有合并。没有改 `docs/`、golden、milestones，没有改 M6，没有连接或写入共用库。迁移文件 `migrations/phase1_m7_0001_anomalies.sql` 只在一次性测试库里应用过，共用库留给 A 线在合并后执行。
