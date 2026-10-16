@@ -234,6 +234,23 @@ def test_plan_json_contract():
     ) <= set(plan)
     assert plan["rule_set"] == "A" and all(s["ticker"] != "NO" for s in plan["skips"])
     json.dumps(plan, default=str, allow_nan=False)
+    # K04: a pending watch opening also consumes one of M-34's twelve portfolio slots.
+    case = json.loads((ROOT / "tests/fixtures/phase1/m4/capacity_synthetic.json").read_text())
+    candidates = {t: signal(ticker=t, tier=tier) for tier in ("attack", "normal") for t in case[tier]}
+    control = engine()
+    control.decide(DAY, candidates, prices={t: 100 for t in candidates})
+    assert len({o["ticker"] for o in control.pending}) == 12
+    candidates[case["watch"]] = signal(
+        ticker=case["watch"],
+        entry_pass=False,
+        tech={**signal()["tech"], "price_vs_ma200": -15, "dev50": -8, "drawdown252": -25},
+    )
+    with_watch = engine()
+    with_watch.decide(
+        DAY, candidates, prices={t: 100 for t in candidates}, history={case["watch"]: case["watch_history"]}
+    )
+    with_watch.fill(NEXT, {t: 100 for t in candidates})
+    assert len(with_watch.positions) <= 12, "K04: pending watch opening is omitted from the M-34 slot count"
 
 
 def test_vix_missing_not_panic():

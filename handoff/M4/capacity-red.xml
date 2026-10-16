@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.522" timestamp="2026-10-16T15:45:45.748456+08:00" hostname="192.168.1.101"><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.434"><failure message="AssertionError: K04: pending watch opening is omitted from the M-34 slot count&#10;assert 13 &lt;= 12&#10; +  where 13 = len({'HD': {'shares': 250, 'avg_cost': 100, 'tier_now': 'normal', 'tier_entry': 'normal', ...}, 'PLTR': {'shares': 480, 'a...entry': 'attack', ...}, 'MU': {'shares': 480, 'avg_cost': 100, 'tier_now': 'attack', 'tier_entry': 'attack', ...}, ...})&#10; +    where {'HD': {'shares': 250, 'avg_cost': 100, 'tier_now': 'normal', 'tier_entry': 'normal', ...}, 'PLTR': {'shares': 480, 'a...entry': 'attack', ...}, 'MU': {'shares': 480, 'avg_cost': 100, 'tier_now': 'attack', 'tier_entry': 'attack', ...}, ...} = &lt;inves_cog.trading.engine.ExecutionEngine object at 0x10a60ff50&gt;.positions">def test_plan_json_contract():
+        e = engine()
+        s = signal(entry_pass=False, red_lines=["短线过热"])
+        e.decide(DAY, {"AAA": signal(), "NO": {**s, "ticker": "NO"}}, prices={"AAA": 100, "NO": 100})
+        plan = e.plan(NEXT)
+        assert set(
+            (
+                "trade_date",
+                "signal_date",
+                "rule_set",
+                "params_version",
+                "overlay",
+                "data_coverage",
+                "published",
+                "unpublished_reason",
+                "orders",
+                "cancels",
+                "skips",
+                "holdings",
+                "portfolio",
+            )
+        ) &lt;= set(plan)
+        assert plan["rule_set"] == "A" and all(s["ticker"] != "NO" for s in plan["skips"])
+        json.dumps(plan, default=str, allow_nan=False)
+        # K04: a pending watch opening also consumes one of M-34's twelve portfolio slots.
+        case = json.loads((ROOT / "tests/fixtures/phase1/m4/capacity_synthetic.json").read_text())
+        candidates = {t: signal(ticker=t, tier=tier) for tier in ("attack", "normal") for t in case[tier]}
+        control = engine()
+        control.decide(DAY, candidates, prices={t: 100 for t in candidates})
+        assert len({o["ticker"] for o in control.pending}) == 12
+        candidates[case["watch"]] = signal(
+            ticker=case["watch"],
+            entry_pass=False,
+            tech={**signal()["tech"], "price_vs_ma200": -15, "dev50": -8, "drawdown252": -25},
+        )
+        with_watch = engine()
+        with_watch.decide(
+            DAY, candidates, prices={t: 100 for t in candidates}, history={case["watch"]: case["watch_history"]}
+        )
+        with_watch.fill(NEXT, {t: 100 for t in candidates})
+&gt;       assert len(with_watch.positions) &lt;= 12, "K04: pending watch opening is omitted from the M-34 slot count"
+E       AssertionError: K04: pending watch opening is omitted from the M-34 slot count
+E       assert 13 &lt;= 12
+E        +  where 13 = len({'HD': {'shares': 250, 'avg_cost': 100, 'tier_now': 'normal', 'tier_entry': 'normal', ...}, 'PLTR': {'shares': 480, 'a...entry': 'attack', ...}, 'MU': {'shares': 480, 'avg_cost': 100, 'tier_now': 'attack', 'tier_entry': 'attack', ...}, ...})
+E        +    where {'HD': {'shares': 250, 'avg_cost': 100, 'tier_now': 'normal', 'tier_entry': 'normal', ...}, 'PLTR': {'shares': 480, 'a...entry': 'attack', ...}, 'MU': {'shares': 480, 'avg_cost': 100, 'tier_now': 'attack', 'tier_entry': 'attack', ...}, ...} = &lt;inves_cog.trading.engine.ExecutionEngine object at 0x10a60ff50&gt;.positions
+
+tests/m4/test_execution.py:253: AssertionError</failure></testcase></testsuite></testsuites>

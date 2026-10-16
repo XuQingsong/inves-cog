@@ -174,3 +174,5 @@
 | tests/fixtures/phase1/m2/a003/unh-cost-components.json | absent | 20ea1d172b03e6519b4cb1603058f1ddf4b73f36d816647dc394d95845c4acca | SEC UNH original cost components: medical benefits and product costs; D-27 regression | A-003; FR-M0-08 |
 
 - A-006/M4: tests/fixtures/phase1/m4/overlay.json d5cb6e3845b9c3a7cf0b8c3e734ffd0b00b9210d6b37947fca69d3f600e61182 — synthetic cooling and rejected-increase contract, before implementation.
+
+- M4 K04: tests/fixtures/phase1/m4/capacity_synthetic.json 3dcfa7f6e0dd06dff71e8725e075e5c1805e481eeb9653ee6b6a07c8581c0c8a — synthetic watch-slot omission regression; no behavior change before decision.
