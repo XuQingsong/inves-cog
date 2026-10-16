@@ -84,6 +84,12 @@ def vector_query(anomaly):
     return " ".join(str(part) for part in parts if part)
 
 
+def shortlist(items, entities, start, now, rules=None):
+    """Visible window, then the union, then the top 40 by the retrieval score."""
+    opened = window_items(items, start, now, limit=max(len(items), 1))
+    return rank_items(retrieval_union(opened, entities, rules), entities)
+
+
 def retrieval_union(items, entities, rules=None, *, vector_limit=50):
     """Rule hits and the top approved vectors, then one row per source root."""
     rules = rules or m8_rules()

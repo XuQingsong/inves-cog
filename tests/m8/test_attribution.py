@@ -150,6 +150,66 @@ def test_retrieval_union_keeps_rule_hits_outside_the_vector_cap():
 
 
 @pytest.mark.phase1_blocking
+def test_shortlist_uses_the_retrieval_score_after_the_window():
+    from inves_cog.perception.attribution.claims import claim_payload
+    from inves_cog.perception.attribution.retrieve import shortlist
+
+    start = datetime(2026, 10, 14, 13, 30)
+    now = datetime(2026, 10, 14, 21, 0)
+    noise = [
+        {
+            "info_id": f"noise-{index}",
+            "published_at": start - timedelta(hours=1),
+            "rank": 1000 - index,
+            "entities": ["WDC"],
+            "source_root": f"noise-{index}",
+        }
+        for index in range(45)
+    ]
+    unrelated = {
+        "info_id": "unrelated",
+        "published_at": start - timedelta(hours=1),
+        "rank": 9000,
+        "entities": [],
+        "source_root": "other",
+    }
+    lead = {
+        "info_id": "lead",
+        "published_at": start - timedelta(days=6),
+        "rank": 0,
+        "entities": ["WDC"],
+        "source_root": "nikkei",
+        "source_level": 4,
+    }
+    too_old = {
+        "info_id": "too-old",
+        "published_at": start - timedelta(days=8),
+        "rank": 5000,
+        "entities": ["WDC"],
+        "source_root": "old-root",
+    }
+    hidden = {
+        "info_id": "hidden",
+        "published_at": start - timedelta(hours=2),
+        "first_seen_at": now + timedelta(hours=1),
+        "rank": 5000,
+        "entities": ["WDC"],
+        "source_root": "hidden-root",
+    }
+    rows = shortlist([*noise, unrelated, lead, too_old, hidden], ["WDC"], start, now)
+    identifiers = {row["info_id"] for row in rows}
+    assert rows[0]["info_id"] == "lead"
+    assert rows[0]["role"] == "background"
+    assert "unrelated" not in identifiers
+    assert "too-old" not in identifiers
+    assert "hidden" not in identifiers
+    assert len(rows) == 40
+    payload_ids = {item["info_id"] for item in claim_payload(rows)["items"]}
+    assert "lead" in payload_ids
+    assert "noise-44" not in payload_ids
+
+
+@pytest.mark.phase1_blocking
 def test_retrieval_background_window():
     from inves_cog.perception.attribution.retrieve import window_items
 
