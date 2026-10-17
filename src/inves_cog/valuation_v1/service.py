@@ -11,6 +11,7 @@ from inves_cog.ingest.market import exchange
 from inves_cog.valuation_v1.calculations import LABEL, calculate, pe_percentiles, settings
 from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs, selected_consensus
 from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
+from inves_cog.valuation_v1.listed_units import historical_eps, normalize_listing
 from inves_cog.valuation_v1.shadows import panel, shadow, summarize
 
 NY = ZoneInfo("America/New_York")
@@ -129,7 +130,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                 {
                     "date": bar["trade_date"],
                     "close": bar["close"],
-                    "eps_ttm": state.values.get("eps_ttm") if state else None,
+                    "eps_ttm": historical_eps(state, ticker, bar["trade_date"]),
                 }
             )
         pe[ticker] = pe_percentiles(rows, as_of)
@@ -158,6 +159,10 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                 book.types[ticker] = h
             inputs = financial_inputs(state, source["states"].get(ticker, []), entity, as_of=cutoff)
             inputs.update(consensus_inputs(source["consensus"].get(ticker, []), as_of, cutoff=cutoff))
+            inputs["price"] = price
+            inputs = normalize_listing(
+                inputs, state, selected_consensus(source["consensus"].get(ticker, []), as_of, cutoff=cutoff), as_of
+            )
             p = dict(pe[ticker])
             if p["insufficient_pe_history"]:
                 fallback = pe_percentiles(

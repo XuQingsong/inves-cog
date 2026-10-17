@@ -73,6 +73,10 @@ def calculate(kind, data):
     if d.get("foreign_annual_only"):
         reasons.append("外国申报人只有年度数据")
     try:
+        if d.get("listed_unit_blockers"):
+            raise ValueError(
+                "上市单位链未核实：" + "; ".join(r["field"] + ": " + r["reason"] for r in d["listed_unit_blockers"])
+            )
         if kind == "困境":
             raise ValueError("不估值：亏损且无增长")
         if kind == "稳定":
@@ -86,7 +90,8 @@ def calculate(kind, data):
                 e = c["eps_weights"][0] * ttm + c["eps_weights"][1] * require(d, "eps_ntm")
             fcf = d.get("fcf_per_share")
             if fcf is None:
-                fcf = require(d, "fcf_ttm") / require(d, "diluted_shares", positive=True)
+                fcf_key = "valuation_fcf_ttm" if "valuation_fcf_ttm" in d else "fcf_ttm"
+                fcf = require(d, fcf_key) / require(d, "diluted_shares", positive=True)
             pe = [
                 e * c["pe_bear"] * require(d, "pe_p25", positive=True),
                 e * require(d, "pe_p50", positive=True),

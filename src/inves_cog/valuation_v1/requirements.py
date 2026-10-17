@@ -14,7 +14,7 @@ def missing_inputs(kind, data):
     if kind == "稳定":
         need("eps_ttm")
         if data.get("fcf_per_share") is None:
-            need("fcf_ttm")
+            need("valuation_fcf_ttm" if "valuation_fcf_ttm" in data else "fcf_ttm")
             need("diluted_shares", True)
         for k in ["pe_p25", "pe_p50", "pe_p75"]:
             need(k, True)
@@ -41,7 +41,7 @@ def missing_inputs(kind, data):
         return [
             {"field": "classification_type", "reason": data.get("annual_eps_reason") or "valuation type not determined"}
         ]
-    missing = []
+    missing = list(data.get("listed_unit_blockers", []))
     for key, positive in required:
         value = data.get(key)
         try:
@@ -54,6 +54,8 @@ def missing_inputs(kind, data):
                 if key == "diluted_shares"
                 else data.get("normal_margin_reason")
                 if key == "normal_net_margin"
+                else data.get("valuation_fcf_reason")
+                if key == "valuation_fcf_ttm"
                 else None
             )
             proof = data.get("input_sources", {}).get(key, {})

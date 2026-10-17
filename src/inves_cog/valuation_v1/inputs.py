@@ -144,10 +144,23 @@ def financial_inputs(state, states, entity, *, as_of=None):
             or proof.get("reason")
             or "M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本"
         )
+    fcf = values.get("fcf_ttm")
+    cashflow = state.field_sources.get("valuation_fcf_ttm", {})
+    if state.ticker == "ARM" and "valuation_fcf_ttm" in values:
+        valid_cashflow = (
+            cashflow.get("method") == "valuation_ocf_minus_pure_ppe"
+            and cashflow.get("period_end") == str(state.period_end)
+            and cashflow.get("as_of", "9999") <= str(state.filed)
+            and cashflow.get("unit") == "USD"
+        )
+        fcf = values["valuation_fcf_ttm"] if valid_cashflow else None
+        out["valuation_fcf_ttm"] = fcf
+        out["input_sources"]["valuation_fcf_ttm"] = cashflow
+        out["valuation_fcf_reason"] = (
+            cashflow.get("reason") if valid_cashflow else "valuation cashflow period/currency/PIT proof invalid"
+        )
     out["fcf_per_share"] = (
-        values["fcf_ttm"] / out["diluted_shares"]
-        if values.get("fcf_ttm") is not None and out["diluted_shares"] is not None
-        else None
+        fcf / out["diluted_shares"] if fcf is not None and out["diluted_shares"] is not None else None
     )
     annual = {}
     for row in states:

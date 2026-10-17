@@ -123,6 +123,14 @@ def decompose(old_kind, old_inputs, new_kind, new_inputs):
     return out
 
 
+def unit_signature(inputs, *, actual_only=False):
+    return {
+        k: tuple(v.get(field) for field in ("status", "from_unit", "to_unit", "factor"))
+        for k, v in inputs.get("listed_unit_audit", {}).items()
+        if not actual_only or k != "eps_ntm"
+    }
+
+
 class ValuationBook:
     def __init__(self):
         self.published = {}
@@ -138,6 +146,10 @@ class ValuationBook:
         financial_version = str(financial_version or period)
         new_report = old is None or financial_version != old["financial_version"]
         method_refresh = bool(old and old.get("method_version") != settings()["method_version"])
+        unit_event = bool(old and unit_signature(old["inputs"]) != unit_signature(inputs))
+        actual_unit_event = bool(
+            old and unit_signature(old["inputs"], actual_only=True) != unit_signature(inputs, actual_only=True)
+        )
         h = self.types.setdefault(ticker, TypeHistory())
         kind = h.observe(period, candidate) if new_report or method_refresh else h.current
         if manual:
@@ -152,12 +164,14 @@ class ValuationBook:
         consensus_event = (old_ntm is None) != (new_ntm is None) or (
             new_ntm is not None and bounds is not None and not bounds[0] <= new_ntm <= bounds[1]
         )
-        trigger = new_report or method_refresh or consensus_event or month_refresh or manual is not None
+        trigger = new_report or method_refresh or consensus_event or unit_event or month_refresh or manual is not None
         audit = {
             "new_report": new_report,
             "consensus_event": consensus_event,
             "month_refresh": month_refresh,
             "method_refresh": method_refresh,
+            "unit_contract_event": unit_event,
+            "actual_unit_contract_event": actual_unit_event,
             "manual": manual is not None,
             "previous_eps_ntm": old_ntm,
             "candidate_eps_ntm": new_ntm,
@@ -166,15 +180,24 @@ class ValuationBook:
             "publication": "updated" if trigger else "held",
         }
         if trigger:
-            if old and not new_report and not month_refresh and not method_refresh and manual is None:
+            if (
+                old
+                and not new_report
+                and not month_refresh
+                and not method_refresh
+                and not actual_unit_event
+                and manual is None
+            ):
                 # A consensus-only event updates E/g inputs, not daily PE history.
-                inputs = {**old["inputs"], **{key: inputs.get(key) for key in CONSENSUS}}
+                unit_keys = {"listed_unit_audit", "listed_unit_blockers", "consensus_reason"} if unit_event else set()
+                inputs = {**old["inputs"], **{key: inputs.get(key) for key in CONSENSUS | unit_keys}}
             elif (
                 old
                 and month_refresh
                 and not new_report
                 and not consensus_event
                 and not method_refresh
+                and not unit_event
                 and manual is None
             ):
                 inputs = {**old["inputs"], **{key: inputs.get(key) for key in MULTIPLES}}
