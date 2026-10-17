@@ -19,7 +19,9 @@ def window_items(items, start, now, limit=40):
 
 
 def _visible(item, now):
-    first_seen = item.get("first_seen_at") or item["published_at"]
+    first_seen = item.get("first_seen_at")
+    if "first_seen_at" not in item or first_seen is None:
+        return False
     return max(item["published_at"], first_seen) <= now
 
 

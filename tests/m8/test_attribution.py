@@ -427,6 +427,7 @@ def test_shortlist_uses_the_retrieval_score_after_the_window():
         {
             "info_id": f"noise-{index}",
             "published_at": start - timedelta(hours=1),
+            "first_seen_at": start - timedelta(hours=1),
             "rank": 1000 - index,
             "entities": ["WDC"],
             "source_root": f"noise-{index}",
@@ -436,6 +437,7 @@ def test_shortlist_uses_the_retrieval_score_after_the_window():
     unrelated = {
         "info_id": "unrelated",
         "published_at": start - timedelta(hours=1),
+        "first_seen_at": start - timedelta(hours=1),
         "rank": 9000,
         "entities": [],
         "source_root": "other",
@@ -443,6 +445,7 @@ def test_shortlist_uses_the_retrieval_score_after_the_window():
     lead = {
         "info_id": "lead",
         "published_at": start - timedelta(days=6),
+        "first_seen_at": start - timedelta(days=6),
         "rank": 0,
         "entities": ["WDC"],
         "source_root": "nikkei",
@@ -451,6 +454,7 @@ def test_shortlist_uses_the_retrieval_score_after_the_window():
     too_old = {
         "info_id": "too-old",
         "published_at": start - timedelta(days=8),
+        "first_seen_at": start - timedelta(days=8),
         "rank": 5000,
         "entities": ["WDC"],
         "source_root": "old-root",
@@ -483,8 +487,18 @@ def test_retrieval_background_window():
     start = datetime(2026, 10, 14, 13, 30)
     now = datetime(2026, 10, 14, 21, 0)
     items = [
-        {"info_id": "six", "published_at": start - timedelta(days=6), "rank": 100},
-        {"info_id": "eight", "published_at": start - timedelta(days=8), "rank": 100},
+        {
+            "info_id": "six",
+            "published_at": start - timedelta(days=6),
+            "first_seen_at": start - timedelta(days=6),
+            "rank": 100,
+        },
+        {
+            "info_id": "eight",
+            "published_at": start - timedelta(days=8),
+            "first_seen_at": start - timedelta(days=8),
+            "rank": 100,
+        },
         {
             "info_id": "hidden",
             "published_at": start - timedelta(days=1),
@@ -496,6 +510,7 @@ def test_retrieval_background_window():
         {
             "info_id": f"fill-{index}",
             "published_at": start - timedelta(hours=1),
+            "first_seen_at": start - timedelta(hours=1),
             "rank": index,
         }
         for index in range(45)
@@ -2945,6 +2960,41 @@ def test_replay_labels_later_recorded_items():
     stamped = {**toshiba, "embedding_created_at": datetime(2026, 10, 14, 18, 0, tzinfo=cst)}
     assert replay_mode([stamped], later)["vectors_then"] is True
     assert replay_mode([stamped], datetime(2026, 10, 14, 17, 30, tzinfo=cst))["vectors_then"] is False
+
+
+@pytest.mark.phase1_blocking
+def test_missing_first_seen_is_not_collected_then():
+    from inves_cog.perception.attribution.manual import production_visible
+    from inves_cog.perception.attribution.replay import replay_mode, then_visible
+    from inves_cog.perception.attribution.retrieve import window_items
+
+    published = datetime(2026, 10, 14, tzinfo=timezone.utc)
+    as_of = datetime(2026, 10, 15, tzinfo=timezone.utc)
+    bare = {"info_id": "bare", "published_at": published}
+    null = {"info_id": "null", "published_at": published, "first_seen_at": None}
+    seen = {"info_id": "seen", "published_at": published, "first_seen_at": published}
+    later = {
+        "info_id": "later",
+        "published_at": published,
+        "first_seen_at": datetime(2026, 10, 16, tzinfo=timezone.utc),
+    }
+    for item in (bare, null):
+        assert then_visible([item], as_of) == []
+        assert window_items([item], as_of - timedelta(hours=1), as_of) == []
+        mode = replay_mode([item], as_of)
+        assert mode["mode"] == "未知"
+        assert mode["collected_then"] is False
+        assert mode["vectors_then"] is False
+        assert mode["unknown_ids"] == [item["info_id"]]
+    kept = replay_mode([seen], as_of)
+    assert then_visible([seen], as_of) == [seen]
+    assert kept["mode"] == "当时可见"
+    assert kept["collected_then"] is True
+    assert replay_mode([later], as_of)["mode"] == "后补录历史复盘"
+    assert then_visible([later], as_of) == []
+    assert production_visible([bare], as_of) == []
+    with pytest.raises(ValueError, match="生产路径不接受案例模式"):
+        production_visible([bare], as_of, mode="后补录历史案例")
 
 
 class _Calls:
