@@ -3,7 +3,7 @@
 import math
 from datetime import date, datetime
 
-from inves_cog.ingest.market import next_trading_day
+from inves_cog.ingest.market import next_trading_day, regular_bounds
 
 
 def capital_state(sessions_elapsed, cumulative, first):
@@ -72,8 +72,13 @@ def earliest_deadline(started_on, *, deadline_on=None, earnings_sessions=None, m
 
 
 def deadline_reached(deadline, as_of):
-    current = _as_date(as_of)
-    return deadline is not None and current is not None and current >= deadline
+    """The reaction session has ended. A Beijing calendar date is not that close."""
+    if deadline is None or not isinstance(as_of, datetime) or as_of.tzinfo is None:
+        return False
+    bounds = regular_bounds(deadline)
+    if bounds is None:
+        return False
+    return as_of >= bounds[1]
 
 
 def _add_sessions(day, count):

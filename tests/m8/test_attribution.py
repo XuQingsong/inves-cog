@@ -4026,7 +4026,8 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert sooner["operating_impact_proven"] is False
     assert sooner["report"]["deadline_on"] == "2026-10-05"
     due = {**waiting, "deadline_on": "2026-10-06"}
-    labelled = execute_stage("attribution_tracks", [due], [item], as_of=later, client=Propose())[0]
+    after_close = regular_bounds(date(2026, 10, 6))[1]
+    labelled = execute_stage("attribution_tracks", [due], [item], as_of=after_close, client=Propose())[0]
     assert labelled["lifecycle"] == "已衰减·无影响"
     assert labelled["operating_impact_proven"] is False
     assert labelled["report"]["deadline_on"] == "2026-10-06"
@@ -4084,6 +4085,58 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     tracks = run_scheduled(slot.replace(hour=9, minute=30), anomalies=[raw], items=[], client=Propose())
     assert tracks["task_name"] == "attribution_tracks"
     assert run_scheduled(slot.replace(hour=8)) is None
+
+
+@pytest.mark.phase1_blocking
+def test_deadline_waits_for_the_reaction_session_to_end():
+    from zoneinfo import ZoneInfo
+
+    from inves_cog.ingest.market import regular_bounds
+    from inves_cog.perception.attribution.chain import execute_stage
+
+    start = regular_bounds(date(2026, 10, 14))[0]
+    history = [
+        {
+            "at": start.isoformat(),
+            "old": "市场确认",
+            "new": "基本面核查中",
+            "trigger": "进入基本面核查",
+            "evidence_ids": [],
+        }
+    ]
+    anomaly = {
+        "anomaly_id": "nvda-tz",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": start,
+        "earnings_sessions": 1,
+        "operating_records": [],
+        "prior_event": {"lifecycle": "基本面核查中", "history": history},
+    }
+    shanghai = ZoneInfo("Asia/Shanghai")
+    early = execute_stage(
+        "attribution_tracks",
+        [anomaly],
+        [],
+        as_of=datetime(2026, 10, 15, 9, 30, tzinfo=shanghai),
+        client=None,
+    )[0]
+    assert early["report"]["deadline_on"] == "2026-10-15"
+    assert early["lifecycle"] == "基本面核查中"
+    assert early["report"]["fundamental_standing"] != "失效"
+    assert early["operating_impact_proven"] is False
+    closed = execute_stage(
+        "attribution_tracks",
+        [anomaly],
+        [],
+        as_of=datetime(2026, 10, 16, 9, 30, tzinfo=shanghai),
+        client=None,
+    )[0]
+    assert closed["lifecycle"] == "已衰减·无影响"
+    assert closed["operating_impact_proven"] is False
+    assert closed["history"][-1]["trigger"] == "截止日仍未知"
 
 
 @pytest.mark.phase1_blocking
