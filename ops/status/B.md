@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 12:26 北京
+
+- 草稿 PR #18 head `01a5cdf`。没有合并进 main。本地 `make phase1-test`：225 passed，18 deselected。
+- 按 Q-M8-15 第 3 项：候选的 affected 或说法的 claims 不是数组时，这一条记为结构不合格，不再当成合法的空结果。合法的空数组仍然是空。载荷里的候选和说法都写成数组。合法的 affected.basket_id 会留下来。没有改共享传输。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 12:14 北京
 
 - 草稿 PR #18 head `6d9dd5b`。没有合并进 main。本地 `make phase1-test`：225 passed，18 deselected。
