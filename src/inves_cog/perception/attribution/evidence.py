@@ -78,12 +78,20 @@ def narrative_support(items, event_entities, affected):
     return min(len(roots) / 5, 1.0)
 
 
+_OWN_FLAGS = ("earnings_reaction", "guidance_8k", "rating_change")
+
+
 def alternative_exclusion(members):
-    """One minus the share of members with their own earnings, 8-K guidance, or rating change."""
+    """One minus the share with their own earnings, 8-K, or rating change. An unknown member stays missing."""
     if not members:
         return None
-    flagged = sum(1 for member in members if _own_news(member))
-    return round(1 - flagged / len(members), 6)
+    flagged = []
+    for member in members:
+        own = _own_news(member)
+        if own is None:
+            return None
+        flagged.append(own)
+    return round(1 - sum(flagged) / len(flagged), 6)
 
 
 def _mean_abs(values):
@@ -91,7 +99,15 @@ def _mean_abs(values):
 
 
 def _own_news(member):
-    return bool(member.get("earnings_reaction") or member.get("guidance_8k") or member.get("rating_change"))
+    """True is an own event. All three explicit false means none. Anything else is unknown."""
+    if not isinstance(member, dict):
+        return None
+    flags = [member.get(name) for name in _OWN_FLAGS]
+    if any(flag is True for flag in flags):
+        return True
+    if all(flag is False for flag in flags):
+        return False
+    return None
 
 
 def exposure_gradient(members, relations, *, direction):

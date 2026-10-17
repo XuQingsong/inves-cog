@@ -360,8 +360,7 @@ def _components(candidate, anomaly, items):
     verdict = (anomaly.get("magnitude_by_mechanism") or {}).get(candidate.get("mechanism"))
     if verdict is not None:
         components["magnitude"] = magnitude_component(verdict)
-    people = [member for member in members if isinstance(member, dict)]
-    exclusion = alternative_exclusion(people)
+    exclusion = alternative_exclusion(_alternative_members(candidate, anomaly))
     if exclusion is not None:
         components["alternatives"] = exclusion
     return components
@@ -406,6 +405,66 @@ def _member_names(anomaly):
         if name and name not in names:
             names.append(name)
     return names
+
+
+def _alternative_members(candidate, anomaly):
+    """Anomaly members named by this candidate. An unmapped range stays missing."""
+    by_name = {}
+    for member in anomaly.get("members") or []:
+        if not isinstance(member, dict):
+            continue
+        name = member.get("ticker") or member.get("entity_id")
+        if name and name not in by_name:
+            by_name[name] = member
+    names = []
+    for row in candidate.get("affected") or []:
+        if not isinstance(row, dict):
+            continue
+        ticker = row.get("ticker")
+        if ticker:
+            if ticker not in by_name:
+                return []
+            names.append(ticker)
+        basket = row.get("basket_id")
+        if isinstance(basket, str) and basket:
+            mapped = _basket_anomaly_members(anomaly, basket, by_name)
+            if mapped is None:
+                if not ticker:
+                    return []
+            else:
+                names.extend(mapped)
+    chosen = []
+    for name in names:
+        if name not in by_name:
+            return []
+        if name not in chosen:
+            chosen.append(name)
+    return [by_name[name] for name in chosen]
+
+
+def _basket_anomaly_members(anomaly, basket_id, by_name):
+    listed = []
+    found = False
+    for basket in _basket_rows(anomaly):
+        if basket.get("basket_id") != basket_id:
+            continue
+        found = True
+        for name in basket.get("members") or []:
+            if isinstance(name, str):
+                listed.append(name)
+    for member in anomaly.get("members") or []:
+        if isinstance(member, dict) and member.get("basket_id") == basket_id:
+            found = True
+            name = member.get("ticker") or member.get("entity_id")
+            if isinstance(name, str):
+                listed.append(name)
+    if not found:
+        return None
+    chosen = []
+    for name in listed:
+        if name in by_name and name not in chosen:
+            chosen.append(name)
+    return chosen
 
 
 def _basket_rows(anomaly):

@@ -303,14 +303,21 @@ def test_specificity_narrative_and_alternatives_are_separate_scores():
     assert narrative_support([], ["toshiba"], ["WDC"]) == 0.0
     many = [{"source_root": f"root-{index}", "entities": ["toshiba", "WDC"]} for index in range(6)]
     assert narrative_support(many, ["toshiba"], ["WDC"]) == 1.0
-    members = [
-        {"ticker": "AAA"},
-        {"ticker": "BBB", "earnings_reaction": True},
-        {"ticker": "CCC", "rating_change": True},
-    ]
+    checked = {
+        "ticker": "AAA",
+        "earnings_reaction": False,
+        "guidance_8k": False,
+        "rating_change": False,
+    }
+    members = [checked, {"ticker": "BBB", "earnings_reaction": True}, {"ticker": "CCC", "rating_change": True}]
     assert alternative_exclusion([]) is None
     assert alternative_exclusion(members) == 0.333333
-    assert alternative_exclusion([{"ticker": "AAA", "resid_z": -4.0}]) == 1.0
+    assert alternative_exclusion([checked]) == 1.0
+    assert alternative_exclusion([{"ticker": "AAA"}]) is None
+    assert alternative_exclusion([{"ticker": "AAA", "resid_z": -4.0}]) is None
+    assert alternative_exclusion([{"ticker": "AAA", "earnings_reaction": None}]) is None
+    assert alternative_exclusion([{"ticker": "AAA", "earnings_reaction": False}]) is None
+    assert alternative_exclusion([checked, {"ticker": "BBB"}]) is None
 
 
 @pytest.mark.phase1_blocking
@@ -3826,22 +3833,85 @@ def test_chain_counts_alternative_exclusion():
         }
         return attribute_all([anomaly], [news], as_of=start, client=Propose())[0]
 
-    clean_member = {"ticker": "NVDA", "resid_z": -2.0}
+    unknown_member = {"ticker": "NVDA", "resid_z": -2.0}
+    clean_member = {
+        "ticker": "NVDA",
+        "resid_z": -2.0,
+        "earnings_reaction": False,
+        "guidance_8k": False,
+        "rating_change": False,
+    }
     own_member = {"ticker": "NVDA", "earnings_reaction": True, "guidance_8k": True, "rating_change": True}
     assert alternative_exclusion([clean_member]) == 1.0
     assert alternative_exclusion([own_member]) == 0.0
+    assert alternative_exclusion([unknown_member]) is None
     assert alternative_exclusion([]) is None
     clean = run(clean_member)
     owned = run(own_member)
+    unknown = run(unknown_member)
     clean_row = clean["report"]["candidates"][0]
     owned_row = owned["report"]["candidates"][0]
+    unknown_row = unknown["report"]["candidates"][0]
     assert clean_row["score"] == 0.76
     assert clean_row["evidence"]["enters_hypothesis"] is True
     assert clean["lifecycle"] == "假设中"
     assert owned_row["score"] == 0.46
     assert owned_row["evidence"]["enters_hypothesis"] is False
     assert owned["lifecycle"] == "已发现"
+    assert unknown_row["score"] == 0.657143
+    assert unknown_row["evidence"]["enters_hypothesis"] is True
     assert clean_row["score"] != owned_row["score"]
+
+    class SplitScope:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-news", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "NVDA", "basket_id": "accelerators"}],
+                        "chain": [{"entity_id": "NVDA"}],
+                    },
+                    {
+                        "mechanism": "需求",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "AMD"}],
+                        "chain": [{"entity_id": "AMD"}],
+                    },
+                ]
+            }
+
+    scoped = attribute_all(
+        [
+            {
+                "anomaly_id": "nvda-amd-alt",
+                "universe": "pool",
+                "trade_date": "2026-10-14",
+                "direction": "down",
+                "members": [
+                    {"ticker": "NVDA", "earnings_reaction": True},
+                    {
+                        "ticker": "AMD",
+                        "earnings_reaction": False,
+                        "guidance_8k": False,
+                        "rating_change": False,
+                    },
+                    {"ticker": "INTC", "earnings_reaction": True, "guidance_8k": True, "rating_change": True},
+                ],
+                "baskets": [{"basket_id": "accelerators", "members": ["NVDA", "AMD"]}],
+                "started_at": start,
+                "ended_at": datetime(2026, 10, 14, 20, 0, tzinfo=timezone.utc),
+            }
+        ],
+        [{**news, "tickers": ["NVDA", "AMD"], "entities": ["NVDA", "AMD"]}],
+        as_of=start,
+        client=SplitScope(),
+    )[0]
+    by_mechanism = {row["mechanism"]: row for row in scoped["report"]["candidates"] if row.get("scored")}
+    assert by_mechanism["供给"]["score"] == 0.61
+    assert by_mechanism["需求"]["score"] == 0.76
 
 
 @pytest.mark.phase1_blocking
@@ -3920,7 +3990,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     result = attribute_all([anomaly], related, as_of=late, client=Split())[0]
     scored = {row["mechanism"]: row for row in result["report"]["candidates"] if row["scored"]}
     assert scored["供给"]["score"] == 1.0
-    assert scored["需求"]["score"] == 0.3
+    assert scored["需求"]["score"] == 0.0
     assert scored["需求"]["evidence"]["enters_hypothesis"] is False
     assert result["report"]["fundamental_standing"] != "支持"
     assert result["operating_impact_proven"] is False
