@@ -68,6 +68,39 @@ def _number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
+_BREADTH_WINDOWS = ("day_7", "day_30")
+
+
+def revision_breadth(reading):
+    """Breadth is upgrades minus downgrades, over coverage. The revision band stays unnamed."""
+    if reading is None:
+        return None
+    return {
+        "windows": {name: _breadth_row(reading.get(name)) for name in _BREADTH_WINDOWS},
+        "band": None,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _breadth_row(row):
+    if not isinstance(row, dict):
+        row = {}
+    up = _count(row.get("up"))
+    down = _count(row.get("down"))
+    coverage = _count(row.get("coverage"))
+    breadth = None
+    if up is not None and down is not None and coverage not in (None, 0):
+        breadth = (up - down) / coverage
+    return {"up": up, "down": down, "coverage": coverage, "breadth": breadth}
+
+
+def _count(value):
+    if _number(value) and value >= 0:
+        return value
+    return None
+
+
 def consensus_band(change, downgrades, upgrades, coverage):
     """Missing EPS consensus or coverage stays unknown. It is not 未下修."""
     breadth = coverage is not None and coverage > 0 and downgrades is not None

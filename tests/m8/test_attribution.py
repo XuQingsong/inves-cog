@@ -2293,6 +2293,55 @@ def test_consensus_lookback_does_not_name_a_band():
 
 
 @pytest.mark.phase1_blocking
+def test_revision_breadth_does_not_name_a_band():
+    from inves_cog.perception.attribution.labels import revision_breadth
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert revision_breadth(None) is None
+    blank = revision_breadth({})
+    assert blank["windows"]["day_7"]["breadth"] is None
+    assert blank["windows"]["day_30"]["breadth"] is None
+    assert blank["band"] is None
+    named = revision_breadth(
+        {
+            "day_7": {"up": 2, "down": 1, "coverage": 10},
+            "day_30": {"up": 0, "down": 9, "coverage": 20},
+        }
+    )
+    assert named["windows"]["day_7"]["breadth"] == 0.1
+    assert named["windows"]["day_30"]["breadth"] == -0.45
+    assert named["band"] is None
+    assert named["operating_evidence"] is False
+    assert named["fundamental_standing"] is None
+    quiet_cover = revision_breadth({"day_7": {"up": 1, "down": 0, "coverage": 0}})
+    assert quiet_cover["windows"]["day_7"]["coverage"] == 0
+    assert quiet_cover["windows"]["day_7"]["breadth"] is None
+    negative = revision_breadth({"day_7": {"up": -1, "down": 1, "coverage": 10}})
+    assert negative["windows"]["day_7"]["up"] is None
+    assert negative["windows"]["day_7"]["breadth"] is None
+    flagged = revision_breadth({"day_7": {"up": True, "down": 1, "coverage": 10}})
+    assert flagged["windows"]["day_7"]["up"] is None
+    anomaly = {"anomaly_id": "breadth", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["revision_breadth"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        breadth={"day_7": {"up": 0, "down": 9, "coverage": 20}},
+    )
+    assert report["revision_breadth"]["band"] is None
+    assert report["revision_breadth"]["windows"]["day_7"]["breadth"] == -0.45
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_divergence_labels():
     from inves_cog.perception.attribution.labels import consensus_band, divergence_label
 
