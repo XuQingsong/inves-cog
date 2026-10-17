@@ -79,6 +79,9 @@ def test_valuation_ignores_price():
 
 @pytest.mark.phase1_blocking
 def test_valuation_monotone_and_stable():
+    from tests.m5.review_cases import assert_daily_candidate_trace
+
+    assert_daily_candidate_trace()
     from inves_cog.valuation_v1.calculations import evaluate
     from inves_cog.valuation_v1.lifecycle import ValuationBook
 
@@ -216,6 +219,9 @@ def test_implied_growth_no_solution():
 
 @pytest.mark.phase1_blocking
 def test_position_panel():
+    from tests.m5.review_cases import assert_pe_reason_recovery
+
+    assert_pe_reason_recovery()
     from tests.m5.inputs_cases import assert_service
 
     assert_service()
