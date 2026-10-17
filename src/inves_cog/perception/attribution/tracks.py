@@ -127,7 +127,7 @@ def _quantitative(row, as_of):
 
 
 def track_reading(tracks):
-    """Two published combinations only. A half retrace is not digested, and valuation stays put."""
+    """Named combinations only. A partial retrace is neither digested nor a new equilibrium."""
     if tracks is None:
         return None
     narrative = tracks.get("narrative")
@@ -141,18 +141,26 @@ def track_reading(tracks):
     if narrative == "衰减" and fundamental == "未变" and retrace is None:
         return None
     reading = None
-    if narrative == "衰减" and fundamental == "未变" and retrace > 0.5:
+    priority = False
+    if narrative == "衰减" and fundamental == "未变" and _not_retraced(retrace):
+        reading = "价格新均衡"
+        priority = True
+    elif narrative == "衰减" and fundamental == "未变" and retrace > 0.5:
         reading = "冲击已消化"
     elif narrative == "衰减" and capital == "延续" and fundamental == "冲突":
         reading = "价格和基本面背离"
     return {
         "reading": reading,
-        "research_priority": False,
+        "research_priority": priority,
         "valuation": None,
         "divergence_label": None,
         "fundamental_standing": None,
         "operating_impact_proven": False,
     }
+
+
+def _not_retraced(retrace):
+    return isinstance(retrace, (int, float)) and not isinstance(retrace, bool) and retrace <= 0
 
 
 def reactivate(evidence):

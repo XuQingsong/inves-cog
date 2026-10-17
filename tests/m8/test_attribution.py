@@ -984,6 +984,41 @@ def test_two_track_rows_do_not_move_valuation():
 
 
 @pytest.mark.phase1_blocking
+def test_unretraced_fade_raises_research_priority():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.tracks import track_reading
+
+    held = track_reading({"narrative": "衰减", "fundamental": "未变", "retrace": 0})
+    assert held["reading"] == "价格新均衡"
+    assert held["research_priority"] is True
+    assert held["valuation"] is None
+    assert held["divergence_label"] is None
+    assert held["fundamental_standing"] is None
+    assert held["operating_impact_proven"] is False
+    extended = track_reading({"narrative": "衰减", "fundamental": "未变", "retrace": -0.2})
+    assert extended["reading"] == "价格新均衡"
+    assert extended["research_priority"] is True
+    partial = track_reading({"narrative": "衰减", "fundamental": "未变", "retrace": 0.01})
+    assert partial["reading"] is None
+    assert partial["research_priority"] is False
+    anomaly = {"anomaly_id": "equilibrium", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        tracks_view={"narrative": "衰减", "fundamental": "未变", "retrace": 0},
+    )
+    assert report["track_reading"]["reading"] == "价格新均衡"
+    assert report["track_reading"]["research_priority"] is True
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_market_fingerprint_does_not_name_the_only_cause():
     from datetime import datetime
 
