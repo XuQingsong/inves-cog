@@ -2683,6 +2683,29 @@ def _recording(root, task, payload, result):
 
 @pytest.mark.phase1_blocking
 def test_claim_fields_omit_unsupported(tmp_path):
+    from copy import deepcopy
+
+    from inves_cog.perception.attribution.propose import candidate_payload
+
+    interval = {
+        "earliest_utc": "2026-09-17T10:00:00+00:00",
+        "latest_utc": "2026-09-19T12:00:00+00:00",
+        "precision": "date_only_unknown_timezone",
+    }
+    coarse = {"info_id": "date-only", "published_at": None, "published_interval": interval}
+    before = deepcopy(coarse)
+    sent = candidate_payload({}, [coarse], [])["items"][0]
+    assert sent["published_at"] is None
+    assert sent["published_interval"] == interval
+    assert coarse == before
+    sent["published_interval"]["precision"] = "changed-by-caller"
+    assert coarse == before
+    exact = {"info_id": "exact", "published_at": datetime(2026, 10, 14, tzinfo=timezone.utc)}
+    exact_view = candidate_payload({}, [exact], [])["items"][0]
+    assert exact_view["published_at"] == "2026-10-14T00:00:00+00:00"
+    assert "published_interval" not in exact_view
+    assert "published_interval" not in candidate_payload({}, [{**coarse, "published_interval": None}], [])["items"][0]
+
     from inves_cog.llm.client import Client
     from inves_cog.perception.attribution.claims import attach_claims, claim_payload
 

@@ -1,5 +1,7 @@
 """Candidate proposals. A wide anomaly is stored without asking the model."""
 
+from copy import deepcopy
+
 from inves_cog.perception.attribution.candidates import validate_candidates
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
@@ -58,7 +60,7 @@ def _item_view(item):
     published = item.get("published_at")
     if hasattr(published, "isoformat"):
         published = published.isoformat()
-    return {
+    view = {
         "info_id": item["info_id"],
         "published_at": published,
         "source_level": item.get("source_level"),
@@ -67,6 +69,11 @@ def _item_view(item):
         "role": item.get("role"),
         "claims": item.get("claims") or [],
     }
+    # Date-only or timezone-unknown metadata is not an exact published_at.
+    # Preserve its supplied bounds; this does not admit it to production windows.
+    if item.get("published_interval") is not None:
+        view["published_interval"] = deepcopy(item["published_interval"])
+    return view
 
 
 _NOT_OPERATING = {"price", "social_heat", "second_hit", "consensus", "flow"}
