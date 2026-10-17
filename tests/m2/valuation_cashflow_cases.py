@@ -27,8 +27,8 @@ def cashflows():
 
 
 def assert_valuation_cashflow_contract():
-    from inves_cog.ingest.fundamentals.valuation_cashflow import attach_valuation_cashflow, select_cashflow
     from inves_cog.ingest.fundamentals.state import FinState
+    from inves_cog.ingest.fundamentals.valuation_cashflow import attach_valuation_cashflow, select_cashflow
 
     original = cashflows()
     value, proof = select_cashflow(original, period_end="2026-06-30", as_of="2026-09-23")

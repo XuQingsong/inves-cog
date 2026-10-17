@@ -2,8 +2,6 @@
 
 from copy import deepcopy
 
-import pytest
-
 
 def assert_listed_units():
     from inves_cog.valuation_v1.listed_units import convert_unit
@@ -34,5 +32,74 @@ def assert_listed_units():
     from inves_cog.valuation_v1.calculations import evaluate
     from tests.m5.test_valuation import stable
 
-    blocked = evaluate("稳定", {**stable(), "listed_unit_blockers": [{"field": "eps_ntm", "reason": "unit absent"}]})
-    assert blocked["neutral"] is None and any(r["field"] == "eps_ntm" for r in blocked["blocking_inputs"])
+    blocked = evaluate("稳定", {**stable(), "listed_unit_blockers": [{"field": "eps_ttm", "reason": "unit absent"}]})
+    assert blocked["neutral"] is None and any(r["field"] == "eps_ttm" for r in blocked["blocking_inputs"])
+    from datetime import date
+
+    from inves_cog.valuation_v1.lifecycle import ValuationBook
+
+    book = ValuationBook()
+    plain = {**stable(), "eps_ntm": None, "listed_unit_audit": {"eps_ntm": {"status": "absent"}}}
+    book.update("LISTED", date(2026, 10, 14), "稳定", plain, period="2026-06-30", price=100)
+    missing_unit = book.update(
+        "LISTED",
+        date(2026, 10, 15),
+        "稳定",
+        {**plain, "listed_unit_audit": {"eps_ntm": {"status": "unknown", "reason": "unit absent"}}},
+        period="2026-06-30",
+        price=110,
+    )
+    assert missing_unit["neutral"] is not None
+    assert missing_unit["inputs"]["listed_unit_audit"]["eps_ntm"]["status"] == "unknown"
+    assert missing_unit["trigger_audit"]["unit_contract_event"]
+    recovered = book.update("LISTED", date(2026, 10, 16), "稳定", plain, period="2026-06-30", price=120)
+    assert recovered["neutral"] is not None and recovered["trigger_audit"]["unit_contract_event"]
+    assert_listing_adapter()
+
+
+def assert_listing_adapter():
+    from datetime import date
+
+    from inves_cog.ingest.fundamentals.state import FinState
+    from inves_cog.valuation_v1.calculations import evaluate
+    from inves_cog.valuation_v1.listed_units import normalize_listing
+    from tests.m5.test_valuation import stable
+
+    state = FinState(
+        "TSM",
+        "fixed",
+        date(2026, 10, 8),
+        date(2024, 12, 31),
+        values={"diluted_shares_weighted": 100},
+        field_sources={
+            "eps_ttm": {
+                "components": [
+                    {"tag": "ifrs-full:DilutedEarningsLossPerShare", "unit": "TWD/shares", "filed": "2025-04-17"}
+                ]
+            },
+            "diluted_shares_weighted": {
+                "method": "diluted_weighted_disclosed",
+                "unit": "shares",
+                "security_basis": "ordinary_shares",
+                "period_kind": "annual",
+                "end": "2024-12-31",
+                "filed": "2025-04-17",
+            },
+        },
+    )
+    inputs = {**stable(), "ticker": "TSM", "price": 100, "eps_ttm": 2, "fcf_ttm": 100}
+    snapshot = {"as_of": "2026-10-15", "source": "synthetic Yahoo", "earningsCurrency": "USD"}
+    unknown = normalize_listing(inputs, state, snapshot, "2026-10-15")
+    assert unknown["eps_ttm"] == 10 and unknown["diluted_shares"] == 20 and unknown["price"] == 100
+    assert unknown["eps_ntm"] is None and unknown["consensus_next_year_eps_growth"] is None
+    assert not unknown["listed_unit_blockers"] and "unit" in unknown["consensus_reason"]
+    assert evaluate("稳定", unknown)["neutral"] is not None
+    for unit, factor in [("USD/ADS", 1), ("USD/ordinary_share", 5)]:
+        known = normalize_listing(inputs, state, {**snapshot, "eps_security_unit": unit}, "2026-10-15")
+        assert known["eps_ntm"] == inputs["eps_ntm"] * factor and not known["listed_unit_blockers"]
+    bad = deepcopy(state)
+    bad.field_sources["eps_ttm"]["components"][0]["unit"] = "USD"
+    rejected = normalize_listing(inputs, bad, snapshot, "2026-10-15")
+    assert evaluate("稳定", rejected)["neutral"] is None
+    future = normalize_listing(inputs, state, snapshot, "2026-03-01")
+    assert evaluate("稳定", future)["neutral"] is None
