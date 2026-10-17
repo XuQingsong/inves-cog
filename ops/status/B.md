@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 15:36 北京
+
+- 草稿 PR #18 head `ce2f045`。没有合并进 main。本地 `make phase1-test`：238 passed，18 deselected。
+- 已看到答复 `466154b`。09:30 没有新的交易时段时，用刚结束的美股交易日另写一行。北京 10-16 上午和中午都写 10-15，周末写 10-16。异常起点仍是 10-14，这一行的支持留着。不把北京日历当天当成交易日。
+- 替代解释的未知语义、全保存失败记账和 dict_row 还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 15:28 北京
 
 - 草稿 PR #18 head `aad70ac`。没有合并进 main。本地 `make phase1-test`：237 passed，18 deselected。
