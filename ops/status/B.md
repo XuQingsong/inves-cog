@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 13:06 北京
+
+- 草稿 PR #18 head `c52dbc0`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
+- 收盘时段没有起点时，用当日交易所开盘（美东 09:30）。盘后仍用收盘时刻。已经写明起点的对象不改。五日冻结报告的可见标题和状态没有因此改变。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 12:58 北京
 
 - 草稿 PR #18 head `110f769`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
