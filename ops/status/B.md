@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 10:22 北京
+
+- 草稿 PR #18 head `e750146`。没有合并进 main。本地 `make phase1-test`：214 passed，18 deselected。
+- 超预期记录最新在前，最多四季。不足四季照存，不取平均。没有季度日期的不排进去。幅度沿用传入的百分数，不从实际值和预期另算。不算经营证据，不改基本面栏。没有传入时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 10:12 北京
 
 - 草稿 PR #18 head `a2e4a98`。没有合并进 main。本地 `make phase1-test`：213 passed，18 deselected。
