@@ -4033,6 +4033,19 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert labelled["report"]["deadline_on"] == "2026-10-06"
     assert labelled["history"][-1]["new"] == "已衰减·无影响"
     assert {"at", "trigger", "evidence_ids"} <= set(labelled["history"][-1])
+    assert "经营记录缺失" not in labelled["report"]["unknowns"]
+    omitted = {key: value for key, value in due.items() if key != "operating_records"}
+    missing = execute_stage("attribution_tracks", [omitted], [item], as_of=after_close, client=Propose())[0]
+    assert missing["lifecycle"] == "已衰减·无影响"
+    assert missing["operating_impact_proven"] is False
+    assert missing["report"]["deadline_outcome"] == "条件风险"
+    assert missing["report"]["closing_reason"] == "截止日仍未知"
+    assert missing["report"]["fundamental_standing"] == "失效"
+    assert "经营记录缺失" in missing["report"]["unknowns"]
+    held = {key: value for key, value in waiting.items() if key != "operating_records"}
+    still_open = execute_stage("attribution_tracks", [held], [item], as_of=later, client=Propose())[0]
+    assert still_open["lifecycle"] == "基本面核查中"
+    assert still_open["report"].get("deadline_outcome") is None
     draft = execute_stage("attribution_labels", [due], [item], as_of=later, client=Propose())[0]
     assert draft["lifecycle"] == continued["lifecycle"]
     assert draft["history"] == continued["history"]

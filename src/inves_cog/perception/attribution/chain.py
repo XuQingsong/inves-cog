@@ -462,14 +462,16 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on):
                 mechanism=mechanism,
             )
     deadline = None
-    records = anomaly.get("operating_records")
-    if (
-        stage == "attribution_tracks"
-        and state == "基本面核查中"
-        and records is not None
-        and deadline_reached(due_on, as_of)
-    ):
-        verdict = operating_verdict(records, as_of=as_of, expected_direction=anomaly.get("direction"))
+    missing_records = anomaly.get("operating_records") is None
+    records = [] if missing_records else anomaly["operating_records"]
+    if stage == "attribution_tracks" and state == "基本面核查中" and deadline_reached(due_on, as_of):
+        unknowns = ("经营记录缺失",) if missing_records else ()
+        verdict = operating_verdict(
+            records,
+            as_of=as_of,
+            expected_direction=anomaly.get("direction"),
+            unknowns=unknowns,
+        )
         if verdict.confirmed():
             deadline = apply_deadline(verdict)
             state, history = transition(
