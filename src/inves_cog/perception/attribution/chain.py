@@ -962,6 +962,19 @@ def _channels(anomaly):
     payload = anomaly.get("magnitude_payload")
     if not isinstance(payload, dict):
         return None
+    if "members" in payload:
+        supplied = payload["members"]
+        if not isinstance(supplied, list) or any(not isinstance(row, dict) for row in supplied):
+            raise ValueError("幅度成员输入必须为对象列表")
+        expected = _member_names(anomaly)
+        actual = [row.get("ticker") for row in supplied]
+        if (
+            not expected
+            or any(not isinstance(name, str) or not name for name in actual)
+            or len(set(actual)) != len(actual)
+            or set(expected) != set(actual)
+        ):
+            raise ValueError("市场幅度必须覆盖原异常全部成员，不得挑选子集或加入范围外标的")
     return implied_magnitude(payload)
 
 

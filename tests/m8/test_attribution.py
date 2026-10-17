@@ -32,6 +32,68 @@ def test_market_move_uses_residual_return_and_positive_eps():
     ]
     assert market_move(blocked) == {"delta_e_mkt": None, "verdict": "无法检验"}
 
+    from copy import deepcopy
+
+    from inves_cog.perception.attribution.chain import _channels, _report, attribute_all
+    from inves_cog.perception.attribution.magnitude import channel_lines, implied_magnitude
+    from inves_cog.perception.attribution.store import Store
+
+    different_pe = [
+        {"ticker": "NVDA", "eps_ttm": 2, "pe_ttm": 10, "market_cap_prev": 100, "resid": -0.1},
+        {"ticker": "AMD", "eps_ttm": 2, "pe_ttm": 20, "market_cap_prev": 200, "resid": -0.1},
+    ]
+    payload = {"members": different_pe, "channels": [{"channel": "直接收入"}]}
+    anomaly = {
+        "anomaly_id": "synthetic",
+        "members": [{"ticker": "NVDA"}, {"ticker": "AMD"}],
+        "magnitude_payload": payload,
+    }
+    result = _channels(anomaly)
+    assert result["delta_e_mkt"] == -2.0
+    assert result["verdict"] == "无法检验" and result["R"] is None
+    assert result["channels"][0]["delta_e_evt"] is None
+    assert result["market_basis"]["eligible"] == ["NVDA", "AMD"]
+    assert result["market_basis"]["actual_profit_loss_or_causation_proven"] is False
+    report = _report(anomaly, [], [], None, None, result, None)
+    assert report["market_magnitude"]["delta_e_mkt"] == -2.0
+    assert report["magnitude_channels"] == [{"channel": "直接收入", "delta_e_evt": None, "verdict": "无法检验"}]
+    for wrong in (
+        different_pe[:1],
+        different_pe + [different_pe[0]],
+        [{**different_pe[0], "ticker": "MSFT"}, different_pe[1]],
+    ):
+        with pytest.raises(ValueError):
+            _channels({**anomaly, "magnitude_payload": {**payload, "members": wrong}})
+    all_unknown = implied_magnitude({"members": blocked, "channels": [{"channel": "估值倍数"}]})
+    assert all_unknown["delta_e_mkt"] is None and all_unknown["verdict"] == "无法检验"
+    assert channel_lines(all_unknown)[0]["verdict"] == "无法检验"
+    with pytest.raises(ValueError):
+        implied_magnitude({**payload, "pe": 10, "delta_mktcap": -20})
+    for bad in (True, "100", float("inf"), float("nan")):
+        with pytest.raises(ValueError):
+            implied_magnitude({**payload, "members": [{**different_pe[0], "market_cap_prev": bad}]})
+
+    class Cursor:
+        def fetchone(self):
+            return None
+
+    class MemoryConnection:
+        def __init__(self):
+            self.reports = []
+
+        def execute(self, query, params):
+            if query.startswith("INSERT INTO perception.reports"):
+                self.reports.append(deepcopy(params[1].obj))
+            return Cursor()
+
+    connection = MemoryConnection()
+    start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    prepared = {**anomaly, "universe": "pool", "trade_date": "2026-10-14", "session": "close", "started_at": start}
+    row = attribute_all([prepared], [], as_of=start + timedelta(hours=8), client=None, store=Store(connection))[0]
+    assert row["saved"] and row["report"]["market_magnitude"]["delta_e_mkt"] == -2.0
+    assert connection.reports[0]["market_magnitude"] == row["report"]["market_magnitude"]
+    assert row["operating_impact_proven"] is False
+
 
 @pytest.mark.phase1_blocking
 def test_channels_follow_the_mechanism_and_the_best_source():

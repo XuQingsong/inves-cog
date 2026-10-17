@@ -238,6 +238,13 @@ def explanation_report(
             operating_impact_proven=bool(deadline and deadline.get("operating_impact_proven")),
         ),
     }
+    if magnitude is not None and magnitude.get("market_basis") is not None:
+        report["market_magnitude"] = {
+            "delta_e_mkt": magnitude["delta_e_mkt"],
+            "basis": magnitude["market_basis"],
+            "comparison_verdict": magnitude["verdict"],
+            "note": "市场侧盈利等价值，不是实际盈利变化；事件侧未知不得填零。",
+        }
     if deadline is not None:
         report["lifecycle"] = deadline["lifecycle"]
         report["deadline_outcome"] = deadline["deadline_outcome"]
