@@ -262,6 +262,8 @@ def _market_confidence(candidates):
 
 
 def _fundamental_standing(candidates, fundamental):
+    if fundamental in {"支持", "冲突", "失效"}:
+        return fundamental
     operating = [row for row in _scored(candidates) if row.get("mechanism") in _OPERATING]
     if not operating:
         return None

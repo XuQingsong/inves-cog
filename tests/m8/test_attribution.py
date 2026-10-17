@@ -193,6 +193,10 @@ def test_market_confidence_and_fundamental_standing_stay_separate():
     assert closed["fundamental_standing"] == "支持"
     copied = split_conclusions([supply], "高")
     assert copied["fundamental_standing"] == "待验证"
+    assert split_conclusions([], "支持")["fundamental_standing"] == "支持"
+    assert split_conclusions([], "冲突")["fundamental_standing"] == "冲突"
+    assert split_conclusions([], "失效")["fundamental_standing"] == "失效"
+    assert split_conclusions([], None)["fundamental_standing"] is None
     medium = split_conclusions([{"scored": True, "score": 0.69, "mechanism": "需求"}], "局部支持")
     assert medium == {"market_confidence": "中", "fundamental_standing": "局部支持"}
 
@@ -4731,7 +4735,16 @@ def test_labels_do_not_overwrite_a_saved_track():
         def fetchone(self):
             return self.row
 
-    def seed(memory, anomaly_id, lifecycle, fundamental, outcome, reason, proven):
+    def seed(memory, anomaly_id, lifecycle, fundamental, outcome, reason, proven, unknowns=()):
+        history = [
+            {
+                "at": "2026-10-14T20:00:00Z",
+                "old": "基本面核查中",
+                "new": lifecycle,
+                "trigger": reason or "进入基本面核查",
+                "evidence_ids": [],
+            }
+        ]
         Store(memory).save(
             {
                 "anomaly_id": anomaly_id,
@@ -4739,77 +4752,163 @@ def test_labels_do_not_overwrite_a_saved_track():
                 "linkage": {
                     "event_id": f"evt-{anomaly_id}",
                     "lifecycle": lifecycle,
-                    "history": [
-                        {
-                            "at": "2026-10-14T20:00:00Z",
-                            "old": "基本面核查中",
-                            "new": lifecycle,
-                            "trigger": reason,
-                            "evidence_ids": [],
-                        }
-                    ],
+                    "history": history,
                     "deadline_outcome": outcome,
                     "closing_reason": reason,
-                    "unknowns": [],
+                    "unknowns": list(unknowns),
                 },
                 "report": {
                     "fundamental_standing": fundamental,
                     "operating_impact_proven": proven,
                     "deadline_outcome": outcome,
                     "closing_reason": reason,
-                    "unknowns": [],
+                    "unknowns": list(unknowns),
                 },
                 "tracks": [
                     {
                         "trade_date": "2026-10-14",
                         "emotion": "延续",
                         "capital": "冲击中",
-                        "fundamental": fundamental,
+                        "fundamental": fundamental or "待验证",
                     }
                 ],
             }
         )
+        return history
 
-    def labelled(memory, anomaly_id, as_of):
+    def anomaly_row(anomaly_id):
+        return {
+            "anomaly_id": anomaly_id,
+            "universe": "pool",
+            "trade_date": "2026-10-14",
+            "direction": "down",
+            "members": [{"ticker": "NVDA"}],
+            "started_at": datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc),
+        }
+
+    def labelled(memory, anomaly_id, as_of, items=None, client=None, scores=None):
         return execute_stage(
             "attribution_labels",
-            [
-                {
-                    "anomaly_id": anomaly_id,
-                    "universe": "pool",
-                    "trade_date": "2026-10-14",
-                    "direction": "down",
-                    "members": [{"ticker": "NVDA"}],
-                    "started_at": datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc),
-                }
-            ],
-            [],
+            [anomaly_row(anomaly_id)],
+            [] if items is None else items,
             as_of=as_of,
-            client=None,
+            client=client,
             store=Store(memory),
+            components_by_id=None if scores is None else {anomaly_id: scores},
         )[0]
+
+    def kept_prior(memory, anomaly_id, lifecycle, fundamental, outcome, reason, proven, history, unknowns):
+        again = Store(memory).prior(f"evt-{anomaly_id}")
+        assert again["lifecycle"] == lifecycle
+        assert again["fundamental"] == fundamental
+        assert again["operating_impact_proven"] is proven
+        assert again["deadline_outcome"] == outcome
+        assert again["closing_reason"] == reason
+        assert again["unknowns"] == list(unknowns)
+        assert again["history"] == history
 
     memory = Memory()
     cases = [
-        ("persist-support", "已验证·有影响", "支持", "支持", "截止日证据支持", True),
-        ("persist-risk", "已衰减·无影响", "失效", "条件风险", "截止日仍未知", False),
-        ("persist-oppose", "已衰减·无影响", "冲突", "反证", "截止日证据指向失效", True),
+        ("persist-support", "已验证·有影响", "支持", "支持", "截止日证据支持", True, ()),
+        ("persist-risk", "已衰减·无影响", "失效", "条件风险", "截止日仍未知", False, ("经营记录缺失",)),
+        ("persist-oppose", "已衰减·无影响", "冲突", "反证", "截止日证据指向失效", True, ()),
     ]
     moments = [
         datetime(2026, 10, 14, 4, 30, tzinfo=timezone.utc),
         datetime(2026, 10, 16, 4, 30, tzinfo=timezone.utc),
         datetime(2026, 10, 17, 4, 30, tzinfo=timezone.utc),
     ]
-    for anomaly_id, lifecycle, fundamental, outcome, reason, proven in cases:
-        seed(memory, anomaly_id, lifecycle, fundamental, outcome, reason, proven)
+    histories = {}
+    for anomaly_id, lifecycle, fundamental, outcome, reason, proven, unknowns in cases:
+        histories[anomaly_id] = seed(memory, anomaly_id, lifecycle, fundamental, outcome, reason, proven, unknowns)
         for moment in moments:
             row = labelled(memory, anomaly_id, moment)
             assert row["tracks"] == []
             assert row["lifecycle"] == lifecycle
+            assert row["report"]["fundamental_standing"] == fundamental
+            assert row["operating_impact_proven"] is proven
+            kept_prior(
+                memory, anomaly_id, lifecycle, fundamental, outcome, reason, proven, histories[anomaly_id], unknowns
+            )
         kept = memory.tracks[(f"evt-{anomaly_id}", "2026-10-14")]
         assert kept["fundamental"] == fundamental
         dates = [trade_date for (event_id, trade_date) in memory.tracks if event_id == f"evt-{anomaly_id}"]
         assert dates == ["2026-10-14"]
+
+    news = {
+        "info_id": "nvda-news",
+        "published_at": datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc),
+        "first_seen_at": datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc),
+        "tickers": ["NVDA"],
+        "source_root": "wire",
+        "claims": [],
+    }
+
+    class Propose:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-news", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "NVDA"}],
+                        "chain": [{"entity_id": "NVDA"}],
+                    }
+                ]
+            }
+
+    scores = {"供给": {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "magnitude": 1.0}}
+    noon = datetime(2026, 10, 16, 4, 30, tzinfo=timezone.utc)
+    with_news = labelled(memory, "persist-support", noon, items=[news], client=Propose(), scores=scores)
+    assert with_news["lifecycle"] == "已验证·有影响"
+    assert with_news["tracks"] == []
+    assert with_news["report"]["fundamental_standing"] == "支持"
+    assert with_news["operating_impact_proven"] is True
+    kept_prior(
+        memory,
+        "persist-support",
+        "已验证·有影响",
+        "支持",
+        "支持",
+        "截止日证据支持",
+        True,
+        histories["persist-support"],
+        (),
+    )
+    unavailable = labelled(memory, "persist-oppose", moments[2], items=[news], client=None)
+    assert unavailable["lifecycle"] == "已衰减·无影响"
+    assert unavailable["degraded"] == "模型调用失败"
+    assert unavailable["report"]["fundamental_standing"] == "冲突"
+    assert unavailable["operating_impact_proven"] is True
+    kept_prior(
+        memory,
+        "persist-oppose",
+        "已衰减·无影响",
+        "冲突",
+        "反证",
+        "截止日证据指向失效",
+        True,
+        histories["persist-oppose"],
+        (),
+    )
+    open_history = seed(memory, "persist-open", "基本面核查中", None, None, None, False)
+    for moment in moments:
+        opened = labelled(memory, "persist-open", moment)
+        assert opened["tracks"] == []
+        assert opened["lifecycle"] == "基本面核查中"
+        assert opened["report"]["fundamental_standing"] is None
+        assert opened["report"].get("deadline_outcome") is None
+        again = Store(memory).prior("evt-persist-open")
+        assert again["lifecycle"] == "基本面核查中"
+        assert again["fundamental"] is None
+        assert again["deadline_outcome"] is None
+        assert again["closing_reason"] is None
+        assert again["history"] == open_history
+    assert memory.tracks[("evt-persist-open", "2026-10-14")]["fundamental"] == "待验证"
+    open_dates = [trade_date for (event_id, trade_date) in memory.tracks if event_id == "evt-persist-open"]
+    assert open_dates == ["2026-10-14"]
 
 
 @pytest.mark.phase1_blocking
