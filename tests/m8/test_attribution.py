@@ -4018,13 +4018,14 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
         "direction": "down",
         "members": [{"ticker": "NVDA"}],
     }
-    close = regular_bounds(date(2026, 10, 14))[1]
-    assert adapt_m7(raw)["started_at"] == close
-    assert adapt_m7({**raw, "session": "post"})["started_at"] == close
-    quiet = attribute_all([raw], [], as_of=close, client=Propose())[0]
+    opened, closed = regular_bounds(date(2026, 10, 14))
+    assert adapt_m7(raw)["started_at"] == opened
+    assert adapt_m7({**raw, "session": "post"})["started_at"] == closed
+    assert adapt_m7({**raw, "started_at": closed})["started_at"] == closed
+    quiet = attribute_all([raw], [], as_of=closed, client=Propose())[0]
     assert quiet["status"] == "已发现·原因未明"
     assert quiet["degraded"] is None
-    missing = attribute_all([{**raw, "session": "open"}], [], as_of=close, client=Propose())[0]
+    missing = attribute_all([{**raw, "session": "open"}], [], as_of=closed, client=Propose())[0]
     assert missing["status"] == "待分析"
     assert missing["degraded"] == "异常缺少起点或范围"
     slot = datetime.fromisoformat("2026-10-15T09:15:00+08:00")

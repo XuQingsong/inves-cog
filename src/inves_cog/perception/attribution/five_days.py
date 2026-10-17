@@ -52,14 +52,14 @@ def headline_items(fixture_dir):
 
 
 def case_anomalies_for_days(fixture_dir, days=TRADING_DAYS):
-    """Pool close objects from the frozen OpenAI panel. Other files are not added again."""
+    """Pool close objects from the frozen OpenAI panel. They start at the exchange open."""
     grouped = []
     for trade_date in days:
         detected = case_anomalies(fixture_dir / "m7", _BARS, trade_date)
         chosen = [row for row in detected if row.get("session") == "close" and row.get("universe") == "pool"]
         identified = _identify(date.fromisoformat(trade_date), chosen)
         bounds = regular_bounds(date.fromisoformat(trade_date))
-        started = None if bounds is None else bounds[1]
+        started = None if bounds is None else bounds[0]
         grouped.append((trade_date, [_anomaly(row, started) for row in identified]))
     return grouped
 

@@ -195,8 +195,9 @@ def run_scheduled(
 
 
 def adapt_m7(anomaly):
-    """A close or post M7 object starts at the exchange close. Other sessions stay untouched."""
-    if anomaly.get("started_at") is not None or anomaly.get("session") not in {"close", "post"}:
+    """Close starts at the exchange open. Post starts at the exchange close."""
+    session = anomaly.get("session")
+    if anomaly.get("started_at") is not None or session not in {"close", "post"}:
         return anomaly
     trade_date = anomaly.get("trade_date")
     if trade_date is None:
@@ -205,7 +206,7 @@ def adapt_m7(anomaly):
     if bounds is None:
         return anomaly
     prepared = dict(anomaly)
-    prepared["started_at"] = bounds[1]
+    prepared["started_at"] = bounds[0] if session == "close" else bounds[1]
     return prepared
 
 
