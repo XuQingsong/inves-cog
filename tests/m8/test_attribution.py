@@ -2801,6 +2801,27 @@ def test_claim_fields_omit_unsupported(tmp_path):
         attach_claims([{"info_id": str(index)} for index in range(41)], idle)
     assert idle.calls == 0
 
+    # Each pending source must be returned exactly once; an explicit empty list is valid.
+    class Coverage:
+        def __init__(self, rows):
+            self.rows = rows
+
+        def call(self, task, payload):
+            assert task == "claim_extraction"
+            return {"items": self.rows}
+
+    pending = [{"info_id": "n1"}, {"info_id": "n2"}]
+    for rows in (
+        [],
+        [{"info_id": "n1", "claims": []}],
+        [{"info_id": "n1", "claims": []}, {"info_id": "foreign", "claims": []}],
+        [{"info_id": "n1", "claims": []}, {"info_id": "n1", "claims": []}, {"info_id": "n2", "claims": []}],
+    ):
+        with pytest.raises(ValueError, match="结构不合格"):
+            attach_claims(pending, Coverage(rows))
+    full = [{"info_id": "n2", "claims": []}, {"info_id": "n1", "claims": []}]
+    assert [row["claims"] for row in attach_claims(pending, Coverage(full))] == [[], []]
+
 
 @pytest.mark.phase1_blocking
 def test_model_output_contract_rejects_a_bad_structure():
@@ -2980,6 +3001,30 @@ def test_model_output_contract_rejects_a_bad_structure():
     assert chained[0]["degraded"] == "结构不合格"
     assert chained[1]["status"] == "假设中"
     assert chained[1]["report"]["candidates"][0]["score"] == 1.0
+
+    # A failed extraction cannot launch a downstream candidate request.
+    class FailedExtraction:
+        def __init__(self):
+            self.calls = []
+
+        def call(self, task, payload):
+            self.calls.append(task)
+            assert task == "claim_extraction"
+            return {"info_id": "nikkei-hdd", "claims": []}
+
+    unclaimed = {key: value for key, value in visible.items() if key != "claims"}
+    upstream = FailedExtraction()
+    blocked = attribute_all(
+        [{**anomaly, "started_at": started, "trade_date": "2026-10-02"}],
+        [unclaimed],
+        as_of=started,
+        client=upstream,
+        stage="attribution_candidates",
+    )[0]
+    assert upstream.calls == ["claim_extraction"]
+    assert blocked["status"] == "待分析"
+    assert "候选未生成：说法抽取未完成" in blocked["degraded"]
+    assert not any(row["scored"] for row in blocked["report"]["candidates"])
 
     class AffectedString:
         def call(self, task, payload):
@@ -4392,9 +4437,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
             self.rows[bundle["anomaly_id"]] = deepcopy(bundle["report"])
 
     transport = FakeTransport()
-    actual_client = Client(
-        registry=Path(__file__).resolve().parents[2] / "source/config/llm_tasks.yaml", transport=transport
-    )
+    actual_client = Client(registry=Path(__file__).resolve().parents[2] / "config/llm_tasks.yaml", transport=transport)
     saved = Reports()
     known_items = [{**item("supplier", entities=["tsmc"]), "claims": []}]
     generated = attribute_all(

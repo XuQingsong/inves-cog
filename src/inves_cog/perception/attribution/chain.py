@@ -249,10 +249,10 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         claimed, candidates, claim_note, model_note, reused = _resume_analysis(anomaly, visible, previous, as_of)
         if not reused and stage == "attribution_candidates":
             claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
-            candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of)
+            candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of, claim_note=claim_note)
     else:
         claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
-        candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of)
+        candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of, claim_note=claim_note)
     candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
     due_on = earliest_deadline(
@@ -429,6 +429,8 @@ def _resume_analysis(anomaly, visible, previous, as_of):
         False,
     )
     snapshot = (previous or {}).get("stage_analysis")
+    if isinstance(snapshot, dict) and snapshot.get("claim_note"):
+        return pending
     now = _stamp(as_of)
     if not isinstance(snapshot, dict) or now is None:
         return pending
@@ -608,11 +610,13 @@ def _claims(items, client, universe):
         return [dict(item) for item in items], "抽取失败"
 
 
-def _candidates(anomaly, items, client, *, as_of=None):
+def _candidates(anomaly, items, client, *, as_of=None, claim_note=None):
     if anomaly.get("universe") == "wide":
         return [], None
     universe = _candidate_universe()
     retrieved = {item["info_id"] for item in items}
+    if claim_note:
+        return validate_candidates([], retrieved, universe), "候选未生成：说法抽取未完成"
     if not items:
         return validate_candidates([], set(), universe), None
     if client is None:

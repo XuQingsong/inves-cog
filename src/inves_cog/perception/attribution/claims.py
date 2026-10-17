@@ -81,6 +81,8 @@ def read_claims(result):
     for row in result["items"]:
         if not isinstance(row, dict) or not isinstance(row.get("info_id"), str) or not row["info_id"]:
             raise ValueError("结构不合格")
+        if row["info_id"] in by_id:
+            raise ValueError("结构不合格")
         claims = row.get("claims")
         if not isinstance(claims, list):
             raise ValueError("结构不合格")
@@ -110,8 +112,13 @@ def attach_claims(items, client):
     pending = [item for item in items if "claims" not in item]
     if not pending:
         return [_bind_source_level(item, item.get("claims") or []) for item in items]
+    requested = {item["info_id"] for item in pending}
+    if len(requested) != len(pending):
+        raise ValueError("结构不合格")
     result = client.call("claim_extraction", claim_payload(pending))
     by_id = read_claims(result)
+    if set(by_id) != requested:
+        raise ValueError("结构不合格")
     attached = []
     for item in items:
         claims = item.get("claims") or by_id.get(item["info_id"], [])
