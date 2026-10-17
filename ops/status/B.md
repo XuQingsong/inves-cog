@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 13:45 北京
+
+- 草稿 PR #18 head `c3dac17`。没有合并进 main。本地 `make phase1-test`：229 passed，18 deselected。
+- 期限复验第 1 项：结案看美股反应日收盘，不看北京日历。10-14 开盘、财报周期 1 个交易日，期限是 10-15。北京 10-15 09:30 继续跟踪。北京 10-16 09:30 才按空记录结成已衰减·无影响，经营影响未证实。
+- 期限复验第 2 到第 5 项，以及 Q-M8-16 第 3 到第 5 项，还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 13:34 北京
 
 - 草稿 PR #18 head `b08cad9`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
