@@ -17,6 +17,12 @@ def _complete(entry):
     return isinstance(entry, dict) and {"at", "old", "new", "trigger", "evidence_ids"} <= set(entry)
 
 
+def _cell(row, index, name):
+    if isinstance(row, dict):
+        return row.get(name)
+    return row[index]
+
+
 def _guard(bundle):
     wide = bundle.get("universe") == "wide"
     blocked = ("candidates", "linkage", "second_hits", "tracks", "ticker_status")
@@ -44,20 +50,21 @@ class Store:
         ).fetchone()
         if found is None:
             return None
-        report = found[5] if isinstance(found[5], dict) else {}
-        outcome = found[2]
-        reason = found[3]
+        report = _cell(found, 5, "report")
+        report = report if isinstance(report, dict) else {}
+        outcome = _cell(found, 2, "deadline_outcome")
+        reason = _cell(found, 3, "closing_reason")
         formed = outcome is not None or reason is not None
         standing = report.get("fundamental_standing") if formed else None
         if standing not in {"待验证", "局部支持", "支持", "冲突", "失效"}:
             standing = None
         proven = report.get("operating_impact_proven") if formed and "operating_impact_proven" in report else None
         return {
-            "lifecycle": found[0],
-            "history": list(found[1] or []),
+            "lifecycle": _cell(found, 0, "lifecycle"),
+            "history": list(_cell(found, 1, "history") or []),
             "deadline_outcome": outcome,
             "closing_reason": reason,
-            "unknowns": list(found[4] or []),
+            "unknowns": list(_cell(found, 4, "unknowns") or []),
             "fundamental": standing,
             "operating_impact_proven": proven,
         }
@@ -171,9 +178,9 @@ class Store:
             "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
             (row["event_id"],),
         ).fetchone()
-        if found is None or found[0] == row["lifecycle"]:
+        if found is None or _cell(found, 0, "lifecycle") == row["lifecycle"]:
             return
-        combined = list(found[1] or []) + history
+        combined = list(_cell(found, 1, "history") or []) + history
         covered = any(_complete(entry) and entry.get("new") == row["lifecycle"] for entry in combined)
         if not covered:
             raise ValueError("状态变更缺少完整审计")

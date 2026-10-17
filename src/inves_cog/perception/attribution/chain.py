@@ -186,7 +186,14 @@ def run_scheduled(
             client=client,
             store=store,
         )
-        return len(holder["rows"])
+        rows = holder["rows"]
+        if store is None:
+            return len(rows)
+        saved = [row for row in rows if row.get("saved")]
+        if rows and not saved:
+            detail = "；".join(row.get("degraded") or row.get("status") or "未保存" for row in rows)
+            raise RuntimeError(detail or "未保存")
+        return len(saved)
 
     row_id = run_recorded(
         connection,

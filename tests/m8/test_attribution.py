@@ -3500,12 +3500,21 @@ def _disposable_database():
     names = [line for line in listed.stdout.splitlines() if line.endswith("-database-1")]
     assert len(names) == 1
     inspected = subprocess.run(
-        ["docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", names[0]],
+        [
+            "docker",
+            "inspect",
+            "-f",
+            "{{range $name, $net := .NetworkSettings.Networks}}{{$name}} {{$net.IPAddress}}\n{{end}}",
+            names[0],
+        ],
         check=True,
         capture_output=True,
         text=True,
     )
-    return inspected.stdout.strip()
+    network, host = inspected.stdout.split()
+    self_id = Path("/etc/hostname").read_text().strip()
+    subprocess.run(["docker", "network", "connect", network, self_id], check=False, capture_output=True, text=True)
+    return host
 
 
 @pytest.mark.phase1_blocking
@@ -5216,6 +5225,148 @@ def test_scheduled_job_records_the_stage_itself():
     assert len(failed.calls) == 2
     assert "INSERT INTO ingest.job_runs" in failed.calls[0][0]
     assert failed.calls[1][1][1:] == ("failed", 0, "stage failed", 7)
+
+
+@pytest.mark.phase1_blocking
+def test_prior_and_linkage_read_dict_rows_and_tuples():
+    from inves_cog.perception.attribution.store import Store
+
+    history = [{"at": "2026-10-14T13:30:00Z", "old": None, "new": "已发现", "trigger": "异常", "evidence_ids": []}]
+    covered = history + [
+        {
+            "at": "2026-10-14T14:00:00Z",
+            "old": "已发现",
+            "new": "假设中",
+            "trigger": "证据分达到假设",
+            "evidence_ids": ["nvda"],
+        }
+    ]
+    report = {"fundamental_standing": "失效", "operating_impact_proven": False}
+    fields = {
+        "lifecycle": "已衰减·无影响",
+        "history": history,
+        "deadline_outcome": "条件风险",
+        "closing_reason": "截止日仍未知",
+        "unknowns": ["经营记录缺失"],
+        "report": report,
+    }
+    expected = {
+        "lifecycle": "已衰减·无影响",
+        "history": history,
+        "deadline_outcome": "条件风险",
+        "closing_reason": "截止日仍未知",
+        "unknowns": ["经营记录缺失"],
+        "fundamental": "失效",
+        "operating_impact_proven": False,
+    }
+
+    class Rows:
+        def __init__(self, row):
+            self.row = row
+
+        def execute(self, statement, params):
+            return self
+
+        def fetchone(self):
+            return self.row
+
+    assert Store(Rows(dict(fields))).prior("evt-1") == expected
+    assert Store(Rows(tuple(fields.values()))).prior("evt-1") == expected
+    missing = {key: value for key, value in fields.items() if key != "report"}
+    blank = Store(Rows(missing)).prior("evt-1")
+    assert blank["fundamental"] is None
+    assert blank["operating_impact_proven"] is None
+    assert blank["deadline_outcome"] == "条件风险"
+    same = {"event_id": "evt-1", "lifecycle": "已发现", "history": history}
+    Store(Rows({"lifecycle": "已发现", "history": history}))._require_linkage(same)
+    Store(Rows(("已发现", history)))._require_linkage(same)
+    changed = {"event_id": "evt-1", "lifecycle": "假设中", "history": []}
+    with pytest.raises(ValueError, match="状态变更缺少完整审计"):
+        Store(Rows({"lifecycle": "已发现", "history": history}))._require_linkage(changed)
+    with pytest.raises(ValueError, match="状态变更缺少完整审计"):
+        Store(Rows(("已发现", history)))._require_linkage(changed)
+    Store(Rows({"lifecycle": "已发现", "history": covered}))._require_linkage(changed)
+    Store(Rows(("已发现", covered)))._require_linkage(changed)
+
+
+@pytest.mark.phase1_blocking
+def test_scheduled_job_fails_only_when_every_save_fails():
+    from inves_cog.perception.attribution.chain import run_scheduled
+
+    slot = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
+    stamp = datetime(2026, 10, 15, 1, 15, tzinfo=timezone.utc)
+
+    def anomaly(anomaly_id):
+        return {
+            "anomaly_id": anomaly_id,
+            "universe": "pool",
+            "trade_date": "2026-10-14",
+            "session": "close",
+            "direction": "down",
+            "members": [{"ticker": "NVDA"}],
+        }
+
+    class Clock:
+        def now_utc(self):
+            return stamp
+
+    class Connection:
+        def __init__(self):
+            self.calls = []
+
+        def execute(self, statement, params):
+            self.calls.append((statement, params))
+            return self
+
+        def fetchone(self):
+            return {"id": 7}
+
+    class Store:
+        def __init__(self, failing):
+            self.failing = failing
+            self.saved = []
+
+        def prior(self, event_id):
+            return None
+
+        def save(self, bundle):
+            if bundle["anomaly_id"] in self.failing:
+                raise RuntimeError("写入失败")
+            self.saved.append(bundle["anomaly_id"])
+
+    failed = Connection()
+    with pytest.raises(RuntimeError, match="写入失败"):
+        run_scheduled(
+            slot,
+            anomalies=[anomaly("fail-all")],
+            items=[],
+            client=None,
+            store=Store({"fail-all"}),
+            connection=failed,
+            clock=Clock(),
+            trade_date=date(2026, 10, 14),
+            params_version="p-2026.10",
+        )
+    assert failed.calls[1][1][1:] == ("failed", 0, "写入失败", 7)
+    connection = Connection()
+    partial = run_scheduled(
+        slot,
+        anomalies=[anomaly("fail-one"), anomaly("keep-two")],
+        items=[],
+        client=None,
+        store=Store({"fail-one"}),
+        connection=connection,
+        clock=Clock(),
+        trade_date=date(2026, 10, 14),
+        params_version="p-2026.10",
+    )
+    assert connection.calls[1][1][1:] == ("ok", 1, None, 7)
+    assert partial["recorded"] is True
+    assert [row["anomaly_id"] for row in partial["rows"]] == ["fail-one", "keep-two"]
+    assert partial["rows"][0]["saved"] is False
+    assert partial["rows"][0]["degraded"] == "写入失败"
+    assert partial["rows"][1]["saved"] is True
+    assert partial["count"] == 2
 
 
 @pytest.mark.phase1_blocking
