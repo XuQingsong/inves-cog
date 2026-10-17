@@ -22,6 +22,25 @@ def candidate_output():
         ],
         "max": 5,
         "mechanism": sorted(MECHANISMS),
+        "selection_policy": {
+            "version": "evidence-bridge-v1",
+            "count": (
+                "Return zero to five supported hypotheses. Allowed mechanisms are not a checklist; "
+                "do not fill one per type or pad to the maximum."
+            ),
+            "basis": (
+                "Each candidate needs a cited supplied fact and a defensible bridge from that fact "
+                "to its mechanism and specific affected scope. Basket membership alone is not that bridge."
+            ),
+            "inference": (
+                "Reasonable hypotheses are allowed without proven earnings or causation. Do not invent "
+                "product identity, deployment, supply-chain, financing or operating facts to complete a chain."
+            ),
+            "missing": (
+                "Omit candidates with no factual bridge; zero is allowed. Missing evidence remains a research "
+                "gap, not an operating conclusion. The application adds its own unscored default."
+            ),
+        },
         "forbidden": list(_FORBIDDEN),
     }
 
