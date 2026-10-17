@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 11:23 北京
+
+- 草稿 PR #18 head `6a5216d`。没有合并进 main。本地 `make phase1-test`：220 passed，18 deselected。
+- 按 Q-M8-14 第 5 项：候选和说法的返回结构写在各自载荷里。机制只有五档。分数、置信度、证据、经营结论和假设标记都标明不由模型决定。整包结构不合格时这一条降级，下一条继续。没有改共享传输、模型或密钥。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 11:14 北京
 
 - 草稿 PR #18 head `075c6c2`。没有合并进 main。本地 `make phase1-test`：219 passed，18 deselected。
