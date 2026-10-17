@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 14:33 北京
+
+- 草稿 PR #18 head `bb2575a`。没有合并进 main。本地 `make phase1-test`：233 passed，18 deselected。
+- 已看到答复 `40b3d13`。新反例第 2 项：写明的期限落在非交易日时，这一条记为期限不是交易日。10-18 星期日不再压过 20 个交易日上限，也不会被挪到别的日期。合法交易日和半日市仍可使用。
+- 期限复验第 5 项，以及 Q-M8-16 第 3 到第 5 项，还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 14:25 北京
 
 - 草稿 PR #18 head `419cbb2`。没有合并进 main。本地 `make phase1-test`：232 passed，18 deselected。
