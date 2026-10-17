@@ -2631,18 +2631,55 @@ def test_claim_fields_omit_unsupported(tmp_path):
 
 @pytest.mark.phase1_blocking
 def test_model_output_contract_rejects_a_bad_structure():
+    from inves_cog.perception.attribution.candidates import validate_candidates
     from inves_cog.perception.attribution.chain import attribute_all
-    from inves_cog.perception.attribution.claims import attach_claims, claim_output, claim_payload
-    from inves_cog.perception.attribution.propose import candidate_output, candidate_payload, propose_candidates
+    from inves_cog.perception.attribution.claims import (
+        attach_claims,
+        claim_output,
+        claim_payload,
+        read_claims,
+    )
+    from inves_cog.perception.attribution.propose import (
+        candidate_output,
+        candidate_payload,
+        propose_candidates,
+        read_candidates,
+    )
+    from inves_cog.perception.attribution.second_hit import prediction_fingerprint
 
     forbidden = {"score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis"}
-    candidate_schema = candidate_output()["candidates"]
-    claim_schema = claim_output()["items"][0]["claims"]
+    candidate_schema = candidate_output()
+    claim_schema = claim_output()
+    assert isinstance(candidate_schema["candidates"], list)
+    assert candidate_schema["candidates"][0]["affected"][0]["basket_id"] == "string"
+    assert isinstance(claim_schema["items"][0]["claims"], list)
     assert set(candidate_schema["mechanism"]) == {"供给", "需求", "竞争", "客户融资", "估值倍数"}
     assert forbidden <= set(candidate_schema["forbidden"])
     assert forbidden <= set(claim_schema["forbidden"])
     assert candidate_payload({"anomaly_id": "a"}, [], [])["output"] == candidate_output()
     assert claim_payload([{"info_id": "n1"}])["output"] == claim_output()
+    with pytest.raises(ValueError, match="结构不合格"):
+        read_candidates({"candidates": [{"mechanism": "需求", "info_ids": ["n1"], "affected": "wrong"}]})
+    with pytest.raises(ValueError, match="结构不合格"):
+        read_claims({"items": [{"info_id": "n1", "claims": "wrong"}]})
+    assert read_candidates({"candidates": []}) == []
+    assert read_claims({"items": []}) == {}
+    assert read_claims({"items": [{"info_id": "n1", "claims": []}]}) == {"n1": []}
+    raw = read_candidates(
+        {
+            "candidates": [
+                {
+                    "mechanism": "需求",
+                    "info_ids": ["n1"],
+                    "affected": [{"ticker": "NVDA", "basket_id": "accelerators", "direction": "down"}],
+                }
+            ]
+        }
+    )
+    kept_basket = validate_candidates(raw, {"n1"}, {"NVDA"})[0]
+    assert kept_basket["affected"] == [{"ticker": "NVDA", "basket_id": "accelerators", "direction": "down"}]
+    fingerprint = prediction_fingerprint({**kept_basket, "score": 0.5, "confidence": "中"})
+    assert fingerprint["baskets"] == [{"basket_id": "accelerators", "direction": "down"}]
 
     anomaly = {
         "anomaly_id": "hdd",
@@ -2673,11 +2710,13 @@ def test_model_output_contract_rejects_a_bad_structure():
                         "confidence": "高",
                         "fundamental": "支持",
                         "affected": [{"ticker": "WDC", "score": 1}],
-                    },
-                    "bad",
-                    {"mechanism": "供给", "info_ids": "nikkei"},
+                    }
                 ]
             }
+
+    class BrokenCandidate:
+        def call(self, task, payload):
+            return {"candidates": ["bad", {"mechanism": "供给", "info_ids": "nikkei"}]}
 
     rows = propose_candidates(anomaly, items, [], Mixed(), {"WDC"})
     scored = [row for row in rows if row["scored"]]
@@ -2685,6 +2724,8 @@ def test_model_output_contract_rejects_a_bad_structure():
     assert scored[0]["score"] is None
     assert scored[0]["fundamental"] is None
     assert scored[0]["affected"] == [{"ticker": "WDC"}]
+    with pytest.raises(ValueError, match="结构不合格"):
+        propose_candidates(anomaly, items, [], BrokenCandidate(), {"WDC"})
 
     class Claims:
         def call(self, task, payload):
@@ -2757,6 +2798,47 @@ def test_model_output_contract_rejects_a_bad_structure():
     assert chained[0]["degraded"] == "结构不合格"
     assert chained[1]["status"] == "假设中"
     assert chained[1]["report"]["candidates"][0]["score"] == 1.0
+
+    class AffectedString:
+        def call(self, task, payload):
+            return {"candidates": [{"mechanism": "需求", "info_ids": ["nikkei-hdd"], "affected": "wrong"}]}
+
+    shaped = attribute_all(
+        [
+            {
+                **anomaly,
+                "anomaly_id": "shape",
+                "started_at": started,
+                "trade_date": "2026-10-02",
+                "members": [{"ticker": "WDC"}],
+            }
+        ],
+        [visible],
+        as_of=started,
+        client=AffectedString(),
+    )
+    assert shaped[0]["status"] == "待分析"
+    assert shaped[0]["degraded"] == "结构不合格"
+
+    class EmptyLegal:
+        def call(self, task, payload):
+            return {"candidates": []}
+
+    empty = attribute_all(
+        [
+            {
+                **anomaly,
+                "anomaly_id": "empty",
+                "started_at": started,
+                "trade_date": "2026-10-02",
+                "members": [{"ticker": "WDC"}],
+            }
+        ],
+        [visible],
+        as_of=started,
+        client=EmptyLegal(),
+    )
+    assert empty[0]["degraded"] is None
 
 
 @pytest.mark.phase1_blocking
@@ -4737,8 +4819,10 @@ def test_case_inputs_are_the_payload_bytes(tmp_path, capsys):
         candidate_body = json.loads(candidate.read_text())
         claim_body = json.loads(claim.read_text())
         assert "result" not in candidate_body and "result" not in claim_body
-        assert candidate_body["output"]["candidates"]["forbidden"]
-        assert claim_body["output"]["items"][0]["claims"]["forbidden"]
+        assert isinstance(candidate_body["output"]["candidates"], list)
+        assert candidate_body["output"]["forbidden"]
+        assert isinstance(claim_body["output"]["items"][0]["claims"], list)
+        assert claim_body["output"]["forbidden"]
         bundle = payloads[plan["anomaly_id"]]
         assert candidate.read_text() == canonical_payload(bundle["candidate_payload"])
         assert (

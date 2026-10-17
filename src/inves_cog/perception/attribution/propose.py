@@ -8,18 +8,21 @@ _FORBIDDEN = ("score", "confidence", "fundamental", "evidence", "operating_impac
 
 
 def candidate_output():
-    """Return schema carried in the payload. The model does not decide scores or conclusions."""
+    """Return schema carried in the payload. Candidates are an array; rules sit beside it."""
     return {
-        "candidates": {
-            "max": 5,
-            "mechanism": sorted(MECHANISMS),
-            "chain": [{"entity_id": "string", "new": "boolean"}],
-            "affected": [{"basket_id": "string", "ticker": "string", "direction": ["up", "down"]}],
-            "control_baskets": ["string"],
-            "info_ids": ["string"],
-            "direction": ["up", "down"],
-            "forbidden": list(_FORBIDDEN),
-        }
+        "candidates": [
+            {
+                "mechanism": "string",
+                "chain": [{"entity_id": "string", "new": "boolean"}],
+                "affected": [{"basket_id": "string", "ticker": "string", "direction": "up|down"}],
+                "control_baskets": ["string"],
+                "info_ids": ["string"],
+                "direction": "up|down",
+            }
+        ],
+        "max": 5,
+        "mechanism": sorted(MECHANISMS),
+        "forbidden": list(_FORBIDDEN),
     }
 
 
@@ -143,7 +146,7 @@ def propose_candidates(anomaly, items, neighbors, client, universe):
 
 
 def read_candidates(result):
-    """Keep structurally valid candidates. A bad envelope is an explicit degrade."""
+    """Keep cited mechanisms. A malformed candidate is an explicit degrade, not an empty result."""
     if not isinstance(result, dict) or not isinstance(result.get("candidates"), list):
         raise ValueError("结构不合格")
     rows = []
@@ -155,36 +158,55 @@ def read_candidates(result):
 
 
 def _candidate_row(row):
-    if not isinstance(row, dict) or row.get("mechanism") not in MECHANISMS:
-        return None
+    if not isinstance(row, dict):
+        raise ValueError("结构不合格")
+    mechanism = row.get("mechanism")
+    if not isinstance(mechanism, str):
+        raise ValueError("结构不合格")
     info_ids = row.get("info_ids")
     if not isinstance(info_ids, list) or any(not isinstance(item, str) or not item for item in info_ids):
-        return None
-    if "chain" in row and not isinstance(row.get("chain"), list):
-        return None
-    if "affected" in row and not isinstance(row.get("affected"), list):
-        return None
-    if "control_baskets" in row and not isinstance(row.get("control_baskets"), list):
-        return None
+        raise ValueError("结构不合格")
     parsed = {
-        "mechanism": row["mechanism"],
+        "mechanism": mechanism,
         "info_ids": list(info_ids),
-        "chain": _chain(row.get("chain") or []),
-        "affected": _affected_rows(row.get("affected") or []),
-        "control_baskets": [item for item in (row.get("control_baskets") or []) if isinstance(item, str)],
+        "chain": _chain(_required_list(row, "chain")),
+        "affected": _affected_rows(_required_list(row, "affected")),
+        "control_baskets": _string_list(_required_list(row, "control_baskets")),
     }
-    if row.get("direction") in {"up", "down"}:
-        parsed["direction"] = row["direction"]
+    direction = row.get("direction")
+    if direction is not None:
+        if direction not in {"up", "down"}:
+            raise ValueError("结构不合格")
+        parsed["direction"] = direction
+    if mechanism not in MECHANISMS:
+        return None
     return parsed
+
+
+def _required_list(row, key):
+    if key not in row or row[key] is None:
+        return []
+    value = row[key]
+    if not isinstance(value, list):
+        raise ValueError("结构不合格")
+    return value
+
+
+def _string_list(rows):
+    if any(not isinstance(item, str) or not item for item in rows):
+        raise ValueError("结构不合格")
+    return list(rows)
 
 
 def _chain(rows):
     kept = []
     for row in rows:
-        if not isinstance(row, dict) or not isinstance(row.get("entity_id"), str):
-            continue
+        if not isinstance(row, dict) or not isinstance(row.get("entity_id"), str) or not row["entity_id"]:
+            raise ValueError("结构不合格")
         item = {"entity_id": row["entity_id"]}
-        if isinstance(row.get("new"), bool):
+        if "new" in row and row["new"] is not None:
+            if not isinstance(row["new"], bool):
+                raise ValueError("结构不合格")
             item["new"] = row["new"]
         kept.append(item)
     return kept
@@ -193,12 +215,20 @@ def _chain(rows):
 def _affected_rows(rows):
     kept = []
     for row in rows:
-        if not isinstance(row, dict) or not isinstance(row.get("ticker"), str):
-            continue
-        item = {"ticker": row["ticker"]}
-        if isinstance(row.get("basket_id"), str):
-            item["basket_id"] = row["basket_id"]
-        if row.get("direction") in {"up", "down"}:
+        if not isinstance(row, dict):
+            raise ValueError("结构不合格")
+        ticker = row.get("ticker")
+        if not isinstance(ticker, str) or not ticker:
+            raise ValueError("结构不合格")
+        item = {"ticker": ticker}
+        if "basket_id" in row and row["basket_id"] is not None:
+            basket = row["basket_id"]
+            if not isinstance(basket, str) or not basket:
+                raise ValueError("结构不合格")
+            item["basket_id"] = basket
+        if "direction" in row and row["direction"] is not None:
+            if row["direction"] not in {"up", "down"}:
+                raise ValueError("结构不合格")
             item["direction"] = row["direction"]
         kept.append(item)
     return kept

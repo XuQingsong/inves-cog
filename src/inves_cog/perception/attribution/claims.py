@@ -8,21 +8,30 @@ _TEXT = {"subject", "variable", "quantity", "horizon", "certainty"}
 
 
 def claim_output():
-    """Return schema carried in the payload. The model does not decide scores or conclusions."""
+    """Return schema carried in the payload. Claims are an array; rules sit beside it."""
     return {
         "items": [
             {
                 "info_id": "string",
-                "claims": {
-                    "fields": list(FIELDS),
-                    "mechanism": sorted(MECHANISMS),
-                    "direction": ["up", "down"],
-                    "source_level": [1, 2, 3, 4],
-                    "omit_when_unsupported": True,
-                    "forbidden": list(_FORBIDDEN),
-                },
+                "claims": [
+                    {
+                        "subject": "string",
+                        "variable": "string",
+                        "mechanism": "string",
+                        "direction": "up|down",
+                        "quantity": "string",
+                        "horizon": "string",
+                        "certainty": "string",
+                        "source_level": "1|2|3|4",
+                    }
+                ],
             }
-        ]
+        ],
+        "mechanism": sorted(MECHANISMS),
+        "direction": ["up", "down"],
+        "source_level": [1, 2, 3, 4],
+        "omit_when_unsupported": True,
+        "forbidden": list(_FORBIDDEN),
     }
 
 
@@ -50,18 +59,24 @@ def normalize_claim(row):
 
 
 def read_claims(result):
-    """Keep structurally valid claims. A bad envelope is an explicit degrade."""
+    """Keep supported claim fields. A malformed claims value is an explicit degrade, not an empty result."""
     if not isinstance(result, dict) or not isinstance(result.get("items"), list):
         raise ValueError("结构不合格")
     by_id = {}
     for row in result["items"]:
-        if (
-            not isinstance(row, dict)
-            or not isinstance(row.get("info_id"), str)
-            or not isinstance(row.get("claims"), list)
-        ):
-            continue
-        by_id[row["info_id"]] = [claim for claim in (normalize_claim(item) for item in row["claims"]) if claim]
+        if not isinstance(row, dict) or not isinstance(row.get("info_id"), str) or not row["info_id"]:
+            raise ValueError("结构不合格")
+        claims = row.get("claims")
+        if not isinstance(claims, list):
+            raise ValueError("结构不合格")
+        parsed = []
+        for claim in claims:
+            if not isinstance(claim, dict):
+                raise ValueError("结构不合格")
+            kept = normalize_claim(claim)
+            if kept:
+                parsed.append(kept)
+        by_id[row["info_id"]] = parsed
     return by_id
 
 

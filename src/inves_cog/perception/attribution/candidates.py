@@ -43,6 +43,9 @@ def _affected(rows, universe):
         if ticker not in universe:
             continue
         item = {"ticker": ticker}
+        basket = row.get("basket_id")
+        if isinstance(basket, str) and basket:
+            item["basket_id"] = basket
         if row.get("direction") in {"up", "down"}:
             item["direction"] = row["direction"]
         kept.append(item)
