@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 12:39 北京
+
+- 草稿 PR #18 head `f351333`。没有合并进 main。本地 `make phase1-test`：226 passed，18 deselected。
+- 按 Q-M8-15 第 4 项：主链回捞改为实体、一跳图谱和批准向量的并集，再取前 40 条。只含 XOM 的新闻不会送给 NVDA。未批准的向量不进入。同一异常的两个候选按各自引用分开打分，缺输入的分项留空。没有新的补搜。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 12:26 北京
 
 - 草稿 PR #18 head `01a5cdf`。没有合并进 main。本地 `make phase1-test`：225 passed，18 deselected。
