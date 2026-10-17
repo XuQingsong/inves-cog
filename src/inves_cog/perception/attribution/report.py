@@ -11,7 +11,7 @@ from inves_cog.perception.attribution.dims import (
 )
 from inves_cog.perception.attribution.evidence import later_report
 from inves_cog.perception.attribution.impact import anomaly_status
-from inves_cog.perception.attribution.lifecycle import weak_signal
+from inves_cog.perception.attribution.lifecycle import relation_step, weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.propose import review_queue
 from inves_cog.perception.attribution.retrieve import discard_review, explore_quota, retrieval_gap
@@ -153,6 +153,7 @@ def explanation_report(
     explore=None,
     discarded=None,
     falsified=None,
+    relation=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -189,6 +190,7 @@ def explanation_report(
         "explore_quota": explore_quota(explore),
         "discard_review": discard_review(discarded),
         "falsified_rumor": falsified_rumor(falsified),
+        "relation_step": relation_step(relation),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

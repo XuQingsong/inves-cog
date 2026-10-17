@@ -1245,6 +1245,118 @@ def test_falsified_rumor_keeps_the_price_record():
 
 
 @pytest.mark.phase1_blocking
+def test_relation_step_does_not_establish_from_price():
+    from datetime import datetime
+
+    from inves_cog.perception.attribution.lifecycle import relation_step
+    from inves_cog.perception.attribution.report import explanation_report
+
+    as_of = datetime(2026, 10, 2, 16, 0)
+    assert relation_step(None) is None
+    assert relation_step({"status": "观察到", "link_type": "业务关系"}) is None
+    born = relation_step({"is_new": True, "proposed_status": "已确立", "link_type": "业务关系"})
+    assert born["status"] == "候选"
+    assert born["blocked"] == ["新边"]
+    assert born["operating_impact_proven"] is False
+    quiet_new = relation_step({"is_new": True, "proposed_status": "候选", "link_type": "市场叙事"})
+    assert quiet_new["status"] == "候选"
+    assert quiet_new["blocked"] == []
+    price = relation_step(
+        {
+            "status": "观察到",
+            "link_type": "业务关系",
+            "proposed_status": "已确立",
+            "price_resonance": True,
+            "evidence": [{"kind": "price"}],
+        }
+    )
+    assert price["status"] == "观察到"
+    assert price["blocked"] == ["价格共振"]
+    assert price["fundamental_standing"] is None
+    other = relation_step(
+        {
+            "status": "观察到",
+            "link_type": "业务关系",
+            "proposed_status": "已确立",
+            "evidence": [{"kind": "company_primary"}],
+        }
+    )
+    assert other is None
+    resonance = relation_step(
+        {
+            "status": "观察到",
+            "link_type": "市场共振",
+            "proposed_link": "经营传导",
+            "evidence": [{"kind": "price"}],
+            "as_of": as_of,
+            "expected_direction": "down",
+        }
+    )
+    assert resonance["link_type"] == "市场共振"
+    assert resonance["blocked"] == ["市场层"]
+    filing = {
+        "kind": "company_primary",
+        "source_level": 1,
+        "form": "8-K",
+        "guidance_change": True,
+        "citation": "8-K",
+        "published_at": as_of,
+        "direction": "down",
+    }
+    supported = relation_step(
+        {
+            "status": "观察到",
+            "link_type": "市场叙事",
+            "proposed_link": "经营传导",
+            "evidence": [filing],
+            "as_of": as_of,
+            "expected_direction": "down",
+        }
+    )
+    assert supported["link_type"] == "经营传导"
+    assert supported["status"] == "观察到"
+    assert supported["blocked"] == []
+    assert supported["fundamental_standing"] is None
+    assert supported["operating_impact_proven"] is False
+    opposed = {**filing, "direction": "up"}
+    denied = relation_step(
+        {
+            "status": "观察到",
+            "link_type": "市场叙事",
+            "proposed_link": "经营传导",
+            "evidence": [opposed],
+            "as_of": as_of,
+            "expected_direction": "down",
+        }
+    )
+    assert denied["link_type"] == "市场叙事"
+    assert denied["blocked"] == ["市场层"]
+    anomaly = {"anomaly_id": "relation", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["relation_step"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        relation=price
+        and {
+            "status": "观察到",
+            "link_type": "市场共振",
+            "proposed_link": "经营传导",
+            "price_resonance": True,
+        },
+    )
+    assert report["relation_step"]["link_type"] == "市场共振"
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

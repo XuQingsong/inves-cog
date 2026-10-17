@@ -1,5 +1,7 @@
 """Linkage lifecycle. Market confirmation cannot skip the hypothesis stage."""
 
+from inves_cog.perception.attribution.operating import operating_verdict
+
 ALLOWED = {
     (None, "已发现"),
     ("已发现", "假设中"),
@@ -16,6 +18,9 @@ _FUNDAMENTAL = {"供给", "需求", "竞争", "客户融资"}
 _WINDOW = 30
 _ROOTS = 3
 _STAGES = 2
+_LADDER = {"候选", "观察到", "有支持", "已确立"}
+_MARKET_LINKS = {"市场共振", "市场叙事"}
+_PRICE = {"price", "price_resonance"}
 
 
 def transition(current, new, history, *, when, trigger, evidence_ids, mechanism=None):
@@ -34,6 +39,62 @@ def transition(current, new, history, *, when, trigger, evidence_ids, mechanism=
         }
     )
     return new, history
+
+
+def relation_step(edge):
+    """A new edge stays a candidate. Price cannot establish it, and resonance is not transmission."""
+    if edge is None:
+        return None
+    status = edge.get("status")
+    link = edge.get("link_type")
+    proposed_status = edge.get("proposed_status")
+    proposed_link = edge.get("proposed_link")
+    is_new = edge.get("is_new") is True
+    price_block = proposed_status == "已确立" and status != "已确立" and _price_only(edge)
+    market_block = proposed_link == "经营传导" and link in _MARKET_LINKS
+    if not is_new and not price_block and not market_block:
+        return None
+    blocked = []
+    if is_new:
+        status_out = "候选"
+        if proposed_status not in (None, "候选"):
+            blocked.append("新边")
+    elif price_block:
+        status_out = status if status in _LADDER else None
+        blocked.append("价格共振")
+    else:
+        status_out = status if status in _LADDER else None
+    if market_block and _operating_support(edge):
+        link_out = "经营传导"
+    elif market_block:
+        link_out = link
+        blocked.append("市场层")
+    else:
+        link_out = link
+    return {
+        "status": status_out,
+        "link_type": link_out,
+        "blocked": blocked,
+        "fundamental_standing": None,
+        "operating_impact_proven": False,
+    }
+
+
+def _price_only(edge):
+    rows = edge.get("evidence") or []
+    if not rows:
+        return edge.get("price_resonance") is True
+    return all(row.get("kind") in _PRICE or row.get("price_resonance") is True for row in rows)
+
+
+def _operating_support(edge):
+    records = edge.get("evidence") or []
+    as_of = edge.get("as_of")
+    direction = edge.get("expected_direction")
+    if not records or as_of is None or direction not in {"up", "down"}:
+        return False
+    verdict = operating_verdict(records, as_of=as_of, expected_direction=direction)
+    return verdict.outcome == "支持"
 
 
 def weak_signal(clues):
