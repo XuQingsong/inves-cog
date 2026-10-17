@@ -250,7 +250,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     proven = bool(deadline and deadline.get("operating_impact_proven"))
     report["operating_impact_proven"] = proven
     hits, conclusion = _second_hits(anomaly, candidates, as_of)
-    tracks = _track_rows(anomaly, state)
+    tracks = _track_rows(anomaly, state, stage)
     saved = False
     if store is not None:
         store.save(_bundle(anomaly, claimed, candidates, report, state, history, impact, hits, tracks, deadline))
@@ -639,8 +639,10 @@ def _expected_direction(candidate, fingerprint, anomaly, event):
     return direction if direction in {"up", "down"} else None
 
 
-def _track_rows(anomaly, state):
+def _track_rows(anomaly, state, stage=None):
     sessions = anomaly.get("sessions") or []
+    if stage == "attribution_labels" and not sessions:
+        return []
     if sessions:
         rows = []
         for row in sessions:
