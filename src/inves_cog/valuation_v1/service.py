@@ -142,6 +142,11 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
         bars = [r for r in source["bars"].get(ticker, []) if r["trade_date"] == as_of]
         price = bars[-1]["close"] if bars else None
         try:
+            previous = book.published.get(ticker)
+            if previous and previous.get("method_version") != settings()["method_version"]:
+                # Rebuild the affected history using only each filing's then-visible
+                # inputs; do not carry an obsolete classifier across a repair.
+                book.types.pop(ticker, None)
             if ticker not in book.types:
                 h = TypeHistory()
                 for prior in source["states"].get(ticker, []):

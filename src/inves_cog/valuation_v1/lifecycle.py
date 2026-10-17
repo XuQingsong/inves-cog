@@ -137,8 +137,9 @@ class ValuationBook:
         old = self.published.get(ticker)
         financial_version = str(financial_version or period)
         new_report = old is None or financial_version != old["financial_version"]
+        method_refresh = bool(old and old.get("method_version") != settings()["method_version"])
         h = self.types.setdefault(ticker, TypeHistory())
-        kind = h.observe(period, candidate) if new_report else h.current
+        kind = h.observe(period, candidate) if new_report or method_refresh else h.current
         if manual:
             kind = h.override(manual["type"], who=manual["who"], reason=manual["reason"], when=manual.get("when"))
         old_ntm = old["inputs"].get("eps_ntm") if old else None
@@ -151,11 +152,12 @@ class ValuationBook:
         consensus_event = (old_ntm is None) != (new_ntm is None) or (
             new_ntm is not None and bounds is not None and not bounds[0] <= new_ntm <= bounds[1]
         )
-        trigger = new_report or consensus_event or month_refresh or manual is not None
+        trigger = new_report or method_refresh or consensus_event or month_refresh or manual is not None
         audit = {
             "new_report": new_report,
             "consensus_event": consensus_event,
             "month_refresh": month_refresh,
+            "method_refresh": method_refresh,
             "manual": manual is not None,
             "previous_eps_ntm": old_ntm,
             "candidate_eps_ntm": new_ntm,
@@ -164,10 +166,17 @@ class ValuationBook:
             "publication": "updated" if trigger else "held",
         }
         if trigger:
-            if old and not new_report and not month_refresh and manual is None:
+            if old and not new_report and not month_refresh and not method_refresh and manual is None:
                 # A consensus-only event updates E/g inputs, not daily PE history.
                 inputs = {**old["inputs"], **{key: inputs.get(key) for key in CONSENSUS}}
-            elif old and month_refresh and not new_report and not consensus_event and manual is None:
+            elif (
+                old
+                and month_refresh
+                and not new_report
+                and not consensus_event
+                and not method_refresh
+                and manual is None
+            ):
                 inputs = {**old["inputs"], **{key: inputs.get(key) for key in MULTIPLES}}
             fresh = calculate(kind, {**inputs, "type_disagreement": h.disagreement})
             fresh.update(
