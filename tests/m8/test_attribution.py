@@ -438,6 +438,18 @@ def test_retrieval_union_keeps_rule_hits_outside_the_vector_cap():
     rules = m8_rules()
     anomaly = {"baskets": ["hdd"], "direction": "down", "members": ["WDC"], "neighbors": ["toshiba"]}
     assert vector_query(anomaly) == "hdd down WDC"
+    structured = {
+        **anomaly,
+        "members": [
+            {"ticker": "WDC", "ret": -0.1, "resid_z": -3.0},
+            {"entity_id": "STX", "financial_revenue": 123456789},
+            "MU",
+            {"ret": -0.2, "resid_z": -4.0},
+            {},
+        ],
+    }
+    assert vector_query(structured) == "hdd down WDC STX MU"
+    assert vector_query({**anomaly, "members": [{"ret": -0.1}, {}, None]}) == "hdd down"
     vectors = [
         {
             "info_id": f"vec-{index:02d}",

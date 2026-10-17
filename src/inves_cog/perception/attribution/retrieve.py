@@ -102,7 +102,13 @@ def rank_items(items, query_entities, limit=40):
 
 def vector_query(anomaly):
     """Basket names, direction, and member names. Neighbors are not part of the query."""
-    parts = [*(anomaly.get("baskets") or []), anomaly.get("direction"), *(anomaly.get("members") or [])]
+    members = []
+    for member in anomaly.get("members") or []:
+        if isinstance(member, dict):
+            member = member.get("ticker") or member.get("entity_id")
+        if isinstance(member, str) and member:
+            members.append(member)
+    parts = [*(anomaly.get("baskets") or []), anomaly.get("direction"), *members]
     return " ".join(str(part) for part in parts if part)
 
 
