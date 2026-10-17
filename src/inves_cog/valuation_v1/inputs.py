@@ -4,13 +4,14 @@ from datetime import date, datetime, time, timedelta, timezone
 from statistics import median
 
 from inves_cog.valuation_v1.calculations import settings
+from inves_cog.valuation_v1.eps_units import normalize_eps, unmapped_observations
 
 
 def day(value):
     return value if isinstance(value, date) and not isinstance(value, datetime) else date.fromisoformat(str(value)[:10])
 
 
-def consensus_inputs(rows, as_of, *, cutoff=None):
+def selected_consensus(rows, as_of, *, cutoff=None):
     cutoff = cutoff or datetime.combine(as_of + timedelta(days=1), time.min, timezone.utc)
     visible = []
     for r in rows:
@@ -19,17 +20,23 @@ def consensus_inputs(rows, as_of, *, cutoff=None):
             captured = datetime.fromisoformat(captured.replace("Z", "+00:00"))
         if day(r["as_of"]) <= as_of and (captured is None or (captured.tzinfo is not None and captured < cutoff)):
             visible.append(r)
+    if not visible:
+        return None
+    return max(
+        visible, key=lambda r: (day(r["as_of"]), r.get("captured_at") or datetime.min.replace(tzinfo=timezone.utc))
+    )
+
+
+def consensus_inputs(rows, as_of, *, cutoff=None):
+    latest = selected_consensus(rows, as_of, cutoff=cutoff)
     out = {
         "eps_ntm": None,
         "rev_ntm_consensus": None,
         "consensus_next_year_eps_growth": None,
         "consensus_reason": "没有当时可见的一致预期快照",
     }
-    if not visible:
+    if latest is None:
         return out
-    latest = max(
-        visible, key=lambda r: (day(r["as_of"]), r.get("captured_at") or datetime.min.replace(tzinfo=timezone.utc))
-    )
     out.update(consensus_as_of=str(latest["as_of"]), consensus_source=latest.get("source"))
     cy, ny = latest.get("fy_cy"), latest.get("fy_ny")
     if cy is None or ny is None or day(cy) < as_of or day(ny) <= day(cy):
@@ -64,7 +71,7 @@ def diluted_shares(value, source):
     )
 
 
-def financial_inputs(state, states, entity):
+def financial_inputs(state, states, entity, *, as_of=None):
     if state is None:
         return {"ticker": entity["ticker"], "input_reason": "M2 fixed状态缺失"}
     values = state.values
@@ -96,6 +103,31 @@ def financial_inputs(state, states, entity):
         if row.period_end not in annual or row.filed > annual[row.period_end].filed:
             annual[row.period_end] = row
     years = [annual[k] for k in sorted(annual)][-10:]
+    events = [e for e in settings()["eps_units"]["events"] if e["ticker"] == state.ticker]
+    eps_units = [
+        normalize_eps(
+            r.values.get("eps_ttm"),
+            r.field_sources.get("eps_ttm", {}),
+            events,
+            as_of or state.filed,
+            periods=1 if str(r.form).removesuffix("/A") in {"20-F", "40-F"} else 4,
+        )
+        for r in years
+    ]
+    out["annual_eps_audit"] = [
+        {"filed": str(r.filed), "period_end": str(r.period_end), **audit}
+        for r, (_, audit) in zip(years, eps_units, strict=True)
+    ]
+    out["annual_eps_basis_unknown"] = any(audit["status"] == "unknown" for _, audit in eps_units)
+    unmapped = unmapped_observations(states, events, as_of or state.filed)
+    out["unmapped_split_observations"] = unmapped
+    if unmapped:
+        out["annual_eps_basis_unknown"] = True
+    if out["annual_eps_basis_unknown"]:
+        reasons = {audit["reason"] for _, audit in eps_units if audit["status"] == "unknown"}
+        if unmapped:
+            reasons.add("unrecognized split observations; canonical identity not verified")
+        out["annual_eps_reason"] = "年度EPS单位基准未核实：" + "; ".join(sorted(reasons))
     out["annual_sequence"] = [
         {
             "filed": str(r.filed),
@@ -113,7 +145,7 @@ def financial_inputs(state, states, entity):
         if r.values.get("ni_ttm") is not None and r.values.get("rev_ttm") is not None and r.values["rev_ttm"] > 0
     ]
     out.update(
-        annual_eps=[r.values.get("eps_ttm") for r in years],
+        annual_eps=[value for value, _ in eps_units],
         annual_gross_margins=[r.values.get("gross_margin") for r in years],
     )
     industry = (

@@ -1,6 +1,47 @@
 m5:
   params_version: p-2026.10
-  method_version: v1.1
+  method_version: v1.2
+  # K05 canonical identities; public evidence differs from local acquisition time.
+  eps_units:
+    events:
+      - id: NVDA-split-2021-07-19-4
+        ticker: NVDA
+        ratio: 4
+        announced_on: '2021-05-21'
+        # Announcement gives an after-close date, not an exact second.
+        # Conservatively admit it from the following day rather than invent one.
+        effective_at: '2021-07-20T00:00:00-04:00'
+        effective_description: distributed after close on 2021-07-19
+        split_trading_on: '2021-07-20'
+        restated_from_filed: '2021-08-20'
+        evidence: https://www.sec.gov/Archives/edgar/data/1045810/000104581021000131/nvda-20210801.htm
+        aliases:
+          - {end: '2021-06-03', filed: '2021-08-20', accession: 0001045810-21-000131}
+          - {end: '2021-06-03', filed: '2021-11-22', accession: 0001045810-21-000163}
+          - {end: '2021-07-19', filed: '2022-03-18', accession: 0001045810-22-000036}
+          - {end: '2021-07-19', filed: '2022-05-27', accession: 0001045810-22-000079}
+      - id: NVDA-split-2024-06-07-10
+        ticker: NVDA
+        ratio: 10
+        announced_on: '2024-05-22'
+        effective_at: '2024-06-07T16:01:00-04:00'
+        split_trading_on: '2024-06-10'
+        restated_from_filed: '2024-08-28'
+        evidence: https://www.sec.gov/Archives/edgar/data/1045810/000104581024000264/nvda-20240728.htm
+        aliases:
+          - {start: '2024-05-01', end: '2024-05-31', filed: '2024-08-28', accession: 0001045810-24-000264}
+          - {start: '2024-05-01', end: '2024-05-31', filed: '2024-11-20', accession: 0001045810-24-000316}
+          - {start: '2024-06-01', end: '2024-06-30', filed: '2025-05-28', accession: 0001045810-25-000116}
+      - id: AVGO-split-2024-07-12-10
+        ticker: AVGO
+        ratio: 10
+        announced_on: '2024-06-12'
+        effective_at: '2024-07-12T16:30:00-04:00'
+        restated_from_filed: '2024-09-11'
+        evidence: https://www.sec.gov/Archives/edgar/data/1730168/000173016824000099/avgo-20240804.htm
+        effective_evidence: https://www.sec.gov/Archives/edgar/data/1730168/000114036124033072/ny20032136x6_8k.htm
+        aliases:
+          - {end: '2024-07-12', filed: '2024-09-11', accession: 0001730168-24-000099}
   stable:
     eps_weights: [0.5, 0.5]
     pe_bear: 0.90

@@ -51,6 +51,10 @@ def classify(data):
         if growth is None:
             return "未确定"
         return "未盈利成长" if growth >= c["minimum_growth_pct"] else "困境"
+    if data.get("subindustry") in settings()["cyclical"]["pe"]:
+        return "周期"
+    if data.get("annual_eps_basis_unknown"):
+        return "未确定"
     annual_eps = data.get("annual_eps", [])
     collapses = sum(
         previous > 0 and (current / previous - 1) * 100 < c["eps_collapse_pct"]
@@ -58,7 +62,7 @@ def classify(data):
         if previous is not None and current is not None
     )
     margins = [m for m in data.get("annual_gross_margins", []) if m is not None]
-    cyclical = data.get("subindustry") in settings()["cyclical"]["pe"] or (
+    cyclical = (
         collapses >= c["eps_collapse_count"] and margins and max(margins) - min(margins) >= c["gross_margin_range_pp"]
     )
     if cyclical:
@@ -148,6 +152,17 @@ class ValuationBook:
             new_ntm is not None and bounds is not None and not bounds[0] <= new_ntm <= bounds[1]
         )
         trigger = new_report or consensus_event or month_refresh or manual is not None
+        audit = {
+            "new_report": new_report,
+            "consensus_event": consensus_event,
+            "month_refresh": month_refresh,
+            "manual": manual is not None,
+            "previous_eps_ntm": old_ntm,
+            "candidate_eps_ntm": new_ntm,
+            "consensus_bounds": bounds,
+            "recomputed": trigger,
+            "publication": "updated" if trigger else "held",
+        }
         if trigger:
             if old and not new_report and not month_refresh and manual is None:
                 # A consensus-only event updates E/g inputs, not daily PE history.
@@ -178,12 +193,14 @@ class ValuationBook:
                     pending_review=True,
                     proposed=mark_price(fresh, price),
                     review_reason="无新财报，中性值变化超过25%",
+                    trigger_audit={**audit, "publication": "pending_review"},
                 )
                 return shown
             self.published[ticker] = deepcopy(fresh)
             self.pending.pop(ticker, None)
         shown = mark_price(self.published[ticker], price)
         shown["date"] = day
+        shown["trigger_audit"] = audit
         if ticker in self.pending:
             shown.update(
                 pending_review=True,

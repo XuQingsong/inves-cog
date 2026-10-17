@@ -4,7 +4,7 @@
 
 验收代码提交：[2bbd615e0d25dceec8b284c105eeb87183e7707d](https://github.com/XuQingsong/inves-cog/commit/2bbd615e0d25dceec8b284c105eeb87183e7707d)。[该完整 SHA 的 phase1-blocking CI](https://github.com/XuQingsong/inves-cog/actions/runs/38914730518) 已成功。证据提交后的最终 head / CI 以 PR #17 和 agent-status 的 A 线回报为准；`code-manifest.sha256` 可核对实现及测试内容。
 
-**提交状态（2026-10-17更新）**：实现与自测齐备。需求方已在main fc13f66e6e3d61412299af4080878a5d9ffc55c3 独立确认D-15第二批59/59并关闭采集次数前置；按A-007在准确最终证据head CI成功后转正式「[M5] 提交验收」，等待需求方完整验收。D-15关闭不代表M5通过。详见第9、10节。
+**提交状态（K04 / K05 修复）**：准确0ee7c599正式验收不通过，PR继续草稿。K05已答复，F1/F2/F3代码修复完成，受影响12项blocking通过、Ruff通过；五日只读重构各59行，15可估/44明确不估/0异常失败，NVDA恢复成长、AVGO保持周期。完整来源/候选/最终五日估值及合成计划已本地留存，但压缩数据上传遭自动权限审查拒绝，未随代码发布；数据交付仍待明确授权，不能把下述旧阶段证据当作本轮完整复验通过。详见round2/README.md与k05-summary.json；当前准确head/CI以PR和A线最终回报为准。
 
 估值参考 v1，不参与仓位
 

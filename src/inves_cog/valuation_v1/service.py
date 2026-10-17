@@ -1,12 +1,15 @@
 """Daily standalone valuation; read M2 fixed, M1 prices, and M4 snapshots only."""
 
+import hashlib
+import json
+from copy import deepcopy
 from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.fundamentals.state import StateStore
 from inves_cog.ingest.market import exchange
 from inves_cog.valuation_v1.calculations import LABEL, calculate, pe_percentiles, settings
-from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs
+from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs, selected_consensus
 from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
 from inves_cog.valuation_v1.shadows import panel, shadow, summarize
 
@@ -66,6 +69,45 @@ def describe_actual(shadows, holdings):
             record["difference"] = "规则A当日无买入计划；记录影子分与系数，实际订单不变"
 
 
+def candidate_sources(state, rows, as_of, cutoff):
+    selected = selected_consensus(rows, as_of, cutoff=cutoff)
+    captured = selected.get("captured_at") if selected else None
+    return {
+        "decision_cutoff": str(cutoff),
+        "financial": {
+            "filed": str(state.filed) if state else None,
+            "period_end": str(state.period_end) if state else None,
+            "accession": state.accession if state else None,
+            "form": state.form if state else None,
+            "captured_at": None,
+            "capture_status": "not_provided_by_M2_contract",
+            "raw_values": deepcopy(state.values) if state else None,
+            "field_sources_reference": {
+                "table": "fundamentals.fin_state",
+                "extractor": "fixed",
+                "ticker": state.ticker if state else None,
+                "filed": str(state.filed) if state else None,
+            },
+            "field_sources_sha256": hashlib.sha256(
+                json.dumps(state.field_sources, default=str, sort_keys=True, ensure_ascii=False).encode()
+            ).hexdigest()
+            if state
+            else None,
+        },
+        "consensus": {
+            "snapshot_as_of": str(selected["as_of"]) if selected else None,
+            "captured_at": str(captured) if captured is not None else None,
+            "capture_status": "no_snapshot"
+            if selected is None
+            else "recorded"
+            if captured is not None
+            else "unknown_import_time",
+            "source": selected.get("source") if selected else None,
+            "raw_candidate": {k: deepcopy(v) for k, v in selected.items() if k != "raw"} if selected else None,
+        },
+    }
+
+
 def build(*, clock, repository, universe, as_of, persist=True, book=None, source=None):
     tickers = [e["ticker"] for e in universe]
     source = source or repository.inputs(as_of, tickers)
@@ -109,13 +151,14 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                     prior_inputs.update(consensus_inputs(source["consensus"].get(ticker, []), prior.filed))
                     h.observe(prior.period_end, classify(prior_inputs))
                 book.types[ticker] = h
-            inputs = financial_inputs(state, source["states"].get(ticker, []), entity)
+            inputs = financial_inputs(state, source["states"].get(ticker, []), entity, as_of=cutoff)
             inputs.update(consensus_inputs(source["consensus"].get(ticker, []), as_of, cutoff=cutoff))
             p = dict(pe[ticker])
             if p["insufficient_pe_history"]:
                 fallback = pe_percentiles(
                     [], as_of, peer_p50=[pe[t]["own_p50"] for t in peers.get(ticker, []) if t in pe]
                 )
+                p.pop("pe_reason", None)
                 p.update(
                     {
                         key: value
@@ -124,6 +167,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                     }
                 )
             inputs.update(p)
+            evidence = candidate_sources(state, source["consensus"].get(ticker, []), as_of, cutoff)
             kind = classify(inputs)
             row = book.update(
                 ticker,
@@ -135,8 +179,11 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                 price=price,
                 month_refresh=first_session(as_of),
             )
+            # Daily read candidates and provenance are audit payloads, not formula
+            # inputs or a claim that an historical replay was captured at that time.
+            row.update(candidate_inputs=deepcopy(inputs), source_evidence=evidence)
             if row["status"] != "ok":
-                extra = [inputs.get("input_reason")]
+                extra = [inputs.get("input_reason"), inputs.get("annual_eps_reason")]
                 if row["type"] in {"稳定", "周期", "未盈利成长"} and inputs.get("diluted_shares") is None:
                     extra.append(inputs.get("diluted_shares_reason"))
                 if row["type"] == "周期":
