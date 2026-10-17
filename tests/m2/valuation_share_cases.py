@@ -17,6 +17,7 @@ def assert_valuation_share_contract(input_facts):
     assert proof["period_kind"] == "quarter" and proof["duration_days"] == 91
     assert proof["start"] == "2026-04-01" and proof["end"] == "2026-06-30"
     assert proof["unit"] == "shares" and proof["filed"] == "2026-08-01"
+    assert select_weighted_shares(raw, ticker="TSM", as_of=day)[1]["listed_share_ratio"] == 5
     changed = deepcopy(raw)
     rows = changed["facts"]["us-gaap"]["WeightedAverageNumberOfDilutedSharesOutstanding"]["units"]["shares"]
     rows[-1]["val"] = 120_000_000
