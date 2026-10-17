@@ -2647,6 +2647,61 @@ def test_claim_fields_omit_unsupported(tmp_path):
     assert idle.calls == 0
     assert already[0]["role"] == "background"
     assert already[0]["claims"] == []
+    level_cases = [
+        ("one", 1, 4, 1),
+        ("two", 2, 1, 2),
+        ("three", 3, 1, 3),
+        ("four", 4, 1, 4),
+        ("model-string", 4, "1", 4),
+        ("unknown", None, 1, None),
+        ("bool", True, 1, None),
+        ("false", False, 1, None),
+        ("string", "4", 1, None),
+        ("float", 4.0, 1, None),
+        ("zero", 0, 1, None),
+        ("five", 5, 1, None),
+    ]
+    source_items = [{"info_id": name, "source_level": source} for name, source, _model, _expected in level_cases]
+    source_payload = claim_payload(source_items)
+    for row, (_name, _source, _model, expected) in zip(source_payload["items"], level_cases, strict=True):
+        assert row.get("source_level") == expected
+        if expected is None:
+            assert "source_level" not in row
+    model_rows = [
+        {
+            "info_id": name,
+            "claims": [{"subject": "Issuer", "direction": "down", "mechanism": "竞争", "source_level": model}],
+        }
+        for name, _source, model, _expected in level_cases
+    ]
+    _recording(tmp_path, "claim_extraction", source_payload, {"items": model_rows})
+    bound = attach_claims(source_items, Client(recordings=tmp_path))
+    for row, (_name, source, _model, expected) in zip(bound, level_cases, strict=True):
+        assert row["source_level"] == source
+        claim = row["claims"][0]
+        assert claim.get("source_level") == expected
+        if expected is None:
+            assert "source_level" not in claim
+        # Source binding does not invent a semantic correction or a verified flag.
+        assert claim["direction"] == "down" and claim["mechanism"] == "竞争"
+        assert "operating_impact_proven" not in claim
+    old_claim = {"subject": "Issuer", "source_level": 1}
+    known = {"info_id": "known", "source_level": 4, "claims": [old_claim]}
+    unknown = {"info_id": "unknown", "claims": [old_claim]}
+    assert attach_claims([known], idle)[0]["claims"][0]["source_level"] == 4
+    assert "source_level" not in attach_claims([unknown], idle)[0]["claims"][0]
+    assert old_claim["source_level"] == 1
+    assert known["claims"][0]["source_level"] == 1
+    assert idle.calls == 0
+    mixed = [known, {"info_id": "fresh", "source_level": 3}]
+    _recording(
+        tmp_path,
+        "claim_extraction",
+        claim_payload(mixed),
+        {"items": [{"info_id": "fresh", "claims": [{"subject": "Issuer", "source_level": 1}]}]},
+    )
+    mixed_bound = attach_claims(mixed, Client(recordings=tmp_path))
+    assert [row["claims"][0]["source_level"] for row in mixed_bound] == [4, 3]
     with pytest.raises(ValueError, match="40"):
         attach_claims([{"info_id": str(index)} for index in range(41)], idle)
     assert idle.calls == 0
@@ -2681,6 +2736,15 @@ def test_model_output_contract_rejects_a_bad_structure():
     assert forbidden <= set(claim_schema["forbidden"])
     assert candidate_payload({"anomaly_id": "a"}, [], [])["output"] == candidate_output()
     assert claim_payload([{"info_id": "n1"}])["output"] == claim_output()
+    assert claim_schema["items"][0]["claims"][0]["source_level"] == {"type": "integer", "enum": [1, 2, 3, 4]}
+    assert "Never infer or regrade" in claim_schema["source_level_policy"]
+    assert "Omit unsupported direction or mechanism" in claim_schema["fact_policy"]
+    for value in (True, False, "1", 1.0, 0, 5, None):
+        parsed = read_claims({"items": [{"info_id": "n1", "claims": [{"subject": "Issuer", "source_level": value}]}]})
+        assert parsed == {"n1": [{"subject": "Issuer"}]}
+    for value in (1, 2, 3, 4):
+        parsed = read_claims({"items": [{"info_id": "n1", "claims": [{"subject": "Issuer", "source_level": value}]}]})
+        assert parsed == {"n1": [{"subject": "Issuer", "source_level": value}]}
     with pytest.raises(ValueError, match="结构不合格"):
         read_candidates({"candidates": [{"mechanism": "需求", "info_ids": ["n1"], "affected": "wrong"}]})
     with pytest.raises(ValueError, match="结构不合格"):
@@ -4578,11 +4642,14 @@ def test_labels_keep_a_closed_conclusion():
     )[0]
     assert still_open["lifecycle"] == "基本面核查中"
     assert still_open["report"].get("deadline_outcome") is None
-    assert still_open["report"]["fundamental_standing"] == "待验证"
+    # No saved candidate: the labels stage must not create one to infer a standing.
+    assert still_open["report"]["fundamental_standing"] is None
 
 
 @pytest.mark.phase1_blocking
 def test_labels_reload_a_saved_conclusion():
+    from copy import deepcopy
+
     from inves_cog.ingest.market import regular_bounds
     from inves_cog.perception.attribution.chain import execute_stage
     from inves_cog.perception.attribution.store import Store
@@ -4601,7 +4668,11 @@ def test_labels_reload_a_saved_conclusion():
     scores = {"供给": {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "magnitude": 1.0}}
 
     class Propose:
+        def __init__(self):
+            self.calls = []
+
         def call(self, task, payload):
+            self.calls.append(task)
             if task == "claim_extraction":
                 return {"items": [{"info_id": "nvda-news", "claims": []}]}
             return {
@@ -4622,7 +4693,10 @@ def test_labels_reload_a_saved_conclusion():
             self.row = None
 
         def execute(self, statement, params):
-            if "LEFT JOIN perception.reports" in statement:
+            if statement == "SELECT report FROM perception.reports WHERE anomaly_id = %s":
+                report = self.reports.get(params[0])
+                self.row = None if report is None else (report,)
+            elif "LEFT JOIN perception.reports" in statement:
                 saved = self.linkage.get(params[0])
                 report = None if saved is None else self.reports.get(saved["anomaly_id"])
                 self.row = (
@@ -4761,8 +4835,69 @@ def test_labels_reload_a_saved_conclusion():
     )[0]
     assert still_open["lifecycle"] == "基本面核查中"
     assert still_open["report"].get("deadline_outcome") is None
-    assert still_open["report"]["fundamental_standing"] == "待验证"
+    assert still_open["report"]["fundamental_standing"] is None
     assert memory.linkage["evt-nvda-open"]["deadline_outcome"] is None
+
+    class NeverModel:
+        def __init__(self):
+            self.calls = 0
+
+        def call(self, task, payload):
+            self.calls += 1
+            raise AssertionError("Only the candidates stage may generate")
+
+    morning = datetime(2026, 10, 15, 1, 15, tzinfo=timezone.utc)
+    tracking = morning + timedelta(minutes=15)
+    noon = morning + timedelta(hours=3, minutes=15)
+    discovered = {
+        **anomaly("nvda-discovered", []),
+        "members": [{"ticker": "NVDA", "earnings_reaction": True, "guidance_8k": False, "rating_change": False}],
+        "deadline_on": "2026-10-30",
+    }
+    discovered.pop("prior_event")
+    visible = [{key: value for key, value in news.items() if key != "claims"}]
+    visible[0]["entities"] = ["NVDA"]
+    fresh = Memory()
+    generator = Propose()
+    first = execute_stage(
+        "attribution_candidates", [discovered], visible, as_of=morning, client=generator, store=Store(fresh)
+    )[0]
+    assert generator.calls == ["claim_extraction", "anomaly_candidates"]
+    assert first["lifecycle"] == "已发现"
+    assert f"evt-{discovered['anomaly_id']}" not in fresh.linkage
+    never = NeverModel()
+    followed = execute_stage(
+        "attribution_tracks", [discovered], visible, as_of=tracking, client=never, store=Store(fresh)
+    )[0]
+    assert followed["report"]["analysis_reused"] is True
+    assert followed["history"] == first["history"]
+    assert followed["report"]["candidates"] == first["report"]["candidates"]
+    before_label = deepcopy(fresh.linkage)
+    labelled = execute_stage("attribution_labels", [discovered], visible, as_of=noon, client=never, store=Store(fresh))[
+        0
+    ]
+    assert never.calls == 0
+    assert labelled["lifecycle"] == "已发现"
+    assert labelled["history"] == first["history"]
+    assert labelled["report"]["candidates"] == first["report"]["candidates"]
+    assert labelled["report"]["sources"] == first["report"]["sources"]
+    assert fresh.linkage == before_label == {}
+
+    old = deepcopy(fresh.reports[discovered["anomaly_id"]])
+    changed = [{**visible[0], "summary": "Changed after the saved generation"}]
+    pending = execute_stage(
+        "attribution_tracks", [discovered], changed, as_of=tracking, client=never, store=Store(fresh)
+    )[0]
+    assert pending["report"]["analysis_reused"] is False
+    assert "候选待更新" in pending["degraded"]
+    assert not any(row.get("scored") for row in pending["report"]["candidates"])
+    fresh.reports[discovered["anomaly_id"]] = old
+    fresh.reports[discovered["anomaly_id"]]["stage_analysis"]["as_of"] = (noon + timedelta(hours=1)).isoformat()
+    future = execute_stage(
+        "attribution_tracks", [discovered], visible, as_of=tracking, client=never, store=Store(fresh)
+    )[0]
+    assert future["report"]["analysis_reused"] is False
+    assert never.calls == 0
 
 
 @pytest.mark.phase1_blocking
@@ -4778,7 +4913,10 @@ def test_labels_do_not_overwrite_a_saved_track():
             self.row = None
 
         def execute(self, statement, params):
-            if "LEFT JOIN perception.reports" in statement:
+            if statement == "SELECT report FROM perception.reports WHERE anomaly_id = %s":
+                report = self.reports.get(params[0])
+                self.row = None if report is None else (report,)
+            elif "LEFT JOIN perception.reports" in statement:
                 saved = self.linkage.get(params[0])
                 report = None if saved is None else self.reports.get(saved["anomaly_id"])
                 self.row = (
@@ -4970,7 +5108,7 @@ def test_labels_do_not_overwrite_a_saved_track():
     )
     unavailable = labelled(memory, "persist-oppose", moments[2], items=[news], client=None)
     assert unavailable["lifecycle"] == "已衰减·无影响"
-    assert unavailable["degraded"] == "模型调用失败"
+    assert unavailable["degraded"] == "旧报告缺少分析时点，仅继承已持久事实"
     assert unavailable["report"]["fundamental_standing"] == "冲突"
     assert unavailable["operating_impact_proven"] is True
     kept_prior(

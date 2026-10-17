@@ -40,6 +40,16 @@ class Store:
     def __init__(self, connection):
         self.connection = connection
 
+    def report(self, anomaly_id):
+        found = self.connection.execute(
+            "SELECT report FROM perception.reports WHERE anomaly_id = %s",
+            (anomaly_id,),
+        ).fetchone()
+        if found is None:
+            return None
+        report = _cell(found, 0, "report")
+        return dict(report) if isinstance(report, dict) else None
+
     def prior(self, event_id):
         found = self.connection.execute(
             "SELECT e.lifecycle, e.history, e.deadline_outcome, e.closing_reason, e.unknowns, r.report "
