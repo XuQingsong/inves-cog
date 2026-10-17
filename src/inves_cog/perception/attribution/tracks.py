@@ -3,7 +3,7 @@
 import math
 from datetime import date, datetime
 
-from inves_cog.ingest.market import next_trading_day, regular_bounds
+from inves_cog.ingest.market import NY, next_trading_day, regular_bounds
 
 
 def capital_state(sessions_elapsed, cumulative, first):
@@ -62,9 +62,11 @@ def earliest_deadline(started_on, *, deadline_on=None, earnings_sessions=None, m
     mechanism = _session_count(mechanism_sessions)
     found = []
     explicit = _as_date(deadline_on)
+    started = _event_day(started_on)
+    if explicit is not None and started is not None and explicit < started:
+        raise ValueError("期限早于事件")
     if explicit is not None:
         found.append(explicit)
-    started = _as_date(started_on)
     if started is not None:
         offset = deadline_offset(earnings, mechanism)
         found.append(_add_sessions(started, offset))
@@ -98,6 +100,12 @@ def _add_sessions(day, count):
     for _ in range(count):
         current = next_trading_day(current)
     return current
+
+
+def _event_day(value):
+    if isinstance(value, datetime) and value.tzinfo is not None:
+        return value.astimezone(NY).date()
+    return _as_date(value)
 
 
 def _as_date(value):

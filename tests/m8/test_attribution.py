@@ -4172,6 +4172,38 @@ def test_negative_session_count_does_not_expire_on_the_start_day():
 
 
 @pytest.mark.phase1_blocking
+def test_deadline_before_the_event_does_not_close_it():
+    from zoneinfo import ZoneInfo
+
+    from inves_cog.ingest.market import regular_bounds
+    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.tracks import earliest_deadline
+
+    start = regular_bounds(date(2026, 10, 14))[0]
+    anomaly = {
+        "anomaly_id": "nvda-early-date",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": start,
+        "deadline_on": "2026-10-01",
+        "operating_records": [],
+        "prior_event": {"lifecycle": "基本面核查中", "history": []},
+    }
+    beijing = datetime(2026, 10, 15, 9, 30, tzinfo=ZoneInfo("Asia/Shanghai"))
+    row = execute_stage("attribution_tracks", [anomaly], [], as_of=beijing, client=None)[0]
+    assert row["status"] == "待分析"
+    assert row["degraded"] == "期限早于事件"
+    assert row["saved"] is False
+    assert row.get("lifecycle") != "已衰减·无影响"
+    with pytest.raises(ValueError, match="期限早于事件"):
+        earliest_deadline(start, deadline_on="2026-10-01")
+    kept = earliest_deadline(start, deadline_on="2026-10-14")
+    assert kept == date(2026, 10, 14)
+
+
+@pytest.mark.phase1_blocking
 def test_scheduled_job_records_the_stage_itself():
     from inves_cog.perception.attribution.chain import run_scheduled
 
