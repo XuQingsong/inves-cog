@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-008  已收到（估值输入覆盖修复）  2026-10-17
+- 已全文读取main的ops/inbox/A/A-008.md、control（A运行）及README；A007准确3ac5f9b修复已验证收口，本次只做现有M2/M5输入覆盖修复，继续原PR #17/phase1/m5-valuation，不开重复PR。
+- 当前基线 **3ac5f9b26a6d116675e01d3a4711152aa3c9cae6**，本地干净。先建立44只逐股全部缺口与现有原件定位，再提交失败回归，新增估值专用稀释加权股本并适配M5；旧shares/EPS/规则A/golden/订单结果保持。
+- 变更：A008明确授权最小M2 JSON可选字段及同名来源扩展（拟diluted_shares_weighted），不改表结构、迁移、共享写回或采集。季度/年度实际期间及拆股/ADS/多类股来源均保留；未知不代理，未定义研究参数仅审计。
+- 原始资料仅本机只读验收，不上传或重复询问公开上传许可。自动接单仍暂停，不做M9/M10、合并或部署；A008完成后交独立验收。
+
 ## A-007  已完成（M5修复交付，需求方有条件复验通过）  2026-10-17
 - 已核对main的A-007 **K06正式答复**及[M5复验与收口报告](https://github.com/XuQingsong/inves-cog/blob/main/docs/phase1/acceptance/M5-recheck-2026-10-17.md)：代码与留存资料历史重建有条件通过，F1/F2关闭，F3可复核重建证据补齐。
 - **PR #17已恢复正式「[M5] 提交验收」，draft=false**：https://github.com/XuQingsong/inves-cog/pull/17。源码head保持 **3ac5f9b26a6d116675e01d3a4711152aa3c9cae6**，本地同SHA且干净；[该准确head的phase1-blocking CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39003612974)。本次只更新PR摘要和交付状态，未改源码或新增代码提交。
