@@ -1,6 +1,6 @@
 """Explanation report. A closed lifecycle still names the reason and the open unknowns."""
 
-from inves_cog.perception.attribution.candidates import market_fingerprint
+from inves_cog.perception.attribution.candidates import market_consensus, market_fingerprint
 from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.dims import (
     falsified_rumor,
@@ -157,6 +157,7 @@ def explanation_report(
     relation=None,
     primary=None,
     research=None,
+    consensus=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -196,6 +197,7 @@ def explanation_report(
         "relation_step": relation_step(relation),
         "primary_signal": primary_signal(primary),
         "research_order": research_order(research),
+        "market_consensus": market_consensus(consensus),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

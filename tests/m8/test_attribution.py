@@ -1448,6 +1448,62 @@ def test_research_order_is_not_the_review_queue():
 
 
 @pytest.mark.phase1_blocking
+def test_market_consensus_stays_on_the_market_layer():
+    from inves_cog.perception.attribution.candidates import market_consensus
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert market_consensus(None) is None
+    empty = market_consensus([])
+    assert empty["source_roots"] == 0
+    assert empty["search_ratio"] is None
+    assert empty["sell_side"] is False
+    assert empty["social_connected"] is False
+    assert empty["confidence"] is None
+    assert empty["operating_evidence"] is False
+    social = market_consensus(
+        [
+            {"kind": "social", "source_root": "weibo", "search_ratio": 9},
+            {"kind": "news", "source_root": "reuters"},
+            {"kind": "news", "source_root": "reuters"},
+            {"kind": "news", "source_root": ""},
+            {"kind": "commentary", "source_level": 1, "source_root": "company"},
+            {"kind": "commentary", "source_level": 4, "source_root": "blog"},
+            {"kind": "commentary", "source_level": 2, "source_root": "barclays", "search_ratio": 2.5},
+        ]
+    )
+    assert social["source_roots"] == 4
+    assert social["search_ratio"] == 2.5
+    assert social["sell_side"] is True
+    assert social["social_connected"] is False
+    assert social["confidence"] is None
+    assert social["market_only"] is True
+    assert social["fundamental_standing"] is None
+    unknown = market_consensus([{"kind": "commentary", "source_root": "desk"}])
+    assert unknown["sell_side"] is None
+    assert unknown["source_roots"] == 1
+    split = market_consensus(
+        [
+            {"kind": "news", "source_root": "a", "search_ratio": 2},
+            {"kind": "news", "source_root": "b", "search_ratio": 4},
+        ]
+    )
+    assert split["search_ratio"] is None
+    assert split["source_roots"] == 2
+    anomaly = {"anomaly_id": "consensus", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["market_consensus"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], consensus=[{"kind": "social", "source_root": "weibo"}])
+    assert report["market_consensus"]["source_roots"] == 0
+    assert report["market_consensus"]["operating_evidence"] is False
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

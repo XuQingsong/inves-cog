@@ -23,6 +23,53 @@ def market_confirmed(*, claim_time, response, independent, alternative):
     return bool(claim_time and response and independent and alternative is not None and alternative >= 0.5)
 
 
+def market_consensus(items):
+    """Count roots, search, and sell-side notes. Social is off, and this stays off the fundamental column."""
+    if items is None:
+        return None
+    roots = set()
+    ratios = []
+    sell_side = False
+    sell_side_unknown = False
+    for row in items:
+        if row.get("kind") == "social":
+            continue
+        root = row.get("source_root")
+        if root:
+            roots.add(root)
+        if row.get("search_ratio") is not None:
+            ratios.append(row["search_ratio"])
+        if row.get("kind") != "commentary":
+            continue
+        level = row.get("source_level")
+        if level in (2, 3):
+            sell_side = True
+        elif level is None:
+            sell_side_unknown = True
+    if sell_side:
+        commentary = True
+    elif sell_side_unknown:
+        commentary = None
+    else:
+        commentary = False
+    if not ratios:
+        search = None
+    elif all(value == ratios[0] for value in ratios):
+        search = ratios[0]
+    else:
+        search = None
+    return {
+        "source_roots": len(roots),
+        "search_ratio": search,
+        "sell_side": commentary,
+        "social_connected": False,
+        "confidence": None,
+        "market_only": True,
+        "fundamental_standing": None,
+        "operating_evidence": False,
+    }
+
+
 def market_fingerprint(reading):
     """A failed check rules that explanation out. Passing checks do not name the only cause."""
     if reading is None:
