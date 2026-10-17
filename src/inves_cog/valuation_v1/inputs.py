@@ -72,6 +72,24 @@ def diluted_shares(value, source):
     )
 
 
+def annual_basis(row, entity):
+    if str(row.form).removesuffix("/A") in {"10-K", "20-F", "40-F"}:
+        return True
+    if not entity.get("foreign") or "annual_basis" not in row.health_codes or "interim_ttm" in row.field_sources:
+        return False
+    # M2 can publish an unchanged annual basis on a 6-K effective date. Its
+    # disclosed duration, rather than the event's form label, proves the period.
+    for source in row.field_sources.get("rev_ttm", {}).get("components", []):
+        if (
+            source.get("start")
+            and source.get("end") == str(row.period_end)
+            and source.get("filed", "9999") <= str(row.filed)
+            and 350 <= (day(source["end"]) - day(source["start"])).days <= 380
+        ):
+            return True
+    return False
+
+
 def financial_inputs(state, states, entity, *, as_of=None):
     if state is None:
         return {"ticker": entity["ticker"], "input_reason": "M2 fixed状态缺失"}
@@ -117,7 +135,8 @@ def financial_inputs(state, states, entity, *, as_of=None):
             out["weighted_share_input_reason"] = (
                 "independent weighted denominator unverified: "
                 f"source period={proof.get('end')}, financial period={state.period_end}, "
-                f"filed={proof.get('filed')}, unit={proof.get('unit')}, security_basis={proof.get('security_basis')}"
+                f"filed={proof.get('filed')}, unit={proof.get('unit')}, security_basis={proof.get('security_basis')}, "
+                f"listed share ratio={proof.get('listed_share_ratio')}; ordinary counts are not silently treated as ADS"
             )
     if out["diluted_shares"] is None:
         out["diluted_shares_reason"] = (
@@ -132,11 +151,7 @@ def financial_inputs(state, states, entity, *, as_of=None):
     )
     annual = {}
     for row in states:
-        if (
-            row.filed > state.filed
-            or row.period_end is None
-            or str(row.form).removesuffix("/A") not in {"10-K", "20-F", "40-F"}
-        ):
+        if row.filed > state.filed or row.period_end is None or not annual_basis(row, entity):
             continue
         if row.period_end not in annual or row.filed > annual[row.period_end].filed:
             annual[row.period_end] = row
@@ -148,7 +163,7 @@ def financial_inputs(state, states, entity, *, as_of=None):
             r.field_sources.get("eps_ttm", {}),
             events,
             as_of or state.filed,
-            periods=1 if str(r.form).removesuffix("/A") in {"20-F", "40-F"} else 4,
+            periods=1 if entity.get("foreign") or str(r.form).removesuffix("/A") in {"20-F", "40-F"} else 4,
         )
         for r in years
     ]

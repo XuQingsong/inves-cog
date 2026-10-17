@@ -98,7 +98,7 @@ def select_weighted_shares(companyfacts, *, ticker, as_of):
     if ticker in {"TSM", "ASML", "NOK", "ARM", "SKHY"}:
         proof.update(
             security_basis="ordinary_shares",
-            listed_share_ratio=1 if ticker in {"ASML", "NOK", "ARM"} else None,
+            listed_share_ratio=5 if ticker == "TSM" else 1 if ticker in {"ASML", "NOK", "ARM"} else None,
             security_basis_reference="existing M2 interims.BASIS; ADS conversion must be established separately",
         )
     return value, proof
