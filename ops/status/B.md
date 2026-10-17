@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 11:48 北京
+
+- 草稿 PR #18 head `6fddc08`。没有合并进 main。本地 `make phase1-test`：223 passed，18 deselected。
+- 四个案例的固定输入可以写成规范载荷。文件字节的 SHA-256 就是计划里的哈希。`--capture` 留给需求方用已批准的客户端落录音。本轮没有调用模型，没有编造成功录音。一条失败不挡住下一条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 11:35 北京
 
 - 草稿 PR #18 head `e173b23`。没有合并进 main。本地 `make phase1-test`：221 passed，18 deselected。
