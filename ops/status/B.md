@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 15:04 北京
+
+- 草稿 PR #18 head `6f4d199`。没有合并进 main。本地 `make phase1-test`：236 passed，18 deselected。
+- 已看到答复 `6ad76e5`。12:30 再跑时从已经保存的事件和报告读回结案。条件风险、支持和反证都留下，未知项也留下。没结案的不新结案，也不凭终态写成支持。
+- Q-M8-16 第 4、第 5 项还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 14:55 北京
 
 - 草稿 PR #18 head `14f388e`。没有合并进 main。本地 `make phase1-test`：235 passed，18 deselected。
