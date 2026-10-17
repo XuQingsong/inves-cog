@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.161" timestamp="2026-10-17T13:26:12.325048+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_fundamentals" name="test_fin_state_pit" time="0.003"><failure message="ModuleNotFoundError: No module named 'inves_cog.ingest.fundamentals.valuation_shares'">def test_fin_state_pit():
+        from tests.m2.valuation_share_cases import assert_valuation_share_contract
+    
+&gt;       assert_valuation_share_contract(input_facts)
+
+tests/m2/test_fundamentals.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input_facts = &lt;function input_facts at 0x108f76ca0&gt;
+
+    def assert_valuation_share_contract(input_facts):
+        from inves_cog.ingest.fundamentals.extractors import extract_state
+&gt;       from inves_cog.ingest.fundamentals.valuation_shares import select_weighted_shares
+E       ModuleNotFoundError: No module named 'inves_cog.ingest.fundamentals.valuation_shares'
+
+tests/m2/valuation_share_cases.py:11: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.015"><failure message="AssertionError">@pytest.mark.phase1_blocking
+    def test_position_panel():
+        from tests.m5.coverage_cases import assert_coverage_contract
+    
+&gt;       assert_coverage_contract()
+
+tests/m5/test_valuation.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_coverage_contract():
+        from inves_cog.ingest.fundamentals.state import FinState
+        from inves_cog.valuation_v1.inputs import financial_inputs
+        from inves_cog.valuation_v1.calculations import calculate
+    
+        state = FinState(
+            ticker="FIXTURE",
+            extractor="fixed",
+            filed=date(2026, 8, 1),
+            period_end=date(2026, 6, 30),
+            values={"shares": 999, "diluted_shares_weighted": 12, "fcf_ttm": 120},
+            field_sources={
+                "shares": {"method": "instant"},
+                "diluted_shares_weighted": {
+                    "method": "diluted_weighted_disclosed",
+                    "start": "2026-04-01",
+                    "end": "2026-06-30",
+                    "filed": "2026-08-01",
+                    "period_kind": "quarter",
+                    "duration_days": 91,
+                    "unit": "shares",
+                    "security_basis": "consolidated_common_equivalent",
+                    "accn": "fixture",
+                },
+            },
+        )
+        entity = {"ticker": "FIXTURE", "sector": "test"}
+        data = financial_inputs(state, [], entity)
+&gt;       assert data["diluted_shares"] == 12 and data["fcf_per_share"] == 10
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m5/coverage_cases.py:34: AssertionError</failure></testcase></testsuite></testsuites>

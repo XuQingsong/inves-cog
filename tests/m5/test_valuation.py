@@ -222,6 +222,9 @@ def test_implied_growth_no_solution():
 
 @pytest.mark.phase1_blocking
 def test_position_panel():
+    from tests.m5.coverage_cases import assert_coverage_contract
+
+    assert_coverage_contract()
     from tests.m5.review_cases import assert_pe_reason_recovery
 
     assert_pe_reason_recovery()
