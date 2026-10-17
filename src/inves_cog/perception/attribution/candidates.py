@@ -1,6 +1,7 @@
 """Drop candidates the model cannot support, then keep one unscored default."""
 
 from inves_cog.perception.attribution.evidence import basket_specificity, exposure_gradient, time_alignment
+from inves_cog.perception.attribution.grounding import copy_support
 from inves_cog.perception.attribution.second_hit import denial_response
 
 DEFAULT = "无事件/资金面"
@@ -21,19 +22,22 @@ def validate_candidates(candidates, retrieved_ids, universe):
 
 def _cited(candidate, citations, universe):
     direction = candidate.get("direction")
-    return {
-        "mechanism": candidate.get("mechanism"),
-        "info_ids": citations,
-        "affected": _affected(candidate.get("affected") or [], universe),
-        "chain": list(candidate.get("chain") or []),
-        "control_baskets": list(candidate.get("control_baskets") or []),
-        "direction": direction if direction in {"up", "down"} else None,
-        "scored": True,
-        "score": None,
-        "confidence": None,
-        "fundamental": None,
-        "evidence": None,
-    }
+    return copy_support(
+        candidate,
+        {
+            "mechanism": candidate.get("mechanism"),
+            "info_ids": citations,
+            "affected": _affected(candidate.get("affected") or [], universe),
+            "chain": list(candidate.get("chain") or []),
+            "control_baskets": list(candidate.get("control_baskets") or []),
+            "direction": direction if direction in {"up", "down"} else None,
+            "scored": True,
+            "score": None,
+            "confidence": None,
+            "fundamental": None,
+            "evidence": None,
+        },
+    )
 
 
 def _affected(rows, universe):

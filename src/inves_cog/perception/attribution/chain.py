@@ -27,6 +27,7 @@ from inves_cog.perception.attribution.evidence import (
     time_alignment,
 )
 from inves_cog.perception.attribution.graph_context import project_graph
+from inves_cog.perception.attribution.grounding import candidate_support, claim_support
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.magnitude import implied_magnitude
@@ -277,6 +278,12 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     report["lifecycle"] = state
     report["history"] = history
     report["graph_context"] = _graph_context(anomaly, as_of)["metadata"]
+    if anomaly.get("universe") != "wide":
+        report["claim_support"] = [
+            {"info_id": item["info_id"], "claim_index": index, **claim_support(claim, item)}
+            for item in claimed
+            for index, claim in enumerate(item.get("claims") or [])
+        ]
     if (
         stage == "attribution_tracks"
         and prior is not None
@@ -657,7 +664,11 @@ def _apply_score(candidates, anomaly, items, overrides):
         components.update(_override(overrides, row.get("mechanism")))
         scored = evidence_score(components)
         copied = dict(row)
-        copied["evidence"] = {**scored, "components": {name: components.get(name) for name in _EVIDENCE}}
+        copied["evidence"] = {
+            **scored,
+            "components": {name: components.get(name) for name in _EVIDENCE},
+            "support_audit": candidate_support(row, items),
+        }
         copied["score"] = scored["total"]
         copied["confidence"] = scored["confidence"]
         copied["fundamental"] = None

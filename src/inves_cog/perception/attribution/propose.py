@@ -3,6 +3,7 @@
 from copy import deepcopy
 
 from inves_cog.perception.attribution.candidates import validate_candidates
+from inves_cog.perception.attribution.grounding import claim_support, copy_support
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
@@ -20,12 +21,27 @@ def candidate_output():
                 "control_baskets": ["string"],
                 "info_ids": ["string"],
                 "direction": "up|down",
+                "support": [
+                    {
+                        "ticker": "string",
+                        "info_id": "string",
+                        "source_field": "headline|summary",
+                        "quote": "exact supplied text",
+                        "inference": "bounded hypothesis bridge",
+                    }
+                ],
             }
         ],
         "max": 5,
         "mechanism": sorted(MECHANISMS),
         "selection_policy": {
-            "version": "evidence-bridge-v1",
+            "version": "evidence-bridge-v2-literal-anchors",
+            "anchors": (
+                "For each affected ticker provide cited exact headline/summary facts and a bounded "
+                "inference bridge. A quote match only confirms provenance; it does not verify the "
+                "inference. Missing per-ticker support remains a research gap. Do not use a ticker list "
+                "or basket membership as proof."
+            ),
             "count": (
                 "Return zero to five supported hypotheses. Allowed mechanisms are not a checklist; "
                 "do not fill one per type or pad to the maximum."
@@ -67,8 +83,17 @@ def _item_view(item):
         "headline": item.get("headline"),
         "summary": item.get("summary"),
         "role": item.get("role"),
-        "claims": item.get("claims") or [],
+        "claims": [
+            (
+                {key: deepcopy(value) for key, value in claim.items() if key != "support"}
+                if isinstance(claim, dict)
+                else deepcopy(claim)
+            )
+            for claim in item.get("claims") or []
+        ],
     }
+    if any(isinstance(claim, dict) and "support" in claim for claim in item.get("claims") or []):
+        view["claim_support"] = [claim_support(claim, item) for claim in item.get("claims") or []]
     # Date-only or timezone-unknown metadata is not an exact published_at.
     # Preserve its supplied bounds; this does not admit it to production windows.
     if item.get("published_interval") is not None:
@@ -206,7 +231,7 @@ def _candidate_row(row):
         parsed["direction"] = direction
     if mechanism not in MECHANISMS:
         return None
-    return parsed
+    return copy_support(row, parsed)
 
 
 def _required_list(row, key):

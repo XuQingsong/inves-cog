@@ -2822,6 +2822,36 @@ def test_claim_fields_omit_unsupported(tmp_path):
     full = [{"info_id": "n2", "claims": []}, {"info_id": "n1", "claims": []}]
     assert [row["claims"] for row in attach_claims(pending, Coverage(full))] == [[], []]
 
+    # Optional field anchors are source-literal checks, never semantic approval.
+    from inves_cog.perception.attribution.grounding import candidate_support, claim_support
+
+    fact = {"info_id": "anchor", "headline": "Yield is 15%.", "summary": "Issuer plans capacity for 2027."}
+    annotated = {
+        "subject": "Issuer",
+        "variable": "yield",
+        "direction": "down",
+        "support": [{"info_id": "anchor", "field": "direction", "source_field": "headline", "quote": "15%"}],
+    }
+    field_audit = claim_support(annotated, fact)
+    assert field_audit["anchors"][0]["literal_anchor_valid"] is True
+    assert field_audit["semantic_verdict"] is None
+    assert field_audit["operating_impact_proven"] is False
+    sent = candidate_payload({}, [{**fact, "claims": [annotated]}], [])["items"][0]
+    assert "support" not in sent["claims"][0]
+    assert sent["claim_support"][0]["semantic_verdict"] is None
+    scoped = {
+        "info_ids": ["anchor"],
+        "affected": [{"ticker": "NVDA"}, {"ticker": "AMD"}],
+        "support": [{"info_id": "anchor", "ticker": "NVDA", "source_field": "summary", "quote": "capacity"}],
+    }
+    scope_audit = candidate_support(scoped, [fact])
+    assert scope_audit["unanchored_tickers"] == ["AMD"]
+    assert scope_audit["semantic_verdict"] is None
+    bad = {**annotated, "support": [{"info_id": "foreign", "field": "direction", "quote": "invented text"}]}
+    bad_view = candidate_payload({}, [{**fact, "claims": [bad]}], [])["items"][0]
+    assert bad_view["claim_support"][0]["anchors"][0]["literal_anchor_valid"] is False
+    assert "invented text" not in str(bad_view)
+
 
 @pytest.mark.phase1_blocking
 def test_model_output_contract_rejects_a_bad_structure():

@@ -1,5 +1,6 @@
 """Claim extraction. Fields the text does not support stay absent."""
 
+from inves_cog.perception.attribution.grounding import copy_support
 from inves_cog.perception.attribution.propose import MECHANISMS
 
 FIELDS = ("subject", "variable", "mechanism", "direction", "quantity", "horizon", "certainty", "source_level")
@@ -22,6 +23,16 @@ def claim_output():
                         "quantity": "string",
                         "horizon": "string",
                         "certainty": "string",
+                        "support": [
+                            {
+                                "info_id": "string",
+                                "field": "claim field name",
+                                "source_field": "headline|summary",
+                                "quote": "exact supplied text",
+                                "comparison_basis": "string",
+                                "statement_kind": "level|change|plan|realized|interpretation",
+                            }
+                        ],
                         "source_level": {"type": "integer", "enum": [1, 2, 3, 4]},
                     }
                 ],
@@ -37,6 +48,24 @@ def claim_output():
             "Omit unsupported direction or mechanism. Split facts with different directions; "
             "do not infer operating changes from a rating."
         ),
+        "grounding_policy": {
+            "version": "literal-field-support-v1",
+            "variable": (
+                "Direction describes this variable against an explicit comparable baseline, not its "
+                "stock-price implication. A level or unchanged value does not supply up/down. Omit "
+                "unsupported fields."
+            ),
+            "basis": (
+                "Keep comparison units, measurement basis and time separate. Incomparable reported totals "
+                "do not establish realized demand change. Reported plans are not realized output; "
+                "preserve future horizon."
+            ),
+            "anchors": (
+                "For each asserted field supply an exact headline/summary quote from this item's info_id. "
+                "Add comparison basis and statement kind only if supported. Quotes will be checked "
+                "literally; they do not establish semantic truth or operating proof."
+            ),
+        },
         "omit_when_unsupported": True,
         "forbidden": list(_FORBIDDEN),
     }
@@ -70,7 +99,7 @@ def normalize_claim(row):
         if key not in row or row[key] is None or not _allowed(key, row[key]):
             continue
         kept[key] = row[key]
-    return kept or None
+    return copy_support(row, kept) if kept else None
 
 
 def read_claims(result):
