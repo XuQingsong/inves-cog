@@ -36,3 +36,40 @@ def attention_line(held, max_abs_z):
     if held and max_abs_z >= 4:
         return "请人工查看"
     return None
+
+
+def coverage_check(days):
+    """Three strictly rising unexplained ratios raise the alarm. One step up does not."""
+    if days is None:
+        return None
+    rows = [_coverage_day(day) for day in days]
+    ratios = [row["unexplained_ratio"] for row in rows]
+    if len(ratios) < 3 or any(value is None for value in ratios):
+        alarm = None
+    else:
+        alarm = all(ratios[index] > ratios[index - 1] for index in range(1, len(ratios)))
+    return {
+        "days": rows,
+        "alarm": alarm,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _coverage_day(day):
+    total = day.get("total")
+    found = day.get("with_candidate")
+    unexplained = day.get("unexplained")
+    ratio = None
+    if _count(total) and _count(found) and _count(unexplained) and found <= total and unexplained <= total and total:
+        ratio = unexplained / total
+    return {
+        "total": total,
+        "with_candidate": found,
+        "unexplained": unexplained,
+        "unexplained_ratio": ratio,
+    }
+
+
+def _count(value):
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0

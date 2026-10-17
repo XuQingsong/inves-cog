@@ -1504,6 +1504,69 @@ def test_market_consensus_stays_on_the_market_layer():
 
 
 @pytest.mark.phase1_blocking
+def test_coverage_alarm_needs_three_rising_days():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.unexplained import coverage_check
+
+    assert coverage_check(None) is None
+    empty = coverage_check([])
+    assert empty["days"] == []
+    assert empty["alarm"] is None
+    one = coverage_check([{"total": 10, "with_candidate": 6, "unexplained": 1}])
+    assert one["days"][0]["unexplained_ratio"] == 0.1
+    assert one["alarm"] is None
+    two = coverage_check(
+        [
+            {"total": 10, "with_candidate": 6, "unexplained": 1},
+            {"total": 10, "with_candidate": 7, "unexplained": 2},
+        ]
+    )
+    assert two["alarm"] is None
+    rising = [
+        {"total": 10, "with_candidate": 4, "unexplained": 1},
+        {"total": 10, "with_candidate": 5, "unexplained": 2},
+        {"total": 10, "with_candidate": 6, "unexplained": 3},
+    ]
+    alarm = coverage_check(rising)
+    assert alarm["alarm"] is True
+    assert alarm["operating_evidence"] is False
+    assert alarm["fundamental_standing"] is None
+    flat = coverage_check(
+        [
+            {"total": 10, "with_candidate": 4, "unexplained": 1},
+            {"total": 10, "with_candidate": 5, "unexplained": 2},
+            {"total": 10, "with_candidate": 6, "unexplained": 2},
+        ]
+    )
+    assert flat["alarm"] is False
+    quiet_day = coverage_check(
+        [
+            {"total": 0, "with_candidate": 0, "unexplained": 0},
+            {"total": 10, "with_candidate": 1, "unexplained": 1},
+            {"total": 10, "with_candidate": 2, "unexplained": 2},
+        ]
+    )
+    assert quiet_day["days"][0]["unexplained_ratio"] is None
+    assert quiet_day["alarm"] is None
+    overflow = coverage_check([{"total": 2, "with_candidate": 3, "unexplained": 1}])
+    assert overflow["days"][0]["unexplained_ratio"] is None
+    flagged = coverage_check([{"total": True, "with_candidate": 1, "unexplained": 1}])
+    assert flagged["days"][0]["unexplained_ratio"] is None
+    anomaly = {"anomaly_id": "coverage", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["coverage_check"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], coverage=rising)
+    assert report["coverage_check"]["alarm"] is True
+    assert report["coverage_check"]["operating_evidence"] is False
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

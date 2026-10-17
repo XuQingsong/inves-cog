@@ -18,6 +18,7 @@ from inves_cog.perception.attribution.propose import research_order, review_queu
 from inves_cog.perception.attribution.retrieve import discard_review, explore_quota, retrieval_gap
 from inves_cog.perception.attribution.second_hit import denial_response
 from inves_cog.perception.attribution.tracks import local_support, track_reading
+from inves_cog.perception.attribution.unexplained import coverage_check
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
 CONSTRAINT_ITEMS = ("新增供给占需求增量", "投产与良率", "产品代际", "需求吸收", "订单相对可交付", "价格传导")
@@ -158,6 +159,7 @@ def explanation_report(
     primary=None,
     research=None,
     consensus=None,
+    coverage=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -198,6 +200,7 @@ def explanation_report(
         "primary_signal": primary_signal(primary),
         "research_order": research_order(research),
         "market_consensus": market_consensus(consensus),
+        "coverage_check": coverage_check(coverage),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
