@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 14:04 北京
+
+- 草稿 PR #18 head `036acfc`。没有合并进 main。本地 `make phase1-test`：231 passed，18 deselected。
+- 期限复验第 3 项：写明的期限早于事件起点时，这一条记为期限早于事件。10-01 不再当成 10-14 事件的最早期限，也不会立即结案。与起点同一天或更晚的日期仍可使用。
+- 期限复验第 4、第 5 项，以及 Q-M8-16 第 3 到第 5 项，还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 13:54 北京
 
 - 草稿 PR #18 head `bfb3f86`。没有合并进 main。本地 `make phase1-test`：230 passed，18 deselected。
