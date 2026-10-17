@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 13:15 北京
+
+- 草稿 PR #18 head `370575e`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
+- 09:30 的跟踪任务更新三轨并做截止日结案。空记录仍不会写成经营影响已证实。12:30 的打标任务不推进生命周期，报告里的标的代码留给下游。日程没有部署。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 13:06 北京
 
 - 草稿 PR #18 head `c52dbc0`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
