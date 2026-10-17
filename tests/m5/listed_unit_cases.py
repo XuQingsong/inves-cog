@@ -40,18 +40,23 @@ def assert_listed_units():
 
     book = ValuationBook()
     plain = {**stable(), "eps_ntm": None, "listed_unit_audit": {"eps_ntm": {"status": "absent"}}}
-    book.update("LISTED", date(2026, 10, 14), "稳定", plain, period="2026-06-30", price=100)
+    before = book.update("LISTED", date(2026, 10, 14), "稳定", plain, period="2026-06-30", price=100)
     missing_unit = book.update(
         "LISTED",
         date(2026, 10, 15),
         "稳定",
-        {**plain, "listed_unit_audit": {"eps_ntm": {"status": "unknown", "reason": "unit absent"}}},
+        {
+            **plain,
+            "pe_p50": plain["pe_p50"] * 1.1,
+            "listed_unit_audit": {"eps_ntm": {"status": "unknown", "reason": "unit absent"}},
+        },
         period="2026-06-30",
         price=110,
     )
     assert missing_unit["neutral"] is not None
     assert missing_unit["inputs"]["listed_unit_audit"]["eps_ntm"]["status"] == "unknown"
     assert missing_unit["trigger_audit"]["unit_contract_event"]
+    assert missing_unit["neutral"] == before["neutral"], "forecast audit alone must not refresh historical PE"
     recovered = book.update("LISTED", date(2026, 10, 16), "稳定", plain, period="2026-06-30", price=120)
     assert recovered["neutral"] is not None and recovered["trigger_audit"]["unit_contract_event"]
     assert_listing_adapter()
