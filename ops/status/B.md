@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 14:55 北京
+
+- 草稿 PR #18 head `14f388e`。没有合并进 main。本地 `make phase1-test`：235 passed，18 deselected。
+- 已看到答复 `1e73c89`。Q-M8-16 第 3 项：主链计入替代解释排除，权重仍是 15%。没有自身财报、8-K 或评级时这分是 1；有这些自身事件时这分是 0，总分低于 0.5，不进入假设。没有成员时这一项仍缺失，不写成 0。
+- 第 4、第 5 项还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 14:43 北京
 
 - 草稿 PR #18 head `4a218b9`。没有合并进 main。本地 `make phase1-test`：234 passed，18 deselected。
