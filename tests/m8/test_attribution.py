@@ -1244,6 +1244,65 @@ def test_discard_review_stops_at_twenty():
 
 
 @pytest.mark.phase1_blocking
+def test_full_text_stops_after_ninety_days():
+    from datetime import datetime, timedelta
+
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.retrieve import text_retention
+
+    seen = datetime(2026, 1, 1)
+    item = {
+        "body": "full filing text",
+        "summary": "short summary",
+        "vector": [0.1, 0.2],
+        "first_seen_at": seen,
+    }
+    assert text_retention(None) is None
+    assert text_retention({"item": item}) is None
+    assert text_retention({"as_of": seen, "item": {"body": "x"}}) is None
+    assert text_retention({"item": item, "as_of": seen - timedelta(seconds=1)}) is None
+    fresh = text_retention({"item": item, "as_of": seen + timedelta(days=90)})
+    assert fresh["full_text"] == "full filing text"
+    assert fresh["full_text_retained"] is True
+    assert fresh["summary_retained"] is True
+    assert fresh["vector_retained"] is True
+    assert fresh["searchable"] is True
+    assert fresh["operating_evidence"] is False
+    aged = text_retention({"item": item, "as_of": seen + timedelta(days=90, seconds=1)})
+    assert aged["full_text"] is None
+    assert aged["full_text_retained"] is False
+    assert aged["summary"] == "short summary"
+    assert aged["summary_retained"] is True
+    assert aged["vector_retained"] is True
+    assert aged["operating_evidence"] is False
+    assert aged["fundamental_standing"] is None
+    blank = {**item, "summary": "", "vector": []}
+    empty = text_retention({"item": blank, "as_of": seen + timedelta(days=91)})
+    assert empty["summary"] is None
+    assert empty["summary_retained"] is False
+    assert empty["vector_retained"] is False
+    assert empty["full_text"] is None
+    anomaly = {"anomaly_id": "archive", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["text_retention"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        archive={"item": item, "as_of": seen + timedelta(days=91)},
+    )
+    assert report["text_retention"]["full_text"] is None
+    assert report["text_retention"]["summary_retained"] is True
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_falsified_rumor_keeps_the_price_record():
     from inves_cog.perception.attribution.dims import falsified_rumor
     from inves_cog.perception.attribution.report import explanation_report

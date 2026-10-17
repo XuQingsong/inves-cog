@@ -299,6 +299,52 @@ def discard_review(items):
     }
 
 
+_FULL_TEXT_DAYS = 90
+
+
+def text_retention(reading):
+    """Full text stays for 90 days from first seen. Later, only the summary and vector remain."""
+    if reading is None:
+        return None
+    item = reading.get("item")
+    as_of = reading.get("as_of")
+    if not isinstance(item, dict) or as_of is None:
+        return None
+    seen = item.get("first_seen_at")
+    if seen is None:
+        return None
+    try:
+        age = as_of - seen
+    except TypeError:
+        return None
+    if not isinstance(age, timedelta) or age < timedelta(0):
+        return None
+    within = age <= timedelta(days=_FULL_TEXT_DAYS)
+    body = item.get("body")
+    summary = item.get("summary")
+    return {
+        "full_text": body if within and _text(body) else None,
+        "full_text_retained": within and _text(body),
+        "summary": summary if _text(summary) else None,
+        "summary_retained": _text(summary),
+        "vector_retained": _vector(item),
+        "searchable": True,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _text(value):
+    return isinstance(value, str) and value != ""
+
+
+def _vector(item):
+    if item.get("has_vector") is True:
+        return True
+    vector = item.get("vector")
+    return isinstance(vector, (list, tuple)) and len(vector) > 0
+
+
 def _monitors(present, monitored):
     found = []
     for row in monitored:
