@@ -1,5 +1,15 @@
 # A 线回报
 
+## A-007  已完成（开发交付并正式提交验收）  2026-10-17
+- **PR #17「[M5] 提交验收」已转正式（draft=false）**：https://github.com/XuQingsong/inves-cog/pull/17。完整head **0ee7c599610abd056373fbd5e74fbfb421f559c0**，准确head的[phase1-blocking CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/38994575578)。本地工作树对齐同SHA且干净；保留先失败测试/夹具、后实现历史。
+- D-15已由需求方在main **fc13f66e6e3d61412299af4080878a5d9ffc55c3** 的ops/answers/A-007.md独立确认关闭：job6394=ok、59/59、零失败、时间/来源/名单/必要字段完整。仅一次窗口内采集，没有重跑、换源或改配置/权限/服务。D-15关闭不等于M5验收通过。
+- [最终自测与逐条AC自评](https://github.com/XuQingsong/inves-cog/blob/0ee7c599610abd056373fbd5e74fbfb421f559c0/handoff/M5/self-test.md)：AC01=14个指定测试全绿；全仓离线143通过、真实只读live1通过；AC02=59行（14可估/45明确不估/0异常失败）；AC03=有序、比例软指标超标逐只附数值原因；AC04=五类真实/明确缺失样例，合成补充单独标注；AC05=五日56组有效稳定对照；AC06=五日M4计划字节不变；AC07=隔离库验证面板与权限，真实持仓未部署明确不可比。证据均在handoff/M5/，第8节集成、第9节单次采集、第10节独立确认与正式提交。
+- AMD（2026-10-15输入快照）：悲观 **216.1520106783**、中性 **334.9227242095**、乐观 **408.3733578489** 美元，**p=1.8004139208**。
+- 剩余限制明确单列：45只不估的输入合同/历史缺口、真实持仓对照未接通、正式定时运行未取证；不冒称完成，不以D-15关闭代替完整验收。高于乐观比例软指标与PANW方法异常仍保留报告。
+- 变更：M5独立估值/事件重算/影子面板、三张自身schema表及美东22:30任务入口仅完成代码交付；未部署、未运行生产迁移，未新增源、key、权限或依赖。M2/M4修复在独立PR #16交付并由需求方合并，本PR未混入其新增差异。
+- 已自行决定：缺失专用字段明确不估，不把普通股/ROE当替代；未知真实持仓对照明确不可用，合成验证与真实输入分别标注；K01按正式节点答复闭环。未改docs/golden/milestones。
+- **下一步：等待需求方完整验收；A停止取任务，停在M0–M8整体验证检查点，不开始M9/M10，不恢复暂停的自动接单，不合并或部署任何PR。**
+
 ## A-007  进行中（D-15证据已发布且CI绿，待独立确认）
 - PR #17最新完整head **f16553ece4e34db5d9a334beb66f1b2375087437**，准确head的[phase1-blocking CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/38994107724)。本地工作树已对齐同SHA且干净；本轮只补M5证据，代码/配置/迁移/测试13文件哈希均未变，未重复历史验收。
 - [完整第二批采集证据](https://github.com/XuQingsong/inves-cog/blob/f16553ece4e34db5d9a334beb66f1b2375087437/handoff/M5/d15-consensus-second-run.json)、upstream-readiness.json和self-test.md §9已发布。**job6394=m2_consensus，ok、59、零失败**；北京时间10-17 10:07:03.161571至10:11:56.394854，293.233秒。as_of=2026-10-17/source=yahoo_page，59不同ticker与universe一致，captured_at齐备且全部在授权窗口；七项预期字段缺失数均0。
