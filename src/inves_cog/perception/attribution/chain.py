@@ -415,6 +415,8 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of):
             evidence_ids.extend(row.get("info_ids") or [])
     state = None if prior is None else prior.get("lifecycle")
     history = [] if prior is None else list(prior.get("history") or [])
+    if stage == "attribution_labels":
+        return state, history, None
     if state is None:
         state, history = transition(None, "已发现", history, when=when, trigger="异常", evidence_ids=[])
     if state == "已发现" and evidence_ids:
@@ -426,7 +428,7 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of):
             trigger="证据分达到假设",
             evidence_ids=evidence_ids,
         )
-    if stage != "attribution_candidates" and state == "假设中" and _market_ready(anomaly):
+    if stage in {None, "attribution_tracks"} and state == "假设中" and _market_ready(anomaly):
         state, history = transition(
             state,
             "市场确认",
@@ -448,7 +450,7 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of):
             )
     deadline = None
     records = anomaly.get("operating_records")
-    if stage == "attribution_labels" and state == "基本面核查中" and records is not None:
+    if stage == "attribution_tracks" and state == "基本面核查中" and records is not None:
         verdict = operating_verdict(records, as_of=as_of, expected_direction=anomaly.get("direction"))
         if verdict.confirmed():
             deadline = apply_deadline(verdict)

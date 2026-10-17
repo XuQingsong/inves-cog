@@ -3972,23 +3972,21 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert continued["tracks"][0]["capital"] == "冲击中"
     assert continued["operating_impact_proven"] is False
 
-    labelled = execute_stage(
-        "attribution_labels",
-        [
-            {
-                **base,
-                "prior_event": {"lifecycle": continued["lifecycle"], "history": continued["history"]},
-                "operating_records": [],
-            }
-        ],
-        [item],
-        as_of=later,
-        client=Propose(),
-    )[0]
+    due = {
+        **base,
+        "prior_event": {"lifecycle": continued["lifecycle"], "history": continued["history"]},
+        "operating_records": [],
+    }
+    labelled = execute_stage("attribution_tracks", [due], [item], as_of=later, client=Propose())[0]
     assert labelled["lifecycle"] == "已衰减·无影响"
     assert labelled["operating_impact_proven"] is False
     assert labelled["history"][-1]["new"] == "已衰减·无影响"
     assert {"at", "trigger", "evidence_ids"} <= set(labelled["history"][-1])
+    draft = execute_stage("attribution_labels", [due], [item], as_of=later, client=Propose())[0]
+    assert draft["lifecycle"] == continued["lifecycle"]
+    assert draft["history"] == continued["history"]
+    assert draft["operating_impact_proven"] is False
+    assert "ticker_status" in draft["report"]
 
     morning = execute_stage(
         "attribution_candidates",
