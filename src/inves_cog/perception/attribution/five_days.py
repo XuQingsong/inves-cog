@@ -88,8 +88,8 @@ def five_day_document(anomalies_by_day, items, *, client=None):
         "closes_case": False,
         "operating_conclusion": "冻结标题的当时可见回放，不是正式五日运行",
         "input_limit": (
-            "异常只来自 OpenAI 案例夹具的收盘池内对象，新闻只来自导出标题短摘录，没有按篮子再筛。"
-            "不是全池，也不是当时的全量新闻。"
+            "异常只来自 OpenAI 案例夹具的收盘池内对象，新闻只来自导出标题短摘录。"
+            "标题没有实体、代码或批准向量，所以不会进入异常报告。不是全池，也不是当时的全量新闻。"
         ),
         "days": days,
     }

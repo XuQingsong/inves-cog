@@ -10,12 +10,19 @@ from zoneinfo import ZoneInfo
 
 from inves_cog.perception.attribution.candidates import validate_candidates
 from inves_cog.perception.attribution.claims import attach_claims
-from inves_cog.perception.attribution.evidence import evidence_score
+from inves_cog.perception.attribution.evidence import (
+    basket_specificity,
+    evidence_score,
+    exposure_gradient,
+    magnitude_component,
+    narrative_support,
+    time_alignment,
+)
 from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.propose import propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
-from inves_cog.perception.attribution.retrieve import retrieval_mode, window_items
+from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
 
 _SHANGHAI = ZoneInfo("Asia/Shanghai")
 _NEW_YORK = ZoneInfo("America/New_York")
@@ -25,6 +32,7 @@ _SLOTS = (
     ("attribution_labels", time(12, 30)),
 )
 _CLAIM_FIELDS = ("subject", "variable", "mechanism", "direction", "quantity", "horizon", "certainty", "source_level")
+_EVIDENCE = ("time", "gradient", "specificity", "narrative", "magnitude", "alternatives")
 
 
 def attribute_all(anomalies, items, *, as_of, client, store=None, components_by_id=None):
@@ -129,10 +137,10 @@ def run_scheduled(when, *, connection=None, clock=None, trade_date=None, params_
 def _one(anomaly, items, *, as_of, client, store, components):
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
-    visible = window_items(items, anomaly["started_at"], as_of)
+    visible = _retrieved(anomaly, items, as_of)
     claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
     candidates, model_note = _candidates(anomaly, claimed, client)
-    candidates = _apply_score(candidates, components)
+    candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
     state, history = _lifecycle(candidates, when)
     report = _report(anomaly, candidates, claimed, "待分析" if model_note else None)
@@ -188,15 +196,27 @@ def _candidates(anomaly, items, client):
         return validate_candidates([], retrieved, universe), "模型调用失败"
 
 
-def _apply_score(candidates, components):
-    if not candidates or components is None:
-        return candidates
-    scored = evidence_score(components)
+def _retrieved(anomaly, items, as_of):
+    """Entity, graph, and approved-vector union, then the top 40 already in the window."""
+    members = _member_names(anomaly)
+    found = retrieval_entities(
+        members,
+        _basket_rows(anomaly),
+        anomaly.get("edges") or [],
+        anomaly.get("monitored") or [],
+    )
+    return shortlist(items, found["entities"], anomaly["started_at"], as_of)
+
+
+def _apply_score(candidates, anomaly, items, overrides):
     updated = []
     for row in candidates:
         if not row.get("scored"):
             updated.append(row)
             continue
+        components = _components(row, anomaly, items)
+        components.update(_override(overrides, row.get("mechanism")))
+        scored = evidence_score(components)
         copied = dict(row)
         copied["evidence"] = scored
         copied["score"] = scored["total"]
@@ -204,6 +224,85 @@ def _apply_score(candidates, components):
         copied["fundamental"] = None
         updated.append(copied)
     return updated
+
+
+def _components(candidate, anomaly, items):
+    """Six evidence parts for this candidate. A part with no input stays missing."""
+    components = {}
+    cited = [item for item in items if item.get("info_id") in set(candidate.get("info_ids") or [])]
+    published = _earliest(cited)
+    start = anomaly.get("started_at")
+    end = anomaly.get("ended_at")
+    if published is not None and start is not None and (published < start or end is not None):
+        components["time"] = time_alignment(published, start, end if end is not None else start)
+    direction = candidate.get("direction") or anomaly.get("direction")
+    members = anomaly.get("members") or []
+    relations = anomaly.get("relations") or []
+    if direction and members and relations:
+        components["gradient"] = exposure_gradient(members, relations, direction=direction)
+    expected, control = _residuals(candidate, anomaly)
+    if expected and control:
+        components["specificity"] = basket_specificity(expected, control)
+    affected = [
+        row.get("ticker") for row in candidate.get("affected") or [] if isinstance(row, dict) and row.get("ticker")
+    ]
+    events = [
+        row.get("entity_id") for row in candidate.get("chain") or [] if isinstance(row, dict) and row.get("entity_id")
+    ]
+    if cited and affected and events:
+        components["narrative"] = narrative_support(cited, events, affected)
+    verdict = (anomaly.get("magnitude_by_mechanism") or {}).get(candidate.get("mechanism"))
+    if verdict is not None:
+        components["magnitude"] = magnitude_component(verdict)
+    return components
+
+
+def _override(overrides, mechanism):
+    if not isinstance(overrides, dict):
+        return {}
+    nested = overrides.get(mechanism)
+    if not isinstance(nested, dict):
+        return {}
+    return {key: value for key, value in nested.items() if key in _EVIDENCE}
+
+
+def _residuals(candidate, anomaly):
+    table = anomaly.get("basket_residuals") or {}
+    expected = []
+    for row in candidate.get("affected") or []:
+        if not isinstance(row, dict):
+            continue
+        expected.extend(table.get(row.get("basket_id")) or [])
+    control = []
+    for basket in candidate.get("control_baskets") or []:
+        control.extend(table.get(basket) or [])
+    return expected, control
+
+
+def _earliest(items):
+    stamps = [item.get("published_at") for item in items if item.get("published_at") is not None]
+    if not stamps:
+        return None
+    return min(stamps)
+
+
+def _member_names(anomaly):
+    names = []
+    for member in anomaly.get("members") or []:
+        if isinstance(member, dict):
+            name = member.get("ticker") or member.get("entity_id")
+        else:
+            name = member
+        if name and name not in names:
+            names.append(name)
+    return names
+
+
+def _basket_rows(anomaly):
+    rows = anomaly.get("basket_members")
+    if rows is None:
+        rows = anomaly.get("baskets") or []
+    return [row for row in rows if isinstance(row, dict)]
 
 
 def _lifecycle(candidates, when):

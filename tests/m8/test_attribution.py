@@ -2747,6 +2747,7 @@ def test_model_output_contract_rejects_a_bad_structure():
         "published_at": published,
         "first_seen_at": published,
         "headline": "Toshiba",
+        "tickers": ["WDC"],
         "claims": [{"subject": "Toshiba"}],
     }
 
@@ -2791,7 +2792,6 @@ def test_model_output_contract_rejects_a_bad_structure():
         [visible],
         as_of=started,
         client=client,
-        components_by_id={"next": {"time": 1.0}},
     )
     assert client.calls == 2
     assert chained[0]["status"] == "待分析"
@@ -3777,6 +3777,102 @@ def _chain_anomaly(anomaly_id, ticker):
 
 
 @pytest.mark.phase1_blocking
+def test_chain_retrieves_related_news_and_scores_each_candidate():
+    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.rules import m8_rules
+
+    rules = m8_rules()
+    start = datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc)
+    end = datetime(2026, 10, 2, 20, 0, tzinfo=timezone.utc)
+    early = datetime(2026, 10, 2, 11, 0, tzinfo=timezone.utc)
+    late = datetime(2026, 10, 2, 21, 0, tzinfo=timezone.utc)
+
+    def item(info_id, **extra):
+        row = {
+            "info_id": info_id,
+            "published_at": early,
+            "first_seen_at": early,
+            "source_level": 4,
+            "source_root": info_id,
+        }
+        row.update(extra)
+        return row
+
+    anomaly = {
+        "anomaly_id": "nvda-2026-10-02",
+        "universe": "pool",
+        "trade_date": "2026-10-02",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": start,
+        "ended_at": end,
+        "edges": [
+            {"from_entity": "NVDA", "to_entity": "tsmc"},
+            {"from_entity": "tsmc", "to_entity": "asml"},
+        ],
+        "basket_residuals": {"accelerators": [3.0, 3.0], "energy": [0.0]},
+    }
+    related = [
+        item("xom-only", tickers=["XOM"], entities=["XOM"]),
+        item("supplier", entities=["tsmc"]),
+        item("second-hop", entities=["asml"]),
+        item("old-vector", similarity=0.99, model="other-model", dimensions=rules["embedding_dimensions"]),
+        item(
+            "approved-vector",
+            similarity=0.4,
+            model=rules["embedding_model"],
+            dimensions=rules["embedding_dimensions"],
+        ),
+        item("late-nvda", tickers=["NVDA"], published_at=late, first_seen_at=late),
+    ]
+
+    class Split:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                sent = [row["info_id"] for row in payload["items"]]
+                assert set(sent) == {"late-nvda", "supplier", "approved-vector"}
+                return {"items": [{"info_id": info_id, "claims": []} for info_id in sent]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["supplier"],
+                        "affected": [{"ticker": "NVDA", "basket_id": "accelerators"}],
+                        "control_baskets": ["energy"],
+                    },
+                    {
+                        "mechanism": "需求",
+                        "info_ids": ["late-nvda"],
+                        "affected": [{"ticker": "NVDA", "basket_id": "energy"}],
+                        "control_baskets": ["accelerators"],
+                    },
+                ]
+            }
+
+    result = attribute_all([anomaly], related, as_of=late, client=Split())[0]
+    scored = {row["mechanism"]: row for row in result["report"]["candidates"] if row["scored"]}
+    assert scored["供给"]["score"] == 1.0
+    assert scored["需求"]["score"] == 0.0
+    assert result["report"]["fundamental_standing"] != "支持"
+    assert result["operating_impact_proven"] is False
+
+    class Cap:
+        def call(self, task, payload):
+            if task != "claim_extraction":
+                return {"candidates": []}
+            sent = [row["info_id"] for row in payload["items"]]
+            assert len(sent) == 40
+            assert "nvda-40" not in sent
+            assert "xom-only" not in sent
+            return {"items": [{"info_id": info_id, "claims": []} for info_id in sent]}
+
+    crowded = [item(f"nvda-{index}", tickers=["NVDA"]) for index in range(41)]
+    crowded.append(item("xom-only", tickers=["XOM"]))
+    capped = attribute_all([anomaly], crowded, as_of=late, client=Cap())[0]
+    assert capped["degraded"] is None
+
+
+@pytest.mark.phase1_blocking
 def test_attribution_chain_scores_from_rules_and_keeps_going():
     from inves_cog.perception.attribution.chain import attribute_all
     from inves_cog.perception.attribution.store import Store
@@ -3788,6 +3884,7 @@ def test_attribution_chain_scores_from_rules_and_keeps_going():
         "first_seen_at": published,
         "source_level": 4,
         "headline": "Toshiba",
+        "tickers": ["WDC", "MU"],
         "claims": [{"subject": "Toshiba", "mechanism": "供给"}],
     }
     unseen = {"info_id": "bare", "published_at": published, "headline": "no stamp"}
@@ -3809,7 +3906,6 @@ def test_attribution_chain_scores_from_rules_and_keeps_going():
         as_of=datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc),
         client=client,
         store=Store(calls),
-        components_by_id={"toshiba-2026-10-02": {"time": 1.0}},
     )
     assert client.calls == 2
     assert [row["anomaly_id"] for row in rows] == ["toshiba-2026-10-02", "boom-2026-10-02", "wide-1"]
@@ -3850,6 +3946,7 @@ def test_five_day_replay_hides_an_item_until_it_was_seen():
         "first_seen_at": days[2],
         "source_level": 4,
         "headline": "later",
+        "tickers": ["WDC"],
         "claims": [],
     }
     anomaly = {
@@ -4935,11 +5032,9 @@ def test_five_day_report_uses_only_items_already_seen(capsys):
     assert "news:benzinga:62350981" in fourteenth["replay"]["late_ids"]
     assert "news:benzinga:62345955" in fourteenth["then_visible"]
     assert "news:benzinga:62350981" not in fourteenth["then_visible"]
-    assert [row["sources"] for row in fourteenth["anomalies"]] == [
-        ["news:benzinga:62345955"],
-        ["news:benzinga:62345955"],
-    ]
-    assert {row["status"] for row in fourteenth["anomalies"]} == {"待分析"}
+    assert [row["sources"] for row in fourteenth["anomalies"]] == [[], []]
+    assert {row["status"] for row in fourteenth["anomalies"]} == {"已发现·原因未明"}
+    assert {row["degraded"] for row in fourteenth["anomalies"]} == {None}
     assert by_day["2026-10-16"]["replay"]["mode"] == "当时可见"
     assert by_day["2026-10-16"]["replay"]["collected_then"] is True
     assert "unknown_ids" not in by_day["2026-10-16"]["replay"]

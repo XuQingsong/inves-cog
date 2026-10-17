@@ -3,7 +3,7 @@
   "closes_ac_m8_06": false,
   "closes_case": false,
   "operating_conclusion": "冻结标题的当时可见回放，不是正式五日运行",
-  "input_limit": "异常只来自 OpenAI 案例夹具的收盘池内对象，新闻只来自导出标题短摘录，没有按篮子再筛。不是全池，也不是当时的全量新闻。",
+  "input_limit": "异常只来自 OpenAI 案例夹具的收盘池内对象，新闻只来自导出标题短摘录。标题没有实体、代码或批准向量，所以不会进入异常报告。不是全池，也不是当时的全量新闻。",
   "days": [
     {
       "trade_date": "2026-10-12",
@@ -80,13 +80,11 @@
             "OpenAI 合作方"
           ],
           "direction": "down",
-          "status": "待分析",
+          "status": "已发现·原因未明",
           "lifecycle": "已发现",
-          "degraded": "抽取失败；模型调用失败",
+          "degraded": null,
           "operating_impact_proven": false,
-          "sources": [
-            "news:benzinga:62345955"
-          ],
+          "sources": [],
           "market_confidence": "低",
           "fundamental_standing": null,
           "valuation": "不变 / 待基本面轨道"
@@ -97,13 +95,11 @@
             "数据中心电力"
           ],
           "direction": "down",
-          "status": "待分析",
+          "status": "已发现·原因未明",
           "lifecycle": "已发现",
-          "degraded": "抽取失败；模型调用失败",
+          "degraded": null,
           "operating_impact_proven": false,
-          "sources": [
-            "news:benzinga:62345955"
-          ],
+          "sources": [],
           "market_confidence": "低",
           "fundamental_standing": null,
           "valuation": "不变 / 待基本面轨道"
