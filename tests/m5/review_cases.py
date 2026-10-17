@@ -5,6 +5,12 @@ from datetime import date, datetime, timezone
 from inves_cog.ingest.fundamentals.state import FinState, StateStore
 
 
+def assert_eps_split_comparability():
+    from tests.m5.split_cases import assert_canonical_eps_units
+
+    assert_canonical_eps_units()
+
+
 class ReviewRepository:
     def __init__(self, *, peers=False):
         self.peers = peers

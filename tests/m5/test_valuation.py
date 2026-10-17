@@ -163,6 +163,9 @@ def test_valuation_label():
 
 @pytest.mark.phase1_blocking
 def test_type_switch_needs_two_periods():
+    from tests.m5.review_cases import assert_eps_split_comparability
+
+    assert_eps_split_comparability()
     from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
 
     h = TypeHistory()

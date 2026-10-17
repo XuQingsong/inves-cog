@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.097" timestamp="2026-10-17T12:32:30.058941+08:00" hostname="192.168.1.101"><testcase classname="tests.m5.test_valuation" name="test_type_switch_needs_two_periods" time="0.009"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.eps_units'">@pytest.mark.phase1_blocking
+    def test_type_switch_needs_two_periods():
+        from tests.m5.review_cases import assert_eps_split_comparability
+    
+&gt;       assert_eps_split_comparability()
+
+tests/m5/test_valuation.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/m5/review_cases.py:11: in assert_eps_split_comparability
+    assert_canonical_eps_units()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_canonical_eps_units():
+        from inves_cog.valuation_v1.inputs import financial_inputs
+        from inves_cog.valuation_v1.lifecycle import classify
+&gt;       from inves_cog.valuation_v1.eps_units import normalize_eps
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.eps_units'
+
+tests/m5/split_cases.py:24: ModuleNotFoundError</failure></testcase></testsuite></testsuites>
