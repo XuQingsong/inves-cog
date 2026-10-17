@@ -58,17 +58,27 @@ def deadline_offset(earnings_sessions, mechanism_sessions, cap=20):
 
 def earliest_deadline(started_on, *, deadline_on=None, earnings_sessions=None, mechanism_sessions=None):
     """The earliest of the given date and the session cap. A complete verdict is not a date."""
+    earnings = _session_count(earnings_sessions)
+    mechanism = _session_count(mechanism_sessions)
     found = []
     explicit = _as_date(deadline_on)
     if explicit is not None:
         found.append(explicit)
     started = _as_date(started_on)
     if started is not None:
-        offset = deadline_offset(earnings_sessions, mechanism_sessions)
+        offset = deadline_offset(earnings, mechanism)
         found.append(_add_sessions(started, offset))
     if not found:
         return None
     return min(found)
+
+
+def _session_count(value):
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ValueError("周期无效")
+    return value
 
 
 def deadline_reached(deadline, as_of):
@@ -82,6 +92,8 @@ def deadline_reached(deadline, as_of):
 
 
 def _add_sessions(day, count):
+    if count < 1:
+        raise ValueError("周期无效")
     current = day
     for _ in range(count):
         current = next_trading_day(current)
