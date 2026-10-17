@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 15:28 北京
+
+- 草稿 PR #18 head `aad70ac`。没有合并进 main。本地 `make phase1-test`：237 passed，18 deselected。
+- 已看到答复 `466154b`。这一轮没有新闻时，已经保存的支持、冲突和失效仍写回报告。同日、跨日和周末再读，经营结论、已证实、结案理由、未知项和历史都留下。有新闻再跑也不要求重新证明。没结案的仍是基本面核查中，不写成支持。
+- 跟踪阶段自己的交易日还没改。替代解释的未知语义、全保存失败记账和 dict_row 还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 15:14 北京
 
 - 草稿 PR #18 head `459d88c`。没有合并进 main。本地 `make phase1-test`：237 passed，18 deselected。
