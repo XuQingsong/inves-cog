@@ -2737,6 +2737,11 @@ def test_claim_fields_omit_unsupported(tmp_path):
     assert audit["anchors"][0]["literal_anchor_valid"] and audit["field_contract_findings"]
     assert audit["anchors"][0]["evidence_role"] == "current_context"
     assert audit["semantic_verdict"] is None and audit["operating_impact_proven"] is False
+    from inves_cog.perception.attribution.chain import _report
+
+    report = _report({"anomaly_id": "synthetic-review", "universe": "pool"}, [], [supplement], None, {}, None, None)
+    assert report["sources"][0]["evidence_role"] == "current_context"
+    assert report["sources"][0]["source_provenance"] == material_fields(supplement)["source_provenance"]
 
     from copy import deepcopy
 

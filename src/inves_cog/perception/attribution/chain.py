@@ -31,6 +31,7 @@ from inves_cog.perception.attribution.grounding import candidate_support, claim_
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.magnitude import implied_magnitude
+from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.operating import operating_verdict
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
@@ -1097,7 +1098,7 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
-    sources = [{"info_id": item["info_id"], "role": item.get("role")} for item in items]
+    sources = [{"info_id": item["info_id"], "role": item.get("role"), **material_fields(item)} for item in items]
     return explanation_report(
         current,
         impact,
