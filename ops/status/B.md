@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 08:02 北京
+
+- 草稿 PR #18 head `9bc8208`。没有合并进 main。本地 `make phase1-test`：200 passed，18 deselected。
+- 传闻被一级否认或矛盾之后，内容退出经营依据。只认传闻或四级材料；一级文件被否认不走这条。二级否认不算证伪。价格冲击原样留下，0 也算有记录，缺记录是缺失而不是删掉。来源根或信息编号留下，空字符串不算传播记录。这条不改基本面栏。没有传入这条时不写。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 07:51 北京
 
 - 草稿 PR #18 head `6bcbe26`。没有合并进 main。本地 `make phase1-test`：199 passed，18 deselected。
