@@ -11,3 +11,5 @@ K02已由需求方在main8d748ef34d11b547a5925f6cb715e44ee9b48a66补齐两条M8 
 K03（D-15提交前置）：已只读核实M2验收报告仍是1/2，Yahoo分析页实际只有2026-10-15这一批59只快照。源任务另外三次为0条，不能按“尝试过”当成功；30只Muse历史导入不是本项目第二次真实采集。M2 AC-M2-06b / next-stage遗留清单要求M5提交验收前完成。请需求方安排既有正式consensus任务，或在A-007答复明确允许A本次只运行一次该任务（不改代码/源）。按ops/README§1，A原边界只读M1/M2，未擅自写入。建议入口为既有 `inves_cog.ingest.fundamentals.cli run --tasks consensus`，不是全量financials/interims或旧schedule循环；实际job_runs及59/59新快照验证后才关闭。证据见upstream-readiness.json。
 
 K03权限边界已由main9d88f0601bc7203a49778168020fb79513c9432b答复：北京时间2026-10-17 09:15–10:30仅一次既有consensus运行例外；先查当日已有59/59则跳过，不在窗口外执行，不重试、不改实现/源/权限/服务。K03疑问关闭；D-15第二轮数据证据尚未完成，PR继续草稿。
+
+K03执行记录（2026-10-17）：窗口内仅一次既有任务，job6394为ok、59/59、零失败，10:07:03至10:11:56完成；来源yahoo_page/as_of2026-10-17，全部捕获时间齐备。证据d15-consensus-second-run.json。需求方独立确认前D-15仍保留待确认，不自行关闭。

@@ -1,66 +1,105 @@
 {
-  "kind": "read-only upstream completeness evidence; counts only, no account or deployment data",
-  "consensus_jobs": [
-    {
-      "task_name": "m2_consensus_round2_fixed",
-      "status": "degraded",
-      "processed_count": 59
-    },
-    {
-      "task_name": "m2_consensus_round2",
-      "status": "degraded",
-      "processed_count": 0
-    },
-    {
-      "task_name": "m2_acceptance_consensus_2",
-      "status": "degraded",
-      "processed_count": 0
-    },
-    {
-      "task_name": "m2_acceptance_consensus_1",
-      "status": "degraded",
-      "processed_count": 0
-    }
-  ],
+  "kind": "read-only completeness evidence after the single authorized existing consensus invocation",
+  "verified_at": "2026-10-17 02:12:17.940864+00:00",
   "daily_snapshot_coverage": [
+    {
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "tickers": 59,
+      "first_capture": "2026-10-17 10:07:05.764524+08:00",
+      "last_capture": "2026-10-17 10:11:56.353901+08:00",
+      "missing_capture": 0
+    },
     {
       "as_of": "2026-10-15",
       "source": "yahoo_page",
-      "tickers": 59
+      "tickers": 59,
+      "first_capture": "2026-10-15 11:19:35.592408+08:00",
+      "last_capture": "2026-10-15 11:24:40.694081+08:00",
+      "missing_capture": 0
     },
     {
       "as_of": "2026-10-13",
       "source": "muse_import",
-      "tickers": 30
+      "tickers": 30,
+      "first_capture": null,
+      "last_capture": null,
+      "missing_capture": 30
     },
     {
       "as_of": "2026-10-12",
       "source": "muse_import",
-      "tickers": 30
+      "tickers": 30,
+      "first_capture": null,
+      "last_capture": null,
+      "missing_capture": 30
     },
     {
       "as_of": "2026-10-11",
       "source": "muse_import",
-      "tickers": 30
+      "tickers": 30,
+      "first_capture": null,
+      "last_capture": null,
+      "missing_capture": 30
     },
     {
       "as_of": "2026-10-10",
       "source": "muse_import",
-      "tickers": 30
+      "tickers": 30,
+      "first_capture": null,
+      "last_capture": null,
+      "missing_capture": 30
     },
     {
       "as_of": "2026-10-09",
       "source": "muse_import",
-      "tickers": 30
+      "tickers": 30,
+      "first_capture": null,
+      "last_capture": null,
+      "missing_capture": 30
     },
     {
       "as_of": "2026-10-08",
       "source": "muse_import",
-      "tickers": 30
+      "tickers": 30,
+      "first_capture": null,
+      "last_capture": null,
+      "missing_capture": 30
     }
   ],
-  "note": "The accepted first collection has 59 Yahoo snapshots even though its job status is degraded. Imported historical snapshots are listed separately and do not prove a second real 59-ticker collection.",
-  "verified_complete_real_snapshot_dates": 1,
-  "d15_required_complete_collections": 2,
-  "d15_evidence_status": "Second complete collection not proven by the available evidence; M2 report still records 1/2. Job attempt counts or imported history do not close D-15."
+  "first_accepted_batch": {
+    "as_of": "2026-10-15",
+    "source": "yahoo_page",
+    "tickers": 59
+  },
+  "second_batch_candidate": {
+    "as_of": "2026-10-17",
+    "source": "yahoo_page",
+    "tickers": 59,
+    "checks": {
+      "expected_tickers": 59,
+      "distinct_tickers": 59,
+      "missing_tickers": [],
+      "unexpected_tickers": [],
+      "all_captures_present": true,
+      "all_captured_in_authorized_window": true,
+      "single_invocation": true,
+      "job_finished": true,
+      "job_count_matches": true
+    },
+    "jobs": [
+      {
+        "id": 6394,
+        "task_name": "m2_consensus",
+        "trade_date": "2026-10-16",
+        "started_at": "2026-10-17 10:07:03.161571+08:00",
+        "ended_at": "2026-10-17 10:11:56.394854+08:00",
+        "status": "ok",
+        "processed_count": 59,
+        "error_summary": null
+      }
+    ]
+  },
+  "d15_status": "second candidate collected; awaiting independent confirmation",
+  "note": "Muse historical imports and failed attempts are not counted as complete own collections. Details in d15-consensus-second-run.json."
 }
