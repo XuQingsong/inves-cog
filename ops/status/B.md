@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 10:42 北京
+
+- 草稿 PR #18 head `80009f7`。没有合并进 main。本地 `make phase1-test`：216 passed，18 deselected。
+- 按 Q-M8-14 第 2 项：校验候选时不再保留模型自填的分数、置信度、证据、经营结论和假设标记。引用、机制、传导链和受影响标的仍留下。没有规则算出的分数时，不进入中高置信，也不写经营支持。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 10:32 北京
 
 - 草稿 PR #18 head `db64e96`。没有合并进 main。本地 `make phase1-test`：215 passed，18 deselected。
