@@ -4621,3 +4621,69 @@ def test_capture_command_stores_recordings_without_a_live_call(tmp_path, capsys,
     assert rows[0]["claim_recording"] is None
     assert rows[0]["recording"] is not None
     assert rows[1]["candidate_error"] is None and rows[1]["recording"] is not None
+
+
+@pytest.mark.phase1_blocking
+def test_five_day_report_uses_only_items_already_seen(capsys):
+    from inves_cog.perception.attribution.five_days import (
+        beijing_deadline,
+        case_anomalies_for_days,
+        five_day_document,
+        headline_items,
+        main,
+    )
+
+    fixture = ROOT / "tests/fixtures/phase1"
+    assert main(["--fixture", str(fixture)]) == 0
+    printed = json.loads(capsys.readouterr().out)
+    stored = json.loads((fixture / "m8/five_day_visibility.json").read_text())
+    assert printed == stored
+    assert stored["closes_ac_m8_06"] is False and stored["closes_case"] is False
+    assert "不是全池" in stored["input_limit"]
+    days = stored["days"]
+    assert [row["trade_date"] for row in days] == [
+        "2026-10-12",
+        "2026-10-13",
+        "2026-10-14",
+        "2026-10-15",
+        "2026-10-16",
+    ]
+    by_day = {row["trade_date"]: row for row in days}
+    for trade_date, row in by_day.items():
+        assert row["as_of"] == beijing_deadline(trade_date).isoformat()
+        assert row["closes_ac_m8_06"] is False
+        assert row["replay"]["vectors_then"] is False
+        for anomaly in row["anomalies"]:
+            assert anomaly["status"]
+            assert anomaly["operating_impact_proven"] is False
+            assert anomaly["valuation"] == "不变 / 待基本面轨道"
+            assert anomaly["fundamental_standing"] != "支持"
+            assert anomaly["market_confidence"] != "高"
+    assert by_day["2026-10-12"]["anomalies"] == []
+    assert by_day["2026-10-12"]["replay"]["mode"] == "后补录历史复盘"
+    assert by_day["2026-10-12"]["then_visible"] == []
+    assert by_day["2026-10-13"]["anomalies"][0]["status"] == "已发现·原因未明"
+    assert by_day["2026-10-13"]["anomalies"][0]["sources"] == []
+    fourteenth = by_day["2026-10-14"]
+    assert fourteenth["replay"]["mode"] == "后补录历史复盘"
+    assert fourteenth["replay"]["collected_then"] is False
+    assert "news:benzinga:62350981" in fourteenth["replay"]["late_ids"]
+    assert "news:benzinga:62345955" in fourteenth["then_visible"]
+    assert "news:benzinga:62350981" not in fourteenth["then_visible"]
+    assert [row["sources"] for row in fourteenth["anomalies"]] == [
+        ["news:benzinga:62345955"],
+        ["news:benzinga:62345955"],
+    ]
+    assert {row["status"] for row in fourteenth["anomalies"]} == {"待分析"}
+    assert by_day["2026-10-16"]["replay"]["mode"] == "当时可见"
+    assert by_day["2026-10-16"]["replay"]["collected_then"] is True
+    assert "unknown_ids" not in by_day["2026-10-16"]["replay"]
+    assert by_day["2026-10-16"]["anomalies"] == []
+    items = headline_items(fixture)
+    items.append({"info_id": "unstamped", "published_at": items[0]["published_at"], "headline": "no stamp"})
+    tainted = five_day_document(case_anomalies_for_days(fixture), items)
+    assert tainted["days"][0]["replay"]["mode"] == "未知"
+    assert tainted["days"][0]["replay"]["collected_then"] is False
+    assert "unstamped" in tainted["days"][0]["replay"]["unknown_ids"]
+    assert "unstamped" not in tainted["days"][0]["then_visible"]
+    assert tainted["closes_ac_m8_06"] is False
