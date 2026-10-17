@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 11:02 北京
+
+- 草稿 PR #18 head `ab54313`。没有合并进 main。本地 `make phase1-test`：217 passed，18 deselected。
+- 按 Q-M8-14 第 6 项：广域异常不再写入标的代码，仍可记下回捞和报告。一条广域被拒绝后，后面的异常继续保存。池内的 N1、N2、N6 照常写。六项证据都缺失时，分数留空，不进入假设，也不再除零。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 10:56 北京
 
 - 草稿 PR #18 head `5c274e6`。没有合并进 main。本地 `make phase1-test`：217 passed，18 deselected。
