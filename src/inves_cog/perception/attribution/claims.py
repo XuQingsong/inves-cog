@@ -1,6 +1,7 @@
 """Claim extraction. Fields the text does not support stay absent."""
 
 from inves_cog.perception.attribution.grounding import copy_support
+from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.propose import MECHANISMS
 
 FIELDS = ("subject", "variable", "mechanism", "direction", "quantity", "horizon", "certainty", "source_level")
@@ -85,6 +86,7 @@ def _source_level(value):
 
 def _item_payload(item):
     row = {"info_id": item["info_id"], "headline": item.get("headline"), "summary": item.get("summary")}
+    row.update(material_fields(item))
     level = _source_level(item.get("source_level"))
     if level is not None:
         row["source_level"] = level

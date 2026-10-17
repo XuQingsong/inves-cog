@@ -4,6 +4,8 @@ from copy import deepcopy
 from hashlib import sha256
 from json import dumps
 
+from inves_cog.perception.attribution.material import material_fields
+
 CLAIM_FIELDS = {"subject", "variable", "mechanism", "direction", "quantity", "horizon", "certainty"}
 _TEXT = ("info_id", "ticker", "field", "source_field", "quote", "inference", "comparison_basis", "statement_kind")
 
@@ -28,6 +30,7 @@ def support_view(value):
 
 def _source_hash(item):
     data = {key: item.get(key) for key in ("info_id", "headline", "summary")}
+    data.update(material_fields(item))
     return sha256(dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
@@ -68,7 +71,7 @@ def _anchors(support, items, *, fields=None, tickers=None, cited=None):
             "semantic_verdict": None,
         }
         if not problems:
-            audit.update(quote=quote, source_content_hash=_source_hash(found[0]))
+            audit.update(quote=quote, source_content_hash=_source_hash(found[0]), **material_fields(found[0]))
         for key in ("inference", "comparison_basis", "statement_kind"):
             if isinstance(row.get(key), str):
                 audit[key] = row[key]
@@ -93,6 +96,7 @@ def claim_support(claim, item):
         "kind": "literal_references_only",
         "anchors": audit,
         "unanchored_fields": sorted(fields - anchored),
+        "field_contract_findings": _field_findings(claim, audit),
         "semantic_verdict": None,
         "model_annotations_unverified": True,
         "operating_impact_proven": False,
@@ -117,3 +121,19 @@ def copy_support(source, target):
     if "support" in source:
         target["support"] = deepcopy(support_view(source["support"]))
     return target
+
+
+def _field_findings(claim, audits):
+    """Mechanical review flags only; model statement kinds are not semantic truth."""
+    findings = []
+    for row in audits:
+        if not row["literal_anchor_valid"]:
+            continue
+        kind = row.get("statement_kind")
+        if row.get("field") == "direction" and claim.get("direction") and kind == "level":
+            findings.append({"field": "direction", "reason": "水平值不自动证明方向，需核同口径比较基准"})
+        if kind == "change" and not (row.get("comparison_basis") or "").strip():
+            findings.append({"field": row.get("field"), "reason": "变化标注未给比较基准"})
+        if kind == "plan" and not (claim.get("horizon") or "").strip():
+            findings.append({"field": "horizon", "reason": "计划未给未来兑现口径"})
+    return findings

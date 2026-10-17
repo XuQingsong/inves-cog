@@ -2683,6 +2683,61 @@ def _recording(root, task, payload, result):
 
 @pytest.mark.phase1_blocking
 def test_claim_fields_omit_unsupported(tmp_path):
+    from inves_cog.perception.attribution.claims import claim_payload
+    from inves_cog.perception.attribution.grounding import claim_support
+    from inves_cog.perception.attribution.material import material_fields, separate_review_material
+    from inves_cog.perception.attribution.propose import candidate_payload
+
+    original = {
+        "info_id": "wire-source",
+        "headline": "Issuer announces release",
+        "summary": "No output reduction has been reported.",
+        "source_level": 4,
+        "context_refs": ["independent-review"],
+    }
+    context = {
+        "independent-review": {
+            "facts": "The release includes open weights.",
+            "limits": ["hardware orders", "customer finance"],
+            "public_url": "https://example.org/release",
+            "reference_record_sha256": "a" * 64,
+        }
+    }
+    separated = separate_review_material([original], context)
+    source, supplement = separated["items"]
+    assert source["summary"] == original["summary"] and original["context_refs"] == ["independent-review"]
+    assert supplement["info_id"] != source["info_id"] and supplement["source_level"] is None
+    assert supplement["source_root"] == source["info_id"]
+    assert supplement["published_at"] is None and supplement["first_seen_at"] is None
+    facts = claim_payload(separated["items"])
+    assert "customer finance" not in json.dumps(facts) and "hardware orders" not in json.dumps(facts)
+    assert facts["items"][0]["summary"] == original["summary"]
+    assert facts["items"][1]["source_provenance"]["read_mode"] == "current_review"
+    assert candidate_payload({}, separated["items"], [])["items"][1]["evidence_role"] == "current_context"
+    assert "source_level" not in facts["items"][1] and material_fields({"info_id": "plain"}) == {}
+    for mutation in [
+        {"evidence_role": "research_gap"},
+        {"source_level": 1},
+        {"info_id": source["info_id"]},
+        {"source_provenance": {}},
+    ]:
+        bad = {**supplement, **mutation}
+        with pytest.raises(ValueError):
+            claim_payload([bad])
+        with pytest.raises(ValueError):
+            candidate_payload({}, [bad], [])
+    anchor = {
+        "info_id": supplement["info_id"],
+        "field": "direction",
+        "source_field": "summary",
+        "quote": supplement["summary"],
+        "statement_kind": "level",
+    }
+    audit = claim_support({"direction": "up", "support": [anchor]}, supplement)
+    assert audit["anchors"][0]["literal_anchor_valid"] and audit["field_contract_findings"]
+    assert audit["anchors"][0]["evidence_role"] == "current_context"
+    assert audit["semantic_verdict"] is None and audit["operating_impact_proven"] is False
+
     from copy import deepcopy
 
     from inves_cog.perception.attribution.propose import candidate_payload

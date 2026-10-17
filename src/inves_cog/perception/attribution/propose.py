@@ -4,6 +4,7 @@ from copy import deepcopy
 
 from inves_cog.perception.attribution.candidates import validate_candidates
 from inves_cog.perception.attribution.grounding import claim_support, copy_support
+from inves_cog.perception.attribution.material import material_fields
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
@@ -96,6 +97,7 @@ def _item_view(item):
         view["claim_support"] = [claim_support(claim, item) for claim in item.get("claims") or []]
     # Date-only or timezone-unknown metadata is not an exact published_at.
     # Preserve its supplied bounds; this does not admit it to production windows.
+    view.update(material_fields(item))
     if item.get("published_interval") is not None:
         view["published_interval"] = deepcopy(item["published_interval"])
     return view
