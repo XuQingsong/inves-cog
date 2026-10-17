@@ -432,6 +432,7 @@ def _alternative_members(candidate, anomaly):
             if ticker not in by_name:
                 return []
             names.append(ticker)
+            continue
         basket = row.get("basket_id")
         if isinstance(basket, str) and basket:
             mapped = _basket_anomaly_members(anomaly, basket, by_name)
@@ -743,7 +744,7 @@ def _track_rows(anomaly, state, stage=None, as_of=None):
     trade_date = anomaly["trade_date"]
     if stage == "attribution_tracks":
         session_day = _completed_session(as_of)
-        if session_day is None:
+        if session_day is None or session_day < _calendar_day(trade_date):
             return []
         trade_date = session_day.isoformat()
     return [{"trade_date": trade_date, "emotion": emotion, "fundamental": "待验证"}]
