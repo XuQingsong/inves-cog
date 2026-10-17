@@ -335,6 +335,48 @@ def test_candidate_validation():
 
 
 @pytest.mark.phase1_blocking
+def test_model_score_does_not_enter_the_hypothesis():
+    from inves_cog.perception.attribution.candidates import validate_candidates
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.second_hit import prediction_fingerprint
+
+    poisoned = {
+        "mechanism": "供给",
+        "info_ids": ["nikkei"],
+        "affected": [{"ticker": "WDC", "direction": "down", "score": 0.999}],
+        "chain": [{"entity": "toshiba"}],
+        "direction": "down",
+        "score": 0.999,
+        "confidence": "高",
+        "fundamental": "支持",
+        "evidence": {"time": 1},
+        "operating_impact_proven": True,
+        "enters_hypothesis": True,
+    }
+    rows = validate_candidates([poisoned], {"nikkei"}, {"WDC"})
+    kept = rows[0]
+    assert kept["mechanism"] == "供给"
+    assert kept["info_ids"] == ["nikkei"]
+    assert kept["affected"] == [{"ticker": "WDC", "direction": "down"}]
+    assert kept["chain"] == [{"entity": "toshiba"}]
+    assert kept["direction"] == "down"
+    assert kept["score"] is None
+    assert kept["confidence"] is None
+    assert kept["fundamental"] is None
+    assert kept["evidence"] is None
+    assert "operating_impact_proven" not in kept
+    assert "enters_hypothesis" not in kept
+    assert prediction_fingerprint(kept) is None
+    anomaly = {"anomaly_id": "model-score", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    report = explanation_report(anomaly, impact, rows, [])
+    assert report["market_confidence"] == "低"
+    assert report["fundamental_standing"] != "支持"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_retrieval_entities_stop_at_one_hop():
     from inves_cog.perception.attribution.retrieve import retrieval_entities
 

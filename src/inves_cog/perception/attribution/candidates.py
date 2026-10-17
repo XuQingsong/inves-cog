@@ -8,14 +8,44 @@ _FINGERPRINTS = ("exposure_gradient", "unexposed_control", "time_order", "denial
 
 
 def validate_candidates(candidates, retrieved_ids, universe):
+    """Keep a cited mechanism. A model score or operating label does not come through."""
     kept = []
     for candidate in candidates:
         citations = list(candidate.get("info_ids") or [])
         if not citations or any(item not in retrieved_ids for item in citations):
             continue
-        affected = [row for row in candidate.get("affected") or [] if row.get("ticker") in universe]
-        kept.append({**candidate, "affected": affected, "scored": True})
+        kept.append(_cited(candidate, citations, universe))
     kept.append({"mechanism": DEFAULT, "info_ids": [], "affected": [], "scored": False})
+    return kept
+
+
+def _cited(candidate, citations, universe):
+    direction = candidate.get("direction")
+    return {
+        "mechanism": candidate.get("mechanism"),
+        "info_ids": citations,
+        "affected": _affected(candidate.get("affected") or [], universe),
+        "chain": list(candidate.get("chain") or []),
+        "control_baskets": list(candidate.get("control_baskets") or []),
+        "direction": direction if direction in {"up", "down"} else None,
+        "scored": True,
+        "score": None,
+        "confidence": None,
+        "fundamental": None,
+        "evidence": None,
+    }
+
+
+def _affected(rows, universe):
+    kept = []
+    for row in rows:
+        ticker = row.get("ticker")
+        if ticker not in universe:
+            continue
+        item = {"ticker": ticker}
+        if row.get("direction") in {"up", "down"}:
+            item["direction"] = row["direction"]
+        kept.append(item)
     return kept
 
 
