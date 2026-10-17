@@ -12,6 +12,7 @@ from inves_cog.ingest.market import regular_bounds
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
 from inves_cog.perception.attribution.claims import attach_claims
 from inves_cog.perception.attribution.evidence import (
+    alternative_exclusion,
     basket_specificity,
     evidence_score,
     exposure_gradient,
@@ -359,6 +360,10 @@ def _components(candidate, anomaly, items):
     verdict = (anomaly.get("magnitude_by_mechanism") or {}).get(candidate.get("mechanism"))
     if verdict is not None:
         components["magnitude"] = magnitude_component(verdict)
+    people = [member for member in members if isinstance(member, dict)]
+    exclusion = alternative_exclusion(people)
+    if exclusion is not None:
+        components["alternatives"] = exclusion
     return components
 
 

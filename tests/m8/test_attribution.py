@@ -3777,6 +3777,70 @@ def _chain_anomaly(anomaly_id, ticker):
 
 
 @pytest.mark.phase1_blocking
+def test_chain_counts_alternative_exclusion():
+    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.evidence import alternative_exclusion
+    from inves_cog.perception.attribution.rules import m8_rules
+
+    assert m8_rules()["evidence_weights"]["alternatives"] == 15
+    start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    early = datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc)
+    news = {
+        "info_id": "nvda-news",
+        "published_at": early,
+        "first_seen_at": early,
+        "tickers": ["NVDA"],
+        "entities": ["NVDA"],
+        "source_root": "wire",
+        "claims": [],
+    }
+
+    class Propose:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-news", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "NVDA"}],
+                        "chain": [{"entity_id": "NVDA"}],
+                    }
+                ]
+            }
+
+    def run(member):
+        anomaly = {
+            "anomaly_id": "nvda-alt",
+            "universe": "pool",
+            "trade_date": "2026-10-14",
+            "direction": "down",
+            "members": [member],
+            "started_at": start,
+            "ended_at": datetime(2026, 10, 14, 20, 0, tzinfo=timezone.utc),
+        }
+        return attribute_all([anomaly], [news], as_of=start, client=Propose())[0]
+
+    clean_member = {"ticker": "NVDA", "resid_z": -2.0}
+    own_member = {"ticker": "NVDA", "earnings_reaction": True, "guidance_8k": True, "rating_change": True}
+    assert alternative_exclusion([clean_member]) == 1.0
+    assert alternative_exclusion([own_member]) == 0.0
+    assert alternative_exclusion([]) is None
+    clean = run(clean_member)
+    owned = run(own_member)
+    clean_row = clean["report"]["candidates"][0]
+    owned_row = owned["report"]["candidates"][0]
+    assert clean_row["score"] == 0.76
+    assert clean_row["evidence"]["enters_hypothesis"] is True
+    assert clean["lifecycle"] == "假设中"
+    assert owned_row["score"] == 0.46
+    assert owned_row["evidence"]["enters_hypothesis"] is False
+    assert owned["lifecycle"] == "已发现"
+    assert clean_row["score"] != owned_row["score"]
+
+
+@pytest.mark.phase1_blocking
 def test_chain_retrieves_related_news_and_scores_each_candidate():
     from inves_cog.perception.attribution.chain import attribute_all
     from inves_cog.perception.attribution.rules import m8_rules
@@ -3852,7 +3916,8 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     result = attribute_all([anomaly], related, as_of=late, client=Split())[0]
     scored = {row["mechanism"]: row for row in result["report"]["candidates"] if row["scored"]}
     assert scored["供给"]["score"] == 1.0
-    assert scored["需求"]["score"] == 0.0
+    assert scored["需求"]["score"] == 0.3
+    assert scored["需求"]["evidence"]["enters_hypothesis"] is False
     assert result["report"]["fundamental_standing"] != "支持"
     assert result["operating_impact_proven"] is False
 
