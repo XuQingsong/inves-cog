@@ -122,6 +122,41 @@ def consensus_dispersion(reading):
     }
 
 
+_SURPRISE_LIMIT = 4
+
+
+def surprise_history(items):
+    """Keep the newest four quarters. A shorter list stays as it is and is not averaged."""
+    if items is None:
+        return None
+    dated = []
+    for index, row in enumerate(items):
+        if not isinstance(row, dict):
+            continue
+        day = _on(row.get("quarter_date"))
+        if day is None:
+            continue
+        dated.append((day, index, row))
+    dated.sort(key=lambda item: (item[0], -item[1]), reverse=True)
+    kept = [_surprise_row(day, row) for day, _index, row in dated[:_SURPRISE_LIMIT]]
+    return {
+        "quarters": kept,
+        "limit": _SURPRISE_LIMIT,
+        "averaged": False,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _surprise_row(day, row):
+    return {
+        "quarter_date": day,
+        "eps_actual": row.get("eps_actual") if _number(row.get("eps_actual")) else None,
+        "eps_est": row.get("eps_est") if _number(row.get("eps_est")) else None,
+        "surprise_pct": row.get("surprise_pct") if _number(row.get("surprise_pct")) else None,
+    }
+
+
 def consensus_band(change, downgrades, upgrades, coverage):
     """Missing EPS consensus or coverage stays unknown. It is not 未下修."""
     breadth = coverage is not None and coverage > 0 and downgrades is not None

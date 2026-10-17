@@ -2380,6 +2380,53 @@ def test_consensus_dispersion_stays_blank_when_eps_is_tiny():
 
 
 @pytest.mark.phase1_blocking
+def test_surprise_history_keeps_four_without_averaging():
+    from datetime import date
+
+    from inves_cog.perception.attribution.labels import surprise_history
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert surprise_history(None) is None
+    empty = surprise_history([])
+    assert empty["quarters"] == []
+    assert empty["averaged"] is False
+    older = {"quarter_date": date(2025, 3, 31), "eps_actual": 1.0, "eps_est": 0.9, "surprise_pct": 11.1}
+    newer = {"quarter_date": date(2026, 3, 31), "eps_actual": 1.2, "eps_est": 1.0, "surprise_pct": 20.0}
+    middle = [
+        {"quarter_date": date(2025, 6, 30), "eps_actual": 1.0, "eps_est": 1.0, "surprise_pct": 0.0},
+        {"quarter_date": date(2025, 9, 30), "eps_actual": 1.0, "eps_est": 1.0, "surprise_pct": 0.0},
+        {"quarter_date": date(2025, 12, 31), "eps_actual": 1.0, "eps_est": 1.0, "surprise_pct": 0.0},
+    ]
+    short = surprise_history([older, newer])
+    assert [row["quarter_date"] for row in short["quarters"]] == [date(2026, 3, 31), date(2025, 3, 31)]
+    assert short["averaged"] is False
+    assert short["operating_evidence"] is False
+    kept = surprise_history([older, *middle, newer])
+    assert len(kept["quarters"]) == 4
+    assert kept["quarters"][0]["quarter_date"] == date(2026, 3, 31)
+    assert kept["quarters"][-1]["quarter_date"] == date(2025, 6, 30)
+    assert date(2025, 3, 31) not in [row["quarter_date"] for row in kept["quarters"]]
+    blank = surprise_history([{"quarter_date": date(2026, 3, 31), "eps_actual": 1.1, "eps_est": 1.0}])
+    assert blank["quarters"][0]["surprise_pct"] is None
+    assert blank["averaged"] is False
+    skipped = surprise_history([{"eps_actual": 1.0, "eps_est": 1.0, "surprise_pct": 2.5}, newer])
+    assert len(skipped["quarters"]) == 1
+    assert skipped["quarters"][0]["surprise_pct"] == 20.0
+    anomaly = {"anomaly_id": "surprise", "universe": "pool", "direction": "up"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["surprise_history"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], surprises=[older, newer])
+    assert report["surprise_history"]["averaged"] is False
+    assert len(report["surprise_history"]["quarters"]) == 2
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_divergence_labels():
     from inves_cog.perception.attribution.labels import consensus_band, divergence_label
 
