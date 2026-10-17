@@ -4487,6 +4487,190 @@ def test_labels_keep_a_closed_conclusion():
 
 
 @pytest.mark.phase1_blocking
+def test_labels_reload_a_saved_conclusion():
+    from inves_cog.ingest.market import regular_bounds
+    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.store import Store
+
+    start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    early = datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc)
+    after_close = regular_bounds(date(2026, 10, 15))[1]
+    news = {
+        "info_id": "nvda-news",
+        "published_at": early,
+        "first_seen_at": early,
+        "tickers": ["NVDA"],
+        "source_root": "wire",
+        "claims": [],
+    }
+    scores = {"供给": {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "magnitude": 1.0}}
+
+    class Propose:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-news", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "NVDA"}],
+                        "chain": [{"entity_id": "NVDA"}],
+                    }
+                ]
+            }
+
+    class Memory:
+        def __init__(self):
+            self.linkage = {}
+            self.reports = {}
+            self.row = None
+
+        def execute(self, statement, params):
+            if "LEFT JOIN perception.reports" in statement:
+                saved = self.linkage.get(params[0])
+                report = None if saved is None else self.reports.get(saved["anomaly_id"])
+                self.row = (
+                    None
+                    if saved is None
+                    else (
+                        saved["lifecycle"],
+                        saved["history"],
+                        saved["deadline_outcome"],
+                        saved["closing_reason"],
+                        saved["unknowns"],
+                        report,
+                    )
+                )
+            elif "SELECT lifecycle, history FROM perception.linkage_events" in statement:
+                saved = self.linkage.get(params[0])
+                self.row = None if saved is None else (saved["lifecycle"], saved["history"])
+            elif "INSERT INTO perception.linkage_events" in statement:
+                event_id, anomaly_id, lifecycle, history, outcome, reason, unknowns, _mechanism = params
+                self.linkage[event_id] = {
+                    "anomaly_id": anomaly_id,
+                    "lifecycle": lifecycle,
+                    "history": history.obj,
+                    "deadline_outcome": outcome,
+                    "closing_reason": reason,
+                    "unknowns": unknowns.obj,
+                }
+                self.row = None
+            elif "INSERT INTO perception.reports" in statement:
+                self.reports[params[0]] = params[1].obj
+                self.row = None
+            else:
+                self.row = None
+            return self
+
+        def fetchone(self):
+            return self.row
+
+    def anomaly(anomaly_id, records):
+        row = {
+            "anomaly_id": anomaly_id,
+            "universe": "pool",
+            "trade_date": "2026-10-14",
+            "direction": "down",
+            "members": [{"ticker": "NVDA"}],
+            "started_at": start,
+            "deadline_on": "2026-10-15",
+            "prior_event": {"lifecycle": "基本面核查中", "history": []},
+        }
+        if records is not None:
+            row["operating_records"] = records
+        return row
+
+    def reload(memory, anomaly_id, records):
+        store = Store(memory)
+        closed = execute_stage(
+            "attribution_tracks",
+            [anomaly(anomaly_id, records)],
+            [news],
+            as_of=after_close,
+            client=Propose(),
+            store=store,
+            components_by_id={anomaly_id: scores},
+        )[0]
+        again = {key: value for key, value in anomaly(anomaly_id, records).items() if key != "prior_event"}
+        labelled = execute_stage(
+            "attribution_labels",
+            [again],
+            [news],
+            as_of=after_close,
+            client=Propose(),
+            store=store,
+            components_by_id={anomaly_id: scores},
+        )[0]
+        return closed, labelled
+
+    guidance = {
+        "kind": "company_primary",
+        "source_level": 1,
+        "citation": "8-K accession",
+        "form": "8-K",
+        "guidance_change": True,
+        "direction": "down",
+        "published_at": after_close,
+    }
+    opposed = {
+        "kind": "eps_revision",
+        "coverage": 10,
+        "same_direction_revisions": 3,
+        "eps_change": 0.03,
+        "published_at": after_close,
+    }
+    memory = Memory()
+    _closed, missing = reload(memory, "nvda-risk", None)
+    assert missing["lifecycle"] == "已衰减·无影响"
+    assert missing["history"] == _closed["history"]
+    assert missing["operating_impact_proven"] is False
+    assert missing["report"]["deadline_outcome"] == "条件风险"
+    assert missing["report"]["closing_reason"] == "截止日仍未知"
+    assert missing["report"]["fundamental_standing"] == "失效"
+    assert "经营记录缺失" in missing["report"]["unknowns"]
+    assert memory.linkage["evt-nvda-risk"]["deadline_outcome"] == "条件风险"
+    _supported, supported = reload(memory, "nvda-support", [guidance])
+    assert supported["lifecycle"] == "已验证·有影响"
+    assert supported["operating_impact_proven"] is True
+    assert supported["report"]["deadline_outcome"] == "支持"
+    assert supported["report"]["closing_reason"] == "截止日证据支持"
+    assert supported["report"]["fundamental_standing"] == "支持"
+    _opposed, faded = reload(memory, "nvda-oppose", [opposed])
+    assert faded["lifecycle"] == "已衰减·无影响"
+    assert faded["operating_impact_proven"] is True
+    assert faded["report"]["deadline_outcome"] == "反证"
+    assert faded["report"]["closing_reason"] == "截止日证据指向失效"
+    assert faded["report"]["fundamental_standing"] == "冲突"
+    waiting = anomaly("nvda-open", [])
+    waiting["deadline_on"] = "2026-10-30"
+    store = Store(memory)
+    execute_stage(
+        "attribution_tracks",
+        [waiting],
+        [news],
+        as_of=after_close,
+        client=Propose(),
+        store=store,
+        components_by_id={"nvda-open": scores},
+    )
+    open_again = {key: value for key, value in waiting.items() if key != "prior_event"}
+    still_open = execute_stage(
+        "attribution_labels",
+        [open_again],
+        [news],
+        as_of=after_close,
+        client=Propose(),
+        store=store,
+        components_by_id={"nvda-open": scores},
+    )[0]
+    assert still_open["lifecycle"] == "基本面核查中"
+    assert still_open["report"].get("deadline_outcome") is None
+    assert still_open["report"]["fundamental_standing"] == "待验证"
+    assert memory.linkage["evt-nvda-open"]["deadline_outcome"] is None
+
+
+@pytest.mark.phase1_blocking
 def test_scheduled_job_records_the_stage_itself():
     from inves_cog.perception.attribution.chain import run_scheduled
 

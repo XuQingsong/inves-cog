@@ -36,12 +36,31 @@ class Store:
 
     def prior(self, event_id):
         found = self.connection.execute(
-            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            "SELECT e.lifecycle, e.history, e.deadline_outcome, e.closing_reason, e.unknowns, r.report "
+            "FROM perception.linkage_events AS e "
+            "LEFT JOIN perception.reports AS r ON r.anomaly_id = e.anomaly_id "
+            "WHERE e.event_id = %s",
             (event_id,),
         ).fetchone()
         if found is None:
             return None
-        return {"lifecycle": found[0], "history": list(found[1] or [])}
+        report = found[5] if isinstance(found[5], dict) else {}
+        outcome = found[2]
+        reason = found[3]
+        formed = outcome is not None or reason is not None
+        standing = report.get("fundamental_standing") if formed else None
+        if standing not in {"待验证", "局部支持", "支持", "冲突", "失效"}:
+            standing = None
+        proven = report.get("operating_impact_proven") if formed and "operating_impact_proven" in report else None
+        return {
+            "lifecycle": found[0],
+            "history": list(found[1] or []),
+            "deadline_outcome": outcome,
+            "closing_reason": reason,
+            "unknowns": list(found[4] or []),
+            "fundamental": standing,
+            "operating_impact_proven": proven,
+        }
 
     def save(self, bundle):
         _guard(bundle)
