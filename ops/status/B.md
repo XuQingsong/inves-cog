@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 15:46 北京
+
+- 用户决策 UD-B-02：token 快用完，要尽快收口。用户原话「token快用完了，要不尽快收口？」。照做：不再开新的代码切片，不把 B-008 写成已完成，不合并 PR。每 10 分钟的唤醒先停，避免下一次再消耗。
+- 草稿 PR #18 head `c1fdba1`。没有合并进 main。本地 `make phase1-test`：238 passed，18 deselected。
+- 仍开放：全保存失败记账、dict_row、测试库连接超时、四例现场、五日全池。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。UD-COORD-04 的 19 次模型请求仍由协调方执行，本线没有发起。
+
 ## B-008  进行中  2026-10-17 15:45 北京
 
 - 草稿 PR #18 head `c1fdba1`。没有合并进 main。本地 `make phase1-test`：238 passed，18 deselected。
