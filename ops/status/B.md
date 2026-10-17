@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 09:52 北京
+
+- 草稿 PR #18 head `3eafdf5`。没有合并进 main。本地 `make phase1-test`：211 passed，18 deselected。
+- 一致预期快照按自然日回望 7、30、60、90 天，只取正好那一天的当季、下季、当年、次年。缺那一天、当天没有快照、或同一天数字冲突时，该格是缺失，不用邻近日期填。前值为 0 时变化留空。这里不写未下修或显著下修。不算经营证据，不改基本面栏。没有传入快照时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 09:42 北京
 
 - 草稿 PR #18 head `0acc18d`。没有合并进 main。本地 `make phase1-test`：210 passed，18 deselected。
