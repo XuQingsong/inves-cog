@@ -157,17 +157,30 @@ def run_scheduled(
         return None
     if anomalies is None:
         return {**slot, "recorded": False, "ran": False}
-    rows = execute_stage(
-        slot["task_name"],
-        anomalies,
-        items or [],
-        as_of=when,
-        client=client,
-        store=store,
-    )
     if connection is None:
+        rows = execute_stage(
+            slot["task_name"],
+            anomalies,
+            items or [],
+            as_of=when,
+            client=client,
+            store=store,
+        )
         return {**slot, "recorded": False, "ran": True, "count": len(rows), "rows": rows}
     from inves_cog.perception.anomaly.service import run_recorded
+
+    holder = {}
+
+    def operation():
+        holder["rows"] = execute_stage(
+            slot["task_name"],
+            anomalies,
+            items or [],
+            as_of=when,
+            client=client,
+            store=store,
+        )
+        return len(holder["rows"])
 
     row_id = run_recorded(
         connection,
@@ -175,8 +188,9 @@ def run_scheduled(
         task_name=slot["task_name"],
         trade_date=trade_date,
         params_version=params_version,
-        operation=lambda: len(rows),
+        operation=operation,
     )
+    rows = holder.get("rows") or []
     return {**slot, "recorded": True, "ran": True, "count": len(rows), "rows": rows, "job_id": row_id}
 
 

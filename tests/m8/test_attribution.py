@@ -4038,6 +4038,102 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
 
 
 @pytest.mark.phase1_blocking
+def test_scheduled_job_records_the_stage_itself():
+    from inves_cog.perception.attribution.chain import run_scheduled
+
+    slot = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
+    anomaly = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "session": "close",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+    }
+    stamp = datetime(2026, 10, 15, 1, 15, tzinfo=timezone.utc)
+
+    class Clock:
+        def now_utc(self):
+            return stamp
+
+    class Connection:
+        def __init__(self):
+            self.calls = []
+
+        def execute(self, statement, params):
+            self.calls.append((statement, params))
+            return self
+
+        def fetchone(self):
+            return {"id": 7}
+
+    class Seen(list):
+        def __init__(self, trace):
+            super().__init__()
+            self.trace = trace
+
+        def __bool__(self):
+            return True
+
+        def __iter__(self):
+            self.trace.append("stage")
+            return super().__iter__()
+
+    trace = []
+    connection = Connection()
+    connection.trace = trace
+    original_execute = connection.execute
+
+    def execute(statement, params):
+        trace.append("insert" if "INSERT INTO ingest.job_runs" in statement else "update")
+        return original_execute(statement, params)
+
+    connection.execute = execute
+    recorded = run_scheduled(
+        slot,
+        anomalies=[anomaly],
+        items=Seen(trace),
+        client=None,
+        connection=connection,
+        clock=Clock(),
+        trade_date=date(2026, 10, 14),
+        params_version="p-2026.10",
+    )
+    assert recorded["job_id"] == 7
+    assert recorded["recorded"] is True
+    assert recorded["ran"] is True
+    assert recorded["count"] == 1
+    assert recorded["rows"][0]["status"] == "已发现·原因未明"
+    assert trace == ["insert", "stage", "update"]
+    inserted, updated = connection.calls
+    assert "INSERT INTO ingest.job_runs" in inserted[0]
+    assert inserted[1][0] == "attribution_candidates"
+    assert inserted[1][1] == date(2026, 10, 14)
+    assert inserted[1][3] == "p-2026.10"
+    assert updated[1][1:] == ("ok", 1, None, 7)
+
+    class Boom:
+        def __iter__(self):
+            raise RuntimeError("stage failed")
+
+    failed = Connection()
+    with pytest.raises(RuntimeError, match="stage failed"):
+        run_scheduled(
+            slot,
+            anomalies=[anomaly],
+            items=Boom(),
+            client=None,
+            connection=failed,
+            clock=Clock(),
+            trade_date=date(2026, 10, 14),
+            params_version="p-2026.10",
+        )
+    assert len(failed.calls) == 2
+    assert "INSERT INTO ingest.job_runs" in failed.calls[0][0]
+    assert failed.calls[1][1][1:] == ("failed", 0, "stage failed", 7)
+
+
+@pytest.mark.phase1_blocking
 def test_attribution_chain_scores_from_rules_and_keeps_going():
     from inves_cog.perception.attribution.chain import attribute_all
     from inves_cog.perception.attribution.store import Store
