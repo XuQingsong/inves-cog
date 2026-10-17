@@ -59,6 +59,21 @@ def assert_listed_units():
     assert missing_unit["neutral"] == before["neutral"], "forecast audit alone must not refresh historical PE"
     recovered = book.update("LISTED", date(2026, 10, 16), "稳定", plain, period="2026-06-30", price=120)
     assert recovered["neutral"] is not None and recovered["trigger_audit"]["unit_contract_event"]
+    # Withdrawing an unusable forecast must not display its old range while
+    # waiting for the ordinary >25% change review.
+    withdrawal = ValuationBook()
+    known = {**plain, "eps_ntm": 1000, "listed_unit_audit": {"eps_ntm": {"status": "known"}}}
+    withdrawal.update("WITHDRAW", date(2026, 10, 14), "稳定", known, period="2026-06-30", price=100)
+    fallback = withdrawal.update(
+        "WITHDRAW",
+        date(2026, 10, 15),
+        "稳定",
+        {**plain, "listed_unit_audit": {"eps_ntm": {"status": "unknown"}}},
+        period="2026-06-30",
+        price=110,
+    )
+    assert fallback["inputs"]["eps_ntm"] is None and not fallback["pending_review"]
+    assert fallback["trigger_audit"]["invalid_forecast_withdrawn"]
     assert_listing_adapter()
 
 
