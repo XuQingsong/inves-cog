@@ -3886,7 +3886,7 @@ def test_chain_counts_alternative_exclusion():
                     {
                         "mechanism": "需求",
                         "info_ids": ["nvda-news"],
-                        "affected": [{"ticker": "AMD"}],
+                        "affected": [{"ticker": "AMD", "basket_id": "accelerators"}],
                         "chain": [{"entity_id": "AMD"}],
                     },
                 ]
@@ -3919,7 +3919,7 @@ def test_chain_counts_alternative_exclusion():
         client=SplitScope(),
     )[0]
     by_mechanism = {row["mechanism"]: row for row in scoped["report"]["candidates"] if row.get("scored")}
-    assert by_mechanism["供给"]["score"] == 0.61
+    assert by_mechanism["供给"]["score"] == 0.46
     assert by_mechanism["需求"]["score"] == 0.76
 
 
@@ -5129,6 +5129,41 @@ def test_tracks_stage_uses_the_completed_session():
     assert "2026-10-18" not in dates()
     assert memory.tracks[(f"evt-{anomaly_id}", "2026-10-14")]["fundamental"] == "支持"
     assert anomaly["trade_date"] == "2026-10-14"
+
+    for origin, before_close, after_close in (
+        ("2026-10-16T13:30:00+00:00", "2026-10-16T19:59:00+00:00", "2026-10-16T20:01:00+00:00"),
+        ("2026-11-27T14:30:00+00:00", "2026-11-27T17:59:00+00:00", "2026-11-27T18:01:00+00:00"),
+    ):
+        intraday = {
+            **anomaly,
+            "anomaly_id": f"intraday-{origin[:10]}",
+            "trade_date": origin[:10],
+            "started_at": datetime.fromisoformat(origin),
+        }
+        fresh = Memory()
+        event_id = f"evt-{intraday['anomaly_id']}"
+        Store(fresh).save(
+            {
+                "anomaly_id": intraday["anomaly_id"],
+                "universe": "pool",
+                "linkage": {
+                    "event_id": event_id,
+                    "lifecycle": "假设中",
+                    "history": [{"at": origin, "old": "已发现", "new": "假设中", "trigger": "证据分达到假设", "evidence_ids": []}],
+                },
+            }
+        )
+        pending = execute_stage(
+            "attribution_tracks", [intraday], [], as_of=datetime.fromisoformat(before_close), client=None, store=Store(fresh)
+        )[0]
+        assert pending["tracks"] == []
+        assert fresh.tracks == {}
+        assert intraday["trade_date"] == origin[:10]
+        closed = execute_stage(
+            "attribution_tracks", [intraday], [], as_of=datetime.fromisoformat(after_close), client=None, store=Store(fresh)
+        )[0]
+        assert [row["trade_date"] for row in closed["tracks"]] == [origin[:10]]
+        assert list(fresh.tracks) == [(event_id, origin[:10])]
 
 
 @pytest.mark.phase1_blocking
