@@ -1,5 +1,17 @@
 # A 线回报
 
+## A-008  已完成（输入覆盖修复交付，待独立验收）  2026-10-17
+- **PR #17已恢复正式「[M5] 提交验收」，draft=false**：https://github.com/XuQingsong/inves-cog/pull/17。当前完整head **10f66edaaa5e08e5426a836ed7ed4095cda73ed6**，本地同SHA且干净；已直接核对[该准确head phase1-blocking CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39007668205)，job117323345150成功，未沿用A007旧CI。
+- [A008逐条自测](https://github.com/XuQingsong/inves-cog/blob/10f66edaaa5e08e5426a836ed7ed4095cda73ed6/handoff/M5/a008/self-test.md)、[五日覆盖/全部剩余字段](https://github.com/XuQingsong/inves-cog/blob/10f66edaaa5e08e5426a836ed7ed4095cda73ed6/handoff/M5/a008/coverage-after.json)、[逐只源审计与剩余处理](https://github.com/XuQingsong/inves-cog/blob/10f66edaaa5e08e5426a836ed7ed4095cda73ed6/handoff/M5/a008/remaining-items.md)已发布；source-audit.csv、code-manifest.sha256、evidence-manifest.json及原44只基线同目录。
+- 五日可估 **15→47/47/47/48/48**，最终不估 **44→11**；每天59行、0异常失败、无原可估丢失。原有75条可估记录类型/三档完全不变。33家最终新增可估来自独立分母及ASML年度适配，不是改参数凑比例。
+- 最小M2例外实现：独立可选diluted_shares_weighted及同名来源，真实季度/年度期间、unit、duration、filed、accession、拆股原披露基准、类股/ADS与近似标识保留；旧shares/EPS/健康码等字段严格不变，legacy不附加。M5方法v1.3升级输入合同、全部阻塞输入并列输出，不静默用普通股、NI/EPS或ROE代理。
+- ASML原件有足够年度历史；原M5按表单名遗漏annual_basis的6-K状态。修复同时校验年度标识及350–380天原始期间，十个年度可用，真实季度/interim仍拒绝；先红后绿，无新增常态利润率/PE参数。
+- 59家完整旧提取输出与3556条留存状态旧字段逐项相同；**11494条规则A打分哈希相同，五日完整合成计划字节相同，订单13/5/2/0/5**。6只不同情况按原件独立核对；最终受影响4项通过，M2/M3/M4 blocking+replay **53通过、2 deselected**，既有Ruff门禁通过。失败历史、旧字段证明和订单哈希均保留，未改golden/Harness。
+- 最终11只：AVGO/GE缺已确认周期参数；SKHY/SNDK存在历史及单位缺口；NOK/ARM需核资本开支范围/对齐现金流接口；UNH/JPM需明确ROTE/TBV构成及适用性；XOM无当前可用稀释原件（现存predecessor标签止2013）；TSM普通股/ADS全链单位须统一；INTC困境主动不估。各项已附具体来源，未将接口缺口冒称公司不披露，不阻塞本轮已授权部分。
+- 原始资料及295行新结果、6例数值和本机manifest已准备给需求方只读验收；清单核对21个代码/配置/测试文件哈希并对应准确10f66ed。公开仅代码、合成回归、来源元数据、计数和哈希，无原始金融行；没有上传许可等待。
+- 变更/边界：只有A008明确授权的M2可选JSON字段及M5读取/审计适配，无表结构、共享写回、采集、额外模型、依赖、权限、服务切换、迁移、合并或部署；docs/golden/milestones未改。
+- **下一步：请需求方独立验收当前A008。A停止当前开发，不自动取下一编号、不启动M9/M10、不恢复自动接单；整体检查仍由主协调/用户决定。**
+
 ## A-008  进行中（覆盖已提升，最终证据整理）
 - 已找到主项目全部59家的既存SEC缓存；本轮不是新增采集。首轮五日可估15→47，无原可估丢失、0异常失败，新增32家；59家原提取输出及3556条留存状态旧字段逐项相同。
 - 发现ASML并非源缺历史：现存companyfacts有19个年度营收/净利期间，M5仅按表单名漏掉M2已标annual_basis的6-K状态。已先补失败正反例，在M5同时要求年度标识与350–380天原始期间，真实季度/interim仍排除；不改M2旧字段或研究参数。正重出受影响五日证据。
