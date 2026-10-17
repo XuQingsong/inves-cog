@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 12:58 北京
+
+- 草稿 PR #18 head `110f769`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
+- 有连接时，候选、跟踪和截止日本身就是被记录的操作。任务行先写入，阶段在这条操作里执行；阶段失败会把该行写成失败并重新抛出，而不是先跑完再记一个条数。没有连接时仍只执行、不写任务行。日程没有部署。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 12:47 北京
 
 - 草稿 PR #18 head `2a080b2`。没有合并进 main。本地 `make phase1-test`：227 passed，18 deselected。
