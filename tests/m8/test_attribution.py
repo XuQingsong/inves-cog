@@ -3048,6 +3048,59 @@ def test_scope_is_a_relation_label_and_tracking_is_not_evidence():
     assert all(row["is_evidence"] is False for row in report["tracking"])
     assert report["tracking"][0]["status"] == "有数据"
 
+    # Exercise the chain boundary, not only the standalone report helpers.
+    from inves_cog.perception.attribution.chain import _components, _labels, _report
+
+    scoped = {
+        "anomaly_id": "scope-wiring",
+        "universe": "pool",
+        "direction": "down",
+        "members": [
+            {"ticker": "WDC", "resid_z": -3.0},
+            {"ticker": "MU", "resid_z": -2.0},
+            {"ticker": "OTHER", "resid_z": -1.0},
+        ],
+        "relations": [
+            {"ticker": "WDC", "exposure": "直接", "status": "观察到"},
+            {"ticker": "MU", "exposure": "间接", "status": "有支持"},
+            {"ticker": "OTHER", "exposure": "概念关联", "status": "已确立"},
+        ],
+    }
+    copied = json.loads(json.dumps(scoped))
+    assert _components(supply[0], scoped, [])["gradient"] == 1.0
+    connected = _report(scoped, supply, [], None, None, None, None)
+    assert connected["scope"] == impact_scope(supply, scoped["relations"], direction="down")
+    assert connected["scope"][0]["exposure"] == "直接"
+    for relation, expected in (
+        (None, "纯共振"),
+        ({"ticker": "WDC", "exposure": "间接", "status": "有支持"}, "间接"),
+        ({"ticker": "WDC", "exposure": "直接", "status": None}, "概念关联"),
+        ({"ticker": "WDC", "exposure": "直接", "status": "候选"}, "概念关联"),
+        ({"ticker": "WDC", "exposure": "直接", "status": "已确立", "exit_reason": "关系退出"}, "概念关联"),
+    ):
+        related = {**scoped, "relations": None if relation is None else [relation]}
+        rendered = _report(related, supply, [], None, None, None, None)
+        assert rendered["scope"][0]["exposure"] == expected
+        if relation and relation.get("exit_reason"):
+            assert rendered["scope"][0]["exit_reason"] == "关系退出"
+    absent = {key: value for key, value in scoped.items() if key != "relations"}
+    assert _report(absent, supply, [], None, None, None, None)["scope"][0]["exposure"] == "纯共振"
+    assert _report(scoped, weak, [], None, None, None, None)["scope"] == []
+    assert _report(scoped, multiple, [], None, None, None, None)["scope"][0]["exposure"] == "概念关联"
+    assert scoped == copied
+
+    # Labels inherit a saved deadline; they never compute a fresh one.
+    saved = {**connected, "deadline_on": "2026-10-20", "lifecycle": "假设中", "history": []}
+    for task in saved["tracking"]:
+        task["deadline"] = "2026-10-20"
+    changed_clock_input = {**scoped, "deadline_on": "2026-11-20", "earnings_sessions": 1}
+    inherited = _labels(changed_clock_input, saved, None, datetime(2026, 10, 21, tzinfo=timezone.utc), None)
+    assert inherited["report"]["deadline_on"] == "2026-10-20"
+    assert {task["deadline"] for task in inherited["report"]["tracking"]} == {"2026-10-20"}
+    assert inherited["lifecycle"] == "假设中" and inherited["history"] == []
+    missing = _labels(changed_clock_input, None, None, datetime(2026, 10, 21, tzinfo=timezone.utc), None)
+    assert missing["report"].get("deadline_on") is None and missing["report"]["tracking"] == []
+
 
 @pytest.mark.phase1_blocking
 def test_constraint_conclusion_does_not_prove_operating_impact():
@@ -4240,6 +4293,27 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert "情绪" not in json.dumps(opened["report"]["magnitude_channels"], ensure_ascii=False)
     assert opened["operating_impact_proven"] is False
     assert opened["report"]["valuation"] == "不变 / 待基本面轨道"
+
+    from inves_cog.perception.attribution.tracks import earliest_deadline
+
+    assert len(opened["report"]["tracking"]) == 6
+    default_due = earliest_deadline(start).isoformat()
+    assert opened["report"]["deadline_on"] == default_due
+    assert {task["deadline"] for task in opened["report"]["tracking"]} == {default_due}
+    for fields, expected in (
+        ({"deadline_on": "2026-10-20"}, "2026-10-20"),
+        ({"deadline_on": "2026-10-30", "earnings_sessions": 1}, "2026-10-05"),
+        ({"deadline_on": "2026-10-30", "mechanism_sessions": 2}, "2026-10-06"),
+    ):
+        checked = attribute_all([{**base, **fields}], [item], as_of=start, client=Propose())[0]
+        assert checked["report"]["deadline_on"] == expected
+        assert len(checked["report"]["tracking"]) == 6
+        assert {task["deadline"] for task in checked["report"]["tracking"]} == {expected}
+        assert all(task["is_evidence"] is False and task["status"] == "未知" for task in checked["report"]["tracking"])
+        assert checked["report"]["candidates"] == opened["report"]["candidates"]
+        assert checked["lifecycle"] == opened["lifecycle"]
+        assert checked["history"] == opened["history"]
+        assert checked["report"]["trading"] is None
 
     continued = attribute_all(
         [

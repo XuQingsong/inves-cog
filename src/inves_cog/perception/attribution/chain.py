@@ -265,6 +265,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         impact,
         channels,
         deadline,
+        deadline_on=due_on.isoformat() if due_on is not None else None,
     )
     report["lifecycle"] = state
     report["history"] = history
@@ -964,7 +965,7 @@ def _track_rows(anomaly, state, stage=None, as_of=None):
     return [{"trade_date": trade_date, "emotion": emotion, "fundamental": "待验证"}]
 
 
-def _report(anomaly, candidates, items, status, impact, channels, deadline):
+def _report(anomaly, candidates, items, status, impact, channels, deadline, *, deadline_on=None):
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
@@ -975,6 +976,8 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline):
         candidates,
         sources,
         deadline,
+        relations=anomaly.get("relations") or (),
+        deadline_on=deadline_on,
         embeddings=anomaly.get("embeddings"),
         magnitude=channels,
         tracks_view=anomaly.get("tracks_view"),
