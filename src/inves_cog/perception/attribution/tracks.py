@@ -3,7 +3,7 @@
 import math
 from datetime import date, datetime
 
-from inves_cog.ingest.market import NY, next_trading_day, regular_bounds
+from inves_cog.ingest.market import NY, next_trading_day, regular_bounds, trading_day
 
 
 def capital_state(sessions_elapsed, cumulative, first):
@@ -65,6 +65,8 @@ def earliest_deadline(started_on, *, deadline_on=None, earnings_sessions=None, m
     started = _event_day(started_on)
     if explicit is not None and started is not None and explicit < started:
         raise ValueError("期限早于事件")
+    if explicit is not None and not trading_day(explicit):
+        raise ValueError("期限不是交易日")
     if explicit is not None:
         found.append(explicit)
     if started is not None:
