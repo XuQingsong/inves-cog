@@ -4560,12 +4560,13 @@ def test_case_inputs_are_the_payload_bytes(tmp_path, capsys):
         assert claim_body["output"]["items"][0]["claims"]["forbidden"]
         bundle = payloads[plan["anomaly_id"]]
         assert candidate.read_text() == canonical_payload(bundle["candidate_payload"])
-        assert candidate_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], tmp_path).stem == plan[
-            "candidate_sha256"
-        ]
-        assert claim_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], tmp_path).stem == plan[
-            "claim_sha256"
-        ]
+        assert (
+            candidate_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], tmp_path).stem
+            == plan["candidate_sha256"]
+        )
+        assert (
+            claim_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], tmp_path).stem == plan["claim_sha256"]
+        )
 
 
 @pytest.mark.phase1_blocking
