@@ -703,6 +703,8 @@ def extract_state(
         health_codes=sorted(set(codes)) or ["ok"],
         oracle_values=oracle,
     )
+    from inves_cog.ingest.fundamentals.valuation_shares import attach_valuation_shares
     from inves_cog.ingest.fundamentals.verification import apply_registered
 
+    attach_valuation_shares(state, data, as_of=as_of)
     return apply_registered(state)

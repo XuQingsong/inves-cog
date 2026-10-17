@@ -185,6 +185,11 @@ def calculate(kind, data):
         out.update(zip(SCENARIOS, sorted(values), strict=False))
     except (ValueError, TypeError, OverflowError) as exc:
         out.update(status="unvalued", reason=str(exc), **dict.fromkeys(SCENARIOS))
+    from inves_cog.valuation_v1.requirements import missing_inputs
+
+    out["blocking_inputs"] = missing_inputs(kind, d) if out["status"] != "ok" else []
+    if out["blocking_inputs"]:
+        out["reason"] += "; 全部阻塞输入：" + ", ".join(r["field"] for r in out["blocking_inputs"])
     return confidence(out, kind, d)
 
 

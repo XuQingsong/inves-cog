@@ -1,6 +1,6 @@
 m5:
   params_version: p-2026.10
-  method_version: v1.2
+  method_version: v1.3
   # K05 canonical identities; public evidence differs from local acquisition time.
   eps_units:
     events:

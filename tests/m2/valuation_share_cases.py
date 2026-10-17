@@ -5,9 +5,8 @@ from datetime import date
 
 
 def assert_valuation_share_contract(input_facts):
-    from inves_cog.ingest.fundamentals.valuation_shares import select_weighted_shares
-
     from inves_cog.ingest.fundamentals.extractors import extract_state
+    from inves_cog.ingest.fundamentals.valuation_shares import select_weighted_shares
 
     day = date(2026, 10, 13)
     raw = input_facts()

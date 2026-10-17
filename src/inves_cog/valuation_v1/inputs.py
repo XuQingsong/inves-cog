@@ -1,5 +1,6 @@
 """Explicit M2 fixed input transformations; never substitute scores or share classes."""
 
+import math
 from datetime import date, datetime, time, timedelta, timezone
 from statistics import median
 
@@ -85,8 +86,45 @@ def financial_inputs(state, states, entity, *, as_of=None):
         "share_basis": state.field_sources.get("shares", {}),
     }
     out["diluted_shares"] = diluted_shares(values.get("shares"), out["share_basis"])
+    weighted = values.get("diluted_shares_weighted")
+    proof = state.field_sources.get("diluted_shares_weighted", {})
+    out["input_sources"] = {
+        k: v
+        for k, v in state.field_sources.items()
+        if k in {"fcf_ttm", "eps_ttm", "cash", "net_debt", "gross_margin", "rev_ttm", "rote_5y_avg", "tbv_per_share"}
+    }
+    out["input_sources"]["diluted_shares"] = proof
+    if weighted is not None:
+        valid = (
+            proof.get("method") == "diluted_weighted_disclosed"
+            and proof.get("unit") == "shares"
+            and proof.get("end") == str(state.period_end)
+            and proof.get("filed", "9999") <= str(state.filed)
+            and proof.get("period_kind") in {"quarter", "annual"}
+            and (
+                proof.get("security_basis") == "consolidated_common_equivalent"
+                or proof.get("security_basis") == "ordinary_shares"
+                and proof.get("listed_share_ratio") == 1
+            )
+            and isinstance(weighted, (int, float))
+            and math.isfinite(weighted)
+            and weighted > 0
+        )
+        if valid:
+            out["diluted_shares"] = weighted
+            out["valuation_denominator_source"] = proof
+        else:
+            out["weighted_share_input_reason"] = (
+                "independent weighted denominator unverified: "
+                f"source period={proof.get('end')}, financial period={state.period_end}, "
+                f"filed={proof.get('filed')}, unit={proof.get('unit')}, security_basis={proof.get('security_basis')}"
+            )
     if out["diluted_shares"] is None:
-        out["diluted_shares_reason"] = "M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本"
+        out["diluted_shares_reason"] = (
+            out.get("weighted_share_input_reason")
+            or proof.get("reason")
+            or "M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本"
+        )
     out["fcf_per_share"] = (
         values["fcf_ttm"] / out["diluted_shares"]
         if values.get("fcf_ttm") is not None and out["diluted_shares"] is not None
