@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 13:26 北京
+
+- 草稿 PR #18 head `ceca207`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
+- 已看到 Q-M8-16。第 1 项：截止日取写明的日期，以及起点之后财报周期、机制周期和 20 个交易日里最早的一天。没到这一天就继续跟踪。到了这一天才走原来的经营门槛。空记录仍不写成经营影响已证实。报告留下这个日期。
+- 第 2 到第 5 项还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 13:15 北京
 
 - 草稿 PR #18 head `370575e`。没有合并进 main。本地 `make phase1-test`：228 passed，18 deselected。
