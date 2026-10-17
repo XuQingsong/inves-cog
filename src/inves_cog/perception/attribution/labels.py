@@ -1,5 +1,72 @@
 """Divergence labels exist only on the deadline or once the case is verified."""
 
+import math
+from datetime import date, datetime, timedelta
+
+_LAGS = (7, 30, 60, 90)
+_EPS_FIELDS = ("当季", "下季", "当年", "次年")
+
+
+def consensus_lookback(reading):
+    """Four calendar lags. A missing day stays missing, and this does not name a revision band."""
+    if reading is None:
+        return None
+    as_of = _on(reading.get("as_of"))
+    snapshots = reading.get("snapshots")
+    if as_of is None or snapshots is None:
+        return None
+    by_day = _snapshot_days(snapshots)
+    current = by_day.get(as_of)
+    if current is None:
+        return None
+    lags = {}
+    for days in _LAGS:
+        prior = by_day.get(as_of - timedelta(days=days))
+        lags[f"day_{days}"] = {field: _lag_cell(current.get(field), prior, field) for field in _EPS_FIELDS}
+    return {
+        "lags": lags,
+        "band": None,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _snapshot_days(snapshots):
+    found = {}
+    for row in snapshots:
+        day = _on(row.get("on"))
+        if day is None:
+            continue
+        levels = {field: row.get(field) if _number(row.get(field)) else None for field in _EPS_FIELDS}
+        if day not in found:
+            found[day] = levels
+        elif found[day] != levels:
+            found[day] = None
+    return {day: levels for day, levels in found.items() if levels is not None}
+
+
+def _lag_cell(current, prior, field):
+    earlier = None if prior is None else prior.get(field)
+    return {"prior": earlier, "change": _change(current, earlier)}
+
+
+def _change(current, prior):
+    if not _number(current) or not _number(prior) or prior == 0:
+        return None
+    return (current - prior) / prior
+
+
+def _on(value):
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    return None
+
+
+def _number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
 
 def consensus_band(change, downgrades, upgrades, coverage):
     """Missing EPS consensus or coverage stays unknown. It is not 未下修."""

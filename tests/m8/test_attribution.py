@@ -2243,6 +2243,56 @@ def test_tracks_and_deadline():
 
 
 @pytest.mark.phase1_blocking
+def test_consensus_lookback_does_not_name_a_band():
+    from datetime import date, timedelta
+
+    from inves_cog.perception.attribution.labels import consensus_lookback
+    from inves_cog.perception.attribution.report import explanation_report
+
+    today = date(2026, 10, 17)
+    assert consensus_lookback(None) is None
+    assert consensus_lookback({"as_of": today, "snapshots": []}) is None
+    current = {"on": today, "当季": 1.1, "下季": 1.2, "当年": 98, "次年": 110}
+    week = {"on": today - timedelta(days=7), "当季": 1.0, "下季": 1.2, "当年": 100, "次年": 110}
+    near = {"on": today - timedelta(days=6), "当年": 50}
+    reading = consensus_lookback({"as_of": today, "snapshots": [current, week, near]})
+    assert reading["band"] is None
+    assert reading["operating_evidence"] is False
+    assert reading["fundamental_standing"] is None
+    assert reading["lags"]["day_7"]["当年"] == {"prior": 100, "change": -0.02}
+    assert reading["lags"]["day_7"]["下季"] == {"prior": 1.2, "change": 0.0}
+    assert reading["lags"]["day_30"]["当年"]["prior"] is None
+    assert reading["lags"]["day_30"]["当年"]["change"] is None
+    assert reading["lags"]["day_60"]["当季"]["prior"] is None
+    assert reading["lags"]["day_90"]["次年"]["prior"] is None
+    zero = {"on": today - timedelta(days=90), "当年": 0, "当季": 1}
+    flat = consensus_lookback({"as_of": today, "snapshots": [current, zero]})
+    assert flat["lags"]["day_90"]["当年"] == {"prior": 0, "change": None}
+    assert flat["lags"]["day_90"]["当季"]["prior"] == 1
+    clash = {"on": today - timedelta(days=7), "当年": 90}
+    conflicted = consensus_lookback({"as_of": today, "snapshots": [current, week, clash]})
+    assert conflicted["lags"]["day_7"]["当年"]["prior"] is None
+    anomaly = {"anomaly_id": "lookback", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["consensus_lookback"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        lookback={"as_of": today, "snapshots": [current, week]},
+    )
+    assert report["consensus_lookback"]["band"] is None
+    assert report["consensus_lookback"]["lags"]["day_7"]["当年"]["change"] == -0.02
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_divergence_labels():
     from inves_cog.perception.attribution.labels import consensus_band, divergence_label
 

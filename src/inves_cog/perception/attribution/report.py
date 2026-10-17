@@ -12,6 +12,7 @@ from inves_cog.perception.attribution.dims import (
 )
 from inves_cog.perception.attribution.evidence import later_report
 from inves_cog.perception.attribution.impact import anomaly_status
+from inves_cog.perception.attribution.labels import consensus_lookback
 from inves_cog.perception.attribution.lifecycle import relation_step, weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines, ntm_move
 from inves_cog.perception.attribution.propose import research_order, review_queue
@@ -168,6 +169,7 @@ def explanation_report(
     windows=None,
     ntm=None,
     archive=None,
+    lookback=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -212,6 +214,7 @@ def explanation_report(
         "retrace_windows": retrace_windows(windows),
         "ntm_move": ntm_move(ntm),
         "text_retention": text_retention(archive),
+        "consensus_lookback": consensus_lookback(lookback),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
