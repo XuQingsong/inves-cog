@@ -568,7 +568,7 @@ def _measured_hit(event, fingerprints, anomaly, start, as_of):
             continue
         if event.get("mechanism") != candidate.get("mechanism"):
             continue
-        direction = _expected_direction(candidate, fingerprint, anomaly)
+        direction = _expected_direction(candidate, fingerprint, anomaly, event)
         if direction is None or event.get("direction") not in {None, direction}:
             continue
         expected = {row.get("basket_id") for row in fingerprint.get("baskets") or []}
@@ -594,10 +594,23 @@ def _later_visible(event, as_of):
     return max(published, seen) <= as_of
 
 
-def _expected_direction(candidate, fingerprint, anomaly):
-    directions = [row.get("direction") for row in fingerprint.get("baskets") or [] if row.get("direction")]
+def _expected_direction(candidate, fingerprint, anomaly, event):
+    baskets = [row for row in fingerprint.get("baskets") or [] if isinstance(row, dict)]
+    named = event.get("basket_id")
+    if named:
+        matched = [
+            row.get("direction")
+            for row in baskets
+            if row.get("basket_id") == named and row.get("direction") in {"up", "down"}
+        ]
+        if len(set(matched)) == 1:
+            return matched[0]
+        return None
+    directions = [row.get("direction") for row in baskets if row.get("direction") in {"up", "down"}]
     if len(set(directions)) == 1:
         return directions[0]
+    if len(directions) > 1:
+        return None
     for row in candidate.get("affected") or []:
         if isinstance(row, dict) and row.get("direction") in {"up", "down"}:
             return row["direction"]

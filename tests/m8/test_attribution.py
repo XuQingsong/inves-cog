@@ -3873,6 +3873,87 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
 
 
 @pytest.mark.phase1_blocking
+def test_second_hit_uses_the_matched_basket_direction():
+    from inves_cog.perception.attribution.chain import attribute_all
+
+    start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    early = datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc)
+    later = datetime(2026, 10, 15, 15, 0, tzinfo=timezone.utc)
+    news = {
+        "info_id": "nvda-amd",
+        "published_at": early,
+        "first_seen_at": early,
+        "tickers": ["NVDA", "AMD"],
+        "source_root": "wire",
+        "claims": [],
+    }
+
+    class Propose:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-amd", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "需求",
+                        "info_ids": ["nvda-amd"],
+                        "chain": [{"entity_id": "NVDA"}, {"entity_id": "AMD"}],
+                        "affected": [
+                            {"ticker": "NVDA", "basket_id": "up-basket", "direction": "up"},
+                            {"ticker": "AMD", "basket_id": "down-basket", "direction": "down"},
+                        ],
+                        "control_baskets": ["control"],
+                    }
+                ]
+            }
+
+    def event(info_id, basket_id, direction, expected_z):
+        return {
+            "info_id": info_id,
+            "published_at": later,
+            "first_seen_at": later,
+            "source_root": info_id,
+            "entities": ["AMD"] if basket_id == "down-basket" else ["NVDA"],
+            "mechanism": "需求",
+            "basket_id": basket_id,
+            "direction": direction,
+            "expected_z": expected_z,
+            "control_z": 0,
+            "control_basket": "control",
+            "outcome": "反证",
+        }
+
+    anomaly = {
+        "anomaly_id": "multi-2026-10-14",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "direction": "up",
+        "members": [{"ticker": "NVDA"}, {"ticker": "AMD"}],
+        "started_at": start,
+        "ended_at": datetime(2026, 10, 14, 20, 0, tzinfo=timezone.utc),
+    }
+    scores = {"需求": {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "magnitude": 1.0}}
+
+    def run(later_event):
+        row = {**anomaly, "later_events": [later_event]}
+        return attribute_all(
+            [row],
+            [news],
+            as_of=later,
+            client=Propose(),
+            components_by_id={anomaly["anomaly_id"]: scores},
+        )[0]
+
+    down = run(event("down-hit", "down-basket", "down", -1.5))
+    assert down["second_hit"] == "确认"
+    assert down["degraded"] is None
+    up = run(event("up-hit", "up-basket", "up", 1.5))
+    assert up["second_hit"] == "确认"
+    wrong = run(event("wrong-basket", "sideways", "down", -1.5))
+    assert wrong["second_hit"] == "未检验"
+
+
+@pytest.mark.phase1_blocking
 def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     from inves_cog.ingest.market import regular_bounds
     from inves_cog.perception.attribution.chain import adapt_m7, attribute_all, execute_stage, run_scheduled
