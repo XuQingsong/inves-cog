@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-007  进行中（D-15证据已发布且CI绿，待独立确认）
+- PR #17最新完整head **f16553ece4e34db5d9a334beb66f1b2375087437**，准确head的[phase1-blocking CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/38994107724)。本地工作树已对齐同SHA且干净；本轮只补M5证据，代码/配置/迁移/测试13文件哈希均未变，未重复历史验收。
+- [完整第二批采集证据](https://github.com/XuQingsong/inves-cog/blob/f16553ece4e34db5d9a334beb66f1b2375087437/handoff/M5/d15-consensus-second-run.json)、upstream-readiness.json和self-test.md §9已发布。**job6394=m2_consensus，ok、59、零失败**；北京时间10-17 10:07:03.161571至10:11:56.394854，293.233秒。as_of=2026-10-17/source=yahoo_page，59不同ticker与universe一致，captured_at齐备且全部在授权窗口；七项预期字段缺失数均0。
+- 仅一次既有任务，先核对没有今日完整批次或重复任务；用既有写连接与已批准分析页，5秒限频，未探受限API、未重试、未改代码/配置文件/源/key/权限/服务/调度，未部署。10-15首批保留，Muse历史与财报任务不计为第二批。
+- **请需求方按job6394、as_of2026-10-17独立只读确认D-15**。A不自行关闭验收前置，PR仍为草稿「[M5] 实现与自测完成（待 D-15 独立确认）」。确认后仅更新交付状态并转正式「[M5] 提交验收」，不合并或部署。
+- 下一步：等待上述独立确认；不再采集，不恢复自动接单，不创建新任务/后台服务，M5结束后停在M0–M8整体验证检查点。
+
 ## A-007  进行中（D-15第二批59/59已采集，待需求方独立确认）
 - 在main9d88f06规定窗口内仅运行一次既有M2 consensus，未改代码/配置文件/源/key/权限/服务或调度，不调用受限API、不重试、不新建后台服务。
 - **job_runs id=6394，task=m2_consensus，status=ok，processed_count=59，error_summary=NULL**。北京时间2026-10-17 **10:07:03.161571开始、10:11:56.394854结束**，耗时293.233秒；trade_date为美东2026-10-16。
