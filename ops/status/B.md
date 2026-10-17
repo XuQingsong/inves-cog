@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 10:56 北京
+
+- 草稿 PR #18 head `5c274e6`。没有合并进 main。本地 `make phase1-test`：217 passed，18 deselected。
+- 按 Q-M8-14 第 3 项：同一事件第二次保存不再撞主键。生命周期写成新状态，原来的审计历史整段留下，同日再跑不会把历史清空。同日跟踪改这一行；下一日另起一行，前一日那一行还在。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 10:42 北京
 
 - 草稿 PR #18 head `80009f7`。没有合并进 main。本地 `make phase1-test`：216 passed，18 deselected。
