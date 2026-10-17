@@ -123,6 +123,49 @@ def _heat_rising(heat):
     return False
 
 
+def primary_signal(reading):
+    """A monitored jump, a search spike, or an official release enters attention. News is not required."""
+    if reading is None:
+        return None
+    checks = (
+        _monitored_over(reading, "rank_jump", 20),
+        _monitored_over(reading, "search_ratio", 3),
+        _official_release(reading),
+    )
+    if any(item is True for item in checks):
+        entered = True
+    elif any(item is None for item in checks):
+        entered = None
+    else:
+        entered = False
+    return {
+        "enters_attention": entered,
+        "news_required": False,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
+def _monitored_over(reading, key, limit):
+    if key not in reading:
+        return None
+    value = reading.get(key)
+    if value is None:
+        return None
+    if not (reading.get("entity") or reading.get("monitor")):
+        return False
+    return value > limit
+
+
+def _official_release(reading):
+    if "official_release" not in reading:
+        return None
+    flag = reading.get("official_release")
+    if flag is None:
+        return None
+    return flag is True
+
+
 _NOT_OPERATING = {"price", "social_heat", "second_hit", "consensus", "flow"}
 
 

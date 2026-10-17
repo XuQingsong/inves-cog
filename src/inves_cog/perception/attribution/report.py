@@ -4,6 +4,7 @@ from inves_cog.perception.attribution.candidates import market_fingerprint
 from inves_cog.perception.attribution.codes import ticker_codes
 from inves_cog.perception.attribution.dims import (
     falsified_rumor,
+    primary_signal,
     rumor_split,
     sentiment_amplification,
     source_check,
@@ -154,6 +155,7 @@ def explanation_report(
     discarded=None,
     falsified=None,
     relation=None,
+    primary=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -191,6 +193,7 @@ def explanation_report(
         "discard_review": discard_review(discarded),
         "falsified_rumor": falsified_rumor(falsified),
         "relation_step": relation_step(relation),
+        "primary_signal": primary_signal(primary),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

@@ -1357,6 +1357,47 @@ def test_relation_step_does_not_establish_from_price():
 
 
 @pytest.mark.phase1_blocking
+def test_primary_signal_enters_attention_without_news():
+    from inves_cog.perception.attribution.dims import primary_signal
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert primary_signal(None) is None
+    blank = primary_signal({})
+    assert blank["enters_attention"] is None
+    assert blank["news_required"] is False
+    assert blank["operating_evidence"] is False
+    unmonitored = primary_signal({"rank_jump": 25})
+    assert unmonitored["enters_attention"] is None
+    quiet_jump = primary_signal({"rank_jump": 25, "search_ratio": 1, "official_release": False})
+    assert quiet_jump["enters_attention"] is False
+    exact = primary_signal({"entity": "muse", "rank_jump": 20, "search_ratio": 3, "official_release": False})
+    assert exact["enters_attention"] is False
+    jumped = primary_signal({"monitor": "app-store", "rank_jump": 21})
+    assert jumped["enters_attention"] is True
+    assert jumped["operating_evidence"] is False
+    assert jumped["fundamental_standing"] is None
+    searched = primary_signal({"entity": "muse", "search_ratio": 3.01})
+    assert searched["enters_attention"] is True
+    released = primary_signal({"official_release": True})
+    assert released["enters_attention"] is True
+    assert released["news_required"] is False
+    partial = primary_signal({"entity": "muse", "rank_jump": 1})
+    assert partial["enters_attention"] is None
+    anomaly = {"anomaly_id": "primary", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["primary_signal"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], primary={"official_release": True})
+    assert report["primary_signal"]["enters_attention"] is True
+    assert report["primary_signal"]["operating_evidence"] is False
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
