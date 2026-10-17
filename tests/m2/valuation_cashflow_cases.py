@@ -75,3 +75,23 @@ def assert_valuation_cashflow_contract():
     other.field_sources.pop("valuation_fcf_ttm")
     attach_valuation_cashflow(other, original, as_of=other.filed)
     assert "valuation_fcf_ttm" not in other.values
+    # A failed aligned valuation flow cannot silently reuse a nonaligned old FCF.
+    from inves_cog.valuation_v1.calculations import evaluate
+    from inves_cog.valuation_v1.inputs import financial_inputs
+    from tests.m5.test_valuation import stable
+
+    gap = deepcopy(state)
+    gap.values.update(fcf_ttm=1000, valuation_fcf_ttm=None, diluted_shares_weighted=100)
+    gap.field_sources["valuation_fcf_ttm"]["reason"] = "missing prior matching YTD"
+    gap.field_sources["diluted_shares_weighted"] = {
+        "method": "diluted_weighted_disclosed",
+        "unit": "shares",
+        "end": "2026-06-30",
+        "filed": "2026-07-29",
+        "period_kind": "quarter",
+        "security_basis": "ordinary_shares",
+        "listed_share_ratio": 1,
+    }
+    inputs = financial_inputs(gap, [], {"ticker": "ARM", "foreign": True, "sector": "半导体设计"})
+    output = evaluate("稳定", {**stable(), **inputs})
+    assert output["neutral"] is None and any("prior matching" in r["reason"] for r in output["blocking_inputs"])
