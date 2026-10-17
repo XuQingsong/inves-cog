@@ -5,8 +5,11 @@ from inves_cog.perception.attribution.rules import m8_rules
 
 def evidence_score(components, rules=None):
     weights = (rules or m8_rules())["evidence_weights"]
+    components = components or {}
     available = {name: components[name] for name in weights if components.get(name) is not None}
     weight = sum(weights[name] for name in available)
+    if weight == 0:
+        return {"total": None, "confidence": None, "enters_hypothesis": False}
     total = round(sum(weights[name] * available[name] for name in available) / weight, 6)
     if total >= 0.70:
         confidence = "高"

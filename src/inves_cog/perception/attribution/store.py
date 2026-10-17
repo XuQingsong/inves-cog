@@ -15,7 +15,7 @@ def _json(value):
 
 def _guard(bundle):
     wide = bundle.get("universe") == "wide"
-    blocked = ("candidates", "linkage", "second_hits", "tracks")
+    blocked = ("candidates", "linkage", "second_hits", "tracks", "ticker_status")
     if wide and any(bundle.get(key) for key in blocked):
         raise ValueError("广域异常只记录回捞和报告")
     for candidate in bundle.get("candidates") or []:

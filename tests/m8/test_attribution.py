@@ -228,6 +228,17 @@ def test_magnitude_component_drops_an_untested_channel():
     assert scored["total"] == 0.88
     assert skipped["total"] == 1.0
     assert "情绪" not in json.dumps(scored, ensure_ascii=False)
+    missing = {"total": None, "confidence": None, "enters_hypothesis": False}
+    assert evidence_score({}) == missing
+    assert (
+        evidence_score(
+            {name: None for name in ("time", "gradient", "specificity", "narrative", "magnitude", "alternatives")}
+        )
+        == missing
+    )
+    followed = evidence_score({"time": 1.0})
+    assert followed["total"] == 1.0
+    assert followed["enters_hypothesis"] is True
 
 
 @pytest.mark.phase1_blocking
@@ -3098,6 +3109,50 @@ def test_store_writes_perception_rows_only():
     empty = {"anomaly_id": "pool-1", "candidates": [{"mechanism": "供给", "info_ids": [], "scored": True}]}
     with pytest.raises(ValueError, match="必须引用"):
         Store(_Calls()).save(empty)
+    wide_codes = _Calls()
+    with pytest.raises(ValueError, match="广域异常"):
+        Store(wide_codes).save(
+            {
+                "anomaly_id": "wide-codes",
+                "universe": "wide",
+                "ticker_status": [{"ticker": "ZZZZ", "n_code": "N6"}],
+            }
+        )
+    assert wide_codes.rows == []
+    continued = _Calls()
+    store = Store(continued)
+    with pytest.raises(ValueError, match="广域异常"):
+        store.save(
+            {
+                "anomaly_id": "wide-blocked",
+                "universe": "wide",
+                "ticker_status": [{"ticker": "ZZZZ", "n_code": "N6"}],
+            }
+        )
+    store.save(
+        {
+            "anomaly_id": "wide-ok",
+            "universe": "wide",
+            "retrievals": [{"info_id": "late", "role": "background", "retrieval_mode": "rules"}],
+            "report": {"status": "假设中"},
+        }
+    )
+    store.save(
+        {
+            "anomaly_id": "pool-ok",
+            "universe": "pool",
+            "ticker_status": [{"ticker": "WDC", "n_code": "N6"}],
+        }
+    )
+    written = "\n".join(row[0] for row in continued.rows)
+    assert "perception.ticker_status" in written
+    assert continued.rows[0][1][0] == "wide-ok"
+    assert continued.rows[-1][1][0] == "pool-ok"
+    assert continued.rows[-1][1][1] == "WDC"
+    with pytest.raises(ValueError, match="标的代码"):
+        Store(_Calls()).save(
+            {"anomaly_id": "pool-bad", "universe": "pool", "ticker_status": [{"ticker": "WDC", "n_code": "N3"}]}
+        )
 
 
 @pytest.mark.phase1_blocking
