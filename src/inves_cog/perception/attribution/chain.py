@@ -668,6 +668,14 @@ def _apply_score(candidates, anomaly, items, overrides):
         copied["evidence"] = {
             **scored,
             "components": {name: components.get(name) for name in _EVIDENCE},
+            "component_coverage": {
+                "available": [name for name in _EVIDENCE if components.get(name) is not None],
+                "missing": [name for name in _EVIDENCE if components.get(name) is None],
+                "total_parts": len(_EVIDENCE),
+                "score_uses_available_parts_only": True,
+                "semantic_quality_proven": False,
+                "note": "分数按已有分项归一化；不表示六项齐备、归因属实或市场确认。",
+            },
             "support_audit": candidate_support(row, items),
         }
         copied["score"] = scored["total"]

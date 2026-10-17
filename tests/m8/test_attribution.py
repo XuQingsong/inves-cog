@@ -372,6 +372,20 @@ def test_time_alignment_late_news():
     assert actual["narrative"] is None
     assert _components(candidate, anomaly, [crossing]).get("time") is None
 
+    from inves_cog.perception.attribution.chain import _apply_score, _report
+
+    scored = _apply_score([{**candidate, "scored": True, "mechanism": "需求"}], anomaly, [early], None)
+    assert scored[0]["score"] == 1.0  # Existing missing-part normalization, not verified causation.
+    coverage = scored[0]["evidence"]["component_coverage"]
+    assert coverage["available"] == ["time"]
+    assert len(coverage["missing"]) == 5
+    assert coverage["total_parts"] == 6 and coverage["score_uses_available_parts_only"]
+    assert coverage["semantic_quality_proven"] is False
+    projected = _report({**anomaly, "anomaly_id": "synthetic"}, scored, [early], None, None, None, None)
+    assert projected["candidates"][0]["evidence"]["component_coverage"] == coverage
+    assert projected["market_confidence"] == "高"  # Frozen rule label is retained and its limits exposed.
+    assert projected["fundamental_standing"] == "待验证"
+
 
 @pytest.mark.phase1_blocking
 def test_candidate_validation():
