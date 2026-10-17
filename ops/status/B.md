@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 10:32 北京
+
+- 草稿 PR #18 head `db64e96`。没有合并进 main。本地 `make phase1-test`：215 passed，18 deselected。
+- 按 Q-M8-13：严格回放和检索窗口在首次取得时间缺失或为空时，不再用发布时间补上。这种材料不进入当时可见，collected_then 和 vectors_then 都为假，模式记为未知。已有首次取得时间且不晚于时点的正例仍是当时可见。明确晚于时点的仍是后补录历史复盘。生产路径不接受案例模式。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 10:22 北京
 
 - 草稿 PR #18 head `e750146`。没有合并进 main。本地 `make phase1-test`：214 passed，18 deselected。
