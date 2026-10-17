@@ -1,0 +1,38 @@
+{
+  "kind": "M4 synthetic historical paper-account replay using real upstream inputs; not a real account or live schedule",
+  "valuation_disabled_then_enabled": true,
+  "production_writes": 0,
+  "all_five_days_byte_identical": true,
+  "days": [
+    {
+      "trade_date": "2026-10-09",
+      "all_plan_bytes_equal": true,
+      "plan_sha256": "5b301c6bab79b9a9fb5a480da2797aa5acb3da6b134da6aa091f7369620f7963",
+      "order_count": 13
+    },
+    {
+      "trade_date": "2026-10-12",
+      "all_plan_bytes_equal": true,
+      "plan_sha256": "7157498aff561c17974803c2f4990d94ee1eaa8e559d68e072ef413bbac8de5c",
+      "order_count": 5
+    },
+    {
+      "trade_date": "2026-10-13",
+      "all_plan_bytes_equal": true,
+      "plan_sha256": "e015a82c7c227a06ebb50a15389e3b5ce8151dd459762d0ac590c5dca3407152",
+      "order_count": 4
+    },
+    {
+      "trade_date": "2026-10-14",
+      "all_plan_bytes_equal": true,
+      "plan_sha256": "d7f1e08b55f663a5c7cf3d274cabc7d72f956153d33e2925fc2b911faf4f8bef",
+      "order_count": 1
+    },
+    {
+      "trade_date": "2026-10-15",
+      "all_plan_bytes_equal": true,
+      "plan_sha256": "1e01fa271e0b43b63e91a22baf07c8aacbf3d6bdb5b6d6ecd84db301d5046209",
+      "order_count": 5
+    }
+  ]
+}

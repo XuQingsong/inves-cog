@@ -1,0 +1,20 @@
+{
+  "kind": "isolated synthetic M4 account and public formula fixtures; no production migration, holdings or orders",
+  "checks": {
+    "persist_restore_idempotent": true,
+    "all_holdings_and_candidates_have_rows": true,
+    "portfolio_risk_equals_sum": true,
+    "plan_bytes_unchanged": true,
+    "synthetic_plan_sha256": "2afe23cc79c4e6e935e4b778e8bb550d77f9a75c59deff94c0ffe9f3800efe11",
+    "row_counts": {
+      "ranges": 2,
+      "position_panel": 3,
+      "shadow_rules": 2
+    },
+    "valuation_cannot_write_trading": true,
+    "trading_cannot_read_valuation": true,
+    "web_read_only": true
+  },
+  "temporary_database_created_and_removed": true,
+  "production_writes": 0
+}

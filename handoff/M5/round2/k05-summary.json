@@ -1,0 +1,73 @@
+{
+  "scope": "K04/K05 affected regressions, readonly local reconstruction; no external collection or production writes",
+  "days": [
+    {
+      "date": "2026-10-09",
+      "rows": 59,
+      "valued": 15,
+      "failed": 0
+    },
+    {
+      "date": "2026-10-12",
+      "rows": 59,
+      "valued": 15,
+      "failed": 0
+    },
+    {
+      "date": "2026-10-13",
+      "rows": 59,
+      "valued": 15,
+      "failed": 0
+    },
+    {
+      "date": "2026-10-14",
+      "rows": 59,
+      "valued": 15,
+      "failed": 0
+    },
+    {
+      "date": "2026-10-15",
+      "rows": 59,
+      "valued": 15,
+      "failed": 0
+    }
+  ],
+  "known_public_counterexample": {
+    "ticker": "NVDA",
+    "raw_fy2024": 11.93,
+    "normalized_fy2024": 1.193,
+    "fy2025": 2.94,
+    "growth_pct": 146.43755238893544,
+    "candidate_type": "成长",
+    "published_type": "成长",
+    "status": "ok",
+    "collapses": 1
+  },
+  "known_control": {
+    "ticker": "AVGO",
+    "published_type": "周期",
+    "collapses": 2
+  },
+  "unknown_eps_basis": [
+    "NOW",
+    "NFLX",
+    "KLAC",
+    "CRWV",
+    "CRWD"
+  ],
+  "source_capture_limit": "M2 financials have no captured_at; Muse imports retain unknown capture. Reconstructed today, not asserted historical local acquisition.",
+  "private_artifact": {
+    "name": "five-day-final.json.gz",
+    "sha256_gzip": "36d20b741bb3e79c69fd6f20825561e9d35df5bbdf20c8f7cee47dbbb3e1fa36",
+    "sha256_raw": "40c02ea217bba006dc76c8f9acd1d627b4e45a67111e58e918ee5e8c185742b3",
+    "published": false,
+    "reason": "raw dataset export awaits explicit authorization after automatic approval rejection"
+  },
+  "full_five_day_synthetic_order_counts": [
+    13,
+    5,
+    2,
+    0,
+    5
+  ]
+}

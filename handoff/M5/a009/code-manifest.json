@@ -1,0 +1,62 @@
+{
+  "baseline": "10f66edaaa5e08e5426a836ed7ed4095cda73ed6",
+  "method": "v1.4",
+  "files": [
+    {
+      "path": "config/params/p-2026.10/m5.yaml",
+      "sha256": "89402ec638c2b7c28c3834d8389b868b4cd619ba66cfa23facdfecbff69d8dcf"
+    },
+    {
+      "path": "src/inves_cog/ingest/fundamentals/extractors.py",
+      "sha256": "3942fe92edb9fd0a2b8bcd0a9af66a66d4be8eed239407e3d8c744c76648ff4a"
+    },
+    {
+      "path": "src/inves_cog/ingest/fundamentals/service.py",
+      "sha256": "0ed2d686581930a264ef9034ce4d02fca5097484ae9f8e45c9544770112238b6"
+    },
+    {
+      "path": "src/inves_cog/ingest/fundamentals/valuation_cashflow.py",
+      "sha256": "4f9407cfeba7684d48b809054ef7bda0c2223a2eae91565c0e794ebdf7d3b3c9"
+    },
+    {
+      "path": "src/inves_cog/valuation_v1/calculations.py",
+      "sha256": "f9933a9555b1ebd1c80a583cadff2738817cbee50ab0cadaa94ef226f6293c9d"
+    },
+    {
+      "path": "src/inves_cog/valuation_v1/inputs.py",
+      "sha256": "d0f24bc02c10005a75f1417462ca0030efd2656621f7074bd67d92d08912d589"
+    },
+    {
+      "path": "src/inves_cog/valuation_v1/lifecycle.py",
+      "sha256": "38cc78cec35d9aa87a51f01fe6691e4352089eacabfede0e01d588aafa20e4da"
+    },
+    {
+      "path": "src/inves_cog/valuation_v1/listed_units.py",
+      "sha256": "103120057a756edc7867c68f17ff9da5ee0048a57f64823380e8516473f2cf6c"
+    },
+    {
+      "path": "src/inves_cog/valuation_v1/requirements.py",
+      "sha256": "6807ab5a00f682f00a8de10707c1fb7b80fc4c0d6ebfe98c4e0df564d482dff6"
+    },
+    {
+      "path": "src/inves_cog/valuation_v1/service.py",
+      "sha256": "aeb97d8b62fcca7ea9e811ae697b41e85dc1e77f415832523ba0d65c0aa1ab18"
+    },
+    {
+      "path": "tests/m2/test_fundamentals.py",
+      "sha256": "5feef8f391c921b8f8644c498745f22d18086798b4a232f11ec2ee4c1c12ba41"
+    },
+    {
+      "path": "tests/m2/valuation_cashflow_cases.py",
+      "sha256": "8d2303a2c34e13220102af8eb2826d156ce3963ae0a86520223926380e6234d7"
+    },
+    {
+      "path": "tests/m5/listed_unit_cases.py",
+      "sha256": "29f6fa41ae55549ac0bf45fded72e89cde4153c6029d114f60acb8aed88d2819"
+    },
+    {
+      "path": "tests/m5/test_valuation.py",
+      "sha256": "85428c846cc12d5a1487c4045cfc19b639420be257713078a2b6152a71c5676f"
+    }
+  ]
+}

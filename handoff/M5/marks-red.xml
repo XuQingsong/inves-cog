@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.450" timestamp="2026-10-16T22:02:18.292950+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.362"><failure message="AssertionError">tests/m5/test_valuation.py:208: in test_position_panel
+    assert_service()
+tests/m5/inputs_cases.py:120: in assert_service
+    assert by_ticker["AAA"]["weight_pct"] == 5
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError</failure></testcase></testsuite></testsuites>

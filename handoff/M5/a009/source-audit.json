@@ -1,0 +1,65 @@
+[
+  {
+    "FX": "USD identity",
+    "accn": "0001973239-26-000097",
+    "coefficient": 1,
+    "end": "2026-03-31",
+    "filed": "2026-05-26",
+    "start": "2025-04-01",
+    "tags": {
+      "capex": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "ocf": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+    },
+    "ticker": "ARM",
+    "unit": "USD"
+  },
+  {
+    "FX": "USD identity",
+    "accn": "0001973239-26-000114",
+    "coefficient": 1,
+    "end": "2026-06-30",
+    "filed": "2026-07-29",
+    "start": "2026-04-01",
+    "tags": {
+      "capex": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "ocf": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+    },
+    "ticker": "ARM",
+    "unit": "USD"
+  },
+  {
+    "FX": "USD identity",
+    "accn": "0001973239-26-000114",
+    "coefficient": -1,
+    "end": "2025-06-30",
+    "filed": "2026-07-29",
+    "start": "2025-04-01",
+    "tags": {
+      "capex": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "ocf": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+    },
+    "ticker": "ARM",
+    "unit": "USD"
+  },
+  {
+    "EPS_period_ends": [
+      "2023-12-31",
+      "2024-12-31",
+      "2025-12-31"
+    ],
+    "accession": "0001628280-26-025362",
+    "factor_listed_price": 1,
+    "factor_per_share": 5,
+    "factor_share_count": 0.2,
+    "filed": "2026-04-16",
+    "forecast_unit": "not established; TTM fallback K01",
+    "locations": [
+      "F-8 EPS and equivalent ADS",
+      "beneficial-owner table note 2; each ADS five common"
+    ],
+    "scope": "conservative known_at; no inferred historic ratio-inception date",
+    "source": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+    "source_sha256": "9f21d7cebbdf16bb2dcf40cb1bc19f0fedb383167a900f020c5545ac5489de67",
+    "ticker": "TSM"
+  }
+]

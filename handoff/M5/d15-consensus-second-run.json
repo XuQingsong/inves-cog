@@ -1,0 +1,419 @@
+{
+  "authorization_commit": "9d88f0601bc7203a49778168020fb79513c9432b",
+  "execution_source_commit": "47c6e592b7a7ee7cd616fef33ca5f9d055a1bc6a",
+  "verified_at": "2026-10-17 02:12:17.940864+00:00",
+  "invocations": 1,
+  "source": "yahoo_page",
+  "request_route": "https://finance.yahoo.com/quote/{ticker}/analysis/",
+  "known_blocked_api_not_probed": true,
+  "minimum_page_interval_seconds": 5,
+  "http_retries": 0,
+  "normal_job_result": {
+    "processed_count": 59,
+    "status": "ok",
+    "failures": [],
+    "note": "0 source gaps",
+    "deadline_met": true
+  },
+  "jobs": [
+    {
+      "id": 6394,
+      "task_name": "m2_consensus",
+      "trade_date": "2026-10-16",
+      "started_at": "2026-10-17 10:07:03.161571+08:00",
+      "ended_at": "2026-10-17 10:11:56.394854+08:00",
+      "status": "ok",
+      "processed_count": 59,
+      "error_summary": null
+    }
+  ],
+  "snapshot_checks": {
+    "expected_tickers": 59,
+    "distinct_tickers": 59,
+    "missing_tickers": [],
+    "unexpected_tickers": [],
+    "all_captures_present": true,
+    "all_captured_in_authorized_window": true,
+    "single_invocation": true,
+    "job_finished": true,
+    "job_count_matches": true
+  },
+  "snapshots": [
+    {
+      "ticker": "AAPL",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:40.444677+08:00"
+    },
+    {
+      "ticker": "ADBE",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:12.105938+08:00"
+    },
+    {
+      "ticker": "AMAT",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:11.677321+08:00"
+    },
+    {
+      "ticker": "AMD",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:10.157642+08:00"
+    },
+    {
+      "ticker": "AMZN",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:30.791954+08:00"
+    },
+    {
+      "ticker": "ANET",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:45.581453+08:00"
+    },
+    {
+      "ticker": "ARM",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:35.322344+08:00"
+    },
+    {
+      "ticker": "ASML",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:25.732568+08:00"
+    },
+    {
+      "ticker": "AVGO",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:15.695170+08:00"
+    },
+    {
+      "ticker": "BE",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:22.092423+08:00"
+    },
+    {
+      "ticker": "CAT",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:45.259330+08:00"
+    },
+    {
+      "ticker": "CEG",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:16.308290+08:00"
+    },
+    {
+      "ticker": "CIEN",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:50.748570+08:00"
+    },
+    {
+      "ticker": "COHR",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:55.415199+08:00"
+    },
+    {
+      "ticker": "COST",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:50.525610+08:00"
+    },
+    {
+      "ticker": "CRM",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:00.816118+08:00"
+    },
+    {
+      "ticker": "CRWD",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:40.675863+08:00"
+    },
+    {
+      "ticker": "CRWV",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:35.959582+08:00"
+    },
+    {
+      "ticker": "CVX",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:40.688155+08:00"
+    },
+    {
+      "ticker": "DELL",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:26.188357+08:00"
+    },
+    {
+      "ticker": "ETN",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:05.481992+08:00"
+    },
+    {
+      "ticker": "FTNT",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:51.042553+08:00"
+    },
+    {
+      "ticker": "GE",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:50.919747+08:00"
+    },
+    {
+      "ticker": "GEV",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:10.370787+08:00"
+    },
+    {
+      "ticker": "GOOGL",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:25.385079+08:00"
+    },
+    {
+      "ticker": "HD",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:00.531930+08:00"
+    },
+    {
+      "ticker": "INTC",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:36.253120+08:00"
+    },
+    {
+      "ticker": "JNJ",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:15.586904+08:00"
+    },
+    {
+      "ticker": "JPM",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:20.090199+08:00"
+    },
+    {
+      "ticker": "KLAC",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:21.094653+08:00"
+    },
+    {
+      "ticker": "LITE",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:45.317480+08:00"
+    },
+    {
+      "ticker": "LLY",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:10.571069+08:00"
+    },
+    {
+      "ticker": "LRCX",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:15.632630+08:00"
+    },
+    {
+      "ticker": "MA",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:30.413559+08:00"
+    },
+    {
+      "ticker": "META",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:20.579856+08:00"
+    },
+    {
+      "ticker": "MRVL",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:20.912996+08:00"
+    },
+    {
+      "ticker": "MSFT",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:51.022514+08:00"
+    },
+    {
+      "ticker": "MU",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:25.224955+08:00"
+    },
+    {
+      "ticker": "NFLX",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:36.535666+08:00"
+    },
+    {
+      "ticker": "NOK",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:40.831820+08:00"
+    },
+    {
+      "ticker": "NOW",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:05.586936+08:00"
+    },
+    {
+      "ticker": "NVDA",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:05.764524+08:00"
+    },
+    {
+      "ticker": "ORCL",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:55.903771+08:00"
+    },
+    {
+      "ticker": "PANW",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:45.459201+08:00"
+    },
+    {
+      "ticker": "PLTR",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:15.761291+08:00"
+    },
+    {
+      "ticker": "QCOM",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:30.888159+08:00"
+    },
+    {
+      "ticker": "SKHY",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:07:30.767041+08:00"
+    },
+    {
+      "ticker": "SMCI",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:31.826544+08:00"
+    },
+    {
+      "ticker": "SNDK",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:05.562175+08:00"
+    },
+    {
+      "ticker": "STX",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:01.309757+08:00"
+    },
+    {
+      "ticker": "TSLA",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:45.576424+08:00"
+    },
+    {
+      "ticker": "TSM",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:10:40.221106+08:00"
+    },
+    {
+      "ticker": "UNH",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:05.601477+08:00"
+    },
+    {
+      "ticker": "V",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:25.261099+08:00"
+    },
+    {
+      "ticker": "VRT",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:00.304448+08:00"
+    },
+    {
+      "ticker": "WDC",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:55.812831+08:00"
+    },
+    {
+      "ticker": "WMT",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:08:55.369941+08:00"
+    },
+    {
+      "ticker": "XOM",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:09:35.624480+08:00"
+    },
+    {
+      "ticker": "ZS",
+      "as_of": "2026-10-17",
+      "source": "yahoo_page",
+      "captured_at": "2026-10-17 10:11:56.353901+08:00"
+    }
+  ],
+  "missing_field_counts": {
+    "eps_cq": 0,
+    "eps_nq": 0,
+    "eps_cy": 0,
+    "eps_ny": 0,
+    "rev_cy": 0,
+    "rev_ny": 0,
+    "coverage": 0
+  },
+  "field_note": "Source coverage and field availability are separate. Missing upstream estimate fields remain NULL; no older or zero substitution.",
+  "independent_confirmation": {
+    "status": "confirmed_by_requirement_owner",
+    "commit": "fc13f66e6e3d61412299af4080878a5d9ffc55c3",
+    "reference": "https://github.com/XuQingsong/inves-cog/blob/fc13f66e6e3d61412299af4080878a5d9ffc55c3/ops/answers/A-007.md",
+    "scope": "D-15 / AC-M2-06b collection-count prerequisite only; not M5 acceptance or a full audit of estimate economics"
+  },
+  "executed_file_hashes": {
+    "src/inves_cog/ingest/fundamentals/cli.py": "ad4b1d7fc99f2593d1f4a25efd3cdf1a0dfb86fdc1ced2c3ba7904b30d7f9a36",
+    "src/inves_cog/ingest/fundamentals/providers.py": "015c1b4652406675bcbaacca7db4dcb3080af400a1be36a05fb7e209e109b55d",
+    "src/inves_cog/ingest/fundamentals/consensus.py": "fa5b06346c598d95aec21820a4d55eaf39ef351e54a564c6b3dbc00077c9312c",
+    "src/inves_cog/ingest/jobs.py": "44658d6b116478665f6074d2a84760bc34c30d9148f4a2113318141ad3cf9075"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.099" timestamp="2026-10-17T12:09:41.936132+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_type_switch_needs_two_periods" time="0.015"><failure message="AssertionError">tests/m5/test_valuation.py:168: in test_type_switch_needs_two_periods
+    assert_eps_split_comparability()
+tests/m5/review_cases.py:55: in assert_eps_split_comparability
+    assert actual["annual_eps"] == [0.385, 0.174, 1.193, 2.94, 4.9]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError</failure></testcase></testsuite></testsuites>
