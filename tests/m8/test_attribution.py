@@ -2,7 +2,7 @@
 
 import json
 import subprocess
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -3870,6 +3870,171 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     crowded.append(item("xom-only", tickers=["XOM"]))
     capped = attribute_all([anomaly], crowded, as_of=late, client=Cap())[0]
     assert capped["degraded"] is None
+
+
+@pytest.mark.phase1_blocking
+def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
+    from inves_cog.ingest.market import regular_bounds
+    from inves_cog.perception.attribution.chain import adapt_m7, attribute_all, execute_stage, run_scheduled
+    from inves_cog.perception.attribution.magnitude import channel_rows
+
+    start = datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc)
+    early = datetime(2026, 10, 2, 11, 0, tzinfo=timezone.utc)
+    later = datetime(2026, 10, 6, 14, 0, tzinfo=timezone.utc)
+    item = {
+        "info_id": "nvda-news",
+        "published_at": early,
+        "first_seen_at": early,
+        "tickers": ["NVDA"],
+        "source_root": "wire",
+        "claims": [],
+    }
+
+    class Propose:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-news", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "NVDA"}],
+                    }
+                ]
+            }
+
+    base = {
+        "anomaly_id": "nvda-2026-10-02",
+        "universe": "pool",
+        "trade_date": "2026-10-02",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": start,
+        "impact_inputs": {
+            "total": -0.05,
+            "sum_delta_e": 1_500_000_000,
+            "pe": 15,
+            "market_cap": 1_000_000_000_000,
+            "verdict": "部分相容",
+            "true_features": 1,
+            "available_features": 4,
+        },
+        "magnitude_payload": {
+            "delta_mktcap": 90_000_000_000.0,
+            "pe": 30.0,
+            "channels": channel_rows("估值倍数", [], []),
+        },
+    }
+    opened = attribute_all([base], [item], as_of=start, client=Propose())[0]
+    assert opened["lifecycle"] == "假设中"
+    assert [step["new"] for step in opened["history"]] == ["已发现", "假设中"]
+    assert opened["report"]["impact"]["total_residual"] == -0.05
+    assert opened["report"]["magnitude_channels"]
+    assert "情绪" not in json.dumps(opened["report"]["magnitude_channels"], ensure_ascii=False)
+    assert opened["operating_impact_proven"] is False
+    assert opened["report"]["valuation"] == "不变 / 待基本面轨道"
+
+    continued = attribute_all(
+        [
+            {
+                **base,
+                "prior_event": {"lifecycle": opened["lifecycle"], "history": opened["history"]},
+                "market_confirmation": {
+                    "claim_time": True,
+                    "response": True,
+                    "independent": True,
+                    "alternative": 0.8,
+                },
+                "later_events": [
+                    {
+                        "info_id": "follow",
+                        "published_at": later,
+                        "source_root": "wire",
+                        "outcome": "命中",
+                    }
+                ],
+                "sessions": [
+                    {"trade_date": "2026-10-02", "sessions_elapsed": 1, "cumulative": -2.0, "first": -2.0},
+                    {"trade_date": "2026-10-03", "sessions_elapsed": 2, "cumulative": -2.5, "first": -2.0},
+                ],
+            }
+        ],
+        [item],
+        as_of=later,
+        client=Propose(),
+    )[0]
+    assert [step["new"] for step in continued["history"]] == ["已发现", "假设中", "市场确认", "基本面核查中"]
+    assert continued["history"][2]["trigger"] == "四项同时成立"
+    assert {"at", "trigger", "evidence_ids"} <= set(continued["history"][2])
+    assert continued["second_hit"] == "确认"
+    assert [row["trade_date"] for row in continued["tracks"]] == ["2026-10-02", "2026-10-03"]
+    assert continued["tracks"][0]["capital"] == "冲击中"
+    assert continued["operating_impact_proven"] is False
+
+    labelled = execute_stage(
+        "attribution_labels",
+        [
+            {
+                **base,
+                "prior_event": {"lifecycle": continued["lifecycle"], "history": continued["history"]},
+                "operating_records": [],
+            }
+        ],
+        [item],
+        as_of=later,
+        client=Propose(),
+    )[0]
+    assert labelled["lifecycle"] == "已衰减·无影响"
+    assert labelled["operating_impact_proven"] is False
+    assert labelled["history"][-1]["new"] == "已衰减·无影响"
+    assert {"at", "trigger", "evidence_ids"} <= set(labelled["history"][-1])
+
+    morning = execute_stage(
+        "attribution_candidates",
+        [
+            {
+                **base,
+                "prior_event": {"lifecycle": "假设中", "history": opened["history"]},
+                "market_confirmation": {
+                    "claim_time": True,
+                    "response": True,
+                    "independent": True,
+                    "alternative": 0.8,
+                },
+            }
+        ],
+        [item],
+        as_of=later,
+        client=Propose(),
+    )[0]
+    assert morning["lifecycle"] == "假设中"
+
+    raw = {
+        "anomaly_id": "2026-10-14:close:001",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "session": "close",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+    }
+    close = regular_bounds(date(2026, 10, 14))[1]
+    assert adapt_m7(raw)["started_at"] == close
+    assert adapt_m7({**raw, "session": "post"})["started_at"] == close
+    quiet = attribute_all([raw], [], as_of=close, client=Propose())[0]
+    assert quiet["status"] == "已发现·原因未明"
+    assert quiet["degraded"] is None
+    missing = attribute_all([{**raw, "session": "open"}], [], as_of=close, client=Propose())[0]
+    assert missing["status"] == "待分析"
+    assert missing["degraded"] == "异常缺少起点或范围"
+    slot = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
+    scheduled = run_scheduled(slot, anomalies=[raw], items=[], client=Propose())
+    assert scheduled["task_name"] == "attribution_candidates"
+    assert scheduled["ran"] is True
+    assert scheduled["recorded"] is False
+    tracks = run_scheduled(slot.replace(hour=9, minute=30), anomalies=[raw], items=[], client=Propose())
+    assert tracks["task_name"] == "attribution_tracks"
+    assert run_scheduled(slot.replace(hour=8)) is None
 
 
 @pytest.mark.phase1_blocking

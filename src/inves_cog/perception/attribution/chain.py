@@ -8,7 +8,8 @@ the morning schedule.
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from inves_cog.perception.attribution.candidates import validate_candidates
+from inves_cog.ingest.market import regular_bounds
+from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
 from inves_cog.perception.attribution.claims import attach_claims
 from inves_cog.perception.attribution.evidence import (
     basket_specificity,
@@ -18,11 +19,16 @@ from inves_cog.perception.attribution.evidence import (
     narrative_support,
     time_alignment,
 )
+from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
+from inves_cog.perception.attribution.magnitude import implied_magnitude
+from inves_cog.perception.attribution.operating import operating_verdict
 from inves_cog.perception.attribution.propose import propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
+from inves_cog.perception.attribution.second_hit import second_hit_conclusion
+from inves_cog.perception.attribution.tracks import apply_deadline, capital_state
 
 _SHANGHAI = ZoneInfo("Asia/Shanghai")
 _NEW_YORK = ZoneInfo("America/New_York")
@@ -33,23 +39,27 @@ _SLOTS = (
 )
 _CLAIM_FIELDS = ("subject", "variable", "mechanism", "direction", "quantity", "horizon", "certainty", "source_level")
 _EVIDENCE = ("time", "gradient", "specificity", "narrative", "magnitude", "alternatives")
+_FUNDAMENTAL = {"供给", "需求", "竞争", "客户融资"}
+_STAGE_NAMES = {name for name, _slot in _SLOTS}
 
 
-def attribute_all(anomalies, items, *, as_of, client, store=None, components_by_id=None):
+def attribute_all(anomalies, items, *, as_of, client, store=None, components_by_id=None, stage=None):
     """Retrieve, score, report, and save each anomaly. One failure stays on that row."""
     usable = [item for item in items if item.get("published_at") is not None]
     scores = components_by_id or {}
     rows = []
     for anomaly in anomalies:
+        prepared = adapt_m7(anomaly)
         try:
             rows.append(
                 _one(
-                    anomaly,
+                    prepared,
                     usable,
                     as_of=as_of,
                     client=client,
                     store=store,
-                    components=scores.get(anomaly.get("anomaly_id")),
+                    components=scores.get(prepared.get("anomaly_id")),
+                    stage=stage,
                 )
             )
         except Exception as exc:
@@ -114,13 +124,49 @@ def job_slot(when):
     return None
 
 
-def run_scheduled(when, *, connection=None, clock=None, trade_date=None, params_version=None, operation=None):
-    """Name the job for this minute. A caller-supplied connection can record it."""
+def execute_stage(task_name, anomalies, items, *, as_of, client, store=None, components_by_id=None):
+    """Run one of the three attribution jobs. This does not deploy a schedule."""
+    if task_name not in _STAGE_NAMES:
+        raise ValueError("未知任务")
+    return attribute_all(
+        anomalies,
+        items,
+        as_of=as_of,
+        client=client,
+        store=store,
+        components_by_id=components_by_id,
+        stage=task_name,
+    )
+
+
+def run_scheduled(
+    when,
+    *,
+    anomalies=None,
+    items=None,
+    client=None,
+    store=None,
+    connection=None,
+    clock=None,
+    trade_date=None,
+    params_version=None,
+):
+    """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
     if slot is None:
         return None
+    if anomalies is None:
+        return {**slot, "recorded": False, "ran": False}
+    rows = execute_stage(
+        slot["task_name"],
+        anomalies,
+        items or [],
+        as_of=when,
+        client=client,
+        store=store,
+    )
     if connection is None:
-        return {**slot, "recorded": False}
+        return {**slot, "recorded": False, "ran": True, "count": len(rows), "rows": rows}
     from inves_cog.perception.anomaly.service import run_recorded
 
     row_id = run_recorded(
@@ -129,12 +175,27 @@ def run_scheduled(when, *, connection=None, clock=None, trade_date=None, params_
         task_name=slot["task_name"],
         trade_date=trade_date,
         params_version=params_version,
-        operation=operation,
+        operation=lambda: len(rows),
     )
-    return {**slot, "recorded": True, "job_id": row_id}
+    return {**slot, "recorded": True, "ran": True, "count": len(rows), "rows": rows, "job_id": row_id}
 
 
-def _one(anomaly, items, *, as_of, client, store, components):
+def adapt_m7(anomaly):
+    """A close or post M7 object starts at the exchange close. Other sessions stay untouched."""
+    if anomaly.get("started_at") is not None or anomaly.get("session") not in {"close", "post"}:
+        return anomaly
+    trade_date = anomaly.get("trade_date")
+    if trade_date is None:
+        return anomaly
+    bounds = regular_bounds(_calendar_day(trade_date))
+    if bounds is None:
+        return anomaly
+    prepared = dict(anomaly)
+    prepared["started_at"] = bounds[1]
+    return prepared
+
+
+def _one(anomaly, items, *, as_of, client, store, components, stage):
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
     visible = _retrieved(anomaly, items, as_of)
@@ -142,14 +203,28 @@ def _one(anomaly, items, *, as_of, client, store, components):
     candidates, model_note = _candidates(anomaly, claimed, client)
     candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
-    state, history = _lifecycle(candidates, when)
-    report = _report(anomaly, candidates, claimed, "待分析" if model_note else None)
+    prior = _prior(anomaly, store)
+    state, history, deadline = _lifecycle(candidates, when, prior, anomaly, stage, as_of)
+    impact = _impact(anomaly)
+    channels = _channels(anomaly)
+    report = _report(
+        anomaly,
+        candidates,
+        claimed,
+        "待分析" if model_note else None,
+        impact,
+        channels,
+        deadline,
+    )
     report["lifecycle"] = state
     report["history"] = history
-    report["operating_impact_proven"] = False
+    proven = bool(deadline and deadline.get("operating_impact_proven"))
+    report["operating_impact_proven"] = proven
+    hits, conclusion = _second_hits(anomaly)
+    tracks = _track_rows(anomaly, state)
     saved = False
     if store is not None:
-        store.save(_bundle(anomaly, claimed, candidates, report, state, history))
+        store.save(_bundle(anomaly, claimed, candidates, report, state, history, impact, hits, tracks, deadline))
         saved = True
     notes = [note for note in (claim_note, model_note) if note]
     return {
@@ -160,7 +235,9 @@ def _one(anomaly, items, *, as_of, client, store, components):
         "history": history,
         "degraded": "；".join(notes) if notes else None,
         "saved": saved,
-        "operating_impact_proven": False,
+        "operating_impact_proven": proven,
+        "second_hit": conclusion,
+        "tracks": tracks,
     }
 
 
@@ -305,13 +382,27 @@ def _basket_rows(anomaly):
     return [row for row in rows if isinstance(row, dict)]
 
 
-def _lifecycle(candidates, when):
+def _prior(anomaly, store):
+    if store is not None:
+        loaded = store.prior(f"evt-{anomaly['anomaly_id']}")
+        if loaded is not None:
+            return loaded
+    carried = anomaly.get("prior_event")
+    if isinstance(carried, dict) and carried.get("lifecycle"):
+        return carried
+    return None
+
+
+def _lifecycle(candidates, when, prior, anomaly, stage, as_of):
     evidence_ids = []
     for row in candidates:
         if row.get("scored") and row.get("score") is not None and row["score"] >= 0.5:
             evidence_ids.extend(row.get("info_ids") or [])
-    state, history = transition(None, "已发现", [], when=when, trigger="异常", evidence_ids=[])
-    if evidence_ids:
+    state = None if prior is None else prior.get("lifecycle")
+    history = [] if prior is None else list(prior.get("history") or [])
+    if state is None:
+        state, history = transition(None, "已发现", history, when=when, trigger="异常", evidence_ids=[])
+    if state == "已发现" and evidence_ids:
         state, history = transition(
             state,
             "假设中",
@@ -320,18 +411,147 @@ def _lifecycle(candidates, when):
             trigger="证据分达到假设",
             evidence_ids=evidence_ids,
         )
-    return state, history
+    if stage != "attribution_candidates" and state == "假设中" and _market_ready(anomaly):
+        state, history = transition(
+            state,
+            "市场确认",
+            history,
+            when=when,
+            trigger="四项同时成立",
+            evidence_ids=evidence_ids,
+        )
+        mechanism = _lead_mechanism(candidates)
+        if mechanism in _FUNDAMENTAL:
+            state, history = transition(
+                state,
+                "基本面核查中",
+                history,
+                when=when,
+                trigger="进入基本面核查",
+                evidence_ids=evidence_ids,
+                mechanism=mechanism,
+            )
+    deadline = None
+    records = anomaly.get("operating_records")
+    if stage == "attribution_labels" and state == "基本面核查中" and records is not None:
+        verdict = operating_verdict(records, as_of=as_of, expected_direction=anomaly.get("direction"))
+        if verdict.confirmed():
+            deadline = apply_deadline(verdict)
+            state, history = transition(
+                state,
+                deadline["lifecycle"],
+                history,
+                when=when,
+                trigger=deadline["closing_reason"],
+                evidence_ids=evidence_ids,
+            )
+    return state, history, deadline
 
 
-def _report(anomaly, candidates, items, status):
+def _market_ready(anomaly):
+    reading = anomaly.get("market_confirmation")
+    if not isinstance(reading, dict):
+        return False
+    return market_confirmed(
+        claim_time=reading.get("claim_time"),
+        response=reading.get("response"),
+        independent=reading.get("independent"),
+        alternative=reading.get("alternative"),
+    )
+
+
+def _lead_mechanism(candidates):
+    scored = [row for row in candidates if row.get("scored") and row.get("score") is not None]
+    if not scored:
+        return None
+    return max(scored, key=lambda row: row["score"]).get("mechanism")
+
+
+def _impact(anomaly):
+    raw = anomaly.get("impact_inputs")
+    if not isinstance(raw, dict):
+        return None
+    parts = decompose(
+        raw["total"],
+        raw.get("sum_delta_e"),
+        raw.get("pe"),
+        raw.get("market_cap"),
+        raw.get("verdict"),
+        raw.get("true_features"),
+        raw.get("available_features"),
+    )
+    return {"total_residual": raw["total"], **parts}
+
+
+def _channels(anomaly):
+    payload = anomaly.get("magnitude_payload")
+    if not isinstance(payload, dict):
+        return None
+    return implied_magnitude(payload)
+
+
+def _second_hits(anomaly):
+    events = anomaly.get("later_events") or []
+    if not events:
+        return [], None
+    start = anomaly.get("started_at")
+    conclusion = second_hit_conclusion(events, start)
+    rows = []
+    for event in events:
+        published = event.get("published_at")
+        if start is not None and (published is None or published <= start):
+            continue
+        rows.append(
+            {
+                "info_id": event["info_id"],
+                "published_at": published,
+                "source_root": event.get("source_root"),
+                "outcome": event.get("outcome"),
+                "expected_z": event.get("expected_z"),
+                "control_z": event.get("control_z"),
+            }
+        )
+    return rows, conclusion
+
+
+def _track_rows(anomaly, state):
+    sessions = anomaly.get("sessions") or []
+    if sessions:
+        rows = []
+        for row in sessions:
+            rows.append(
+                {
+                    "trade_date": row["trade_date"],
+                    "emotion": row.get("emotion") or "延续",
+                    "capital": capital_state(row["sessions_elapsed"], row["cumulative"], row["first"]),
+                    "fundamental": row.get("fundamental") or "待验证",
+                }
+            )
+        return rows
+    if state in {None, "已发现"} or not anomaly.get("trade_date"):
+        return []
+    emotion = "初现" if state == "假设中" else "延续"
+    return [{"trade_date": anomaly["trade_date"], "emotion": emotion, "fundamental": "待验证"}]
+
+
+def _report(anomaly, candidates, items, status, impact, channels, deadline):
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
     sources = [{"info_id": item["info_id"], "role": item.get("role")} for item in items]
-    return explanation_report(current, None, candidates, sources, embeddings=anomaly.get("embeddings"))
+    return explanation_report(
+        current,
+        impact,
+        candidates,
+        sources,
+        deadline,
+        embeddings=anomaly.get("embeddings"),
+        magnitude=channels,
+        tracks_view=anomaly.get("tracks_view"),
+    )
 
 
-def _bundle(anomaly, items, candidates, report, state, history):
+def _bundle(anomaly, items, candidates, report, state, history, impact, hits, tracks, deadline):
     mode = retrieval_mode(anomaly.get("embeddings") or [])
     bundle = {
         "anomaly_id": anomaly["anomaly_id"],
@@ -357,10 +577,19 @@ def _bundle(anomaly, items, candidates, report, state, history):
     codes = [row for row in report.get("ticker_status") or [] if row.get("n_code")]
     if codes:
         bundle["ticker_status"] = codes
-    if state == "假设中":
-        bundle["linkage"] = {"event_id": f"evt-{anomaly['anomaly_id']}", "lifecycle": state, "history": history}
-        if anomaly.get("trade_date"):
-            bundle["tracks"] = [{"trade_date": anomaly["trade_date"], "emotion": "初现", "fundamental": "待验证"}]
+    if state not in {None, "已发现"}:
+        linkage = {"event_id": f"evt-{anomaly['anomaly_id']}", "lifecycle": state, "history": history}
+        if deadline is not None:
+            linkage["deadline_outcome"] = deadline["deadline_outcome"]
+            linkage["closing_reason"] = deadline["closing_reason"]
+            linkage["unknowns"] = list(deadline.get("unknowns") or [])
+        bundle["linkage"] = linkage
+        if tracks:
+            bundle["tracks"] = tracks
+        if hits:
+            bundle["second_hits"] = hits
+        if impact is not None:
+            bundle["impact"] = impact
     return bundle
 
 

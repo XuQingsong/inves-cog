@@ -34,6 +34,15 @@ class Store:
     def __init__(self, connection):
         self.connection = connection
 
+    def prior(self, event_id):
+        found = self.connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (event_id,),
+        ).fetchone()
+        if found is None:
+            return None
+        return {"lifecycle": found[0], "history": list(found[1] or [])}
+
     def save(self, bundle):
         _guard(bundle)
         linkage = bundle.get("linkage")
