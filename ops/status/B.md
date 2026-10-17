@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 15:45 北京
+
+- 草稿 PR #18 head `c1fdba1`。没有合并进 main。本地 `make phase1-test`：238 passed，18 deselected。
+- 已看到答复 `1d836d8`。替代解释排除仍是 15%。缺标记、空值或部分未知不再记成满分；三项都明确为否才是查无。每个候选只用自己的受影响标的和预期篮子。NVDA 为 0、AMD 为 1，无关股票不改变另一条。
+- UD-COORD-04 已看到。这一批 19 次模型请求由协调方执行，本线没有发起。全保存失败记账和 dict_row 还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 15:36 北京
 
 - 草稿 PR #18 head `ce2f045`。没有合并进 main。本地 `make phase1-test`：238 passed，18 deselected。
