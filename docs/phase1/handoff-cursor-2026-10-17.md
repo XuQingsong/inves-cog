@@ -186,7 +186,33 @@ M0–M4、M6、M7 已验收合并；**M5 有业务能力但未合并（PR #17）
 | 读公开的 Muse 仓库 | 拿不到仓库外的参考脚本和本机材料：`~/inves-cog-reference/`（golden_reference.py、task_cards.py、patrol.py、away-log.md、next-rules.md、drafts）、协调方的本机验收材料（`review/…`、`/private/tmp/…`）、Claude 的 Artifact 页面 |
 | 按需重写参考脚本（独立复算） | 没有常驻的 20 分钟巡检；Mac 上 agent 的唤醒由用户自己管 |
 
-## 9. 文件索引
+## 8.1 M5/M8 验收准备（2026-10-17 18:30 北京）
+
+用户 10-17 决定：**M5、M8 开发完成后的独立验收由 Cursor 云端来做**。
+
+**验收入口已在云端跑通**：
+- 装了 docker，以及 `python3.12-venv`（uv 用它来装 Python 3.11）；`make phase1-*` 照常起一次性的 pgvector 库；
+- 两套测试不能同时跑：有几项测试要求只有一个临时库容器。
+
+**基线**（只代表测试门禁，不代表模块通过）：
+
+| 对象 | 准确 head | blocking | replay / cases |
+|---|---|---|---|
+| M5，PR #17 | `10cd0dc` | 138 通过 | replay 5 通过 |
+| M8，PR #19（包含 PR #18） | `a0c7146` | 240 通过 | cases 7 通过；`test_case_attribution` 仍在 pending |
+
+**合并顺序**：两个 PR 各自和 main 都能干净合并；M5 和 M8 之间只在 `tests/fixtures/phase1/MANIFEST.sha256`、`tests/harness/CHANGELOG.md` 上冲突，后合并的那个重新生成这两个文件即可。
+
+**不连库时能独立验的**：
+- 准确 SHA 的全部门禁；
+- 代码审查、反例构造；
+- 用 golden 和已提交的 `handoff/` 证据做独立算术；
+- M8 用 `data/m8-export` 分支里的导出数据做离线回放（截至 10-16，经用户批准）。
+
+**需要额外条件才能验的**：
+- M5 五日重建，以及 M8 五日全池：要能只读访问数据库，或者拿到对应日期的导出；
+- M8 现场模型验收：要用户授权调用；
+- 正式调度：要看 `job_runs` 记录。
 
 | 想了解 | 读这里 |
 |---|---|
