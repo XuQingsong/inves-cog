@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-009  已收到（ARM现金流对齐与TSM每ADS单位链）  2026-10-17
+- 已全文读取main的A009、control（A运行）及A008 K02/正式独立报告；A008准确10f66ed的85项检查、295行重建、旧字段/评分/计划和165组稳定证据已通过，不重做未变工作。
+- 当前代码基线 **10f66edaaa5e08e5426a836ed7ed4095cda73ed6**，本地干净；继续原PR17/phase1/m5-valuation并转草稿，不建重复PR。先核现存ARM OCF/PPE的完整期间与TSM EPS/股数/历史PE/价格/预期各单位，再提交失败回归与实现。
+- 变更授权：最小M2/FinState可选估值专用现金流JSON及同名来源，或等效M5只读适配；旧fcf_ttm/shares/EPS等值、来源、健康码与规则A/M3/M4保持。TSM转换仅在M5输入边界，有明确来源/当时可见/适用范围，不猜已ADS或历史比例。
+- 只做A009；不并入NOK、金融模型、新PE参数或缺史研究。原始包仅本机，无采集、模型调用、共享写回、表结构/迁移/部署/权限变更；自动接单仍暂停。
+
 ## A-008  已完成（输入覆盖修复交付，待独立验收）  2026-10-17
 - **PR #17已恢复正式「[M5] 提交验收」，draft=false**：https://github.com/XuQingsong/inves-cog/pull/17。当前完整head **10f66edaaa5e08e5426a836ed7ed4095cda73ed6**，本地同SHA且干净；已直接核对[该准确head phase1-blocking CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39007668205)，job117323345150成功，未沿用A007旧CI。
 - [A008逐条自测](https://github.com/XuQingsong/inves-cog/blob/10f66edaaa5e08e5426a836ed7ed4095cda73ed6/handoff/M5/a008/self-test.md)、[五日覆盖/全部剩余字段](https://github.com/XuQingsong/inves-cog/blob/10f66edaaa5e08e5426a836ed7ed4095cda73ed6/handoff/M5/a008/coverage-after.json)、[逐只源审计与剩余处理](https://github.com/XuQingsong/inves-cog/blob/10f66edaaa5e08e5426a836ed7ed4095cda73ed6/handoff/M5/a008/remaining-items.md)已发布；source-audit.csv、code-manifest.sha256、evidence-manifest.json及原44只基线同目录。
