@@ -1567,6 +1567,44 @@ def test_coverage_alarm_needs_three_rising_days():
 
 
 @pytest.mark.phase1_blocking
+def test_retrace_windows_do_not_pick_a_capital_state():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.tracks import retrace_windows
+
+    assert retrace_windows(None) is None
+    blank = retrace_windows({})
+    assert blank["retrace_5"] is None
+    assert blank["retrace_20"] is None
+    assert blank["capital_state"] is None
+    assert blank["valuation"] is None
+    half = retrace_windows({"first": -2, "day_5": -1})
+    assert half["retrace_5"] == 0.5
+    assert half["retrace_20"] is None
+    assert half["capital_state"] is None
+    same = retrace_windows({"first": -2, "day_5": -2, "day_20": 0})
+    assert same["retrace_5"] == 0
+    assert same["retrace_20"] == 1
+    flipped = retrace_windows({"first": -2, "day_5": 1, "day_20": 1})
+    assert flipped["retrace_5"] == 1.5
+    assert flipped["capital_state"] is None
+    assert retrace_windows({"first": 0, "day_5": -1, "day_20": -1})["retrace_5"] is None
+    assert retrace_windows({"first": -2, "day_5": None, "day_20": True})["retrace_20"] is None
+    anomaly = {"anomaly_id": "retrace", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["retrace_windows"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], windows={"first": -2, "day_5": -1, "day_20": 0})
+    assert report["retrace_windows"]["retrace_5"] == 0.5
+    assert report["retrace_windows"]["capital_state"] is None
+    assert report["retrace_windows"]["operating_evidence"] is False
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

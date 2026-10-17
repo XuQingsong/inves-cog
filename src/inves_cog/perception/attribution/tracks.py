@@ -1,5 +1,7 @@
 """Capital track and the deadline clock. A reprint does not start the clock again."""
 
+import math
+
 
 def capital_state(sessions_elapsed, cumulative, first):
     if sessions_elapsed <= 1:
@@ -12,6 +14,34 @@ def capital_state(sessions_elapsed, cumulative, first):
     if ratio >= 0.5:
         return "已消化"
     return "消化中"
+
+
+def retrace_windows(reading):
+    """Report the 5-day and 20-day retrace. A zero first residual has no percentage."""
+    if reading is None:
+        return None
+    first = reading.get("first")
+    return {
+        "retrace_5": _window_retrace(reading, "day_5", first),
+        "retrace_20": _window_retrace(reading, "day_20", first),
+        "capital_state": None,
+        "fundamental_standing": None,
+        "operating_evidence": False,
+        "valuation": None,
+    }
+
+
+def _window_retrace(reading, key, first):
+    if key not in reading:
+        return None
+    cumulative = reading.get(key)
+    if not _finite(cumulative) or not _finite(first) or first == 0:
+        return None
+    return 1 - cumulative / first
+
+
+def _finite(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def deadline_offset(earnings_sessions, mechanism_sessions, cap=20):

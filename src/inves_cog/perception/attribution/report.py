@@ -17,7 +17,7 @@ from inves_cog.perception.attribution.magnitude import channel_lines
 from inves_cog.perception.attribution.propose import research_order, review_queue
 from inves_cog.perception.attribution.retrieve import discard_review, explore_quota, retrieval_gap
 from inves_cog.perception.attribution.second_hit import denial_response
-from inves_cog.perception.attribution.tracks import local_support, track_reading
+from inves_cog.perception.attribution.tracks import local_support, retrace_windows, track_reading
 from inves_cog.perception.attribution.unexplained import coverage_check
 
 _OPERATING = {"供给", "需求", "竞争", "客户融资"}
@@ -160,6 +160,7 @@ def explanation_report(
     research=None,
     consensus=None,
     coverage=None,
+    windows=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -201,6 +202,7 @@ def explanation_report(
         "research_order": research_order(research),
         "market_consensus": market_consensus(consensus),
         "coverage_check": coverage_check(coverage),
+        "retrace_windows": retrace_windows(windows),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,
