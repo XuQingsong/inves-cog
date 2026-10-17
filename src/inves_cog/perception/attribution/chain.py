@@ -142,6 +142,10 @@ def _claims(items, client, universe):
         return [dict(item) for item in items], None
     try:
         return attach_claims(items, client), None
+    except ValueError as exc:
+        if str(exc) == "结构不合格":
+            return [dict(item) for item in items], "结构不合格"
+        raise
     except Exception:
         return [dict(item) for item in items], "抽取失败"
 
@@ -157,6 +161,10 @@ def _candidates(anomaly, items, client):
         return validate_candidates([], retrieved, universe), "模型调用失败"
     try:
         return propose_candidates(anomaly, items, [], client, universe), None
+    except ValueError as exc:
+        if str(exc) == "结构不合格":
+            return validate_candidates([], retrieved, universe), "结构不合格"
+        raise
     except Exception:
         return validate_candidates([], retrieved, universe), "模型调用失败"
 

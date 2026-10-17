@@ -2630,6 +2630,136 @@ def test_claim_fields_omit_unsupported(tmp_path):
 
 
 @pytest.mark.phase1_blocking
+def test_model_output_contract_rejects_a_bad_structure():
+    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.claims import attach_claims, claim_output, claim_payload
+    from inves_cog.perception.attribution.propose import candidate_output, candidate_payload, propose_candidates
+
+    forbidden = {"score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis"}
+    candidate_schema = candidate_output()["candidates"]
+    claim_schema = claim_output()["items"][0]["claims"]
+    assert set(candidate_schema["mechanism"]) == {"供给", "需求", "竞争", "客户融资", "估值倍数"}
+    assert forbidden <= set(candidate_schema["forbidden"])
+    assert forbidden <= set(claim_schema["forbidden"])
+    assert candidate_payload({"anomaly_id": "a"}, [], [])["output"] == candidate_output()
+    assert claim_payload([{"info_id": "n1"}])["output"] == claim_output()
+
+    anomaly = {
+        "anomaly_id": "hdd",
+        "universe": "pool",
+        "direction": "down",
+        "baskets": ["hdd"],
+        "members": ["WDC"],
+    }
+    items = [{"info_id": "nikkei", "headline": "expand"}]
+
+    class Envelope:
+        def call(self, task, payload):
+            return {"candidates": {}} if task == "anomaly_candidates" else {"items": {}}
+
+    with pytest.raises(ValueError, match="结构不合格"):
+        propose_candidates(anomaly, items, [], Envelope(), {"WDC"})
+    with pytest.raises(ValueError, match="结构不合格"):
+        attach_claims(items, Envelope())
+
+    class Mixed:
+        def call(self, task, payload):
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nikkei"],
+                        "score": 0.999,
+                        "confidence": "高",
+                        "fundamental": "支持",
+                        "affected": [{"ticker": "WDC", "score": 1}],
+                    },
+                    "bad",
+                    {"mechanism": "供给", "info_ids": "nikkei"},
+                ]
+            }
+
+    rows = propose_candidates(anomaly, items, [], Mixed(), {"WDC"})
+    scored = [row for row in rows if row["scored"]]
+    assert [row["mechanism"] for row in scored] == ["供给"]
+    assert scored[0]["score"] is None
+    assert scored[0]["fundamental"] is None
+    assert scored[0]["affected"] == [{"ticker": "WDC"}]
+
+    class Claims:
+        def call(self, task, payload):
+            return {
+                "items": [
+                    {
+                        "info_id": "n1",
+                        "claims": [{"subject": "Toshiba", "score": 0.9, "source_level": 9, "mechanism": "谣言"}],
+                    }
+                ]
+            }
+
+    attached = attach_claims([{"info_id": "n1", "headline": "expand"}], Claims())
+    assert attached[0]["claims"] == [{"subject": "Toshiba"}]
+
+    published = datetime(2026, 10, 2, 11, 0, tzinfo=timezone.utc)
+    visible = {
+        "info_id": "nikkei-hdd",
+        "published_at": published,
+        "first_seen_at": published,
+        "headline": "Toshiba",
+        "claims": [{"subject": "Toshiba"}],
+    }
+
+    class Continue:
+        def __init__(self):
+            self.calls = 0
+
+        def call(self, task, payload):
+            self.calls += 1
+            if self.calls == 1:
+                return ["not-an-object"]
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nikkei-hdd"],
+                        "score": 0.999,
+                        "affected": [{"ticker": "WDC"}],
+                    }
+                ]
+            }
+
+    started = datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc)
+    client = Continue()
+    chained = attribute_all(
+        [
+            {
+                **anomaly,
+                "anomaly_id": "bad",
+                "started_at": started,
+                "trade_date": "2026-10-02",
+                "members": [{"ticker": "WDC"}],
+            },
+            {
+                "anomaly_id": "next",
+                "universe": "pool",
+                "trade_date": "2026-10-02",
+                "members": [{"ticker": "WDC"}],
+                "started_at": started,
+            },
+        ],
+        [visible],
+        as_of=started,
+        client=client,
+        components_by_id={"next": {"time": 1.0}},
+    )
+    assert client.calls == 2
+    assert chained[0]["status"] == "待分析"
+    assert chained[0]["degraded"] == "结构不合格"
+    assert chained[1]["status"] == "假设中"
+    assert chained[1]["report"]["candidates"][0]["score"] == 1.0
+
+
+@pytest.mark.phase1_blocking
 def test_wide_anomaly_skips_candidates(tmp_path):
     from inves_cog.llm.client import Client
     from inves_cog.perception.attribution.operating import operating_verdict

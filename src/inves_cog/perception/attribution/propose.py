@@ -4,6 +4,23 @@ from inves_cog.perception.attribution.candidates import validate_candidates
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
+_FORBIDDEN = ("score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis")
+
+
+def candidate_output():
+    """Return schema carried in the payload. The model does not decide scores or conclusions."""
+    return {
+        "candidates": {
+            "max": 5,
+            "mechanism": sorted(MECHANISMS),
+            "chain": [{"entity_id": "string", "new": "boolean"}],
+            "affected": [{"basket_id": "string", "ticker": "string", "direction": ["up", "down"]}],
+            "control_baskets": ["string"],
+            "info_ids": ["string"],
+            "direction": ["up", "down"],
+            "forbidden": list(_FORBIDDEN),
+        }
+    }
 
 
 def candidate_payload(anomaly, items, neighbors):
@@ -11,6 +28,7 @@ def candidate_payload(anomaly, items, neighbors):
         "anomaly": {key: anomaly[key] for key in _ANOMALY_KEYS if key in anomaly},
         "items": [_item_view(item) for item in items[:40]],
         "neighbors": neighbors,
+        "output": candidate_output(),
     }
 
 
@@ -120,5 +138,67 @@ def propose_candidates(anomaly, items, neighbors, client, universe):
     if not items:
         return validate_candidates([], set(), universe)
     result = client.call("anomaly_candidates", candidate_payload(anomaly, items, neighbors))
-    raw = [row for row in result.get("candidates") or [] if row.get("mechanism") in MECHANISMS][:5]
+    raw = read_candidates(result)
     return validate_candidates(raw, {item["info_id"] for item in items}, universe)
+
+
+def read_candidates(result):
+    """Keep structurally valid candidates. A bad envelope is an explicit degrade."""
+    if not isinstance(result, dict) or not isinstance(result.get("candidates"), list):
+        raise ValueError("结构不合格")
+    rows = []
+    for row in result["candidates"]:
+        parsed = _candidate_row(row)
+        if parsed is not None:
+            rows.append(parsed)
+    return rows[:5]
+
+
+def _candidate_row(row):
+    if not isinstance(row, dict) or row.get("mechanism") not in MECHANISMS:
+        return None
+    info_ids = row.get("info_ids")
+    if not isinstance(info_ids, list) or any(not isinstance(item, str) or not item for item in info_ids):
+        return None
+    if "chain" in row and not isinstance(row.get("chain"), list):
+        return None
+    if "affected" in row and not isinstance(row.get("affected"), list):
+        return None
+    if "control_baskets" in row and not isinstance(row.get("control_baskets"), list):
+        return None
+    parsed = {
+        "mechanism": row["mechanism"],
+        "info_ids": list(info_ids),
+        "chain": _chain(row.get("chain") or []),
+        "affected": _affected_rows(row.get("affected") or []),
+        "control_baskets": [item for item in (row.get("control_baskets") or []) if isinstance(item, str)],
+    }
+    if row.get("direction") in {"up", "down"}:
+        parsed["direction"] = row["direction"]
+    return parsed
+
+
+def _chain(rows):
+    kept = []
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get("entity_id"), str):
+            continue
+        item = {"entity_id": row["entity_id"]}
+        if isinstance(row.get("new"), bool):
+            item["new"] = row["new"]
+        kept.append(item)
+    return kept
+
+
+def _affected_rows(rows):
+    kept = []
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get("ticker"), str):
+            continue
+        item = {"ticker": row["ticker"]}
+        if isinstance(row.get("basket_id"), str):
+            item["basket_id"] = row["basket_id"]
+        if row.get("direction") in {"up", "down"}:
+            item["direction"] = row["direction"]
+        kept.append(item)
+    return kept
