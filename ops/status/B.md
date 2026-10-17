@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 14:43 北京
+
+- 草稿 PR #18 head `4a218b9`。没有合并进 main。本地 `make phase1-test`：234 passed，18 deselected。
+- 已看到答复 `a04c0f0`。期限复验第 5 项：12:30 的打标任务不推进生命周期。已经形成的结案结论会留下来：条件风险、截止日仍未知和基本面失效不会退成待验证。没有这些结论的事件仍不结案。
+- Q-M8-16 第 3 到第 5 项还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 14:33 北京
 
 - 草稿 PR #18 head `bb2575a`。没有合并进 main。本地 `make phase1-test`：233 passed，18 deselected。
