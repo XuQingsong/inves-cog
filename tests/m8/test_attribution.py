@@ -4912,6 +4912,147 @@ def test_labels_do_not_overwrite_a_saved_track():
 
 
 @pytest.mark.phase1_blocking
+def test_tracks_stage_uses_the_completed_session():
+    from zoneinfo import ZoneInfo
+
+    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.store import Store
+
+    shanghai = ZoneInfo("Asia/Shanghai")
+
+    class Memory:
+        def __init__(self):
+            self.linkage = {}
+            self.reports = {}
+            self.tracks = {}
+            self.row = None
+
+        def execute(self, statement, params):
+            if "LEFT JOIN perception.reports" in statement:
+                saved = self.linkage.get(params[0])
+                report = None if saved is None else self.reports.get(saved["anomaly_id"])
+                self.row = (
+                    None
+                    if saved is None
+                    else (
+                        saved["lifecycle"],
+                        saved["history"],
+                        saved["deadline_outcome"],
+                        saved["closing_reason"],
+                        saved["unknowns"],
+                        report,
+                    )
+                )
+            elif "SELECT lifecycle, history FROM perception.linkage_events" in statement:
+                saved = self.linkage.get(params[0])
+                self.row = None if saved is None else (saved["lifecycle"], saved["history"])
+            elif "INSERT INTO perception.linkage_events" in statement:
+                event_id, anomaly_id, lifecycle, history, outcome, reason, unknowns, _mechanism = params
+                self.linkage[event_id] = {
+                    "anomaly_id": anomaly_id,
+                    "lifecycle": lifecycle,
+                    "history": history.obj,
+                    "deadline_outcome": outcome,
+                    "closing_reason": reason,
+                    "unknowns": unknowns.obj,
+                }
+                self.row = None
+            elif "INSERT INTO perception.reports" in statement:
+                self.reports[params[0]] = params[1].obj
+                self.row = None
+            elif "INSERT INTO perception.tracks" in statement:
+                event_id, trade_date, emotion, capital, fundamental, metrics = params
+                self.tracks[(event_id, trade_date)] = {
+                    "emotion": emotion,
+                    "capital": capital,
+                    "fundamental": fundamental,
+                    "metrics": metrics.obj,
+                }
+                self.row = None
+            else:
+                self.row = None
+            return self
+
+        def fetchone(self):
+            return self.row
+
+    memory = Memory()
+    anomaly_id = "session-day"
+    Store(memory).save(
+        {
+            "anomaly_id": anomaly_id,
+            "universe": "pool",
+            "linkage": {
+                "event_id": f"evt-{anomaly_id}",
+                "lifecycle": "已验证·有影响",
+                "history": [
+                    {
+                        "at": "2026-10-14T20:00:00Z",
+                        "old": "基本面核查中",
+                        "new": "已验证·有影响",
+                        "trigger": "截止日证据支持",
+                        "evidence_ids": [],
+                    }
+                ],
+                "deadline_outcome": "支持",
+                "closing_reason": "截止日证据支持",
+                "unknowns": ["经营记录缺失"],
+            },
+            "report": {
+                "fundamental_standing": "支持",
+                "operating_impact_proven": True,
+                "deadline_outcome": "支持",
+                "closing_reason": "截止日证据支持",
+                "unknowns": ["经营记录缺失"],
+            },
+            "tracks": [{"trade_date": "2026-10-14", "emotion": "延续", "capital": "冲击中", "fundamental": "支持"}],
+        }
+    )
+    anomaly = {
+        "anomaly_id": anomaly_id,
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc),
+    }
+
+    def run(stage, moment):
+        return execute_stage(stage, [anomaly], [], as_of=moment, client=None, store=Store(memory))[0]
+
+    def dates():
+        found = [trade_date for (event_id, trade_date) in memory.tracks if event_id == f"evt-{anomaly_id}"]
+        return sorted(found)
+
+    morning = datetime(2026, 10, 16, 9, 30, tzinfo=shanghai)
+    noon = datetime(2026, 10, 16, 12, 30, tzinfo=shanghai)
+    saturday = datetime(2026, 10, 17, 9, 30, tzinfo=shanghai)
+    sunday = datetime(2026, 10, 18, 9, 30, tzinfo=shanghai)
+    for moment in (morning, noon, saturday, sunday):
+        labelled = run("attribution_labels", moment)
+        assert labelled["tracks"] == []
+        assert dates() == ["2026-10-14"]
+    first = run("attribution_tracks", morning)
+    assert anomaly["trade_date"] == "2026-10-14"
+    assert [row["trade_date"] for row in first["tracks"]] == ["2026-10-15"]
+    assert dates() == ["2026-10-14", "2026-10-15"]
+    assert memory.tracks[(f"evt-{anomaly_id}", "2026-10-14")]["fundamental"] == "支持"
+    again = run("attribution_tracks", noon)
+    assert [row["trade_date"] for row in again["tracks"]] == ["2026-10-15"]
+    assert dates() == ["2026-10-14", "2026-10-15"]
+    assert memory.tracks[(f"evt-{anomaly_id}", "2026-10-14")]["fundamental"] == "支持"
+    weekend = run("attribution_tracks", saturday)
+    assert [row["trade_date"] for row in weekend["tracks"]] == ["2026-10-16"]
+    assert "2026-10-17" not in dates()
+    sunday_run = run("attribution_tracks", sunday)
+    assert [row["trade_date"] for row in sunday_run["tracks"]] == ["2026-10-16"]
+    assert dates() == ["2026-10-14", "2026-10-15", "2026-10-16"]
+    assert "2026-10-18" not in dates()
+    assert memory.tracks[(f"evt-{anomaly_id}", "2026-10-14")]["fundamental"] == "支持"
+    assert anomaly["trade_date"] == "2026-10-14"
+
+
+@pytest.mark.phase1_blocking
 def test_scheduled_job_records_the_stage_itself():
     from inves_cog.perception.attribution.chain import run_scheduled
 

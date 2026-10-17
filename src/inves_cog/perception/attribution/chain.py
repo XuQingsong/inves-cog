@@ -8,7 +8,7 @@ the morning schedule.
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from inves_cog.ingest.market import regular_bounds
+from inves_cog.ingest.market import exchange, regular_bounds, trading_day
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
 from inves_cog.perception.attribution.claims import attach_claims
 from inves_cog.perception.attribution.evidence import (
@@ -250,7 +250,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     proven = bool(deadline and deadline.get("operating_impact_proven"))
     report["operating_impact_proven"] = proven
     hits, conclusion = _second_hits(anomaly, candidates, as_of)
-    tracks = _track_rows(anomaly, state, stage)
+    tracks = _track_rows(anomaly, state, stage, as_of)
     saved = False
     if store is not None:
         store.save(_bundle(anomaly, claimed, candidates, report, state, history, impact, hits, tracks, deadline))
@@ -639,7 +639,23 @@ def _expected_direction(candidate, fingerprint, anomaly, event):
     return direction if direction in {"up", "down"} else None
 
 
-def _track_rows(anomaly, state, stage=None):
+def _completed_session(as_of):
+    """The NYSE session that has already closed. A Beijing date is not that session."""
+    if not isinstance(as_of, datetime) or as_of.tzinfo is None:
+        return None
+    day = as_of.astimezone(_NEW_YORK).date()
+    bounds = regular_bounds(day)
+    if bounds is not None and as_of >= bounds[1]:
+        return day
+    cal = exchange(day.year)
+    if trading_day(day):
+        label = cal.previous_session(str(day))
+    else:
+        label = cal.date_to_session(str(day), direction="previous")
+    return label.date()
+
+
+def _track_rows(anomaly, state, stage=None, as_of=None):
     sessions = anomaly.get("sessions") or []
     if stage == "attribution_labels" and not sessions:
         return []
@@ -658,7 +674,13 @@ def _track_rows(anomaly, state, stage=None):
     if state in {None, "已发现"} or not anomaly.get("trade_date"):
         return []
     emotion = "初现" if state == "假设中" else "延续"
-    return [{"trade_date": anomaly["trade_date"], "emotion": emotion, "fundamental": "待验证"}]
+    trade_date = anomaly["trade_date"]
+    if stage == "attribution_tracks":
+        session_day = _completed_session(as_of)
+        if session_day is None:
+            return []
+        trade_date = session_day.isoformat()
+    return [{"trade_date": trade_date, "emotion": emotion, "fundamental": "待验证"}]
 
 
 def _report(anomaly, candidates, items, status, impact, channels, deadline):
