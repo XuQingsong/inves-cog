@@ -103,3 +103,13 @@ def assert_daily_candidate_trace():
     assert evidence["captured_at"] is None and evidence["capture_status"] == "unknown_import_time"
     assert evidence["snapshot_as_of"] == "2026-10-12"
     assert second["source_evidence"]["financial"]["capture_status"] == "not_provided_by_M2_contract"
+    # Reopening a stored pre-repair result must not retain its obsolete type
+    # simply because no new financial filing arrived on the upgrade day.
+    legacy = ValuationBook()
+    run(9, repo, legacy)
+    legacy.published["AAA"]["method_version"] = "v1.1"
+    legacy.types["AAA"].current = "周期"
+    legacy.types["AAA"].observations = {"2026-06-30": "周期"}
+    upgraded = run(12, repo, legacy)["ranges"][0]
+    assert upgraded["trigger_audit"]["method_refresh"] is True
+    assert upgraded["type"] == "稳定" and upgraded["inputs"]["eps_ntm"] == 6.06
