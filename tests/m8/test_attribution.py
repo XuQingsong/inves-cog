@@ -5149,18 +5149,36 @@ def test_tracks_stage_uses_the_completed_session():
                 "linkage": {
                     "event_id": event_id,
                     "lifecycle": "假设中",
-                    "history": [{"at": origin, "old": "已发现", "new": "假设中", "trigger": "证据分达到假设", "evidence_ids": []}],
+                    "history": [
+                        {
+                            "at": origin,
+                            "old": "已发现",
+                            "new": "假设中",
+                            "trigger": "证据分达到假设",
+                            "evidence_ids": [],
+                        }
+                    ],
                 },
             }
         )
         pending = execute_stage(
-            "attribution_tracks", [intraday], [], as_of=datetime.fromisoformat(before_close), client=None, store=Store(fresh)
+            "attribution_tracks",
+            [intraday],
+            [],
+            as_of=datetime.fromisoformat(before_close),
+            client=None,
+            store=Store(fresh),
         )[0]
         assert pending["tracks"] == []
         assert fresh.tracks == {}
         assert intraday["trade_date"] == origin[:10]
         closed = execute_stage(
-            "attribution_tracks", [intraday], [], as_of=datetime.fromisoformat(after_close), client=None, store=Store(fresh)
+            "attribution_tracks",
+            [intraday],
+            [],
+            as_of=datetime.fromisoformat(after_close),
+            client=None,
+            store=Store(fresh),
         )[0]
         assert [row["trade_date"] for row in closed["tracks"]] == [origin[:10]]
         assert list(fresh.tracks) == [(event_id, origin[:10])]
