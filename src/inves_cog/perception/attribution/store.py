@@ -13,6 +13,10 @@ def _json(value):
     return Jsonb(value)
 
 
+def _complete(entry):
+    return isinstance(entry, dict) and {"at", "old", "new", "trigger", "evidence_ids"} <= set(entry)
+
+
 def _guard(bundle):
     wide = bundle.get("universe") == "wide"
     blocked = ("candidates", "linkage", "second_hits", "tracks", "ticker_status")
@@ -32,6 +36,9 @@ class Store:
 
     def save(self, bundle):
         _guard(bundle)
+        linkage = bundle.get("linkage")
+        if linkage is not None:
+            self._require_linkage(linkage)
         anomaly_id = bundle["anomaly_id"]
         for row in bundle.get("retrievals") or []:
             self._retrieval(anomaly_id, row)
@@ -60,7 +67,11 @@ class Store:
         self.connection.execute(
             "INSERT INTO perception.retrievals "
             "(anomaly_id, info_id, role, relevance, published_at, source_level, retrieval_mode) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (anomaly_id, info_id) DO UPDATE SET "
+            "role = EXCLUDED.role, relevance = EXCLUDED.relevance, "
+            "published_at = EXCLUDED.published_at, source_level = EXCLUDED.source_level, "
+            "retrieval_mode = EXCLUDED.retrieval_mode",
             (
                 anomaly_id,
                 row["info_id"],
@@ -76,7 +87,11 @@ class Store:
         self.connection.execute(
             "INSERT INTO perception.claims "
             "(claim_id, info_id, subject, variable, mechanism, direction, quantity, horizon, certainty, source_level) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (claim_id) DO UPDATE SET "
+            "info_id = EXCLUDED.info_id, subject = EXCLUDED.subject, variable = EXCLUDED.variable, "
+            "mechanism = EXCLUDED.mechanism, direction = EXCLUDED.direction, quantity = EXCLUDED.quantity, "
+            "horizon = EXCLUDED.horizon, certainty = EXCLUDED.certainty, source_level = EXCLUDED.source_level",
             (
                 row["claim_id"],
                 row["info_id"],
@@ -96,7 +111,12 @@ class Store:
             "INSERT INTO perception.candidates "
             "(anomaly_id, candidate_id, mechanism, chain, affected, control_baskets, info_ids, "
             "evidence, score, confidence, magnitude, fundamental, scored) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (anomaly_id, candidate_id) DO UPDATE SET "
+            "mechanism = EXCLUDED.mechanism, chain = EXCLUDED.chain, affected = EXCLUDED.affected, "
+            "control_baskets = EXCLUDED.control_baskets, info_ids = EXCLUDED.info_ids, "
+            "evidence = EXCLUDED.evidence, score = EXCLUDED.score, confidence = EXCLUDED.confidence, "
+            "magnitude = EXCLUDED.magnitude, fundamental = EXCLUDED.fundamental, scored = EXCLUDED.scored",
             (
                 anomaly_id,
                 row.get("candidate_id") or f"c{index}",
@@ -113,6 +133,22 @@ class Store:
                 bool(row.get("scored")),
             ),
         )
+
+    def _require_linkage(self, row):
+        history = list(row.get("history") or [])
+        for entry in history:
+            if not _complete(entry):
+                raise ValueError("审计链缺少时间、触发条件或证据")
+        found = self.connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (row["event_id"],),
+        ).fetchone()
+        if found is None or found[0] == row["lifecycle"]:
+            return
+        combined = list(found[1] or []) + history
+        covered = any(_complete(entry) and entry.get("new") == row["lifecycle"] for entry in combined)
+        if not covered:
+            raise ValueError("状态变更缺少完整审计")
 
     def _linkage(self, anomaly_id, row):
         self.connection.execute(
@@ -136,18 +172,6 @@ class Store:
             "WHERE NOT EXISTS ("
             "SELECT 1 FROM jsonb_array_elements(perception.linkage_events.history) AS kept(entry) "
             "WHERE kept.entry = incoming.entry"
-            ") "
-            "UNION ALL "
-            "SELECT jsonb_build_object('old', perception.linkage_events.lifecycle, 'new', EXCLUDED.lifecycle), "
-            "2000000 "
-            "WHERE perception.linkage_events.lifecycle IS DISTINCT FROM EXCLUDED.lifecycle "
-            "AND NOT EXISTS ("
-            "SELECT 1 FROM ("
-            "SELECT entry FROM jsonb_array_elements(perception.linkage_events.history) AS prior(entry) "
-            "UNION "
-            "SELECT entry FROM jsonb_array_elements(COALESCE(EXCLUDED.history, '[]'::jsonb)) AS incoming(entry)"
-            ") AS seen(entry) "
-            "WHERE seen.entry->>'new' IS NOT DISTINCT FROM EXCLUDED.lifecycle"
             ")) AS combined)",
             (
                 row["event_id"],
@@ -182,7 +206,10 @@ class Store:
         self.connection.execute(
             "INSERT INTO perception.second_hits "
             "(event_id, info_id, session, expected_z, control_z, outcome, source_root, published_at) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (event_id, info_id) DO UPDATE SET "
+            "session = EXCLUDED.session, expected_z = EXCLUDED.expected_z, control_z = EXCLUDED.control_z, "
+            "outcome = EXCLUDED.outcome, source_root = EXCLUDED.source_root, published_at = EXCLUDED.published_at",
             (
                 row.get("event_id") or event_id,
                 row["info_id"],
@@ -199,20 +226,29 @@ class Store:
         self.connection.execute(
             "INSERT INTO perception.impact_decomposition "
             "(anomaly_id, total_residual, event_part, amplification, unexplained) "
-            "VALUES (%s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s) "
+            "ON CONFLICT (anomaly_id) DO UPDATE SET "
+            "total_residual = EXCLUDED.total_residual, event_part = EXCLUDED.event_part, "
+            "amplification = EXCLUDED.amplification, unexplained = EXCLUDED.unexplained",
             (anomaly_id, row["total_residual"], row["event"], row["amplification"], row["unexplained"]),
         )
 
     def _market_day(self, row):
         self.connection.execute(
-            "INSERT INTO perception.market_day (trade_date, systemic_event_tag, info_ids) VALUES (%s, %s, %s)",
+            "INSERT INTO perception.market_day (trade_date, systemic_event_tag, info_ids) "
+            "VALUES (%s, %s, %s) "
+            "ON CONFLICT (trade_date) DO UPDATE SET "
+            "systemic_event_tag = EXCLUDED.systemic_event_tag, info_ids = EXCLUDED.info_ids",
             (row["trade_date"], row["systemic_event_tag"], row.get("info_ids") or []),
         )
 
     def _ticker(self, anomaly_id, row):
         self.connection.execute(
             "INSERT INTO perception.ticker_status (anomaly_id, ticker, exposure, mechanism, n_code, note) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (anomaly_id, ticker) DO UPDATE SET "
+            "exposure = EXCLUDED.exposure, mechanism = EXCLUDED.mechanism, "
+            "n_code = EXCLUDED.n_code, note = EXCLUDED.note",
             (anomaly_id, row["ticker"], row.get("exposure"), row.get("mechanism"), row["n_code"], row.get("note")),
         )
 
@@ -221,6 +257,7 @@ class Store:
         if bundle.get("universe") == "wide":
             report["status"] = "已记录"
         self.connection.execute(
-            "INSERT INTO perception.reports (anomaly_id, report) VALUES (%s, %s)",
+            "INSERT INTO perception.reports (anomaly_id, report) VALUES (%s, %s) "
+            "ON CONFLICT (anomaly_id) DO UPDATE SET report = EXCLUDED.report",
             (anomaly_id, _json(report)),
         )

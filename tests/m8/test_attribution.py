@@ -3252,12 +3252,18 @@ def test_missing_first_seen_is_not_collected_then():
         production_visible([bare], as_of, mode="后补录历史案例")
 
 
+class _Cursor:
+    def fetchone(self):
+        return None
+
+
 class _Calls:
     def __init__(self):
         self.rows = []
 
     def execute(self, sql, params=None):
         self.rows.append((sql, params))
+        return _Cursor()
 
 
 def _pool_bundle():
@@ -3496,6 +3502,161 @@ def test_second_save_keeps_linkage_history_on_disposable_database():
             (event_id,),
         ).fetchall()
         assert tracks == [("2026-10-02", "扩散", "延续"), ("2026-10-03", "扩散", "延续")]
+        connection.rollback()
+
+
+@pytest.mark.phase1_blocking
+def test_second_save_updates_the_full_bundle_without_a_stub_history():
+    import psycopg
+
+    from inves_cog.perception.attribution.store import Store
+
+    discovered = [{"at": "2026-10-02T13:30:00Z", "old": None, "new": "已发现", "trigger": "异常", "evidence_ids": []}]
+    hypothesized = [
+        {
+            "at": "2026-10-02T13:40:00Z",
+            "old": "已发现",
+            "new": "假设中",
+            "trigger": "证据分达到假设",
+            "evidence_ids": ["nikkei"],
+        }
+    ]
+    host = _disposable_database()
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as connection:
+        connection.execute("SET LOCAL ROLE role_perception")
+        store = Store(connection)
+        anomaly_id = "full-2026-10-02"
+        event_id = "evt-full"
+        first = {
+            "anomaly_id": anomaly_id,
+            "retrievals": [{"info_id": "nikkei", "role": "primary", "retrieval_mode": "rules", "source_level": 4}],
+            "claims": [{"claim_id": "nikkei:0", "info_id": "nikkei", "subject": "Toshiba", "mechanism": "供给"}],
+            "candidates": [
+                {"candidate_id": "c0", "mechanism": "供给", "info_ids": ["nikkei"], "scored": True, "score": 0.5}
+            ],
+            "linkage": {"event_id": event_id, "lifecycle": "已发现", "history": discovered},
+            "tracks": [{"trade_date": "2026-10-02", "emotion": "初现", "fundamental": "待验证"}],
+            "second_hits": [
+                {
+                    "info_id": "tdk",
+                    "outcome": "未检验",
+                    "source_root": "benzinga",
+                    "published_at": "2026-10-06T14:44:00Z",
+                }
+            ],
+            "impact": {"total_residual": -0.05, "event": -0.05, "amplification": 0.0, "unexplained": 0.0},
+            "market_day": {"trade_date": "2026-10-02", "systemic_event_tag": "无", "info_ids": []},
+            "ticker_status": [{"ticker": "WDC", "n_code": "N6"}],
+            "report": {"status": "已发现·原因未明", "valuation": "不变 / 待基本面轨道"},
+        }
+        store.save(first)
+        with pytest.raises(ValueError, match="状态变更缺少完整审计"):
+            store.save(
+                {
+                    **first,
+                    "linkage": {"event_id": event_id, "lifecycle": "假设中", "history": []},
+                }
+            )
+        lifecycle, history = connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (event_id,),
+        ).fetchone()
+        assert lifecycle == "已发现"
+        assert history == discovered
+        updated = {
+            **first,
+            "retrievals": [
+                {"info_id": "nikkei", "role": "background", "retrieval_mode": "rules", "source_level": 4},
+            ],
+            "claims": [{"claim_id": "nikkei:0", "info_id": "nikkei", "subject": "东芝", "mechanism": "供给"}],
+            "candidates": [
+                {"candidate_id": "c0", "mechanism": "供给", "info_ids": ["nikkei"], "scored": True, "score": 0.7}
+            ],
+            "linkage": {"event_id": event_id, "lifecycle": "假设中", "history": hypothesized},
+            "second_hits": [
+                {
+                    "info_id": "tdk",
+                    "outcome": "确认",
+                    "source_root": "benzinga",
+                    "published_at": "2026-10-06T14:44:00Z",
+                }
+            ],
+            "impact": {"total_residual": -0.04, "event": -0.04, "amplification": 0.0, "unexplained": 0.0},
+            "market_day": {"trade_date": "2026-10-02", "systemic_event_tag": "行业", "info_ids": ["nikkei"]},
+            "ticker_status": [{"ticker": "WDC", "n_code": "N1", "note": "同日"}],
+            "report": {"status": "假设中", "valuation": "不变 / 待基本面轨道"},
+        }
+        store.save(updated)
+        role, level = connection.execute(
+            "SELECT role, source_level FROM perception.retrievals WHERE anomaly_id = %s AND info_id = %s",
+            (anomaly_id, "nikkei"),
+        ).fetchone()
+        assert (role, level) == ("background", 4)
+        count = connection.execute(
+            "SELECT count(*) FROM perception.retrievals WHERE anomaly_id = %s",
+            (anomaly_id,),
+        ).fetchone()[0]
+        assert count == 1
+        subject = connection.execute(
+            "SELECT subject FROM perception.claims WHERE claim_id = %s",
+            ("nikkei:0",),
+        ).fetchone()[0]
+        assert subject == "东芝"
+        score = connection.execute(
+            "SELECT score FROM perception.candidates WHERE anomaly_id = %s AND candidate_id = %s",
+            (anomaly_id, "c0"),
+        ).fetchone()[0]
+        assert score == 0.7
+        outcome = connection.execute(
+            "SELECT outcome FROM perception.second_hits WHERE event_id = %s AND info_id = %s",
+            (event_id, "tdk"),
+        ).fetchone()[0]
+        assert outcome == "确认"
+        total = connection.execute(
+            "SELECT total_residual FROM perception.impact_decomposition WHERE anomaly_id = %s",
+            (anomaly_id,),
+        ).fetchone()[0]
+        assert total == -0.04
+        tag = connection.execute(
+            "SELECT systemic_event_tag FROM perception.market_day WHERE trade_date = %s",
+            ("2026-10-02",),
+        ).fetchone()[0]
+        assert tag == "行业"
+        code = connection.execute(
+            "SELECT n_code FROM perception.ticker_status WHERE anomaly_id = %s AND ticker = %s",
+            (anomaly_id, "WDC"),
+        ).fetchone()[0]
+        assert code == "N1"
+        report = connection.execute(
+            "SELECT report FROM perception.reports WHERE anomaly_id = %s",
+            (anomaly_id,),
+        ).fetchone()[0]
+        assert report["status"] == "假设中"
+        lifecycle, history = connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (event_id,),
+        ).fetchone()
+        assert lifecycle == "假设中"
+        assert history == discovered + hypothesized
+        assert all({"at", "trigger", "evidence_ids"} <= set(entry) for entry in history)
+        later = {
+            **updated,
+            "retrievals": updated["retrievals"]
+            + [{"info_id": "later", "role": "background", "retrieval_mode": "rules", "source_level": 2}],
+            "linkage": {"event_id": event_id, "lifecycle": "假设中", "history": []},
+            "tracks": [{"trade_date": "2026-10-03", "emotion": "扩散", "fundamental": "待验证"}],
+        }
+        store.save(later)
+        kept = connection.execute(
+            "SELECT info_id, role FROM perception.retrievals WHERE anomaly_id = %s ORDER BY info_id",
+            (anomaly_id,),
+        ).fetchall()
+        assert kept == [("later", "background"), ("nikkei", "background")]
+        tracks = connection.execute(
+            "SELECT trade_date::text FROM perception.tracks WHERE event_id = %s ORDER BY trade_date",
+            (event_id,),
+        ).fetchall()
+        assert tracks == [("2026-10-02",), ("2026-10-03",)]
         connection.rollback()
 
 
