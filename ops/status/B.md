@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 11:35 北京
+
+- 草稿 PR #18 head `e173b23`。没有合并进 main。本地 `make phase1-test`：221 passed，18 deselected。
+- 东芝完整解释报告和事件历史记在冻结夹具里。合成走查从已发现走到已验证，五步历史在再次保存后仍整段留下，不会收成一跳。三天跟踪都留下。经营证据标明合成。不是现场结论。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 11:23 北京
 
 - 草稿 PR #18 head `6a5216d`。没有合并进 main。本地 `make phase1-test`：220 passed，18 deselected。
