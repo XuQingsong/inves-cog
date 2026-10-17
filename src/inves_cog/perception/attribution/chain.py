@@ -27,7 +27,12 @@ from inves_cog.perception.attribution.propose import propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
-from inves_cog.perception.attribution.second_hit import second_hit_conclusion
+from inves_cog.perception.attribution.second_hit import (
+    classify_response,
+    later_matches_fingerprint,
+    prediction_fingerprint,
+    second_hit_conclusion,
+)
 from inves_cog.perception.attribution.tracks import apply_deadline, capital_state, deadline_reached, earliest_deadline
 
 _SHANGHAI = ZoneInfo("Asia/Shanghai")
@@ -243,7 +248,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         report["deadline_on"] = due_on.isoformat()
     proven = bool(deadline and deadline.get("operating_impact_proven"))
     report["operating_impact_proven"] = proven
-    hits, conclusion = _second_hits(anomaly)
+    hits, conclusion = _second_hits(anomaly, candidates, as_of)
     tracks = _track_rows(anomaly, state)
     saved = False
     if store is not None:
@@ -520,28 +525,82 @@ def _channels(anomaly):
     return implied_magnitude(payload)
 
 
-def _second_hits(anomaly):
+def _second_hits(anomaly, candidates, as_of):
     events = anomaly.get("later_events") or []
     if not events:
         return [], None
     start = anomaly.get("started_at")
-    conclusion = second_hit_conclusion(events, start)
+    fingerprints = []
+    for candidate in candidates:
+        fingerprint = prediction_fingerprint(candidate)
+        if fingerprint:
+            fingerprints.append((candidate, fingerprint))
+    measured = []
     rows = []
     for event in events:
-        published = event.get("published_at")
-        if start is not None and (published is None or published <= start):
+        outcome = _measured_hit(event, fingerprints, anomaly, start, as_of)
+        if outcome is None:
             continue
+        measured.append({**event, "outcome": outcome})
         rows.append(
             {
                 "info_id": event["info_id"],
-                "published_at": published,
+                "published_at": event.get("published_at"),
                 "source_root": event.get("source_root"),
-                "outcome": event.get("outcome"),
+                "outcome": outcome,
                 "expected_z": event.get("expected_z"),
                 "control_z": event.get("control_z"),
             }
         )
-    return rows, conclusion
+    if not measured:
+        return [], "未检验"
+    return rows, second_hit_conclusion(measured, start)
+
+
+def _measured_hit(event, fingerprints, anomaly, start, as_of):
+    """A later page counts only when it was visible and matches the frozen fingerprint."""
+    if not _later_visible(event, as_of):
+        return None
+    for candidate, fingerprint in fingerprints:
+        if not later_matches_fingerprint(fingerprint, event, start):
+            continue
+        if event.get("mechanism") != candidate.get("mechanism"):
+            continue
+        direction = _expected_direction(candidate, fingerprint, anomaly)
+        if direction is None or event.get("direction") not in {None, direction}:
+            continue
+        expected = {row.get("basket_id") for row in fingerprint.get("baskets") or []}
+        if expected and event.get("basket_id") not in expected:
+            continue
+        controls = set(fingerprint.get("control_baskets") or [])
+        named = event.get("control_basket")
+        if controls and named not in controls:
+            continue
+        expected_z = event.get("expected_z")
+        control_z = event.get("control_z")
+        if expected_z is None or control_z is None:
+            continue
+        return classify_response(expected_z, control_z, direction=direction)
+    return None
+
+
+def _later_visible(event, as_of):
+    published = event.get("published_at")
+    seen = event.get("first_seen_at")
+    if published is None or seen is None or as_of is None:
+        return False
+    return max(published, seen) <= as_of
+
+
+def _expected_direction(candidate, fingerprint, anomaly):
+    directions = [row.get("direction") for row in fingerprint.get("baskets") or [] if row.get("direction")]
+    if len(set(directions)) == 1:
+        return directions[0]
+    for row in candidate.get("affected") or []:
+        if isinstance(row, dict) and row.get("direction") in {"up", "down"}:
+            return row["direction"]
+    direction = anomaly.get("direction")
+    return direction if direction in {"up", "down"} else None
 
 
 def _track_rows(anomaly, state):

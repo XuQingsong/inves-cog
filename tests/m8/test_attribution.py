@@ -3900,6 +3900,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
                         "mechanism": "供给",
                         "info_ids": ["nvda-news"],
                         "affected": [{"ticker": "NVDA"}],
+                        "chain": [{"entity_id": "NVDA"}],
                     }
                 ]
             }
@@ -3950,8 +3951,13 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
                     {
                         "info_id": "follow",
                         "published_at": later,
+                        "first_seen_at": later,
                         "source_root": "wire",
-                        "outcome": "命中",
+                        "entities": ["NVDA"],
+                        "mechanism": "供给",
+                        "expected_z": -1.2,
+                        "control_z": 0.2,
+                        "outcome": "反证",
                     }
                 ],
                 "sessions": [
@@ -3968,6 +3974,31 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert continued["history"][2]["trigger"] == "四项同时成立"
     assert {"at", "trigger", "evidence_ids"} <= set(continued["history"][2])
     assert continued["second_hit"] == "确认"
+    unrelated = attribute_all(
+        [
+            {
+                **base,
+                "prior_event": {"lifecycle": opened["lifecycle"], "history": opened["history"]},
+                "later_events": [
+                    {
+                        "info_id": "xom-tomorrow",
+                        "published_at": later + timedelta(days=1),
+                        "first_seen_at": later + timedelta(days=1),
+                        "source_root": "wire",
+                        "entities": ["XOM"],
+                        "mechanism": "供给",
+                        "expected_z": -2.0,
+                        "control_z": 0.0,
+                        "outcome": "命中",
+                    }
+                ],
+            }
+        ],
+        [item],
+        as_of=later,
+        client=Propose(),
+    )[0]
+    assert unrelated["second_hit"] == "未检验"
     assert [row["trade_date"] for row in continued["tracks"]] == ["2026-10-02", "2026-10-03"]
     assert continued["tracks"][0]["capital"] == "冲击中"
     assert continued["operating_impact_proven"] is False
