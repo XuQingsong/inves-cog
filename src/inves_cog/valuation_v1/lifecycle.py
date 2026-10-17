@@ -156,6 +156,11 @@ class ValuationBook:
             kind = h.override(manual["type"], who=manual["who"], reason=manual["reason"], when=manual.get("when"))
         old_ntm = old["inputs"].get("eps_ntm") if old else None
         new_ntm = inputs.get("eps_ntm")
+        withdrawn = bool(
+            unit_event
+            and old_ntm is not None
+            and inputs.get("listed_unit_audit", {}).get("eps_ntm", {}).get("status") == "unknown"
+        )
         bounds = (
             sorted([old_ntm * (1 - c["consensus_trigger_pct"] / 100), old_ntm * (1 + c["consensus_trigger_pct"] / 100)])
             if old_ntm is not None
@@ -172,6 +177,7 @@ class ValuationBook:
             "method_refresh": method_refresh,
             "unit_contract_event": unit_event,
             "actual_unit_contract_event": actual_unit_event,
+            "invalid_forecast_withdrawn": withdrawn,
             "manual": manual is not None,
             "previous_eps_ntm": old_ntm,
             "candidate_eps_ntm": new_ntm,
@@ -217,7 +223,7 @@ class ValuationBook:
                 and after is not None
                 and abs(after / before - 1) * 100 > c["review_trigger_pct"]
             )
-            if old and not new_report and large:
+            if old and not new_report and large and not withdrawn:
                 self.pending[ticker] = deepcopy(fresh)
                 shown = mark_price(old, price)
                 shown.update(

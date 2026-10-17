@@ -6,7 +6,10 @@ m5:
       id: TSM-listed-ADS-five-common
       ratio: 5
       # Conservative public visibility; this does not assert a historical inception date.
-      known_at: '2026-04-16'
+      filed_on: '2026-04-16'
+      # Accepted time is unavailable; use the next date rather than assert
+      # that this filing was already visible at the filing-day market close.
+      known_at: '2026-04-17'
       source: https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm
       source_sha256: 9f21d7cebbdf16bb2dcf40cb1bc19f0fedb383167a900f020c5545ac5489de67
       eps_period_ends: ['2023-12-31', '2024-12-31', '2025-12-31']
