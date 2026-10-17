@@ -4526,3 +4526,97 @@ def test_case_capture_plan_prints_paths_without_calling(tmp_path, capsys):
     bundle = next(row for row in case_bundles(fixture) if row["case_kind"] == "r1_release")
     with pytest.raises(LLMUnavailable, match="待分析"):
         historical_report(bundle["anomaly"], bundle["leads"], bundle["read_on"], Client(recordings=tmp_path))
+
+
+@pytest.mark.phase1_blocking
+def test_case_inputs_are_the_payload_bytes(tmp_path, capsys):
+    import hashlib
+
+    from inves_cog.llm.client import canonical_payload
+    from inves_cog.perception.attribution.capture_plan import case_payloads, main
+    from inves_cog.perception.attribution.historical import candidate_capture, claim_capture
+
+    fixture = ROOT / "tests/fixtures/phase1"
+    inputs = tmp_path / "inputs"
+    assert main(["--fixture", str(fixture), "--root", str(tmp_path / "recordings"), "--inputs", str(inputs)]) == 0
+    plans = json.loads(capsys.readouterr().out)
+    index = json.loads((inputs / "index.json").read_text())
+    payloads = {row["anomaly"]["anomaly_id"]: row for row in case_payloads(fixture)}
+    assert [row["anomaly_id"] for row in index] == [row["anomaly_id"] for row in plans]
+    assert not (tmp_path / "recordings" / "anomaly_candidates").exists()
+    assert not (tmp_path / "recordings" / "claim_extraction").exists()
+    for plan, row in zip(plans, index, strict=True):
+        assert plan["candidate_sha256"] == Path(plan["recording"]).stem == row["candidate_sha256"]
+        assert plan["claim_sha256"] == Path(plan["claim_recording"]).stem == row["claim_sha256"]
+        assert plan["closes_case"] is False and row["closes_ac_m8_06"] is False
+        candidate = inputs / row["candidate_input"]
+        claim = inputs / row["claim_input"]
+        assert hashlib.sha256(candidate.read_bytes()).hexdigest() == plan["candidate_sha256"]
+        assert hashlib.sha256(claim.read_bytes()).hexdigest() == plan["claim_sha256"]
+        candidate_body = json.loads(candidate.read_text())
+        claim_body = json.loads(claim.read_text())
+        assert "result" not in candidate_body and "result" not in claim_body
+        assert candidate_body["output"]["candidates"]["forbidden"]
+        assert claim_body["output"]["items"][0]["claims"]["forbidden"]
+        bundle = payloads[plan["anomaly_id"]]
+        assert candidate.read_text() == canonical_payload(bundle["candidate_payload"])
+        assert candidate_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], tmp_path).stem == plan[
+            "candidate_sha256"
+        ]
+        assert claim_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], tmp_path).stem == plan[
+            "claim_sha256"
+        ]
+
+
+@pytest.mark.phase1_blocking
+def test_capture_command_stores_recordings_without_a_live_call(tmp_path, capsys, monkeypatch):
+    from inves_cog.llm.client import Client, LLMUnavailable
+    from inves_cog.perception.attribution.capture_plan import capture_cases, case_payloads, main
+    from inves_cog.perception.attribution.historical import historical_report
+
+    fixture = ROOT / "tests/fixtures/phase1"
+    payloads = case_payloads(fixture)
+
+    class Fake:
+        def __init__(self, fail_first=False):
+            self.calls = []
+            self.fail_first = fail_first
+
+        def call(self, task, payload):
+            self.calls.append((task, payload))
+            if self.fail_first and len(self.calls) == 1:
+                raise LLMUnavailable("未调用")
+            if task == "claim_extraction":
+                return {"items": [{"info_id": row["info_id"], "claims": []} for row in payload["items"]]}
+            if not isinstance(payload, dict) or "result" in payload:
+                raise AssertionError("载荷不能带结果")
+            return {"candidates": []}
+
+    fake = Fake()
+    monkeypatch.setattr(Client, "from_environment", lambda: fake)
+    assert main(["--fixture", str(fixture), "--root", str(tmp_path), "--capture"]) == 0
+    saved = json.loads(capsys.readouterr().out)
+    assert len(saved) == len(payloads)
+    claim_payloads = [row["claim_payload"] for row in payloads]
+    unique_claims = {json.dumps(row, sort_keys=True) for row in claim_payloads}
+    assert [task for task, _payload in fake.calls].count("claim_extraction") == len(unique_claims)
+    assert [task for task, _payload in fake.calls].count("anomaly_candidates") == len(payloads)
+    for row in saved:
+        assert row["closes_case"] is False and row["closes_ac_m8_06"] is False
+        assert row["candidate_error"] is None and row["claim_error"] is None
+        recording = json.loads(Path(row["recording"]).read_text())
+        assert recording["task"] == "anomaly_candidates"
+        assert recording["payload_sha256"] == Path(row["recording"]).stem
+        assert "score" not in recording["result"]
+    first = next(row for row in payloads if row["anomaly"]["anomaly_id"] == saved[0]["anomaly_id"])
+    report = historical_report(first["anomaly"], first["leads"], first["read_on"], Client(recordings=tmp_path))
+    assert report["closes_case"] is False and report["collected_then"] is False
+
+    failed = tmp_path / "failed"
+    broken = Fake(fail_first=True)
+    rows = capture_cases(fixture, failed, broken)
+    assert len(rows) == len(payloads)
+    assert rows[0]["claim_error"] == "LLMUnavailable"
+    assert rows[0]["claim_recording"] is None
+    assert rows[0]["recording"] is not None
+    assert rows[1]["candidate_error"] is None and rows[1]["recording"] is not None

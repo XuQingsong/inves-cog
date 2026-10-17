@@ -1,14 +1,22 @@
-"""Recording paths for the four historical cases. Printing them does not call a model."""
+"""Fixed inputs and recording paths for the four historical cases.
+
+Printing the plan and writing the input files does not call a model.
+``--capture`` is the demand-side command that calls the approved client.
+"""
 
 import argparse
+import hashlib
 import json
 import sys
 from datetime import date, datetime
 from pathlib import Path
 
+from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.anomaly.cases import case_anomalies
 from inves_cog.perception.anomaly.replay import _identify
-from inves_cog.perception.attribution.historical import candidate_capture, claim_capture, headline_lead, retrieval_items
+from inves_cog.perception.attribution.claims import claim_payload
+from inves_cog.perception.attribution.historical import headline_lead, recording_path, retrieval_items
+from inves_cog.perception.attribution.propose import candidate_payload
 
 READ_ON = "2026-10-16"
 
@@ -49,19 +57,40 @@ def case_bundles(fixture_dir, read_on=READ_ON):
     return bundles
 
 
+def case_payloads(fixture_dir, read_on=READ_ON):
+    """The exact claim and candidate objects. Claims stay empty in the candidate object."""
+    rows = []
+    for bundle in case_bundles(fixture_dir, read_on):
+        items = retrieval_items(bundle["leads"], bundle["anomaly"]["trade_date"], bundle["read_on"])
+        claim = claim_payload(items) if items else None
+        if claim is not None and not claim["items"]:
+            claim = None
+        rows.append(
+            {
+                **bundle,
+                "items": items,
+                "candidate_payload": candidate_payload(bundle["anomaly"], items, []),
+                "claim_payload": claim,
+            }
+        )
+    return rows
+
+
 def case_plans(fixture_dir, root, read_on=READ_ON):
     plans = []
-    for bundle in case_bundles(fixture_dir, read_on):
-        path = candidate_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], root)
-        claim = claim_capture(bundle["anomaly"], bundle["leads"], bundle["read_on"], root)
+    for row in case_payloads(fixture_dir, read_on):
+        path = recording_path("anomaly_candidates", row["candidate_payload"], root)
+        claim = None if row["claim_payload"] is None else recording_path("claim_extraction", row["claim_payload"], root)
         plans.append(
             {
-                "case_kind": bundle["case_kind"],
-                "anomaly_id": bundle["anomaly"]["anomaly_id"],
-                "trade_date": str(bundle["anomaly"]["trade_date"])[:10],
-                "sources": bundle["sources"],
+                "case_kind": row["case_kind"],
+                "anomaly_id": row["anomaly"]["anomaly_id"],
+                "trade_date": str(row["anomaly"]["trade_date"])[:10],
+                "sources": row["sources"],
                 "recording": str(path),
                 "claim_recording": None if claim is None else str(claim),
+                "candidate_sha256": path.stem,
+                "claim_sha256": None if claim is None else claim.stem,
                 "evidence_mode": "后补录历史案例",
                 "collected_then": False,
                 "closes_case": False,
@@ -71,14 +100,110 @@ def case_plans(fixture_dir, root, read_on=READ_ON):
     return plans
 
 
+def write_inputs(fixture_dir, dest, read_on=READ_ON):
+    """Write the canonical payloads. These are inputs, not recordings."""
+    dest = Path(dest)
+    index = []
+    for row in case_payloads(fixture_dir, read_on):
+        folder = dest / row["case_kind"] / row["anomaly"]["anomaly_id"]
+        folder.mkdir(parents=True, exist_ok=True)
+        candidate_text = canonical_payload(row["candidate_payload"])
+        (folder / "anomaly_candidates.json").write_text(candidate_text, encoding="utf-8")
+        claim_name = None
+        if row["claim_payload"] is not None:
+            claim_name = "claim_extraction.json"
+            (folder / claim_name).write_text(canonical_payload(row["claim_payload"]), encoding="utf-8")
+        index.append(
+            {
+                "case_kind": row["case_kind"],
+                "anomaly_id": row["anomaly"]["anomaly_id"],
+                "candidate_sha256": _sha(row["candidate_payload"]),
+                "claim_sha256": None if row["claim_payload"] is None else _sha(row["claim_payload"]),
+                "candidate_input": str((folder / "anomaly_candidates.json").relative_to(dest)),
+                "claim_input": None if claim_name is None else str((folder / claim_name).relative_to(dest)),
+                "evidence_mode": "后补录历史案例",
+                "collected_then": False,
+                "closes_case": False,
+                "closes_ac_m8_06": False,
+            }
+        )
+    (dest / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return index
+
+
+def capture_cases(fixture_dir, root, client, read_on=READ_ON):
+    """Call ``client`` and store recordings. A failed anomaly does not stop the next one."""
+    root = Path(root)
+    saved = []
+    seen = {}
+    for row in case_payloads(fixture_dir, read_on):
+        claim_file, claim_error = None, None
+        payload = row["claim_payload"]
+        if payload is not None:
+            digest = _sha(payload)
+            if digest not in seen:
+                seen[digest] = _invoke(root, "claim_extraction", payload, client)
+            claim_file, claim_error = seen[digest]
+        candidate_file, candidate_error = _invoke(root, "anomaly_candidates", row["candidate_payload"], client)
+        saved.append(
+            {
+                "case_kind": row["case_kind"],
+                "anomaly_id": row["anomaly"]["anomaly_id"],
+                "recording": None if candidate_file is None else str(candidate_file),
+                "claim_recording": None if claim_file is None else str(claim_file),
+                "candidate_error": candidate_error,
+                "claim_error": claim_error,
+                "evidence_mode": "后补录历史案例",
+                "collected_then": False,
+                "closes_case": False,
+                "closes_ac_m8_06": False,
+            }
+        )
+    return saved
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--fixture", required=True)
     parser.add_argument("--root", required=True)
+    parser.add_argument("--inputs")
+    parser.add_argument("--capture", action="store_true")
     args = parser.parse_args(argv)
+    if args.capture:
+        from inves_cog.llm.client import Client
+
+        rows = capture_cases(args.fixture, args.root, Client.from_environment())
+        json.dump(rows, sys.stdout, ensure_ascii=False, indent=1)
+        sys.stdout.write("\n")
+        return 0
+    if args.inputs:
+        write_inputs(args.fixture, args.inputs)
     json.dump(case_plans(args.fixture, args.root), sys.stdout, ensure_ascii=False, indent=1)
     sys.stdout.write("\n")
     return 0
+
+
+def _sha(payload):
+    return hashlib.sha256(canonical_payload(payload).encode("utf-8")).hexdigest()
+
+
+def _invoke(root, task, payload, client):
+    try:
+        result = client.call(task, payload)
+    except Exception as exc:
+        return None, type(exc).__name__
+    if not isinstance(result, dict):
+        return None, "结果不是对象"
+    return _store(root, task, payload, result), None
+
+
+def _store(root, task, payload, result):
+    digest = _sha(payload)
+    path = Path(root) / task / f"{digest}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = {"task": task, "payload_sha256": digest, "result": result}
+    path.write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
+    return path
 
 
 def _plain(value):
