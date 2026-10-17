@@ -78,6 +78,42 @@ def _review_rank(row):
     return 5, _REASONS[4]
 
 
+def research_order(items):
+    """Four research tiers. A candidate is not recent unless it is already marked recent."""
+    if items is None:
+        return None
+    ordered = []
+    for index, row in enumerate(items):
+        rank, reason = _research_rank(row)
+        ordered.append(
+            (
+                rank,
+                index,
+                {
+                    "info_id": row.get("info_id"),
+                    "rank": rank,
+                    "reason": reason,
+                    "operating_evidence": False,
+                    "fundamental_standing": None,
+                },
+            )
+        )
+    ordered.sort(key=lambda item: (item[0], item[1]))
+    return [item[2] for item in ordered]
+
+
+def _research_rank(row):
+    if row.get("held") is True and row.get("risk") is True:
+        return 1, "持仓风险"
+    if row.get("candidate") is True and row.get("recent") is True:
+        return 2, "近期候选"
+    if row.get("driver_link") is True:
+        return 3, "可改变驱动因子的关键环节"
+    if row.get("unknown_anomaly") is True:
+        return 4, "重大未知异常"
+    return 5, None
+
+
 def propose_candidates(anomaly, items, neighbors, client, universe):
     if anomaly.get("universe") == "wide":
         return []

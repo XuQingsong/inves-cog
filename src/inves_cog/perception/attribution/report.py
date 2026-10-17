@@ -14,7 +14,7 @@ from inves_cog.perception.attribution.evidence import later_report
 from inves_cog.perception.attribution.impact import anomaly_status
 from inves_cog.perception.attribution.lifecycle import relation_step, weak_signal
 from inves_cog.perception.attribution.magnitude import channel_lines
-from inves_cog.perception.attribution.propose import review_queue
+from inves_cog.perception.attribution.propose import research_order, review_queue
 from inves_cog.perception.attribution.retrieve import discard_review, explore_quota, retrieval_gap
 from inves_cog.perception.attribution.second_hit import denial_response
 from inves_cog.perception.attribution.tracks import local_support, track_reading
@@ -156,6 +156,7 @@ def explanation_report(
     falsified=None,
     relation=None,
     primary=None,
+    research=None,
 ):
     scores = [row["score"] for row in candidates if row.get("scored") and row.get("score") is not None]
     mechanisms = [row.get("mechanism") for row in _scored(candidates)]
@@ -194,6 +195,7 @@ def explanation_report(
         "falsified_rumor": falsified_rumor(falsified),
         "relation_step": relation_step(relation),
         "primary_signal": primary_signal(primary),
+        "research_order": research_order(research),
         "ticker_status": ticker_codes(
             anomaly,
             candidates,

@@ -1398,6 +1398,56 @@ def test_primary_signal_enters_attention_without_news():
 
 
 @pytest.mark.phase1_blocking
+def test_research_order_is_not_the_review_queue():
+    from inves_cog.perception.attribution.propose import research_order, review_queue
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert research_order(None) is None
+    assert research_order([]) == []
+    held = {"info_id": "held", "held": True, "risk": True, "unknown_anomaly": True}
+    assert research_order([held])[0]["reason"] == "持仓风险"
+    assert review_queue([held])[0]["rank"] == 5
+    rows = [
+        {"info_id": "plain"},
+        {"info_id": "unknown", "unknown_anomaly": True},
+        {"info_id": "driver", "driver_link": True},
+        {"info_id": "old", "candidate": True, "recent": False},
+        {"info_id": "soon", "candidate": True, "recent": True},
+        {"info_id": "risk-only", "risk": True},
+        {"info_id": "held-only", "held": True},
+        {"info_id": "soon-2", "candidate": True, "recent": True},
+    ]
+    ordered = research_order(rows)
+    assert [row["info_id"] for row in ordered] == [
+        "soon",
+        "soon-2",
+        "driver",
+        "unknown",
+        "plain",
+        "old",
+        "risk-only",
+        "held-only",
+    ]
+    assert [row["rank"] for row in ordered[:4]] == [2, 2, 3, 4]
+    assert ordered[4]["reason"] is None
+    assert all(row["operating_evidence"] is False for row in ordered)
+    assert all(row["fundamental_standing"] is None for row in ordered)
+    anomaly = {"anomaly_id": "research", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["research_order"] is None
+    assert quiet["review_queue"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], research=rows)
+    assert report["research_order"][0]["info_id"] == "soon"
+    assert report["review_queue"] is None
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 
