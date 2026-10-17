@@ -101,6 +101,27 @@ def _count(value):
     return None
 
 
+def consensus_dispersion(reading):
+    """Disagreement is the high-low range over the absolute current-year EPS."""
+    if reading is None:
+        return None
+    high = reading.get("high") if _number(reading.get("high")) else None
+    low = reading.get("low") if _number(reading.get("low")) else None
+    eps = reading.get("eps") if _number(reading.get("eps")) else None
+    dispersion = None
+    if high is not None and low is not None and eps is not None and abs(eps) >= 0.01:
+        dispersion = (high - low) / abs(eps)
+    return {
+        "high": high,
+        "low": low,
+        "eps": eps,
+        "dispersion": dispersion,
+        "band": None,
+        "operating_evidence": False,
+        "fundamental_standing": None,
+    }
+
+
 def consensus_band(change, downgrades, upgrades, coverage):
     """Missing EPS consensus or coverage stays unknown. It is not 未下修."""
     breadth = coverage is not None and coverage > 0 and downgrades is not None

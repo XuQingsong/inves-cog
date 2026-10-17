@@ -2342,6 +2342,44 @@ def test_revision_breadth_does_not_name_a_band():
 
 
 @pytest.mark.phase1_blocking
+def test_consensus_dispersion_stays_blank_when_eps_is_tiny():
+    from inves_cog.perception.attribution.labels import consensus_dispersion
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert consensus_dispersion(None) is None
+    wide = consensus_dispersion({"high": 12, "low": 8, "eps": 10})
+    assert wide["dispersion"] == 0.4
+    assert wide["band"] is None
+    assert wide["operating_evidence"] is False
+    assert wide["fundamental_standing"] is None
+    negative = consensus_dispersion({"high": 1, "low": -1, "eps": -2})
+    assert negative["dispersion"] == 1
+    tiny = consensus_dispersion({"high": 1, "low": 0, "eps": 0.009})
+    assert tiny["eps"] == 0.009
+    assert tiny["dispersion"] is None
+    edge = consensus_dispersion({"high": 1, "low": 0, "eps": 0.01})
+    assert edge["dispersion"] == 100
+    missing = consensus_dispersion({"high": 12, "eps": 10})
+    assert missing["low"] is None
+    assert missing["dispersion"] is None
+    flagged = consensus_dispersion({"high": True, "low": 1, "eps": 2})
+    assert flagged["high"] is None
+    assert flagged["dispersion"] is None
+    anomaly = {"anomaly_id": "dispersion", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["consensus_dispersion"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], dispersion={"high": 12, "low": 8, "eps": 10})
+    assert report["consensus_dispersion"]["dispersion"] == 0.4
+    assert report["consensus_dispersion"]["band"] is None
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_divergence_labels():
     from inves_cog.perception.attribution.labels import consensus_band, divergence_label
 
