@@ -5,7 +5,7 @@ from the rules. This module does not open a database URL and does not deploy
 the morning schedule.
 """
 
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from inves_cog.perception.attribution.candidates import validate_candidates
@@ -58,12 +58,13 @@ def attribute_all(anomalies, items, *, as_of, client, store=None, components_by_
 
 
 def replay_days(anomalies, items, days, *, client, store=None, components_by_id=None):
-    """Replay each as-of with only the items visible then."""
+    """Replay each as-of with anomalies that already occurred and items visible then."""
     played = []
     for as_of in days:
+        due = [anomaly for anomaly in anomalies if _occurred(anomaly, as_of)]
         mode = replay_mode(items, as_of)
         batch = attribute_all(
-            anomalies,
+            due,
             items,
             as_of=as_of,
             client=client,
@@ -72,6 +73,24 @@ def replay_days(anomalies, items, days, *, client, store=None, components_by_id=
         )
         played.append({"as_of": as_of, "replay": mode, "anomalies": batch})
     return played
+
+
+def _occurred(anomaly, as_of):
+    started = anomaly.get("started_at")
+    if started is not None:
+        return started <= as_of
+    trade_date = anomaly.get("trade_date")
+    if trade_date is None:
+        return True
+    return _calendar_day(trade_date) <= _calendar_day(as_of)
+
+
+def _calendar_day(value):
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    return date.fromisoformat(str(value)[:10])
 
 
 def job_slot(when):

@@ -3777,21 +3777,41 @@ def test_five_day_replay_hides_an_item_until_it_was_seen():
         "members": [{"ticker": "WDC"}],
         "started_at": start,
     }
+    future = {
+        "anomaly_id": "future-16",
+        "universe": "pool",
+        "trade_date": "2026-10-16",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": datetime(2026, 10, 16, 20, 0, tzinfo=timezone.utc),
+    }
 
     class Quiet:
         def call(self, task, payload):
             raise AssertionError(task)
 
-    played = replay_days([anomaly], [item], days, client=Quiet())
+    played = replay_days([anomaly, future], [item], days, client=Quiet())
     assert len(played) == 5
     assert played[0]["replay"]["mode"] == "后补录历史复盘"
     assert played[0]["replay"]["collected_then"] is False
+    assert [row["anomaly_id"] for row in played[0]["anomalies"]] == ["replay-1"]
+    assert played[0]["anomalies"][0]["lifecycle"] == "已发现"
     assert played[0]["anomalies"][0]["report"]["sources"] == []
+    assert [row["anomaly_id"] for row in played[1]["anomalies"]] == ["replay-1"]
     assert played[1]["anomalies"][0]["report"]["sources"] == []
     assert played[2]["replay"]["mode"] == "当时可见"
     assert played[2]["replay"]["collected_then"] is True
     assert played[2]["anomalies"][0]["report"]["sources"] == [{"info_id": "later", "role": "primary"}]
     assert played[4]["anomalies"][0]["report"]["sources"][0]["info_id"] == "later"
+    assert [row["anomaly_id"] for row in played[4]["anomalies"]] == ["replay-1", "future-16"]
+    dated = {"anomaly_id": "dated-16", "universe": "pool", "trade_date": "2026-10-16", "members": [{"ticker": "NVDA"}]}
+    by_date = replay_days(
+        [anomaly, dated],
+        [],
+        [datetime(2026, 10, 14, 4, 30, tzinfo=timezone.utc), datetime(2026, 10, 16, 4, 30, tzinfo=timezone.utc)],
+        client=Quiet(),
+    )
+    assert [row["anomaly_id"] for row in by_date[0]["anomalies"]] == ["replay-1"]
+    assert [row["anomaly_id"] for row in by_date[1]["anomalies"]] == ["replay-1", "dated-16"]
     summer = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
     winter = datetime.fromisoformat("2027-01-15T10:15:00+08:00")
     assert job_slot(summer)["task_name"] == "attribution_candidates"
