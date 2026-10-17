@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 10:02 北京
+
+- 草稿 PR #18 head `8f67174`。没有合并进 main。本地 `make phase1-test`：212 passed，18 deselected。
+- 近 7 天和近 30 天的修订广度是（上修家数 − 下修家数）÷ 覆盖家数。家数用传入的窗口计数，不在这里重数事件。覆盖为 0、缺任一数、或出现负数和布尔值时，广度留空。下修达到覆盖的 30% 也不在这里写成显著下修。不算经营证据，不改基本面栏。没有传入时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 09:52 北京
 
 - 草稿 PR #18 head `3eafdf5`。没有合并进 main。本地 `make phase1-test`：211 passed，18 deselected。
