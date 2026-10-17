@@ -118,7 +118,38 @@ class Store:
         self.connection.execute(
             "INSERT INTO perception.linkage_events "
             "(event_id, anomaly_id, lifecycle, history, deadline_outcome, closing_reason, unknowns, mechanism) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (event_id) DO UPDATE SET "
+            "anomaly_id = EXCLUDED.anomaly_id, "
+            "lifecycle = EXCLUDED.lifecycle, "
+            "deadline_outcome = EXCLUDED.deadline_outcome, "
+            "closing_reason = EXCLUDED.closing_reason, "
+            "unknowns = EXCLUDED.unknowns, "
+            "mechanism = EXCLUDED.mechanism, "
+            "history = ("
+            "SELECT COALESCE(jsonb_agg(entry ORDER BY seq), '[]'::jsonb) FROM ("
+            "SELECT entry, seq FROM jsonb_array_elements(perception.linkage_events.history) "
+            "WITH ORDINALITY AS prior(entry, seq) "
+            "UNION ALL "
+            "SELECT entry, seq + 1000000 FROM jsonb_array_elements(COALESCE(EXCLUDED.history, '[]'::jsonb)) "
+            "WITH ORDINALITY AS incoming(entry, seq) "
+            "WHERE NOT EXISTS ("
+            "SELECT 1 FROM jsonb_array_elements(perception.linkage_events.history) AS kept(entry) "
+            "WHERE kept.entry = incoming.entry"
+            ") "
+            "UNION ALL "
+            "SELECT jsonb_build_object('old', perception.linkage_events.lifecycle, 'new', EXCLUDED.lifecycle), "
+            "2000000 "
+            "WHERE perception.linkage_events.lifecycle IS DISTINCT FROM EXCLUDED.lifecycle "
+            "AND NOT EXISTS ("
+            "SELECT 1 FROM ("
+            "SELECT entry FROM jsonb_array_elements(perception.linkage_events.history) AS prior(entry) "
+            "UNION "
+            "SELECT entry FROM jsonb_array_elements(COALESCE(EXCLUDED.history, '[]'::jsonb)) AS incoming(entry)"
+            ") AS seen(entry) "
+            "WHERE seen.entry->>'old' IS NOT DISTINCT FROM perception.linkage_events.lifecycle "
+            "AND seen.entry->>'new' IS NOT DISTINCT FROM EXCLUDED.lifecycle"
+            ")) AS combined)",
             (
                 row["event_id"],
                 anomaly_id,
@@ -134,7 +165,10 @@ class Store:
     def _track(self, event_id, row):
         self.connection.execute(
             "INSERT INTO perception.tracks (event_id, trade_date, emotion, capital, fundamental, metrics) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (event_id, trade_date) DO UPDATE SET "
+            "emotion = EXCLUDED.emotion, capital = EXCLUDED.capital, "
+            "fundamental = EXCLUDED.fundamental, metrics = EXCLUDED.metrics",
             (
                 row.get("event_id") or event_id,
                 row["trade_date"],

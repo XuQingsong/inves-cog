@@ -3134,6 +3134,114 @@ def test_attribution_rows_round_trip_on_disposable_database():
     assert result.returncode == 0, result.stderr + result.stdout
 
 
+def _disposable_database():
+    listed = subprocess.run(
+        ["docker", "ps", "--filter", "name=inves-cog-test-", "--format", "{{.Names}}"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    names = [line for line in listed.stdout.splitlines() if line.endswith("-database-1")]
+    assert len(names) == 1
+    inspected = subprocess.run(
+        ["docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", names[0]],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return inspected.stdout.strip()
+
+
+@pytest.mark.phase1_blocking
+def test_second_save_keeps_linkage_history_on_disposable_database():
+    import psycopg
+
+    from inves_cog.perception.attribution.store import Store
+
+    discovered = [{"at": "2026-10-02T13:30:00Z", "old": None, "new": "已发现", "trigger": "异常", "evidence_ids": []}]
+    hypothesized = [
+        {
+            "at": "2026-10-02T13:40:00Z",
+            "old": "已发现",
+            "new": "假设中",
+            "trigger": "证据分达到假设",
+            "evidence_ids": ["nikkei-hdd"],
+        }
+    ]
+    confirmed = [
+        {
+            "at": "2026-10-03T20:00:00Z",
+            "old": "假设中",
+            "new": "市场确认",
+            "trigger": "四项同时成立",
+            "evidence_ids": ["nikkei-hdd"],
+        }
+    ]
+    host = _disposable_database()
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as connection:
+        connection.execute("SET LOCAL ROLE role_perception")
+        store = Store(connection)
+        anomaly_id = "rerun-2026-10-02"
+        event_id = "evt-rerun"
+        store.save(
+            {
+                "anomaly_id": anomaly_id,
+                "linkage": {"event_id": event_id, "lifecycle": "已发现", "history": discovered},
+                "tracks": [
+                    {"trade_date": "2026-10-02", "emotion": "初现", "capital": "冲击中", "fundamental": "待验证"}
+                ],
+            }
+        )
+        store.save(
+            {
+                "anomaly_id": anomaly_id,
+                "linkage": {"event_id": event_id, "lifecycle": "假设中", "history": hypothesized},
+                "tracks": [
+                    {"trade_date": "2026-10-02", "emotion": "扩散", "capital": "冲击中", "fundamental": "待验证"}
+                ],
+            }
+        )
+        lifecycle, history = connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (event_id,),
+        ).fetchone()
+        assert lifecycle == "假设中"
+        assert discovered[0] in history
+        assert hypothesized[0] in history
+        store.save(
+            {
+                "anomaly_id": anomaly_id,
+                "linkage": {"event_id": event_id, "lifecycle": "假设中", "history": []},
+                "tracks": [{"trade_date": "2026-10-02", "emotion": "扩散", "capital": "延续", "fundamental": "待验证"}],
+            }
+        )
+        lifecycle, history = connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (event_id,),
+        ).fetchone()
+        assert lifecycle == "假设中"
+        assert history == discovered + hypothesized
+        store.save(
+            {
+                "anomaly_id": anomaly_id,
+                "linkage": {"event_id": event_id, "lifecycle": "市场确认", "history": confirmed},
+                "tracks": [{"trade_date": "2026-10-03", "emotion": "扩散", "capital": "延续", "fundamental": "待验证"}],
+            }
+        )
+        lifecycle, history = connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (event_id,),
+        ).fetchone()
+        assert lifecycle == "市场确认"
+        assert history == discovered + hypothesized + confirmed
+        tracks = connection.execute(
+            "SELECT trade_date::text, emotion, capital FROM perception.tracks WHERE event_id = %s ORDER BY trade_date",
+            (event_id,),
+        ).fetchall()
+        assert tracks == [("2026-10-02", "扩散", "延续"), ("2026-10-03", "扩散", "延续")]
+        connection.rollback()
+
+
 @pytest.mark.phase1_cases
 def test_case_no_news_unexplained():
     from inves_cog.perception.attribution.unexplained import statuses_without_news
