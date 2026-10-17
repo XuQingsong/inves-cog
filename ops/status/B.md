@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 09:12 北京
+
+- 草稿 PR #18 head `a42f2cd`。没有合并进 main。本地 `make phase1-test`：207 passed，18 deselected。
+- 有一致预期时，NTM 另给一条市场侧金额，公式仍是前一日市值乘剩余收益再除以市盈率，只用 TTM 已经计入的成员。TTM 一个都计不上时，NTM 也留空。已计入的成员里只要有一个缺 NTM 市盈率、市盈率为 0、或不是有限数，整条 NTM 留空，不把其余成员加总。负的 NTM 市盈率照公式算。这条不改 TTM 金额，不写相容或部分相容，不算经营证据，不改基本面栏。没有传入成员时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 09:01 北京
 
 - 草稿 PR #18 head `776de94`。没有合并进 main。本地 `make phase1-test`：206 passed，18 deselected。
