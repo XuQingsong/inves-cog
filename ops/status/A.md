@@ -1,5 +1,15 @@
 # A 线回报
 
+## A-009  已完成（开发交付，待独立验收）  2026-10-17
+- **PR #17已恢复正式「[M5] 提交验收」，draft=false**：https://github.com/XuQingsong/inves-cog/pull/17。最终完整head **10cd0dc47495db5108d788fc1f88b5f0f21c94dc**；本机同SHA且干净，8次提交保留先失败测试、后实现/边界修复历史。
+- **准确head CI成功**：https://github.com/XuQingsong/inves-cog/actions/runs/39011028178；已直接核对head_sha及phase1-blocking job **117333409879=success**，不是沿用A008旧CI。本地受影响M2/M5离线28通过，live1未选；改动文件Ruff门禁通过，不重复未变权限/公式的全验。
+- [逐项自评](https://github.com/XuQingsong/inves-cog/blob/10cd0dc47495db5108d788fc1f88b5f0f21c94dc/handoff/M5/a009/self-test.md)、[全部覆盖/剩余字段](https://github.com/XuQingsong/inves-cog/blob/10cd0dc47495db5108d788fc1f88b5f0f21c94dc/handoff/M5/a009/coverage-after.json)、[来源元数据](https://github.com/XuQingsong/inves-cog/blob/10cd0dc47495db5108d788fc1f88b5f0f21c94dc/handoff/M5/a009/source-audit.json)。五日59行可估 **49/49/49/50/50**，原可估47/47/47/48/48的类型/三档均零差异；剩余9只逐项保留原源/历史/参数限制，零异常失败，不扩大任务范围。
+- **本机独立复验入口：/private/tmp/inves-m5-a009/manifest.json**。含准确head/CI、14个代码/参数/回归指纹、12项完整证据及原始源hash和复现脚本。10项ARM/TSM源/公式独立算术通过；236组相邻比较、171组无重算稳定对照，新增ARM/TSM五日三档各自不变。完整金融包仍仅本机；公开无原始金额、预测或逐日金融数据。
+- 59完整旧提取/3556旧状态原字段、来源和健康逐项相等；11494条实际规则A评分相等；五日完整合成计划字节相等（13/5/2/0/5）。详见rule-a-trading-proof.json和本机旧字段报告；不是实际账户/持仓证明。
+- ARM估值专用FCF严格OCF−纯PPE，以年度+当期YTD−上年同YTD对齐目标期；旧fcf_ttm/shares/EPS不变、无旧年度回退。TSM实际EPS/股数/价格/PE统一美元/ADS，保留原FX/来源；历史比例只从可见证据开始，不猜历史起点。**真实NTM证券单位仍unknown**，按正式K01拒用并走原TTM降级，置信度/原因/触发如实记录；未知预测撤回不继续展示旧预测估值，不增加全局NTM门槛。
+- 变更：仅A009明确授权的M2可选valuation_fcf_ttm JSON/来源及M5输入审计，method v1.4；无表结构/持久化接口、来源、模型、依赖或权限变化。已自行决定：20-F缺Accepted时刻，保守从申报次日2026-04-17启用ADS证据；不倒灌申报当日市场收盘。
+- **下一步：协调方按上述准确SHA/清单独立复验。A009开发交付完成，不自称M5整体验收通过；停止当前任务，不取新编号，不合并/部署/采集/共享写/迁移，自动接单保持暂停，M9/M10不开工。**
+
 ## A-009  进行中（最终代码/本机manifest已同步，CI运行中）  2026-10-17
 - PR #17最终完整head **10cd0dc47495db5108d788fc1f88b5f0f21c94dc**，本机工作树已对齐同SHA且干净；8次提交保留先红后绿历史。准确head CI运行中：https://github.com/XuQingsong/inves-cog/actions/runs/39011028178，不冒称已绿。
 - **本机复验入口已生成：/private/tmp/inves-m5-a009/manifest.json**，含最终SHA、14个代码/参数/回归文件指纹、12项完整证据与原始源hash/复现脚本。公开报告handoff/M5/a009/self-test.md、coverage-after.json、source-audit.json仅元数据/计数/hash；原始包仍本机。
