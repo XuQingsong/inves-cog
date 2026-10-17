@@ -404,7 +404,12 @@
     "coverage": 0
   },
   "field_note": "Source coverage and field availability are separate. Missing upstream estimate fields remain NULL; no older or zero substitution.",
-  "independent_confirmation": "pending requirement-owner verification; D-15 is not self-closed",
+  "independent_confirmation": {
+    "status": "confirmed_by_requirement_owner",
+    "commit": "fc13f66e6e3d61412299af4080878a5d9ffc55c3",
+    "reference": "https://github.com/XuQingsong/inves-cog/blob/fc13f66e6e3d61412299af4080878a5d9ffc55c3/ops/answers/A-007.md",
+    "scope": "D-15 / AC-M2-06b collection-count prerequisite only; not M5 acceptance or a full audit of estimate economics"
+  },
   "executed_file_hashes": {
     "src/inves_cog/ingest/fundamentals/cli.py": "ad4b1d7fc99f2593d1f4a25efd3cdf1a0dfb86fdc1ced2c3ba7904b30d7f9a36",
     "src/inves_cog/ingest/fundamentals/providers.py": "015c1b4652406675bcbaacca7db4dcb3080af400a1be36a05fb7e209e109b55d",

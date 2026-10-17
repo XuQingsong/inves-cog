@@ -100,6 +100,12 @@
       }
     ]
   },
-  "d15_status": "second candidate collected; awaiting independent confirmation",
-  "note": "Muse historical imports and failed attempts are not counted as complete own collections. Details in d15-consensus-second-run.json."
+  "d15_status": "closed after independent requirement-owner verification of both 59-ticker collections",
+  "note": "Muse historical imports and failed attempts are not counted as complete own collections. Details in d15-consensus-second-run.json.",
+  "independent_confirmation": {
+    "status": "confirmed_by_requirement_owner",
+    "commit": "fc13f66e6e3d61412299af4080878a5d9ffc55c3",
+    "reference": "https://github.com/XuQingsong/inves-cog/blob/fc13f66e6e3d61412299af4080878a5d9ffc55c3/ops/answers/A-007.md",
+    "scope": "D-15 / AC-M2-06b collection-count prerequisite only; not M5 acceptance or a full audit of estimate economics"
+  }
 }
