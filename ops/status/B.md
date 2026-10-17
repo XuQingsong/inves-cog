@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 11:57 北京
+
+- 草稿 PR #18 head `8b0a66b`。没有合并进 main。本地 `make phase1-test`：224 passed，18 deselected。
+- 五个交易日 2026-10-12 至 2026-10-16 的当时可见报告已冻结。截止点是每个交易日之后的第一个北京 12:30。10-14 的对象在 10-15 12:30 只能看见 CoreWeave，巴克莱和 CPI 仍是后补录。没有录音时状态是待分析。这批标题不是全池，也不是正式五日运行。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 11:48 北京
 
 - 草稿 PR #18 head `6fddc08`。没有合并进 main。本地 `make phase1-test`：223 passed，18 deselected。
