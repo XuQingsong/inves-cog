@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 10:12 北京
+
+- 草稿 PR #18 head `a2e4a98`。没有合并进 main。本地 `make phase1-test`：213 passed，18 deselected。
+- 当年 EPS 分歧度是（最高 − 最低）÷ |当年 EPS|。绝对值小于 0.01 时分歧度留空，等于 0.01 时照公式算。缺最高、最低或当年 EPS，或出现布尔值时留空。不写成未下修或显著下修。不算经营证据，不改基本面栏。没有传入时不写这条。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 10:02 北京
 
 - 草稿 PR #18 head `8f67174`。没有合并进 main。本地 `make phase1-test`：212 passed，18 deselected。
