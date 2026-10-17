@@ -3297,6 +3297,151 @@ def test_second_save_keeps_linkage_history_on_disposable_database():
         connection.rollback()
 
 
+class _Propose:
+    def __init__(self):
+        self.calls = 0
+
+    def call(self, task, payload):
+        self.calls += 1
+        if self.calls > 1:
+            raise RuntimeError("超时")
+        return {
+            "candidates": [
+                {
+                    "mechanism": "供给",
+                    "info_ids": ["nikkei-hdd"],
+                    "score": 0.999,
+                    "confidence": "高",
+                    "fundamental": "支持",
+                    "affected": [{"ticker": "WDC"}],
+                }
+            ]
+        }
+
+
+def _chain_anomaly(anomaly_id, ticker):
+    return {
+        "anomaly_id": anomaly_id,
+        "universe": "pool",
+        "trade_date": "2026-10-02",
+        "direction": "down",
+        "baskets": ["HDD"],
+        "members": [{"ticker": ticker}],
+        "started_at": datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc),
+    }
+
+
+@pytest.mark.phase1_blocking
+def test_attribution_chain_scores_from_rules_and_keeps_going():
+    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.store import Store
+
+    published = datetime(2026, 10, 2, 11, 0, tzinfo=timezone.utc)
+    item = {
+        "info_id": "nikkei-hdd",
+        "published_at": published,
+        "first_seen_at": published,
+        "source_level": 4,
+        "headline": "Toshiba",
+        "claims": [{"subject": "Toshiba", "mechanism": "供给"}],
+    }
+    unseen = {"info_id": "bare", "published_at": published, "headline": "no stamp"}
+    client = _Propose()
+    calls = _Calls()
+    rows = attribute_all(
+        [
+            _chain_anomaly("toshiba-2026-10-02", "WDC"),
+            _chain_anomaly("boom-2026-10-02", "MU"),
+            {
+                "anomaly_id": "wide-1",
+                "universe": "wide",
+                "trade_date": "2026-10-02",
+                "members": [{"ticker": "ZZZZ"}],
+                "started_at": datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc),
+            },
+        ],
+        [item, unseen],
+        as_of=datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc),
+        client=client,
+        store=Store(calls),
+        components_by_id={"toshiba-2026-10-02": {"time": 1.0}},
+    )
+    assert client.calls == 2
+    assert [row["anomaly_id"] for row in rows] == ["toshiba-2026-10-02", "boom-2026-10-02", "wide-1"]
+    first, failed, wide = rows
+    assert first["status"] == "假设中"
+    assert first["lifecycle"] == "假设中"
+    assert [step["new"] for step in first["history"]] == ["已发现", "假设中"]
+    assert first["report"]["candidates"][0]["score"] == 1.0
+    assert first["report"]["candidates"][0]["fundamental"] is None
+    assert first["report"]["fundamental_standing"] == "待验证"
+    assert first["report"]["valuation"] == "不变 / 待基本面轨道"
+    assert first["operating_impact_proven"] is False
+    assert first["report"]["sources"] == [{"info_id": "nikkei-hdd", "role": "primary"}]
+    assert failed["status"] == "待分析"
+    assert failed["degraded"] == "模型调用失败"
+    assert wide["status"] == "已记录"
+    assert wide["report"]["candidates"] == []
+    sql = "\n".join(statement for statement, _params in calls.rows)
+    assert "perception.linkage_events" in sql
+    assert "perception.tracks" in sql
+    ticker_ids = [params[0] for statement, params in calls.rows if "perception.ticker_status" in statement]
+    assert "wide-1" not in ticker_ids
+    assert "MU" in [params[1] for statement, params in calls.rows if "perception.ticker_status" in statement]
+    saved_scores = [params[8] for statement, params in calls.rows if "perception.candidates" in statement]
+    assert 0.999 not in saved_scores
+    assert 1.0 in saved_scores
+
+
+@pytest.mark.phase1_blocking
+def test_five_day_replay_hides_an_item_until_it_was_seen():
+    from inves_cog.perception.attribution.chain import job_slot, replay_days, run_scheduled
+
+    start = datetime(2026, 10, 13, 1, 15, tzinfo=timezone.utc)
+    days = [start + timedelta(days=offset) for offset in range(5)]
+    item = {
+        "info_id": "later",
+        "published_at": start - timedelta(hours=1),
+        "first_seen_at": days[2],
+        "source_level": 4,
+        "headline": "later",
+        "claims": [],
+    }
+    anomaly = {
+        "anomaly_id": "replay-1",
+        "universe": "pool",
+        "trade_date": "2026-10-13",
+        "members": [{"ticker": "WDC"}],
+        "started_at": start,
+    }
+
+    class Quiet:
+        def call(self, task, payload):
+            raise AssertionError(task)
+
+    played = replay_days([anomaly], [item], days, client=Quiet())
+    assert len(played) == 5
+    assert played[0]["replay"]["mode"] == "后补录历史复盘"
+    assert played[0]["replay"]["collected_then"] is False
+    assert played[0]["anomalies"][0]["report"]["sources"] == []
+    assert played[1]["anomalies"][0]["report"]["sources"] == []
+    assert played[2]["replay"]["mode"] == "当时可见"
+    assert played[2]["replay"]["collected_then"] is True
+    assert played[2]["anomalies"][0]["report"]["sources"] == [{"info_id": "later", "role": "primary"}]
+    assert played[4]["anomalies"][0]["report"]["sources"][0]["info_id"] == "later"
+    summer = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
+    winter = datetime.fromisoformat("2027-01-15T10:15:00+08:00")
+    assert job_slot(summer)["task_name"] == "attribution_candidates"
+    assert job_slot(summer.replace(hour=9, minute=30))["task_name"] == "attribution_tracks"
+    assert job_slot(summer.replace(hour=12, minute=30))["task_name"] == "attribution_labels"
+    assert job_slot(summer.replace(hour=10, minute=15)) is None
+    assert job_slot(winter)["task_name"] == "attribution_candidates"
+    assert job_slot(winter)["winter"] is True
+    assert job_slot(winter.replace(hour=9, minute=15)) is None
+    assert run_scheduled(summer)["recorded"] is False
+    assert run_scheduled(summer.replace(hour=8, minute=0)) is None
+
+
 @pytest.mark.phase1_cases
 def test_case_no_news_unexplained():
     from inves_cog.perception.attribution.unexplained import statuses_without_news
