@@ -222,6 +222,9 @@ def test_implied_growth_no_solution():
 
 @pytest.mark.phase1_blocking
 def test_position_panel():
+    from tests.m5.listed_unit_cases import assert_listed_units
+
+    assert_listed_units()
     from tests.m5.coverage_cases import assert_coverage_contract
 
     assert_coverage_contract()
