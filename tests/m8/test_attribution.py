@@ -813,6 +813,27 @@ def test_market_confirmation_four_conditions():
     for key, value in (("claim_time", False), ("response", False), ("independent", False), ("alternative", 0.49)):
         assert market_confirmed(**{**full, key: value}) is False
 
+    from inves_cog.perception.attribution.chain import _lifecycle, _market_ready
+
+    for field in ("claim_time", "response", "independent"):
+        for unknown in (None, "未知", "false", 1, {}, [True]):
+            reading = {**full, field: unknown}
+            assert market_confirmed(**reading) is False
+            assert _market_ready({"market_confirmation": reading}) is False
+    for invalid in (None, True, "0.8", float("inf"), float("nan"), 1.01):
+        assert market_confirmed(**{**full, "alternative": invalid}) is False
+    assert market_confirmed(**{**full, "alternative": 1}) is True
+    candidates = [{"scored": True, "score": 1.0, "mechanism": "需求", "info_ids": ["one"]}]
+    start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    for reading, expected in (({**full, "claim_time": "未知"}, "假设中"), (full, "基本面核查中")):
+        anomaly = {"started_at": start, "market_confirmation": reading}
+        state, history, deadline = _lifecycle(
+            candidates, start.isoformat(), None, anomaly, "attribution_tracks", start, None
+        )
+        assert state == expected and deadline is None
+        if expected == "假设中":
+            assert not any(row["new"] == "市场确认" for row in history)
+
 
 @pytest.mark.phase1_blocking
 def test_independent_evidence_is_not_the_price_move():

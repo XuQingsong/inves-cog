@@ -1,5 +1,7 @@
 """Drop candidates the model cannot support, then keep one unscored default."""
 
+import math
+
 from inves_cog.perception.attribution.evidence import basket_specificity, exposure_gradient, time_alignment
 from inves_cog.perception.attribution.grounding import copy_support
 from inves_cog.perception.attribution.second_hit import denial_response
@@ -57,7 +59,15 @@ def _affected(rows, universe):
 
 
 def market_confirmed(*, claim_time, response, independent, alternative):
-    return bool(claim_time and response and independent and alternative is not None and alternative >= 0.5)
+    return (
+        claim_time is True
+        and response is True
+        and independent is True
+        and isinstance(alternative, (int, float))
+        and not isinstance(alternative, bool)
+        and math.isfinite(alternative)
+        and 0.5 <= alternative <= 1.0
+    )
 
 
 def market_consensus(items):
