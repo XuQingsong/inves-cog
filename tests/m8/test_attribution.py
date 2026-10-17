@@ -1605,6 +1605,56 @@ def test_retrace_windows_do_not_pick_a_capital_state():
 
 
 @pytest.mark.phase1_blocking
+def test_ntm_move_does_not_replace_ttm():
+    from inves_cog.perception.attribution.magnitude import market_move, ntm_move
+    from inves_cog.perception.attribution.report import explanation_report
+
+    assert ntm_move(None) is None
+    empty = ntm_move([])
+    assert empty["delta_e_ntm"] is None
+    assert empty["verdict"] is None
+    first = {
+        "eps_ttm": 1,
+        "pe_ttm": 10,
+        "pe_ntm": 20,
+        "market_cap_prev": 100,
+        "resid": 0.1,
+    }
+    second = {
+        "eps_ttm": 1,
+        "pe_ttm": 10,
+        "pe_ntm": 10,
+        "market_cap_prev": 100,
+        "resid": 0.2,
+    }
+    both = ntm_move([first, second])
+    assert both["delta_e_ntm"] == 2.5
+    assert both["verdict"] is None
+    assert both["operating_evidence"] is False
+    assert market_move([first, second])["delta_e_mkt"] == 3
+    quiet_eps = {"eps_ttm": 0, "pe_ttm": 10, "pe_ntm": 5, "market_cap_prev": 100, "resid": 0.1}
+    assert ntm_move([quiet_eps, first])["delta_e_ntm"] == 0.5
+    missing = {**second, "pe_ntm": None}
+    assert ntm_move([first, missing])["delta_e_ntm"] is None
+    assert ntm_move([{**first, "pe_ntm": 0}])["delta_e_ntm"] is None
+    assert ntm_move([{**first, "pe_ntm": True}])["delta_e_ntm"] is None
+    negative = {**first, "pe_ntm": -10}
+    assert ntm_move([negative])["delta_e_ntm"] == -1
+    anomaly = {"anomaly_id": "ntm", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["ntm_move"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    report = explanation_report(anomaly, impact, [supply], [], ntm=[first, second])
+    assert report["ntm_move"]["delta_e_ntm"] == 2.5
+    assert report["ntm_move"]["verdict"] is None
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

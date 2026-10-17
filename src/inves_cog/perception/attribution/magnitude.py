@@ -1,5 +1,7 @@
 """Channel implied-magnitude rules. Incompatible is not an emotion label."""
 
+import math
+
 from inves_cog.perception.attribution.rules import m8_rules
 
 ORDER = "订单/积压"
@@ -40,6 +42,32 @@ def _member_move(member):
     if eps is None or eps <= 0 or not pe or cap is None or resid is None:
         return None
     return cap * resid / pe
+
+
+def ntm_move(members):
+    """NTM repeats the TTM member set. One missing forward PE leaves the NTM total blank."""
+    if members is None:
+        return None
+    counted = [member for member in members if _member_move(member) is not None]
+    blank = {
+        "delta_e_ntm": None,
+        "verdict": None,
+        "fundamental_standing": None,
+        "operating_evidence": False,
+    }
+    if not counted:
+        return blank
+    total = 0.0
+    for member in counted:
+        pe = member.get("pe_ntm")
+        if not _usable_pe(pe):
+            return blank
+        total += member["market_cap_prev"] * member["resid"] / pe
+    return {**blank, "delta_e_ntm": total}
+
+
+def _usable_pe(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value != 0
 
 
 def exposure_tasks(mechanism, exposures):
