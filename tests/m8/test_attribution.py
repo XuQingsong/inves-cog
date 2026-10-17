@@ -1175,6 +1175,76 @@ def test_discard_review_stops_at_twenty():
 
 
 @pytest.mark.phase1_blocking
+def test_falsified_rumor_keeps_the_price_record():
+    from inves_cog.perception.attribution.dims import falsified_rumor
+    from inves_cog.perception.attribution.report import explanation_report
+
+    denial = [{"level": 1, "action": "否认"}]
+    assert falsified_rumor(None) is None
+    assert falsified_rumor({"item": {"kind": "rumor"}}) is None
+    assert falsified_rumor({"sources": denial}) is None
+    kept = falsified_rumor(
+        {
+            "item": {
+                "kind": "filing",
+                "source_level": 1,
+                "source_root": "company",
+                "info_id": "8k",
+                "price_impact": -1.4,
+            },
+            "sources": denial,
+        }
+    )
+    assert kept is None
+    open_rumor = falsified_rumor(
+        {
+            "item": {"kind": "rumor", "source_root": "blog", "info_id": "r1", "price_impact": -1.4},
+            "sources": [{"level": 2, "action": "否认"}],
+        }
+    )
+    assert open_rumor is None
+    closed = falsified_rumor(
+        {
+            "item": {"kind": "rumor", "source_level": 4, "source_root": "blog", "info_id": "r1", "price_impact": -1.4},
+            "sources": denial,
+        }
+    )
+    assert closed["operating_evidence"] is False
+    assert closed["price_impact"] == -1.4
+    assert closed["price_impact_retained"] is True
+    assert closed["propagation_retained"] is True
+    assert closed["source_root"] == "blog"
+    assert closed["info_id"] == "r1"
+    assert closed["fundamental_standing"] is None
+    zero = falsified_rumor(
+        {"item": {"kind": "rumor", "price_impact": 0, "source_root": "", "info_id": ""}, "sources": denial}
+    )
+    assert zero["price_impact_retained"] is True
+    assert zero["propagation_retained"] is None
+    assert zero["operating_evidence"] is False
+    blank = falsified_rumor({"item": {"source_level": 4}, "sources": [{"level": 1, "action": "矛盾"}]})
+    assert blank["price_impact_retained"] is None
+    assert blank["propagation_retained"] is None
+    assert blank["operating_evidence"] is False
+    anomaly = {"anomaly_id": "rumor", "universe": "pool", "direction": "down"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    quiet = explanation_report(anomaly, impact, [supply], [])
+    assert quiet["falsified_rumor"] is None
+    assert quiet["fundamental_standing"] == "待验证"
+    reading = {
+        "item": {"kind": "rumor", "source_root": "blog", "info_id": "r1", "price_impact": -1.4},
+        "sources": denial,
+    }
+    report = explanation_report(anomaly, impact, [supply], [], falsified=reading)
+    assert report["falsified_rumor"]["operating_evidence"] is False
+    assert report["falsified_rumor"]["price_impact"] == -1.4
+    assert report["fundamental_standing"] == "待验证"
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
 def test_lifecycle_transitions():
     from inves_cog.perception.attribution.lifecycle import transition
 

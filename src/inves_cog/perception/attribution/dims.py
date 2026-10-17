@@ -141,6 +141,32 @@ def rumor_split(item, verifiers=()):
     }
 
 
+def falsified_rumor(reading):
+    """After a level-1 denial, rumor content leaves the operating basis. The price and spread records stay."""
+    if reading is None:
+        return None
+    item = reading.get("item")
+    sources = reading.get("sources")
+    if item is None or sources is None:
+        return None
+    if item.get("kind") != "rumor" and item.get("source_level") != 4:
+        return None
+    if authenticity(sources) != "证伪":
+        return None
+    root = item.get("source_root") or None
+    info_id = item.get("info_id") or None
+    price = item.get("price_impact")
+    return {
+        "operating_evidence": False,
+        "price_impact": price,
+        "price_impact_retained": None if price is None else True,
+        "propagation_retained": None if not (root or info_id) else True,
+        "source_root": root,
+        "info_id": info_id,
+        "fundamental_standing": None,
+    }
+
+
 def _rumor_verified(item, verifiers):
     variable = item.get("variable")
     root = item.get("source_root")
