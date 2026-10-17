@@ -960,7 +960,7 @@ def test_two_track_rows_do_not_move_valuation():
     assert split["divergence_label"] is None
     assert split["fundamental_standing"] is None
     early = track_reading({"narrative": "扩散", "capital": "延续", "fundamental": "开始修订", "retrace": 0.1})
-    assert early["reading"] is None
+    assert early["reading"] == "基本面开始兑现"
     assert early["valuation"] is None
     assert early["research_priority"] is False
     anomaly = {"anomaly_id": "tracks", "universe": "pool", "direction": "down"}
@@ -1013,6 +1013,40 @@ def test_unretraced_fade_raises_research_priority():
     )
     assert report["track_reading"]["reading"] == "价格新均衡"
     assert report["track_reading"]["research_priority"] is True
+    assert report["valuation"] == "不变 / 待基本面轨道"
+    assert report["fundamental_standing"] == "待验证"
+    assert "operating_impact_proven" not in report
+
+
+@pytest.mark.phase1_blocking
+def test_revision_spread_does_not_move_valuation():
+    from inves_cog.perception.attribution.report import explanation_report
+    from inves_cog.perception.attribution.tracks import track_reading
+
+    assert track_reading({"narrative": "扩散", "fundamental": "开始修订"}) is None
+    named = track_reading({"narrative": "扩散", "capital": "延续", "fundamental": "开始修订"})
+    assert named["reading"] == "基本面开始兑现"
+    assert named["valuation"] is None
+    assert named["research_priority"] is False
+    assert named["divergence_label"] is None
+    assert named["fundamental_standing"] is None
+    assert named["operating_impact_proven"] is False
+    other = track_reading({"narrative": "扩散", "capital": "冲击中", "fundamental": "开始修订"})
+    assert other["reading"] is None
+    local = track_reading({"narrative": "扩散", "capital": "延续", "fundamental": "局部支持"})
+    assert local["reading"] is None
+    anomaly = {"anomaly_id": "revision", "universe": "pool", "direction": "up"}
+    impact = {"event": 0.0, "amplification": 0.0, "unexplained": 0.0}
+    supply = {"scored": True, "score": 0.8, "mechanism": "供给", "affected": [{"ticker": "WDC"}]}
+    report = explanation_report(
+        anomaly,
+        impact,
+        [supply],
+        [],
+        tracks_view={"narrative": "扩散", "capital": "延续", "fundamental": "开始修订"},
+    )
+    assert report["track_reading"]["reading"] == "基本面开始兑现"
+    assert report["track_reading"]["valuation"] is None
     assert report["valuation"] == "不变 / 待基本面轨道"
     assert report["fundamental_standing"] == "待验证"
     assert "operating_impact_proven" not in report

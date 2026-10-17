@@ -140,6 +140,8 @@ def track_reading(tracks):
         return None
     if narrative == "衰减" and fundamental == "未变" and retrace is None:
         return None
+    if narrative == "扩散" and fundamental == "开始修订" and capital is None:
+        return None
     reading = None
     priority = False
     if narrative == "衰减" and fundamental == "未变" and _not_retraced(retrace):
@@ -149,6 +151,8 @@ def track_reading(tracks):
         reading = "冲击已消化"
     elif narrative == "衰减" and capital == "延续" and fundamental == "冲突":
         reading = "价格和基本面背离"
+    elif narrative == "扩散" and capital == "延续" and fundamental == "开始修订":
+        reading = "基本面开始兑现"
     return {
         "reading": reading,
         "research_priority": priority,
