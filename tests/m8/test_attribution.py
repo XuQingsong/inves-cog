@@ -4330,6 +4330,98 @@ def test_nontrading_deadline_does_not_stay_open():
 
 
 @pytest.mark.phase1_blocking
+def test_labels_keep_a_closed_conclusion():
+    from inves_cog.perception.attribution.chain import execute_stage
+
+    start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    early = datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc)
+    noon = datetime(2026, 10, 16, 4, 30, tzinfo=timezone.utc)
+    news = {
+        "info_id": "nvda-news",
+        "published_at": early,
+        "first_seen_at": early,
+        "tickers": ["NVDA"],
+        "source_root": "wire",
+        "claims": [],
+    }
+    history = [
+        {
+            "at": start.isoformat(),
+            "old": "基本面核查中",
+            "new": "已衰减·无影响",
+            "trigger": "截止日仍未知",
+            "evidence_ids": ["nvda-news"],
+        }
+    ]
+    anomaly = {
+        "anomaly_id": "nvda-labels",
+        "universe": "pool",
+        "trade_date": "2026-10-14",
+        "direction": "down",
+        "members": [{"ticker": "NVDA"}],
+        "started_at": start,
+        "deadline_on": "2026-10-15",
+        "operating_records": [],
+    }
+
+    class Propose:
+        def call(self, task, payload):
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nvda-news", "claims": []}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "供给",
+                        "info_ids": ["nvda-news"],
+                        "affected": [{"ticker": "NVDA"}],
+                        "chain": [{"entity_id": "NVDA"}],
+                    }
+                ]
+            }
+
+    scores = {"供给": {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "magnitude": 1.0}}
+    closed = {
+        **anomaly,
+        "prior_event": {
+            "lifecycle": "已衰减·无影响",
+            "history": history,
+            "deadline_outcome": "条件风险",
+            "closing_reason": "截止日仍未知",
+            "fundamental": "失效",
+            "operating_impact_proven": False,
+            "unknowns": ["经营记录缺失"],
+        },
+    }
+    labelled = execute_stage(
+        "attribution_labels",
+        [closed],
+        [news],
+        as_of=noon,
+        client=Propose(),
+        components_by_id={anomaly["anomaly_id"]: scores},
+    )[0]
+    assert labelled["lifecycle"] == "已衰减·无影响"
+    assert labelled["history"] == history
+    assert labelled["operating_impact_proven"] is False
+    assert labelled["report"]["deadline_outcome"] == "条件风险"
+    assert labelled["report"]["closing_reason"] == "截止日仍未知"
+    assert labelled["report"]["fundamental_standing"] == "失效"
+    assert "经营记录缺失" in labelled["report"]["unknowns"]
+    open_prior = {**anomaly, "prior_event": {"lifecycle": "基本面核查中", "history": history[:0]}}
+    still_open = execute_stage(
+        "attribution_labels",
+        [open_prior],
+        [news],
+        as_of=noon,
+        client=Propose(),
+        components_by_id={anomaly["anomaly_id"]: scores},
+    )[0]
+    assert still_open["lifecycle"] == "基本面核查中"
+    assert still_open["report"].get("deadline_outcome") is None
+    assert still_open["report"]["fundamental_standing"] == "待验证"
+
+
+@pytest.mark.phase1_blocking
 def test_scheduled_job_records_the_stage_itself():
     from inves_cog.perception.attribution.chain import run_scheduled
 

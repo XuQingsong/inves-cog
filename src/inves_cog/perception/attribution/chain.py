@@ -410,6 +410,22 @@ def _basket_rows(anomaly):
     return [row for row in rows if isinstance(row, dict)]
 
 
+def _carried_deadline(prior):
+    """A labels pass keeps a conclusion that was already formed. It does not form a new one."""
+    if not isinstance(prior, dict):
+        return None
+    if all(prior.get(key) is None for key in ("deadline_outcome", "closing_reason", "fundamental")):
+        return None
+    return {
+        "lifecycle": prior.get("lifecycle"),
+        "deadline_outcome": prior.get("deadline_outcome"),
+        "closing_reason": prior.get("closing_reason"),
+        "fundamental": prior.get("fundamental"),
+        "unknowns": list(prior.get("unknowns") or []),
+        "operating_impact_proven": bool(prior.get("operating_impact_proven")),
+    }
+
+
 def _prior(anomaly, store):
     if store is not None:
         loaded = store.prior(f"evt-{anomaly['anomaly_id']}")
@@ -429,7 +445,7 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on):
     state = None if prior is None else prior.get("lifecycle")
     history = [] if prior is None else list(prior.get("history") or [])
     if stage == "attribution_labels":
-        return state, history, None
+        return state, history, _carried_deadline(prior)
     if state is None:
         state, history = transition(None, "已发现", history, when=when, trigger="异常", evidence_ids=[])
     if state == "已发现" and evidence_ids:
