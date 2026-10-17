@@ -134,6 +134,22 @@ def midpoint_report():
     return {"lifecycle": state, "history": history, "report": report}
 
 
+def explanation_document():
+    """The midpoint walk as one JSON document. Synthetic, and not a live conclusion."""
+    walked = midpoint_report()
+    return {
+        "fixture": "synthetic",
+        "closes_ac_m8_06": False,
+        "closes_case": False,
+        "operating_conclusion": "合成生命周期，不是真实经营结论",
+        "event_id": "evt-toshiba-2026-10-02",
+        "anomaly_id": walked["report"]["anomaly_id"],
+        "lifecycle": walked["lifecycle"],
+        "history": walked["history"],
+        "report": walked["report"],
+    }
+
+
 def _tracks():
     rows = [
         ("2026-10-02", "初现", capital_state(1, -0.05, -0.05), "待验证"),

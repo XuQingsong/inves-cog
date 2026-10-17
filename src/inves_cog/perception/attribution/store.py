@@ -147,8 +147,7 @@ class Store:
             "UNION "
             "SELECT entry FROM jsonb_array_elements(COALESCE(EXCLUDED.history, '[]'::jsonb)) AS incoming(entry)"
             ") AS seen(entry) "
-            "WHERE seen.entry->>'old' IS NOT DISTINCT FROM perception.linkage_events.lifecycle "
-            "AND seen.entry->>'new' IS NOT DISTINCT FROM EXCLUDED.lifecycle"
+            "WHERE seen.entry->>'new' IS NOT DISTINCT FROM EXCLUDED.lifecycle"
             ")) AS combined)",
             (
                 row["event_id"],

@@ -2961,6 +2961,78 @@ def test_toshiba_midpoint_reaches_deadline():
 
 
 @pytest.mark.phase1_blocking
+def test_toshiba_explanation_json_keeps_the_event_history():
+    import psycopg
+
+    from inves_cog.perception.attribution.store import Store
+    from inves_cog.perception.attribution.toshiba import explanation_document
+
+    path = ROOT / "tests/fixtures/phase1/m8/toshiba_explanation.json"
+    fresh = explanation_document()
+    stored = json.loads(path.read_text())
+    assert stored == fresh
+    assert stored["fixture"] == "synthetic"
+    assert stored["closes_ac_m8_06"] is False
+    assert stored["closes_case"] is False
+    assert stored["operating_conclusion"] == "合成生命周期，不是真实经营结论"
+    assert [row["new"] for row in stored["history"]] == [
+        "已发现",
+        "假设中",
+        "市场确认",
+        "基本面核查中",
+        "已验证·有影响",
+    ]
+    assert stored["history"][0]["old"] is None
+    assert all({"at", "old", "new", "trigger", "evidence_ids"} <= set(row) for row in stored["history"])
+    assert stored["report"]["valuation"] == "不变 / 待基本面轨道"
+    assert stored["report"]["operating_evidence_id"] == "synthetic-8k-guidance"
+
+    host = _disposable_database()
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as connection:
+        connection.execute("SET LOCAL ROLE role_perception")
+        store = Store(connection)
+        store.save(
+            {
+                "anomaly_id": stored["anomaly_id"],
+                "linkage": {
+                    "event_id": stored["event_id"],
+                    "lifecycle": "已发现",
+                    "history": [stored["history"][0]],
+                },
+                "tracks": [stored["report"]["tracks"][0]],
+            }
+        )
+        store.save(
+            {
+                "anomaly_id": stored["anomaly_id"],
+                "linkage": {
+                    "event_id": stored["event_id"],
+                    "lifecycle": stored["lifecycle"],
+                    "history": stored["history"],
+                },
+                "tracks": stored["report"]["tracks"],
+            }
+        )
+        lifecycle, history = connection.execute(
+            "SELECT lifecycle, history FROM perception.linkage_events WHERE event_id = %s",
+            (stored["event_id"],),
+        ).fetchone()
+        assert lifecycle == "已验证·有影响"
+        assert history == stored["history"]
+        tracks = connection.execute(
+            "SELECT trade_date::text, emotion, capital, fundamental "
+            "FROM perception.tracks WHERE event_id = %s ORDER BY trade_date",
+            (stored["event_id"],),
+        ).fetchall()
+        expected = [
+            (row["trade_date"], row["emotion"], row["capital"], row["fundamental"])
+            for row in stored["report"]["tracks"]
+        ]
+        assert tracks == expected
+        connection.rollback()
+
+
+@pytest.mark.phase1_blocking
 def test_ticker_codes_follow_the_scored_candidate():
     from inves_cog.perception.attribution.codes import ticker_codes
     from inves_cog.perception.attribution.report import explanation_report
