@@ -1,6 +1,9 @@
 """Capital track and the deadline clock. A reprint does not start the clock again."""
 
 import math
+from datetime import date, datetime
+
+from inves_cog.ingest.market import next_trading_day
 
 
 def capital_state(sessions_elapsed, cumulative, first):
@@ -51,6 +54,47 @@ def deadline_offset(earnings_sessions, mechanism_sessions, cap=20):
     if mechanism_sessions is not None:
         candidates.append(mechanism_sessions)
     return min(candidates)
+
+
+def earliest_deadline(started_on, *, deadline_on=None, earnings_sessions=None, mechanism_sessions=None):
+    """The earliest of the given date and the session cap. A complete verdict is not a date."""
+    found = []
+    explicit = _as_date(deadline_on)
+    if explicit is not None:
+        found.append(explicit)
+    started = _as_date(started_on)
+    if started is not None:
+        offset = deadline_offset(earnings_sessions, mechanism_sessions)
+        found.append(_add_sessions(started, offset))
+    if not found:
+        return None
+    return min(found)
+
+
+def deadline_reached(deadline, as_of):
+    current = _as_date(as_of)
+    return deadline is not None and current is not None and current >= deadline
+
+
+def _add_sessions(day, count):
+    current = day
+    for _ in range(count):
+        current = next_trading_day(current)
+    return current
+
+
+def _as_date(value):
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    text = str(value)[:10]
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return None
 
 
 def close_deadline(verdict, *, renewed=False):

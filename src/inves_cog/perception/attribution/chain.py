@@ -28,7 +28,7 @@ from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
 from inves_cog.perception.attribution.second_hit import second_hit_conclusion
-from inves_cog.perception.attribution.tracks import apply_deadline, capital_state
+from inves_cog.perception.attribution.tracks import apply_deadline, capital_state, deadline_reached, earliest_deadline
 
 _SHANGHAI = ZoneInfo("Asia/Shanghai")
 _NEW_YORK = ZoneInfo("America/New_York")
@@ -219,7 +219,13 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
     prior = _prior(anomaly, store)
-    state, history, deadline = _lifecycle(candidates, when, prior, anomaly, stage, as_of)
+    due_on = earliest_deadline(
+        anomaly.get("started_at") or anomaly.get("trade_date"),
+        deadline_on=anomaly.get("deadline_on"),
+        earnings_sessions=anomaly.get("earnings_sessions"),
+        mechanism_sessions=anomaly.get("mechanism_sessions"),
+    )
+    state, history, deadline = _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on)
     impact = _impact(anomaly)
     channels = _channels(anomaly)
     report = _report(
@@ -233,6 +239,8 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     )
     report["lifecycle"] = state
     report["history"] = history
+    if due_on is not None:
+        report["deadline_on"] = due_on.isoformat()
     proven = bool(deadline and deadline.get("operating_impact_proven"))
     report["operating_impact_proven"] = proven
     hits, conclusion = _second_hits(anomaly)
@@ -408,7 +416,7 @@ def _prior(anomaly, store):
     return None
 
 
-def _lifecycle(candidates, when, prior, anomaly, stage, as_of):
+def _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on):
     evidence_ids = []
     for row in candidates:
         if row.get("scored") and row.get("score") is not None and row["score"] >= 0.5:
@@ -450,7 +458,12 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of):
             )
     deadline = None
     records = anomaly.get("operating_records")
-    if stage == "attribution_tracks" and state == "基本面核查中" and records is not None:
+    if (
+        stage == "attribution_tracks"
+        and state == "基本面核查中"
+        and records is not None
+        and deadline_reached(due_on, as_of)
+    ):
         verdict = operating_verdict(records, as_of=as_of, expected_direction=anomaly.get("direction"))
         if verdict.confirmed():
             deadline = apply_deadline(verdict)

@@ -3972,14 +3972,33 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert continued["tracks"][0]["capital"] == "冲击中"
     assert continued["operating_impact_proven"] is False
 
-    due = {
+    waiting = {
         **base,
         "prior_event": {"lifecycle": continued["lifecycle"], "history": continued["history"]},
         "operating_records": [],
+        "deadline_on": "2026-10-30",
     }
+    early = execute_stage("attribution_tracks", [waiting], [item], as_of=later, client=Propose())[0]
+    assert early["lifecycle"] == "基本面核查中"
+    assert early["history"] == continued["history"]
+    assert early["operating_impact_proven"] is False
+    assert early["report"]["deadline_on"] == "2026-10-30"
+    assert early["report"]["fundamental_standing"] != "失效"
+    sooner = execute_stage(
+        "attribution_tracks",
+        [{**waiting, "earnings_sessions": 1}],
+        [item],
+        as_of=later,
+        client=Propose(),
+    )[0]
+    assert sooner["lifecycle"] == "已衰减·无影响"
+    assert sooner["operating_impact_proven"] is False
+    assert sooner["report"]["deadline_on"] == "2026-10-05"
+    due = {**waiting, "deadline_on": "2026-10-06"}
     labelled = execute_stage("attribution_tracks", [due], [item], as_of=later, client=Propose())[0]
     assert labelled["lifecycle"] == "已衰减·无影响"
     assert labelled["operating_impact_proven"] is False
+    assert labelled["report"]["deadline_on"] == "2026-10-06"
     assert labelled["history"][-1]["new"] == "已衰减·无影响"
     assert {"at", "trigger", "evidence_ids"} <= set(labelled["history"][-1])
     draft = execute_stage("attribution_labels", [due], [item], as_of=later, client=Propose())[0]
