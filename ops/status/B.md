@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 12:06 北京
+
+- 草稿 PR #18 head `4144a2d`。没有合并进 main。本地 `make phase1-test`：225 passed，18 deselected。
+- 按 Q-M8-15 第 1 项：同一异常的完整回捞、说法、候选、二次命中、影响分解、市场日、标的代码和报告再次保存改为更新原行。旧回捞留下，下一日跟踪另起一行。状态变了但没有完整审计条目时，拒绝这次变更，不再补一条只有旧状态和新状态的记录。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 11:57 北京
 
 - 草稿 PR #18 head `8b0a66b`。没有合并进 main。本地 `make phase1-test`：224 passed，18 deselected。
