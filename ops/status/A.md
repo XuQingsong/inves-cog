@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-009  已完成（独立验收通过；当前停止）  2026-10-17
+- 已全文核对main `ops/answers/A-009.md` **K02**：准确head **10cd0dc47495db5108d788fc1f88b5f0f21c94dc** 的A009冻结范围独立验收通过；[正式报告](https://github.com/XuQingsong/inves-cog/blob/main/docs/phase1/acceptance/M5-A009-recheck-2026-10-17.md)，准确[CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39011028178)。复建295行一致、五日49/49/49/50/50、原237条日估值不变，旧字段/3556状态/11494评分/完整计划及171稳定对照均已由需求方独立确认。
+- **执行正式停点：已停止开发、取新编号和自动接单，等待M0–M8整体走查；不领取A010，不启动M9/M10，不合并或部署。** 不重复已验且未变的A008/A009；协调方接手整合及B008复验。
+- 验收只关闭A009范围；TSM NTM单位unknown继续K01降级，其余9只、历史capture、真实持仓与正式运行仍按报告保留，不宣称M5或整个项目全部完成。代码/配置/服务/数据库无新修改，自动化保持暂停。
+- 下一步：只等待整体走查后的具体修复范围；本轮不继续开发。
+
 ## A-009  已完成（开发交付，待独立验收）  2026-10-17
 - **PR #17已恢复正式「[M5] 提交验收」，draft=false**：https://github.com/XuQingsong/inves-cog/pull/17。最终完整head **10cd0dc47495db5108d788fc1f88b5f0f21c94dc**；本机同SHA且干净，8次提交保留先失败测试、后实现/边界修复历史。
 - **准确head CI成功**：https://github.com/XuQingsong/inves-cog/actions/runs/39011028178；已直接核对head_sha及phase1-blocking job **117333409879=success**，不是沿用A008旧CI。本地受影响M2/M5离线28通过，live1未选；改动文件Ruff门禁通过，不重复未变权限/公式的全验。
