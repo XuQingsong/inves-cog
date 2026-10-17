@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 14:15 北京
+
+- 草稿 PR #18 head `40f6582`。没有合并进 main。本地 `make phase1-test`：231 passed，18 deselected。
+- 期限复验第 4 项：期限已到但没有经营记录字段时，走原来的条件风险，结案理由仍是截止日仍未知，未知项写明经营记录缺失。没到期限时，缺这个字段也继续跟踪。空列表仍按原规则结案，不额外标成缺失。
+- 期限复验第 5 项，以及 Q-M8-16 第 3 到第 5 项，还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 14:04 北京
 
 - 草稿 PR #18 head `036acfc`。没有合并进 main。本地 `make phase1-test`：231 passed，18 deselected。
