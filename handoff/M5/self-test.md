@@ -4,7 +4,7 @@
 
 验收代码提交：[2bbd615e0d25dceec8b284c105eeb87183e7707d](https://github.com/XuQingsong/inves-cog/commit/2bbd615e0d25dceec8b284c105eeb87183e7707d)。[该完整 SHA 的 phase1-blocking CI](https://github.com/XuQingsong/inves-cog/actions/runs/38914730518) 已成功。证据提交后的最终 head / CI 以 PR #17 和 agent-status 的 A 线回报为准；`code-manifest.sha256` 可核对实现及测试内容。
 
-**提交状态（K04 / K05 修复）**：准确0ee7c599正式验收不通过，PR继续草稿。K05已答复，F1/F2/F3代码修复完成，受影响12项blocking通过、Ruff通过；五日只读重构各59行，15可估/44明确不估/0异常失败，NVDA恢复成长、AVGO保持周期。完整来源/候选/最终五日估值及合成计划已本地留存，但压缩数据上传遭自动权限审查拒绝，未随代码发布；数据交付仍待明确授权，不能把下述旧阶段证据当作本轮完整复验通过。详见round2/README.md与k05-summary.json；当前准确head/CI以PR和A线最终回报为准。
+**当前交付：A008 输入覆盖修复**。A007/K06 已独立验证收口。本轮新增独立估值稀释字段、全部缺项输出及可核实年度历史适配：五日可估数15→47/47/47/48/48，原有75条可估类型/三档不变；全部规则A字段及订单保持。完整新自测见 [a008/self-test.md](a008/self-test.md)，原始资料仅本机验收，不再以公开上传为前置。下文为此前阶段的原始记录，当前完整SHA/CI以PR与A线回报为准。
 
 估值参考 v1，不参与仓位
 
