@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 14:25 北京
+
+- 草稿 PR #18 head `419cbb2`。没有合并进 main。本地 `make phase1-test`：232 passed，18 deselected。
+- 已看到答复 `65c66ed`。新反例第 1 项：同一候选里上涨篮子和下跌篮子方向不同时，二次命中按这次对上的篮子取方向。down-basket 的下跌不再套第一只上涨标的。错误篮子仍是未检验。
+- 新反例第 2 项还没改。期限复验第 5 项，以及 Q-M8-16 第 3 到第 5 项，还没改。不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 14:15 北京
 
 - 草稿 PR #18 head `40f6582`。没有合并进 main。本地 `make phase1-test`：231 passed，18 deselected。
