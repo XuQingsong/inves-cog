@@ -5,26 +5,36 @@ from the rules. This module does not open a database URL and does not deploy
 the morning schedule.
 """
 
+import json
+from copy import deepcopy
 from datetime import date, datetime, time, timedelta
+from hashlib import sha256
 from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import exchange, regular_bounds, trading_day
+from inves_cog.llm.client import canonical_payload
+from inves_cog.perception.anomaly.universe import pool_names
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
-from inves_cog.perception.attribution.claims import attach_claims
+from inves_cog.perception.attribution.capital import bound_capital_rows
+from inves_cog.perception.attribution.claims import attach_claims, claim_payload, read_claims
+from inves_cog.perception.attribution.confirmation import confirmation_reading
 from inves_cog.perception.attribution.evidence import (
     alternative_exclusion,
     basket_specificity,
+    bounded_time_alignment,
     evidence_score,
     exposure_gradient,
     magnitude_component,
     narrative_support,
-    time_alignment,
 )
+from inves_cog.perception.attribution.graph_context import project_graph
+from inves_cog.perception.attribution.grounding import candidate_support, claim_support
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.magnitude import implied_magnitude
+from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.operating import operating_verdict
-from inves_cog.perception.attribution.propose import propose_candidates
+from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
@@ -226,19 +236,37 @@ def adapt_m7(anomaly):
 def _one(anomaly, items, *, as_of, client, store, components, stage):
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
+    previous, rejected = _stored_report(anomaly, store, as_of) if stage is not None else (None, False)
+    prior = None if rejected else _prior(anomaly, store)
+    if prior is None and previous is not None and anomaly.get("universe") != "wide":
+        prior = _report_prior(previous)
+    if stage == "attribution_labels":
+        return _labels(anomaly, previous, prior, as_of, store)
+    if anomaly.get("capital_track") is not None:
+        if rejected:
+            raise ValueError("价格轨道不能沿用范围或时点不符的旧报告")
+        return _capital_only(anomaly, previous, prior, as_of, store, stage)
     visible = _retrieved(anomaly, items, as_of)
-    claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
-    candidates, model_note = _candidates(anomaly, claimed, client)
+    reused = False
+    if stage in {"attribution_candidates", "attribution_tracks"} and anomaly.get("universe") != "wide":
+        claimed, candidates, claim_note, model_note, reused = _resume_analysis(anomaly, visible, previous, as_of)
+        if not reused and stage == "attribution_candidates":
+            claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
+            candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of, claim_note=claim_note)
+    else:
+        claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
+        candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of, claim_note=claim_note)
     candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
-    prior = _prior(anomaly, store)
     due_on = earliest_deadline(
         anomaly.get("started_at") or anomaly.get("trade_date"),
         deadline_on=anomaly.get("deadline_on"),
         earnings_sessions=anomaly.get("earnings_sessions"),
         mechanism_sessions=anomaly.get("mechanism_sessions"),
     )
-    state, history, deadline = _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on)
+    confirmation = _confirmation(anomaly, candidates, claimed)
+    lifecycle_input = {**anomaly, "market_confirmation": confirmation["reading"]}
+    state, history, deadline = _lifecycle(candidates, when, prior, lifecycle_input, stage, as_of, due_on)
     impact = _impact(anomaly)
     channels = _channels(anomaly)
     report = _report(
@@ -249,20 +277,57 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         impact,
         channels,
         deadline,
+        deadline_on=due_on.isoformat() if due_on is not None else None,
     )
     report["lifecycle"] = state
     report["history"] = history
+    report["market_confirmation_review"] = confirmation
+    report["graph_context"] = _graph_context(anomaly, as_of)["metadata"]
+    if anomaly.get("universe") != "wide":
+        report["claim_support"] = [
+            {"info_id": item["info_id"], "claim_index": index, **claim_support(claim, item)}
+            for item in claimed
+            for index, claim in enumerate(item.get("claims") or [])
+        ]
+    if (
+        stage == "attribution_tracks"
+        and prior is not None
+        and (prior.get("deadline_outcome") is not None or prior.get("closing_reason") is not None)
+    ):
+        report["fundamental_standing"] = prior.get("fundamental")
     if due_on is not None:
         report["deadline_on"] = due_on.isoformat()
     proven = bool(deadline and deadline.get("operating_impact_proven"))
     report["operating_impact_proven"] = proven
+    if stage == "attribution_candidates" and anomaly.get("universe") != "wide":
+        snapshot = (
+            deepcopy(previous["stage_analysis"])
+            if reused
+            else _analysis_snapshot(anomaly, visible, claimed, candidates, as_of, claim_note, model_note)
+        )
+        if snapshot is not None:
+            snapshot["candidate_rows_hash"] = _hash_input({"candidates": candidates})
+            report["stage_analysis"] = snapshot
+        report["analysis_reused"] = reused
+    elif stage == "attribution_tracks" and anomaly.get("universe") != "wide":
+        report["analysis_reused"] = reused
+        report["analysis_as_of"] = (previous or {}).get("stage_analysis", {}).get("as_of")
+        if reused:
+            report["stage_analysis"] = deepcopy(previous["stage_analysis"])
+            report["stage_analysis"]["candidate_rows_hash"] = _hash_input({"candidates": candidates})
+        elif previous is not None:
+            report["previous_candidates"] = deepcopy(previous.get("candidates") or [])
     hits, conclusion = _second_hits(anomaly, candidates, as_of)
     tracks = _track_rows(anomaly, state, stage, as_of)
+    notes = [note for note in (claim_note, model_note) if note]
+    if reused and notes:
+        notes = ["沿用此前分析降级：" + "；".join(notes)]
+    if stage is not None and notes:
+        report["analysis_note"] = "；".join(notes)
     saved = False
     if store is not None:
         store.save(_bundle(anomaly, claimed, candidates, report, state, history, impact, hits, tracks, deadline))
         saved = True
-    notes = [note for note in (claim_note, model_note) if note]
     return {
         "anomaly_id": anomaly.get("anomaly_id"),
         "status": report["status"],
@@ -273,6 +338,273 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         "saved": saved,
         "operating_impact_proven": proven,
         "second_hit": conclusion,
+        "tracks": tracks,
+    }
+
+
+def _stamp(value):
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    return value if isinstance(value, datetime) and value.tzinfo is not None else None
+
+
+def _hash_input(value):
+    def encode(part):
+        if isinstance(part, (date, datetime)):
+            return part.isoformat()
+        raise TypeError("分析输入不能序列化")
+
+    ready = json.loads(json.dumps(value, default=encode, ensure_ascii=False, allow_nan=False))
+    return sha256(canonical_payload(ready).encode()).hexdigest()
+
+
+def _analysis_binding(anomaly, visible):
+    scope = candidate_payload(anomaly, [], [])["anomaly"]
+    return {
+        "anomaly": scope,
+        "started_at": anomaly["started_at"],
+        "visible": visible,
+        "candidate_universe": sorted(_candidate_universe()),
+    }
+
+
+def _stored_report(anomaly, store, as_of):
+    reader = getattr(store, "report", None)
+    report = reader(anomaly["anomaly_id"]) if reader is not None else None
+    if not isinstance(report, dict):
+        return None, False
+    if report.get("anomaly_id") not in {None, anomaly["anomaly_id"]}:
+        return None, True
+    snapshot = report.get("stage_analysis")
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    if snapshot and (
+        snapshot.get("anomaly_id") != anomaly["anomaly_id"] or snapshot.get("universe") != anomaly["universe"]
+    ):
+        return None, True
+    if snapshot.get("scope_hash") is not None and snapshot["scope_hash"] != _hash_input(_analysis_binding(anomaly, [])):
+        return None, True
+    created = _stamp(snapshot.get("as_of") or report.get("analysis_as_of"))
+    now = _stamp(as_of)
+    if snapshot and created is None or created is not None and (now is None or created > now):
+        return None, True
+    return deepcopy(report), False
+
+
+def _report_prior(report):
+    formed = report.get("deadline_outcome") is not None or report.get("closing_reason") is not None
+    return {
+        "lifecycle": report.get("lifecycle"),
+        "history": list(report.get("history") or []),
+        "deadline_outcome": report.get("deadline_outcome"),
+        "closing_reason": report.get("closing_reason"),
+        "unknowns": list(report.get("unknowns") or []),
+        "fundamental": report.get("fundamental_standing") if formed else None,
+        "operating_impact_proven": report.get("operating_impact_proven") if formed else None,
+    }
+
+
+def _analysis_snapshot(anomaly, visible, claimed, candidates, as_of, claim_note, model_note):
+    now = _stamp(as_of)
+    if now is None:
+        return None
+    try:
+        return {
+            "version": 1,
+            "anomaly_id": anomaly["anomaly_id"],
+            "universe": anomaly["universe"],
+            "analysis_day": now.astimezone(_SHANGHAI).date().isoformat(),
+            "as_of": now.isoformat(),
+            "scope_hash": _hash_input(_analysis_binding(anomaly, [])),
+            "input_hash": _hash_input(_analysis_binding(anomaly, visible)),
+            "claim_payload_hash": _hash_input(claim_payload(visible)),
+            "candidate_payload_hash": _hash_input(
+                candidate_payload(anomaly, claimed, _graph_context(anomaly, as_of)["neighbors"])
+            ),
+            "candidate_rows_hash": _hash_input({"candidates": candidates}),
+            "claims": [{"info_id": item["info_id"], "claims": deepcopy(item.get("claims") or [])} for item in claimed],
+            "claim_note": claim_note,
+            "model_note": model_note,
+        }
+    except (TypeError, ValueError):
+        return None
+
+
+def _resume_analysis(anomaly, visible, previous, as_of):
+    pending = (
+        [dict(item) for item in visible],
+        validate_candidates([], set(), _candidate_universe()),
+        None,
+        "候选待更新：无合格本日分析",
+        False,
+    )
+    snapshot = (previous or {}).get("stage_analysis")
+    if isinstance(snapshot, dict) and snapshot.get("claim_note"):
+        return pending
+    now = _stamp(as_of)
+    if not isinstance(snapshot, dict) or now is None:
+        return pending
+    created = _stamp(snapshot.get("as_of"))
+    if (
+        snapshot.get("version") != 1
+        or snapshot.get("anomaly_id") != anomaly["anomaly_id"]
+        or snapshot.get("universe") != anomaly["universe"]
+    ):
+        return pending
+    if created is None or created > now or snapshot.get("analysis_day") != now.astimezone(_SHANGHAI).date().isoformat():
+        return pending
+    try:
+        if snapshot.get("input_hash") != _hash_input(_analysis_binding(anomaly, visible)) or snapshot.get(
+            "claim_payload_hash"
+        ) != _hash_input(claim_payload(visible)):
+            return pending
+        by_id = read_claims({"items": snapshot.get("claims")})
+        if set(by_id) != {item["info_id"] for item in visible}:
+            return pending
+        claimed = [{**item, "claims": by_id[item["info_id"]]} for item in visible]
+        if snapshot.get("candidate_payload_hash") != _hash_input(
+            candidate_payload(anomaly, claimed, _graph_context(anomaly, as_of)["neighbors"])
+        ):
+            return pending
+        rows = previous.get("candidates") or []
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            return pending
+        if snapshot.get("candidate_rows_hash") != _hash_input({"candidates": rows}):
+            return pending
+        candidates = validate_candidates([row for row in rows if row.get("scored")], set(by_id), _candidate_universe())
+        return claimed, candidates, snapshot.get("claim_note"), snapshot.get("model_note"), True
+    except (TypeError, ValueError, KeyError):
+        return pending
+
+
+def _labels(anomaly, previous, prior, as_of, store):
+    report = _report(anomaly, [], [], None, None, None, _carried_deadline(prior))
+    if previous is not None:
+        report.update(deepcopy(previous))
+    if "price_capital_tracks" in report and not _capital_cache_valid(report, anomaly, as_of):
+        for key in ("price_capital_tracks", "price_capital_binding", "price_capital_mode"):
+            report.pop(key, None)
+        report["price_capital_note"] = "价格缓存时点或范围不符，未沿用"
+    if anomaly["universe"] == "wide":
+        prior = None
+        report.update({"status": "已记录", "candidates": [], "scope": [], "ticker_status": []})
+    state = (prior or {}).get("lifecycle", report.get("lifecycle"))
+    history = list((prior or {}).get("history", report.get("history")) or [])
+    report["lifecycle"] = state
+    report["history"] = history
+    if prior is not None and (prior.get("deadline_outcome") is not None or prior.get("closing_reason") is not None):
+        for key in ("deadline_outcome", "closing_reason", "unknowns", "operating_impact_proven"):
+            report[key] = deepcopy(prior.get(key))
+        report["fundamental_standing"] = prior.get("fundamental")
+    report["labelled_as_of"] = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
+    snapshot = report.get("stage_analysis")
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    report["analysis_as_of"] = snapshot.get("as_of") or report.get("analysis_as_of")
+    note = None
+    if previous is None:
+        note = "缺少此前分析报告，未形成新候选或结论"
+    elif report["analysis_as_of"] is None:
+        note = "旧报告缺少分析时点，仅继承已持久事实"
+    elif report.get("analysis_note"):
+        note = report["analysis_note"]
+        if not note.startswith("沿用此前分析说明："):
+            note = "沿用此前分析说明：" + note
+    if note:
+        report["analysis_note"] = note
+    if store is not None:
+        bundle = {"anomaly_id": anomaly["anomaly_id"], "universe": anomaly["universe"], "report": report}
+        codes = [row for row in report.get("ticker_status") or [] if row.get("n_code")]
+        if codes and anomaly["universe"] != "wide":
+            bundle["ticker_status"] = codes
+        store.save(bundle)
+    return {
+        "anomaly_id": anomaly["anomaly_id"],
+        "status": report["status"],
+        "report": report,
+        "lifecycle": state,
+        "history": history,
+        "degraded": note,
+        "saved": store is not None,
+        "operating_impact_proven": report.get("operating_impact_proven", False),
+        "second_hit": None,
+        "tracks": [],
+    }
+
+
+def _capital_scope_hash(anomaly):
+    members = [row.get("ticker") if isinstance(row, dict) else row for row in anomaly.get("members") or []]
+    return _hash_input(
+        {
+            "anomaly_id": anomaly["anomaly_id"],
+            "universe": anomaly.get("universe"),
+            "started_at": anomaly.get("started_at"),
+            "trade_date": str(anomaly.get("trade_date"))[:10],
+            "session": anomaly.get("session"),
+            "members": sorted(members),
+            "basket_ids": anomaly.get("basket_ids"),
+            "baskets": anomaly.get("baskets"),
+        }
+    )
+
+
+def _capital_cache_valid(report, anomaly, as_of):
+    binding = report.get("price_capital_binding")
+    if not isinstance(binding, dict):
+        return False
+    created, now = _stamp(binding.get("as_of")), _stamp(as_of)
+    return (
+        created is not None
+        and now is not None
+        and created <= now
+        and binding.get("scope_hash") == _capital_scope_hash(anomaly)
+    )
+
+
+def _capital_only(anomaly, previous, prior, as_of, store, stage):
+    """A retained price update preserves accepted facts and never advances analysis."""
+    if stage != "attribution_tracks" or anomaly.get("universe") != "pool":
+        raise ValueError("独立价格轨道仅用于池内09:30跟踪阶段")
+    tracks = bound_capital_rows(anomaly, as_of)
+    if (
+        previous is not None
+        and "price_capital_tracks" in previous
+        and not _capital_cache_valid(previous, anomaly, as_of)
+    ):
+        raise ValueError("价格轨道不能覆盖起点或时点不符的既有价格缓存")
+    event_id = f"evt-{anomaly['anomaly_id']}"
+    reader = getattr(store, "price_event", None)
+    existing = reader is not None and reader(event_id, anomaly["anomaly_id"])
+    accepted_prior = prior if existing else None
+    report = (
+        deepcopy(previous)
+        if previous is not None
+        else _report(anomaly, [], [], None, None, None, _carried_deadline(accepted_prior))
+    )
+    state = (accepted_prior or {}).get("lifecycle", report.get("lifecycle"))
+    history = list((accepted_prior or {}).get("history", report.get("history")) or [])
+    report["lifecycle"] = state
+    report["history"] = history
+    report["price_capital_tracks"] = deepcopy(tracks)
+    report["price_capital_mode"] = "retained_replay_not_scheduled_runtime"
+    report["price_capital_binding"] = {"as_of": as_of.isoformat(), "scope_hash": _capital_scope_hash(anomaly)}
+    report.pop("price_capital_note", None)
+    if store is not None:
+        bundle = {"anomaly_id": anomaly["anomaly_id"], "universe": "pool", "report": report}
+        if existing:
+            bundle["tracks"] = [{**row, "event_id": event_id} for row in tracks]
+        store.save(bundle)
+    return {
+        "anomaly_id": anomaly["anomaly_id"],
+        "status": report["status"],
+        "report": report,
+        "lifecycle": state,
+        "history": history,
+        "degraded": None,
+        "saved": store is not None,
+        "operating_impact_proven": report.get("operating_impact_proven"),
+        "second_hit": None,
         "tracks": tracks,
     }
 
@@ -290,17 +622,19 @@ def _claims(items, client, universe):
         return [dict(item) for item in items], "抽取失败"
 
 
-def _candidates(anomaly, items, client):
-    universe = _tickers(anomaly)
+def _candidates(anomaly, items, client, *, as_of=None, claim_note=None):
     if anomaly.get("universe") == "wide":
         return [], None
+    universe = _candidate_universe()
     retrieved = {item["info_id"] for item in items}
+    if claim_note:
+        return validate_candidates([], retrieved, universe), "候选未生成：说法抽取未完成"
     if not items:
         return validate_candidates([], set(), universe), None
     if client is None:
         return validate_candidates([], retrieved, universe), "模型调用失败"
     try:
-        return propose_candidates(anomaly, items, [], client, universe), None
+        return propose_candidates(anomaly, items, _graph_context(anomaly, as_of)["neighbors"], client, universe), None
     except ValueError as exc:
         if str(exc) == "结构不合格":
             return validate_candidates([], retrieved, universe), "结构不合格"
@@ -309,13 +643,17 @@ def _candidates(anomaly, items, client):
         return validate_candidates([], retrieved, universe), "模型调用失败"
 
 
+def _graph_context(anomaly, as_of):
+    return project_graph(_member_names(anomaly), _basket_rows(anomaly), anomaly.get("edges") or [], as_of)
+
+
 def _retrieved(anomaly, items, as_of):
     """Entity, graph, and approved-vector union, then the top 40 already in the window."""
     members = _member_names(anomaly)
     found = retrieval_entities(
         members,
         _basket_rows(anomaly),
-        anomaly.get("edges") or [],
+        _graph_context(anomaly, as_of)["neighbors"],
         anomaly.get("monitored") or [],
     )
     return shortlist(items, found["entities"], anomaly["started_at"], as_of)
@@ -331,7 +669,19 @@ def _apply_score(candidates, anomaly, items, overrides):
         components.update(_override(overrides, row.get("mechanism")))
         scored = evidence_score(components)
         copied = dict(row)
-        copied["evidence"] = scored
+        copied["evidence"] = {
+            **scored,
+            "components": {name: components.get(name) for name in _EVIDENCE},
+            "component_coverage": {
+                "available": [name for name in _EVIDENCE if components.get(name) is not None],
+                "missing": [name for name in _EVIDENCE if components.get(name) is None],
+                "total_parts": len(_EVIDENCE),
+                "score_uses_available_parts_only": True,
+                "semantic_quality_proven": False,
+                "note": "分数按已有分项归一化；不表示六项齐备、归因属实或市场确认。",
+            },
+            "support_audit": candidate_support(row, items),
+        }
         copied["score"] = scored["total"]
         copied["confidence"] = scored["confidence"]
         copied["fundamental"] = None
@@ -343,11 +693,9 @@ def _components(candidate, anomaly, items):
     """Six evidence parts for this candidate. A part with no input stays missing."""
     components = {}
     cited = [item for item in items if item.get("info_id") in set(candidate.get("info_ids") or [])]
-    published = _earliest(cited)
-    start = anomaly.get("started_at")
-    end = anomaly.get("ended_at")
-    if published is not None and start is not None and (published < start or end is not None):
-        components["time"] = time_alignment(published, start, end if end is not None else start)
+    timing = bounded_time_alignment(cited, anomaly.get("started_at"), anomaly.get("ended_at"))
+    if timing is not None:
+        components["time"] = timing
     direction = candidate.get("direction") or anomaly.get("direction")
     members = anomaly.get("members") or []
     relations = anomaly.get("relations") or []
@@ -432,6 +780,7 @@ def _alternative_members(candidate, anomaly):
             if ticker not in by_name:
                 return []
             names.append(ticker)
+            continue
         basket = row.get("basket_id")
         if isinstance(basket, str) and basket:
             mapped = _basket_anomaly_members(anomaly, basket, by_name)
@@ -517,6 +866,12 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on):
     history = [] if prior is None else list(prior.get("history") or [])
     if stage == "attribution_labels":
         return state, history, _carried_deadline(prior)
+    if (
+        stage == "attribution_tracks"
+        and prior is not None
+        and (prior.get("deadline_outcome") is not None or prior.get("closing_reason") is not None)
+    ):
+        return state, history, _carried_deadline(prior)
     if state is None:
         state, history = transition(None, "已发现", history, when=when, trigger="异常", evidence_ids=[])
     if state == "已发现" and evidence_ids:
@@ -584,6 +939,39 @@ def _market_ready(anomaly):
     )
 
 
+def _confirmation(anomaly, candidates, items):
+    rows = [
+        {"candidate_index": index, **confirmation_reading(row, anomaly, items, _alternative_members(row, anomaly))}
+        for index, row in enumerate(candidates)
+        if row.get("scored") and row.get("score") is not None
+    ]
+    legacy = anomaly.get("market_confirmation")
+    if isinstance(legacy, dict):
+        reading = {key: legacy.get(key) for key in ("claim_time", "response", "independent", "alternative")}
+        return {
+            "origin": "caller_preverified_flags",
+            "reading": reading,
+            "confirmed": market_confirmed(**reading),
+            "candidates": rows,
+            "selected_candidate_index": None,
+            "note": "保留既有调用方已核标记；不冒充本轮来源推导或经营证明",
+        }
+    selected = max(rows, key=lambda row: candidates[row["candidate_index"]]["score"]) if rows else None
+    reading = (
+        selected["reading"]
+        if selected is not None
+        else dict.fromkeys(("claim_time", "response", "independent", "alternative"))
+    )
+    return {
+        "origin": "lead_candidate_source_checks",
+        "selected_candidate_index": selected["candidate_index"] if selected else None,
+        "reading": reading,
+        "confirmed": market_confirmed(**reading),
+        "candidates": rows,
+        "note": "四项绑定同一最高分候选；不拼接不同候选的部分证据，也不证明语义或经营成立",
+    }
+
+
 def _lead_mechanism(candidates):
     scored = [row for row in candidates if row.get("scored") and row.get("score") is not None]
     if not scored:
@@ -611,6 +999,19 @@ def _channels(anomaly):
     payload = anomaly.get("magnitude_payload")
     if not isinstance(payload, dict):
         return None
+    if "members" in payload:
+        supplied = payload["members"]
+        if not isinstance(supplied, list) or any(not isinstance(row, dict) for row in supplied):
+            raise ValueError("幅度成员输入必须为对象列表")
+        expected = _member_names(anomaly)
+        actual = [row.get("ticker") for row in supplied]
+        if (
+            not expected
+            or any(not isinstance(name, str) or not name for name in actual)
+            or len(set(actual)) != len(actual)
+            or set(expected) != set(actual)
+        ):
+            raise ValueError("市场幅度必须覆盖原异常全部成员，不得挑选子集或加入范围外标的")
     return implied_magnitude(payload)
 
 
@@ -743,23 +1144,25 @@ def _track_rows(anomaly, state, stage=None, as_of=None):
     trade_date = anomaly["trade_date"]
     if stage == "attribution_tracks":
         session_day = _completed_session(as_of)
-        if session_day is None:
+        if session_day is None or session_day < _calendar_day(trade_date):
             return []
         trade_date = session_day.isoformat()
     return [{"trade_date": trade_date, "emotion": emotion, "fundamental": "待验证"}]
 
 
-def _report(anomaly, candidates, items, status, impact, channels, deadline):
+def _report(anomaly, candidates, items, status, impact, channels, deadline, *, deadline_on=None):
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
-    sources = [{"info_id": item["info_id"], "role": item.get("role")} for item in items]
+    sources = [{"info_id": item["info_id"], "role": item.get("role"), **material_fields(item)} for item in items]
     return explanation_report(
         current,
         impact,
         candidates,
         sources,
         deadline,
+        relations=anomaly.get("relations") or (),
+        deadline_on=deadline_on,
         embeddings=anomaly.get("embeddings"),
         magnitude=channels,
         tracks_view=anomaly.get("tracks_view"),
@@ -831,3 +1234,11 @@ def _tickers(anomaly):
         elif isinstance(member, str):
             names.add(member)
     return names
+
+
+def _candidate_universe():
+    """Configured pool only. Model scope and anomaly membership cannot add permission.
+
+    Wide candidates stay disabled. No full wide-symbol snapshot is wired here.
+    """
+    return pool_names([])

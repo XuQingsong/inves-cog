@@ -118,7 +118,14 @@ def implied_magnitude(payload, rules=None):
     rules = rules or m8_rules()
     income_cap = {int(level): value for level, value in rules["income_change_cap"].items()}
     counterparty_cap = {int(level): value for level, value in rules["counterparty_default_cap"].items()}
-    delta_market = payload["delta_mktcap"] / payload["pe"]
+    member_basis = None
+    if "members" in payload:
+        if "delta_mktcap" in payload or "pe" in payload:
+            raise ValueError("市场幅度不能混用逐成员和统一PE输入")
+        member_basis = _member_basis(payload["members"])
+        delta_market = market_move(payload["members"])["delta_e_mkt"]
+    else:
+        delta_market = payload["delta_mktcap"] / payload["pe"]
     channels = []
     for row in payload["channels"]:
         channels.append({**row, "delta_e_evt": _event_limit(row, income_cap, counterparty_cap)})
@@ -127,17 +134,59 @@ def implied_magnitude(payload, rules=None):
     known = [row for row in channels if row.get("exposure_usd") is not None]
     partial = bool(missing and known)
     total = sum(present)
-    if _uncomputable(channels):
+    if delta_market is None or _uncomputable(channels):
         ratio, verdict = None, "无法检验"
     else:
         ratio, verdict = _verdict(delta_market, total, partial, bool(present) or not missing)
-    return {
+    result = {
         "delta_e_mkt": delta_market,
         "channels": [{"channel": row["channel"], "delta_e_evt": row["delta_e_evt"]} for row in channels],
         "sum_delta_e_evt": total,
         "R": ratio,
         "verdict": verdict,
         "partial_missing": partial,
+    }
+    if member_basis is not None:
+        result["market_basis"] = member_basis
+    return result
+
+
+def _member_basis(members):
+    """Optional per-member input audit; financial aggregation stays in market_move."""
+    if not isinstance(members, list) or any(not isinstance(row, dict) for row in members):
+        raise ValueError("市场成员输入必须为对象列表")
+    eligible, excluded = [], []
+    for index, row in enumerate(members):
+        for field in ("eps_ttm", "pe_ttm", "market_cap_prev", "resid"):
+            value = row.get(field)
+            if value is not None and (
+                isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+            ):
+                raise ValueError("市场幅度输入必须为有限数值或未知")
+        name = row.get("ticker", index)
+        reason = None
+        if row.get("eps_ttm") is None:
+            reason = "缺EPS"
+        elif row["eps_ttm"] <= 0:
+            reason = "EPS非正"
+        elif not row.get("pe_ttm"):
+            reason = "缺有效TTM PE"
+        elif row.get("market_cap_prev") is None:
+            reason = "缺前一日市值"
+        elif row.get("resid") is None:
+            reason = "缺剩余收益"
+        if reason is None:
+            eligible.append(name)
+        else:
+            excluded.append({"ticker": name, "reason": reason})
+    return {
+        "method": "sum_member_previous_cap_times_residual_over_ttm_pe",
+        "scope": "explicit_members",
+        "member_count": len(members),
+        "eligible": eligible,
+        "excluded": excluded,
+        "unit": "USD/year-equivalent",
+        "actual_profit_loss_or_causation_proven": False,
     }
 
 
@@ -219,7 +268,7 @@ def _uncomputable(channels):
 
 
 def _one_channel_verdict(delta_market, delta):
-    if delta is None:
+    if delta_market is None or delta is None:
         return "无法检验"
     _ratio, verdict = _verdict(delta_market, delta, False, True)
     return verdict

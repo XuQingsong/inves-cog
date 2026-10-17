@@ -1,5 +1,7 @@
 """Six-part evidence score. Missing parts drop out and the remaining weights are rescaled."""
 
+from datetime import datetime
+
 from inves_cog.perception.attribution.rules import m8_rules
 
 
@@ -36,6 +38,63 @@ def time_alignment(published, session_start, session_end):
     return 0.0
 
 
+def bounded_time_alignment(items, session_start, session_end=None):
+    """Score the earliest cited publication only when all possible times agree.
+
+    An interval remains an interval. Unknown publication time can make the
+    earliest time uncertain; a known pre-start publication already proves that
+    the earliest one precedes the start. This says nothing about first_seen.
+    """
+    start = _publication_stamp(session_start)
+    end = _publication_stamp(session_end)
+    if start is None or not items:
+        return None
+    bounds = [_publication_bounds(item) for item in items]
+    known = [bound for bound in bounds if bound is not None]
+    if not known:
+        return None
+    try:
+        upper = min(bound[1] for bound in known)
+        if upper < start:
+            return 1.0
+        if len(known) != len(bounds) or end is None or end < start:
+            return None
+        lower = min(bound[0] for bound in known)
+        scores = {time_alignment(stamp, start, end) for stamp in (lower, upper)}
+    except TypeError:  # Mixed naive/aware times are not a usable comparison.
+        return None
+    return scores.pop() if len(scores) == 1 else None
+
+
+def _publication_stamp(value):
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        try:
+            stamp = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+        return stamp if stamp.tzinfo is not None else None
+    return None
+
+
+def _publication_bounds(item):
+    exact = _publication_stamp(item.get("published_at"))
+    if exact is not None:
+        return exact, exact
+    interval = item.get("published_interval")
+    if not isinstance(interval, dict):
+        return None
+    lower = _publication_stamp(interval.get("earliest_utc"))
+    upper = _publication_stamp(interval.get("latest_utc"))
+    try:
+        if lower is not None and upper is not None and lower <= upper:
+            return lower, upper
+    except TypeError:
+        pass
+    return None
+
+
 def later_report(timing):
     """A report after the start can explain later spread. It cannot explain the drop already underway."""
     if timing is None:
@@ -66,16 +125,38 @@ def basket_specificity(expected, control):
 
 
 def narrative_support(items, event_entities, affected):
-    """Share of independent roots that name both the event and an affected entity, capped at 1."""
+    """Independent co-mention roots. Missing tags or roots are not a checked absence."""
     event = set(event_entities)
     names = set(affected)
+    if not event or not names:
+        return None
     roots = set()
+    uncertain_roots = set()
+    unknown_root = False
     for item in items:
-        mentioned = set(item.get("entities") or []) | set(item.get("tickers") or [])
+        tags = [item.get(key) for key in ("entities", "tickers") if item.get(key) is not None]
+        known_tags = bool(tags) and all(
+            isinstance(value, list) and all(isinstance(name, str) for name in value) for value in tags
+        )
         root = item.get("source_root")
-        if root and mentioned & event and mentioned & names:
-            roots.add(root)
-    return min(len(roots) / 5, 1.0)
+        root = root if isinstance(root, str) and root.strip() else None
+        if not known_tags:
+            if root:
+                uncertain_roots.add(root)
+            else:
+                unknown_root = True
+            continue
+        mentioned = {name for value in tags for name in value}
+        if mentioned & event and mentioned & names:
+            if root:
+                roots.add(root)
+            else:
+                unknown_root = True
+    if len(roots) >= 5:
+        return 1.0
+    if unknown_root or uncertain_roots - roots:
+        return None
+    return len(roots) / 5
 
 
 _OWN_FLAGS = ("earnings_reaction", "guidance_8k", "rating_change")

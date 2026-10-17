@@ -1,6 +1,10 @@
 """Candidate proposals. A wide anomaly is stored without asking the model."""
 
+from copy import deepcopy
+
 from inves_cog.perception.attribution.candidates import validate_candidates
+from inves_cog.perception.attribution.grounding import claim_support, copy_support
+from inves_cog.perception.attribution.material import material_fields
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
@@ -18,10 +22,44 @@ def candidate_output():
                 "control_baskets": ["string"],
                 "info_ids": ["string"],
                 "direction": "up|down",
+                "support": [
+                    {
+                        "ticker": "string",
+                        "info_id": "string",
+                        "source_field": "headline|summary",
+                        "quote": "exact supplied text",
+                        "inference": "bounded hypothesis bridge",
+                    }
+                ],
             }
         ],
         "max": 5,
         "mechanism": sorted(MECHANISMS),
+        "selection_policy": {
+            "version": "evidence-bridge-v2-literal-anchors",
+            "anchors": (
+                "For each affected ticker provide cited exact headline/summary facts and a bounded "
+                "inference bridge. A quote match only confirms provenance; it does not verify the "
+                "inference. Missing per-ticker support remains a research gap. Do not use a ticker list "
+                "or basket membership as proof."
+            ),
+            "count": (
+                "Return zero to five supported hypotheses. Allowed mechanisms are not a checklist; "
+                "do not fill one per type or pad to the maximum."
+            ),
+            "basis": (
+                "Each candidate needs a cited supplied fact and a defensible bridge from that fact "
+                "to its mechanism and specific affected scope. Basket membership alone is not that bridge."
+            ),
+            "inference": (
+                "Reasonable hypotheses are allowed without proven earnings or causation. Do not invent "
+                "product identity, deployment, supply-chain, financing or operating facts to complete a chain."
+            ),
+            "missing": (
+                "Omit candidates with no factual bridge; zero is allowed. Missing evidence remains a research "
+                "gap, not an operating conclusion. The application adds its own unscored default."
+            ),
+        },
         "forbidden": list(_FORBIDDEN),
     }
 
@@ -39,15 +77,30 @@ def _item_view(item):
     published = item.get("published_at")
     if hasattr(published, "isoformat"):
         published = published.isoformat()
-    return {
+    view = {
         "info_id": item["info_id"],
         "published_at": published,
         "source_level": item.get("source_level"),
         "headline": item.get("headline"),
         "summary": item.get("summary"),
         "role": item.get("role"),
-        "claims": item.get("claims") or [],
+        "claims": [
+            (
+                {key: deepcopy(value) for key, value in claim.items() if key != "support"}
+                if isinstance(claim, dict)
+                else deepcopy(claim)
+            )
+            for claim in item.get("claims") or []
+        ],
     }
+    if any(isinstance(claim, dict) and "support" in claim for claim in item.get("claims") or []):
+        view["claim_support"] = [claim_support(claim, item) for claim in item.get("claims") or []]
+    # Date-only or timezone-unknown metadata is not an exact published_at.
+    # Preserve its supplied bounds; this does not admit it to production windows.
+    view.update(material_fields(item))
+    if item.get("published_interval") is not None:
+        view["published_interval"] = deepcopy(item["published_interval"])
+    return view
 
 
 _NOT_OPERATING = {"price", "social_heat", "second_hit", "consensus", "flow"}
@@ -180,7 +233,7 @@ def _candidate_row(row):
         parsed["direction"] = direction
     if mechanism not in MECHANISMS:
         return None
-    return parsed
+    return copy_support(row, parsed)
 
 
 def _required_list(row, key):
@@ -223,9 +276,10 @@ def _affected_rows(rows):
         item = {"ticker": ticker}
         if "basket_id" in row and row["basket_id"] is not None:
             basket = row["basket_id"]
-            if not isinstance(basket, str) or not basket:
+            if not isinstance(basket, str):
                 raise ValueError("结构不合格")
-            item["basket_id"] = basket
+            if basket:
+                item["basket_id"] = basket
         if "direction" in row and row["direction"] is not None:
             if row["direction"] not in {"up", "down"}:
                 raise ValueError("结构不合格")
