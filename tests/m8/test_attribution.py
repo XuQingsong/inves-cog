@@ -4268,8 +4268,8 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
         "started_at": start,
         "ended_at": end,
         "edges": [
-            {"from_entity": "NVDA", "to_entity": "tsmc"},
-            {"from_entity": "tsmc", "to_entity": "asml"},
+            {"from_entity": "NVDA", "to_entity": "tsmc", "first_discovered_at": early},
+            {"from_entity": "tsmc", "to_entity": "asml", "first_discovered_at": early},
         ],
         "basket_residuals": {"accelerators": [3.0, 3.0], "energy": [0.0]},
     }
@@ -4315,6 +4315,12 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     assert scored["供给"]["score"] == 1.0
     assert scored["需求"]["score"] == 0.0
     assert scored["需求"]["evidence"]["enters_hypothesis"] is False
+    # Six calculated inputs survive reporting; missing inputs stay unknown.
+    evidence_parts = scored["供给"]["evidence"]["components"]
+    assert set(evidence_parts) == {"time", "gradient", "specificity", "narrative", "magnitude", "alternatives"}
+    assert evidence_parts["time"] == 1.0
+    assert evidence_parts["magnitude"] is None
+    assert scored["供给"]["confidence"] == "高"
     assert result["report"]["fundamental_standing"] != "支持"
     assert result["operating_impact_proven"] is False
 
@@ -4332,6 +4338,132 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     crowded.append(item("xom-only", tickers=["XOM"]))
     capped = attribute_all([anomaly], crowded, as_of=late, client=Cap())[0]
     assert capped["degraded"] is None
+
+    # FR07: these relationship dates are explicit synthetic fixture data.
+    from copy import deepcopy
+    from pathlib import Path
+
+    from inves_cog.llm.client import Client
+    from inves_cog.perception.attribution.chain import _graph_context, _retrieved
+
+    edge = {
+        "relation_id": "fixture-1",
+        "from_entity": "NVDA",
+        "to_entity": "tsmc",
+        "status": "候选",
+        "source_info_ids": ["supplier"],
+        "first_discovered_at": early,
+        "reviewed_at": early,
+        "revision": 1,
+        "exposure_usd": 999,
+        "evidence": "private full text",
+    }
+    graph_anomaly = {
+        **anomaly,
+        "edges": [edge, {**edge, "relation_id": "second", "from_entity": "tsmc", "to_entity": "asml"}],
+    }
+    projected = _graph_context(graph_anomaly, late)
+    assert len(projected["neighbors"]) == 1
+    projected_edge = projected["neighbors"][0]
+    assert projected_edge["status"] == "候选" and projected_edge["source_info_ids"] == ["supplier"]
+    assert "exposure_usd" not in projected_edge and "evidence" not in projected_edge
+    assert projected["metadata"]["eligible_rows"] == 1
+
+    class FakeTransport:
+        def __init__(self):
+            self.payloads = []
+
+        def __call__(self, spec, payload):
+            self.payloads.append(deepcopy(payload))
+            assert spec.task == "anomaly_candidates"
+            return {"candidates": [{"mechanism": "供给", "info_ids": ["supplier"], "affected": [{"ticker": "NVDA"}]}]}
+
+    class Reports:
+        def __init__(self):
+            self.rows = {}
+
+        def report(self, identifier):
+            return deepcopy(self.rows.get(identifier))
+
+        def prior(self, _identifier):
+            return None
+
+        def save(self, bundle):
+            self.rows[bundle["anomaly_id"]] = deepcopy(bundle["report"])
+
+    transport = FakeTransport()
+    actual_client = Client(
+        registry=Path(__file__).resolve().parents[2] / "source/config/llm_tasks.yaml", transport=transport
+    )
+    saved = Reports()
+    known_items = [{**item("supplier", entities=["tsmc"]), "claims": []}]
+    generated = attribute_all(
+        [graph_anomaly], known_items, as_of=late, client=actual_client, store=saved, stage="attribution_candidates"
+    )[0]
+    assert generated["degraded"] is None and len(transport.payloads) == 1
+    assert transport.payloads[0]["neighbors"] == projected["neighbors"]
+    original_report = deepcopy(saved.rows[graph_anomaly["anomaly_id"]])
+    tracking = late + timedelta(minutes=15)
+    unchanged = attribute_all(
+        [graph_anomaly], known_items, as_of=tracking, client=actual_client, store=saved, stage="attribution_tracks"
+    )[0]
+    assert unchanged["report"]["analysis_reused"] is True and len(transport.payloads) == 1
+    assert unchanged["history"] == generated["history"]
+    for change in ({**edge, "revision": 2}, None):
+        saved.rows[graph_anomaly["anomaly_id"]] = deepcopy(original_report)
+        changed = {**graph_anomaly, "edges": [] if change is None else [change]}
+        pending = attribute_all(
+            [changed], known_items, as_of=tracking, client=actual_client, store=saved, stage="attribution_tracks"
+        )[0]
+        assert pending["report"]["analysis_reused"] is False and len(transport.payloads) == 1
+        assert pending["history"] == generated["history"]
+        assert "候选待更新" in pending["degraded"]
+    for bad in (
+        {**edge, "first_discovered_at": tracking + timedelta(days=1)},
+        {**edge, "first_discovered_at": None},
+        {**edge, "reviewed_at": "not-a-time"},
+    ):
+        blocked = {**graph_anomaly, "edges": [bad]}
+        assert _graph_context(blocked, tracking)["neighbors"] == []
+        assert _retrieved(blocked, known_items, tracking) == []
+    conflicting = _graph_context({**graph_anomaly, "edges": [edge, {**edge, "status": "驳回"}]}, tracking)
+    assert conflicting["neighbors"] == [] and "同ID关系版本冲突" in conflicting["metadata"]["gaps"]
+    wide = attribute_all([{**graph_anomaly, "universe": "wide"}], known_items, as_of=tracking, client=actual_client)[0]
+    assert wide["status"] == "已记录" and len(transport.payloads) == 1
+
+    for outcome, state, fundamental, proven in (
+        ("支持", "已验证·有影响", "支持", True),
+        ("反证", "已衰减·无影响", "冲突", True),
+        ("条件风险", "已衰减·无影响", "失效", False),
+        (None, "已衰减·无影响", None, False),
+    ):
+        for changed_edges in (graph_anomaly["edges"], []):
+            terminal = deepcopy(original_report)
+            terminal.update(
+                {
+                    "deadline_outcome": outcome,
+                    "closing_reason": "already persisted",
+                    "unknowns": ["retained unknown"],
+                    "lifecycle": state,
+                    "fundamental_standing": fundamental,
+                    "operating_impact_proven": proven,
+                }
+            )
+            saved.rows[graph_anomaly["anomaly_id"]] = terminal
+            carried = attribute_all(
+                [{**graph_anomaly, "edges": changed_edges}],
+                known_items,
+                as_of=tracking,
+                client=actual_client,
+                store=saved,
+                stage="attribution_tracks",
+            )[0]
+            assert carried["report"]["deadline_outcome"] == outcome
+            assert carried["report"]["fundamental_standing"] == fundamental
+            assert carried["report"]["unknowns"] == ["retained unknown"]
+            assert carried["operating_impact_proven"] is proven
+            assert carried["history"] == terminal["history"] and carried["lifecycle"] == state
+            assert len(transport.payloads) == 1
 
 
 @pytest.mark.phase1_blocking

@@ -26,6 +26,7 @@ from inves_cog.perception.attribution.evidence import (
     narrative_support,
     time_alignment,
 )
+from inves_cog.perception.attribution.graph_context import project_graph
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.magnitude import implied_magnitude
@@ -248,10 +249,10 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         claimed, candidates, claim_note, model_note, reused = _resume_analysis(anomaly, visible, previous, as_of)
         if not reused and stage == "attribution_candidates":
             claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
-            candidates, model_note = _candidates(anomaly, claimed, client)
+            candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of)
     else:
         claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
-        candidates, model_note = _candidates(anomaly, claimed, client)
+        candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of)
     candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
     due_on = earliest_deadline(
@@ -275,6 +276,13 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     )
     report["lifecycle"] = state
     report["history"] = history
+    report["graph_context"] = _graph_context(anomaly, as_of)["metadata"]
+    if (
+        stage == "attribution_tracks"
+        and prior is not None
+        and (prior.get("deadline_outcome") is not None or prior.get("closing_reason") is not None)
+    ):
+        report["fundamental_standing"] = prior.get("fundamental")
     if due_on is not None:
         report["deadline_on"] = due_on.isoformat()
     proven = bool(deadline and deadline.get("operating_impact_proven"))
@@ -400,7 +408,9 @@ def _analysis_snapshot(anomaly, visible, claimed, candidates, as_of, claim_note,
             "scope_hash": _hash_input(_analysis_binding(anomaly, [])),
             "input_hash": _hash_input(_analysis_binding(anomaly, visible)),
             "claim_payload_hash": _hash_input(claim_payload(visible)),
-            "candidate_payload_hash": _hash_input(candidate_payload(anomaly, claimed, [])),
+            "candidate_payload_hash": _hash_input(
+                candidate_payload(anomaly, claimed, _graph_context(anomaly, as_of)["neighbors"])
+            ),
             "candidate_rows_hash": _hash_input({"candidates": candidates}),
             "claims": [{"info_id": item["info_id"], "claims": deepcopy(item.get("claims") or [])} for item in claimed],
             "claim_note": claim_note,
@@ -440,7 +450,9 @@ def _resume_analysis(anomaly, visible, previous, as_of):
         if set(by_id) != {item["info_id"] for item in visible}:
             return pending
         claimed = [{**item, "claims": by_id[item["info_id"]]} for item in visible]
-        if snapshot.get("candidate_payload_hash") != _hash_input(candidate_payload(anomaly, claimed, [])):
+        if snapshot.get("candidate_payload_hash") != _hash_input(
+            candidate_payload(anomaly, claimed, _graph_context(anomaly, as_of)["neighbors"])
+        ):
             return pending
         rows = previous.get("candidates") or []
         if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
@@ -596,7 +608,7 @@ def _claims(items, client, universe):
         return [dict(item) for item in items], "抽取失败"
 
 
-def _candidates(anomaly, items, client):
+def _candidates(anomaly, items, client, *, as_of=None):
     if anomaly.get("universe") == "wide":
         return [], None
     universe = _candidate_universe()
@@ -606,7 +618,7 @@ def _candidates(anomaly, items, client):
     if client is None:
         return validate_candidates([], retrieved, universe), "模型调用失败"
     try:
-        return propose_candidates(anomaly, items, [], client, universe), None
+        return propose_candidates(anomaly, items, _graph_context(anomaly, as_of)["neighbors"], client, universe), None
     except ValueError as exc:
         if str(exc) == "结构不合格":
             return validate_candidates([], retrieved, universe), "结构不合格"
@@ -615,13 +627,17 @@ def _candidates(anomaly, items, client):
         return validate_candidates([], retrieved, universe), "模型调用失败"
 
 
+def _graph_context(anomaly, as_of):
+    return project_graph(_member_names(anomaly), _basket_rows(anomaly), anomaly.get("edges") or [], as_of)
+
+
 def _retrieved(anomaly, items, as_of):
     """Entity, graph, and approved-vector union, then the top 40 already in the window."""
     members = _member_names(anomaly)
     found = retrieval_entities(
         members,
         _basket_rows(anomaly),
-        anomaly.get("edges") or [],
+        _graph_context(anomaly, as_of)["neighbors"],
         anomaly.get("monitored") or [],
     )
     return shortlist(items, found["entities"], anomaly["started_at"], as_of)
@@ -637,7 +653,7 @@ def _apply_score(candidates, anomaly, items, overrides):
         components.update(_override(overrides, row.get("mechanism")))
         scored = evidence_score(components)
         copied = dict(row)
-        copied["evidence"] = scored
+        copied["evidence"] = {**scored, "components": {name: components.get(name) for name in _EVIDENCE}}
         copied["score"] = scored["total"]
         copied["confidence"] = scored["confidence"]
         copied["fundamental"] = None
@@ -823,6 +839,12 @@ def _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on):
     state = None if prior is None else prior.get("lifecycle")
     history = [] if prior is None else list(prior.get("history") or [])
     if stage == "attribution_labels":
+        return state, history, _carried_deadline(prior)
+    if (
+        stage == "attribution_tracks"
+        and prior is not None
+        and (prior.get("deadline_outcome") is not None or prior.get("closing_reason") is not None)
+    ):
         return state, history, _carried_deadline(prior)
     if state is None:
         state, history = transition(None, "已发现", history, when=when, trigger="异常", evidence_ids=[])
