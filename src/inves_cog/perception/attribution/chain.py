@@ -17,6 +17,7 @@ from inves_cog.perception.anomaly.universe import pool_names
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
 from inves_cog.perception.attribution.capital import bound_capital_rows
 from inves_cog.perception.attribution.claims import attach_claims, claim_payload, read_claims
+from inves_cog.perception.attribution.confirmation import confirmation_reading
 from inves_cog.perception.attribution.evidence import (
     alternative_exclusion,
     basket_specificity,
@@ -263,7 +264,9 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         earnings_sessions=anomaly.get("earnings_sessions"),
         mechanism_sessions=anomaly.get("mechanism_sessions"),
     )
-    state, history, deadline = _lifecycle(candidates, when, prior, anomaly, stage, as_of, due_on)
+    confirmation = _confirmation(anomaly, candidates, claimed)
+    lifecycle_input = {**anomaly, "market_confirmation": confirmation["reading"]}
+    state, history, deadline = _lifecycle(candidates, when, prior, lifecycle_input, stage, as_of, due_on)
     impact = _impact(anomaly)
     channels = _channels(anomaly)
     report = _report(
@@ -278,6 +281,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
     )
     report["lifecycle"] = state
     report["history"] = history
+    report["market_confirmation_review"] = confirmation
     report["graph_context"] = _graph_context(anomaly, as_of)["metadata"]
     if anomaly.get("universe") != "wide":
         report["claim_support"] = [
@@ -933,6 +937,39 @@ def _market_ready(anomaly):
         independent=reading.get("independent"),
         alternative=reading.get("alternative"),
     )
+
+
+def _confirmation(anomaly, candidates, items):
+    rows = [
+        {"candidate_index": index, **confirmation_reading(row, anomaly, items, _alternative_members(row, anomaly))}
+        for index, row in enumerate(candidates)
+        if row.get("scored") and row.get("score") is not None
+    ]
+    legacy = anomaly.get("market_confirmation")
+    if isinstance(legacy, dict):
+        reading = {key: legacy.get(key) for key in ("claim_time", "response", "independent", "alternative")}
+        return {
+            "origin": "caller_preverified_flags",
+            "reading": reading,
+            "confirmed": market_confirmed(**reading),
+            "candidates": rows,
+            "selected_candidate_index": None,
+            "note": "保留既有调用方已核标记；不冒充本轮来源推导或经营证明",
+        }
+    selected = max(rows, key=lambda row: candidates[row["candidate_index"]]["score"]) if rows else None
+    reading = (
+        selected["reading"]
+        if selected is not None
+        else dict.fromkeys(("claim_time", "response", "independent", "alternative"))
+    )
+    return {
+        "origin": "lead_candidate_source_checks",
+        "selected_candidate_index": selected["candidate_index"] if selected else None,
+        "reading": reading,
+        "confirmed": market_confirmed(**reading),
+        "candidates": rows,
+        "note": "四项绑定同一最高分候选；不拼接不同候选的部分证据，也不证明语义或经营成立",
+    }
 
 
 def _lead_mechanism(candidates):

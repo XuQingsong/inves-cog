@@ -834,6 +834,91 @@ def test_market_confirmation_four_conditions():
         if expected == "假设中":
             assert not any(row["new"] == "市场确认" for row in history)
 
+    from copy import deepcopy
+
+    from inves_cog.perception.attribution.chain import _confirmation, execute_stage
+
+    member = {
+        "ticker": "NVDA",
+        "resid": -0.05,
+        "earnings_reaction": False,
+        "guidance_8k": False,
+        "rating_change": False,
+    }
+    base = {
+        "anomaly_id": "source-gate",
+        "started_at": start,
+        "trade_date": "2026-10-14",
+        "session": "close",
+        "universe": "pool",
+        "members": [member],
+    }
+    source_items = [
+        {
+            "info_id": name,
+            "published_at": start - timedelta(hours=1),
+            "first_seen_at": start - timedelta(hours=1),
+            "source_root": name,
+            "tickers": ["NVDA"],
+            "claims": [{"subject": "NVDA", "variable": "capacity"}],
+        }
+        for name in ("wire-one", "wire-two")
+    ]
+    proposal = {
+        "mechanism": "需求",
+        "info_ids": [row["info_id"] for row in source_items],
+        "affected": [{"ticker": "NVDA"}],
+    }
+    scored = [{**proposal, "scored": True, "score": 0.8}]
+    produced = _confirmation(base, scored, source_items)
+    assert produced["confirmed"] is True and produced["reading"]["alternative"] == 1.0
+    assert produced["candidates"][0]["checks"]["response"]["scope"] == ["NVDA"]
+    for bad_member in ({**member, "rating_change": None}, {**member, "resid": "-0.05"}):
+        assert _confirmation({**base, "members": [bad_member]}, scored, source_items)["confirmed"] is False
+    assert _confirmation(base, [{**scored[0], "affected": [{"ticker": "MSFT"}]}], source_items)["confirmed"] is False
+    assert _confirmation(base, scored, [{**row, "source_root": "same"} for row in source_items])["confirmed"] is False
+    assert _confirmation(base, scored, [{**row, "published_at": None} for row in source_items])["confirmed"] is False
+    assert _confirmation(base, scored, [{**row, "kind": "price"} for row in source_items])["confirmed"] is False
+    assert (
+        _confirmation(base, scored, [{**row, "evidence_role": "current_context"} for row in source_items])["confirmed"]
+        is False
+    )
+
+    class Client:
+        calls = 0
+
+        def call(self, task, payload):
+            self.calls += 1
+            assert task == "anomaly_candidates"
+            return {"candidates": [proposal]}
+
+    class Saved:
+        row = None
+
+        def save(self, row):
+            self.row = deepcopy(row)
+
+        def report(self, anomaly_id):
+            return None if self.row is None else deepcopy(self.row["report"])
+
+        def prior(self, event_id):
+            return None if self.row is None else deepcopy(self.row.get("linkage"))
+
+    client, store = Client(), Saved()
+    proposed = execute_stage("attribution_candidates", [base], source_items, as_of=start, client=client, store=store)[0]
+    assert proposed["saved"] and proposed["lifecycle"] == "假设中", proposed
+    tracked = execute_stage(
+        "attribution_tracks", [base], source_items, as_of=start + timedelta(minutes=15), client=client, store=store
+    )[0]
+    assert tracked["lifecycle"] == "基本面核查中" and tracked["saved"], tracked
+    assert tracked["report"]["market_confirmation_review"]["origin"] == "lead_candidate_source_checks"
+    assert tracked["operating_impact_proven"] is False and client.calls == 1
+    labels = execute_stage(
+        "attribution_labels", [base], source_items, as_of=start + timedelta(hours=3), client=client, store=store
+    )[0]
+    assert labels["report"]["market_confirmation_review"] == tracked["report"]["market_confirmation_review"]
+    assert labels["lifecycle"] == tracked["lifecycle"] and client.calls == 1
+
 
 @pytest.mark.phase1_blocking
 def test_independent_evidence_is_not_the_price_move():
