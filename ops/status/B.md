@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-008  进行中  2026-10-17 11:14 北京
+
+- 草稿 PR #18 head `075c6c2`。没有合并进 main。本地 `make phase1-test`：219 passed，18 deselected。
+- 按 Q-M8-14 第 4 项：有可见新闻时，一条入口把回捞、说法、候选、规则打分、解释报告、生命周期和保存串起来。模型自填的分数不会留下。调用失败的那条标成待分析，下一条继续。五日回放只使用当时已经见到的材料。三个定时任务有代码入口，日程本身没有部署。
+- 不关闭 AC-M8-06。`test_case_attribution` 继续 pending。不开始下一条。
+
 ## B-008  进行中  2026-10-17 11:02 北京
 
 - 草稿 PR #18 head `ab54313`。没有合并进 main。本地 `make phase1-test`：217 passed，18 deselected。
