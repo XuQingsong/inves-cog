@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import exchange, regular_bounds, trading_day
 from inves_cog.llm.client import canonical_payload
+from inves_cog.perception.anomaly.universe import pool_names
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
 from inves_cog.perception.attribution.claims import attach_claims, claim_payload, read_claims
 from inves_cog.perception.attribution.evidence import (
@@ -337,7 +338,12 @@ def _hash_input(value):
 
 def _analysis_binding(anomaly, visible):
     scope = candidate_payload(anomaly, [], [])["anomaly"]
-    return {"anomaly": scope, "started_at": anomaly["started_at"], "visible": visible}
+    return {
+        "anomaly": scope,
+        "started_at": anomaly["started_at"],
+        "visible": visible,
+        "candidate_universe": sorted(_candidate_universe()),
+    }
 
 
 def _stored_report(anomaly, store, as_of):
@@ -402,7 +408,7 @@ def _analysis_snapshot(anomaly, visible, claimed, candidates, as_of, claim_note,
 def _resume_analysis(anomaly, visible, previous, as_of):
     pending = (
         [dict(item) for item in visible],
-        validate_candidates([], set(), _tickers(anomaly)),
+        validate_candidates([], set(), _candidate_universe()),
         None,
         "候选待更新：无合格本日分析",
         False,
@@ -436,7 +442,7 @@ def _resume_analysis(anomaly, visible, previous, as_of):
             return pending
         if snapshot.get("candidate_rows_hash") != _hash_input({"candidates": rows}):
             return pending
-        candidates = validate_candidates([row for row in rows if row.get("scored")], set(by_id), _tickers(anomaly))
+        candidates = validate_candidates([row for row in rows if row.get("scored")], set(by_id), _candidate_universe())
         return claimed, candidates, snapshot.get("claim_note"), snapshot.get("model_note"), True
     except (TypeError, ValueError, KeyError):
         return pending
@@ -506,9 +512,9 @@ def _claims(items, client, universe):
 
 
 def _candidates(anomaly, items, client):
-    universe = _tickers(anomaly)
     if anomaly.get("universe") == "wide":
         return [], None
+    universe = _candidate_universe()
     retrieved = {item["info_id"] for item in items}
     if not items:
         return validate_candidates([], set(), universe), None
@@ -1049,3 +1055,11 @@ def _tickers(anomaly):
         elif isinstance(member, str):
             names.add(member)
     return names
+
+
+def _candidate_universe():
+    """Configured pool only. Model scope and anomaly membership cannot add permission.
+
+    Wide candidates stay disabled. No full wide-symbol snapshot is wired here.
+    """
+    return pool_names([])

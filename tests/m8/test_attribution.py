@@ -355,6 +355,78 @@ def test_candidate_validation():
     assert default["mechanism"] == "无事件/资金面"
     assert default["scored"] is False
 
+    from copy import deepcopy
+    from unittest.mock import patch
+
+    from inves_cog.perception.attribution import chain
+
+    start = datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc)
+    anomaly = {
+        "anomaly_id": "hdd-pool-permission",
+        "trade_date": "2026-10-02",
+        "started_at": start,
+        "session": "close",
+        "universe": "pool",
+        "members": [{"ticker": "STX", "resid_z": -1.6}, {"ticker": "WDC", "resid_z": -1.2}],
+        "baskets": [{"basket_id": "untrusted", "members": ["NOT_A_NAME"]}],
+    }
+    original = deepcopy(anomaly)
+    item = {
+        "info_id": "nikkei",
+        "published_at": start - timedelta(hours=1),
+        "first_seen_at": start - timedelta(hours=1),
+        "tickers": ["STX"],
+        "claims": [],
+    }
+    candidate = {
+        "mechanism": "竞争",
+        "info_ids": ["nikkei"],
+        "affected": [{"ticker": "MU"}, {"ticker": "SNDK"}, {"ticker": "NOT_A_NAME"}],
+        "chain": [],
+        "control_baskets": [],
+    }
+
+    class Controlled:
+        def __init__(self):
+            self.calls = []
+
+        def call(self, task, payload):
+            self.calls.append(task)
+            if task == "claim_extraction":
+                return {"items": [{"info_id": "nikkei", "claims": []}]}
+            return {"candidates": [deepcopy(candidate)]}
+
+    client = Controlled()
+    permitted, note = chain._candidates(anomaly, [item], client)
+    assert note is None
+    assert [r["ticker"] for r in permitted[0]["affected"]] == ["MU", "SNDK"]
+    assert chain._alternative_members(permitted[0], anomaly) == []
+    with patch.object(chain, "_components", wraps=chain._components) as components:
+        actual = chain.attribute_all([anomaly], [item], as_of=start, client=Controlled())[0]
+    assert actual["degraded"] is None
+    assert [r["ticker"] for r in actual["report"]["candidates"][0]["affected"]] == ["MU", "SNDK"]
+    assert all(call.args[1]["members"] == original["members"] for call in components.call_args_list)
+    assert anomaly == original
+    wide_client = Controlled()
+    assert chain._candidates({**anomaly, "universe": "wide"}, [item], wide_client) == ([], None)
+    assert wide_client.calls == []
+
+    allowed = chain._candidate_universe()
+    assert {"MU", "SNDK", "GOOGL", "MSFT"} <= allowed
+    assert "NOT_A_NAME" not in allowed
+    candidates = chain._apply_score(permitted, anomaly, [item], {})
+    snapshot = chain._analysis_snapshot(anomaly, [item], [item], candidates, start, None, None)
+    stored = {"anomaly_id": anomaly["anomaly_id"], "candidates": candidates, "stage_analysis": snapshot}
+    assert chain._resume_analysis(anomaly, [item], stored, start + timedelta(minutes=15))[-1] is True
+    with patch.object(chain, "_candidate_universe", return_value=allowed - {"MU"}):
+        assert chain._resume_analysis(anomaly, [item], stored, start + timedelta(minutes=15))[-1] is False
+
+        class Stored:
+            def report(self, _identifier):
+                return stored
+
+        assert chain._stored_report(anomaly, Stored(), start + timedelta(minutes=15)) == (None, True)
+
 
 @pytest.mark.phase1_blocking
 def test_model_score_does_not_enter_the_hypothesis():
