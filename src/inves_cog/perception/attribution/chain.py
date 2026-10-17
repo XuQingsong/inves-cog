@@ -20,11 +20,11 @@ from inves_cog.perception.attribution.claims import attach_claims, claim_payload
 from inves_cog.perception.attribution.evidence import (
     alternative_exclusion,
     basket_specificity,
+    bounded_time_alignment,
     evidence_score,
     exposure_gradient,
     magnitude_component,
     narrative_support,
-    time_alignment,
 )
 from inves_cog.perception.attribution.graph_context import project_graph
 from inves_cog.perception.attribution.grounding import candidate_support, claim_support
@@ -681,11 +681,9 @@ def _components(candidate, anomaly, items):
     """Six evidence parts for this candidate. A part with no input stays missing."""
     components = {}
     cited = [item for item in items if item.get("info_id") in set(candidate.get("info_ids") or [])]
-    published = _earliest(cited)
-    start = anomaly.get("started_at")
-    end = anomaly.get("ended_at")
-    if published is not None and start is not None and (published < start or end is not None):
-        components["time"] = time_alignment(published, start, end if end is not None else start)
+    timing = bounded_time_alignment(cited, anomaly.get("started_at"), anomaly.get("ended_at"))
+    if timing is not None:
+        components["time"] = timing
     direction = candidate.get("direction") or anomaly.get("direction")
     members = anomaly.get("members") or []
     relations = anomaly.get("relations") or []

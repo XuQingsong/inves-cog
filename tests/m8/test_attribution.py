@@ -303,6 +303,13 @@ def test_specificity_narrative_and_alternatives_are_separate_scores():
     assert narrative_support([], ["toshiba"], ["WDC"]) == 0.0
     many = [{"source_root": f"root-{index}", "entities": ["toshiba", "WDC"]} for index in range(6)]
     assert narrative_support(many, ["toshiba"], ["WDC"]) == 1.0
+    assert narrative_support([{"source_root": "wire"}], ["toshiba"], ["WDC"]) is None
+    assert narrative_support([{"entities": ["toshiba", "WDC"]}], ["toshiba"], ["WDC"]) is None
+    assert narrative_support([{"source_root": "wire", "entities": []}], ["toshiba"], ["WDC"]) == 0.0
+    assert narrative_support([{"source_root": "wire", "entities": "toshiba WDC"}], ["toshiba"], ["WDC"]) is None
+    assert narrative_support(many + [{}], ["toshiba"], ["WDC"]) == 1.0
+    assert narrative_support(items + [{"source_root": "new-root"}], ["toshiba"], ["WDC"]) is None
+    assert narrative_support(items + [{"source_root": "nikkei"}], ["toshiba"], ["WDC"]) == 0.2
     checked = {
         "ticker": "AAA",
         "earnings_reaction": False,
@@ -329,6 +336,41 @@ def test_time_alignment_late_news():
     assert time_alignment(end + timedelta(minutes=1), start, end) == 0.0
     assert time_alignment(start - timedelta(hours=1), start, end) == 1.0
     assert time_alignment(start + timedelta(hours=1), start, end) == 0.7
+
+    from inves_cog.perception.attribution.chain import _components
+    from inves_cog.perception.attribution.evidence import bounded_time_alignment
+
+    def interval(lower, upper):
+        return {"info_id": "bounded", "published_interval": {"earliest_utc": lower, "latest_utc": upper}}
+
+    early = interval("2026-10-12T00:00:00+00:00", "2026-10-13T23:59:00+00:00")
+    aware_start = datetime.fromisoformat("2026-10-14T13:30:00+00:00")
+    aware_end = datetime.fromisoformat("2026-10-14T20:00:00+00:00")
+    assert bounded_time_alignment([early], aware_start) == 1.0
+    assert bounded_time_alignment([early, {}], aware_start) == 1.0
+    during = interval("2026-10-14T14:00:00+00:00", "2026-10-14T16:00:00+00:00")
+    crossing = interval("2026-10-14T12:00:00+00:00", "2026-10-14T14:00:00+00:00")
+    assert bounded_time_alignment([during], aware_start, aware_end) == 0.7
+    assert bounded_time_alignment([during, {}], aware_start, aware_end) is None
+    assert bounded_time_alignment([crossing], aware_start, aware_end) is None
+    assert bounded_time_alignment([during], aware_start) is None
+    assert bounded_time_alignment([interval("bad", "bad")], aware_start, aware_end) is None
+    assert (
+        bounded_time_alignment(
+            [interval("2026-10-15T00:00:00+00:00", "2026-10-14T00:00:00+00:00")], aware_start, aware_end
+        )
+        is None
+    )
+    exact = {"info_id": "bounded", "published_at": aware_start}
+    assert bounded_time_alignment([exact], aware_start, aware_end) == 0.7
+    assert bounded_time_alignment([{"published_at": aware_end + timedelta(seconds=1)}], aware_start, aware_end) == 0.0
+    assert bounded_time_alignment([early], start, end) is None
+    candidate = {"info_ids": ["bounded"], "chain": [{"entity_id": "supplier"}], "affected": [{"ticker": "AAA"}]}
+    anomaly = {"started_at": aware_start, "ended_at": aware_end}
+    actual = _components(candidate, anomaly, [early])
+    assert actual["time"] == 1.0
+    assert actual["narrative"] is None
+    assert _components(candidate, anomaly, [crossing]).get("time") is None
 
 
 @pytest.mark.phase1_blocking
