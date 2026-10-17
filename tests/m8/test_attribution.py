@@ -3679,6 +3679,74 @@ def test_store_writes_perception_rows_only():
             {"anomaly_id": "pool-bad", "universe": "pool", "ticker_status": [{"ticker": "WDC", "n_code": "N3"}]}
         )
 
+    # NULL price-only inputs must not clobber already sourced nonprice tracks.
+    from contextlib import nullcontext
+
+    class PriceSQL:
+        def __init__(self, existing="missing"):
+            self.calls = []
+            self.existing = existing
+
+        def transaction(self):
+            return nullcontext()
+
+        def execute(self, statement, params):
+            self.calls.append((statement, params))
+            return self
+
+        def fetchone(self):
+            if self.calls[-1][0].startswith("SELECT metrics FROM perception.tracks "):
+                return None if self.existing == "missing" else (self.existing,)
+            return ("existing-event",)
+
+    projected = PriceSQL()
+    Store(projected).save(
+        {
+            "anomaly_id": "price-only",
+            "universe": "pool",
+            "tracks": [
+                {
+                    "event_id": "existing-event",
+                    "trade_date": "2026-10-14",
+                    "price_only": True,
+                    "capital": "已消化",
+                    "emotion": "not authority",
+                    "fundamental": "not authority",
+                    "metrics": {"price_capital": {"version": 1, "mode": "retained_price_replay"}},
+                }
+            ],
+        }
+    )
+    statement, params = next(call for call in projected.calls if call[0].startswith("INSERT INTO perception.tracks "))
+    assert "emotion = perception.tracks.emotion" in statement
+    assert "fundamental = perception.tracks.fundamental" in statement
+    assert "capital = EXCLUDED.capital" in statement
+    assert "metrics = perception.tracks.metrics || EXCLUDED.metrics" in statement
+    assert params[2] is None and params[4] is None
+    assert set(params[5].obj) == {"price_capital"}
+    assert "WHERE jsonb_typeof(perception.tracks.metrics) = 'object' RETURNING event_id" in statement
+    price_bundle = {
+        "anomaly_id": "price-only",
+        "universe": "pool",
+        "tracks": [
+            {
+                "event_id": "existing-event",
+                "trade_date": "2026-10-14",
+                "price_only": True,
+                "capital": "已消化",
+                "metrics": {"price_capital": {"version": 1}},
+            }
+        ],
+    }
+    empty = PriceSQL({})
+    Store(empty).save(price_bundle)
+    assert any(sql.startswith("INSERT INTO perception.tracks ") for sql, _params in empty.calls)
+    for old_metrics in (None, [], "legacy scalar"):
+        malformed = PriceSQL(old_metrics)
+        with pytest.raises(ValueError, match="不是对象"):
+            Store(malformed).save(price_bundle)
+        assert not any(sql.startswith("INSERT INTO perception.tracks ") for sql, _params in malformed.calls)
+
 
 @pytest.mark.phase1_blocking
 def test_attribution_rows_round_trip_on_disposable_database():
@@ -5501,6 +5569,96 @@ def test_tracks_stage_uses_the_completed_session():
         )[0]
         assert [row["trade_date"] for row in closed["tracks"]] == [origin[:10]]
         assert list(fresh.tracks) == [(event_id, origin[:10])]
+
+    # Explicit retained price updates do not run the ordinary analysis/default-track path.
+    from copy import deepcopy
+
+    from inves_cog.ingest.market import regular_bounds
+
+    origin = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
+    cut = regular_bounds(date(2026, 10, 16))[1]
+    price_rows = [
+        {
+            "trade_date": "2026-10-14",
+            "resid": -8.0,
+            "first": -8.0,
+            "cumulative": -8.0,
+            "k": 0,
+            "sessions_elapsed": 0,
+            "capital": "冲击中",
+            "members": ["NVDA"],
+            "measurement": "m7_stock_residual",
+            "emotion": None,
+            "fundamental": None,
+        },
+        {
+            "trade_date": "2026-10-15",
+            "resid": 1.0,
+            "first": -8.0,
+            "cumulative": -7.0,
+            "k": 1,
+            "sessions_elapsed": 1,
+            "capital": "冲击中",
+            "members": ["NVDA"],
+            "measurement": "m7_stock_residual",
+            "emotion": None,
+            "fundamental": None,
+        },
+        {
+            "trade_date": "2026-10-16",
+            "resid": 3.0,
+            "first": -8.0,
+            "cumulative": -4.0,
+            "k": 2,
+            "sessions_elapsed": 2,
+            "capital": "已消化",
+            "members": ["NVDA"],
+            "measurement": "m7_stock_residual",
+            "emotion": None,
+            "fundamental": None,
+        },
+    ]
+    explicit = {
+        "anomaly_id": "price-only",
+        "trade_date": "2026-10-14",
+        "started_at": origin,
+        "universe": "pool",
+        "session": "close",
+        "members": [{"ticker": "NVDA"}],
+        "direction": "down",
+        "capital_track": {
+            "version": 1,
+            "anomaly_id": "price-only",
+            "origin": "2026-10-14",
+            "started_at": origin.isoformat(),
+            "as_of": cut.isoformat(),
+            "mode": "retained_price_replay",
+            "scope": {"kind": "single_stock", "identifier": "NVDA", "members": ["NVDA"], "session": "close"},
+            "source_hashes": {"synthetic_input_not_an_original": "a" * 64},
+            "rows": price_rows,
+        },
+    }
+
+    class NoPriceModel:
+        def call(self, *_args, **_kwargs):
+            raise AssertionError("Price input never runs the model")
+
+    result = execute_stage("attribution_tracks", [explicit], [], as_of=cut, client=NoPriceModel())[0]
+    assert len(result["tracks"]) == 3
+    assert [row["capital"] for row in result["tracks"]] == ["冲击中", "冲击中", "已消化"]
+    assert all(row["emotion"] is None and row["fundamental"] is None for row in result["tracks"])
+    assert result["lifecycle"] is None and result["operating_impact_proven"] is not True
+    assert result["second_hit"] is None
+    assert result["report"]["price_capital_mode"] == "retained_replay_not_scheduled_runtime"
+    for field, value in (("as_of", "2026-10-18T09:30:00+08:00"), ("anomaly_id", "other-event")):
+        bad = deepcopy(explicit)
+        bad["capital_track"][field] = value
+        rejected = execute_stage("attribution_tracks", [bad], [], as_of=cut, client=NoPriceModel())[0]
+        assert rejected["status"] == "待分析"
+    bad = deepcopy(explicit)
+    bad["capital_track"]["rows"][1]["cumulative"] = 999
+    assert execute_stage("attribution_tracks", [bad], [], as_of=cut, client=NoPriceModel())[0]["status"] == "待分析"
+    assert execute_stage("attribution_labels", [explicit], [], as_of=cut, client=NoPriceModel())[0]["tracks"] == []
 
 
 @pytest.mark.phase1_blocking

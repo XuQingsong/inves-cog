@@ -15,6 +15,7 @@ from inves_cog.ingest.market import exchange, regular_bounds, trading_day
 from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.anomaly.universe import pool_names
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
+from inves_cog.perception.attribution.capital import bound_capital_rows
 from inves_cog.perception.attribution.claims import attach_claims, claim_payload, read_claims
 from inves_cog.perception.attribution.evidence import (
     alternative_exclusion,
@@ -237,6 +238,10 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         prior = _report_prior(previous)
     if stage == "attribution_labels":
         return _labels(anomaly, previous, prior, as_of, store)
+    if anomaly.get("capital_track") is not None:
+        if rejected:
+            raise ValueError("价格轨道不能沿用范围或时点不符的旧报告")
+        return _capital_only(anomaly, previous, prior, as_of, store, stage)
     visible = _retrieved(anomaly, items, as_of)
     reused = False
     if stage in {"attribution_candidates", "attribution_tracks"} and anomaly.get("universe") != "wide":
@@ -452,6 +457,10 @@ def _labels(anomaly, previous, prior, as_of, store):
     report = _report(anomaly, [], [], None, None, None, _carried_deadline(prior))
     if previous is not None:
         report.update(deepcopy(previous))
+    if "price_capital_tracks" in report and not _capital_cache_valid(report, anomaly, as_of):
+        for key in ("price_capital_tracks", "price_capital_binding", "price_capital_mode"):
+            report.pop(key, None)
+        report["price_capital_note"] = "价格缓存时点或范围不符，未沿用"
     if anomaly["universe"] == "wide":
         prior = None
         report.update({"status": "已记录", "candidates": [], "scope": [], "ticker_status": []})
@@ -495,6 +504,82 @@ def _labels(anomaly, previous, prior, as_of, store):
         "operating_impact_proven": report.get("operating_impact_proven", False),
         "second_hit": None,
         "tracks": [],
+    }
+
+
+def _capital_scope_hash(anomaly):
+    members = [row.get("ticker") if isinstance(row, dict) else row for row in anomaly.get("members") or []]
+    return _hash_input(
+        {
+            "anomaly_id": anomaly["anomaly_id"],
+            "universe": anomaly.get("universe"),
+            "started_at": anomaly.get("started_at"),
+            "trade_date": str(anomaly.get("trade_date"))[:10],
+            "session": anomaly.get("session"),
+            "members": sorted(members),
+            "basket_ids": anomaly.get("basket_ids"),
+            "baskets": anomaly.get("baskets"),
+        }
+    )
+
+
+def _capital_cache_valid(report, anomaly, as_of):
+    binding = report.get("price_capital_binding")
+    if not isinstance(binding, dict):
+        return False
+    created, now = _stamp(binding.get("as_of")), _stamp(as_of)
+    return (
+        created is not None
+        and now is not None
+        and created <= now
+        and binding.get("scope_hash") == _capital_scope_hash(anomaly)
+    )
+
+
+def _capital_only(anomaly, previous, prior, as_of, store, stage):
+    """A retained price update preserves accepted facts and never advances analysis."""
+    if stage != "attribution_tracks" or anomaly.get("universe") != "pool":
+        raise ValueError("独立价格轨道仅用于池内09:30跟踪阶段")
+    tracks = bound_capital_rows(anomaly, as_of)
+    if (
+        previous is not None
+        and "price_capital_tracks" in previous
+        and not _capital_cache_valid(previous, anomaly, as_of)
+    ):
+        raise ValueError("价格轨道不能覆盖起点或时点不符的既有价格缓存")
+    event_id = f"evt-{anomaly['anomaly_id']}"
+    reader = getattr(store, "price_event", None)
+    existing = reader is not None and reader(event_id, anomaly["anomaly_id"])
+    accepted_prior = prior if existing else None
+    report = (
+        deepcopy(previous)
+        if previous is not None
+        else _report(anomaly, [], [], None, None, None, _carried_deadline(accepted_prior))
+    )
+    state = (accepted_prior or {}).get("lifecycle", report.get("lifecycle"))
+    history = list((accepted_prior or {}).get("history", report.get("history")) or [])
+    report["lifecycle"] = state
+    report["history"] = history
+    report["price_capital_tracks"] = deepcopy(tracks)
+    report["price_capital_mode"] = "retained_replay_not_scheduled_runtime"
+    report["price_capital_binding"] = {"as_of": as_of.isoformat(), "scope_hash": _capital_scope_hash(anomaly)}
+    report.pop("price_capital_note", None)
+    if store is not None:
+        bundle = {"anomaly_id": anomaly["anomaly_id"], "universe": "pool", "report": report}
+        if existing:
+            bundle["tracks"] = [{**row, "event_id": event_id} for row in tracks]
+        store.save(bundle)
+    return {
+        "anomaly_id": anomaly["anomaly_id"],
+        "status": report["status"],
+        "report": report,
+        "lifecycle": state,
+        "history": history,
+        "degraded": None,
+        "saved": store is not None,
+        "operating_impact_proven": report.get("operating_impact_proven"),
+        "second_hit": None,
+        "tracks": tracks,
     }
 
 
