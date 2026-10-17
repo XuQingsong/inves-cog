@@ -3022,6 +3022,28 @@ def test_model_output_contract_rejects_a_bad_structure():
     )
     assert empty[0]["degraded"] is None
 
+    # basket_id is optional; the exact empty string has the same meaning as omission.
+    minimal = {"mechanism": "需求", "info_ids": ["n1"], "affected": [{"ticker": "META", "direction": "up"}]}
+    for optional in ({}, {"basket_id": None}, {"basket_id": ""}):
+        shaped = {**minimal, "affected": [{**minimal["affected"][0], **optional}]}
+        parsed = read_candidates({"candidates": [shaped]})
+        assert parsed[0]["affected"] == [{"ticker": "META", "direction": "up"}]
+        retained = validate_candidates(parsed, {"n1"}, {"META"})[0]
+        assert retained["affected"] == [{"ticker": "META", "direction": "up"}]
+        assert retained["score"] is None and retained["fundamental"] is None
+    named = {**minimal, "affected": [{"ticker": "META", "basket_id": "unchanged-id", "direction": "up"}]}
+    assert read_candidates({"candidates": [named]})[0]["affected"][0]["basket_id"] == "unchanged-id"
+    for bad_basket in (0, False, [], {}):
+        malformed = {**minimal, "affected": [{"ticker": "META", "basket_id": bad_basket}]}
+        with pytest.raises(ValueError, match="结构不合格"):
+            read_candidates({"candidates": [malformed]})
+    for bad_ticker in (None, ""):
+        malformed = {**minimal, "affected": [{"ticker": bad_ticker, "basket_id": ""}]}
+        with pytest.raises(ValueError, match="结构不合格"):
+            read_candidates({"candidates": [malformed]})
+    with pytest.raises(ValueError, match="结构不合格"):
+        read_claims({"claims": []})
+
 
 @pytest.mark.phase1_blocking
 def test_wide_anomaly_skips_candidates(tmp_path):

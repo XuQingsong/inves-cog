@@ -249,9 +249,10 @@ def _affected_rows(rows):
         item = {"ticker": ticker}
         if "basket_id" in row and row["basket_id"] is not None:
             basket = row["basket_id"]
-            if not isinstance(basket, str) or not basket:
+            if not isinstance(basket, str):
                 raise ValueError("结构不合格")
-            item["basket_id"] = basket
+            if basket:
+                item["basket_id"] = basket
         if "direction" in row and row["direction"] is not None:
             if row["direction"] not in {"up", "down"}:
                 raise ValueError("结构不合格")
