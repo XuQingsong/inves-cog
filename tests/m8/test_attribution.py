@@ -3137,6 +3137,43 @@ def test_claim_fields_omit_unsupported(tmp_path):
     assert bad_view["claim_support"][0]["anchors"][0]["literal_anchor_valid"] is False
     assert "invented text" not in str(bad_view)
 
+    # A report reader needs the received context, not only the matching quote.
+    from inves_cog.perception.attribution.chain import _report
+    from inves_cog.perception.attribution.store import Store
+
+    source = {
+        **fact,
+        "summary": "Reported totals use different measurement bases; contracts are unchanged.",
+        "claims": [annotated],
+        "published_at": datetime(2026, 1, 2, 12, tzinfo=timezone.utc),
+        "published_interval": {"start": date(2026, 1, 2), "end": date(2026, 1, 3)},
+        "internal_unrelated": "not part of the model input",
+    }
+    report = _report({"anomaly_id": "review-source", "universe": "pool"}, [], [source], None, None, None, None)
+    received = report["sources"][0]["input_material"]
+    assert received["summary"] == source["summary"]
+    assert received["claims"][0]["direction"] == "down"
+    assert received["claim_support"][0]["semantic_verdict"] is None
+    assert received["source_level"] is None
+    assert received["published_at"] == "2026-01-02T12:00:00+00:00"
+    assert received["published_interval"] == {"start": "2026-01-02", "end": "2026-01-03"}
+    assert "internal_unrelated" not in received
+    review = report["sources"][0]["input_material_review"]
+    assert review["semantic_verdict"] is None
+    assert review["historical_availability_proven"] is None
+    assert review["original_article_completeness"] is None
+
+    class ReportProjection:
+        def execute(self, sql, params):
+            assert sql.startswith("INSERT INTO perception.reports ")
+            self.saved = json.loads(json.dumps(params[1].obj))
+
+    projection = ReportProjection()
+    Store(projection)._report("review-source", {"universe": "pool", "report": report})
+    assert projection.saved == report
+    source["summary"] = "changed later"
+    assert received["summary"].endswith("contracts are unchanged.")
+
 
 @pytest.mark.phase1_blocking
 def test_model_output_contract_rejects_a_bad_structure():
@@ -6470,7 +6507,11 @@ def test_attribution_chain_scores_from_rules_and_keeps_going():
     assert first["report"]["fundamental_standing"] == "待验证"
     assert first["report"]["valuation"] == "不变 / 待基本面轨道"
     assert first["operating_impact_proven"] is False
-    assert first["report"]["sources"] == [{"info_id": "nikkei-hdd", "role": "primary"}]
+    source = first["report"]["sources"][0]
+    assert {k: source[k] for k in ("info_id", "role")} == {"info_id": "nikkei-hdd", "role": "primary"}
+    assert source["input_material"]["headline"] == "Toshiba"
+    assert source["input_material"]["published_at"] == published.isoformat()
+    assert source["input_material_review"]["semantic_verdict"] is None
     assert failed["status"] == "待分析"
     assert failed["degraded"] == "模型调用失败"
     assert wide["status"] == "已记录"
@@ -6531,7 +6572,10 @@ def test_five_day_replay_hides_an_item_until_it_was_seen():
     assert played[1]["anomalies"][0]["report"]["sources"] == []
     assert played[2]["replay"]["mode"] == "当时可见"
     assert played[2]["replay"]["collected_then"] is True
-    assert played[2]["anomalies"][0]["report"]["sources"] == [{"info_id": "later", "role": "primary"}]
+    source = played[2]["anomalies"][0]["report"]["sources"][0]
+    assert {k: source[k] for k in ("info_id", "role")} == {"info_id": "later", "role": "primary"}
+    assert source["input_material"]["info_id"] == "later"
+    assert source["input_material_review"]["historical_availability_proven"] is None
     assert played[4]["anomalies"][0]["report"]["sources"][0]["info_id"] == "later"
     assert [row["anomaly_id"] for row in played[4]["anomalies"]] == ["replay-1", "future-16"]
     dated = {"anomaly_id": "dated-16", "universe": "pool", "trade_date": "2026-10-16", "members": [{"ticker": "NVDA"}]}

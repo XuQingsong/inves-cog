@@ -1155,10 +1155,7 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
-    sources = [
-        {"info_id": item["info_id"], "role": item.get("role"), **material_fields(item), **source_coverage(item)}
-        for item in items
-    ]
+    sources = [_report_source(item) for item in items]
     return explanation_report(
         current,
         impact,
@@ -1171,6 +1168,30 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
         magnitude=channels,
         tracks_view=anomaly.get("tracks_view"),
     )
+
+
+def _report_source(item):
+    row = {"info_id": item["info_id"], "role": item.get("role"), **material_fields(item), **source_coverage(item)}
+    if not any(key in item for key in ("headline", "summary", "claims", "source_document")):
+        return row
+
+    def encode(value):
+        if isinstance(value, (date, datetime)):
+            return value.isoformat()
+        raise TypeError("信源输入不能序列化")
+
+    material = candidate_payload({}, [item], [])["items"][0]
+    material = json.loads(json.dumps(material, default=encode, ensure_ascii=False, allow_nan=False))
+    row["input_material"] = material
+    row["input_material_review"] = {
+        "kind": "candidate_input_snapshot",
+        "version": 1,
+        "sha256": _hash_input(material),
+        "semantic_verdict": None,
+        "historical_availability_proven": None,
+        "original_article_completeness": None,
+    }
+    return row
 
 
 def _bundle(anomaly, items, candidates, report, state, history, impact, hits, tracks, deadline):
