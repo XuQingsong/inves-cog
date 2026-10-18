@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-009  已完成  2026-10-18 21:05 北京
+
+- PR #21，head `68ee464`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39129742708 。`phase1-blocking` 通过。没有合并。
+- 证据：本地 `make phase1-test` 244 passed、19 deselected；`make phase1-cases` 7 passed、1 xfailed。开工复述在 `handoff/M8/b009-kickoff.md`。
+- 已自行决定：无。评分公式、权重、阈值未改。`test_case_attribution` 继续 pending。没有发起模型调用，没有连接数据库。
+- 下一步：等需求方验收。AC-M8-02/06/08 的现场和五日全池仍未关闭。不取新任务。
+
 ## B-009  进行中  2026-10-18 21:04 北京
 
 - 草稿 PR #21，head `68ee464`。本地 `make phase1-test`：244 passed，19 deselected。`make phase1-cases`：7 passed，1 xfailed。`test_case_attribution` 仍 pending。
