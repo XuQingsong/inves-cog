@@ -4,10 +4,24 @@ from copy import deepcopy
 from hashlib import sha256
 from json import dumps
 
+from inves_cog.perception.attribution.documents import document_fields, passage_anchor
 from inves_cog.perception.attribution.material import material_fields
 
 CLAIM_FIELDS = {"subject", "variable", "mechanism", "direction", "quantity", "horizon", "certainty"}
-_TEXT = ("info_id", "ticker", "field", "source_field", "quote", "inference", "comparison_basis", "statement_kind")
+_TEXT = (
+    "info_id",
+    "ticker",
+    "field",
+    "source_field",
+    "quote",
+    "inference",
+    "comparison_basis",
+    "statement_kind",
+    "passage_id",
+    "source_record_hash",
+    "source_text_hash",
+)
+_OFFSETS = ("quote_begin", "quote_end")
 
 
 def support_view(value):
@@ -20,7 +34,8 @@ def support_view(value):
             rows.append({"malformed": True})
             continue
         kept = {key: row[key] for key in _TEXT if isinstance(row.get(key), str) and len(row[key]) <= 800}
-        if row.get("malformed") or any(key in row and key not in kept for key in _TEXT):
+        kept.update({key: row[key] for key in _OFFSETS if type(row.get(key)) is int and 0 <= row[key] <= 10**7})
+        if row.get("malformed") or any(key in row and key not in kept for key in _TEXT + _OFFSETS):
             kept["malformed"] = True
         rows.append(kept)
     if len(value) > 120:
@@ -31,6 +46,7 @@ def support_view(value):
 def _source_hash(item):
     data = {key: item.get(key) for key in ("info_id", "headline", "summary")}
     data.update(material_fields(item))
+    data.update(document_fields(item))
     return sha256(dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
@@ -54,7 +70,10 @@ def _anchors(support, items, *, fields=None, tickers=None, cited=None):
         field = row.get("source_field")
         quote = row.get("quote")
         text = found[0].get(field) if len(found) == 1 and field in {"headline", "summary"} else None
-        if not isinstance(quote, str) or not quote.strip() or not isinstance(text, str) or quote not in text:
+        matched = isinstance(text, str) and isinstance(quote, str) and bool(quote.strip()) and quote in text
+        if field == "passage" and len(found) == 1:
+            matched = isinstance(quote, str) and bool(quote.strip()) and passage_anchor(found[0], row)
+        if not matched:
             problems.append("原文片段未精确匹配")
         if fields is not None and row.get("field") not in fields:
             problems.append("未绑定本条说法字段")
@@ -72,6 +91,10 @@ def _anchors(support, items, *, fields=None, tickers=None, cited=None):
         }
         if not problems:
             audit.update(quote=quote, source_content_hash=_source_hash(found[0]), **material_fields(found[0]))
+            if field == "passage":
+                audit.update(
+                    {key: row[key] for key in ("passage_id", "source_record_hash", "source_text_hash") + _OFFSETS}
+                )
         for key in ("inference", "comparison_basis", "statement_kind"):
             if isinstance(row.get(key), str):
                 audit[key] = row[key]

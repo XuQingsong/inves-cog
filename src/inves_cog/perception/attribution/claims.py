@@ -1,5 +1,6 @@
 """Claim extraction. Fields the text does not support stay absent."""
 
+from inves_cog.perception.attribution.documents import document_fields, passage_schema
 from inves_cog.perception.attribution.grounding import copy_support
 from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.propose import MECHANISMS
@@ -74,10 +75,11 @@ def claim_output():
 
 def claim_payload(items):
     _require_shortlist(items)
-    return {
-        "items": [_item_payload(item) for item in items if "claims" not in item],
-        "output": claim_output(),
-    }
+    rows = [_item_payload(item) for item in items if "claims" not in item]
+    output = claim_output()
+    if any("source_document" in row for row in rows):
+        output["items"][0]["claims"][0]["support"][0].update(passage_schema())
+    return {"items": rows, "output": output}
 
 
 def _source_level(value):
@@ -87,6 +89,7 @@ def _source_level(value):
 def _item_payload(item):
     row = {"info_id": item["info_id"], "headline": item.get("headline"), "summary": item.get("summary")}
     row.update(material_fields(item))
+    row.update(document_fields(item))
     level = _source_level(item.get("source_level"))
     if level is not None:
         row["source_level"] = level

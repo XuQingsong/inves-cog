@@ -3,6 +3,7 @@
 from copy import deepcopy
 
 from inves_cog.perception.attribution.candidates import validate_candidates
+from inves_cog.perception.attribution.documents import document_fields, passage_schema
 from inves_cog.perception.attribution.grounding import claim_support, copy_support
 from inves_cog.perception.attribution.material import material_fields
 
@@ -65,11 +66,15 @@ def candidate_output():
 
 
 def candidate_payload(anomaly, items, neighbors):
+    rows = [_item_view(item) for item in items[:40]]
+    output = candidate_output()
+    if any("source_document" in row for row in rows):
+        output["candidates"][0]["support"][0].update(passage_schema())
     return {
         "anomaly": {key: anomaly[key] for key in _ANOMALY_KEYS if key in anomaly},
-        "items": [_item_view(item) for item in items[:40]],
+        "items": rows,
         "neighbors": neighbors,
-        "output": candidate_output(),
+        "output": output,
     }
 
 
@@ -98,6 +103,7 @@ def _item_view(item):
     # Date-only or timezone-unknown metadata is not an exact published_at.
     # Preserve its supplied bounds; this does not admit it to production windows.
     view.update(material_fields(item))
+    view.update(document_fields(item))
     if item.get("published_interval") is not None:
         view["published_interval"] = deepcopy(item["published_interval"])
     return view

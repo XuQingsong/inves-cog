@@ -2907,6 +2907,7 @@ def _recording(root, task, payload, result):
 
 @pytest.mark.phase1_blocking
 def test_claim_fields_omit_unsupported(tmp_path):
+    _assert_optional_body_passages()
     from inves_cog.perception.attribution.claims import claim_payload
     from inves_cog.perception.attribution.grounding import claim_support
     from inves_cog.perception.attribution.material import material_fields, separate_review_material
@@ -7585,3 +7586,55 @@ def test_five_day_report_uses_only_items_already_seen(capsys):
     assert "unstamped" in tainted["days"][0]["replay"]["unknown_ids"]
     assert "unstamped" not in tainted["days"][0]["then_visible"]
     assert tainted["closes_ac_m8_06"] is False
+
+
+def _assert_optional_body_passages():
+    from copy import deepcopy
+
+    from inves_cog.ingest.info import extraction_body
+    from inves_cog.perception.attribution.claims import claim_payload
+    from inves_cog.perception.attribution.documents import document_fields, make_document, passage_anchor
+    from inves_cog.perception.attribution.grounding import candidate_support
+    from inves_cog.perception.attribution.propose import candidate_payload
+
+    qualifier = "This is a future plan, not realized sales."
+    body = "Introductory context. " * 30 + qualifier
+    item = {"info_id": "synthetic-passage", "headline": "Synthetic announcement", "summary": body[:500], "body": body}
+    legacy = deepcopy(item)
+    text = extraction_body(body)
+    item["source_document"] = make_document(item, [[0, len(text)]], char_budget=2000)
+    extraction = claim_payload([item])["items"][0]
+    proposal = candidate_payload({"members": ["NVDA"]}, [item], [])["items"][0]
+    assert extraction["source_document"] == proposal["source_document"]
+    assert qualifier in extraction["source_document"]["passages"][0]["text"]
+    assert extraction["summary"] == legacy["summary"] and qualifier not in extraction["summary"]
+    assert "source_document" not in claim_payload([legacy])["items"][0]
+    assert "passage_id" not in claim_payload([legacy])["output"]["items"][0]["claims"][0]["support"][0]
+    document = item["source_document"]
+    passage = document["passages"][0]
+    begin = passage["text"].index(qualifier)
+    support = {
+        "info_id": item["info_id"],
+        "ticker": "NVDA",
+        "source_field": "passage",
+        "passage_id": passage["passage_id"],
+        "source_record_hash": document["source_record_hash"],
+        "source_text_hash": document["source_text_hash"],
+        "quote_begin": begin,
+        "quote_end": begin + len(qualifier),
+        "quote": qualifier,
+        "inference": "Realized sales declined",
+    }
+    candidate = {"affected": [{"ticker": "NVDA"}], "info_ids": [item["info_id"]], "support": [support]}
+    review = candidate_support(candidate, [item])
+    assert review["anchors"][0]["literal_anchor_valid"]
+    assert review["semantic_verdict"] is None and review["operating_impact_proven"] is False
+    assert not passage_anchor(item, {**support, "quote_begin": True})
+    assert not passage_anchor(item, {**support, "source_record_hash": "0" * 64})
+    changed = {**item, "body": body + " amended"}
+    with pytest.raises(ValueError):
+        document_fields(changed)
+    with pytest.raises(ValueError):
+        make_document(legacy, [[0, 20], [10, 30]], char_budget=100)
+    with pytest.raises(ValueError):
+        make_document(legacy, [[0, len(text)]], char_budget=1)

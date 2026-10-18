@@ -18,6 +18,7 @@ from inves_cog.perception.attribution.candidates import market_confirmed, valida
 from inves_cog.perception.attribution.capital import bound_capital_rows
 from inves_cog.perception.attribution.claims import attach_claims, claim_payload, read_claims
 from inves_cog.perception.attribution.confirmation import confirmation_reading
+from inves_cog.perception.attribution.documents import source_coverage
 from inves_cog.perception.attribution.evidence import (
     alternative_exclusion,
     basket_specificity,
@@ -1154,7 +1155,10 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
-    sources = [{"info_id": item["info_id"], "role": item.get("role"), **material_fields(item)} for item in items]
+    sources = [
+        {"info_id": item["info_id"], "role": item.get("role"), **material_fields(item), **source_coverage(item)}
+        for item in items
+    ]
     return explanation_report(
         current,
         impact,
