@@ -40,6 +40,16 @@ class Store:
     def __init__(self, connection):
         self.connection = connection
 
+    def report(self, anomaly_id):
+        found = self.connection.execute(
+            "SELECT report FROM perception.reports WHERE anomaly_id = %s",
+            (anomaly_id,),
+        ).fetchone()
+        if found is None:
+            return None
+        report = _cell(found, 0, "report")
+        return dict(report) if isinstance(report, dict) else None
+
     def prior(self, event_id):
         found = self.connection.execute(
             "SELECT e.lifecycle, e.history, e.deadline_outcome, e.closing_reason, e.unknowns, r.report "
@@ -69,9 +79,30 @@ class Store:
             "operating_impact_proven": proven,
         }
 
+    def price_event(self, event_id, anomaly_id):
+        """Price rows may use an existing event only when its anomaly also matches."""
+        return (
+            self.connection.execute(
+                "SELECT event_id FROM perception.linkage_events WHERE event_id = %s AND anomaly_id = %s",
+                (event_id, anomaly_id),
+            ).fetchone()
+            is not None
+        )
+
     def save(self, bundle):
+        if any(row.get("price_only") is True for row in bundle.get("tracks") or []):
+            transaction = getattr(self.connection, "transaction", None)
+            if transaction is None:
+                raise ValueError("独立价格轨道需要可回滚的事务连接")
+            with transaction():
+                self._save(bundle)
+        else:
+            self._save(bundle)
+
+    def _save(self, bundle):
         _guard(bundle)
         linkage = bundle.get("linkage")
+        self._price_track_shapes(linkage["event_id"] if linkage else None, bundle.get("tracks") or [])
         if linkage is not None:
             self._require_linkage(linkage)
         anomaly_id = bundle["anomaly_id"]
@@ -220,22 +251,55 @@ class Store:
             ),
         )
 
+    def _price_track_shapes(self, event_id, rows):
+        for row in rows:
+            if row.get("price_only") is not True:
+                continue
+            if (
+                row.get("capital") not in {"冲击中", "消化中", "已消化", "延续", "反转"}
+                or not isinstance(row.get("metrics"), dict)
+                or set(row["metrics"]) != {"price_capital"}
+                or not isinstance(row["metrics"]["price_capital"], dict)
+            ):
+                raise ValueError("独立价格轨道缺少对象型资金指标")
+            found = self.connection.execute(
+                "SELECT metrics FROM perception.tracks WHERE event_id = %s AND trade_date = %s FOR UPDATE",
+                (row.get("event_id") or event_id, row["trade_date"]),
+            ).fetchone()
+            if found is not None and not isinstance(_cell(found, 0, "metrics"), dict):
+                raise ValueError("既有轨道指标不是对象，独立价格更新未保存")
+
     def _track(self, event_id, row):
-        self.connection.execute(
+        price_only = row.get("price_only") is True
+        if price_only and (
+            row.get("capital") not in {"冲击中", "消化中", "已消化", "延续", "反转"}
+            or set(row.get("metrics") or {}) != {"price_capital"}
+        ):
+            raise ValueError("独立价格轨道缺少资金状态或独立指标")
+        update = (
+            "emotion = perception.tracks.emotion, capital = EXCLUDED.capital, "
+            "fundamental = perception.tracks.fundamental, "
+            "metrics = perception.tracks.metrics || EXCLUDED.metrics"
+            if price_only
+            else "emotion = EXCLUDED.emotion, capital = EXCLUDED.capital, "
+            "fundamental = EXCLUDED.fundamental, metrics = EXCLUDED.metrics"
+        )
+        guard = " WHERE jsonb_typeof(perception.tracks.metrics) = 'object' RETURNING event_id" if price_only else ""
+        result = self.connection.execute(
             "INSERT INTO perception.tracks (event_id, trade_date, emotion, capital, fundamental, metrics) "
             "VALUES (%s, %s, %s, %s, %s, %s) "
-            "ON CONFLICT (event_id, trade_date) DO UPDATE SET "
-            "emotion = EXCLUDED.emotion, capital = EXCLUDED.capital, "
-            "fundamental = EXCLUDED.fundamental, metrics = EXCLUDED.metrics",
+            "ON CONFLICT (event_id, trade_date) DO UPDATE SET " + update + guard,
             (
                 row.get("event_id") or event_id,
                 row["trade_date"],
-                row.get("emotion"),
+                None if price_only else row.get("emotion"),
                 row.get("capital"),
-                row.get("fundamental"),
+                None if price_only else row.get("fundamental"),
                 _json(row.get("metrics") or {}),
             ),
         )
+        if price_only and result.fetchone() is None:
+            raise ValueError("价格指标结构已变化，独立价格更新未保存")
 
     def _second_hit(self, event_id, row):
         self.connection.execute(

@@ -1,6 +1,9 @@
 """Drop candidates the model cannot support, then keep one unscored default."""
 
+import math
+
 from inves_cog.perception.attribution.evidence import basket_specificity, exposure_gradient, time_alignment
+from inves_cog.perception.attribution.grounding import copy_support
 from inves_cog.perception.attribution.second_hit import denial_response
 
 DEFAULT = "无事件/资金面"
@@ -21,19 +24,22 @@ def validate_candidates(candidates, retrieved_ids, universe):
 
 def _cited(candidate, citations, universe):
     direction = candidate.get("direction")
-    return {
-        "mechanism": candidate.get("mechanism"),
-        "info_ids": citations,
-        "affected": _affected(candidate.get("affected") or [], universe),
-        "chain": list(candidate.get("chain") or []),
-        "control_baskets": list(candidate.get("control_baskets") or []),
-        "direction": direction if direction in {"up", "down"} else None,
-        "scored": True,
-        "score": None,
-        "confidence": None,
-        "fundamental": None,
-        "evidence": None,
-    }
+    return copy_support(
+        candidate,
+        {
+            "mechanism": candidate.get("mechanism"),
+            "info_ids": citations,
+            "affected": _affected(candidate.get("affected") or [], universe),
+            "chain": list(candidate.get("chain") or []),
+            "control_baskets": list(candidate.get("control_baskets") or []),
+            "direction": direction if direction in {"up", "down"} else None,
+            "scored": True,
+            "score": None,
+            "confidence": None,
+            "fundamental": None,
+            "evidence": None,
+        },
+    )
 
 
 def _affected(rows, universe):
@@ -53,7 +59,15 @@ def _affected(rows, universe):
 
 
 def market_confirmed(*, claim_time, response, independent, alternative):
-    return bool(claim_time and response and independent and alternative is not None and alternative >= 0.5)
+    return (
+        claim_time is True
+        and response is True
+        and independent is True
+        and isinstance(alternative, (int, float))
+        and not isinstance(alternative, bool)
+        and math.isfinite(alternative)
+        and 0.5 <= alternative <= 1.0
+    )
 
 
 def market_consensus(items):
