@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-011  已完成  2026-10-18 22:14 北京
+
+- PR #22，head `c11250b`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39134912237 。`phase1-blocking` 通过。没有合并。
+- 证据：本地 `make phase1-test` 129 passed、12 deselected；`make phase1-replay` 4 passed。v18 的 90 笔没有变化，golden 保持。
+- 已自行决定：无。阈值、卖出比例和其他风控未改。没有发起模型调用，没有连接数据库。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-011  进行中  2026-10-18 22:12 北京
 
 - 草稿 PR #22，分支 `cursor/m4-b011-drawdown-e013`，head `c11250b`。两个等号案例修之前失败，修之后通过。相邻金额保持原运算符。
