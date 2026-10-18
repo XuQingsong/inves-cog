@@ -41,7 +41,7 @@ python docs/phase1/acceptance/M8-v3-batch-2026-10-18.py run \
   --root /tmp/m8-v3-2026-10-18
 ```
 
-哈希清单：[M8-v3-batch-manifest-2026-10-18.json](M8-v3-batch-manifest-2026-10-18.json)。
+哈希清单：[M8-v3-batch-manifest-2026-10-18.json](M8-v3-batch-manifest-2026-10-18.json)。执行器在 [PR #23](https://github.com/XuQingsong/inves-cog/pull/23)。
 
 ## 已定、不再问
 
