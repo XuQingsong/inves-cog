@@ -1,0 +1,85 @@
+{
+ "batch": "m8-v3-2026-10-18",
+ "code": "820e5e958e21716c768000ac1b2b4a1809eeb9c0",
+ "prompt_version": "evidence-bridge-v3-links",
+ "read_on": "2026-10-16",
+ "neighbors": [],
+ "http_cap": 19,
+ "retries": 0,
+ "order": "先四次说法抽取，接上说法后再冻结候选哈希，然后每个候选载荷跑 3 次",
+ "models": {
+  "claim_extraction": "deepseek-v4.1-flash",
+  "anomaly_candidates": "glm-5.3"
+ },
+ "claims": [
+  {
+   "sha256": "1ce62f664de09724edc480a966bd7db30b5d94367d2c5dd83f14b631fea975ad",
+   "calls": 1,
+   "model": "deepseek-v4.1-flash",
+   "anomaly_ids": [
+    "2025-01-27:close:001"
+   ]
+  },
+  {
+   "sha256": "c92b8e2d3772376ac4bf913d2fac25a002f088f2164dd4c9f6dff2eb5a9f2d05",
+   "calls": 1,
+   "model": "deepseek-v4.1-flash",
+   "anomaly_ids": [
+    "2026-09-21:close:001",
+    "2026-09-21:close:002"
+   ]
+  },
+  {
+   "sha256": "69a8399837ec815d2923eef0343314a3256d7c28c8ccd103d6a03f21573f3b27",
+   "calls": 1,
+   "model": "deepseek-v4.1-flash",
+   "anomaly_ids": [
+    "2026-10-02:close:001"
+   ]
+  },
+  {
+   "sha256": "9fe317c92128ab79bfd359d30c014bc2890da2f4ac8e709a831c4155dc087514",
+   "calls": 1,
+   "model": "deepseek-v4.1-flash",
+   "anomaly_ids": [
+    "2026-10-14:close:001"
+   ]
+  }
+ ],
+ "empty_claim_candidates_not_called": [
+  {
+   "case_kind": "r1_release",
+   "anomaly_id": "2025-01-27:close:001",
+   "sha256": "b1d6db8ea0e4b8e7ac448b480dc8502d2f26a300b35adf30c9142fcf28f4ac29",
+   "called": false
+  },
+  {
+   "case_kind": "muse_rank",
+   "anomaly_id": "2026-09-21:close:001",
+   "sha256": "a19a9856d3d7a6a8b28f6360c4a3da29ce963cf546491b41dae38460ea169a03",
+   "called": false
+  },
+  {
+   "case_kind": "muse_rank",
+   "anomaly_id": "2026-09-21:close:002",
+   "sha256": "d422f73df7b0bfdc50caad8bddb19f337e42ce89c27dfc13da9600064191ff4f",
+   "called": false
+  },
+  {
+   "case_kind": "toshiba",
+   "anomaly_id": "2026-10-02:close:001",
+   "sha256": "5d6a640b6afaf2148557073086515c68981efb5d9e6852adf5094fa8397b6e98",
+   "called": false
+  },
+  {
+   "case_kind": "openai_arr",
+   "anomaly_id": "2026-10-14:close:001",
+   "sha256": "9fa7bc3af061e7f6e871493874f3e0c9011dc2056892a3798996e93c44527c08",
+   "called": false
+  }
+ ],
+ "five_day_in_pool": {
+  "included": false,
+  "reason": "本机没有 2026-10-12 至 10-16 的 9 个池内异常输入，仓库夹具不能代替"
+ }
+}
