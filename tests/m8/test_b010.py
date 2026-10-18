@@ -297,8 +297,8 @@ def _run_market(*, session, later, extra_ticker=None):
         "info_id": "nikkei-hdd",
         "published_at": published,
         "first_seen_at": published,
-        "headline": "Toshiba expands disk output",
-        "summary": "Toshiba expands disk output",
+        "headline": "Western Digital: Toshiba expands disk output",
+        "summary": "Western Digital: Toshiba expands disk output",
         "tickers": ["WDC"],
         "entities": ["HDD", "WDC"],
         "source_root": "nikkei",
@@ -363,7 +363,7 @@ def _run_market(*, session, later, extra_ticker=None):
                                     {
                                         "info_id": "nikkei-hdd",
                                         "source_field": "headline",
-                                        "quote": "Toshiba expands",
+                                        "quote": "Western Digital",
                                     }
                                 ],
                             }

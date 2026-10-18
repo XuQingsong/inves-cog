@@ -1,5 +1,6 @@
 """Per-step links for an expected scope. Rules still own the other two layers."""
 
+import re
 from copy import deepcopy
 
 from inves_cog.perception.attribution.grounding import _anchors
@@ -9,6 +10,28 @@ _TYPES = {"产业结构", "需求弹性", "暴露关系", "其他"}
 _OBSERVED = {"观察到", "有支持", "已确立"}
 _RULE_LAYERS = ("已支持的市场关联", "已量化或验证的经营暴露")
 _QUOTE = "引文匹配只证明出处，不证明支持推断"
+_UNNAMED = "材料未点名"
+_SHARED = "共用假设"
+_ALIASES = {
+    "CRWV": "CoreWeave",
+    "DELL": "Dell",
+    "NTAP": "NetApp",
+    "STX": "Seagate",
+    "WDC": "Western Digital",
+    "META": "Meta",
+    "NVDA": "Nvidia",
+    "AMD": "AMD",
+    "AVGO": "Broadcom",
+    "MSFT": "Microsoft",
+    "ORCL": "Oracle",
+    "SMCI": "Super Micro",
+    "MRVL": "Marvell",
+    "VRT": "Vertiv",
+    "ETN": "Eaton",
+    "TSM": "TSMC",
+    "ANET": "Arista",
+    "GEV": "GE Vernova",
+}
 
 
 def inspect_links(candidate, items, neighbors):
@@ -39,39 +62,27 @@ def inspect_links(candidate, items, neighbors):
             problems.append("逐环不合格")
             continue
         valid.append(checked)
-    edges = [(link["from"], link["to"], link) for link in valid]
-    reached = {dst for _src, dst, _link in edges}
+    quotes = _quotes(valid)
+    groups, missing_prediction = _hypothesis_groups(row, valid)
+    hypothesis_kept, shared = _hypothesis_kept(groups)
     gaps = []
     affected = []
-    signatures = {}
-    shared = False
     for item in list(row.get("affected") or []):
         if not isinstance(item, dict) or not item.get("ticker"):
             gaps.append({"ticker": None, "reason": "受影响标的缺少代码"})
             continue
         ticker = item["ticker"]
-        if ticker not in reached:
-            gaps.append({"ticker": ticker, "reason": "没有到达该标的的逐环路径"})
+        if _named(ticker, quotes) or ticker in hypothesis_kept:
+            affected.append(item)
             continue
-        path = _path(ticker, edges)
-        if any(link["kind"] == "声明的假设" for link in path):
-            prediction = _prediction(row.get("证伪预测"), ticker)
-            if prediction is None:
-                gaps.append({"ticker": ticker, "reason": "假设标的缺少证伪预测"})
-                continue
-            texts = tuple(sorted(link["hypothesis"] for link in path if link["kind"] == "声明的假设"))
-            signatures.setdefault((texts, prediction), []).append(ticker)
-        affected.append(item)
-    for tickers in signatures.values():
-        if len(tickers) > 1:
-            shared = True
+        gaps.append({"ticker": ticker, "reason": _gap_reason(ticker, valid, missing_prediction, groups)})
     expected = [dict(item) for item in affected]
     row["affected"] = expected
     row["links"] = valid
     row["research_gaps"] = gaps
     row["link_problems"] = problems
-    row["hypothesis_count"] = len(signatures)
-    row["hypothesis_width"] = len(signatures)
+    row["hypothesis_count"] = len(groups)
+    row["hypothesis_width"] = len(groups)
     row["共用假设"] = shared
     row["model_scope_rejected"] = rejected
     row["scope_layers"] = {
@@ -237,21 +248,68 @@ def _hypothesis(link, origin, target):
     }
 
 
-def _path(ticker, edges):
-    reverse = {}
-    for origin, target, link in edges:
-        reverse.setdefault(target, []).append((origin, link))
-    seen = set()
-    stack = [ticker]
-    found = []
-    while stack:
-        node = stack.pop()
-        for origin, link in reverse.get(node, []):
-            found.append(link)
-            if origin not in seen:
-                seen.add(origin)
-                stack.append(origin)
-    return found
+def _quotes(links):
+    quotes = []
+    for link in links:
+        if link.get("kind") != "来源陈述":
+            continue
+        for anchor in link.get("anchors") or []:
+            quote = anchor.get("quote") if isinstance(anchor, dict) else None
+            if isinstance(quote, str):
+                quotes.append(quote)
+    return quotes
+
+
+def _mentioned(quote, ticker):
+    code = ticker.upper()
+    names = [code]
+    alias = _ALIASES.get(code)
+    if alias and alias.upper() != code:
+        names.append(alias)
+    return any(re.search(rf"\b{re.escape(name)}\b", quote, flags=re.IGNORECASE) for name in names)
+
+
+def _named(ticker, quotes):
+    return any(_mentioned(quote, ticker) for quote in quotes)
+
+
+def _hypothesis_groups(row, links):
+    groups = {}
+    missing = set()
+    for link in links:
+        if link.get("kind") != "声明的假设" or not isinstance(link.get("to"), str):
+            continue
+        ticker = link["to"]
+        prediction = _prediction(row.get("证伪预测"), ticker)
+        if prediction is None:
+            missing.add(ticker)
+            continue
+        groups.setdefault((link["hypothesis"], prediction), []).append(ticker)
+    return groups, missing
+
+
+def _hypothesis_kept(groups):
+    kept = set()
+    shared = False
+    for tickers in groups.values():
+        unique = list(dict.fromkeys(tickers))
+        if len(unique) > 1:
+            shared = True
+            continue
+        kept.add(unique[0])
+    return kept, shared
+
+
+def _gap_reason(ticker, links, missing_prediction, groups):
+    if not links:
+        return "没有到达该标的的逐环路径"
+    if ticker in missing_prediction:
+        return "假设标的缺少证伪预测"
+    for tickers in groups.values():
+        unique = list(dict.fromkeys(tickers))
+        if ticker in unique and len(unique) > 1:
+            return _SHARED
+    return _UNNAMED
 
 
 def _prediction(rows, ticker):
