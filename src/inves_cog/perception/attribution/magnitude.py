@@ -104,13 +104,14 @@ def channel_lines(result):
     lines = []
     for row in result["channels"]:
         delta = row["delta_e_evt"]
-        lines.append(
-            {
-                "channel": row["channel"],
-                "delta_e_evt": delta,
-                "verdict": _one_channel_verdict(result["delta_e_mkt"], delta),
-            }
-        )
+        line = {
+            "channel": row["channel"],
+            "delta_e_evt": delta,
+            "verdict": _one_channel_verdict(result["delta_e_mkt"], delta),
+        }
+        if "credit_loss_cap" in row:
+            line.update(credit_loss_cap=row["credit_loss_cap"], unit="USD", annual_conversion=None)
+        lines.append(line)
     return lines
 
 
@@ -128,7 +129,39 @@ def implied_magnitude(payload, rules=None):
         delta_market = payload["delta_mktcap"] / payload["pe"]
     channels = []
     for row in payload["channels"]:
-        channels.append({**row, "delta_e_evt": _event_limit(row, income_cap, counterparty_cap)})
+        calculated = {**row, "delta_e_evt": _event_limit(row, income_cap, counterparty_cap)}
+        if row["channel"] == COUNTERPARTY and row.get("exposure_usd") is not None:
+            calculated["credit_loss_cap"] = _credit_limit(row, counterparty_cap)
+        channels.append(calculated)
+    total, ratio, verdict, partial = _comparison(delta_market, channels)
+    output_channels = []
+    for row in channels:
+        output = {"channel": row["channel"], "delta_e_evt": row["delta_e_evt"]}
+        if "credit_loss_cap" in row:
+            output.update(credit_loss_cap=row["credit_loss_cap"], unit="USD", annual_conversion=None)
+        output_channels.append(output)
+    result = {
+        "delta_e_mkt": delta_market,
+        "channels": output_channels,
+        "sum_delta_e_evt": total,
+        "R": ratio,
+        "verdict": verdict,
+        "partial_missing": partial,
+    }
+    if any("credit_loss_cap" in row for row in channels):
+        bounds = _separate_bounds(delta_market, channels)
+        result.update(
+            event_bounds=bounds,
+            sum_delta_e_evt=bounds["annual_operating"]["bound"],
+            R=None,
+            verdict="无法检验",
+        )
+    if member_basis is not None:
+        result["market_basis"] = member_basis
+    return result
+
+
+def _comparison(delta_market, channels):
     present = [row["delta_e_evt"] for row in channels if row["delta_e_evt"] is not None]
     missing = [row for row in channels if row["channel"] != MULTIPLE and row.get("exposure_usd") is None]
     known = [row for row in channels if row.get("exposure_usd") is not None]
@@ -138,17 +171,44 @@ def implied_magnitude(payload, rules=None):
         ratio, verdict = None, "无法检验"
     else:
         ratio, verdict = _verdict(delta_market, total, partial, bool(present) or not missing)
-    result = {
-        "delta_e_mkt": delta_market,
-        "channels": [{"channel": row["channel"], "delta_e_evt": row["delta_e_evt"]} for row in channels],
-        "sum_delta_e_evt": total,
-        "R": ratio,
-        "verdict": verdict,
-        "partial_missing": partial,
+    return total, ratio, verdict, partial
+
+
+def _separate_bounds(delta_market, channels):
+    annual = [row for row in channels if row["channel"] != COUNTERPARTY]
+    total, ratio, verdict, partial = _comparison(delta_market, annual)
+    if not any(row["delta_e_evt"] is not None for row in annual):
+        total, ratio, verdict = None, None, "无法检验"
+    credit = [row.get("credit_loss_cap") for row in channels if row["channel"] == COUNTERPARTY]
+    complete = all(value is not None for value in credit)
+    return {
+        "annual_operating": {
+            "bound": total,
+            "unit": "USD/year",
+            "R": ratio,
+            "verdict": verdict,
+            "partial_missing": partial,
+        },
+        "credit_balance": {"bound": sum(credit) if complete else None, "unit": "USD", "complete": complete},
+        "combined_annual_bound": None,
+        "annual_conversion": None,
+        "comparison_note": "一次性信用损失与年度盈利等价值单位不同，未换算、不合并比较；上限不证明实际损失。",
+        "operating_impact_proven": False,
     }
-    if member_basis is not None:
-        result["market_basis"] = member_basis
-    return result
+
+
+def _credit_limit(row, caps):
+    exposure, level = row.get("exposure_usd"), row.get("source_level")
+    if (
+        isinstance(exposure, bool)
+        or not isinstance(exposure, (int, float))
+        or not math.isfinite(exposure)
+        or exposure < 0
+        or type(level) is not int
+        or level not in caps
+    ):
+        return None
+    return exposure * caps[level]
 
 
 def _member_basis(members):
@@ -193,6 +253,9 @@ def _member_basis(members):
 def _event_limit(row, income_cap, counterparty_cap):
     if row["channel"] == MULTIPLE:
         return 0.0
+    if row["channel"] == COUNTERPARTY:
+        # A balance loss is USD, not an annual operating flow. See _credit_limit.
+        return None
     exposure = row.get("exposure_usd")
     level = row.get("source_level")
     margin = row.get("incremental_margin")

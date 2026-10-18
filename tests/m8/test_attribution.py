@@ -94,6 +94,35 @@ def test_market_move_uses_residual_return_and_positive_eps():
     assert connection.reports[0]["market_magnitude"] == row["report"]["market_magnitude"]
     assert row["operating_impact_proven"] is False
 
+    # Annual flow and credit balance survive the actual report/save path separately.
+    mixed = {
+        **payload,
+        "channels": [
+            {"channel": "直接收入", "exposure_usd": 400, "source_level": 4, "incremental_margin": 0.25},
+            {"channel": "融资/对手方", "exposure_usd": 100, "source_level": 4, "incremental_margin": -0.25},
+        ],
+    }
+    credited = attribute_all(
+        [{**prepared, "magnitude_payload": mixed}],
+        [],
+        as_of=start + timedelta(hours=8),
+        client=None,
+        store=Store(connection),
+    )[0]
+    assert credited["saved"] and credited["operating_impact_proven"] is False
+    bounds = credited["report"]["event_bounds"]
+    assert bounds["annual_operating"]["bound"] == 10
+    assert bounds["annual_operating"]["unit"] == "USD/year"
+    assert bounds["credit_balance"]["bound"] == 5
+    assert bounds["credit_balance"]["unit"] == "USD"
+    assert bounds["combined_annual_bound"] is None
+    assert credited["report"]["market_magnitude"]["comparison_verdict"] == "无法检验"
+    credit_line = credited["report"]["magnitude_channels"][1]
+    assert credit_line["credit_loss_cap"] == 5 and credit_line["delta_e_evt"] is None
+    assert credit_line["verdict"] == "无法检验"
+    assert connection.reports[-1]["event_bounds"] == bounds
+    assert credited["report"]["valuation"] == "不变 / 待基本面轨道"
+
 
 @pytest.mark.phase1_blocking
 def test_channels_follow_the_mechanism_and_the_best_source():
@@ -269,6 +298,29 @@ def test_implied_magnitude_rules():
 
     for case in _golden()["implied_magnitude"]:
         assert implied_magnitude(case["input"]) == case["expected"]
+
+    credit = {"channel": "融资/对手方", "exposure_usd": 100, "source_level": 4}
+    annual = {"channel": "直接收入", "exposure_usd": 400, "source_level": 4, "incremental_margin": 0.25}
+    for margin in (None, -0.25, 0, 0.25, 1):
+        payload = {"delta_mktcap": -100, "pe": 10, "channels": [{**credit, "incremental_margin": margin}]}
+        result = implied_magnitude(payload)
+        assert result["channels"][0]["credit_loss_cap"] == 5
+        assert result["channels"][0]["delta_e_evt"] is None
+        assert result["sum_delta_e_evt"] is None and result["R"] is None
+        assert result["verdict"] == "无法检验"
+        assert result["event_bounds"]["credit_balance"]["unit"] == "USD"
+        mixed = implied_magnitude({**payload, "channels": [annual, credit]})
+        assert mixed["sum_delta_e_evt"] == 10
+        assert mixed["event_bounds"]["annual_operating"]["R"] == 1
+        assert mixed["R"] is None and mixed["verdict"] == "无法检验"
+        assert mixed["event_bounds"]["combined_annual_bound"] is None
+    for level in (None, True, "4", 4.0):
+        unknown = implied_magnitude({"delta_mktcap": -100, "pe": 10, "channels": [{**credit, "source_level": level}]})
+        assert unknown["event_bounds"]["credit_balance"]["bound"] is None
+        assert unknown["R"] is None
+    zero = implied_magnitude({"delta_mktcap": -100, "pe": 10, "channels": [{**credit, "exposure_usd": 0}]})
+    assert zero["event_bounds"]["credit_balance"]["bound"] == 0
+    assert zero["R"] is None and zero["verdict"] == "无法检验"
 
 
 @pytest.mark.phase1_blocking

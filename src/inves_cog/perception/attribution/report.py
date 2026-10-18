@@ -245,6 +245,8 @@ def explanation_report(
             "comparison_verdict": magnitude["verdict"],
             "note": "市场侧盈利等价值，不是实际盈利变化；事件侧未知不得填零。",
         }
+    if magnitude is not None and magnitude.get("event_bounds") is not None:
+        report["event_bounds"] = magnitude["event_bounds"]
     if deadline is not None:
         report["lifecycle"] = deadline["lifecycle"]
         report["deadline_outcome"] = deadline["deadline_outcome"]
