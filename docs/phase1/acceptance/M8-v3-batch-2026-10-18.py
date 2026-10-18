@@ -15,6 +15,8 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
 
@@ -23,6 +25,7 @@ BATCH = "m8-v3-2026-10-18"
 PROMPT = "evidence-bridge-v3-links"
 CAP = 19
 RUNS = 3
+WORKERS = 5
 LLM_BASE = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 CLAIM_PREFIX = {
     "2025-01-27:close:001": "1ce62f664de0",
@@ -208,8 +211,9 @@ def live(modules, fixture, root, key_file):
     from inves_cog.llm.transport import OpenAICompatibleTransport
 
     transport = OpenAICompatibleTransport(dialogue_config(key, base))
+    install_normal_thinking()
     try:
-        execute(modules, fixture, root, transport)
+        execute(modules, fixture, root, transport, workers=WORKERS)
     except BatchStop as exc:
         print(f"停：{exc}")
         return 3
@@ -217,7 +221,26 @@ def live(modules, fixture, root, key_file):
     return 0
 
 
-def execute(modules, fixture, root, transport):
+def install_normal_thinking():
+    """glm-5.3 cannot turn thinking off. low is its shallowest effort; the default is max."""
+    from inves_cog.ingest.http import HTTPClient
+
+    if getattr(HTTPClient.request, "_m8_normal_thinking", False):
+        return
+    original = HTTPClient.request
+
+    def request(self, method, url, *, params=None, headers=None, json=None, limiter=None):
+        if isinstance(json, dict) and json.get("model") == "glm-5.3":
+            json = dict(json)
+            json["enable_thinking"] = True
+            json["reasoning_effort"] = "low"
+        return original(self, method, url, params=params, headers=headers, json=json, limiter=limiter)
+
+    request._m8_normal_thinking = True
+    HTTPClient.request = request
+
+
+def execute(modules, fixture, root, transport, workers=1):
     prepare_root(root)
     ledger = Ledger(root)
     try:
@@ -229,11 +252,33 @@ def execute(modules, fixture, root, transport):
             accept_claims(modules, group["items"], raw)
             extracted[group["sha256"]] = raw
         frozen = freeze_candidates(modules, root, rows, extracted)
-        for item in frozen:
-            for slot in range(1, RUNS + 1):
-                send(modules, ledger, transport, root, "anomaly_candidates", item["payload"], str(slot))
+        dispatch_candidates(modules, ledger, transport, root, frozen, workers)
     finally:
         write_summary(root, ledger)
+
+
+def dispatch_candidates(modules, ledger, transport, root, frozen, workers):
+    jobs = [(item["payload"], str(slot)) for item in frozen for slot in range(1, RUNS + 1)]
+    if workers <= 1:
+        for payload, slot in jobs:
+            send(modules, ledger, transport, root, "anomaly_candidates", payload, slot)
+        return
+    stop = threading.Event()
+    errors = []
+
+    def one(job):
+        if stop.is_set():
+            return
+        try:
+            send(modules, ledger, transport, root, "anomaly_candidates", job[0], job[1])
+        except BatchStop as exc:
+            stop.set()
+            errors.append(exc)
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        list(pool.map(one, jobs))
+    if errors:
+        raise errors[0]
 
 
 def prepare_root(root):
@@ -294,11 +339,11 @@ def send(modules, ledger, transport, root, task, payload, slot):
     path = recording_path(root, task, sha, slot)
     if path.is_file():
         return stored_result(path, task, sha)
-    if ledger.has(task, sha, slot):
+    state = ledger.reserve(task, sha, slot, CAP)
+    if state == "attempted":
         raise BatchStop(f"已尝试过且没有完整录音，不重试 {task} {sha[:12]}")
-    if ledger.count() >= CAP:
+    if state == "full":
         raise BatchStop("已到 19 次上限")
-    ledger.begin(task, sha, slot)
     spec = modules["CallSpec"](**asdict(modules["registry"].resolve(task)), task=task)
     try:
         outcome = transport(spec, payload)
@@ -319,9 +364,11 @@ def send(modules, ledger, transport, root, task, payload, slot):
     }
     if task == "anomaly_candidates":
         body["prompt_version"] = PROMPT
+        body["reasoning_effort"] = "low"
     else:
         body["prompt_version"] = payload["output"]["grounding_policy"]["version"]
     write_json(path, body)
+    print(f"{task} {sha[:12]} slot {slot} 完成", flush=True)
     if missing:
         raise BatchStop(f"{task} 没有用量，停止后续调用")
     return data
@@ -381,24 +428,29 @@ class Ledger:
     def __init__(self, root):
         self.path = root / "attempts.jsonl"
         self.rows = []
+        self._lock = threading.Lock()
         if self.path.is_file():
             for line in self.path.read_text(encoding="utf-8").splitlines():
                 if line.strip():
                     self.rows.append(json.loads(line))
 
     def count(self):
-        return len(self.rows)
+        with self._lock:
+            return len(self.rows)
 
-    def has(self, task, sha, slot):
-        return any(row["task"] == task and row["payload_sha256"] == sha and row["slot"] == slot for row in self.rows)
-
-    def begin(self, task, sha, slot):
-        row = {"n": len(self.rows) + 1, "task": task, "payload_sha256": sha, "slot": slot}
-        self.rows.append(row)
-        with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-            handle.flush()
-            os.fsync(handle.fileno())
+    def reserve(self, task, sha, slot, cap):
+        with self._lock:
+            if any(row["task"] == task and row["payload_sha256"] == sha and row["slot"] == slot for row in self.rows):
+                return "attempted"
+            if len(self.rows) >= cap:
+                return "full"
+            row = {"n": len(self.rows) + 1, "task": task, "payload_sha256": sha, "slot": slot}
+            self.rows.append(row)
+            with self.path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            return "go"
 
 
 def self_check(modules, fixture):

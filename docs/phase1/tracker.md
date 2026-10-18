@@ -217,4 +217,5 @@
 - 2026-10-18 23:05 用户要求不要用两套对话变量名，改读阿里百炼的 key。接口用 `https://dashscope.aliyuncs.com/compatible-mode/v1`。
 - 2026-10-18 23:07 用户写入 key 后发出第 1 次说法抽取。百炼北京、国际和原 Token Plan 地址都返回 401 Invalid API key，没有模型输出。该次不计入已消耗的模型调用，本地失败记录已清除。等控制台 API-Key 覆盖原值后再发。
 - 2026-10-18 23:12 用户问这一批用 DashScope 还是 LLM。结论：用 LLM。说法是 deepseek-v4.1-flash，候选是 glm-5.3，地址是 Token Plan `token-plan.cn-beijing.maas.aliyuncs.com`。DashScope 只用于嵌入，这次不调用。上一轮把「阿里百炼的 key」接到了 DashScope 地址，是接错了。
+- 2026-10-18 23:25 用户要求普通思考，并让能并行的调用一起发。glm-5.3 不能关闭思考，未传参时默认深度推理；候选改为 `reasoning_effort=low`。正在进行的一次深度请求没有结果，已停掉且不计入。候选 5 路并行。说法保持关闭思考。
 - 这不代表 M8 通过，也不合并 PR #17 / #21。
