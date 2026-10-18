@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-012  进行中  2026-10-19 00:10 北京
+
+- 草稿 PR #21，head `2c9c07f`。七个例子修之前失败，修之后通过。不新开 PR。
+- 现有期望值因此变化的有三条：`test_three_link_kinds_keep_or_drop_the_expected_ticker` 的 WDC 不再因未点名引文或仅有关系留下；`test_r1_accelerator_basket_still_needs_a_recording` 的 missing 从空变为候选未连接加速芯片范围；`test_toshiba_reprint_is_not_operating_evidence` 的 affected 从 WDC 变为空。
+- 全套测试和 CI 还没有结果。不写成已完成。没有发起模型调用，没有连接数据库。评分公式、权重、阈值没有改。
+
 ## B-012  已收到  2026-10-19 00:00 北京
 
 - 任务：点名规则进入门禁。继续在 PR #21 的分支 `cursor/m8-b009-links-e013` 上提交，基线 `820e5e9`。不新开 PR，不改 PR #17、#18、#19、#22、#23。
