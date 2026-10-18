@@ -3168,6 +3168,19 @@ def test_model_output_contract_rejects_a_bad_structure():
     assert candidate_payload({"anomaly_id": "a"}, [], [])["output"] == candidate_output()
     assert claim_payload([{"info_id": "n1"}])["output"] == claim_output()
     assert claim_schema["items"][0]["claims"][0]["source_level"] == {"type": "integer", "enum": [1, 2, 3, 4]}
+    support_schema = claim_schema["items"][0]["claims"][0]["support"][0]
+    assert support_schema["field"]["type"] == "string"
+    assert set(support_schema["field"]["enum"]) == {
+        "subject",
+        "variable",
+        "mechanism",
+        "direction",
+        "quantity",
+        "horizon",
+        "certainty",
+    }
+    assert not {"headline", "summary", "passage"}.intersection(support_schema["field"]["enum"])
+    assert support_schema["source_field"] == "headline|summary"
     assert "Never infer or regrade" in claim_schema["source_level_policy"]
     assert "Omit unsupported direction or mechanism" in claim_schema["fact_policy"]
     for value in (True, False, "1", 1.0, 0, 5, None):

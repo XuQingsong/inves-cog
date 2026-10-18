@@ -1,7 +1,7 @@
 """Claim extraction. Fields the text does not support stay absent."""
 
 from inves_cog.perception.attribution.documents import document_fields, passage_schema
-from inves_cog.perception.attribution.grounding import copy_support
+from inves_cog.perception.attribution.grounding import CLAIM_FIELDS, copy_support
 from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.propose import MECHANISMS
 
@@ -28,7 +28,7 @@ def claim_output():
                         "support": [
                             {
                                 "info_id": "string",
-                                "field": "claim field name",
+                                "field": {"type": "string", "enum": sorted(CLAIM_FIELDS)},
                                 "source_field": "headline|summary",
                                 "quote": "exact supplied text",
                                 "comparison_basis": "string",
