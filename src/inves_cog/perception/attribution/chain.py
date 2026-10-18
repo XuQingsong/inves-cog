@@ -33,7 +33,7 @@ from inves_cog.perception.attribution.graph_context import project_graph
 from inves_cog.perception.attribution.grounding import candidate_support, claim_support
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
-from inves_cog.perception.attribution.links import fill_rule_layers, link_view
+from inves_cog.perception.attribution.links import fill_rule_layers, inspect_links, link_view
 from inves_cog.perception.attribution.magnitude import implied_magnitude
 from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.operating import operating_verdict
@@ -320,9 +320,11 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
             report["stage_analysis"]["candidate_rows_hash"] = _hash_input({"candidates": candidates})
         elif previous is not None:
             report["previous_candidates"] = deepcopy(previous.get("candidates") or [])
-    hits, conclusion = _second_hits(anomaly, candidates, as_of)
-    if conclusion == "确认":
-        report["link_view"]["范围"]["已支持的市场关联"] = [{"source": "二次命中", "written_by": "rule"}]
+    hits, conclusion, coverage = _second_hits(anomaly, candidates, as_of)
+    _sync_market_layer(report, candidates, confirmation, conclusion, coverage, anomaly)
+    analysis = report.get("stage_analysis")
+    if isinstance(analysis, dict):
+        analysis["candidate_rows_hash"] = _hash_input({"candidates": candidates})
     tracks = _track_rows(anomaly, state, stage, as_of)
     notes = [note for note in (claim_note, model_note) if note]
     if reused and notes:
@@ -479,7 +481,14 @@ def _resume_analysis(anomaly, visible, previous, as_of):
         if snapshot.get("candidate_rows_hash") != _hash_input({"candidates": rows}):
             return pending
         candidates = validate_candidates([row for row in rows if row.get("scored")], set(by_id), _candidate_universe())
-        return claimed, candidates, snapshot.get("claim_note"), snapshot.get("model_note"), True
+        neighbors = _graph_context(anomaly, as_of)["neighbors"]
+        restored = []
+        for row in candidates:
+            if row.get("scored") is False and "links" not in row:
+                restored.append(row)
+            else:
+                restored.append(inspect_links(row, claimed, neighbors))
+        return claimed, restored, snapshot.get("claim_note"), snapshot.get("model_note"), True
     except (TypeError, ValueError, KeyError):
         return pending
 
@@ -1021,20 +1030,63 @@ def _channels(anomaly):
     return implied_magnitude(payload)
 
 
+def _sync_market_layer(report, candidates, confirmation, conclusion, coverage, anomaly):
+    """Fill the market layer from checks that already ran. Unknown stays empty."""
+    members = set(_member_names(anomaly))
+    grouped = {}
+    for row in (confirmation or {}).get("candidates") or []:
+        if row.get("confirmed") is not True:
+            continue
+        index = row.get("candidate_index")
+        for ticker in row.get("scope") or []:
+            if ticker in members:
+                grouped.setdefault(index, []).append({"ticker": ticker, "source": "市场确认", "rule": "FR-M8-14"})
+    if conclusion == "确认":
+        for item in coverage or []:
+            ticker = item.get("ticker")
+            index = item.get("candidate_index")
+            if ticker not in members:
+                continue
+            bucket = grouped.setdefault(index, [])
+            entry = {"ticker": ticker, "source": "二次命中", "rule": "FR-M8-15"}
+            if entry not in bucket:
+                bucket.append(entry)
+    flat = []
+    for index, candidate in enumerate(candidates or []):
+        if not isinstance(candidate, dict):
+            continue
+        rows = list(grouped.get(index) or [])
+        layers = candidate.get("scope_layers")
+        if isinstance(layers, dict):
+            layers["已支持的市场关联"] = rows
+            flat.extend(rows)
+        elif rows:
+            candidate["scope_layers"] = {
+                "预期影响范围": [dict(item) for item in candidate.get("affected") or [] if isinstance(item, dict)],
+                "已支持的市场关联": rows,
+                "已量化或验证的经营暴露": [],
+            }
+            flat.extend(rows)
+    view = report.setdefault("link_view", {})
+    scoped = view.setdefault("范围", {})
+    scoped["已支持的市场关联"] = flat
+
+
 def _second_hits(anomaly, candidates, as_of):
     events = anomaly.get("later_events") or []
     if not events:
-        return [], None
+        return [], None, []
     start = anomaly.get("started_at")
     fingerprints = []
-    for candidate in candidates:
+    for index, candidate in enumerate(candidates):
         fingerprint = prediction_fingerprint(candidate)
         if fingerprint:
-            fingerprints.append((candidate, fingerprint))
+            fingerprints.append((index, candidate, fingerprint))
     measured = []
     rows = []
+    covered = []
     for event in events:
-        outcome = _measured_hit(event, fingerprints, anomaly, start, as_of)
+        outcome, index = _measured_hit(event, fingerprints, anomaly, start, as_of)
         if outcome is None:
             continue
         measured.append({**event, "outcome": outcome})
@@ -1048,16 +1100,46 @@ def _second_hits(anomaly, candidates, as_of):
                 "control_z": event.get("control_z"),
             }
         )
+        if outcome == "命中" and index is not None:
+            for ticker in _hit_tickers(candidates[index], anomaly, event):
+                entry = {"candidate_index": index, "ticker": ticker}
+                if entry not in covered:
+                    covered.append(entry)
     if not measured:
-        return [], "未检验"
-    return rows, second_hit_conclusion(measured, start)
+        return [], "未检验", []
+    return rows, second_hit_conclusion(measured, start), covered
+
+
+def _hit_tickers(candidate, anomaly, event):
+    members = set(_member_names(anomaly))
+    basket = event.get("basket_id")
+    allowed = None
+    if isinstance(basket, str) and basket:
+        names = []
+        for row in _basket_rows(anomaly):
+            if row.get("basket_id") != basket:
+                continue
+            for name in row.get("members") or []:
+                if isinstance(name, str):
+                    names.append(name)
+        if names:
+            allowed = set(names)
+    found = []
+    for row in candidate.get("affected") or []:
+        if not isinstance(row, dict):
+            continue
+        ticker = row.get("ticker")
+        if ticker not in members or (allowed is not None and ticker not in allowed) or ticker in found:
+            continue
+        found.append(ticker)
+    return found
 
 
 def _measured_hit(event, fingerprints, anomaly, start, as_of):
     """A later page counts only when it was visible and matches the frozen fingerprint."""
     if not _later_visible(event, as_of):
-        return None
-    for candidate, fingerprint in fingerprints:
+        return None, None
+    for index, candidate, fingerprint in fingerprints:
         if not later_matches_fingerprint(fingerprint, event, start):
             continue
         if event.get("mechanism") != candidate.get("mechanism"):
@@ -1076,8 +1158,8 @@ def _measured_hit(event, fingerprints, anomaly, start, as_of):
         control_z = event.get("control_z")
         if expected_z is None or control_z is None:
             continue
-        return classify_response(expected_z, control_z, direction=direction)
-    return None
+        return classify_response(expected_z, control_z, direction=direction), index
+    return None, None
 
 
 def _later_visible(event, as_of):

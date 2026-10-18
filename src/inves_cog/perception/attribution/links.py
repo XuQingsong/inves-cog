@@ -12,9 +12,11 @@ _QUOTE = "引文匹配只证明出处，不证明支持推断"
 
 
 def inspect_links(candidate, items, neighbors):
-    """Check a v3 link list. A candidate without links stays as it was."""
-    if not isinstance(candidate, dict) or "links" not in candidate or candidate.get("link_checked"):
+    """Check a v3 link list. Missing links do not keep the affected tickers."""
+    if not isinstance(candidate, dict) or candidate.get("link_checked"):
         return candidate
+    if "links" not in candidate or not isinstance(candidate.get("links"), list):
+        return _missing_links(candidate)
     row = dict(candidate)
     rejected = [key for key in _RULE_LAYERS if key in row]
     for key in rejected:
@@ -84,13 +86,43 @@ def inspect_links(candidate, items, neighbors):
     return row
 
 
+def _missing_links(candidate):
+    """No array of links is not a path. Keep the candidate and clear its scope."""
+    row = dict(candidate)
+    rejected = [key for key in _RULE_LAYERS if key in row]
+    for key in rejected:
+        row.pop(key, None)
+    gaps = []
+    for item in list(row.get("affected") or []):
+        ticker = item.get("ticker") if isinstance(item, dict) else None
+        gaps.append({"ticker": ticker, "reason": "未给逐环依据"})
+    row["affected"] = []
+    row["research_gaps"] = gaps
+    row["link_problems"] = ["未给逐环依据"]
+    row["hypothesis_count"] = 0
+    row["hypothesis_width"] = 0
+    row["共用假设"] = False
+    row["model_scope_rejected"] = rejected
+    row["scope_layers"] = {
+        "预期影响范围": [],
+        "已支持的市场关联": [],
+        "已量化或验证的经营暴露": [],
+    }
+    row["quote_note"] = _QUOTE
+    row["link_checked"] = True
+    row["links_missing"] = True
+    return row
+
+
 def link_view(candidates):
     """Split what the report may show. Quote match is provenance only."""
     statements, relations, hypotheses, gaps = [], [], [], []
     expected = []
-    for row in candidates or []:
+    widths = []
+    for index, row in enumerate(candidates or []):
         if not isinstance(row, dict):
             continue
+        widths.append({"candidate_index": index, "hypothesis_width": row.get("hypothesis_width")})
         for link in row.get("links") or []:
             if link.get("kind") == "来源陈述":
                 statements.append(link)
@@ -113,6 +145,7 @@ def link_view(candidates):
         "引文说明": _QUOTE,
         "评分展示名": "时间与关联特征分",
         "分数不是可信度": True,
+        "hypothesis_width": widths,
     }
 
 

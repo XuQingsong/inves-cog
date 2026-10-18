@@ -237,9 +237,34 @@ def propose_candidates(anomaly, items, neighbors, client, universe):
     if not items:
         return validate_candidates([], set(), universe)
     result = client.call("anomaly_candidates", candidate_payload(anomaly, items, neighbors))
-    raw = read_candidates(result)
+    raw = read_candidates(soften_links(result))
     validated = validate_candidates(raw, {item["info_id"] for item in items}, universe)
-    return [inspect_links(row, items, neighbors) if "links" in row else row for row in validated]
+    return [_gate_row(row, items, neighbors) for row in validated]
+
+
+def soften_links(result):
+    """A non-array links field stays on the v3 path as missing evidence."""
+    if not isinstance(result, dict) or not isinstance(result.get("candidates"), list):
+        return result
+    rows = []
+    changed = False
+    for row in result["candidates"]:
+        if isinstance(row, dict) and "links" in row and not isinstance(row.get("links"), list):
+            copied = deepcopy(row)
+            copied.pop("links", None)
+            rows.append(copied)
+            changed = True
+        else:
+            rows.append(row)
+    if not changed:
+        return result
+    return {**result, "candidates": rows}
+
+
+def _gate_row(row, items, neighbors):
+    if row.get("scored") is False and "links" not in row:
+        return row
+    return inspect_links(row, items, neighbors)
 
 
 def read_candidates(result):

@@ -7,6 +7,7 @@ from pathlib import Path
 from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.attribution.cases import muse_chart, openai_cover, openai_labels, r1_or_store
 from inves_cog.perception.attribution.claims import claim_payload
+from inves_cog.perception.attribution.links import inspect_links
 from inves_cog.perception.attribution.manual import historical_case, open_relation
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.report import type_candidates
@@ -81,7 +82,15 @@ def judge_recording(anomaly, items, recording):
     if not isinstance(recording, dict) or recording.get("prompt_version") != PROMPT_VERSION:
         return {"eligible": False, "reason": "旧录音不能标成 v3", "passes_7_1": False}
     result = recording.get("result") if isinstance(recording.get("result"), dict) else {}
-    missing = _missing(anomaly, [], items, result.get("candidates") or [])
+    gated = []
+    for row in result.get("candidates") or []:
+        if not isinstance(row, dict):
+            continue
+        current = dict(row)
+        if "links" in current and not isinstance(current.get("links"), list):
+            current.pop("links", None)
+        gated.append(inspect_links(current, items, []))
+    missing = _missing(anomaly, [], items, gated)
     return {
         "eligible": True,
         "prompt_version": PROMPT_VERSION,
@@ -90,6 +99,27 @@ def judge_recording(anomaly, items, recording):
         "missing": missing,
         "semantic_support": False,
     }
+
+
+def v3_candidates(recording, items, neighbors=None):
+    """Read candidates on the v3 path. An older recording is returned unchanged."""
+    from inves_cog.perception.attribution.propose import PROMPT_VERSION, read_candidates, soften_links
+
+    result = (
+        recording.get("result") if isinstance(recording, dict) and isinstance(recording.get("result"), dict) else {}
+    )
+    raw = result.get("candidates")
+    stored = list(raw) if isinstance(raw, list) else []
+    if not isinstance(recording, dict) or recording.get("prompt_version") != PROMPT_VERSION:
+        return {"v3": False, "candidates": stored}
+    parsed = read_candidates(soften_links(result))
+    gated = []
+    for row in parsed:
+        if row.get("scored") is False and "links" not in row:
+            gated.append(row)
+            continue
+        gated.append(inspect_links(row, items, neighbors or []))
+    return {"v3": True, "candidates": gated}
 
 
 def real_v3_recordings(root):

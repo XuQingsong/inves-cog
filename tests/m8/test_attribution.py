@@ -546,6 +546,7 @@ def test_candidate_validation():
         "published_at": start - timedelta(hours=1),
         "first_seen_at": start - timedelta(hours=1),
         "tickers": ["STX"],
+        "headline": "MU and SNDK",
         "claims": [],
     }
     candidate = {
@@ -554,6 +555,7 @@ def test_candidate_validation():
         "affected": [{"ticker": "MU"}, {"ticker": "SNDK"}, {"ticker": "NOT_A_NAME"}],
         "chain": [],
         "control_baskets": [],
+        **_kept_scope("nikkei", ["MU", "SNDK"], "MU"),
     }
 
     class Controlled:
@@ -916,10 +918,12 @@ def test_market_confirmation_four_conditions():
         }
         for name in ("wire-one", "wire-two")
     ]
+    source_items[0]["headline"] = "NVDA capacity"
     proposal = {
         "mechanism": "需求",
         "info_ids": [row["info_id"] for row in source_items],
         "affected": [{"ticker": "NVDA"}],
+        **_kept_scope("wire-one", ["NVDA"], "NVDA"),
     }
     scored = [{**proposal, "scored": True, "score": 0.8}]
     produced = _confirmation(base, scored, source_items)
@@ -3330,6 +3334,7 @@ def test_model_output_contract_rejects_a_bad_structure():
                         "confidence": "高",
                         "fundamental": "支持",
                         "affected": [{"ticker": "WDC", "score": 1}],
+                        **_kept_scope("nikkei", ["WDC"], "expand"),
                     }
                 ]
             }
@@ -4588,6 +4593,7 @@ def test_chain_counts_alternative_exclusion():
         "tickers": ["NVDA"],
         "entities": ["NVDA"],
         "source_root": "wire",
+        "headline": "NVDA AMD",
         "claims": [],
     }
 
@@ -4602,6 +4608,7 @@ def test_chain_counts_alternative_exclusion():
                         "info_ids": ["nvda-news"],
                         "affected": [{"ticker": "NVDA"}],
                         "chain": [{"entity_id": "NVDA"}],
+                        **_kept_scope("nvda-news", ["NVDA"], "NVDA"),
                     }
                 ]
             }
@@ -4658,12 +4665,14 @@ def test_chain_counts_alternative_exclusion():
                         "info_ids": ["nvda-news"],
                         "affected": [{"ticker": "NVDA", "basket_id": "accelerators"}],
                         "chain": [{"entity_id": "NVDA"}],
+                        **_kept_scope("nvda-news", ["NVDA"], "NVDA"),
                     },
                     {
                         "mechanism": "需求",
                         "info_ids": ["nvda-news"],
                         "affected": [{"ticker": "AMD", "basket_id": "accelerators"}],
                         "chain": [{"entity_id": "AMD"}],
+                        **_kept_scope("nvda-news", ["AMD"], "AMD"),
                     },
                 ]
             }
@@ -4939,6 +4948,7 @@ def test_second_hit_uses_the_matched_basket_direction():
         "first_seen_at": early,
         "tickers": ["NVDA", "AMD"],
         "source_root": "wire",
+        "headline": "NVDA AMD",
         "claims": [],
     }
 
@@ -4957,6 +4967,7 @@ def test_second_hit_uses_the_matched_basket_direction():
                             {"ticker": "AMD", "basket_id": "down-basket", "direction": "down"},
                         ],
                         "control_baskets": ["control"],
+                        **_kept_scope("nvda-amd", ["NVDA", "AMD"], "NVDA"),
                     }
                 ]
             }
@@ -5514,6 +5525,7 @@ def test_labels_reload_a_saved_conclusion():
         "first_seen_at": early,
         "tickers": ["NVDA"],
         "source_root": "wire",
+        "headline": "NVDA",
         "claims": [],
     }
     scores = {"供给": {"time": 1.0, "gradient": 1.0, "specificity": 1.0, "narrative": 1.0, "magnitude": 1.0}}
@@ -5533,6 +5545,7 @@ def test_labels_reload_a_saved_conclusion():
                         "info_ids": ["nvda-news"],
                         "affected": [{"ticker": "NVDA"}],
                         "chain": [{"entity_id": "NVDA"}],
+                        **_kept_scope("nvda-news", ["NVDA"], "NVDA"),
                     }
                 ]
             }
@@ -7133,7 +7146,16 @@ def test_r1_accelerator_basket_still_needs_a_recording(tmp_path):
             assert task == "anomaly_candidates"
             ids = [item["info_id"] for item in body["items"]]
             assert ids == ["manual-r1-2025-01-20"]
-            return {"candidates": [{"mechanism": "竞争", "info_ids": ids, "affected": [{"ticker": "NVDA"}]}]}
+            return {
+                "candidates": [
+                    {
+                        "mechanism": "竞争",
+                        "info_ids": ids,
+                        "affected": [{"ticker": "NVDA"}],
+                        **_kept_scope(ids[0], ["NVDA"], "DeepSeek R1"),
+                    }
+                ]
+            }
 
     report = historical_report(anomaly, leads, read_on, Cite())
     assert "候选未连接加速芯片范围" not in report["missing"]
@@ -7233,6 +7255,7 @@ def test_toshiba_reprint_is_not_operating_evidence(tmp_path):
                         "mechanism": "供给",
                         "info_ids": [by_kind["toshiba_supply"]["info_id"]],
                         "affected": [{"ticker": "WDC"}, {"ticker": "MU"}],
+                        **_kept_scope(by_kind["toshiba_supply"]["info_id"], ["WDC"], "Toshiba"),
                     }
                 ]
             }
@@ -7266,6 +7289,23 @@ def test_toshiba_reprint_is_not_operating_evidence(tmp_path):
     assert later_event(published, start, source_root=by_kind["tdk_second_hit"]["info_id"]) == {
         "eligible": True,
         "conclusion": "未检验",
+    }
+
+
+def _kept_scope(info_id, tickers, quote):
+    """Legal v3 links so the original affected tickers stay in scope."""
+    return {
+        "links": [
+            {
+                "from": "source",
+                "to": ticker,
+                "kind": "来源陈述",
+                "anchors": [{"info_id": info_id, "source_field": "headline", "quote": quote}],
+            }
+            for ticker in tickers
+        ],
+        "竞争解释": [],
+        "反证条件": "无",
     }
 
 
@@ -7406,7 +7446,12 @@ def test_r1_citation_must_name_the_release():
         "2026-10-16",
         _cite(
             [
-                {"mechanism": "竞争", "info_ids": ["release"], "affected": [{"ticker": "NVDA"}]},
+                {
+                    "mechanism": "竞争",
+                    "info_ids": ["release"],
+                    "affected": [{"ticker": "NVDA"}],
+                    **_kept_scope("release", ["NVDA"], "DeepSeek R1"),
+                },
             ]
         ),
     )

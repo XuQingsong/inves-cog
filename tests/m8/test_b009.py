@@ -249,7 +249,7 @@ def test_diagnostic_packet_checks_preregistration_and_does_not_call():
     }
     packet = build_packet(spec)
     assert packet["refused"] is False
-    assert packet["generation_order"] == ["四格", "删除变体", "安慰剂与方向反转", "盲审表", "调用计划", "诱饵评分"]
+    assert packet["generation_order"] == ["四格", "删除变体", "对照对象", "盲审表", "调用计划", "诱饵评分"]
     assert packet["sha256"]
     assert len(packet["cells"]) == 4
     completed_model = next(
@@ -258,9 +258,10 @@ def test_diagnostic_packet_checks_preregistration_and_does_not_call():
     assert [row["info_id"] for row in completed_model["extraction_rows"]] == ["base"]
     assert "fill" in packet["deleted"]["removed"] and "copy" in packet["deleted"]["removed"]
     assert [row["info_id"] for row in packet["deleted"]["claims"]] == ["base"]
-    assert all("summary" not in row for row in packet["deleted"]["items"])
-    assert packet["placebo"]["anomaly"] is False
-    assert packet["reversed"]["direction"] == "up"
+    kept_base = next(item for item in spec["materials"]["completed"] if item["info_id"] == "base")
+    assert packet["deleted"]["items"] == [kept_base]
+    assert packet["placebo"]["anomaly"]["trade_date"] == "2026-10-13"
+    assert packet["reversed"]["anomaly"]["direction"] == "up"
     assert packet["reversed"]["items"] == packet["placebo"]["items"]
     assert all("group" not in row for row in packet["blind_table"])
     assert {row["group"] for row in packet["blind_map"]} == {
@@ -272,7 +273,8 @@ def test_diagnostic_packet_checks_preregistration_and_does_not_call():
         "方向反转",
     }
     assert packet["call_plan"]["executes"] is False
-    assert packet["call_plan"]["total_cap"] == 4
+    assert packet["call_plan"]["runs"] == 3
+    assert packet["call_plan"]["total_cap"] == 18
     with pytest.raises(RuntimeError, match="诊断工具不执行调用"):
         execute_calls(packet["call_plan"])
     labels = {row["label"]: row for row in packet["ranking"]}
