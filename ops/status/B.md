@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-012  已完成  2026-10-19 00:13 北京
+
+- PR #21，head `2c9c07f`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39143773187 。`phase1-blocking` 通过。没有合并。
+- 证据：本地 `make phase1-test` 257 passed、19 deselected；`make phase1-cases` 7 passed、1 xfailed。七个点名例子通过。
+- 因此改变的现有期望值：`test_three_link_kinds_keep_or_drop_the_expected_ticker` 里未点名的 WDC 和仅有关系的 WDC 不再留下；`test_r1_accelerator_basket_still_needs_a_recording` 的 missing 从空变为候选未连接加速芯片范围；`test_toshiba_reprint_is_not_operating_evidence` 的 affected 从 WDC 变为空。
+- 已自行决定：无。评分公式、权重、阈值未改。`test_case_attribution` 继续 pending。没有发起模型调用，没有连接数据库。
+- 下一步：等需求方验收。AC-M8-02/06/08 的现场和五日全池仍未关闭。不取新任务。
+
 ## B-012  进行中  2026-10-19 00:10 北京
 
 - 草稿 PR #21，head `2c9c07f`。七个例子修之前失败，修之后通过。不新开 PR。
