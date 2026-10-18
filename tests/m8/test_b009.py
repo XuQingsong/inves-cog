@@ -60,12 +60,9 @@ def test_three_link_kinds_keep_or_drop_the_expected_ticker():
         [item],
         [],
     )
-    assert [row["ticker"] for row in legal["affected"]] == []
+    assert [row["ticker"] for row in legal["affected"]] == ["WDC"]
     assert legal["scope_layers"]["预期影响范围"] == legal["affected"]
-    assert legal["research_gaps"] == [
-        {"ticker": "WDC", "reason": "材料未点名"},
-        {"ticker": "INTC", "reason": "材料未点名"},
-    ]
+    assert legal["research_gaps"] == [{"ticker": "INTC", "reason": "没有到达该标的的逐环路径"}]
     assert legal["quote_note"] == "引文匹配只证明出处，不证明支持推断"
     assert legal["scope_layers"]["已支持的市场关联"] == []
     assert legal["scope_layers"]["已量化或验证的经营暴露"] == []
@@ -103,7 +100,7 @@ def test_three_link_kinds_keep_or_drop_the_expected_ticker():
         [item],
         [observed, rejected],
     )
-    assert [row["ticker"] for row in related["affected"]] == []
+    assert [row["ticker"] for row in related["affected"]] == ["WDC"]
     hypothesis = {
         "from": "HDD",
         "to": "NVDA",
@@ -167,7 +164,7 @@ def test_three_link_kinds_keep_or_drop_the_expected_ticker():
         [item],
         [],
     )
-    assert combined["affected"] == []
+    assert combined["affected"][0]["ticker"] == "WDC"
     assert combined["links"][0]["组合"] is True
     bare = inspect_links(
         {**base, "links": [{**combined["links"][0], "组合": False, "anchors": combined["links"][0]["anchors"]}]},

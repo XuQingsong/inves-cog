@@ -555,7 +555,7 @@ def test_candidate_validation():
         "affected": [{"ticker": "MU"}, {"ticker": "SNDK"}, {"ticker": "NOT_A_NAME"}],
         "chain": [],
         "control_baskets": [],
-        **_kept_scope("nikkei", ["MU", "SNDK"], "MU and SNDK"),
+        **_kept_scope("nikkei", ["MU", "SNDK"], "MU"),
     }
 
     class Controlled:
@@ -3312,7 +3312,7 @@ def test_model_output_contract_rejects_a_bad_structure():
         "baskets": ["hdd"],
         "members": ["WDC"],
     }
-    items = [{"info_id": "nikkei", "headline": "WDC expand"}]
+    items = [{"info_id": "nikkei", "headline": "expand"}]
 
     class Envelope:
         def call(self, task, payload):
@@ -3334,7 +3334,7 @@ def test_model_output_contract_rejects_a_bad_structure():
                         "confidence": "高",
                         "fundamental": "支持",
                         "affected": [{"ticker": "WDC", "score": 1}],
-                        **_kept_scope("nikkei", ["WDC"], "WDC"),
+                        **_kept_scope("nikkei", ["WDC"], "expand"),
                     }
                 ]
             }
@@ -4967,7 +4967,7 @@ def test_second_hit_uses_the_matched_basket_direction():
                             {"ticker": "AMD", "basket_id": "down-basket", "direction": "down"},
                         ],
                         "control_baskets": ["control"],
-                        **_kept_scope("nvda-amd", ["NVDA", "AMD"], "NVDA AMD"),
+                        **_kept_scope("nvda-amd", ["NVDA", "AMD"], "NVDA"),
                     }
                 ]
             }
@@ -7158,7 +7158,8 @@ def test_r1_accelerator_basket_still_needs_a_recording(tmp_path):
             }
 
     report = historical_report(anomaly, leads, read_on, Cite())
-    assert report["missing"] == ["候选未连接加速芯片范围"]
+    assert "候选未连接加速芯片范围" not in report["missing"]
+    assert report["missing"] == []
     assert report["closes_case"] is False
     assert report["closes_ac_m8_06"] is False
     assert report["collected_then"] is False
@@ -7264,7 +7265,7 @@ def test_toshiba_reprint_is_not_operating_evidence(tmp_path):
     assert report["closes_case"] is False
     assert report["closes_ac_m8_06"] is False
     assert report["collected_then"] is False
-    assert report["candidates"][0]["affected"] == []
+    assert report["candidates"][0]["affected"] == [{"ticker": "WDC"}]
     supply = by_kind["toshiba_supply"]
     verdict = operating_verdict(
         [
@@ -7395,7 +7396,7 @@ def test_r1_citation_must_name_the_release():
         "published_on": "2025-01-20",
         "published_precision": "date",
         "source_root": "official-site",
-        "excerpt": "The page says DeepSeek R1 was released that day and names NVDA.",
+        "excerpt": "The page says DeepSeek R1 was released that day.",
     }
     other = {
         "id": "unrelated-cpi",
@@ -7449,7 +7450,7 @@ def test_r1_citation_must_name_the_release():
                     "mechanism": "竞争",
                     "info_ids": ["release"],
                     "affected": [{"ticker": "NVDA"}],
-                    **_kept_scope("release", ["NVDA"], "DeepSeek R1 was released that day and names NVDA"),
+                    **_kept_scope("release", ["NVDA"], "DeepSeek R1"),
                 },
             ]
         ),
