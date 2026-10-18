@@ -23,7 +23,7 @@ BATCH = "m8-v3-2026-10-18"
 PROMPT = "evidence-bridge-v3-links"
 CAP = 19
 RUNS = 3
-PUBLIC_BASE = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+BAILIAN_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 CLAIM_PREFIX = {
     "2025-01-27:close:001": "1ce62f664de0",
     "2026-09-21:close:001": "c92b8e2d3772",
@@ -50,6 +50,7 @@ def main(argv=None):
     parser.add_argument("--src", required=True)
     parser.add_argument("--root")
     parser.add_argument("--fixture")
+    parser.add_argument("--key-file")
     args = parser.parse_args(argv)
     modules = pin_src(Path(args.src))
     fixture = Path(args.fixture) if args.fixture else Path(args.src).resolve().parent / "tests/fixtures/phase1"
@@ -63,7 +64,7 @@ def main(argv=None):
         return 0
     if not args.root:
         raise SystemExit("run 需要 --root")
-    return live(modules, fixture, Path(args.root))
+    return live(modules, fixture, Path(args.root), key_file_path(args.key_file))
 
 
 def pin_src(src):
@@ -165,16 +166,48 @@ def claim_groups(modules, rows):
     return groups
 
 
-def live(modules, fixture, root):
-    missing = [name for name in ("LLM_HARD_API_KEY", "LLM_STANDARD_API_KEY") if not os.environ.get(name)]
-    if missing:
-        print("停：没有模型密钥，一次都没发送。")
-        print("把 LLM_HARD_API_KEY 和 LLM_STANDARD_API_KEY 放进运行这条命令的环境，不要贴到对话里。")
-        print(f"端点没单独设置时用 {PUBLIC_BASE}")
+def key_file_path(explicit):
+    if explicit:
+        return Path(explicit)
+    return Path(__file__).resolve().parents[3] / "secrets" / "bailian.env"
+
+
+def read_bailian(path):
+    if not path.is_file():
+        raise BatchStop(f"还没有文件 {path}")
+    values = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        text = line.strip()
+        if not text or text.startswith("#") or "=" not in text:
+            continue
+        name, value = text.split("=", 1)
+        values[name.strip()] = value.strip().strip('"').strip("'")
+    key = values.get("DASHSCOPE_API_KEY") or ""
+    if not key:
+        raise BatchStop(f"{path} 里还没有阿里百炼的 key")
+    return key, values.get("DASHSCOPE_BASE_URL") or BAILIAN_BASE
+
+
+def dialogue_config(key, base):
+    """The existing client looks up two internal slots. Both carry this one Bailian key."""
+    config = {}
+    for prefix in ("LLM_HARD", "LLM_STANDARD"):
+        config[prefix + "_API_KEY"] = key
+        config[prefix + "_BASE_URL"] = base
+        config[prefix + "_API_STYLE"] = "openai-compatible"
+    return config
+
+
+def live(modules, fixture, root, key_file):
+    try:
+        key, base = read_bailian(key_file)
+    except BatchStop as exc:
+        print(f"停：{exc}")
+        print("在 DASHSCOPE_API_KEY= 后面写上阿里百炼的 key，保存即可。不要贴到对话里。")
         return 2
     from inves_cog.llm.transport import OpenAICompatibleTransport
 
-    transport = OpenAICompatibleTransport(endpoint_config())
+    transport = OpenAICompatibleTransport(dialogue_config(key, base))
     try:
         execute(modules, fixture, root, transport)
     except BatchStop as exc:
@@ -182,14 +215,6 @@ def live(modules, fixture, root):
         return 3
     print("本批 19 次已落盘")
     return 0
-
-
-def endpoint_config():
-    config = dict(os.environ)
-    for prefix in ("LLM_HARD", "LLM_STANDARD"):
-        config.setdefault(prefix + "_BASE_URL", PUBLIC_BASE)
-        config.setdefault(prefix + "_API_STYLE", "openai-compatible")
-    return config
 
 
 def execute(modules, fixture, root, transport):
@@ -377,12 +402,50 @@ class Ledger:
 
 
 def self_check(modules, fixture):
+    _expect_bailian_file()
     manifest = build_manifest(modules, fixture)
     _expect_prefixes(manifest)
     _expect_attached_hash_changes(modules, fixture)
     _expect_complete_batch(modules, fixture)
     _expect_http_failure_stops(modules, fixture)
     _expect_missing_usage_stops(modules, fixture)
+
+
+def _expect_bailian_file():
+    try:
+        read_bailian(Path("/tmp/m8-v3-missing-bailian.env"))
+    except BatchStop:
+        pass
+    else:
+        raise BatchStop("缺文件没有拦住")
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "bailian.env"
+        path.write_text("DASHSCOPE_API_KEY=\n", encoding="utf-8")
+        try:
+            read_bailian(path)
+        except BatchStop:
+            pass
+        else:
+            raise BatchStop("空 key 没有拦住")
+        path.write_text(
+            "\n".join(
+                (
+                    "DASHSCOPE_API_KEY=sk-test",
+                    "DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1",
+                    "LLM_HARD_API_KEY=other",
+                )
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        key, base = read_bailian(path)
+        config = dialogue_config(key, base)
+        if key != "sk-test" or base != BAILIAN_BASE:
+            raise BatchStop("没有读到阿里百炼的 key")
+        if config["LLM_HARD_API_KEY"] != "sk-test" or config["LLM_STANDARD_API_KEY"] != "sk-test":
+            raise BatchStop("两个模型没有共用这一把 key")
+        if "other" in config.values():
+            raise BatchStop("读到了不该使用的 key")
 
 
 def _expect_prefixes(manifest):
