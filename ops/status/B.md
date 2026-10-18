@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-009  进行中  2026-10-18 21:04 北京
+
+- 草稿 PR #21，head `68ee464`。本地 `make phase1-test`：244 passed，19 deselected。`make phase1-cases`：7 passed，1 xfailed。`test_case_attribution` 仍 pending。
+- CI 还没有结果。不写成已完成。没有发起模型调用，没有连接数据库。AC-M8-02/06/08 的现场和五日全池仍未关闭。
+
 ## B-009  进行中  2026-10-18 21:01 北京
 
 - 草稿 PR #21，head `68ee464`。基线是 `c22aa14`。没有向 `codex/m8-takeover-r01` 推送。PR #18、#19 没有改。
