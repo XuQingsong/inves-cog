@@ -5,11 +5,23 @@ from copy import deepcopy
 from inves_cog.perception.attribution.candidates import validate_candidates
 from inves_cog.perception.attribution.documents import document_fields, passage_schema
 from inves_cog.perception.attribution.grounding import claim_support, copy_support
+from inves_cog.perception.attribution.links import inspect_links
 from inves_cog.perception.attribution.material import material_fields
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
+PROMPT_VERSION = "evidence-bridge-v3-links"
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
-_FORBIDDEN = ("score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis")
+_FORBIDDEN = (
+    "score",
+    "confidence",
+    "fundamental",
+    "evidence",
+    "operating_impact_proven",
+    "enters_hypothesis",
+    "已支持的市场关联",
+    "已量化或验证的经营暴露",
+)
+_LINK_KEYS = ("links", "竞争解释", "反证条件", "证伪预测")
 
 
 def candidate_output():
@@ -23,6 +35,31 @@ def candidate_output():
                 "control_baskets": ["string"],
                 "info_ids": ["string"],
                 "direction": "up|down",
+                "links": [
+                    {
+                        "from": "string",
+                        "to": "string",
+                        "kind": "来源陈述|已有关系|声明的假设",
+                        "anchors": [
+                            {
+                                "info_id": "string",
+                                "source_field": "headline|summary",
+                                "quote": "exact supplied text",
+                                "provides": "what this anchor contributes",
+                            }
+                        ],
+                        "组合": "boolean",
+                        "relation_id": "string",
+                        "hypothesis": "string",
+                        "hypothesis_type": "产业结构|需求弹性|暴露关系|其他",
+                        "falsify": {"metric": "string", "direction": "string", "window": "string"},
+                    }
+                ],
+                "竞争解释": ["string"],
+                "反证条件": "string",
+                "证伪预测": [
+                    {"ticker": "string", "control_basket": "string", "direction": "up|down", "window": "string"}
+                ],
                 "support": [
                     {
                         "ticker": "string",
@@ -37,7 +74,7 @@ def candidate_output():
         "max": 5,
         "mechanism": sorted(MECHANISMS),
         "selection_policy": {
-            "version": "evidence-bridge-v2-literal-anchors",
+            "version": PROMPT_VERSION,
             "anchors": (
                 "For each affected ticker provide cited exact headline/summary facts and a bounded "
                 "inference bridge. A quote match only confirms provenance; it does not verify the "
@@ -201,7 +238,8 @@ def propose_candidates(anomaly, items, neighbors, client, universe):
         return validate_candidates([], set(), universe)
     result = client.call("anomaly_candidates", candidate_payload(anomaly, items, neighbors))
     raw = read_candidates(result)
-    return validate_candidates(raw, {item["info_id"] for item in items}, universe)
+    validated = validate_candidates(raw, {item["info_id"] for item in items}, universe)
+    return [inspect_links(row, items, neighbors) if "links" in row else row for row in validated]
 
 
 def read_candidates(result):
@@ -225,6 +263,8 @@ def _candidate_row(row):
     info_ids = row.get("info_ids")
     if not isinstance(info_ids, list) or any(not isinstance(item, str) or not item for item in info_ids):
         raise ValueError("结构不合格")
+    if "links" in row and not isinstance(row.get("links"), list):
+        raise ValueError("结构不合格")
     parsed = {
         "mechanism": mechanism,
         "info_ids": list(info_ids),
@@ -239,6 +279,9 @@ def _candidate_row(row):
         parsed["direction"] = direction
     if mechanism not in MECHANISMS:
         return None
+    for key in _LINK_KEYS:
+        if key in row:
+            parsed[key] = deepcopy(row[key])
     return copy_support(row, parsed)
 
 

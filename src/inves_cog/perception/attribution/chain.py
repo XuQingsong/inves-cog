@@ -18,6 +18,7 @@ from inves_cog.perception.attribution.candidates import market_confirmed, valida
 from inves_cog.perception.attribution.capital import bound_capital_rows
 from inves_cog.perception.attribution.claims import attach_claims, claim_payload, read_claims
 from inves_cog.perception.attribution.confirmation import confirmation_reading
+from inves_cog.perception.attribution.diagnostics import score_marks
 from inves_cog.perception.attribution.documents import source_coverage
 from inves_cog.perception.attribution.evidence import (
     alternative_exclusion,
@@ -32,6 +33,7 @@ from inves_cog.perception.attribution.graph_context import project_graph
 from inves_cog.perception.attribution.grounding import candidate_support, claim_support
 from inves_cog.perception.attribution.impact import decompose
 from inves_cog.perception.attribution.lifecycle import transition
+from inves_cog.perception.attribution.links import fill_rule_layers, link_view
 from inves_cog.perception.attribution.magnitude import implied_magnitude
 from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.operating import operating_verdict
@@ -319,6 +321,8 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         elif previous is not None:
             report["previous_candidates"] = deepcopy(previous.get("candidates") or [])
     hits, conclusion = _second_hits(anomaly, candidates, as_of)
+    if conclusion == "确认":
+        report["link_view"]["范围"]["已支持的市场关联"] = [{"source": "二次命中", "written_by": "rule"}]
     tracks = _track_rows(anomaly, state, stage, as_of)
     notes = [note for note in (claim_note, model_note) if note]
     if reused and notes:
@@ -682,6 +686,7 @@ def _apply_score(candidates, anomaly, items, overrides):
                 "note": "分数按已有分项归一化；不表示六项齐备、归因属实或市场确认。",
             },
             "support_audit": candidate_support(row, items),
+            "diagnostics": score_marks(row, items, components),
         }
         copied["score"] = scored["total"]
         copied["confidence"] = scored["confidence"]
@@ -1156,7 +1161,7 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
     if status:
         current["status"] = status
     sources = [_report_source(item) for item in items]
-    return explanation_report(
+    report = explanation_report(
         current,
         impact,
         candidates,
@@ -1168,6 +1173,14 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
         magnitude=channels,
         tracks_view=anomaly.get("tracks_view"),
     )
+    operating = []
+    if deadline and deadline.get("operating_impact_proven") is True and deadline.get("deadline_outcome") == "支持":
+        operating.append({"source": "经营门槛", "written_by": "rule"})
+    report["score_display_name"] = "时间与关联特征分"
+    report["score_not_credibility"] = True
+    report["quote_note"] = "引文匹配只证明出处，不证明支持推断"
+    report["link_view"] = fill_rule_layers(link_view(candidates), market=[], operating=operating)
+    return report
 
 
 def _report_source(item):

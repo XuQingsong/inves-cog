@@ -1,6 +1,7 @@
 """Historical-case candidates. A missing recording is not a successful call."""
 
 import hashlib
+import json
 from pathlib import Path
 
 from inves_cog.llm.client import canonical_payload
@@ -71,6 +72,44 @@ def claim_capture(anomaly, leads, read_on, root):
     if not payload["items"]:
         return None
     return recording_path("claim_extraction", payload, root)
+
+
+def judge_recording(anomaly, items, recording):
+    """Judge a v3 recording with section 7.1. An older recording is not relabeled."""
+    from inves_cog.perception.attribution.propose import PROMPT_VERSION
+
+    if not isinstance(recording, dict) or recording.get("prompt_version") != PROMPT_VERSION:
+        return {"eligible": False, "reason": "旧录音不能标成 v3", "passes_7_1": False}
+    result = recording.get("result") if isinstance(recording.get("result"), dict) else {}
+    missing = _missing(anomaly, [], items, result.get("candidates") or [])
+    return {
+        "eligible": True,
+        "prompt_version": PROMPT_VERSION,
+        "synthetic": recording.get("synthetic") is True,
+        "passes_7_1": not missing,
+        "missing": missing,
+        "semantic_support": False,
+    }
+
+
+def real_v3_recordings(root):
+    """Non-synthetic v3 files. An empty directory is not a pass."""
+    from inves_cog.perception.attribution.propose import PROMPT_VERSION
+
+    folder = Path(root)
+    if not folder.exists():
+        return []
+    found = []
+    for path in sorted(folder.rglob("*.json")):
+        try:
+            body = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(body, dict) or body.get("synthetic") is True:
+            continue
+        if body.get("prompt_version") == PROMPT_VERSION:
+            found.append(path)
+    return found
 
 
 def _ranked(candidates, limit):

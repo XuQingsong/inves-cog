@@ -13,7 +13,7 @@ test_position_panel | M5 | 等待 M5 实现
 test_shadow_rules_no_orders | M5 | 等待 M5 实现
 test_valuation_live_smoke | M5 | 等待 R5
 test_anomaly_live_smoke | M7 | 等待 R5
-test_case_attribution | M8 | 等待 M8 实现
+test_case_attribution | M8 | 等待 v3 真实录音（需用户授权调用）
 test_overlay_only_tightens | M9 | 等待 M9 实现
 test_overlay_cooling_rules | M9 | 等待 M9 实现
 test_overlay_contract | M9 | 等待 M9 实现

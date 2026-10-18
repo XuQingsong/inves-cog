@@ -1,10 +1,13 @@
 """Drop candidates the model cannot support, then keep one unscored default."""
 
 import math
+from copy import deepcopy
 
 from inves_cog.perception.attribution.evidence import basket_specificity, exposure_gradient, time_alignment
 from inves_cog.perception.attribution.grounding import copy_support
 from inves_cog.perception.attribution.second_hit import denial_response
+
+_LINK_KEYS = ("links", "竞争解释", "反证条件", "证伪预测")
 
 DEFAULT = "无事件/资金面"
 _FINGERPRINTS = ("exposure_gradient", "unexposed_control", "time_order", "denial_response")
@@ -24,22 +27,23 @@ def validate_candidates(candidates, retrieved_ids, universe):
 
 def _cited(candidate, citations, universe):
     direction = candidate.get("direction")
-    return copy_support(
-        candidate,
-        {
-            "mechanism": candidate.get("mechanism"),
-            "info_ids": citations,
-            "affected": _affected(candidate.get("affected") or [], universe),
-            "chain": list(candidate.get("chain") or []),
-            "control_baskets": list(candidate.get("control_baskets") or []),
-            "direction": direction if direction in {"up", "down"} else None,
-            "scored": True,
-            "score": None,
-            "confidence": None,
-            "fundamental": None,
-            "evidence": None,
-        },
-    )
+    copied = {
+        "mechanism": candidate.get("mechanism"),
+        "info_ids": citations,
+        "affected": _affected(candidate.get("affected") or [], universe),
+        "chain": list(candidate.get("chain") or []),
+        "control_baskets": list(candidate.get("control_baskets") or []),
+        "direction": direction if direction in {"up", "down"} else None,
+        "scored": True,
+        "score": None,
+        "confidence": None,
+        "fundamental": None,
+        "evidence": None,
+    }
+    for key in _LINK_KEYS:
+        if key in candidate:
+            copied[key] = deepcopy(candidate[key])
+    return copy_support(candidate, copied)
 
 
 def _affected(rows, universe):
