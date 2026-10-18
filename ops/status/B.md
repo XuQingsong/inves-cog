@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-010  已完成  2026-10-18 21:55 北京
+
+- PR #21，head `820e5e9`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39133341729 。`phase1-blocking` 通过。没有合并。
+- 证据：本地 `make phase1-test` 250 passed、19 deselected；`make phase1-cases` 7 passed、1 xfailed。第 1 项现有期望值：无。
+- 已自行决定：无。评分公式、权重、阈值未改。`test_case_attribution` 继续 pending。没有发起模型调用，没有连接数据库。
+- 下一步：等需求方验收。AC-M8-02/06/08 的现场和五日全池仍未关闭。不取新任务。
+
 ## B-010  进行中  2026-10-18 21:50 北京
 
 - head `820e5e9`。上一头 `0294358` 的 CI 失败：https://github.com/XuQingsong/inves-cog/actions/runs/39132601819 。产品测试通过。导入检查把 main 上未格式化的 `docs/phase1/acceptance/M8-B009-probe-2026-10-18.py` 算进本 PR，因为 `base.sha` 停在开 PR 时的 `28cfbad`。没有改 `docs/`。`820e5e9` 改为对合并提交的第一父本做差分。
