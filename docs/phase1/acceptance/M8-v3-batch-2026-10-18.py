@@ -23,7 +23,7 @@ BATCH = "m8-v3-2026-10-18"
 PROMPT = "evidence-bridge-v3-links"
 CAP = 19
 RUNS = 3
-BAILIAN_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+LLM_BASE = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 CLAIM_PREFIX = {
     "2025-01-27:close:001": "1ce62f664de0",
     "2026-09-21:close:001": "c92b8e2d3772",
@@ -182,10 +182,10 @@ def read_bailian(path):
             continue
         name, value = text.split("=", 1)
         values[name.strip()] = value.strip().strip('"').strip("'")
-    key = values.get("DASHSCOPE_API_KEY") or ""
+    key = values.get("LLM_API_KEY") or ""
     if not key:
-        raise BatchStop(f"{path} 里还没有阿里百炼的 key")
-    return key, values.get("DASHSCOPE_BASE_URL") or BAILIAN_BASE
+        raise BatchStop(f"{path} 里还没有 LLM 对话 key")
+    return key, values.get("LLM_BASE_URL") or LLM_BASE
 
 
 def dialogue_config(key, base):
@@ -203,7 +203,7 @@ def live(modules, fixture, root, key_file):
         key, base = read_bailian(key_file)
     except BatchStop as exc:
         print(f"停：{exc}")
-        print("在 DASHSCOPE_API_KEY= 后面写上阿里百炼的 key，保存即可。不要贴到对话里。")
+        print("在 LLM_API_KEY= 后面写上 Token Plan 的对话 key，保存即可。不要贴到对话里。")
         return 2
     from inves_cog.llm.transport import OpenAICompatibleTransport
 
@@ -420,7 +420,7 @@ def _expect_bailian_file():
         raise BatchStop("缺文件没有拦住")
     with tempfile.TemporaryDirectory() as folder:
         path = Path(folder) / "bailian.env"
-        path.write_text("DASHSCOPE_API_KEY=\n", encoding="utf-8")
+        path.write_text("DASHSCOPE_API_KEY=embed-key\nLLM_API_KEY=\n", encoding="utf-8")
         try:
             read_bailian(path)
         except BatchStop:
@@ -430,8 +430,9 @@ def _expect_bailian_file():
         path.write_text(
             "\n".join(
                 (
-                    "DASHSCOPE_API_KEY=sk-test",
+                    "DASHSCOPE_API_KEY=embed-key",
                     "DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1",
+                    "LLM_API_KEY=sk-test",
                     "LLM_HARD_API_KEY=other",
                 )
             )
@@ -440,8 +441,8 @@ def _expect_bailian_file():
         )
         key, base = read_bailian(path)
         config = dialogue_config(key, base)
-        if key != "sk-test" or base != BAILIAN_BASE:
-            raise BatchStop("没有读到阿里百炼的 key")
+        if key != "sk-test" or base != LLM_BASE:
+            raise BatchStop("没有读到 LLM 对话 key")
         if config["LLM_HARD_API_KEY"] != "sk-test" or config["LLM_STANDARD_API_KEY"] != "sk-test":
             raise BatchStop("两个模型没有共用这一把 key")
         if "other" in config.values():

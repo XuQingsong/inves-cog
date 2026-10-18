@@ -213,7 +213,8 @@
 - 候选哈希在说法落盘之后、候选请求之前写入 `candidate-freeze.json`。说法抽空时才会等于清单里标成不调用的 5 个空说法哈希。10-17 的 19 次录音不读取、不重放。
 - 不写数据库，不提交新闻正文和模型原文。执行器是 `docs/phase1/acceptance/M8-v3-batch-2026-10-18.py`，哈希清单是同目录的 `M8-v3-batch-manifest-2026-10-18.json`。
 - 五日 9 个池内异常不在这 19 次里。本机没有当时的输入；`five_day_visibility.json` 不能当作这 9 个对象。输入到了以后先数清次数，再发，不并进这一批。
-- UD-COORD-06 的日预算豁免不到这一批。端点因额度拒绝就停，不改日常预算。密钥只放 `secrets/bailian.env` 的 `DASHSCOPE_API_KEY`（阿里百炼这一把，两个模型共用），不进仓库和对话。
+- UD-COORD-06 的日预算豁免不到这一批。端点因额度拒绝就停，不改日常预算。密钥只放 `secrets/bailian.env` 的 `LLM_API_KEY`（Token Plan 对话 key，两个模型共用），不进仓库和对话。
 - 2026-10-18 23:05 用户要求不要用两套对话变量名，改读阿里百炼的 key。接口用 `https://dashscope.aliyuncs.com/compatible-mode/v1`。
 - 2026-10-18 23:07 用户写入 key 后发出第 1 次说法抽取。百炼北京、国际和原 Token Plan 地址都返回 401 Invalid API key，没有模型输出。该次不计入已消耗的模型调用，本地失败记录已清除。等控制台 API-Key 覆盖原值后再发。
+- 2026-10-18 23:12 用户问这一批用 DashScope 还是 LLM。结论：用 LLM。说法是 deepseek-v4.1-flash，候选是 glm-5.3，地址是 Token Plan `token-plan.cn-beijing.maas.aliyuncs.com`。DashScope 只用于嵌入，这次不调用。上一轮把「阿里百炼的 key」接到了 DashScope 地址，是接错了。
 - 这不代表 M8 通过，也不合并 PR #17 / #21。
