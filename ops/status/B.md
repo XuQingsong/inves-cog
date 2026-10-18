@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-013  已完成  2026-10-19 00:37 北京
+
+- PR #21，head `8b25fbe`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39145362431 。`phase1-blocking` 通过。没有合并。
+- 证据：已撤回 `2c9c07f`，工作区与 `820e5e9` 没有文件差异。三个测试的期望已回到当时。本地 `make phase1-test` 250 passed、19 deselected；`make phase1-cases` 7 passed、1 xfailed。
+- 已自行决定：UD-B-05，见上一条已收到。没有实现两条新的新闻路径。没有发起模型调用，没有连接数据库。评分没有改。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-013  进行中  2026-10-19 00:31 北京
 
 - 草稿 PR #21，head `8b25fbe`。已撤回 `2c9c07f`，留下方式与 `820e5e9` 相同。三个测试的期望已改回。
