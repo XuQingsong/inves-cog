@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-014  已完成  2026-10-19 01:00 北京
+
+- PR #21，head `fb9cfda`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39147297944 。`phase1-blocking` 通过。没有合并。
+- 证据：八个例子先因没有记录器而收集失败，再通过。本地 `make phase1-test` 259 passed、19 deselected；`make phase1-cases` 7 passed、1 xfailed。
+- 已自行决定：公司名用 `config/news_entities.yaml` 里这 59 只的正式名称和代码。产品别名不算公司，所以 Muse 那条里的 iPhone 不会写成 AAPL。超过三家时，按正文出现的先后留下前三家。
+- 没有改留下方式。没有发起模型调用，没有连接数据库。评分、估值、交易没有改。没有改 `docs/`、`golden/`、`milestones.txt`。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-014  进行中  2026-10-19 00:57 北京
 
 - 草稿 PR #21，head `fb9cfda`。基线 `8b25fbe`。没有新开 PR。
