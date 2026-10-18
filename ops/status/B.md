@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-010  进行中  2026-10-18 21:50 北京
+
+- head `820e5e9`。上一头 `0294358` 的 CI 失败：https://github.com/XuQingsong/inves-cog/actions/runs/39132601819 。产品测试通过。导入检查把 main 上未格式化的 `docs/phase1/acceptance/M8-B009-probe-2026-10-18.py` 算进本 PR，因为 `base.sha` 停在开 PR 时的 `28cfbad`。没有改 `docs/`。`820e5e9` 改为对合并提交的第一父本做差分。
+- 新 CI：https://github.com/XuQingsong/inves-cog/actions/runs/39133341729 。还没有结果。不写成已完成。
+- 本地 `make phase1-test`：250 passed，19 deselected。`make phase1-cases`：7 passed，1 xfailed。第 1 项现有期望值：无。没有发起模型调用，没有连接数据库。
+
 ## B-010  进行中  2026-10-18 21:40 北京
 
 - 五项和两个次要项已写进 PR #21，head `0294358`。没有新开 PR。PR #18、#19 没有改。
