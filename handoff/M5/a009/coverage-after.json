@@ -1,0 +1,493 @@
+{
+  "TSM_NTM_unit": "unknown; rejected; original FR-M5-05 TTM fallback per A009 K01",
+  "baseline": "10f66edaaa5e08e5426a836ed7ed4095cda73ed6",
+  "days": [
+    {
+      "after_valued": 49,
+      "before_valued": 47,
+      "date": "2026-10-09",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "ARM",
+        "TSM"
+      ],
+      "old_valued_range_changes": [],
+      "remaining": [
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "AVGO",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ],
+          "reason": "retained history insufficient and listed-security denominator relationship unverified",
+          "ticker": "SKHY",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [],
+          "reason": "intentional distress non-valuation; no ingestion repair or arbitrary parameter change",
+          "ticker": "INTC",
+          "type": "困境"
+        },
+        {
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ],
+          "reason": "retained capex tag includes intangible outlays; pure PPE scope unresolved (outside A009)",
+          "ticker": "NOK",
+          "type": "稳定"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "UNH",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "JPM",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "retained weighted denominator ends in 2013; cannot align current state without new source",
+          "ticker": "XOM",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "GE",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ],
+          "reason": "retained annual history has two usable years, below existing seven-year margin contract",
+          "ticker": "SNDK",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "unchanged pre-A009 source gap",
+          "ticker": "ASML",
+          "type": "周期"
+        }
+      ],
+      "rows": 59
+    },
+    {
+      "after_valued": 49,
+      "before_valued": 47,
+      "date": "2026-10-12",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "ARM",
+        "TSM"
+      ],
+      "old_valued_range_changes": [],
+      "remaining": [
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "AVGO",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ],
+          "reason": "retained history insufficient and listed-security denominator relationship unverified",
+          "ticker": "SKHY",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [],
+          "reason": "intentional distress non-valuation; no ingestion repair or arbitrary parameter change",
+          "ticker": "INTC",
+          "type": "困境"
+        },
+        {
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ],
+          "reason": "retained capex tag includes intangible outlays; pure PPE scope unresolved (outside A009)",
+          "ticker": "NOK",
+          "type": "稳定"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "UNH",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "JPM",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "retained weighted denominator ends in 2013; cannot align current state without new source",
+          "ticker": "XOM",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "GE",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ],
+          "reason": "retained annual history has two usable years, below existing seven-year margin contract",
+          "ticker": "SNDK",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "unchanged pre-A009 source gap",
+          "ticker": "ASML",
+          "type": "周期"
+        }
+      ],
+      "rows": 59
+    },
+    {
+      "after_valued": 49,
+      "before_valued": 47,
+      "date": "2026-10-13",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "ARM",
+        "TSM"
+      ],
+      "old_valued_range_changes": [],
+      "remaining": [
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "AVGO",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ],
+          "reason": "retained history insufficient and listed-security denominator relationship unverified",
+          "ticker": "SKHY",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [],
+          "reason": "intentional distress non-valuation; no ingestion repair or arbitrary parameter change",
+          "ticker": "INTC",
+          "type": "困境"
+        },
+        {
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ],
+          "reason": "retained capex tag includes intangible outlays; pure PPE scope unresolved (outside A009)",
+          "ticker": "NOK",
+          "type": "稳定"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "UNH",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "JPM",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "retained weighted denominator ends in 2013; cannot align current state without new source",
+          "ticker": "XOM",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "GE",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ],
+          "reason": "retained annual history has two usable years, below existing seven-year margin contract",
+          "ticker": "SNDK",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "unchanged pre-A009 source gap",
+          "ticker": "ASML",
+          "type": "周期"
+        }
+      ],
+      "rows": 59
+    },
+    {
+      "after_valued": 50,
+      "before_valued": 48,
+      "date": "2026-10-14",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "ARM",
+        "TSM"
+      ],
+      "old_valued_range_changes": [],
+      "remaining": [
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "AVGO",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ],
+          "reason": "retained history insufficient and listed-security denominator relationship unverified",
+          "ticker": "SKHY",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [],
+          "reason": "intentional distress non-valuation; no ingestion repair or arbitrary parameter change",
+          "ticker": "INTC",
+          "type": "困境"
+        },
+        {
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ],
+          "reason": "retained capex tag includes intangible outlays; pure PPE scope unresolved (outside A009)",
+          "ticker": "NOK",
+          "type": "稳定"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "UNH",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "JPM",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "retained weighted denominator ends in 2013; cannot align current state without new source",
+          "ticker": "XOM",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "GE",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ],
+          "reason": "retained annual history has two usable years, below existing seven-year margin contract",
+          "ticker": "SNDK",
+          "type": "周期"
+        }
+      ],
+      "rows": 59
+    },
+    {
+      "after_valued": 50,
+      "before_valued": 48,
+      "date": "2026-10-15",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "ARM",
+        "TSM"
+      ],
+      "old_valued_range_changes": [],
+      "remaining": [
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "AVGO",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ],
+          "reason": "retained history insufficient and listed-security denominator relationship unverified",
+          "ticker": "SKHY",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [],
+          "reason": "intentional distress non-valuation; no ingestion repair or arbitrary parameter change",
+          "ticker": "INTC",
+          "type": "困境"
+        },
+        {
+          "blocking_fields": [
+            "fcf_ttm"
+          ],
+          "reason": "retained capex tag includes intangible outlays; pure PPE scope unresolved (outside A009)",
+          "ticker": "NOK",
+          "type": "稳定"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "UNH",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ],
+          "reason": "M2 contract supplies neither approved ROTE history nor tangible book per share",
+          "ticker": "JPM",
+          "type": "金融"
+        },
+        {
+          "blocking_fields": [
+            "diluted_shares"
+          ],
+          "reason": "retained weighted denominator ends in 2013; cannot align current state without new source",
+          "ticker": "XOM",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ],
+          "reason": "cyclical type has no approved subindustry PE parameters (outside A009)",
+          "ticker": "GE",
+          "type": "周期"
+        },
+        {
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ],
+          "reason": "retained annual history has two usable years, below existing seven-year margin contract",
+          "ticker": "SNDK",
+          "type": "周期"
+        }
+      ],
+      "rows": 59
+    }
+  ],
+  "external_requests": 0,
+  "independent_new_formula_checks": 10,
+  "method": "v1.4",
+  "new_ARM_TSM_five_day_numeric_stability": true,
+  "old_extractor_outputs_unchanged": 59,
+  "old_states_unchanged": 3556,
+  "production_writes": 0,
+  "stability_comparisons": 236,
+  "stable_valued_pairs": 171
+}

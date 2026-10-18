@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.108" timestamp="2026-10-16T22:16:59.818946+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_growth_valuation_v11" time="0.022"><failure message="assert (None == 1)">tests/m5/test_valuation.py:67: in test_growth_valuation_v11
+    assert positive_fcf['runway_years'] == 1 and positive_fcf['runway_haircut'] is True
+E   assert (None == 1)</failure></testcase></testsuite></testsuites>

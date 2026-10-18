@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-10-17 04:10:59.310685+00:00",
+  "production_writes": 0,
+  "external_requests": 0,
+  "model_calls": 0,
+  "files": [
+    {
+      "file": "retained-upstream.json.gz",
+      "sha256_raw": "50702870c49a656c00d10689ccfc00510e261b9289a95aea7f39825e76d009eb",
+      "sha256_gz": "a063279ce982efa9f83aaf391fd9365009027e29bc2016e8fa82f20926744037",
+      "bytes_gz": 606519,
+      "contents": "retained source row values and exact JSONB source hashes; no claim of original capture proof",
+      "published": false,
+      "delivery": "retained locally; automatic approval rejected dataset export"
+    },
+    {
+      "file": "five-day-plans.json.gz",
+      "sha256_raw": "5a3408e52e38754bf5c6e6474a155e993c7ae4d019d1f51d95b35ab17c7b2701",
+      "sha256_gz": "9379760411a6bf9344de488f369db98653f60da42cd0e448bfe4a258599f1212",
+      "bytes_gz": 3878,
+      "published": false,
+      "delivery": "retained locally; automatic approval rejected dataset export"
+    },
+    {
+      "file": "daily-candidates.json.gz",
+      "sha256_raw": "5b0964746d2e99756a77338749678749c07fe7c7383d5b2ff5d4671a2c9ad121",
+      "sha256_gz": "b79c7eebced14b09eb90d31276b1314efea0dd34c6dc4cb755fdf013d284bdfb",
+      "bytes_gz": 117114,
+      "published": false,
+      "delivery": "retained locally; automatic approval rejected dataset export"
+    }
+  ],
+  "original_companyfacts_manifest": {
+    "path": "tests/fixtures/phase1/m2/muse/companyfacts/manifest.json",
+    "sha256": "556f6128a1ae1fd47906337969242e3aa54346c8bd477ebbc4aed1434571ed0b",
+    "declared_export_date": "2026-10-14",
+    "earlier_system_capture_proven": false,
+    "meaning": "Export/archive on Oct14 does not prove this project held it on Oct9/12/13; SEC filed dates prove claimed public dates, not local acquisition time."
+  },
+  "financial_capture": {
+    "schema": "fundamentals.fin_state has filed/source accession but no captured_at column",
+    "status": "unknown; reconstruction from retained state, not original daily local archive"
+  },
+  "consensus_capture": {
+    "muse_import": "captured_at absent in original retained imports; as_of is not system acquisition time",
+    "yahoo_page": "actual captured_at retained; never substituted for older replay days"
+  },
+  "five_day_plans": {
+    "account_kind": "explicitly synthetic acceptance replay",
+    "complete_snapshots": true,
+    "order_counts": [
+      13,
+      5,
+      2,
+      0,
+      5
+    ],
+    "old_comparison_preserved": "../trading-decoupling.json",
+    "not_a_new_strategy_backtest": true
+  },
+  "history_proof_limits": "No proof of earlier system possession is invented, and missing capture is not a new universal M5 rejection gate.",
+  "publication_scope": "code, synthetic regressions and non-raw audit summary only; compressed datasets are not published"
+}

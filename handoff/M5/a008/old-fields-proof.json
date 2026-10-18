@@ -1,0 +1,364 @@
+{
+  "baseline": "3ac5f9b26a6d116675e01d3a4711152aa3c9cae6",
+  "issuer_outputs": [
+    {
+      "new_sha256": "5c3e9c797fe8996926b21cf151e3d1ba5c4d00a4e2ec388a1b4d8c1db9231389",
+      "old_sha256": "5c3e9c797fe8996926b21cf151e3d1ba5c4d00a4e2ec388a1b4d8c1db9231389",
+      "status": "equal_full_extractor_output",
+      "ticker": "NVDA"
+    },
+    {
+      "new_sha256": "ba91bbb3c1cdc9a2df3ac2adc9a1f63510221cf4b72c9c89a020378871267344",
+      "old_sha256": "ba91bbb3c1cdc9a2df3ac2adc9a1f63510221cf4b72c9c89a020378871267344",
+      "status": "equal_full_extractor_output",
+      "ticker": "AMD"
+    },
+    {
+      "new_sha256": "3bc876c08cb63baeda7fb63fb9cbabf9910c9f5d76941533eeab39484d873e43",
+      "old_sha256": "3bc876c08cb63baeda7fb63fb9cbabf9910c9f5d76941533eeab39484d873e43",
+      "status": "equal_full_extractor_output",
+      "ticker": "AVGO"
+    },
+    {
+      "new_sha256": "aa698fcff74c366e3197cc512d7529cabf89bc0d2691532d172c34c88e8c52f5",
+      "old_sha256": "aa698fcff74c366e3197cc512d7529cabf89bc0d2691532d172c34c88e8c52f5",
+      "status": "equal_full_extractor_output",
+      "ticker": "MRVL"
+    },
+    {
+      "new_sha256": "abcc07b7748783f057dc1d9f19494d0d371558167e88c4e92722e2c2fdb0d3ca",
+      "old_sha256": "abcc07b7748783f057dc1d9f19494d0d371558167e88c4e92722e2c2fdb0d3ca",
+      "status": "equal_full_extractor_output",
+      "ticker": "MU"
+    },
+    {
+      "new_sha256": "41c6c1c24054e9c3a82b73e41a1b41873fc4c14c7e43b666f0a1f486de537962",
+      "old_sha256": "41c6c1c24054e9c3a82b73e41a1b41873fc4c14c7e43b666f0a1f486de537962",
+      "status": "equal_full_extractor_output",
+      "ticker": "SKHY"
+    },
+    {
+      "new_sha256": "477db718721cf4660d0d4c3e57d79c74f84a8469e09d9130c62323723c0e650c",
+      "old_sha256": "477db718721cf4660d0d4c3e57d79c74f84a8469e09d9130c62323723c0e650c",
+      "status": "equal_full_extractor_output",
+      "ticker": "INTC"
+    },
+    {
+      "new_sha256": "03cb29184846d6fe43767ae550940ed7e0b183ba739e284e988a9b5b69311005",
+      "old_sha256": "03cb29184846d6fe43767ae550940ed7e0b183ba739e284e988a9b5b69311005",
+      "status": "equal_full_extractor_output",
+      "ticker": "NOK"
+    },
+    {
+      "new_sha256": "cabe3e8bd5a857c2f83be8e30e75b042dd7271f2f9dbc52dfefc5958483e23e3",
+      "old_sha256": "cabe3e8bd5a857c2f83be8e30e75b042dd7271f2f9dbc52dfefc5958483e23e3",
+      "status": "equal_full_extractor_output",
+      "ticker": "LITE"
+    },
+    {
+      "new_sha256": "c743aafafa43dd1ca01c078cb7d15ad9eedd04678dba6e2f85bc2794edfd3444",
+      "old_sha256": "c743aafafa43dd1ca01c078cb7d15ad9eedd04678dba6e2f85bc2794edfd3444",
+      "status": "equal_full_extractor_output",
+      "ticker": "MSFT"
+    },
+    {
+      "new_sha256": "158a120e0bebd3be4408aeb2356b23656fe183ea610c5d167e190578eb125095",
+      "old_sha256": "158a120e0bebd3be4408aeb2356b23656fe183ea610c5d167e190578eb125095",
+      "status": "equal_full_extractor_output",
+      "ticker": "ORCL"
+    },
+    {
+      "new_sha256": "99e15de1b18545a85b8a8947e67f0c1f80a7259f665bb80633d3324cf595ab16",
+      "old_sha256": "99e15de1b18545a85b8a8947e67f0c1f80a7259f665bb80633d3324cf595ab16",
+      "status": "equal_full_extractor_output",
+      "ticker": "CRM"
+    },
+    {
+      "new_sha256": "754bdb4a6823b4e4a99d6af2fb058ad8ef05406642beb5d3097b11f99191faea",
+      "old_sha256": "754bdb4a6823b4e4a99d6af2fb058ad8ef05406642beb5d3097b11f99191faea",
+      "status": "equal_full_extractor_output",
+      "ticker": "NOW"
+    },
+    {
+      "new_sha256": "9b56b858cb556f8d6dfa4be851dca38d6884d208540cfda1e4efc283c33a25c8",
+      "old_sha256": "9b56b858cb556f8d6dfa4be851dca38d6884d208540cfda1e4efc283c33a25c8",
+      "status": "equal_full_extractor_output",
+      "ticker": "ADBE"
+    },
+    {
+      "new_sha256": "5f7d21f2fa6eb2b00594bc470abd3e511b772f61bcf92459b7a2630bee6092f4",
+      "old_sha256": "5f7d21f2fa6eb2b00594bc470abd3e511b772f61bcf92459b7a2630bee6092f4",
+      "status": "equal_full_extractor_output",
+      "ticker": "PLTR"
+    },
+    {
+      "new_sha256": "657aa03a33a1a669cc987a4e78f4844779a8acff3a8e22475b718bb3a7973e2f",
+      "old_sha256": "657aa03a33a1a669cc987a4e78f4844779a8acff3a8e22475b718bb3a7973e2f",
+      "status": "equal_full_extractor_output",
+      "ticker": "META"
+    },
+    {
+      "new_sha256": "efc34fd477c51aa2de6e89f9efce3002f48b313640871dbd41f072afb23a8463",
+      "old_sha256": "efc34fd477c51aa2de6e89f9efce3002f48b313640871dbd41f072afb23a8463",
+      "status": "equal_full_extractor_output",
+      "ticker": "GOOGL"
+    },
+    {
+      "new_sha256": "663c5a9be7062f3d4cf63a0579505fce30eecd553367e34da372fc687f8c93af",
+      "old_sha256": "663c5a9be7062f3d4cf63a0579505fce30eecd553367e34da372fc687f8c93af",
+      "status": "equal_full_extractor_output",
+      "ticker": "AMZN"
+    },
+    {
+      "new_sha256": "be19c621f89f3c6c4aea794ca87212b4b3c1c0ab3be368f658a7abda183a9c68",
+      "old_sha256": "be19c621f89f3c6c4aea794ca87212b4b3c1c0ab3be368f658a7abda183a9c68",
+      "status": "equal_full_extractor_output",
+      "ticker": "NFLX"
+    },
+    {
+      "new_sha256": "f68a5bda5a42bff4c1b22c67493edfe3b831f4ac7a757924ea0b07152c235232",
+      "old_sha256": "f68a5bda5a42bff4c1b22c67493edfe3b831f4ac7a757924ea0b07152c235232",
+      "status": "equal_full_extractor_output",
+      "ticker": "AAPL"
+    },
+    {
+      "new_sha256": "3248056fdb88d8010328e0e2b6162b4e067a648a6abc3fc4b89513210f1e8ba0",
+      "old_sha256": "3248056fdb88d8010328e0e2b6162b4e067a648a6abc3fc4b89513210f1e8ba0",
+      "status": "equal_full_extractor_output",
+      "ticker": "TSLA"
+    },
+    {
+      "new_sha256": "c94789086713e53c317c27010d99603989bd6c4912fa90826af949fce3ef525b",
+      "old_sha256": "c94789086713e53c317c27010d99603989bd6c4912fa90826af949fce3ef525b",
+      "status": "equal_full_extractor_output",
+      "ticker": "COST"
+    },
+    {
+      "new_sha256": "cba75917628903c9023c9ce4bf7d546db76c5d85a21c910b8eea262cd57920f8",
+      "old_sha256": "cba75917628903c9023c9ce4bf7d546db76c5d85a21c910b8eea262cd57920f8",
+      "status": "equal_full_extractor_output",
+      "ticker": "WMT"
+    },
+    {
+      "new_sha256": "b17f252ffecc447304248a3660f3e85301c3cd54e8690c04a7d228bfb01f6477",
+      "old_sha256": "b17f252ffecc447304248a3660f3e85301c3cd54e8690c04a7d228bfb01f6477",
+      "status": "equal_full_extractor_output",
+      "ticker": "HD"
+    },
+    {
+      "new_sha256": "ee25f7726bf2f81dc628fb4ad336dc2f6bd654b741cd38df951e094a46c86956",
+      "old_sha256": "ee25f7726bf2f81dc628fb4ad336dc2f6bd654b741cd38df951e094a46c86956",
+      "status": "equal_full_extractor_output",
+      "ticker": "UNH"
+    },
+    {
+      "new_sha256": "a83458ae226f1e7c8fd97a5203e460154fcca8c0536146d56396e0e1bfe5b2d2",
+      "old_sha256": "a83458ae226f1e7c8fd97a5203e460154fcca8c0536146d56396e0e1bfe5b2d2",
+      "status": "equal_full_extractor_output",
+      "ticker": "LLY"
+    },
+    {
+      "new_sha256": "90d71af43a72186c8d206100528070efdc6bc173340037f901dca9d7542e9173",
+      "old_sha256": "90d71af43a72186c8d206100528070efdc6bc173340037f901dca9d7542e9173",
+      "status": "equal_full_extractor_output",
+      "ticker": "JNJ"
+    },
+    {
+      "new_sha256": "2fb0e8307e4f7609fedf42fee6bb6721c76d8b274173b983319a02cfe2c4b610",
+      "old_sha256": "2fb0e8307e4f7609fedf42fee6bb6721c76d8b274173b983319a02cfe2c4b610",
+      "status": "equal_full_extractor_output",
+      "ticker": "JPM"
+    },
+    {
+      "new_sha256": "c1a10fe07ddba99a8ae09a043656664efc1088b1f07cdd664e3a31b557a5d0ef",
+      "old_sha256": "c1a10fe07ddba99a8ae09a043656664efc1088b1f07cdd664e3a31b557a5d0ef",
+      "status": "equal_full_extractor_output",
+      "ticker": "V"
+    },
+    {
+      "new_sha256": "d162b46b99b8c9b7f0a1f684c7503287435d48d816ab69138f0df730b13e56b4",
+      "old_sha256": "d162b46b99b8c9b7f0a1f684c7503287435d48d816ab69138f0df730b13e56b4",
+      "status": "equal_full_extractor_output",
+      "ticker": "MA"
+    },
+    {
+      "new_sha256": "5606ecbff2f7f9e47024b08fbbf84e1e5a45c7ab100f0a245bd46c52b6a95f42",
+      "old_sha256": "5606ecbff2f7f9e47024b08fbbf84e1e5a45c7ab100f0a245bd46c52b6a95f42",
+      "status": "equal_full_extractor_output",
+      "ticker": "XOM"
+    },
+    {
+      "new_sha256": "5561f56b4cecc24ef8fa53b0afc1e494d0e434bb7d9074aa950122ac4c44bedf",
+      "old_sha256": "5561f56b4cecc24ef8fa53b0afc1e494d0e434bb7d9074aa950122ac4c44bedf",
+      "status": "equal_full_extractor_output",
+      "ticker": "CVX"
+    },
+    {
+      "new_sha256": "d845e894c81ecfc89ab58b7d3246be0b83cd6e3a21850c12a40a5d88e3e05a2e",
+      "old_sha256": "d845e894c81ecfc89ab58b7d3246be0b83cd6e3a21850c12a40a5d88e3e05a2e",
+      "status": "equal_full_extractor_output",
+      "ticker": "CAT"
+    },
+    {
+      "new_sha256": "56cae88f57b7a5cbd2fcdbc63db334f7fa096feb532a53ad022f810b4735ba64",
+      "old_sha256": "56cae88f57b7a5cbd2fcdbc63db334f7fa096feb532a53ad022f810b4735ba64",
+      "status": "equal_full_extractor_output",
+      "ticker": "GE"
+    },
+    {
+      "new_sha256": "fe543778eea57ed5f4a67c2072e6cf6837cc88aaa3de9d569422546ffc4b1709",
+      "old_sha256": "fe543778eea57ed5f4a67c2072e6cf6837cc88aaa3de9d569422546ffc4b1709",
+      "status": "equal_full_extractor_output",
+      "ticker": "WDC"
+    },
+    {
+      "new_sha256": "2c4e6772d9ef16a28a66e0907ef234d3364f029fddbf8948fa480fa046e2126a",
+      "old_sha256": "2c4e6772d9ef16a28a66e0907ef234d3364f029fddbf8948fa480fa046e2126a",
+      "status": "equal_full_extractor_output",
+      "ticker": "STX"
+    },
+    {
+      "new_sha256": "a4050be4466bc22db402b15b28be12ebabc60859491a39475e94d395d9184749",
+      "old_sha256": "a4050be4466bc22db402b15b28be12ebabc60859491a39475e94d395d9184749",
+      "status": "equal_full_extractor_output",
+      "ticker": "SNDK"
+    },
+    {
+      "new_sha256": "215d19571b1a02c7608ad5563a2301947406bb388513bcfe65c8873faf4875ea",
+      "old_sha256": "215d19571b1a02c7608ad5563a2301947406bb388513bcfe65c8873faf4875ea",
+      "status": "equal_full_extractor_output",
+      "ticker": "AMAT"
+    },
+    {
+      "new_sha256": "0e1e009b4cc85047b7c6743be9cb48ae2129702967fa1835e4b5a2a77467ee60",
+      "old_sha256": "0e1e009b4cc85047b7c6743be9cb48ae2129702967fa1835e4b5a2a77467ee60",
+      "status": "equal_full_extractor_output",
+      "ticker": "LRCX"
+    },
+    {
+      "new_sha256": "432870e031a64f5a7d7e29272d22236acb46674d9f57064c3aa1954598312094",
+      "old_sha256": "432870e031a64f5a7d7e29272d22236acb46674d9f57064c3aa1954598312094",
+      "status": "equal_full_extractor_output",
+      "ticker": "KLAC"
+    },
+    {
+      "new_sha256": "457cd8cdbf05fc97de399646d919ac479117b664ad85ec98a3559242518d5ee6",
+      "old_sha256": "457cd8cdbf05fc97de399646d919ac479117b664ad85ec98a3559242518d5ee6",
+      "status": "equal_full_extractor_output",
+      "ticker": "ASML"
+    },
+    {
+      "new_sha256": "00984b988ff0e118997df0045e5fbe56e809120f8117d2bea74d236a462d6103",
+      "old_sha256": "00984b988ff0e118997df0045e5fbe56e809120f8117d2bea74d236a462d6103",
+      "status": "equal_full_extractor_output",
+      "ticker": "QCOM"
+    },
+    {
+      "new_sha256": "7916da19ce11c9cfaa50b831ae9e76fc37a7a722aa323a99d839f6b1406841fb",
+      "old_sha256": "7916da19ce11c9cfaa50b831ae9e76fc37a7a722aa323a99d839f6b1406841fb",
+      "status": "equal_full_extractor_output",
+      "ticker": "ARM"
+    },
+    {
+      "new_sha256": "300ce40f1c2ab605aa0187dd6e159bf1ad547fdd0e46dadd03a0b3f4aff8f48c",
+      "old_sha256": "300ce40f1c2ab605aa0187dd6e159bf1ad547fdd0e46dadd03a0b3f4aff8f48c",
+      "status": "equal_full_extractor_output",
+      "ticker": "TSM"
+    },
+    {
+      "new_sha256": "6e084e5e8dc1fc89c2ed7440a1d0399ee59133521787c68d6920519992d5dccf",
+      "old_sha256": "6e084e5e8dc1fc89c2ed7440a1d0399ee59133521787c68d6920519992d5dccf",
+      "status": "equal_full_extractor_output",
+      "ticker": "ANET"
+    },
+    {
+      "new_sha256": "eb090f6785f5f39da22a32b447b7ec5a0cbacfa5d17c2330de9539fdc8342260",
+      "old_sha256": "eb090f6785f5f39da22a32b447b7ec5a0cbacfa5d17c2330de9539fdc8342260",
+      "status": "equal_full_extractor_output",
+      "ticker": "CIEN"
+    },
+    {
+      "new_sha256": "469d68af41e18a9b1f71f7904a0971e729aa4aa3fdee9f0964a234f9a3488ec4",
+      "old_sha256": "469d68af41e18a9b1f71f7904a0971e729aa4aa3fdee9f0964a234f9a3488ec4",
+      "status": "equal_full_extractor_output",
+      "ticker": "COHR"
+    },
+    {
+      "new_sha256": "2e07b6ca42ad1a88ef0128f2c894931d951690704d5b7abb62c00c52aa2aa50d",
+      "old_sha256": "2e07b6ca42ad1a88ef0128f2c894931d951690704d5b7abb62c00c52aa2aa50d",
+      "status": "equal_full_extractor_output",
+      "ticker": "VRT"
+    },
+    {
+      "new_sha256": "2c17c3d14bfd0041ddcb81a888cb1d173dc88e6d8d7aa858c64d7b4e6b9a24cd",
+      "old_sha256": "2c17c3d14bfd0041ddcb81a888cb1d173dc88e6d8d7aa858c64d7b4e6b9a24cd",
+      "status": "equal_full_extractor_output",
+      "ticker": "ETN"
+    },
+    {
+      "new_sha256": "c13d3a65c92b8ec5770a30325e0fd94337c7ba77bfb7f84cee1399a7611c2b32",
+      "old_sha256": "c13d3a65c92b8ec5770a30325e0fd94337c7ba77bfb7f84cee1399a7611c2b32",
+      "status": "equal_full_extractor_output",
+      "ticker": "GEV"
+    },
+    {
+      "new_sha256": "58b7dae455fe47ef852f58a26ba707cdfb842124b6991e7c7fc4ec502d15790a",
+      "old_sha256": "58b7dae455fe47ef852f58a26ba707cdfb842124b6991e7c7fc4ec502d15790a",
+      "status": "equal_full_extractor_output",
+      "ticker": "CEG"
+    },
+    {
+      "new_sha256": "7171ffbfd2ff6c0a688ca37270c9402845ff0af585cc140c115115df7fc7adf4",
+      "old_sha256": "7171ffbfd2ff6c0a688ca37270c9402845ff0af585cc140c115115df7fc7adf4",
+      "status": "equal_full_extractor_output",
+      "ticker": "BE"
+    },
+    {
+      "new_sha256": "a7f3f3f884f9c4e36c15cfa19fe09136f52049d56c0dc98f8dfbfc97c0e585a1",
+      "old_sha256": "a7f3f3f884f9c4e36c15cfa19fe09136f52049d56c0dc98f8dfbfc97c0e585a1",
+      "status": "equal_full_extractor_output",
+      "ticker": "DELL"
+    },
+    {
+      "new_sha256": "abe21b2ac0616784638177f92dc828344a1dae2bb1842c490074f8dedafe0908",
+      "old_sha256": "abe21b2ac0616784638177f92dc828344a1dae2bb1842c490074f8dedafe0908",
+      "status": "equal_full_extractor_output",
+      "ticker": "SMCI"
+    },
+    {
+      "new_sha256": "50bdba9fadabae9d2e1ec0496d8aa48340bdcd0c7e19e56e9b8c6ca373f7ad6b",
+      "old_sha256": "50bdba9fadabae9d2e1ec0496d8aa48340bdcd0c7e19e56e9b8c6ca373f7ad6b",
+      "status": "equal_full_extractor_output",
+      "ticker": "CRWV"
+    },
+    {
+      "new_sha256": "28668895b14b34668928176ce12a99bc91d9b8a902e6aa41e295fd5a5cadcf25",
+      "old_sha256": "28668895b14b34668928176ce12a99bc91d9b8a902e6aa41e295fd5a5cadcf25",
+      "status": "equal_full_extractor_output",
+      "ticker": "CRWD"
+    },
+    {
+      "new_sha256": "34b41ff752b8cbe888e20279873771474ad4691d266955d88d3b73eaa69933fc",
+      "old_sha256": "34b41ff752b8cbe888e20279873771474ad4691d266955d88d3b73eaa69933fc",
+      "status": "equal_full_extractor_output",
+      "ticker": "PANW"
+    },
+    {
+      "new_sha256": "45db2f029dcbec8a05b5c4bd1ba9cdf6e0e8f24991c05e71f9465e9856aa994c",
+      "old_sha256": "45db2f029dcbec8a05b5c4bd1ba9cdf6e0e8f24991c05e71f9465e9856aa994c",
+      "status": "equal_full_extractor_output",
+      "ticker": "FTNT"
+    },
+    {
+      "new_sha256": "9e2703a99364f71d3b6045bd81581b159ea1a0ea2c038a80165d9433a2144870",
+      "old_sha256": "9e2703a99364f71d3b6045bd81581b159ea1a0ea2c038a80165d9433a2144870",
+      "status": "equal_full_extractor_output",
+      "ticker": "ZS"
+    }
+  ],
+  "retained_states_unchanged": 3556,
+  "original_valued_invariance": {
+    "previously_valued_rows_checked": 75,
+    "changed_ranges": []
+  }
+}

@@ -1,0 +1,892 @@
+{
+  "label": "估值参考 v1，不参与仓位",
+  "kind": "five real type examples including explicit gaps; independent arithmetic where inputs exist",
+  "actual_examples": [
+    {
+      "type": "稳定",
+      "ticker": "V",
+      "kind": "actual public issuer inputs",
+      "inputs": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 44488000000.0,
+        "ni_ttm": 22592000000.0,
+        "rev_growth": 14.385622091378902,
+        "rev_q_yoy": 14.362957137239473,
+        "rev_accel_pp": -2.6893672321580695,
+        "eps_ttm": 11.75,
+        "eps_growth": 14.74609375,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
+        "fcf_ttm": 21013000000.0,
+        "fcf_margin": 47.23296169753641,
+        "fcf_conversion": 0.9301080028328612,
+        "roe": 85.45598971138934,
+        "cash": 12359000000.0,
+        "debt": 22611000000.0,
+        "net_debt": 10252000000.0,
+        "net_debt_fcf": 0.48788845000713843,
+        "current_ratio": 0.9852226141672228,
+        "shares": 1898000000.0,
+        "fcf_margin_change_pp": -9.545893109241156,
+        "op_margin_ttm": 60.68153209854342,
+        "ticker": "V",
+        "sic": 7389,
+        "financial_filed": "2026-07-29",
+        "financial_period": "2026-06-30",
+        "financial_health_codes": [
+          "ni_tag_fallback"
+        ],
+        "share_basis": {
+          "end": "2026-06-30",
+          "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+          "accn": "0001403161-26-000104",
+          "unit": "shares",
+          "filed": "2026-07-29",
+          "start": "2026-04-01",
+          "method": "multi_class_diluted",
+          "origin": "instance_parsed",
+          "d9_only": true,
+          "dimensions": {
+            "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+          }
+        },
+        "diluted_shares": 1898000000.0,
+        "fcf_per_share": 11.071127502634353,
+        "annual_sequence": [
+          {
+            "filed": "2016-11-15",
+            "period_end": "2016-09-30",
+            "rev_ttm": 15082000000.0,
+            "ni_ttm": 5991000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2017-11-17",
+            "period_end": "2017-09-30",
+            "rev_ttm": 18358000000.0,
+            "ni_ttm": 6699000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2018-11-16",
+            "period_end": "2018-09-30",
+            "rev_ttm": 20609000000.0,
+            "ni_ttm": 10301000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2019-11-14",
+            "period_end": "2019-09-30",
+            "rev_ttm": 22977000000.0,
+            "ni_ttm": 12080000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2020-11-19",
+            "period_end": "2020-09-30",
+            "rev_ttm": 21846000000.0,
+            "ni_ttm": 10866000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2021-11-18",
+            "period_end": "2021-09-30",
+            "rev_ttm": 24105000000.0,
+            "ni_ttm": 12311000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2022-11-16",
+            "period_end": "2022-09-30",
+            "rev_ttm": 29310000000.0,
+            "ni_ttm": 14957000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2023-11-15",
+            "period_end": "2023-09-30",
+            "rev_ttm": 32653000000.0,
+            "ni_ttm": 17273000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2024-11-13",
+            "period_end": "2024-09-30",
+            "rev_ttm": 35926000000.0,
+            "ni_ttm": 19743000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          },
+          {
+            "filed": "2025-11-06",
+            "period_end": "2025-09-30",
+            "rev_ttm": 40000000000.0,
+            "ni_ttm": 20058000000.0,
+            "eps_ttm": null,
+            "gross_margin": null
+          }
+        ],
+        "annual_eps": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "annual_gross_margins": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "subindustry": null,
+        "normal_net_margin": 0.5058768253155919,
+        "normal_revenue": 36193000000.0,
+        "rev_cagr_10y_pct": 11.44726039956636,
+        "ttm_net_margin": 0.5078223341125697,
+        "rev_cagr_3y": 11.80576559952371,
+        "rev_cagr_3y_source": {
+          "filed": "2023-07-26",
+          "period_end": "2023-06-30",
+          "rev_ttm": 31831000000.0
+        },
+        "foreign_annual_only": false,
+        "rote_5y_avg": null,
+        "tbv_per_share": null,
+        "eps_ntm": null,
+        "rev_ntm_consensus": null,
+        "consensus_next_year_eps_growth": null,
+        "consensus_reason": "快照财年缺失或已过期",
+        "consensus_as_of": "2026-10-15",
+        "consensus_source": "yahoo_page",
+        "pe_p25": 25.689938874461376,
+        "pe_p50": 25.689938874461376,
+        "pe_p75": 25.689938874461376,
+        "pe_p90": 25.689938874461376,
+        "insufficient_pe_history": true,
+        "eligible_count": 55,
+        "trim_each": 1,
+        "coverage_years": 0.2108188395381151,
+        "own_p50": 31.381276595744684,
+        "pe_basis": "L2成员P50中位数",
+        "pe_reason": "倍数历史不足5年，且无可用L2成员P50",
+        "type_disagreement": false
+      },
+      "published": {
+        "bear": 245.52541003137213,
+        "neutral": 285.1072639266738,
+        "bull": 316.76011319857577,
+        "price": 399.75,
+        "p": 2.165020462100173,
+        "g": null,
+        "reason": null
+      },
+      "independent_arithmetic": {
+        "E": 11.75,
+        "pe_method": [
+          271.67110359742907,
+          301.85678177492116,
+          316.94962086366723
+        ],
+        "values": [
+          245.5254100313721,
+          285.1072639266738,
+          316.76011319857577
+        ],
+        "p": 2.1650204621001725
+      }
+    },
+    {
+      "type": "成长",
+      "ticker": "AMD",
+      "kind": "actual public issuer inputs",
+      "inputs": {
+        "data_flags": [],
+        "rev_period": "2026-06-27",
+        "shares_date": "2026-07-29",
+        "rev_ttm": 41305000000.0,
+        "ni_ttm": 6434000000.0,
+        "rev_growth": 39.54391891891893,
+        "rev_q_yoy": 50.11060507482108,
+        "rev_accel_pp": 12.264409861053949,
+        "eps_ttm": 3.8899999999999997,
+        "eps_growth": 122.28571428571429,
+        "gross_margin": 53.20421256506476,
+        "gross_margin_change_pp": 5.582590943443137,
+        "fcf_ttm": 8403000000.0,
+        "fcf_margin": 20.343784045515072,
+        "fcf_conversion": 1.3060304631644388,
+        "roe": 9.570986552421754,
+        "cash": 5086000000.0,
+        "debt": 2351000000.0,
+        "net_debt": -2735000000.0,
+        "net_debt_fcf": -0.32547899559681065,
+        "current_ratio": 2.6092210909692906,
+        "shares": 1632475042.0,
+        "fcf_margin_change_pp": 6.685000261731288,
+        "op_margin_ttm": 15.707541459871685,
+        "ticker": "AMD",
+        "sic": 3674,
+        "financial_filed": "2026-08-05",
+        "financial_period": "2026-06-27",
+        "financial_health_codes": [
+          "ni_tag_fallback"
+        ],
+        "share_basis": {
+          "method": "instant",
+          "components": [
+            {
+              "end": "2026-07-29",
+              "tag": "dei:EntityCommonStockSharesOutstanding",
+              "accn": "0000002488-26-000123",
+              "unit": "shares",
+              "filed": "2026-08-05"
+            }
+          ]
+        },
+        "diluted_shares": null,
+        "diluted_shares_reason": "M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本",
+        "fcf_per_share": null,
+        "annual_sequence": [
+          {
+            "filed": "2017-02-21",
+            "period_end": "2016-12-31",
+            "rev_ttm": 4272000000.0,
+            "ni_ttm": -497000000.0,
+            "eps_ttm": -0.6200000000000001,
+            "gross_margin": 23.36142322097378
+          },
+          {
+            "filed": "2018-02-27",
+            "period_end": "2017-12-30",
+            "rev_ttm": 5329000000.0,
+            "ni_ttm": 43000000.0,
+            "eps_ttm": 0.03,
+            "gross_margin": 34.20904484893976
+          },
+          {
+            "filed": "2019-02-08",
+            "period_end": "2018-12-29",
+            "rev_ttm": 6475000000.0,
+            "ni_ttm": 337000000.0,
+            "eps_ttm": 0.32,
+            "gross_margin": 37.79150579150579
+          },
+          {
+            "filed": "2020-02-04",
+            "period_end": "2019-12-28",
+            "rev_ttm": 6731000000.0,
+            "ni_ttm": 341000000.0,
+            "eps_ttm": 0.3,
+            "gross_margin": 42.608824840291184
+          },
+          {
+            "filed": "2021-01-29",
+            "period_end": "2020-12-26",
+            "rev_ttm": 9763000000.0,
+            "ni_ttm": 2490000000.0,
+            "eps_ttm": 2.04,
+            "gross_margin": 44.525248386766364
+          },
+          {
+            "filed": "2022-02-03",
+            "period_end": "2021-12-25",
+            "rev_ttm": 16434000000.0,
+            "ni_ttm": 3162000000.0,
+            "eps_ttm": 2.57,
+            "gross_margin": 48.24753559693319
+          },
+          {
+            "filed": "2023-02-27",
+            "period_end": "2022-12-31",
+            "rev_ttm": 23601000000.0,
+            "ni_ttm": 1320000000.0,
+            "eps_ttm": 0.84,
+            "gross_margin": 44.92606245498072
+          },
+          {
+            "filed": "2024-01-31",
+            "period_end": "2023-12-30",
+            "rev_ttm": 22680000000.0,
+            "ni_ttm": 854000000.0,
+            "eps_ttm": 0.53,
+            "gross_margin": 46.119929453262785
+          },
+          {
+            "filed": "2025-02-05",
+            "period_end": "2024-12-28",
+            "rev_ttm": 25785000000.0,
+            "ni_ttm": 1641000000.0,
+            "eps_ttm": 1.0,
+            "gross_margin": 49.350397517936784
+          },
+          {
+            "filed": "2026-02-04",
+            "period_end": "2025-12-27",
+            "rev_ttm": 34639000000.0,
+            "ni_ttm": 4335000000.0,
+            "eps_ttm": 2.65,
+            "gross_margin": 49.51644100580271
+          }
+        ],
+        "annual_eps": [
+          -0.6200000000000001,
+          0.03,
+          0.32,
+          0.3,
+          2.04,
+          2.57,
+          0.84,
+          0.53,
+          1.0,
+          2.65
+        ],
+        "annual_gross_margins": [
+          23.36142322097378,
+          34.20904484893976,
+          37.79150579150579,
+          42.608824840291184,
+          44.525248386766364,
+          48.24753559693319,
+          44.92606245498072,
+          46.119929453262785,
+          49.350397517936784,
+          49.51644100580271
+        ],
+        "subindustry": null,
+        "normal_net_margin": 0.05398808276398209,
+        "normal_revenue": 27701333333.333332,
+        "rev_cagr_10y_pct": 26.2180136938569,
+        "ttm_net_margin": 0.15576806681999758,
+        "rev_cagr_3y": 23.598036235046326,
+        "rev_cagr_3y_source": {
+          "filed": "2023-08-02",
+          "period_end": "2023-07-01",
+          "rev_ttm": 21876000000.0
+        },
+        "foreign_annual_only": false,
+        "rote_5y_avg": null,
+        "tbv_per_share": null,
+        "eps_ntm": 14.366041666666668,
+        "rev_ntm_consensus": 82610030363.33334,
+        "consensus_next_year_eps_growth": 107.22689407919015,
+        "consensus_reason": null,
+        "consensus_as_of": "2026-10-15",
+        "consensus_source": "yahoo_page",
+        "ntm_current_year_weight": 0.16666666666666666,
+        "pe_p25": 58.279411764705884,
+        "pe_p50": 109.12561576354679,
+        "pe_p75": 162.8517295597484,
+        "pe_p90": 255.41842105263166,
+        "insufficient_pe_history": false,
+        "eligible_count": 2106,
+        "trim_each": 52,
+        "coverage_years": 8.627144979020787,
+        "own_p50": 109.12561576354679,
+        "pe_basis": "本股十年PIT截尾PE",
+        "type_disagreement": false
+      },
+      "published": {
+        "bear": 216.15201067832948,
+        "neutral": 334.9227242094619,
+        "bull": 408.3733578489227,
+        "price": 562.23,
+        "p": 1.800413920804187,
+        "g": 23.598036235046326,
+        "reason": null
+      },
+      "independent_arithmetic": {
+        "E": 14.366041666666668,
+        "g": 23.598036235046326,
+        "scenarios": [
+          {
+            "growth": 11.799018117523163,
+            "eps3": 18.51375673827884,
+            "pe": 15.539705435256948
+          },
+          {
+            "growth": 23.598036235046326,
+            "eps3": 23.364565549124155,
+            "pe": 19.079410870513897
+          },
+          {
+            "growth": 29.497545293807907,
+            "eps3": 26.070222432510622,
+            "pe": 20.84926358814237
+          }
+        ],
+        "values": [
+          216.15201067832948,
+          334.9227242094619,
+          408.3733578489226
+        ],
+        "p": 1.800413920804188
+      }
+    },
+    {
+      "type": "周期",
+      "ticker": "WDC",
+      "kind": "actual missing-input example; no invented value",
+      "inputs": {
+        "data_flags": [],
+        "rev_period": "2026-07-03",
+        "shares_date": "2026-08-07",
+        "rev_ttm": 12919000000.0,
+        "ni_ttm": 9424000000.0,
+        "rev_growth": 35.70378151260505,
+        "rev_q_yoy": 43.83877159309022,
+        "rev_accel_pp": -1.6276625830213831,
+        "eps_ttm": 24.28,
+        "eps_growth": 371.4563106796116,
+        "gross_margin": 48.85053022679774,
+        "gross_margin_change_pp": 10.06901762175572,
+        "fcf_ttm": 3511000000.0,
+        "fcf_margin": 27.17702608561034,
+        "fcf_conversion": 0.3725594227504245,
+        "roe": 106.31768953068593,
+        "cash": 1579000000.0,
+        "debt": 1052000000.0,
+        "net_debt": -527000000.0,
+        "net_debt_fcf": -0.15009968669894616,
+        "current_ratio": 1.3287735849056603,
+        "shares": 360540944.0,
+        "fcf_margin_change_pp": 13.742152136030509,
+        "op_margin_ttm": 34.46861212168125,
+        "ticker": "WDC",
+        "sic": 3572,
+        "financial_filed": "2026-08-14",
+        "financial_period": "2026-07-03",
+        "financial_health_codes": [
+          "ok"
+        ],
+        "share_basis": {
+          "method": "instant",
+          "components": [
+            {
+              "end": "2026-08-07",
+              "tag": "dei:EntityCommonStockSharesOutstanding",
+              "accn": "0001628280-26-057139",
+              "unit": "shares",
+              "filed": "2026-08-14"
+            }
+          ]
+        },
+        "diluted_shares": null,
+        "diluted_shares_reason": "M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本",
+        "fcf_per_share": null,
+        "annual_sequence": [
+          {
+            "filed": "2019-08-27",
+            "period_end": "2019-06-28",
+            "rev_ttm": 16569000000.0,
+            "ni_ttm": -754000000.0,
+            "eps_ttm": -2.63,
+            "gross_margin": 22.644697929869032
+          },
+          {
+            "filed": "2020-08-28",
+            "period_end": "2020-07-03",
+            "rev_ttm": 16736000000.0,
+            "ni_ttm": -250000000.0,
+            "eps_ttm": -0.8499999999999999,
+            "gross_margin": 22.592017208413
+          },
+          {
+            "filed": "2021-08-27",
+            "period_end": "2021-07-02",
+            "rev_ttm": 16922000000.0,
+            "ni_ttm": 821000000.0,
+            "eps_ttm": 1.38,
+            "gross_margin": 26.71670015364614
+          },
+          {
+            "filed": "2022-08-25",
+            "period_end": "2022-07-01",
+            "rev_ttm": 18793000000.0,
+            "ni_ttm": 1500000000.0,
+            "eps_ttm": 4.75,
+            "gross_margin": 31.256318842122067
+          },
+          {
+            "filed": "2023-08-22",
+            "period_end": "2023-06-30",
+            "rev_ttm": 12318000000.0,
+            "ni_ttm": -1706000000.0,
+            "eps_ttm": -5.44,
+            "gross_margin": 15.319045299561617
+          },
+          {
+            "filed": "2024-08-20",
+            "period_end": "2024-06-28",
+            "rev_ttm": 13003000000.0,
+            "ni_ttm": -798000000.0,
+            "eps_ttm": -2.61,
+            "gross_margin": 22.648619549334768
+          },
+          {
+            "filed": "2025-08-14",
+            "period_end": "2025-06-27",
+            "rev_ttm": 9520000000.0,
+            "ni_ttm": 1889000000.0,
+            "eps_ttm": 5.15,
+            "gross_margin": 38.78151260504202
+          },
+          {
+            "filed": "2026-08-14",
+            "period_end": "2026-07-03",
+            "rev_ttm": 12919000000.0,
+            "ni_ttm": 9424000000.0,
+            "eps_ttm": 24.28,
+            "gross_margin": 48.85053022679774
+          }
+        ],
+        "annual_eps": [
+          -2.63,
+          -0.8499999999999999,
+          1.38,
+          4.75,
+          -5.44,
+          -2.61,
+          5.15,
+          24.28
+        ],
+        "annual_gross_margins": [
+          22.644697929869032,
+          22.592017208413,
+          26.71670015364614,
+          31.256318842122067,
+          15.319045299561617,
+          22.648619549334768,
+          38.78151260504202,
+          48.85053022679774
+        ],
+        "subindustry": "存储",
+        "normal_net_margin": 0.0167894326414549,
+        "normal_revenue": 11814000000.0,
+        "rev_cagr_10y_pct": null,
+        "ttm_net_margin": 0.7294682250948216,
+        "rev_cagr_3y": 1.6005906785288015,
+        "rev_cagr_3y_source": {
+          "filed": "2023-08-22",
+          "period_end": "2023-06-30",
+          "rev_ttm": 12318000000.0
+        },
+        "foreign_annual_only": false,
+        "rote_5y_avg": null,
+        "tbv_per_share": null,
+        "eps_ntm": 23.66957,
+        "rev_ntm_consensus": 21067934342.5,
+        "consensus_next_year_eps_growth": 61.202284814634034,
+        "consensus_reason": null,
+        "consensus_as_of": "2026-10-15",
+        "consensus_source": "yahoo_page",
+        "ntm_current_year_weight": 0.75,
+        "pe_p25": 14.235269041303523,
+        "pe_p50": 26.01890743320007,
+        "pe_p75": 54.572463768115945,
+        "pe_p90": 91.64600000000003,
+        "insufficient_pe_history": false,
+        "eligible_count": 1506,
+        "trim_each": 37,
+        "coverage_years": 9.990622668501064,
+        "own_p50": 26.01890743320007,
+        "pe_basis": "本股十年PIT截尾PE",
+        "type_disagreement": false
+      },
+      "published": {
+        "bear": null,
+        "neutral": null,
+        "bull": null,
+        "price": 356.45,
+        "p": null,
+        "g": null,
+        "reason": "缺少输入：diluted_shares; M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本"
+      }
+    },
+    {
+      "type": "未盈利成长",
+      "ticker": "CRWV",
+      "kind": "actual public issuer inputs",
+      "inputs": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30（稀释加权近似）",
+        "rev_ttm": 7590000000.0,
+        "ni_ttm": -1928000000.0,
+        "rev_growth": 115.322508578148,
+        "rev_q_yoy": 112.45874587458746,
+        "rev_accel_pp": 0.8497845711251415,
+        "eps_ttm": -3.26,
+        "eps_growth": null,
+        "gross_margin": 67.41765480895916,
+        "gross_margin_change_pp": -7.051677336648794,
+        "fcf_ttm": -13655000000.0,
+        "fcf_margin": -179.90777338603425,
+        "fcf_conversion": 7.08246887966805,
+        "roe": -38.375796178343954,
+        "cash": 5524000000.0,
+        "debt": 24859000000.0,
+        "net_debt": 19335000000.0,
+        "net_debt_fcf": null,
+        "current_ratio": 0.4551321891284601,
+        "shares": 551000000.0,
+        "fcf_margin_change_pp": 45.20546951562804,
+        "op_margin_ttm": -3.0434782608695654,
+        "ticker": "CRWV",
+        "sic": 7372,
+        "financial_filed": "2026-08-12",
+        "financial_period": "2026-06-30",
+        "financial_health_codes": [
+          "gross_margin_derived"
+        ],
+        "share_basis": {
+          "end": "2026-06-30",
+          "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+          "accn": "0001769628-26-000366",
+          "unit": "shares",
+          "filed": "2026-08-12",
+          "start": "2026-04-01",
+          "method": "diluted_weighted_approximation"
+        },
+        "diluted_shares": 551000000.0,
+        "fcf_per_share": -24.782214156079856,
+        "annual_sequence": [
+          {
+            "filed": "2026-03-02",
+            "period_end": "2025-12-31",
+            "rev_ttm": 5131000000.0,
+            "ni_ttm": -1167000000.0,
+            "eps_ttm": -2.81,
+            "gross_margin": 71.68193334632626
+          }
+        ],
+        "annual_eps": [
+          -2.81
+        ],
+        "annual_gross_margins": [
+          71.68193334632626
+        ],
+        "subindustry": null,
+        "normal_net_margin": null,
+        "insufficient_annual_history": true,
+        "normal_margin_reason": "仅1个可核实年度净利率，少于7年；无已确认板块净利率参数",
+        "normal_revenue": null,
+        "rev_cagr_10y_pct": null,
+        "ttm_net_margin": -0.25401844532279316,
+        "rev_cagr_3y": null,
+        "foreign_annual_only": false,
+        "rote_5y_avg": null,
+        "tbv_per_share": null,
+        "eps_ntm": -4.456371666666667,
+        "rev_ntm_consensus": 24058235313.333332,
+        "consensus_next_year_eps_growth": null,
+        "consensus_reason": null,
+        "consensus_as_of": "2026-10-15",
+        "consensus_source": "yahoo_page",
+        "ntm_current_year_weight": 0.16666666666666666,
+        "pe_p25": 18.711216435292336,
+        "pe_p50": 18.711216435292336,
+        "pe_p75": 18.711216435292336,
+        "pe_p90": 18.711216435292336,
+        "insufficient_pe_history": true,
+        "eligible_count": 0,
+        "trim_each": 0,
+        "coverage_years": 0,
+        "own_p50": null,
+        "pe_basis": "L2成员P50中位数",
+        "pe_reason": "倍数历史不足5年，且无可用L2成员P50",
+        "type_disagreement": false
+      },
+      "published": {
+        "bear": 144.81460240259455,
+        "neutral": 385.4303354075753,
+        "bull": 595.6908751621797,
+        "price": 69.69,
+        "p": -0.16661910803776595,
+        "g": null,
+        "reason": null
+      },
+      "independent_arithmetic": {
+        "forward_revenue": 24058235313.333332,
+        "gm_multiplier": 0.9631093544137023,
+        "runway": 0.40454046136946176,
+        "values": [
+          144.81460240259455,
+          385.4303354075753,
+          595.6908751621797
+        ],
+        "p": -0.16661910803776595
+      }
+    },
+    {
+      "type": "金融",
+      "ticker": "JPM",
+      "kind": "actual missing-input example; no invented value",
+      "inputs": {
+        "data_flags": [],
+        "rev_period": "2026-06-30",
+        "shares_date": "2026-06-30",
+        "rev_ttm": 199408000000.0,
+        "ni_ttm": 65067000000.0,
+        "rev_growth": 13.529639498075664,
+        "rev_q_yoy": 27.687477734235834,
+        "rev_accel_pp": 17.698512825827088,
+        "eps_ttm": 23.349999999999998,
+        "eps_growth": 19.74358974358974,
+        "gross_margin": null,
+        "gross_margin_change_pp": null,
+        "fcf_ttm": null,
+        "fcf_margin": null,
+        "fcf_conversion": null,
+        "roe": 17.36982044751974,
+        "cash": 278793000000.0,
+        "debt": 269929000000.0,
+        "net_debt": -8864000000.0,
+        "net_debt_fcf": null,
+        "current_ratio": null,
+        "shares": 2658186195.0,
+        "fcf_margin_change_pp": null,
+        "op_margin_ttm": null,
+        "ticker": "JPM",
+        "sic": 6021,
+        "financial_filed": "2026-08-06",
+        "financial_period": "2026-06-30",
+        "financial_health_codes": [
+          "ok"
+        ],
+        "share_basis": {
+          "method": "instant",
+          "components": [
+            {
+              "end": "2026-06-30",
+              "tag": "dei:EntityCommonStockSharesOutstanding",
+              "accn": "0001628280-26-054343",
+              "unit": "shares",
+              "filed": "2026-08-06"
+            }
+          ]
+        },
+        "diluted_shares": null,
+        "diluted_shares_reason": "M2仅有期末普通股或缺股本，未提供可核实的稀释加权股本",
+        "fcf_per_share": null,
+        "annual_sequence": [
+          {
+            "filed": "2026-02-13",
+            "period_end": "2014-12-31",
+            "rev_ttm": 95112000000.0,
+            "ni_ttm": 57048000000.0,
+            "eps_ttm": 20.02,
+            "gross_margin": null
+          }
+        ],
+        "annual_eps": [
+          20.02
+        ],
+        "annual_gross_margins": [
+          null
+        ],
+        "subindustry": null,
+        "normal_net_margin": null,
+        "insufficient_annual_history": true,
+        "normal_margin_reason": "仅1个可核实年度净利率，少于7年；无已确认板块净利率参数",
+        "normal_revenue": null,
+        "rev_cagr_10y_pct": null,
+        "ttm_net_margin": 0.3263008505175319,
+        "rev_cagr_3y": null,
+        "foreign_annual_only": false,
+        "rote_5y_avg": null,
+        "tbv_per_share": null,
+        "eps_ntm": 25.170405,
+        "rev_ntm_consensus": 214818109045.0,
+        "consensus_next_year_eps_growth": 5.384029111341904,
+        "consensus_reason": null,
+        "consensus_as_of": "2026-10-15",
+        "consensus_source": "yahoo_page",
+        "ntm_current_year_weight": 0.16666666666666666,
+        "pe_p25": 11.186227529006457,
+        "pe_p50": 12.784811369067942,
+        "pe_p75": 14.702608907521293,
+        "pe_p90": 15.668598084538726,
+        "insufficient_pe_history": false,
+        "eligible_count": 2512,
+        "trim_each": 62,
+        "coverage_years": 9.990622668501064,
+        "own_p50": 12.784811369067942,
+        "pe_basis": "本股十年PIT截尾PE",
+        "type_disagreement": false
+      },
+      "published": {
+        "bear": null,
+        "neutral": null,
+        "bull": null,
+        "price": 335.53,
+        "p": null,
+        "g": null,
+        "reason": "缺少输入：rote_5y_avg; M2未提供金融估值字段：rote_5y_avg, tbv_per_share"
+      }
+    }
+  ],
+  "synthetic_supplement_kind": "frozen synthetic formula examples, not real issuer valuations or holdings",
+  "synthetic_supplement": [
+    {
+      "id": "cyclical-wdc",
+      "type": "周期",
+      "input": {
+        "normal_net_margin": 0.12,
+        "normal_revenue": 10000000000.0,
+        "rev_cagr_10y_pct": 5.0,
+        "diluted_shares": 350000000.0,
+        "subindustry": "存储",
+        "price": 70.0,
+        "ttm_net_margin": 0.2
+      },
+      "expected": {
+        "normal_eps": 3.428571,
+        "bear": 26.228571,
+        "neutral": 44.571429,
+        "bull": 67.028571,
+        "p": 1.072829,
+        "p_label": "高于乐观",
+        "cycle_position_pp": 8.0,
+        "price_after_drop": 55.0,
+        "p_after_drop": 0.705182
+      }
+    },
+    {
+      "id": "financial-bank",
+      "type": "金融",
+      "input": {
+        "rote_5y_avg": 15.0,
+        "tbv_per_share": 100.0,
+        "price": 160.0
+      },
+      "expected": {
+        "bear": 114.285714,
+        "neutral": 183.333333,
+        "bull": 216.666667,
+        "p": 0.446512
+      }
+    }
+  ]
+}

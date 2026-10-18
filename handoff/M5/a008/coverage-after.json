@@ -1,0 +1,820 @@
+{
+  "kind": "non-raw A008 coverage and source audit summary",
+  "baseline_code": "3ac5f9b26a6d116675e01d3a4711152aa3c9cae6",
+  "method_version": "v1.3",
+  "days": [
+    {
+      "after_valued": 47,
+      "before_valued": 15,
+      "date": "2026-10-09",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "MRVL",
+        "MU",
+        "LITE",
+        "ORCL",
+        "CRM",
+        "ADBE",
+        "GOOGL",
+        "AMZN",
+        "NFLX",
+        "AAPL",
+        "TSLA",
+        "COST",
+        "WMT",
+        "HD",
+        "JNJ",
+        "CVX",
+        "CAT",
+        "WDC",
+        "STX",
+        "AMAT",
+        "LRCX",
+        "KLAC",
+        "QCOM",
+        "CIEN",
+        "COHR",
+        "ETN",
+        "GEV",
+        "CEG",
+        "DELL",
+        "CRWD",
+        "FTNT",
+        "ZS"
+      ],
+      "rows": 59,
+      "remaining": [
+        {
+          "ticker": "AVGO",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SKHY",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "INTC",
+          "type": "困境",
+          "blocking_fields": []
+        },
+        {
+          "ticker": "NOK",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "UNH",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "JPM",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "XOM",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "GE",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SNDK",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ]
+        },
+        {
+          "ticker": "ASML",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "ARM",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "type": "稳定",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        }
+      ]
+    },
+    {
+      "after_valued": 47,
+      "before_valued": 15,
+      "date": "2026-10-12",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "MRVL",
+        "MU",
+        "LITE",
+        "ORCL",
+        "CRM",
+        "ADBE",
+        "GOOGL",
+        "AMZN",
+        "NFLX",
+        "AAPL",
+        "TSLA",
+        "COST",
+        "WMT",
+        "HD",
+        "JNJ",
+        "CVX",
+        "CAT",
+        "WDC",
+        "STX",
+        "AMAT",
+        "LRCX",
+        "KLAC",
+        "QCOM",
+        "CIEN",
+        "COHR",
+        "ETN",
+        "GEV",
+        "CEG",
+        "DELL",
+        "CRWD",
+        "FTNT",
+        "ZS"
+      ],
+      "rows": 59,
+      "remaining": [
+        {
+          "ticker": "AVGO",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SKHY",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "INTC",
+          "type": "困境",
+          "blocking_fields": []
+        },
+        {
+          "ticker": "NOK",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "UNH",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "JPM",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "XOM",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "GE",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SNDK",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ]
+        },
+        {
+          "ticker": "ASML",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "ARM",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "type": "稳定",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        }
+      ]
+    },
+    {
+      "after_valued": 47,
+      "before_valued": 15,
+      "date": "2026-10-13",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "MRVL",
+        "MU",
+        "LITE",
+        "ORCL",
+        "CRM",
+        "ADBE",
+        "GOOGL",
+        "AMZN",
+        "NFLX",
+        "AAPL",
+        "TSLA",
+        "COST",
+        "WMT",
+        "HD",
+        "JNJ",
+        "CVX",
+        "CAT",
+        "WDC",
+        "STX",
+        "AMAT",
+        "LRCX",
+        "KLAC",
+        "QCOM",
+        "CIEN",
+        "COHR",
+        "ETN",
+        "GEV",
+        "CEG",
+        "DELL",
+        "CRWD",
+        "FTNT",
+        "ZS"
+      ],
+      "rows": 59,
+      "remaining": [
+        {
+          "ticker": "AVGO",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SKHY",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "INTC",
+          "type": "困境",
+          "blocking_fields": []
+        },
+        {
+          "ticker": "NOK",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "UNH",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "JPM",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "XOM",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "GE",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SNDK",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ]
+        },
+        {
+          "ticker": "ASML",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "ARM",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "type": "稳定",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        }
+      ]
+    },
+    {
+      "after_valued": 48,
+      "before_valued": 15,
+      "date": "2026-10-14",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "MRVL",
+        "MU",
+        "LITE",
+        "ORCL",
+        "CRM",
+        "ADBE",
+        "GOOGL",
+        "AMZN",
+        "NFLX",
+        "AAPL",
+        "TSLA",
+        "COST",
+        "WMT",
+        "HD",
+        "JNJ",
+        "CVX",
+        "CAT",
+        "WDC",
+        "STX",
+        "AMAT",
+        "LRCX",
+        "KLAC",
+        "ASML",
+        "QCOM",
+        "CIEN",
+        "COHR",
+        "ETN",
+        "GEV",
+        "CEG",
+        "DELL",
+        "CRWD",
+        "FTNT",
+        "ZS"
+      ],
+      "rows": 59,
+      "remaining": [
+        {
+          "ticker": "AVGO",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SKHY",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "INTC",
+          "type": "困境",
+          "blocking_fields": []
+        },
+        {
+          "ticker": "NOK",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "UNH",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "JPM",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "XOM",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "GE",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SNDK",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ]
+        },
+        {
+          "ticker": "ARM",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "type": "稳定",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        }
+      ]
+    },
+    {
+      "after_valued": 48,
+      "before_valued": 15,
+      "date": "2026-10-15",
+      "failed": 0,
+      "lost_valuation": [],
+      "newly_valued": [
+        "MRVL",
+        "MU",
+        "LITE",
+        "ORCL",
+        "CRM",
+        "ADBE",
+        "GOOGL",
+        "AMZN",
+        "NFLX",
+        "AAPL",
+        "TSLA",
+        "COST",
+        "WMT",
+        "HD",
+        "JNJ",
+        "CVX",
+        "CAT",
+        "WDC",
+        "STX",
+        "AMAT",
+        "LRCX",
+        "KLAC",
+        "ASML",
+        "QCOM",
+        "CIEN",
+        "COHR",
+        "ETN",
+        "GEV",
+        "CEG",
+        "DELL",
+        "CRWD",
+        "FTNT",
+        "ZS"
+      ],
+      "rows": 59,
+      "remaining": [
+        {
+          "ticker": "AVGO",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SKHY",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue",
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "INTC",
+          "type": "困境",
+          "blocking_fields": []
+        },
+        {
+          "ticker": "NOK",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm"
+          ]
+        },
+        {
+          "ticker": "UNH",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "JPM",
+          "type": "金融",
+          "blocking_fields": [
+            "rote_5y_avg",
+            "tbv_per_share"
+          ]
+        },
+        {
+          "ticker": "XOM",
+          "type": "周期",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        },
+        {
+          "ticker": "GE",
+          "type": "周期",
+          "blocking_fields": [
+            "cyclical_subindustry_PE_parameters"
+          ]
+        },
+        {
+          "ticker": "SNDK",
+          "type": "周期",
+          "blocking_fields": [
+            "normal_net_margin",
+            "normal_revenue"
+          ]
+        },
+        {
+          "ticker": "ARM",
+          "type": "稳定",
+          "blocking_fields": [
+            "fcf_ttm"
+          ]
+        },
+        {
+          "ticker": "TSM",
+          "type": "稳定",
+          "blocking_fields": [
+            "diluted_shares"
+          ]
+        }
+      ]
+    }
+  ],
+  "retained_states_old_fields_equal": 3556,
+  "full_extractor_outputs_equal": 59,
+  "manual_checks": [
+    {
+      "ticker": "MRVL",
+      "kind": "stable",
+      "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "start": "2026-05-03",
+      "end": "2026-08-01",
+      "filed": "2026-08-28",
+      "accession": "0001835632-26-000025",
+      "duration_days": 91,
+      "unit": "shares",
+      "independent_raw_match": true,
+      "fcf_check": "passed"
+    },
+    {
+      "ticker": "MU",
+      "kind": "cyclical-current-cache",
+      "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "start": "2025-08-29",
+      "end": "2026-09-03",
+      "filed": "2026-10-09",
+      "accession": "0000723125-26-000023",
+      "duration_days": 371,
+      "unit": "shares",
+      "independent_raw_match": true,
+      "fcf_check": "passed"
+    },
+    {
+      "ticker": "LITE",
+      "kind": "unprofitable",
+      "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "start": "2025-06-29",
+      "end": "2026-06-27",
+      "filed": "2026-08-17",
+      "accession": "0001628280-26-057358",
+      "duration_days": 364,
+      "unit": "shares",
+      "independent_raw_match": true,
+      "fcf_check": "passed"
+    },
+    {
+      "ticker": "GOOGL",
+      "kind": "multi-class-consolidated",
+      "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "start": "2026-04-01",
+      "end": "2026-06-30",
+      "filed": "2026-07-23",
+      "accession": "0001652044-26-000071",
+      "duration_days": 91,
+      "unit": "shares",
+      "independent_raw_match": true,
+      "fcf_check": "passed"
+    },
+    {
+      "ticker": "ARM",
+      "kind": "foreign-1-to-1",
+      "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "start": "2026-04-01",
+      "end": "2026-06-30",
+      "filed": "2026-07-29",
+      "accession": "0001973239-26-000114",
+      "duration_days": 91,
+      "unit": "shares",
+      "independent_raw_match": true,
+      "fcf_check": "not_applicable_missing_FCF"
+    },
+    {
+      "ticker": "NVDA",
+      "kind": "growth-post-split",
+      "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "start": "2026-04-27",
+      "end": "2026-07-26",
+      "filed": "2026-08-26",
+      "accession": "0001045810-26-000075",
+      "duration_days": 91,
+      "unit": "shares",
+      "independent_raw_match": true,
+      "fcf_check": "passed"
+    }
+  ],
+  "remaining": [
+    {
+      "ticker": "AVGO",
+      "type": "周期",
+      "blocking_fields": [
+        "cyclical_subindustry_PE_parameters"
+      ]
+    },
+    {
+      "ticker": "SKHY",
+      "type": "周期",
+      "blocking_fields": [
+        "normal_net_margin",
+        "normal_revenue",
+        "diluted_shares"
+      ]
+    },
+    {
+      "ticker": "INTC",
+      "type": "困境",
+      "blocking_fields": []
+    },
+    {
+      "ticker": "NOK",
+      "type": "稳定",
+      "blocking_fields": [
+        "fcf_ttm"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "type": "金融",
+      "blocking_fields": [
+        "rote_5y_avg",
+        "tbv_per_share"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "type": "金融",
+      "blocking_fields": [
+        "rote_5y_avg",
+        "tbv_per_share"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "type": "周期",
+      "blocking_fields": [
+        "diluted_shares"
+      ]
+    },
+    {
+      "ticker": "GE",
+      "type": "周期",
+      "blocking_fields": [
+        "cyclical_subindustry_PE_parameters"
+      ]
+    },
+    {
+      "ticker": "SNDK",
+      "type": "周期",
+      "blocking_fields": [
+        "normal_net_margin",
+        "normal_revenue"
+      ]
+    },
+    {
+      "ticker": "ARM",
+      "type": "稳定",
+      "blocking_fields": [
+        "fcf_ttm"
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "type": "稳定",
+      "blocking_fields": [
+        "diluted_shares"
+      ]
+    }
+  ],
+  "production_writes": 0,
+  "external_requests": 0
+}

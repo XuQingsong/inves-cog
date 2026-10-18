@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="13" time="0.154" timestamp="2026-10-16T18:35:31.458521+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_valuation_synthetic" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_blocking
+    def test_valuation_synthetic():
+&gt;       from inves_cog.valuation_v1.calculations import evaluate, pe_percentiles
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:25: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_growth_valuation_v11" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_blocking
+    def test_growth_valuation_v11():
+&gt;       from inves_cog.valuation_v1.calculations import evaluate
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:53: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_valuation_ignores_price" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_blocking
+    def test_valuation_ignores_price():
+&gt;       from inves_cog.valuation_v1.calculations import evaluate
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:64: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_valuation_monotone_and_stable" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_blocking
+    def test_valuation_monotone_and_stable():
+&gt;       from inves_cog.valuation_v1.calculations import evaluate
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:74: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_trading_without_valuation" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_replay
+    def test_trading_without_valuation():
+&gt;       from inves_cog.valuation_v1.calculations import evaluate
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:92: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_valuation_schema_revoke" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.repository'">@pytest.mark.phase1_blocking
+    def test_valuation_schema_revoke():
+&gt;       from inves_cog.valuation_v1.repository import WRITE_TABLES
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.repository'
+
+tests/m5/test_valuation.py:105: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_valuation_label" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_blocking
+    def test_valuation_label():
+&gt;       from inves_cog.valuation_v1.calculations import LABEL,evaluate
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:117: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_type_switch_needs_two_periods" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.lifecycle'">@pytest.mark.phase1_blocking
+    def test_type_switch_needs_two_periods():
+&gt;       from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.lifecycle'
+
+tests/m5/test_valuation.py:127: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_change_decomposition_sums" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.lifecycle'">@pytest.mark.phase1_blocking
+    def test_change_decomposition_sums():
+&gt;       from inves_cog.valuation_v1.lifecycle import decompose
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.lifecycle'
+
+tests/m5/test_valuation.py:145: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_pending_review_over_25pct" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.lifecycle'">@pytest.mark.phase1_blocking
+    def test_pending_review_over_25pct():
+&gt;       from inves_cog.valuation_v1.lifecycle import ValuationBook
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.lifecycle'
+
+tests/m5/test_valuation.py:158: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_implied_growth_no_solution" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'">@pytest.mark.phase1_blocking
+    def test_implied_growth_no_solution():
+&gt;       from inves_cog.valuation_v1.calculations import evaluate
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.calculations'
+
+tests/m5/test_valuation.py:170: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.shadows'">@pytest.mark.phase1_blocking
+    def test_position_panel():
+&gt;       from inves_cog.valuation_v1.shadows import panel,summarize
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.shadows'
+
+tests/m5/test_valuation.py:179: ModuleNotFoundError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_shadow_rules_no_orders" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.valuation_v1.shadows'">@pytest.mark.phase1_blocking
+    def test_shadow_rules_no_orders():
+&gt;       from inves_cog.valuation_v1.shadows import shadow
+E       ModuleNotFoundError: No module named 'inves_cog.valuation_v1.shadows'
+
+tests/m5/test_valuation.py:194: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

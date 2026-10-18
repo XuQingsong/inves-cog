@@ -164,6 +164,12 @@ def test_industry_basis_na():
 
 
 def test_fin_state_pit():
+    from tests.m2.valuation_cashflow_cases import assert_valuation_cashflow_contract
+
+    assert_valuation_cashflow_contract()
+    from tests.m2.valuation_share_cases import assert_valuation_share_contract
+
+    assert_valuation_share_contract(input_facts)
     from inves_cog.ingest.fundamentals.service import FinancialService, MemoryRepository
 
     calls = []
