@@ -16,7 +16,7 @@
 | M7 异常感知 | 已合并，还差一次现场冒烟 |
 | M5 独立估值 | 已合并。五个交易日里 59 只最多 50 只能估，ARM、台积电是这次新加上的。另外 9 只缺输入，明确不估。[PR #17](https://github.com/XuQingsong/inves-cog/pull/17)，合并提交 `b74a431` |
 | **新闻和波动（M8）** | **已合并。** 细读时写新闻卡；模型用英文栏时，内容会留在中文栏上。[PR #25](https://github.com/XuQingsong/inves-cog/pull/25)，合并提交 `232a46f`。跟踪范围内的不寻常波动写当天那一页，不再问 glm。[PR #21](https://github.com/XuQingsong/inves-cog/pull/21)，合并提交 `50d4e41` |
-| 每日一页 | **页的形状和再查一次都已合并。** 早上 9:15 只出刚收盘那天（[PR #26](https://github.com/XuQingsong/inves-cog/pull/26)，`8c0fc48`）。对不上或新闻太少时再查一次（[PR #27](https://github.com/XuQingsong/inves-cog/pull/27)，`61fb74e`）。五天重跑在第一条新闻卡停下：模型换了一套栏名，内容又是空的。 |
+| 每日一页 | **页的形状、再查一次、新闻卡栏名都已合并。** 早上 9:15 只出刚收盘那天（[PR #26](https://github.com/XuQingsong/inves-cog/pull/26)，`8c0fc48`）。对不上或新闻太少时再查一次（[PR #27](https://github.com/XuQingsong/inves-cog/pull/27)，`61fb74e`）。新闻卡认「新闻摘要」和「跟踪名单内受影响公司」（[PR #28](https://github.com/XuQingsong/inves-cog/pull/28)，`b9a2b6f`）。五天真实页面正在重跑。 |
 | M9、完整页面 | 没开工，等整体走查后由你决定 |
 
 ## 新闻和波动现在的情况（2026-10-19 已用 DeepSeek 核对）
@@ -35,7 +35,7 @@
 2. **B-019 已合并**（新闻卡留下模型实际给出的答案）。[PR #25](https://github.com/XuQingsong/inves-cog/pull/25)，合并提交 `232a46f`（父提交 `57d07db`、`d447e6e`）。见 [B-019 验收](M8-B019-recheck-2026-10-19.md)。这是节点内的普通合并，验收通过后由需求方直接合并，不再等你说「合并」。
 3. **B-020 已合并**（一次早上运行只出刚收盘的那一个交易日）。[PR #26](https://github.com/XuQingsong/inves-cog/pull/26)，合并提交 `8c0fc48`。见 [B-020 验收](M8-B020-recheck-2026-10-19.md)。
 4. **B-021 已合并**（对不上或新闻太少时，再查一次这只股票）。[PR #27](https://github.com/XuQingsong/inves-cog/pull/27)，合并提交 `61fb74e`。见 [B-021 验收](M8-B021-recheck-2026-10-19.md)。
-5. **已派 B-022**（新闻卡再认一套模型实际用过的栏名）。五天重跑先试了一条，模型把摘要和名单写成了另一套中文栏，程序只认 B-019 写过的英文栏，卡又是空的。没有继续跑剩下的。这是需求方例子没写到，不打回 B-019。B-022 合并后再重跑。
+5. **B-022 已合并**（新闻卡再认一套模型实际用过的栏名）。[PR #28](https://github.com/XuQingsong/inves-cog/pull/28)，合并提交 `b9a2b6f`。见 [B-022 验收](M8-B022-recheck-2026-10-19.md)。五天重跑接着做。行业对象里的键是「行业」，现在留下的是影响和理由，行业名称本身还没留下；每天那一页不印这一栏。
 6. M9 和完整页面仍等走查之后由你决定。那是重要节点，会把要合并的内容和修复项一起发给你。
 
 ## 已定、不再问
