@@ -346,28 +346,38 @@ def _position_hit(card, held):
     return [code for code in _high_codes(card) if code in held]
 
 
-def rank_morning_news(cards, moves, plan, trade_date=None):
-    """Macro and wide names first, then large position names. The morning page prints this."""
-    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
-    held = _held_names(plan, trade_date)
-    move_names = _move_names(moves)
+def _first_shown(scoped):
+    """Macro and wide names, at most five. That cap is not a holding count."""
     first = [card for card in scoped if _macro(card) or _wide(card)]
     first.sort(key=lambda card: (0 if _macro(card) else 1, -len(_high_codes(card)), str(card.get("编号") or "")))
-    shown_first = first[:5]
-    used = {id(card) for card in shown_first}
-    second = []
-    if held:
-        second = [card for card in scoped if id(card) not in used and _position_hit(card, held)]
-        second.sort(
-            key=lambda card: (
-                0 if set(_position_hit(card, held)) & set(move_names) else 1,
-                str(card.get("编号") or ""),
-            )
-        )
-    shown_second = second[:5]
-    used.update(id(card) for card in shown_second)
-    rest = sum(1 for card in scoped if id(card) not in used)
-    return shown_first, shown_second, rest, held, move_names
+    return first[:5]
+
+
+def _hits_move(card, move_names):
+    return bool(set(_high_codes(card)) & set(move_names))
+
+
+def _cards_for(scoped, ticker):
+    return [card for card in scoped if ticker in _high_codes(card)]
+
+
+def _holding_lines(cards, move_names):
+    """One line for this holding. Other high cards on the same name are counted, not repeated."""
+    chosen = min(
+        cards,
+        key=lambda card: (0 if _hits_move(card, move_names) else 1, str(card.get("编号") or "")),
+    )
+    lines = []
+    said = str(chosen.get("说了什么") or chosen.get("标题") or "")
+    if _hits_move(chosen, move_names):
+        said = f"{said} 碰上不寻常波动".strip()
+    if said:
+        lines.append(said)
+    lines.extend(_fold(chosen))
+    extra = len(cards) - 1
+    if extra:
+        lines.append(f"这只还有 {extra} 条")
+    return lines
 
 
 def _ranked_lines(cards, held, move_names, tier):
@@ -387,16 +397,39 @@ def _ranked_lines(cards, held, move_names, tier):
 
 
 def _morning_news_lines(cards, moves, plan, trade_date):
-    first, second, rest, held, move_names = rank_morning_news(cards, moves, plan, trade_date)
+    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
+    held = _held_names(plan, trade_date)
+    move_names = _move_names(moves)
+    first = _first_shown(scoped)
     lines = ["先看：宏观和影响面广的"]
     lines.extend(_ranked_lines(first, held, move_names, 1) or ["这档没有"])
     lines.append("再看：持仓上影响大的")
+    accounted = {id(card) for card in first}
     if held:
-        lines.extend(_ranked_lines(second, held, move_names, 2) or ["这档没有"])
+        lines.extend(_holding_section(scoped, held, move_names, accounted))
     else:
         lines.append("没有持仓快照")
+    rest = sum(1 for card in scoped if id(card) not in accounted)
     if rest:
         lines.append(f"还有 {rest} 条标了高，这里不展开")
+    return lines
+
+
+def _holding_section(scoped, held, move_names, accounted):
+    """Every positive holding, move names first. Unexpanded cards on that name are not counted again."""
+    lines = []
+    quiet = []
+    moved = set(move_names)
+    order = sorted(enumerate(held), key=lambda item: (item[1] not in moved, item[0]))
+    for _, ticker in order:
+        owned = _cards_for(scoped, ticker)
+        if not owned:
+            quiet.append(ticker)
+            continue
+        lines.extend(_holding_lines(owned, move_names))
+        accounted.update(id(card) for card in owned)
+    if quiet:
+        lines.append("今天没有标成高的：" + "、".join(sorted(quiet)))
     return lines
 
 
