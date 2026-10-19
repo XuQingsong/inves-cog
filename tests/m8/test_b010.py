@@ -374,9 +374,9 @@ def _run_market(*, session, later, extra_ticker=None):
                 ]
             }
 
-    from inves_cog.perception.attribution.chain import _one
+    from inves_cog.perception.attribution.chain import _score_one
 
-    return _one(anomaly, [item], as_of=as_of, client=Client(), store=None, components=None, stage=None)
+    return _score_one(anomaly, [item], as_of=as_of, client=Client(), store=None, components=None, stage=None)
 
 
 def _spec():
