@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-012  已收到（15只估值与现价差异核查）  2026-10-19
+- 用户决策 **UD-A-06**：用户明确要求“开发新需求啊”。本次恢复且仅执行A-012；A-011持仓任务已撤回、不执行，不去Muse取持仓。此直接指令覆盖上一轮仅阅读和A011停止接下一单的停点；自动接单仍不恢复。
+- 已全文读取A012及control/README。逐只核查15只输入、单位、期间、分类与原件；确认错误才修，公式本身结果保留并写待复核或明确未知，不用股价反推估值。
+- 独立分支phase1/a012-valuation-vs-price基于main ad1c71a，只改M5范围，先提交真实失败例子再实现；用既有五日输入从build重建，证明其余35只三档、11494条打分和完整计划13/5/2/0/5不变。提交新PR及准确head/CI后停。
+- 变更边界：不改公式参数、规则A、每天页面、新闻波动、docs/golden/milestones；不新增源、不调模型、不写共享库、不迁移、不合并部署。尚未声称原因或修复已验证。连接器状态写入失败后已同步状态工作树，仅通过正常Git提交本回报。
+
 ## A-010  已完成（加密脱敏数据已交付；停止）  2026-10-19
 - 已推送空历史分支 **[data/a010-five-days](https://github.com/XuQingsong/inves-cog/tree/data/a010-five-days/handoff/A010)**，完整head **c639f5fca3f9f7959057cd2e012a4003a33abb9a**。GitHub API已核对parents=[]、仅一个根提交，8个文件全在handoff/A010/；七个密文与manifest的远端Git对象/字节数和本机逐一一致，密文SHA256全部匹配。不开PR、不合main；本纯数据孤立分支没有CI工作流，未声称CI通过。
 - [manifest.json](https://github.com/XuQingsong/inves-cog/blob/c639f5fca3f9f7959057cd2e012a4003a33abb9a/handoff/A010/manifest.json)含逐文件行数、压缩明文/密文hash与字节、SELECT原文/来源、逐日统计及新闻时间统计。行数：**info-items 44050；anomalies 10；valuation 295；plan 5；bars-daily 14597；marketstate 5869；graph 1085**。七个密文合计31649572字节，单文件均小于90MB。
