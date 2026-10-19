@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-017  已收到  2026-10-19 13:10 北京
+
+- 任务：跟踪范围内的不寻常波动，从 `attribute_all` 跑下来，没有新闻卡、以及一条可送新闻都没有时，也不许再问 glm。继续在 PR #21 的分支 `cursor/m8-b009-links-e013` 上提交，基线 `3e549a6`，先合入 `origin/main`。不新开 PR。
+- B-016 有新闻卡的那一段留下，不重做。B-016 把入口收成「只有新闻卡才走波动卡」不验收。
+- 三种都从 `attribute_all` 走：已有新闻卡、有新闻但没有新闻卡、一条可送新闻都没有。前两种只调 `move_card`，不调 `anomaly_candidates`，也不调 `claim_extraction`。第三种不调任何模型，归类写「查过没有消息」，当天文字仍要有。
+- 宽扫、只打标签、单独的价格轨道不走波动卡。直接调用 `propose_candidates` 的测试可以留下。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`，不改估值和交易的计算。
+- 下一步：先写三个失败例子，再改入口。
+
 ## B-016  已完成  2026-10-19 12:40 北京
 
 - PR #21，head `3e549a6`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39200189667 。`phase1-blocking` 通过，nightly 跳过。没有合并。
