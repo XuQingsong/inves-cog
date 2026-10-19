@@ -25,6 +25,9 @@ def test_valuation_synthetic():
     from tests.m5.tsm_annual_cases import assert_tsm_annual_build
 
     assert_tsm_annual_build()
+    from tests.m5.a012_cases import assert_a012_historical_split_units
+
+    assert_a012_historical_split_units()
     from tests.m5.inputs_cases import assert_inputs
 
     assert_inputs()
@@ -166,6 +169,9 @@ def test_valuation_label():
 
 @pytest.mark.phase1_blocking
 def test_type_switch_needs_two_periods():
+    from tests.m5.a012_cases import assert_a012_stale_annual_basis
+
+    assert_a012_stale_annual_basis()
     from tests.m5.review_cases import assert_eps_split_comparability
 
     assert_eps_split_comparability()

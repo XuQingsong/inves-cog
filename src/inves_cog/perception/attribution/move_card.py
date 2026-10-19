@@ -619,18 +619,27 @@ def _flat_move(names, post, peer, codes):
     return f"{names[0] if names else ''} {where}基本没动{peer}".replace("  ", " ").strip()
 
 
+_STRENGTH_ORDER = {"强": 0, "中": 1, "弱": 2}
+
+
 def _reason_lines(move):
     explanations = [item for item in move.get("解释") or [] if isinstance(item, dict)]
-    kept = []
-    for item in explanations:
+    spoken = []
+    for index, item in enumerate(explanations):
         sentence = str(item.get("怎么影响") or item.get("一句话") or "")
         if not sentence:
             continue
         strength = str(item.get("强弱") or "")
-        spoken = f"{sentence}（{strength}）" if strength else sentence
+        words = f"{sentence}（{strength}）" if strength else sentence
         tail = " ".join(part for part in (_source_label(item.get("编号")), _beijing(item.get("发布时间"))) if part)
-        kept.append(f"可能的原因：{spoken} {tail}".strip())
-    return kept or ["可能的原因：没找到能解释这次波动的新闻"]
+        line = f"可能的原因：{words} {tail}".strip()
+        spoken.append((_STRENGTH_ORDER.get(strength, len(_STRENGTH_ORDER)), index, line))
+    spoken.sort()
+    shown = [line for _rank, _index, line in spoken[:3]]
+    extra = len(spoken) - len(shown)
+    if extra:
+        shown.append(f"另有 {extra} 条较弱的可能原因")
+    return shown or ["可能的原因：没找到能解释这次波动的新闻"]
 
 
 _SEEN_LINES = {

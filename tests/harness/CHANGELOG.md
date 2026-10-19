@@ -196,3 +196,4 @@
 - 2026-10-16 M5: freeze lifecycle dates, price-only updates and <=3% consensus changes. tests/fixtures/phase1/m5/lifecycle.json sha256 b1e17622cc1204f1fd577a988ff7d4067c72653ac60765e338754015a8d7f410
 
 | tests/fixtures/phase1/m2/tsm-valuation-annual.json.gz | absent | 100c187b29c36aba93418621f19a8c51981bdc32d8729697e414286e6e6decbf | TSM 2025 retained SEC annual facts and existing FRED PIT recording; UD-A-07 valuation-only input regression | FR-M0-08; A012 |
+2026-10-19 A012 real retained source inputs (no account data): tests/fixtures/phase1/m5/a012_real_inputs.json 9495ca7006f608d5d5580548aab5cd8c7107d48494c4cd76bfd12c1a1c886d5f

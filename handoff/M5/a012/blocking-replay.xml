@@ -1,0 +1,899 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="338" time="64.387" timestamp="2026-10-19T23:30:43.059689+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.harness.test_m0" name="test_harness_no_network" time="14.275" /><testcase classname="tests.harness.test_m0" name="test_injected_clock_only" time="0.388" /><testcase classname="tests.harness.test_m0" name="test_pending_registry" time="3.080" /><testcase classname="tests.harness.test_m0" name="test_milestones_consistency" time="0.194" /><testcase classname="tests.harness.test_m0" name="test_requirements_golden_unchanged" time="0.074" /><testcase classname="tests.harness.test_m0" name="test_frozen_fixtures_changelog" time="0.038"><failure message="AssertionError: /private/tmp/inves-cog-a012/tests/fixtures/phase1/m5/a012_real_inputs.json:1: FR-M0-08: missing CHANGELOG path and new hash">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-300/test_frozen_fixtures_changelog0')
+
+    def test_frozen_fixtures_changelog(tmp_path):
+        from tests.harness.tools.golden import validate_frozen
+    
+&gt;       validate_frozen(ROOT / "tests/fixtures/phase1", ROOT / "tests/harness/CHANGELOG.md")
+
+tests/harness/test_m0.py:264: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+directory = PosixPath('/private/tmp/inves-cog-a012/tests/fixtures/phase1')
+changelog = PosixPath('/private/tmp/inves-cog-a012/tests/harness/CHANGELOG.md')
+changelog_prefix = 'tests/fixtures/phase1/'
+
+    def validate_frozen(directory, changelog, *, changelog_prefix='tests/fixtures/phase1/'):
+        directory, changelog = Path(directory), Path(changelog)
+        rows = read_manifest(directory, 'FR-M0-08')
+        ignored = {'MANIFEST.sha256'}
+        if changelog.parent == directory:
+            ignored.add(changelog.name)
+        present = {str(p.relative_to(directory)) for p in directory.rglob('*') if p.is_file()}
+        if present - ignored != set(rows):
+            raise AssertionError(f'{directory}:1: FR-M0-08: frozen file-set mismatch')
+        log = changelog.read_text()
+        for name, registered_hash in rows.items():
+            p = directory / name
+            actual = hashlib.sha256(p.read_bytes()).hexdigest()
+            if actual != registered_hash:
+                raise AssertionError(f'{p}:1: FR-M0-08: frozen hash mismatch; update manifest and CHANGELOG')
+            if not any(changelog_prefix + name in line and actual in line for line in log.splitlines()):
+&gt;               raise AssertionError(f'{p}:1: FR-M0-08: missing CHANGELOG path and new hash')
+E               AssertionError: /private/tmp/inves-cog-a012/tests/fixtures/phase1/m5/a012_real_inputs.json:1: FR-M0-08: missing CHANGELOG path and new hash
+
+tests/harness/tools/golden.py:70: AssertionError</failure></testcase><testcase classname="tests.harness.test_m0" name="test_import_firewall" time="0.184"><failure message="AssertionError: RUFF format: Would reformat: src/inves_cog/valuation_v1/lifecycle.py&#10;1 file would be reformatted, 5 files already formatted">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-300/test_import_firewall0')
+
+    def test_import_firewall(tmp_path):
+        from tests.harness.tools.style import check_style
+    
+        clean = tmp_path / "clean.py"
+        clean.write_text("a = 1\nb = 2\n")
+        check_style(ROOT, paths=[clean])
+        clean.write_text("a=1;b=2\n")
+        with pytest.raises(AssertionError, match="RUFF"):
+            check_style(ROOT, paths=[clean])
+&gt;       check_style(ROOT)
+
+tests/harness/test_m0.py:290: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/tmp/inves-cog-a012')
+paths = [PosixPath('/private/tmp/inves-cog-a012/src/inves_cog/valuation_v1/calculations.py'), PosixPath('/private/tmp/inves-co...ivate/tmp/inves-cog-a012/tests/m5/a012_cases.py'), PosixPath('/private/tmp/inves-cog-a012/tests/m5/test_valuation.py')]
+
+    def check_style(root, *, paths=None):
+        root = Path(root)
+        paths = changed_python(root) if paths is None else list(paths)
+        if not paths:
+            return
+        command = [sys.executable, "-m", "ruff"]
+        config = str(root / "pyproject.toml")
+        formatter = subprocess.run(
+            [*command, "format", "--check", "--config", config, *map(str, paths)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if formatter.returncode:
+&gt;           raise AssertionError("RUFF format: " + formatter.stdout + formatter.stderr)
+E           AssertionError: RUFF format: Would reformat: src/inves_cog/valuation_v1/lifecycle.py
+E           1 file would be reformatted, 5 files already formatted
+
+tests/harness/tools/style.py:68: AssertionError</failure></testcase><testcase classname="tests.harness.test_m0" name="test_llm_models_allowed" time="0.075" /><testcase classname="tests.harness.test_m0" name="test_schema_roles_migration" time="0.004" /><testcase classname="tests.harness.test_m0" name="test_markers_registered" time="0.584" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_issuer_failure_isolated_and_next_run_only_resumes_failed_issuer" time="0.001" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_document_failure_is_inside_company_boundary" time="0.120" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_completed_cycle_refreshes_on_next_trade_date" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_permission_failure_is_not_misreported_as_a_company_gap" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_reuses_transport_without_splitting_the_shared_rate_budget" time="0.001" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_unfinished_cycle_resumes_across_day_boundary" time="0.000" /><testcase classname="tests.m1.test_a003_sec_resume" name="test_sec_transport_failure_keeps_safe_endpoint_and_concrete_cause" time="0.000" /><testcase classname="tests.m1.test_market_info" name="test_bar_window_to_20et" time="0.006" /><testcase classname="tests.m1.test_market_info" name="test_bar_window_from_04et" time="0.000" /><testcase classname="tests.m1.test_market_info" name="test_post_close_null_when_no_trade" time="0.000" /><testcase classname="tests.m1.test_market_info" name="test_wide_universe_rules" time="0.000" /><testcase classname="tests.m1.test_market_info" name="test_news_dedupe_and_times" time="0.002" /><testcase classname="tests.m1.test_market_info" name="test_earnings_reaction_day" time="0.049" /><testcase classname="tests.m1.test_market_info" name="test_earnings_fallback_flag" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_form4_parse_code_p" time="0.002" /><testcase classname="tests.m1.test_market_info" name="test_app_rank_jump" time="0.001" /><testcase classname="tests.m1.test_market_info" name="test_trends_unavailable_marked" time="0.003" /><testcase classname="tests.m1.test_market_info" name="test_source_level_mapping" time="0.011" /><testcase classname="tests.m1.test_market_info" name="test_info_item_contract" time="0.043" /><testcase classname="tests.m1.test_market_info" name="test_info_fields_extraction" time="0.007" /><testcase classname="tests.m1.test_market_info" name="test_llm_extraction_failure_degrades" time="0.111" /><testcase classname="tests.m2.test_a003_margins" name="test_unh_gross_profit_includes_medical_and_product_costs" time="0.023" /><testcase classname="tests.m2.test_a003_margins" name="test_unh_incomplete_medical_costs_cannot_produce_high_margin[True]" time="0.001" /><testcase classname="tests.m2.test_a003_margins" name="test_unh_incomplete_medical_costs_cannot_produce_high_margin[False]" time="0.001" /><testcase classname="tests.m2.test_a003_margins" name="test_unh_reported_gross_profit_takes_precedence" time="0.001" /><testcase classname="tests.m2.test_a003_margins" name="test_other_issuer_cost_derivation_is_unchanged" time="0.001" /><testcase classname="tests.m2.test_a003_margins" name="test_unh_legacy_does_not_inherit_fixed_cost_repair" time="0.001" /><testcase classname="tests.m2.test_cik_history" name="test_successor_companyfacts_history_uses_visible_registrant" time="0.006" /><testcase classname="tests.m2.test_cik_history" name="test_current_and_historical_quarters_survive_registered_cik_merge" time="0.006" /><testcase classname="tests.m2.test_external_pending" name="test_legacy_matches_muse_state" time="5.614" /><testcase classname="tests.m2.test_fundamentals" name="test_revenue_tag_gap" time="0.006" /><testcase classname="tests.m2.test_fundamentals" name="test_q4_derived_from_annual" time="0.008" /><testcase classname="tests.m2.test_fundamentals" name="test_companyfacts_lag" time="0.191" /><testcase classname="tests.m2.test_fundamentals" name="test_stale_fundamentals_code" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_gross_margin_derived" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_ni_tag_fallback" time="0.003" /><testcase classname="tests.m2.test_fundamentals" name="test_industry_basis_na" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_fin_state_pit" time="0.025" /><testcase classname="tests.m2.test_fundamentals" name="test_extractor_fixed_toggles" time="0.009" /><testcase classname="tests.m2.test_fundamentals" name="test_segment_extraction" time="0.329" /><testcase classname="tests.m2.test_fundamentals" name="test_segment_recast" time="0.000" /><testcase classname="tests.m2.test_fundamentals" name="test_segment_mapping_pending" time="0.000" /><testcase classname="tests.m2.test_fundamentals" name="test_consensus_derived_pit" time="0.002" /><testcase classname="tests.m2.test_fundamentals" name="test_consensus_import_idempotent" time="0.001" /><testcase classname="tests.m2.test_fundamentals" name="test_health_contract" time="0.167" /><testcase classname="tests.m3.test_scoring" name="test_interp_points" time="0.004" /><testcase classname="tests.m3.test_scoring" name="test_books_synthetic" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_red_line_boundaries" time="0.006" /><testcase classname="tests.m3.test_scoring" name="test_tier_reassess_only_on_filing" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_m31_m32" time="0.000" /><testcase classname="tests.m3.test_scoring" name="test_stale_books_are_null" time="0.007" /><testcase classname="tests.m3.test_scoring" name="test_split_suspect_valuation_null" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_pit_filed_date" time="0.002" /><testcase classname="tests.m3.test_scoring" name="test_foreign_filers_not_tradable" time="0.008" /><testcase classname="tests.m3.test_scoring" name="test_rule_set_a_locked" time="0.003" /><testcase classname="tests.m3.test_scoring" name="test_v18_constants" time="0.001" /><testcase classname="tests.m3.test_scoring" name="test_no_tracker_stops_in_rule_a" time="0.001" /><testcase classname="tests.m3.test_scoring" name="test_scores_match_muse" time="7.881" /><testcase classname="tests.m4.test_b011" name="test_exact_minus_eight_sells_one_third_of_each_attack_name" time="0.017" /><testcase classname="tests.m4.test_b011" name="test_exact_minus_six_releases_the_deep_brake" time="0.000" /><testcase classname="tests.m4.test_b011" name="test_neighboring_amounts_keep_each_operator" time="0.000" /><testcase classname="tests.m4.test_closeout" name="test_plan_zero_amount_becomes_explained_skip" time="0.003" /><testcase classname="tests.m4.test_closeout" name="test_plan_skip_identifies_one_actual_gate" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_order_reason_tokens" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_orders_only_from_engine" time="0.022" /><testcase classname="tests.m4.test_execution" name="test_fill_timing_and_cost" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_membership_asof" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_sell_priority" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_panic_gate_scope" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_cooldown_m58" time="0.001" /><testcase classname="tests.m4.test_execution" name="test_overlay_cooling_skip_and_cancel" time="0.001" /><testcase classname="tests.m4.test_execution" name="test_overlay_missing_marked" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_plan_unpublished_low_coverage" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.004" /><testcase classname="tests.m4.test_execution" name="test_vix_missing_not_panic" time="0.001" /><testcase classname="tests.m4.test_execution" name="test_v18_replay" time="8.203" /><testcase classname="tests.m4.test_execution" name="test_amd_entry_2026_01_12" time="0.000" /><testcase classname="tests.m5.test_valuation" name="test_valuation_synthetic" time="0.009" /><testcase classname="tests.m5.test_valuation" name="test_growth_valuation_v11" time="0.006" /><testcase classname="tests.m5.test_valuation" name="test_valuation_ignores_price" time="0.002" /><testcase classname="tests.m5.test_valuation" name="test_valuation_monotone_and_stable" time="0.017" /><testcase classname="tests.m5.test_valuation" name="test_trading_without_valuation" time="0.002" /><testcase classname="tests.m5.test_valuation" name="test_valuation_schema_revoke" time="0.003" /><testcase classname="tests.m5.test_valuation" name="test_valuation_label" time="0.002" /><testcase classname="tests.m5.test_valuation" name="test_type_switch_needs_two_periods" time="0.004" /><testcase classname="tests.m5.test_valuation" name="test_change_decomposition_sums" time="0.003" /><testcase classname="tests.m5.test_valuation" name="test_pending_review_over_25pct" time="0.003" /><testcase classname="tests.m5.test_valuation" name="test_implied_growth_no_solution" time="0.003" /><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.009" /><testcase classname="tests.m5.test_valuation" name="test_shadow_rules_no_orders" time="0.000" /><testcase classname="tests.m6.test_service" name="test_market_service_preserves_requested_tickers" time="0.003" /><testcase classname="tests.m6.test_structure" name="test_marketstate_flags" time="0.002" /><testcase classname="tests.m6.test_structure" name="test_residual_exact_linear" time="0.002" /><testcase classname="tests.m6.test_structure" name="test_sic_review_additions" time="0.003" /><testcase classname="tests.m6.test_structure" name="test_l3_same_as_l2_drops_theme_factor" time="1.456" /><testcase classname="tests.m6.test_structure" name="test_residual_leave_one_out" time="0.001" /><testcase classname="tests.m6.test_structure" name="test_residual_window_excludes_today" time="0.000" /><testcase classname="tests.m6.test_structure" name="test_insufficient_history_null" time="0.001" /><testcase classname="tests.m6.test_structure" name="test_post_session_null_when_missing" time="1.389" /><testcase classname="tests.m6.test_structure" name="test_beta_share_bounds" time="0.000" /><testcase classname="tests.m6.test_structure" name="test_marketstate_price_only" time="0.726" /><testcase classname="tests.m6.test_structure" name="test_graph_draft_requires_citation" time="0.020" /><testcase classname="tests.m6.test_structure" name="test_candidate_edges_not_used" time="0.001" /><testcase classname="tests.m6.test_structure" name="test_auto_cluster_suggestion" time="0.347" /><testcase classname="tests.m6.test_structure" name="test_draft_all_does_not_share_one_connection" time="0.175" /><testcase classname="tests.m7.test_anomaly" name="test_path_a_total_shock" time="0.060" /><testcase classname="tests.m7.test_anomaly" name="test_path_b_relative" time="0.067" /><testcase classname="tests.m7.test_anomaly" name="test_replay_basket_alias" time="0.004" /><testcase classname="tests.m7.test_anomaly" name="test_file_and_database_views_match" time="0.113" /><testcase classname="tests.m7.test_anomaly" name="test_path_c_factor" time="0.022" /><testcase classname="tests.m7.test_anomaly" name="test_multi_day_cumulative" time="0.022" /><testcase classname="tests.m7.test_anomaly" name="test_merge_and_layer" time="0.011" /><testcase classname="tests.m7.test_anomaly" name="test_data_quality_gates" time="0.032" /><testcase classname="tests.m7.test_anomaly" name="test_amplification_features" time="0.022" /><testcase classname="tests.m7.test_anomaly" name="test_type_candidates_prelim" time="0.022" /><testcase classname="tests.m7.test_anomaly" name="test_premarket_review_scope" time="0.012" /><testcase classname="tests.m7.test_anomaly" name="test_no_news_dependency" time="0.001" /><testcase classname="tests.m8.test_attribution" name="test_market_move_uses_residual_return_and_positive_eps" time="0.138" /><testcase classname="tests.m8.test_attribution" name="test_channels_follow_the_mechanism_and_the_best_source" time="0.031" /><testcase classname="tests.m8.test_attribution" name="test_missing_exposure_is_a_fill_task_and_not_incompatible" time="0.011" /><testcase classname="tests.m8.test_attribution" name="test_market_confidence_and_fundamental_standing_stay_separate" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_implied_magnitude_rules" time="0.227" /><testcase classname="tests.m8.test_attribution" name="test_evidence_scores" time="0.041" /><testcase classname="tests.m8.test_attribution" name="test_magnitude_component_drops_an_untested_channel" time="0.052" /><testcase classname="tests.m8.test_attribution" name="test_exposure_gradient_needs_three_observed_relations" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_specificity_narrative_and_alternatives_are_separate_scores" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_time_alignment_late_news" time="0.010" /><testcase classname="tests.m8.test_attribution" name="test_candidate_validation" time="0.035" /><testcase classname="tests.m8.test_attribution" name="test_model_score_does_not_enter_the_hypothesis" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_retrieval_entities_stop_at_one_hop" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_retrieval_union_keeps_rule_hits_outside_the_vector_cap" time="0.021" /><testcase classname="tests.m8.test_attribution" name="test_shortlist_uses_the_retrieval_score_after_the_window" time="0.011" /><testcase classname="tests.m8.test_attribution" name="test_retrieval_background_window" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_embedding_model_isolation" time="0.068" /><testcase classname="tests.m8.test_attribution" name="test_market_confirmation_four_conditions" time="0.064" /><testcase classname="tests.m8.test_attribution" name="test_independent_evidence_is_not_the_price_move" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_sentiment_amplification_does_not_change_the_fundamental" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_weak_signal_only_raises_research_priority" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_review_queue_keeps_authenticity_off_the_rank" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_rumor_publication_is_not_operating_evidence" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_a_later_link_does_not_fill_an_earlier_one" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_a_later_report_cannot_explain_the_prior_drop" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_source_check_does_not_make_the_claim_true" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_official_denial_response_uses_absolute_residual" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_two_track_rows_do_not_move_valuation" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_unretraced_fade_raises_research_priority" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_revision_spread_does_not_move_valuation" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_market_fingerprint_does_not_name_the_only_cause" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_explore_quota_is_not_operating_evidence" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_discard_review_stops_at_twenty" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_full_text_stops_after_ninety_days" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_falsified_rumor_keeps_the_price_record" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_relation_step_does_not_establish_from_price" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_primary_signal_enters_attention_without_news" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_research_order_is_not_the_review_queue" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_market_consensus_stays_on_the_market_layer" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_coverage_alarm_needs_three_rising_days" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_retrace_windows_do_not_pick_a_capital_state" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_ntm_move_does_not_replace_ttm" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_lifecycle_transitions" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_second_hit" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_price_retrieval_must_be_seen_before_the_response" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_missing_vectors_are_named_as_a_rule_fallback" time="0.041" /><testcase classname="tests.m8.test_attribution" name="test_magnitude_channels_keep_their_own_verdicts" time="0.031" /><testcase classname="tests.m8.test_attribution" name="test_one_level12_quantity_is_local_support_only" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_fingerprint_registers_only_a_medium_market_score" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_search_budget" time="0.031" /><testcase classname="tests.m8.test_attribution" name="test_supplement_runs_only_below_five_items" time="0.041" /><testcase classname="tests.m8.test_attribution" name="test_skipped_supplement_is_named_on_the_report" time="0.012" /><testcase classname="tests.m8.test_attribution" name="test_verified_not_from_market_evidence" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_retrieval_recovers_low_rank_item" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_five_dims_rules" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_tracks_and_deadline" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_consensus_lookback_does_not_name_a_band" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_revision_breadth_does_not_name_a_band" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_consensus_dispersion_stays_blank_when_eps_is_tiny" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_surprise_history_keeps_four_without_averaging" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_divergence_labels" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_systemic_event_tag_requires_level12" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_unexplained_recheck_5d" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_anomaly_contract" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_claim_fields_omit_unsupported" time="0.007" /><testcase classname="tests.m8.test_attribution" name="test_model_output_contract_rejects_a_bad_structure" time="0.065" /><testcase classname="tests.m8.test_attribution" name="test_wide_anomaly_skips_candidates" time="0.002" /><testcase classname="tests.m8.test_attribution" name="test_type_candidates_follow_score_not_case_name" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_scope_is_a_relation_label_and_tracking_is_not_evidence" time="0.012" /><testcase classname="tests.m8.test_attribution" name="test_constraint_conclusion_does_not_prove_operating_impact" time="0.011" /><testcase classname="tests.m8.test_attribution" name="test_toshiba_midpoint_reaches_deadline" time="0.011" /><testcase classname="tests.m8.test_attribution" name="test_toshiba_explanation_json_keeps_the_event_history" time="0.020"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'docker'">@pytest.mark.phase1_blocking
+    def test_toshiba_explanation_json_keeps_the_event_history():
+        import psycopg
+    
+        from inves_cog.perception.attribution.store import Store
+        from inves_cog.perception.attribution.toshiba import explanation_document
+    
+        path = ROOT / "tests/fixtures/phase1/m8/toshiba_explanation.json"
+        fresh = explanation_document()
+        stored = json.loads(path.read_text())
+        assert stored == fresh
+        assert stored["fixture"] == "synthetic"
+        assert stored["closes_ac_m8_06"] is False
+        assert stored["closes_case"] is False
+        assert stored["operating_conclusion"] == "合成生命周期，不是真实经营结论"
+        assert [row["new"] for row in stored["history"]] == [
+            "已发现",
+            "假设中",
+            "市场确认",
+            "基本面核查中",
+            "已验证·有影响",
+        ]
+        assert stored["history"][0]["old"] is None
+        assert all({"at", "old", "new", "trigger", "evidence_ids"} &lt;= set(row) for row in stored["history"])
+        assert stored["report"]["valuation"] == "不变 / 待基本面轨道"
+        assert stored["report"]["operating_evidence_id"] == "synthetic-8k-guidance"
+    
+&gt;       host = _disposable_database()
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m8/test_attribution.py:3796: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/m8/test_attribution.py:4275: in _disposable_database
+    listed = subprocess.run(
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1026: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Popen: returncode: 255 args: ['docker', 'ps', '--filter', 'name=inves-cog-t...&gt;
+args = ['docker', 'ps', '--filter', 'name=inves-cog-test-', '--format', '{{.Names}}']
+executable = b'docker', preexec_fn = None, close_fds = True, pass_fds = ()
+cwd = None, env = None, startupinfo = None, creationflags = 0, shell = False
+p2cread = -1, p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13
+errwrite = 14, restore_signals = True, gid = None, gids = None, uid = None
+umask = -1, start_new_session = False, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and not close_fds
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread &gt; 2)
+                and (c2pwrite == -1 or c2pwrite &gt; 2)
+                and (errwrite == -1 or errwrite &gt; 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask &lt; 0):
+            self._posix_spawn(args, executable, env, restore_signals,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write &lt; 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+                self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+                self._child_created = True
+            finally:
+                # be sure the FD is closed no matter what
+                os.close(errpipe_write)
+    
+            self._close_pipe_fds(p2cread, p2cwrite,
+                                 c2pread, c2pwrite,
+                                 errread, errwrite)
+    
+            # Wait for exec to fail or succeed; possibly raising an
+            # exception (limited in size)
+            errpipe_data = bytearray()
+            while True:
+                part = os.read(errpipe_read, 50000)
+                errpipe_data += part
+                if not part or len(errpipe_data) &gt; 50000:
+                    break
+        finally:
+            # be sure the FD is closed no matter what
+            os.close(errpipe_read)
+    
+        if errpipe_data:
+            try:
+                pid, sts = os.waitpid(self.pid, 0)
+                if pid == self.pid:
+                    self._handle_exitstatus(sts)
+                else:
+                    self.returncode = sys.maxsize
+            except ChildProcessError:
+                pass
+    
+            try:
+                exception_name, hex_errno, err_msg = (
+                        errpipe_data.split(b':', 2))
+                # The encoding here should match the encoding
+                # written in by the subprocess implementations
+                # like _posixsubprocess
+                err_msg = err_msg.decode()
+            except ValueError:
+                exception_name = b'SubprocessError'
+                hex_errno = b'0'
+                err_msg = 'Bad exception data from child: {!r}'.format(
+                              bytes(errpipe_data))
+            child_exception_type = getattr(
+                    builtins, exception_name.decode('ascii'),
+                    SubprocessError)
+            if issubclass(child_exception_type, OSError) and hex_errno:
+                errno_num = int(hex_errno, 16)
+                if err_msg == "noexec:chdir":
+                    err_msg = ""
+                    # The error must be from chdir(cwd).
+                    err_filename = cwd
+                elif err_msg == "noexec":
+                    err_msg = ""
+                    err_filename = None
+                else:
+                    err_filename = orig_executable
+                if errno_num != 0:
+                    err_msg = os.strerror(errno_num)
+                if err_filename is not None:
+&gt;                   raise child_exception_type(errno_num, err_msg, err_filename)
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'docker'
+
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1955: FileNotFoundError</failure></testcase><testcase classname="tests.m8.test_attribution" name="test_ticker_codes_follow_the_scored_candidate" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_attribution_tables_do_not_grant_ingest" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_case_direction_on_synthetic_headlines" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_operating_evidence_thresholds" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_replay_labels_later_recorded_items" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_missing_first_seen_is_not_collected_then" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_store_writes_perception_rows_only" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_attribution_rows_round_trip_on_disposable_database" time="0.005"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'docker'">@pytest.mark.phase1_blocking
+    def test_attribution_rows_round_trip_on_disposable_database():
+&gt;       listed = subprocess.run(
+            ["docker", "ps", "--filter", "name=inves-cog-test-", "--format", "{{.Names}}"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+tests/m8/test_attribution.py:4242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1026: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Popen: returncode: 255 args: ['docker', 'ps', '--filter', 'name=inves-cog-t...&gt;
+args = ['docker', 'ps', '--filter', 'name=inves-cog-test-', '--format', '{{.Names}}']
+executable = b'docker', preexec_fn = None, close_fds = True, pass_fds = ()
+cwd = None, env = None, startupinfo = None, creationflags = 0, shell = False
+p2cread = -1, p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13
+errwrite = 14, restore_signals = True, gid = None, gids = None, uid = None
+umask = -1, start_new_session = False, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and not close_fds
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread &gt; 2)
+                and (c2pwrite == -1 or c2pwrite &gt; 2)
+                and (errwrite == -1 or errwrite &gt; 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask &lt; 0):
+            self._posix_spawn(args, executable, env, restore_signals,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write &lt; 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+                self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+                self._child_created = True
+            finally:
+                # be sure the FD is closed no matter what
+                os.close(errpipe_write)
+    
+            self._close_pipe_fds(p2cread, p2cwrite,
+                                 c2pread, c2pwrite,
+                                 errread, errwrite)
+    
+            # Wait for exec to fail or succeed; possibly raising an
+            # exception (limited in size)
+            errpipe_data = bytearray()
+            while True:
+                part = os.read(errpipe_read, 50000)
+                errpipe_data += part
+                if not part or len(errpipe_data) &gt; 50000:
+                    break
+        finally:
+            # be sure the FD is closed no matter what
+            os.close(errpipe_read)
+    
+        if errpipe_data:
+            try:
+                pid, sts = os.waitpid(self.pid, 0)
+                if pid == self.pid:
+                    self._handle_exitstatus(sts)
+                else:
+                    self.returncode = sys.maxsize
+            except ChildProcessError:
+                pass
+    
+            try:
+                exception_name, hex_errno, err_msg = (
+                        errpipe_data.split(b':', 2))
+                # The encoding here should match the encoding
+                # written in by the subprocess implementations
+                # like _posixsubprocess
+                err_msg = err_msg.decode()
+            except ValueError:
+                exception_name = b'SubprocessError'
+                hex_errno = b'0'
+                err_msg = 'Bad exception data from child: {!r}'.format(
+                              bytes(errpipe_data))
+            child_exception_type = getattr(
+                    builtins, exception_name.decode('ascii'),
+                    SubprocessError)
+            if issubclass(child_exception_type, OSError) and hex_errno:
+                errno_num = int(hex_errno, 16)
+                if err_msg == "noexec:chdir":
+                    err_msg = ""
+                    # The error must be from chdir(cwd).
+                    err_filename = cwd
+                elif err_msg == "noexec":
+                    err_msg = ""
+                    err_filename = None
+                else:
+                    err_filename = orig_executable
+                if errno_num != 0:
+                    err_msg = os.strerror(errno_num)
+                if err_filename is not None:
+&gt;                   raise child_exception_type(errno_num, err_msg, err_filename)
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'docker'
+
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1955: FileNotFoundError</failure></testcase><testcase classname="tests.m8.test_attribution" name="test_second_save_keeps_linkage_history_on_disposable_database" time="0.006"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'docker'">@pytest.mark.phase1_blocking
+    def test_second_save_keeps_linkage_history_on_disposable_database():
+        import psycopg
+    
+        from inves_cog.perception.attribution.store import Store
+    
+        discovered = [{"at": "2026-10-02T13:30:00Z", "old": None, "new": "已发现", "trigger": "异常", "evidence_ids": []}]
+        hypothesized = [
+            {
+                "at": "2026-10-02T13:40:00Z",
+                "old": "已发现",
+                "new": "假设中",
+                "trigger": "证据分达到假设",
+                "evidence_ids": ["nikkei-hdd"],
+            }
+        ]
+        confirmed = [
+            {
+                "at": "2026-10-03T20:00:00Z",
+                "old": "假设中",
+                "new": "市场确认",
+                "trigger": "四项同时成立",
+                "evidence_ids": ["nikkei-hdd"],
+            }
+        ]
+&gt;       host = _disposable_database()
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m8/test_attribution.py:4326: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/m8/test_attribution.py:4275: in _disposable_database
+    listed = subprocess.run(
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1026: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Popen: returncode: 255 args: ['docker', 'ps', '--filter', 'name=inves-cog-t...&gt;
+args = ['docker', 'ps', '--filter', 'name=inves-cog-test-', '--format', '{{.Names}}']
+executable = b'docker', preexec_fn = None, close_fds = True, pass_fds = ()
+cwd = None, env = None, startupinfo = None, creationflags = 0, shell = False
+p2cread = -1, p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13
+errwrite = 14, restore_signals = True, gid = None, gids = None, uid = None
+umask = -1, start_new_session = False, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and not close_fds
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread &gt; 2)
+                and (c2pwrite == -1 or c2pwrite &gt; 2)
+                and (errwrite == -1 or errwrite &gt; 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask &lt; 0):
+            self._posix_spawn(args, executable, env, restore_signals,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write &lt; 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+                self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+                self._child_created = True
+            finally:
+                # be sure the FD is closed no matter what
+                os.close(errpipe_write)
+    
+            self._close_pipe_fds(p2cread, p2cwrite,
+                                 c2pread, c2pwrite,
+                                 errread, errwrite)
+    
+            # Wait for exec to fail or succeed; possibly raising an
+            # exception (limited in size)
+            errpipe_data = bytearray()
+            while True:
+                part = os.read(errpipe_read, 50000)
+                errpipe_data += part
+                if not part or len(errpipe_data) &gt; 50000:
+                    break
+        finally:
+            # be sure the FD is closed no matter what
+            os.close(errpipe_read)
+    
+        if errpipe_data:
+            try:
+                pid, sts = os.waitpid(self.pid, 0)
+                if pid == self.pid:
+                    self._handle_exitstatus(sts)
+                else:
+                    self.returncode = sys.maxsize
+            except ChildProcessError:
+                pass
+    
+            try:
+                exception_name, hex_errno, err_msg = (
+                        errpipe_data.split(b':', 2))
+                # The encoding here should match the encoding
+                # written in by the subprocess implementations
+                # like _posixsubprocess
+                err_msg = err_msg.decode()
+            except ValueError:
+                exception_name = b'SubprocessError'
+                hex_errno = b'0'
+                err_msg = 'Bad exception data from child: {!r}'.format(
+                              bytes(errpipe_data))
+            child_exception_type = getattr(
+                    builtins, exception_name.decode('ascii'),
+                    SubprocessError)
+            if issubclass(child_exception_type, OSError) and hex_errno:
+                errno_num = int(hex_errno, 16)
+                if err_msg == "noexec:chdir":
+                    err_msg = ""
+                    # The error must be from chdir(cwd).
+                    err_filename = cwd
+                elif err_msg == "noexec":
+                    err_msg = ""
+                    err_filename = None
+                else:
+                    err_filename = orig_executable
+                if errno_num != 0:
+                    err_msg = os.strerror(errno_num)
+                if err_filename is not None:
+&gt;                   raise child_exception_type(errno_num, err_msg, err_filename)
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'docker'
+
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1955: FileNotFoundError</failure></testcase><testcase classname="tests.m8.test_attribution" name="test_second_save_updates_the_full_bundle_without_a_stub_history" time="0.005"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'docker'">@pytest.mark.phase1_blocking
+    def test_second_save_updates_the_full_bundle_without_a_stub_history():
+        import psycopg
+    
+        from inves_cog.perception.attribution.store import Store
+    
+        discovered = [{"at": "2026-10-02T13:30:00Z", "old": None, "new": "已发现", "trigger": "异常", "evidence_ids": []}]
+        hypothesized = [
+            {
+                "at": "2026-10-02T13:40:00Z",
+                "old": "已发现",
+                "new": "假设中",
+                "trigger": "证据分达到假设",
+                "evidence_ids": ["nikkei"],
+            }
+        ]
+&gt;       host = _disposable_database()
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m8/test_attribution.py:4407: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/m8/test_attribution.py:4275: in _disposable_database
+    listed = subprocess.run(
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1026: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Popen: returncode: 255 args: ['docker', 'ps', '--filter', 'name=inves-cog-t...&gt;
+args = ['docker', 'ps', '--filter', 'name=inves-cog-test-', '--format', '{{.Names}}']
+executable = b'docker', preexec_fn = None, close_fds = True, pass_fds = ()
+cwd = None, env = None, startupinfo = None, creationflags = 0, shell = False
+p2cread = -1, p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13
+errwrite = 14, restore_signals = True, gid = None, gids = None, uid = None
+umask = -1, start_new_session = False, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and not close_fds
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread &gt; 2)
+                and (c2pwrite == -1 or c2pwrite &gt; 2)
+                and (errwrite == -1 or errwrite &gt; 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask &lt; 0):
+            self._posix_spawn(args, executable, env, restore_signals,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write &lt; 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+                self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+                self._child_created = True
+            finally:
+                # be sure the FD is closed no matter what
+                os.close(errpipe_write)
+    
+            self._close_pipe_fds(p2cread, p2cwrite,
+                                 c2pread, c2pwrite,
+                                 errread, errwrite)
+    
+            # Wait for exec to fail or succeed; possibly raising an
+            # exception (limited in size)
+            errpipe_data = bytearray()
+            while True:
+                part = os.read(errpipe_read, 50000)
+                errpipe_data += part
+                if not part or len(errpipe_data) &gt; 50000:
+                    break
+        finally:
+            # be sure the FD is closed no matter what
+            os.close(errpipe_read)
+    
+        if errpipe_data:
+            try:
+                pid, sts = os.waitpid(self.pid, 0)
+                if pid == self.pid:
+                    self._handle_exitstatus(sts)
+                else:
+                    self.returncode = sys.maxsize
+            except ChildProcessError:
+                pass
+    
+            try:
+                exception_name, hex_errno, err_msg = (
+                        errpipe_data.split(b':', 2))
+                # The encoding here should match the encoding
+                # written in by the subprocess implementations
+                # like _posixsubprocess
+                err_msg = err_msg.decode()
+            except ValueError:
+                exception_name = b'SubprocessError'
+                hex_errno = b'0'
+                err_msg = 'Bad exception data from child: {!r}'.format(
+                              bytes(errpipe_data))
+            child_exception_type = getattr(
+                    builtins, exception_name.decode('ascii'),
+                    SubprocessError)
+            if issubclass(child_exception_type, OSError) and hex_errno:
+                errno_num = int(hex_errno, 16)
+                if err_msg == "noexec:chdir":
+                    err_msg = ""
+                    # The error must be from chdir(cwd).
+                    err_filename = cwd
+                elif err_msg == "noexec":
+                    err_msg = ""
+                    err_filename = None
+                else:
+                    err_filename = orig_executable
+                if errno_num != 0:
+                    err_msg = os.strerror(errno_num)
+                if err_filename is not None:
+&gt;                   raise child_exception_type(errno_num, err_msg, err_filename)
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'docker'
+
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1955: FileNotFoundError</failure></testcase><testcase classname="tests.m8.test_attribution" name="test_chain_counts_alternative_exclusion" time="0.098" /><testcase classname="tests.m8.test_attribution" name="test_chain_retrieves_related_news_and_scores_each_candidate" time="0.391" /><testcase classname="tests.m8.test_attribution" name="test_second_hit_uses_the_matched_basket_direction" time="0.060" /><testcase classname="tests.m8.test_attribution" name="test_chain_continues_a_prior_event_and_adapts_m7_sessions" time="0.356" /><testcase classname="tests.m8.test_attribution" name="test_deadline_waits_for_the_reaction_session_to_end" time="0.055" /><testcase classname="tests.m8.test_attribution" name="test_negative_session_count_does_not_expire_on_the_start_day" time="0.010" /><testcase classname="tests.m8.test_attribution" name="test_deadline_before_the_event_does_not_close_it" time="0.010" /><testcase classname="tests.m8.test_attribution" name="test_nontrading_deadline_does_not_stay_open" time="0.010" /><testcase classname="tests.m8.test_attribution" name="test_labels_keep_a_closed_conclusion" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_labels_reload_a_saved_conclusion" time="0.231" /><testcase classname="tests.m8.test_attribution" name="test_labels_do_not_overwrite_a_saved_track" time="0.002" /><testcase classname="tests.m8.test_attribution" name="test_tracks_stage_uses_the_completed_session" time="0.191" /><testcase classname="tests.m8.test_attribution" name="test_scheduled_job_records_the_stage_itself" time="0.021" /><testcase classname="tests.m8.test_attribution" name="test_prior_and_linkage_read_dict_rows_and_tuples" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_scheduled_job_fails_only_when_every_save_fails" time="0.090" /><testcase classname="tests.m8.test_attribution" name="test_attribution_chain_scores_from_rules_and_keeps_going" time="0.070" /><testcase classname="tests.m8.test_attribution" name="test_five_day_replay_hides_an_item_until_it_was_seen" time="0.079" /><testcase classname="tests.m8.test_attribution" name="test_m7_anomalies_without_visible_news_stay_unexplained" time="0.001" /><testcase classname="tests.m8.test_attribution" name="test_manual_public_leads_leave_case_gaps" time="0.002" /><testcase classname="tests.m8.test_attribution" name="test_backfill_leads_do_not_close_m7_case_days" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_historical_case_mode_does_not_open_production_path" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_historical_case_report_keeps_citations_and_lists_gaps" time="0.002" /><testcase classname="tests.m8.test_attribution" name="test_export_headlines_fill_known_categories_without_live_visibility" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_candidate_capture_path_is_the_recording_file" time="0.003" /><testcase classname="tests.m8.test_attribution" name="test_tdk_headline_is_eligible_but_untested_without_a_response" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_muse_open_uses_the_cited_date_interval" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_r1_citation_must_name_the_release" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_openai_rank_counts_candidates_not_citations" time="0.000" /><testcase classname="tests.m8.test_attribution" name="test_claim_capture_is_separate_from_the_candidate_file" time="0.002" /><testcase classname="tests.m8.test_attribution" name="test_case_inputs_are_the_payload_bytes" time="11.487" /><testcase classname="tests.m8.test_attribution" name="test_capture_command_stores_recordings_without_a_live_call" time="0.364" /><testcase classname="tests.m8.test_attribution" name="test_five_day_report_uses_only_items_already_seen" time="0.221" /><testcase classname="tests.m8.test_b009" name="test_three_link_kinds_keep_or_drop_the_expected_ticker" time="0.000" /><testcase classname="tests.m8.test_b009" name="test_score_marks_do_not_change_the_existing_total" time="0.031" /><testcase classname="tests.m8.test_b009" name="test_diagnostic_packet_checks_preregistration_and_does_not_call" time="0.023" /><testcase classname="tests.m8.test_b009" name="test_review_tool_reads_caller_files_and_v3_judges_a_synthetic_recording" time="0.011" /><testcase classname="tests.m8.test_b010" name="test_missing_or_non_array_links_move_every_ticker_to_a_gap" time="0.000" /><testcase classname="tests.m8.test_b010" name="test_blind_files_hide_group_names_and_ids_repeat_from_the_seed" time="0.002" /><testcase classname="tests.m8.test_b010" name="test_delete_keeps_other_items_byte_for_byte_and_refuses_a_missing_target" time="0.001" /><testcase classname="tests.m8.test_b010" name="test_six_payloads_use_the_recording_hash_and_the_run_cap" time="0.002" /><testcase classname="tests.m8.test_b010" name="test_market_layer_follows_confirmation_and_second_hit_per_ticker" time="0.151" /><testcase classname="tests.m8.test_b010" name="test_preregistration_compares_time_zones_and_report_shows_hypothesis_width" time="0.023" /><testcase classname="tests.m8.test_b014" name="test_coreweave_headline_marks_only_crwv" time="0.011" /><testcase classname="tests.m8.test_b014" name="test_dell_headline_marks_only_dell" time="0.008" /><testcase classname="tests.m8.test_b014" name="test_hewlett_packard_and_netapp_headlines_list_nobody" time="0.008" /><testcase classname="tests.m8.test_b014" name="test_close_reading_keeps_at_most_three_named_companies" time="0.009" /><testcase classname="tests.m8.test_b014" name="test_move_with_no_earlier_news_is_complete" time="0.008" /><testcase classname="tests.m8.test_b014" name="test_news_published_after_the_move_is_not_already_known" time="0.008" /><testcase classname="tests.m8.test_b015" name="test_layer3_does_not_call_news_card_and_layer2_calls_it_once" time="0.002" /><testcase classname="tests.m8.test_b015" name="test_injected_replies_keep_meta_and_companies_outside_the_list" time="0.001" /><testcase classname="tests.m8.test_b015" name="test_injected_coreweave_dell_and_r1_replies_keep_their_tickers" time="0.002" /><testcase classname="tests.m8.test_b015" name="test_short_news_id_matches_one_full_id_and_two_matches_are_dropped" time="0.000" /><testcase classname="tests.m8.test_b015" name="test_date_only_news_on_the_move_day_is_not_seen_ahead" time="0.000" /><testcase classname="tests.m8.test_b015" name="test_move_card_path_does_not_call_anomaly_candidates" time="0.000" /><testcase classname="tests.m8.test_b015" name="test_daily_page_folds_a_wide_medium_list_and_keeps_the_card" time="0.000" /><testcase classname="tests.m8.test_b015" name="test_b014_empty_company_list_examples_are_gone" time="0.001" /><testcase classname="tests.m8.test_b016" name="test_tracked_move_run_calls_only_move_card_and_writes_the_daily_page" time="0.012" /><testcase classname="tests.m8.test_b017" name="test_tracked_move_without_a_news_card_calls_only_move_card" time="0.011" /><testcase classname="tests.m8.test_b017" name="test_tracked_move_with_no_news_writes_the_daily_page_without_a_model" time="0.022" /><testcase classname="tests.m8.test_b017" name="test_tracked_move_keeps_meta_and_does_not_rewrite_numbers" time="0.011" /><testcase classname="tests.m8.test_b018" name="test_one_morning_page_lists_both_tracked_moves" time="0.022" /><testcase classname="tests.m8.test_b018" name="test_morning_page_prints_one_valuation_and_one_plan_order" time="0.011" /><testcase classname="tests.m8.test_b018" name="test_morning_page_names_a_missing_valuation_and_plan" time="0.022" /><testcase classname="tests.m8.test_b018" name="test_same_day_date_only_news_is_not_already_seen" time="0.011" /><testcase classname="tests.m8.test_b018" name="test_earlier_date_only_news_was_already_known" time="0.011" /><testcase classname="tests.m8.test_b018" name="test_quiet_day_still_prints_high_news_valuation_and_plan" time="0.000" /><testcase classname="tests.m8.test_b018" name="test_wide_medium_list_folds_without_a_move_card" time="0.000" /><testcase classname="tests.m8.test_b018" name="test_later_slots_do_not_return_a_daily_page" time="0.000" /><testcase classname="tests.m8.test_b019" name="test_english_news_card_fields_are_kept" time="0.001" /><testcase classname="tests.m8.test_b019" name="test_chinese_news_card_stays_and_a_bad_reply_keeps_the_name_match" time="0.001" /><testcase classname="tests.m8.test_b020" name="test_morning_run_keeps_only_the_closed_session" time="0.011" /><testcase classname="tests.m8.test_b020" name="test_section_four_keeps_high_and_drops_low" time="0.000" /><testcase classname="tests.m8.test_b020" name="test_quiet_closed_session_does_not_print_an_older_high_card" time="0.000" /><testcase classname="tests.m8.test_b020" name="test_later_slots_still_omit_the_page" time="0.000" /><testcase classname="tests.m8.test_b021" name="test_lookup_before_the_move_is_missed_not_already_seen" time="0.033" /><testcase classname="tests.m8.test_b021" name="test_empty_lookup_stays_no_news" time="0.033" /><testcase classname="tests.m8.test_b021" name="test_six_matched_items_skip_the_lookup" time="0.022" /><testcase classname="tests.m8.test_b021" name="test_lookup_after_the_move_is_labeled_and_not_already_known" time="0.032" /><testcase classname="tests.m8.test_b021" name="test_three_matched_items_still_look_up" time="0.021" /><testcase classname="tests.m8.test_b021" name="test_half_past_nine_does_not_look_up_or_write_a_page" time="0.021" /><testcase classname="tests.m8.test_b022" name="test_other_chinese_field_names_fill_the_card" time="0.001" /><testcase classname="tests.m8.test_b022" name="test_english_news_card_fields_stay" time="0.001" /><testcase classname="tests.m8.test_b023" name="test_third_field_names_fill_the_card" time="0.001" /><testcase classname="tests.m8.test_b023" name="test_industry_object_keeps_the_name_key" time="0.001" /><testcase classname="tests.m8.test_b023" name="test_question_names_the_card_fields" time="0.001" /><testcase classname="tests.m8.test_b024" name="test_one_industry_sentence_keeps_the_card" time="0.001" /><testcase classname="tests.m8.test_b024" name="test_industry_list_stays_a_list" time="0.001" /><testcase classname="tests.m8.test_b025" name="test_macro_leads_and_a_single_name_is_only_counted" time="0.000" /><testcase classname="tests.m8.test_b025" name="test_a_position_in_a_move_leads_the_second_tier" time="0.022" /><testcase classname="tests.m8.test_b025" name="test_missing_position_snapshot_does_not_use_orders" time="0.021" /><testcase classname="tests.m8.test_b025" name="test_the_first_tier_stops_at_five" time="0.000" /><testcase classname="tests.m8.test_b025" name="test_one_medium_name_is_not_counted" time="0.000" /><testcase classname="tests.m8.test_b025" name="test_macro_position_move_stays_in_both_tiers" time="0.021" /><testcase classname="tests.m8.test_b026" name="test_six_holdings_are_all_listed" time="0.000" /><testcase classname="tests.m8.test_b026" name="test_one_holding_expands_the_earliest_id_and_counts_the_rest" time="0.021" /><testcase classname="tests.m8.test_b026" name="test_holdings_without_a_high_mark_share_one_line" time="0.000" /><testcase classname="tests.m8.test_b026" name="test_a_holding_stays_in_the_second_tier_after_the_first_tier" time="0.000" /><testcase classname="tests.m8.test_b027" name="test_two_moves_each_keep_their_own_group" time="0.021" /><testcase classname="tests.m8.test_b027" name="test_later_news_lists_three_and_counts_the_rest" time="0.032" /><testcase classname="tests.m8.test_b027" name="test_the_other_four_labels_use_plain_words" time="0.103" /><testcase classname="tests.m8.test_b027" name="test_valuation_prints_only_the_relevant_names" time="0.070" /><testcase classname="tests.m8.test_b027" name="test_plan_amount_is_dollars_with_cents" time="0.000" /><testcase classname="tests.m8.test_b027" name="test_the_page_hides_internal_words" time="0.180" /><testcase classname="tests.m8.test_b028" name="test_one_close_move_uses_the_member_return" time="0.021" /><testcase classname="tests.m8.test_b028" name="test_nine_names_average_the_returns_that_exist" time="0.021" /><testcase classname="tests.m8.test_b028" name="test_post_move_names_the_opposite_of_the_peer_direction" time="0.021" /><testcase classname="tests.m8.test_b028" name="test_a_rounded_zero_is_called_flat" time="0.021" /><testcase classname="tests.m8.test_b028" name="test_a_blank_return_names_the_direction_without_a_percent" time="0.022" /><testcase classname="tests.m8.test_b028" name="test_a_day_with_no_news_says_nothing_arrived" time="0.000" /><testcase classname="tests.m8.test_b028" name="test_the_page_has_no_english_session_words" time="0.105" /><testcase classname="tests.ops.test_daily_scheduling" name="test_installer_registers_inputs_without_dropping_existing_sec_tasks" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T00:44:00Z-names0]" time="0.001" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T00:45:00Z-names1]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T02:29:00Z-names2]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T02:30:00Z-names3]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T01:44:00Z-names4]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T01:45:00Z-names5]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T03:30:00Z-names6]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_waits_for_inputs_and_financials_before_dispatch" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_market_failure_does_not_prevent_ready_scoring" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_never_starts_on_weekend" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_installer_registers_restarting_financials_only_service" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:14:59+00:00-False]" time="0.001" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:15:00+00:00-True]" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:44:59+00:00-True]" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-17T01:45:00+00:00-False]" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-11-03T02:15:00+00:00-True]" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_slot_et_dst_and_no_repeat[2026-10-18T01:15:00+00:00-False]" time="0.000" /><testcase classname="tests.ops.test_financials_scheduling" name="test_financials_dispatch_uses_existing_m2_runner_and_only_financials" time="0.000" /></testsuite></testsuites>
