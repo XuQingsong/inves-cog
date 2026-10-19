@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-030  已收到  2026-10-19 23:40 北京
+
+- 任务：波动那一问写明回答的样子，并认已经见过的栏名，不再把回答丢掉。送去的波动和页上那一行同一套算法。能解释为否的不印。页上每条带强中弱。北京周二到周六早上写页，周日、周一和美东假日后的那个早上不写。计划行用 `label`，金额用 `value`，空了用 `notional_est`。
+- 入口是北京 09:15 的 `run_scheduled`，以及 `morning` 命令判断是不是那一刻。从最新 `origin/main`（含 PR #35）开新分支 `cursor/m8-b030-move-reply-e013`，开新 PR。
+- 不改送哪些新闻、最多 40 条，不改新闻摘要的问法，不改估值、计划、持仓的计算。B-029 不打回。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`。
+- 下一步：先写九个失败例子，再改这一问和周六、计划行。
+
 ## B-029  已完成  2026-10-19 23:20 北京
 
 - 草稿 PR #35，head `2cffe0b`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39276636354 。`phase1-blocking` 340 passed，用时 107.24 秒，nightly 跳过。没有合并。
