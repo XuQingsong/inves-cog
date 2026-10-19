@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-018  已收到  2026-10-19 15:11 北京
+
+- 任务：每个交易日一页。同一天的波动放在一起，带上当天的估值和计划。只有日期的新闻不算「提前看到」。从最新 `origin/main` 开新分支 `cursor/m8-b018-daily-page-e013`，开新 PR。
+- 入口是北京 09:15 的 `run_scheduled`。每个交易日出一页，没有跟踪范围内的波动也出。09:30 和 12:30 不出页面。`replay_days`、`score_all`、`score_stage` 不改，冻结的五日文件不改。
+- `run_scheduled` 和 `execute_stage` 增加 `valuation=`、`plan=`，传到 `attribute_all`。这张单不从库里读估值和计划。
+- 只有日期的新闻按钟点不清楚处理。同一天归类「同一天，发布钟点不清楚」。更早的、已经标到的算「提前看到」。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`，不改估值和交易的计算。不做补查。
+- 下一步：先写八个失败例子，再改 09:15 那一页。
+
 ## B-017  已完成  2026-10-19 13:33 北京
 
 - PR #21，head `c16a146`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39204825060 。`phase1-blocking` 通过，nightly 跳过。没有合并。
