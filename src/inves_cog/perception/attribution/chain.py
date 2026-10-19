@@ -356,7 +356,10 @@ def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None
     """One page for the session that just closed. Wide scans stay out of section 1."""
     day = _closed_trade_date(when)
     cards = []
+    heard = False
     for item in items:
+        if _news_day(item) == day:
+            heard = True
         card = _news_card(item)
         if not isinstance(card, dict) or _news_day(item) != day or not _page_news(card):
             continue
@@ -377,13 +380,7 @@ def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None
             _with_lookup(
                 anomaly,
                 items,
-                {
-                    "股票": _member_names(anomaly),
-                    "方向": anomaly.get("direction") or "",
-                    "幅度": anomaly.get("幅度") or anomaly.get("magnitude") or "",
-                    "解释": move.get("解释") or [],
-                    "归类": move.get("归类") or "",
-                },
+                _page_move(anomaly, move),
                 news_lookup,
                 when,
             )
@@ -391,9 +388,38 @@ def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None
     return [
         {
             "trade_date": day,
-            "text": daily_text(moves=moves, news_cards=cards, valuation=valuation, plan=plan, trade_date=day),
+            "text": daily_text(
+                moves=moves, news_cards=cards, valuation=valuation, plan=plan, trade_date=day, received=heard
+            ),
         }
     ]
+
+
+def _page_move(anomaly, move):
+    """Chinese magnitude stays. Otherwise the line is computed from member returns."""
+    supplied = anomaly.get("方向") if anomaly.get("方向") in {"涨", "跌"} else ""
+    return {
+        "股票": _member_names(anomaly),
+        "方向": supplied or anomaly.get("direction") or "",
+        "幅度": anomaly.get("幅度") or anomaly.get("magnitude") or "",
+        "时段": anomaly.get("session") or "",
+        "收益": _member_rets(anomaly),
+        "解释": move.get("解释") or [],
+        "归类": move.get("归类") or "",
+    }
+
+
+def _member_rets(anomaly):
+    returns = []
+    for member in anomaly.get("members") or []:
+        if isinstance(member, dict):
+            name = member.get("ticker") or member.get("entity_id")
+            ret = member.get("ret")
+        else:
+            name, ret = member, None
+        if name:
+            returns.append(ret)
+    return returns
 
 
 def adapt_m7(anomaly):

@@ -425,8 +425,23 @@ def _beijing(value):
     return f"{local.month}月{local.day}日 {local:%H:%M}"
 
 
+def _legacy_move(move):
+    """A caller that already supplied a Chinese word and a magnitude keeps that line."""
+    return str(move.get("方向") or "") in {"涨", "跌"} and move.get("幅度") not in (None, "")
+
+
+def _move_names_line(move):
+    return [str(name) for name in (move.get("股票") or []) if name]
+
+
 def _move_headline(move, index):
-    names = [str(name) for name in (move.get("股票") or []) if name]
+    if _legacy_move(move):
+        return _legacy_headline(move, index)
+    return _raw_headline(move, index)
+
+
+def _legacy_headline(move, index):
+    names = _move_names_line(move)
     direction = str(move.get("方向") or "")
     number = _percent_text(_percent_number(move.get("幅度")))
     percent = f" {number}%" if number else ""
@@ -435,6 +450,68 @@ def _move_headline(move, index):
     else:
         body = f"{names[0] if names else ''} {direction}{percent}".strip()
     return f"{index}. {body}"
+
+
+def _numeric_returns(move):
+    numbers = []
+    for value in move.get("收益") or []:
+        if isinstance(value, bool) or value is None or value == "":
+            continue
+        try:
+            numbers.append(Decimal(str(value)))
+        except (InvalidOperation, ValueError):
+            continue
+    return numbers
+
+
+def _peer_clause(direction):
+    if direction == "down":
+        return "，明显弱于同类股票"
+    if direction == "up":
+        return "，明显强于同类股票"
+    return ""
+
+
+def _raw_headline(move, index):
+    names = _move_names_line(move)
+    direction = str(move.get("方向") or "")
+    word = {"up": "涨", "down": "跌"}.get(direction, direction if direction in {"涨", "跌"} else "")
+    post = (move.get("时段") or "") == "post"
+    codes = "、".join(names)
+    numbers = _numeric_returns(move)
+    if not numbers:
+        return f"{index}. {_unnamed_move(names, word, post, codes)}"
+    average = sum(numbers) / Decimal(len(numbers)) * Decimal(100)
+    rounded = average.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    if rounded == 0:
+        return f"{index}. {_flat_move(names, post, _peer_clause(direction), codes)}"
+    price = "跌" if average < 0 else "涨"
+    opposite = (price == "涨" and direction == "down") or (price == "跌" and direction == "up")
+    peer = _peer_clause(direction) if opposite else ""
+    shown = f"{abs(rounded):.1f}"
+    if len(names) > 1:
+        where = "盘后一起" if post else "一起"
+        body = f"{len(names)} 只{where}{price}，平均{price} {shown}%{peer}：{codes}"
+    else:
+        where = "盘后" if post else ""
+        body = f"{names[0] if names else ''} {where}{price} {shown}%{peer}".replace("  ", " ").strip()
+    return f"{index}. {body}"
+
+
+def _unnamed_move(names, word, post, codes):
+    if len(names) > 1:
+        where = "盘后一起" if post else "一起"
+        return f"{len(names)} 只{where}{word}：{codes}"
+    where = "盘后" if post else ""
+    return f"{names[0] if names else ''} {where}{word}".replace("  ", " ").strip()
+
+
+def _flat_move(names, post, peer, codes):
+    if len(names) > 1:
+        where = "盘后" if post else ""
+        return f"{len(names)} 只{where}基本没动{peer}：{codes}"
+    where = "盘后" if post else ""
+    return f"{names[0] if names else ''} {where}基本没动{peer}".replace("  ", " ").strip()
 
 
 def _reason_lines(move):
@@ -558,9 +635,16 @@ def _position_lines(scoped, held, move_names, accounted):
     return lines
 
 
-def _news_sections(cards, moves, plan, trade_date):
-    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
+def _news_sections(cards, moves, plan, trade_date, received):
     held = _held_names(plan, trade_date)
+    if received is False:
+        macro = ["今天一条新闻都没收到"]
+        if held:
+            positions = ["今天一条新闻都没收到，没法判断这些持仓有没有消息：" + "、".join(sorted(held))]
+        else:
+            positions = ["今天没有拿到持仓"]
+        return macro, positions
+    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
     move_names = _move_names(moves)
     first = _first_shown(scoped)
     macro = [_macro_line(card, held) for card in first] or ["今天没有"]
@@ -575,7 +659,7 @@ def _news_sections(cards, moves, plan, trade_date):
     return macro, positions
 
 
-def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
+def daily_text(*, moves, news_cards, valuation, plan, trade_date=None, received=None):
     """One page of text. News and moves do not change valuation or the plan."""
     lines = [f"{trade_date} 收盘后"] if trade_date else []
     lines.append("一、昨天不寻常的波动")
@@ -583,7 +667,7 @@ def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
         lines.append("昨天没有不寻常的波动")
     for index, move in enumerate(moves or [], start=1):
         lines.extend(_move_block(move, index))
-    macro, positions = _news_sections(news_cards, moves, plan, trade_date)
+    macro, positions = _news_sections(news_cards, moves, plan, trade_date, received)
     lines.append("二、影响大盘和多个行业的新闻（最多 5 条）")
     lines.extend(macro)
     lines.append("三、你的持仓")
