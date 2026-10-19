@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-019  已收到  2026-10-19 16:50 北京
+
+- 任务：新闻卡要留下模型实际给出的答案。英文栏 `summary`、`industries`、`companies_affected`、`companies_outside_list`，以及公司的 `code`、`name`、`direction`、`reason`、`relation`、`importance`，补进原来的中文栏。中文栏有内容时用中文栏。
+- 入口是 `enrich(..., close_read=True)`。从最新 `origin/main` 开新分支 `cursor/m8-b019-news-card-keys-e013`，开新 PR。
+- 标题初筛不写新闻卡。波动卡问法不改。模型没答或答坏了仍写原因，名字匹配保留。名单仍只分成名单内和名单外，不删模型答出的公司。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`，不改估值和交易的计算。不做补查，不改每天那一页。
+- 下一步：先写两个失败例子，再接英文栏。
+
 ## B-018  已完成  2026-10-19 15:26 北京
 
 - 草稿 PR #24，head `6ed8440`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39215554261 。`phase1-blocking` 通过，nightly 跳过。没有合并。
