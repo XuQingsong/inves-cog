@@ -264,11 +264,16 @@ def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
     lines.append("哪几条新闻可能解释")
     for move in moves:
         explanations = move.get("解释") or []
-        if not explanations:
+        if explanations:
+            for item in explanations:
+                lines.append(f"{item.get('编号')} {item.get('怎么影响')} {item.get('强弱')}")
+        else:
             lines.append("入库新闻里没有对得上的")
-            continue
-        for item in explanations:
-            lines.append(f"{item.get('编号')} {item.get('怎么影响')} {item.get('强弱')}")
+        for extra in move.get("补查") or []:
+            if not isinstance(extra, dict):
+                continue
+            suffix = " 波动后才公开" if extra.get("波动后才公开") else ""
+            lines.append(f"{extra.get('编号')} {extra.get('说了什么')}{suffix}".strip())
     lines.append("归类")
     lines.extend(str(move.get("归类", "")) for move in moves)
     lines.append("股价没动但新闻卡标了高")
