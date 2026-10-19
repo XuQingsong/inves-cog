@@ -239,7 +239,7 @@ def run_scheduled(
     if connection is None:
         material = _visible_items(items)
         rows = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
-        return _scheduled_result(slot, rows, anomalies, material, valuation, plan, recorded=False)
+        return _scheduled_result(slot, rows, anomalies, material, valuation, plan, recorded=False, when=when)
     from inves_cog.perception.anomaly.service import run_recorded
 
     holder = {}
@@ -266,7 +266,9 @@ def run_scheduled(
         operation=operation,
     )
     rows = holder.get("rows") or []
-    result = _scheduled_result(slot, rows, anomalies, holder.get("material") or [], valuation, plan, recorded=True)
+    result = _scheduled_result(
+        slot, rows, anomalies, holder.get("material") or [], valuation, plan, recorded=True, when=when
+    )
     result["job_id"] = row_id
     return result
 
@@ -289,11 +291,37 @@ def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan):
     )
 
 
-def _scheduled_result(slot, rows, anomalies, items, valuation, plan, *, recorded):
+def _scheduled_result(slot, rows, anomalies, items, valuation, plan, *, recorded, when):
     result = {**slot, "recorded": recorded, "ran": True, "count": len(rows), "rows": rows}
     if slot["task_name"] == "attribution_candidates":
-        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan)
+        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan, when)
     return result
+
+
+def _closed_trade_date(when):
+    """The US session that has already closed, from the exchange calendar."""
+    day = when.astimezone(_NEW_YORK).date()
+    bounds = regular_bounds(day)
+    if bounds is not None and when >= bounds[1]:
+        return day.isoformat()
+    closed = day - timedelta(days=1)
+    while not trading_day(closed):
+        closed -= timedelta(days=1)
+    return closed.isoformat()
+
+
+def _page_news(card):
+    """Section 4 keeps a high name, or a list long enough to fold."""
+    high = mid = 0
+    for company in card.get("名单内") or []:
+        if not isinstance(company, dict):
+            continue
+        level = company.get("重要程度") or company.get("高中低") or ""
+        if level == "高":
+            high += 1
+        elif level == "中":
+            mid += 1
+    return high > 0 or high + mid > 8
 
 
 def _date_only(item):
@@ -313,34 +341,26 @@ def _news_day(item):
     return published.astimezone(_NEW_YORK).date().isoformat()
 
 
-def _daily_pages(anomalies, items, rows, valuation, plan):
-    """One page per day that had a tracked move or a news card. Wide scans stay out of section 1."""
-    days = {}
-
-    def bucket(day):
-        return days.setdefault(day, {"moves": [], "cards": []})
-
+def _daily_pages(anomalies, items, rows, valuation, plan, when):
+    """One page for the session that just closed. Wide scans stay out of section 1."""
+    day = _closed_trade_date(when)
+    cards = []
     for item in items:
         card = _news_card(item)
-        if not isinstance(card, dict):
-            continue
-        day = _news_day(item)
-        if not day:
+        if not isinstance(card, dict) or _news_day(item) != day or not _page_news(card):
             continue
         shown = dict(card)
         if not shown.get("说了什么"):
             shown["说了什么"] = item.get("headline") or ""
-        bucket(day)["cards"].append(shown)
+        cards.append(shown)
+    moves = []
     by_id = {row.get("anomaly_id"): row for row in rows}
     for anomaly in anomalies:
-        if anomaly.get("universe") == "wide":
-            continue
-        day = str(anomaly.get("trade_date") or "")[:10]
-        if not day:
+        if anomaly.get("universe") == "wide" or str(anomaly.get("trade_date") or "")[:10] != day:
             continue
         found = by_id.get(anomaly.get("anomaly_id")) or {}
         move = found.get("move_card") if isinstance(found.get("move_card"), dict) else {}
-        bucket(day)["moves"].append(
+        moves.append(
             {
                 "股票": _member_names(anomaly),
                 "方向": anomaly.get("direction") or "",
@@ -349,22 +369,12 @@ def _daily_pages(anomalies, items, rows, valuation, plan):
                 "归类": move.get("归类") or "",
             }
         )
-    pages = []
-    for day in sorted(days):
-        found = days[day]
-        pages.append(
-            {
-                "trade_date": day,
-                "text": daily_text(
-                    moves=found["moves"],
-                    news_cards=found["cards"],
-                    valuation=valuation,
-                    plan=plan,
-                    trade_date=day,
-                ),
-            }
-        )
-    return pages
+    return [
+        {
+            "trade_date": day,
+            "text": daily_text(moves=moves, news_cards=cards, valuation=valuation, plan=plan, trade_date=day),
+        }
+    ]
 
 
 def adapt_m7(anomaly):
