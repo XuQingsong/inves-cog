@@ -85,8 +85,10 @@ def test_section_four_keeps_high_and_drops_low():
         _item("news:low", published, "低的这条", "低"),
     ]
     text = _run([], items)["daily_pages"][0]["text"]
-    assert "高的这条" in text
+    assert "高的这条" not in text
     assert "低的这条" not in text
+    assert "没有持仓快照" in text
+    assert "还有 1 条标了高，这里不展开" in text
 
 
 @pytest.mark.phase1_blocking

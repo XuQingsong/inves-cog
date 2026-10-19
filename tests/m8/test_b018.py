@@ -192,7 +192,9 @@ def test_quiet_day_still_prints_high_news_valuation_and_plan():
     assert client.tasks == []
     text = _page(result)
     assert "没有不寻常波动" in text
-    assert "这条新闻" in text
+    assert "这条新闻" not in text
+    assert "没有持仓快照" in text
+    assert "还有 1 条标了高，这里不展开" in text
     assert "META 424 / 478 / 531" in text
     assert "META buy_to 0.05" in text
 

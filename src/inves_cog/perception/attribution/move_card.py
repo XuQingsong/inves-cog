@@ -255,6 +255,151 @@ def _plan_lines(plan, trade_date):
     return lines or ["今天没有计划单"]
 
 
+_MACRO_WORDS = ("宏观", "利率", "通胀", "cpi", "非农", "就业", "美联储", "关税", "指数", "大盘", "衰退", "fed")
+
+
+def _marked(card):
+    high = mid = 0
+    for company in card.get("名单内") or []:
+        if not isinstance(company, dict):
+            continue
+        level = _level(company)
+        if level == "高":
+            high += 1
+        elif level == "中":
+            mid += 1
+    return high, mid
+
+
+def _in_scope(card):
+    high, mid = _marked(card)
+    return high > 0 or high + mid > 8
+
+
+def _high_codes(card):
+    found = []
+    for company in card.get("名单内") or []:
+        if not isinstance(company, dict) or _level(company) != "高":
+            continue
+        code = company.get("代码") or company.get("名称") or ""
+        if code and code not in found:
+            found.append(code)
+    return found
+
+
+def _industry_sentence(card):
+    raw = card.get("行业")
+    if isinstance(raw, str):
+        return raw
+    if isinstance(raw, list):
+        return " ".join(item for item in raw if isinstance(item, str))
+    return ""
+
+
+def _macro(card):
+    text = f"{card.get('说了什么') or ''} {_industry_sentence(card)}".casefold()
+    return any(word in text for word in _MACRO_WORDS)
+
+
+def _wide(card):
+    high, mid = _marked(card)
+    return len(_high_codes(card)) >= 3 or high + mid > 8
+
+
+def _held_names(plan, trade_date):
+    """Share counts above zero. Missing positions are not the same as an empty book."""
+    rows = _scoped(plan, trade_date)
+    if not rows:
+        return None
+    saw = False
+    names = []
+    for row in rows:
+        source = row.get("positions") if isinstance(row.get("positions"), dict) else None
+        payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
+        if source is None and isinstance(payload.get("positions"), dict):
+            source = payload["positions"]
+        if source is None:
+            continue
+        saw = True
+        for ticker, shares in source.items():
+            if isinstance(shares, bool) or not isinstance(shares, (int, float)):
+                continue
+            if shares > 0 and ticker not in names:
+                names.append(ticker)
+    if not saw or not names:
+        return None
+    return names
+
+
+def _move_names(moves):
+    names = []
+    for move in moves or []:
+        for name in move.get("股票") or []:
+            if name and name not in names:
+                names.append(name)
+    return names
+
+
+def _position_hit(card, held):
+    if not held:
+        return []
+    return [code for code in _high_codes(card) if code in held]
+
+
+def rank_morning_news(cards, moves, plan, trade_date=None):
+    """Macro and wide names first, then large position names. The morning page prints this."""
+    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
+    held = _held_names(plan, trade_date)
+    move_names = _move_names(moves)
+    first = [card for card in scoped if _macro(card) or _wide(card)]
+    first.sort(key=lambda card: (0 if _macro(card) else 1, -len(_high_codes(card)), str(card.get("编号") or "")))
+    shown_first = first[:5]
+    used = {id(card) for card in shown_first}
+    second = []
+    if held:
+        second = [card for card in scoped if id(card) not in used and _position_hit(card, held)]
+        second.sort(
+            key=lambda card: (
+                0 if set(_position_hit(card, held)) & set(move_names) else 1,
+                str(card.get("编号") or ""),
+            )
+        )
+    shown_second = second[:5]
+    used.update(id(card) for card in shown_second)
+    rest = sum(1 for card in scoped if id(card) not in used)
+    return shown_first, shown_second, rest, held, move_names
+
+
+def _ranked_lines(cards, held, move_names, tier):
+    lines = []
+    for card in cards:
+        said = str(card.get("说了什么") or card.get("标题") or "")
+        flags = []
+        hit = _position_hit(card, held)
+        if tier == 1 and hit:
+            flags.append("含持仓")
+        if set(hit) & set(move_names):
+            flags.append("碰上不寻常波动")
+        if said:
+            lines.append(f"{said} {' '.join(flags)}".strip())
+        lines.extend(_fold(card))
+    return lines
+
+
+def _morning_news_lines(cards, moves, plan, trade_date):
+    first, second, rest, held, move_names = rank_morning_news(cards, moves, plan, trade_date)
+    lines = ["先看：宏观和影响面广的"]
+    lines.extend(_ranked_lines(first, held, move_names, 1) or ["这档没有"])
+    lines.append("再看：持仓上影响大的")
+    if held:
+        lines.extend(_ranked_lines(second, held, move_names, 2) or ["这档没有"])
+    else:
+        lines.append("没有持仓快照")
+    if rest:
+        lines.append(f"还有 {rest} 条标了高，这里不展开")
+    return lines
+
+
 def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
     """One page of text. News and moves do not change valuation or the plan."""
     lines = ["哪些股票或篮子波动不寻常"]
@@ -276,12 +421,7 @@ def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
             lines.append(f"{extra.get('编号')} {extra.get('说了什么')}{suffix}".strip())
     lines.append("归类")
     lines.extend(str(move.get("归类", "")) for move in moves)
-    lines.append("股价没动但新闻卡标了高")
-    for card in news_cards:
-        said = card.get("说了什么") or card.get("标题") or ""
-        if said:
-            lines.append(str(said))
-        lines.extend(_fold(card))
+    lines.extend(_morning_news_lines(news_cards, moves, plan, trade_date))
     lines.append("估值和纸面计划")
     lines.extend(_valuation_lines(valuation, trade_date))
     lines.extend(_plan_lines(plan, trade_date))

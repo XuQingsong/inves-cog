@@ -361,6 +361,8 @@ def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None
         if not isinstance(card, dict) or _news_day(item) != day or not _page_news(card):
             continue
         shown = dict(card)
+        if not shown.get("编号"):
+            shown["编号"] = item.get("info_id") or ""
         if not shown.get("说了什么"):
             shown["说了什么"] = item.get("headline") or ""
         cards.append(shown)
