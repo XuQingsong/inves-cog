@@ -36,7 +36,7 @@ from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.links import fill_rule_layers, inspect_links, link_view
 from inves_cog.perception.attribution.magnitude import implied_magnitude
 from inves_cog.perception.attribution.material import material_fields
-from inves_cog.perception.attribution.move_card import daily_text, move_card
+from inves_cog.perception.attribution.move_card import NONE, daily_text, move_card
 from inves_cog.perception.attribution.operating import operating_verdict
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
@@ -66,7 +66,41 @@ _STAGE_NAMES = {name for name, _slot in _SLOTS}
 def attribute_all(
     anomalies, items, *, as_of, client, store=None, components_by_id=None, stage=None, valuation=None, plan=None
 ):
-    """Retrieve, score, report, and save each anomaly. One failure stays on that row."""
+    """A tracked move asks the move card. Wide scans still use the rule report."""
+    return _rows(
+        anomalies,
+        items,
+        as_of=as_of,
+        client=client,
+        store=store,
+        components_by_id=components_by_id,
+        stage=stage,
+        valuation=valuation,
+        plan=plan,
+        runner=_one,
+    )
+
+
+def score_all(
+    anomalies, items, *, as_of, client, store=None, components_by_id=None, stage=None, valuation=None, plan=None
+):
+    """Rule report for a direct call or a replay. The tracked-move entry does not use this."""
+    return _rows(
+        anomalies,
+        items,
+        as_of=as_of,
+        client=client,
+        store=store,
+        components_by_id=components_by_id,
+        stage=stage,
+        valuation=valuation,
+        plan=plan,
+        runner=_score_one,
+    )
+
+
+def _rows(anomalies, items, *, as_of, client, store, components_by_id, stage, valuation, plan, runner):
+    """One failure stays on that row."""
     usable = [item for item in items if item.get("published_at") is not None]
     scores = components_by_id or {}
     rows = []
@@ -74,7 +108,7 @@ def attribute_all(
         prepared = adapt_m7(anomaly)
         try:
             rows.append(
-                _one(
+                runner(
                     prepared,
                     usable,
                     as_of=as_of,
@@ -105,7 +139,7 @@ def replay_days(anomalies, items, days, *, client, store=None, components_by_id=
     for as_of in days:
         due = [anomaly for anomaly in anomalies if _occurred(anomaly, as_of)]
         mode = replay_mode(items, as_of)
-        batch = attribute_all(
+        batch = score_all(
             due,
             items,
             as_of=as_of,
@@ -153,6 +187,21 @@ def execute_stage(task_name, anomalies, items, *, as_of, client, store=None, com
     if task_name not in _STAGE_NAMES:
         raise ValueError("未知任务")
     return attribute_all(
+        anomalies,
+        items,
+        as_of=as_of,
+        client=client,
+        store=store,
+        components_by_id=components_by_id,
+        stage=task_name,
+    )
+
+
+def score_stage(task_name, anomalies, items, *, as_of, client, store=None, components_by_id=None):
+    """Rule report for one scheduled stage. Tests of scores call this, not the move entry."""
+    if task_name not in _STAGE_NAMES:
+        raise ValueError("未知任务")
+    return score_all(
         anomalies,
         items,
         as_of=as_of,
@@ -242,6 +291,33 @@ def adapt_m7(anomaly):
 
 
 def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None):
+    """Tracked news goes to the move card. Labels, price tracks, and wide scans do not."""
+    if anomaly.get("started_at") is None or "universe" not in anomaly:
+        raise ValueError("异常缺少起点或范围")
+    tracked = anomaly.get("universe") != "wide"
+    if tracked and stage != "attribution_labels" and anomaly.get("capital_track") is None:
+        visible = _retrieved(anomaly, items, as_of)
+        if any(_before_move(item, anomaly.get("started_at")) for item in visible):
+            return _phase1_move(anomaly, visible, client, valuation, plan)
+        scored = _score_one(anomaly, [], as_of=as_of, client=client, store=store, components=components, stage=stage)
+        page = _phase1_move(anomaly, [], client, valuation, plan)
+        scored["daily_text"] = page["daily_text"]
+        scored["move_card"] = page["move_card"]
+        return scored
+    return _score_one(
+        anomaly,
+        items,
+        as_of=as_of,
+        client=client,
+        store=store,
+        components=components,
+        stage=stage,
+        valuation=valuation,
+        plan=plan,
+    )
+
+
+def _score_one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None):
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
     previous, rejected = _stored_report(anomaly, store, as_of) if stage is not None else (None, False)
@@ -255,8 +331,6 @@ def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=N
             raise ValueError("价格轨道不能沿用范围或时点不符的旧报告")
         return _capital_only(anomaly, previous, prior, as_of, store, stage)
     visible = _retrieved(anomaly, items, as_of)
-    if anomaly.get("universe") != "wide" and any(_news_card(item) for item in visible):
-        return _phase1_move(anomaly, visible, client, valuation, plan)
     reused = False
     if stage in {"attribution_candidates", "attribution_tracks"} and anomaly.get("universe") != "wide":
         claimed, candidates, claim_note, model_note, reused = _resume_analysis(anomaly, visible, previous, as_of)
@@ -387,7 +461,7 @@ def _move_view(item):
 def _phase1_move(anomaly, visible, client, valuation, plan):
     """One DeepSeek question for this tracked move, then the daily page. Numbers stay put."""
     start = anomaly.get("started_at")
-    chosen = [item for item in visible if _news_card(item) and _before_move(item, start)][:40]
+    chosen = [item for item in visible if _before_move(item, start)][:40]
     move = {
         "股票": _member_names(anomaly),
         "方向": anomaly.get("direction") or "",
@@ -395,10 +469,13 @@ def _phase1_move(anomaly, visible, client, valuation, plan):
         "日期": str(anomaly.get("trade_date") or "")[:10],
         "开始": start.isoformat() if hasattr(start, "isoformat") else str(start),
     }
-    card = move_card(move, [_move_view(item) for item in chosen], client)
+    if chosen:
+        card = move_card(move, [_move_view(item) for item in chosen], client)
+    else:
+        card = {"解释": [], "丢掉": 0, "归类": NONE}
     page = daily_text(
         moves=[{**move, "解释": card.get("解释") or [], "归类": card.get("归类") or ""}],
-        news_cards=[_news_card(item) for item in chosen],
+        news_cards=[_news_card(item) or {} for item in chosen],
         valuation={} if valuation is None else valuation,
         plan={} if plan is None else plan,
     )

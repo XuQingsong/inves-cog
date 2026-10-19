@@ -34,7 +34,7 @@ def test_market_move_uses_residual_return_and_positive_eps():
 
     from copy import deepcopy
 
-    from inves_cog.perception.attribution.chain import _channels, _report, attribute_all
+    from inves_cog.perception.attribution.chain import _channels, _report, score_all
     from inves_cog.perception.attribution.magnitude import channel_lines, implied_magnitude
     from inves_cog.perception.attribution.store import Store
 
@@ -89,7 +89,7 @@ def test_market_move_uses_residual_return_and_positive_eps():
     connection = MemoryConnection()
     start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
     prepared = {**anomaly, "universe": "pool", "trade_date": "2026-10-14", "session": "close", "started_at": start}
-    row = attribute_all([prepared], [], as_of=start + timedelta(hours=8), client=None, store=Store(connection))[0]
+    row = score_all([prepared], [], as_of=start + timedelta(hours=8), client=None, store=Store(connection))[0]
     assert row["saved"] and row["report"]["market_magnitude"]["delta_e_mkt"] == -2.0
     assert connection.reports[0]["market_magnitude"] == row["report"]["market_magnitude"]
     assert row["operating_impact_proven"] is False
@@ -102,7 +102,7 @@ def test_market_move_uses_residual_return_and_positive_eps():
             {"channel": "融资/对手方", "exposure_usd": 100, "source_level": 4, "incremental_margin": -0.25},
         ],
     }
-    credited = attribute_all(
+    credited = score_all(
         [{**prepared, "magnitude_payload": mixed}],
         [],
         as_of=start + timedelta(hours=8),
@@ -574,7 +574,7 @@ def test_candidate_validation():
     assert [r["ticker"] for r in permitted[0]["affected"]] == ["MU", "SNDK"]
     assert chain._alternative_members(permitted[0], anomaly) == []
     with patch.object(chain, "_components", wraps=chain._components) as components:
-        actual = chain.attribute_all([anomaly], [item], as_of=start, client=Controlled())[0]
+        actual = chain.score_all([anomaly], [item], as_of=start, client=Controlled())[0]
     assert actual["degraded"] is None
     assert [r["ticker"] for r in actual["report"]["candidates"][0]["affected"]] == ["MU", "SNDK"]
     assert all(call.args[1]["members"] == original["members"] for call in components.call_args_list)
@@ -890,7 +890,7 @@ def test_market_confirmation_four_conditions():
 
     from copy import deepcopy
 
-    from inves_cog.perception.attribution.chain import _confirmation, execute_stage
+    from inves_cog.perception.attribution.chain import _confirmation, score_stage
 
     member = {
         "ticker": "NVDA",
@@ -961,15 +961,15 @@ def test_market_confirmation_four_conditions():
             return None if self.row is None else deepcopy(self.row.get("linkage"))
 
     client, store = Client(), Saved()
-    proposed = execute_stage("attribution_candidates", [base], source_items, as_of=start, client=client, store=store)[0]
+    proposed = score_stage("attribution_candidates", [base], source_items, as_of=start, client=client, store=store)[0]
     assert proposed["saved"] and proposed["lifecycle"] == "假设中", proposed
-    tracked = execute_stage(
+    tracked = score_stage(
         "attribution_tracks", [base], source_items, as_of=start + timedelta(minutes=15), client=client, store=store
     )[0]
     assert tracked["lifecycle"] == "基本面核查中" and tracked["saved"], tracked
     assert tracked["report"]["market_confirmation_review"]["origin"] == "lead_candidate_source_checks"
     assert tracked["operating_impact_proven"] is False and client.calls == 1
-    labels = execute_stage(
+    labels = score_stage(
         "attribution_labels", [base], source_items, as_of=start + timedelta(hours=3), client=client, store=store
     )[0]
     assert labels["report"]["market_confirmation_review"] == tracked["report"]["market_confirmation_review"]
@@ -3234,7 +3234,7 @@ def test_claim_fields_omit_unsupported(tmp_path):
 @pytest.mark.phase1_blocking
 def test_model_output_contract_rejects_a_bad_structure():
     from inves_cog.perception.attribution.candidates import validate_candidates
-    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.chain import score_all
     from inves_cog.perception.attribution.claims import (
         attach_claims,
         claim_output,
@@ -3397,7 +3397,7 @@ def test_model_output_contract_rejects_a_bad_structure():
 
     started = datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc)
     client = Continue()
-    chained = attribute_all(
+    chained = score_all(
         [
             {
                 **anomaly,
@@ -3436,7 +3436,7 @@ def test_model_output_contract_rejects_a_bad_structure():
 
     unclaimed = {key: value for key, value in visible.items() if key != "claims"}
     upstream = FailedExtraction()
-    blocked = attribute_all(
+    blocked = score_all(
         [{**anomaly, "started_at": started, "trade_date": "2026-10-02"}],
         [unclaimed],
         as_of=started,
@@ -3452,7 +3452,7 @@ def test_model_output_contract_rejects_a_bad_structure():
         def call(self, task, payload):
             return {"candidates": [{"mechanism": "需求", "info_ids": ["nikkei-hdd"], "affected": "wrong"}]}
 
-    shaped = attribute_all(
+    shaped = score_all(
         [
             {
                 **anomaly,
@@ -3473,7 +3473,7 @@ def test_model_output_contract_rejects_a_bad_structure():
         def call(self, task, payload):
             return {"candidates": []}
 
-    empty = attribute_all(
+    empty = score_all(
         [
             {
                 **anomaly,
@@ -4579,7 +4579,7 @@ def _chain_anomaly(anomaly_id, ticker):
 
 @pytest.mark.phase1_blocking
 def test_chain_counts_alternative_exclusion():
-    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.chain import score_all
     from inves_cog.perception.attribution.evidence import alternative_exclusion
     from inves_cog.perception.attribution.rules import m8_rules
 
@@ -4623,7 +4623,7 @@ def test_chain_counts_alternative_exclusion():
             "started_at": start,
             "ended_at": datetime(2026, 10, 14, 20, 0, tzinfo=timezone.utc),
         }
-        return attribute_all([anomaly], [news], as_of=start, client=Propose())[0]
+        return score_all([anomaly], [news], as_of=start, client=Propose())[0]
 
     unknown_member = {"ticker": "NVDA", "resid_z": -2.0}
     clean_member = {
@@ -4677,7 +4677,7 @@ def test_chain_counts_alternative_exclusion():
                 ]
             }
 
-    scoped = attribute_all(
+    scoped = score_all(
         [
             {
                 "anomaly_id": "nvda-amd-alt",
@@ -4710,7 +4710,7 @@ def test_chain_counts_alternative_exclusion():
 
 @pytest.mark.phase1_blocking
 def test_chain_retrieves_related_news_and_scores_each_candidate():
-    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.chain import score_all
     from inves_cog.perception.attribution.rules import m8_rules
 
     rules = m8_rules()
@@ -4781,7 +4781,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
                 ]
             }
 
-    result = attribute_all([anomaly], related, as_of=late, client=Split())[0]
+    result = score_all([anomaly], related, as_of=late, client=Split())[0]
     scored = {row["mechanism"]: row for row in result["report"]["candidates"] if row["scored"]}
     assert scored["供给"]["score"] == 1.0
     assert scored["需求"]["score"] == 0.0
@@ -4807,7 +4807,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
 
     crowded = [item(f"nvda-{index}", tickers=["NVDA"]) for index in range(41)]
     crowded.append(item("xom-only", tickers=["XOM"]))
-    capped = attribute_all([anomaly], crowded, as_of=late, client=Cap())[0]
+    capped = score_all([anomaly], crowded, as_of=late, client=Cap())[0]
     assert capped["degraded"] is None
 
     # FR07: these relationship dates are explicit synthetic fixture data.
@@ -4866,14 +4866,14 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     actual_client = Client(registry=Path(__file__).resolve().parents[2] / "config/llm_tasks.yaml", transport=transport)
     saved = Reports()
     known_items = [{**item("supplier", entities=["tsmc"]), "claims": []}]
-    generated = attribute_all(
+    generated = score_all(
         [graph_anomaly], known_items, as_of=late, client=actual_client, store=saved, stage="attribution_candidates"
     )[0]
     assert generated["degraded"] is None and len(transport.payloads) == 1
     assert transport.payloads[0]["neighbors"] == projected["neighbors"]
     original_report = deepcopy(saved.rows[graph_anomaly["anomaly_id"]])
     tracking = late + timedelta(minutes=15)
-    unchanged = attribute_all(
+    unchanged = score_all(
         [graph_anomaly], known_items, as_of=tracking, client=actual_client, store=saved, stage="attribution_tracks"
     )[0]
     assert unchanged["report"]["analysis_reused"] is True and len(transport.payloads) == 1
@@ -4881,7 +4881,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
     for change in ({**edge, "revision": 2}, None):
         saved.rows[graph_anomaly["anomaly_id"]] = deepcopy(original_report)
         changed = {**graph_anomaly, "edges": [] if change is None else [change]}
-        pending = attribute_all(
+        pending = score_all(
             [changed], known_items, as_of=tracking, client=actual_client, store=saved, stage="attribution_tracks"
         )[0]
         assert pending["report"]["analysis_reused"] is False and len(transport.payloads) == 1
@@ -4897,7 +4897,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
         assert _retrieved(blocked, known_items, tracking) == []
     conflicting = _graph_context({**graph_anomaly, "edges": [edge, {**edge, "status": "驳回"}]}, tracking)
     assert conflicting["neighbors"] == [] and "同ID关系版本冲突" in conflicting["metadata"]["gaps"]
-    wide = attribute_all([{**graph_anomaly, "universe": "wide"}], known_items, as_of=tracking, client=actual_client)[0]
+    wide = score_all([{**graph_anomaly, "universe": "wide"}], known_items, as_of=tracking, client=actual_client)[0]
     assert wide["status"] == "已记录" and len(transport.payloads) == 1
 
     for outcome, state, fundamental, proven in (
@@ -4919,7 +4919,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
                 }
             )
             saved.rows[graph_anomaly["anomaly_id"]] = terminal
-            carried = attribute_all(
+            carried = score_all(
                 [{**graph_anomaly, "edges": changed_edges}],
                 known_items,
                 as_of=tracking,
@@ -4937,7 +4937,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
 
 @pytest.mark.phase1_blocking
 def test_second_hit_uses_the_matched_basket_direction():
-    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.chain import score_all
 
     start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
     early = datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc)
@@ -5001,7 +5001,7 @@ def test_second_hit_uses_the_matched_basket_direction():
 
     def run(later_event):
         row = {**anomaly, "later_events": [later_event]}
-        return attribute_all(
+        return score_all(
             [row],
             [news],
             as_of=later,
@@ -5021,7 +5021,7 @@ def test_second_hit_uses_the_matched_basket_direction():
 @pytest.mark.phase1_blocking
 def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     from inves_cog.ingest.market import regular_bounds
-    from inves_cog.perception.attribution.chain import adapt_m7, attribute_all, execute_stage, run_scheduled
+    from inves_cog.perception.attribution.chain import adapt_m7, run_scheduled, score_all, score_stage
     from inves_cog.perception.attribution.magnitude import channel_rows
 
     start = datetime(2026, 10, 2, 13, 30, tzinfo=timezone.utc)
@@ -5073,7 +5073,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
             "channels": channel_rows("估值倍数", [], []),
         },
     }
-    opened = attribute_all([base], [item], as_of=start, client=Propose())[0]
+    opened = score_all([base], [item], as_of=start, client=Propose())[0]
     assert opened["lifecycle"] == "假设中"
     assert [step["new"] for step in opened["history"]] == ["已发现", "假设中"]
     assert opened["report"]["impact"]["total_residual"] == -0.05
@@ -5093,7 +5093,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
         ({"deadline_on": "2026-10-30", "earnings_sessions": 1}, "2026-10-05"),
         ({"deadline_on": "2026-10-30", "mechanism_sessions": 2}, "2026-10-06"),
     ):
-        checked = attribute_all([{**base, **fields}], [item], as_of=start, client=Propose())[0]
+        checked = score_all([{**base, **fields}], [item], as_of=start, client=Propose())[0]
         assert checked["report"]["deadline_on"] == expected
         assert len(checked["report"]["tracking"]) == 6
         assert {task["deadline"] for task in checked["report"]["tracking"]} == {expected}
@@ -5103,7 +5103,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
         assert checked["history"] == opened["history"]
         assert checked["report"]["trading"] is None
 
-    continued = attribute_all(
+    continued = score_all(
         [
             {
                 **base,
@@ -5141,7 +5141,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert continued["history"][2]["trigger"] == "四项同时成立"
     assert {"at", "trigger", "evidence_ids"} <= set(continued["history"][2])
     assert continued["second_hit"] == "确认"
-    unrelated = attribute_all(
+    unrelated = score_all(
         [
             {
                 **base,
@@ -5176,13 +5176,13 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
         "operating_records": [],
         "deadline_on": "2026-10-30",
     }
-    early = execute_stage("attribution_tracks", [waiting], [item], as_of=later, client=Propose())[0]
+    early = score_stage("attribution_tracks", [waiting], [item], as_of=later, client=Propose())[0]
     assert early["lifecycle"] == "基本面核查中"
     assert early["history"] == continued["history"]
     assert early["operating_impact_proven"] is False
     assert early["report"]["deadline_on"] == "2026-10-30"
     assert early["report"]["fundamental_standing"] != "失效"
-    sooner = execute_stage(
+    sooner = score_stage(
         "attribution_tracks",
         [{**waiting, "earnings_sessions": 1}],
         [item],
@@ -5194,7 +5194,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert sooner["report"]["deadline_on"] == "2026-10-05"
     due = {**waiting, "deadline_on": "2026-10-06"}
     after_close = regular_bounds(date(2026, 10, 6))[1]
-    labelled = execute_stage("attribution_tracks", [due], [item], as_of=after_close, client=Propose())[0]
+    labelled = score_stage("attribution_tracks", [due], [item], as_of=after_close, client=Propose())[0]
     assert labelled["lifecycle"] == "已衰减·无影响"
     assert labelled["operating_impact_proven"] is False
     assert labelled["report"]["deadline_on"] == "2026-10-06"
@@ -5202,7 +5202,7 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert {"at", "trigger", "evidence_ids"} <= set(labelled["history"][-1])
     assert "经营记录缺失" not in labelled["report"]["unknowns"]
     omitted = {key: value for key, value in due.items() if key != "operating_records"}
-    missing = execute_stage("attribution_tracks", [omitted], [item], as_of=after_close, client=Propose())[0]
+    missing = score_stage("attribution_tracks", [omitted], [item], as_of=after_close, client=Propose())[0]
     assert missing["lifecycle"] == "已衰减·无影响"
     assert missing["operating_impact_proven"] is False
     assert missing["report"]["deadline_outcome"] == "条件风险"
@@ -5210,16 +5210,16 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert missing["report"]["fundamental_standing"] == "失效"
     assert "经营记录缺失" in missing["report"]["unknowns"]
     held = {key: value for key, value in waiting.items() if key != "operating_records"}
-    still_open = execute_stage("attribution_tracks", [held], [item], as_of=later, client=Propose())[0]
+    still_open = score_stage("attribution_tracks", [held], [item], as_of=later, client=Propose())[0]
     assert still_open["lifecycle"] == "基本面核查中"
     assert still_open["report"].get("deadline_outcome") is None
-    draft = execute_stage("attribution_labels", [due], [item], as_of=later, client=Propose())[0]
+    draft = score_stage("attribution_labels", [due], [item], as_of=later, client=Propose())[0]
     assert draft["lifecycle"] == continued["lifecycle"]
     assert draft["history"] == continued["history"]
     assert draft["operating_impact_proven"] is False
     assert "ticker_status" in draft["report"]
 
-    morning = execute_stage(
+    morning = score_stage(
         "attribution_candidates",
         [
             {
@@ -5251,10 +5251,10 @@ def test_chain_continues_a_prior_event_and_adapts_m7_sessions():
     assert adapt_m7(raw)["started_at"] == opened
     assert adapt_m7({**raw, "session": "post"})["started_at"] == closed
     assert adapt_m7({**raw, "started_at": closed})["started_at"] == closed
-    quiet = attribute_all([raw], [], as_of=closed, client=Propose())[0]
+    quiet = score_all([raw], [], as_of=closed, client=Propose())[0]
     assert quiet["status"] == "已发现·原因未明"
     assert quiet["degraded"] is None
-    missing = attribute_all([{**raw, "session": "open"}], [], as_of=closed, client=Propose())[0]
+    missing = score_all([{**raw, "session": "open"}], [], as_of=closed, client=Propose())[0]
     assert missing["status"] == "待分析"
     assert missing["degraded"] == "异常缺少起点或范围"
     slot = datetime.fromisoformat("2026-10-15T09:15:00+08:00")
@@ -5272,7 +5272,7 @@ def test_deadline_waits_for_the_reaction_session_to_end():
     from zoneinfo import ZoneInfo
 
     from inves_cog.ingest.market import regular_bounds
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
 
     start = regular_bounds(date(2026, 10, 14))[0]
     history = [
@@ -5296,7 +5296,7 @@ def test_deadline_waits_for_the_reaction_session_to_end():
         "prior_event": {"lifecycle": "基本面核查中", "history": history},
     }
     shanghai = ZoneInfo("Asia/Shanghai")
-    early = execute_stage(
+    early = score_stage(
         "attribution_tracks",
         [anomaly],
         [],
@@ -5307,7 +5307,7 @@ def test_deadline_waits_for_the_reaction_session_to_end():
     assert early["lifecycle"] == "基本面核查中"
     assert early["report"]["fundamental_standing"] != "失效"
     assert early["operating_impact_proven"] is False
-    closed = execute_stage(
+    closed = score_stage(
         "attribution_tracks",
         [anomaly],
         [],
@@ -5324,7 +5324,7 @@ def test_negative_session_count_does_not_expire_on_the_start_day():
     from zoneinfo import ZoneInfo
 
     from inves_cog.ingest.market import regular_bounds
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
     from inves_cog.perception.attribution.tracks import earliest_deadline
 
     start = regular_bounds(date(2026, 10, 14))[0]
@@ -5340,7 +5340,7 @@ def test_negative_session_count_does_not_expire_on_the_start_day():
         "prior_event": {"lifecycle": "基本面核查中", "history": []},
     }
     beijing = datetime(2026, 10, 15, 9, 30, tzinfo=ZoneInfo("Asia/Shanghai"))
-    row = execute_stage("attribution_tracks", [anomaly], [], as_of=beijing, client=None)[0]
+    row = score_stage("attribution_tracks", [anomaly], [], as_of=beijing, client=None)[0]
     assert row["status"] == "待分析"
     assert row["degraded"] == "周期无效"
     assert row["saved"] is False
@@ -5356,7 +5356,7 @@ def test_deadline_before_the_event_does_not_close_it():
     from zoneinfo import ZoneInfo
 
     from inves_cog.ingest.market import regular_bounds
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
     from inves_cog.perception.attribution.tracks import earliest_deadline
 
     start = regular_bounds(date(2026, 10, 14))[0]
@@ -5372,7 +5372,7 @@ def test_deadline_before_the_event_does_not_close_it():
         "prior_event": {"lifecycle": "基本面核查中", "history": []},
     }
     beijing = datetime(2026, 10, 15, 9, 30, tzinfo=ZoneInfo("Asia/Shanghai"))
-    row = execute_stage("attribution_tracks", [anomaly], [], as_of=beijing, client=None)[0]
+    row = score_stage("attribution_tracks", [anomaly], [], as_of=beijing, client=None)[0]
     assert row["status"] == "待分析"
     assert row["degraded"] == "期限早于事件"
     assert row["saved"] is False
@@ -5386,7 +5386,7 @@ def test_deadline_before_the_event_does_not_close_it():
 @pytest.mark.phase1_blocking
 def test_nontrading_deadline_does_not_stay_open():
     from inves_cog.ingest.market import regular_bounds
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
     from inves_cog.perception.attribution.tracks import earliest_deadline
 
     start = regular_bounds(date(2026, 10, 14))[0]
@@ -5402,7 +5402,7 @@ def test_nontrading_deadline_does_not_stay_open():
         "prior_event": {"lifecycle": "基本面核查中", "history": []},
     }
     far = datetime(2026, 11, 20, 21, 0, tzinfo=timezone.utc)
-    row = execute_stage("attribution_tracks", [anomaly], [], as_of=far, client=None)[0]
+    row = score_stage("attribution_tracks", [anomaly], [], as_of=far, client=None)[0]
     assert row["status"] == "待分析"
     assert row["degraded"] == "期限不是交易日"
     assert row["saved"] is False
@@ -5417,7 +5417,7 @@ def test_nontrading_deadline_does_not_stay_open():
 
 @pytest.mark.phase1_blocking
 def test_labels_keep_a_closed_conclusion():
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
 
     start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
     early = datetime(2026, 10, 14, 11, 0, tzinfo=timezone.utc)
@@ -5478,7 +5478,7 @@ def test_labels_keep_a_closed_conclusion():
             "unknowns": ["经营记录缺失"],
         },
     }
-    labelled = execute_stage(
+    labelled = score_stage(
         "attribution_labels",
         [closed],
         [news],
@@ -5494,7 +5494,7 @@ def test_labels_keep_a_closed_conclusion():
     assert labelled["report"]["fundamental_standing"] == "失效"
     assert "经营记录缺失" in labelled["report"]["unknowns"]
     open_prior = {**anomaly, "prior_event": {"lifecycle": "基本面核查中", "history": history[:0]}}
-    still_open = execute_stage(
+    still_open = score_stage(
         "attribution_labels",
         [open_prior],
         [news],
@@ -5513,7 +5513,7 @@ def test_labels_reload_a_saved_conclusion():
     from copy import deepcopy
 
     from inves_cog.ingest.market import regular_bounds
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
     from inves_cog.perception.attribution.store import Store
 
     start = datetime(2026, 10, 14, 13, 30, tzinfo=timezone.utc)
@@ -5616,7 +5616,7 @@ def test_labels_reload_a_saved_conclusion():
 
     def reload(memory, anomaly_id, records):
         store = Store(memory)
-        closed = execute_stage(
+        closed = score_stage(
             "attribution_tracks",
             [anomaly(anomaly_id, records)],
             [news],
@@ -5626,7 +5626,7 @@ def test_labels_reload_a_saved_conclusion():
             components_by_id={anomaly_id: scores},
         )[0]
         again = {key: value for key, value in anomaly(anomaly_id, records).items() if key != "prior_event"}
-        labelled = execute_stage(
+        labelled = score_stage(
             "attribution_labels",
             [again],
             [news],
@@ -5678,7 +5678,7 @@ def test_labels_reload_a_saved_conclusion():
     waiting = anomaly("nvda-open", [])
     waiting["deadline_on"] = "2026-10-30"
     store = Store(memory)
-    execute_stage(
+    score_stage(
         "attribution_tracks",
         [waiting],
         [news],
@@ -5688,7 +5688,7 @@ def test_labels_reload_a_saved_conclusion():
         components_by_id={"nvda-open": scores},
     )
     open_again = {key: value for key, value in waiting.items() if key != "prior_event"}
-    still_open = execute_stage(
+    still_open = score_stage(
         "attribution_labels",
         [open_again],
         [news],
@@ -5723,23 +5723,21 @@ def test_labels_reload_a_saved_conclusion():
     visible[0]["entities"] = ["NVDA"]
     fresh = Memory()
     generator = Propose()
-    first = execute_stage(
+    first = score_stage(
         "attribution_candidates", [discovered], visible, as_of=morning, client=generator, store=Store(fresh)
     )[0]
     assert generator.calls == ["claim_extraction", "anomaly_candidates"]
     assert first["lifecycle"] == "已发现"
     assert f"evt-{discovered['anomaly_id']}" not in fresh.linkage
     never = NeverModel()
-    followed = execute_stage(
+    followed = score_stage(
         "attribution_tracks", [discovered], visible, as_of=tracking, client=never, store=Store(fresh)
     )[0]
     assert followed["report"]["analysis_reused"] is True
     assert followed["history"] == first["history"]
     assert followed["report"]["candidates"] == first["report"]["candidates"]
     before_label = deepcopy(fresh.linkage)
-    labelled = execute_stage("attribution_labels", [discovered], visible, as_of=noon, client=never, store=Store(fresh))[
-        0
-    ]
+    labelled = score_stage("attribution_labels", [discovered], visible, as_of=noon, client=never, store=Store(fresh))[0]
     assert never.calls == 0
     assert labelled["lifecycle"] == "已发现"
     assert labelled["history"] == first["history"]
@@ -5749,7 +5747,7 @@ def test_labels_reload_a_saved_conclusion():
 
     old = deepcopy(fresh.reports[discovered["anomaly_id"]])
     changed = [{**visible[0], "summary": "Changed after the saved generation"}]
-    pending = execute_stage(
+    pending = score_stage(
         "attribution_tracks", [discovered], changed, as_of=tracking, client=never, store=Store(fresh)
     )[0]
     assert pending["report"]["analysis_reused"] is False
@@ -5757,16 +5755,16 @@ def test_labels_reload_a_saved_conclusion():
     assert not any(row.get("scored") for row in pending["report"]["candidates"])
     fresh.reports[discovered["anomaly_id"]] = old
     fresh.reports[discovered["anomaly_id"]]["stage_analysis"]["as_of"] = (noon + timedelta(hours=1)).isoformat()
-    future = execute_stage(
-        "attribution_tracks", [discovered], visible, as_of=tracking, client=never, store=Store(fresh)
-    )[0]
+    future = score_stage("attribution_tracks", [discovered], visible, as_of=tracking, client=never, store=Store(fresh))[
+        0
+    ]
     assert future["report"]["analysis_reused"] is False
     assert never.calls == 0
 
 
 @pytest.mark.phase1_blocking
 def test_labels_do_not_overwrite_a_saved_track():
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
     from inves_cog.perception.attribution.store import Store
 
     class Memory:
@@ -5880,7 +5878,7 @@ def test_labels_do_not_overwrite_a_saved_track():
         }
 
     def labelled(memory, anomaly_id, as_of, items=None, client=None, scores=None):
-        return execute_stage(
+        return score_stage(
             "attribution_labels",
             [anomaly_row(anomaly_id)],
             [] if items is None else items,
@@ -6008,7 +6006,7 @@ def test_labels_do_not_overwrite_a_saved_track():
 def test_tracks_stage_uses_the_completed_session():
     from zoneinfo import ZoneInfo
 
-    from inves_cog.perception.attribution.chain import execute_stage
+    from inves_cog.perception.attribution.chain import score_stage
     from inves_cog.perception.attribution.store import Store
 
     shanghai = ZoneInfo("Asia/Shanghai")
@@ -6111,7 +6109,7 @@ def test_tracks_stage_uses_the_completed_session():
     }
 
     def run(stage, moment):
-        return execute_stage(stage, [anomaly], [], as_of=moment, client=None, store=Store(memory))[0]
+        return score_stage(stage, [anomaly], [], as_of=moment, client=None, store=Store(memory))[0]
 
     def dates():
         found = [trade_date for (event_id, trade_date) in memory.tracks if event_id == f"evt-{anomaly_id}"]
@@ -6175,7 +6173,7 @@ def test_tracks_stage_uses_the_completed_session():
                 },
             }
         )
-        pending = execute_stage(
+        pending = score_stage(
             "attribution_tracks",
             [intraday],
             [],
@@ -6186,7 +6184,7 @@ def test_tracks_stage_uses_the_completed_session():
         assert pending["tracks"] == []
         assert fresh.tracks == {}
         assert intraday["trade_date"] == origin[:10]
-        closed = execute_stage(
+        closed = score_stage(
             "attribution_tracks",
             [intraday],
             [],
@@ -6270,7 +6268,7 @@ def test_tracks_stage_uses_the_completed_session():
         def call(self, *_args, **_kwargs):
             raise AssertionError("Price input never runs the model")
 
-    result = execute_stage("attribution_tracks", [explicit], [], as_of=cut, client=NoPriceModel())[0]
+    result = score_stage("attribution_tracks", [explicit], [], as_of=cut, client=NoPriceModel())[0]
     assert len(result["tracks"]) == 3
     assert [row["capital"] for row in result["tracks"]] == ["冲击中", "冲击中", "已消化"]
     assert all(row["emotion"] is None and row["fundamental"] is None for row in result["tracks"])
@@ -6280,12 +6278,12 @@ def test_tracks_stage_uses_the_completed_session():
     for field, value in (("as_of", "2026-10-18T09:30:00+08:00"), ("anomaly_id", "other-event")):
         bad = deepcopy(explicit)
         bad["capital_track"][field] = value
-        rejected = execute_stage("attribution_tracks", [bad], [], as_of=cut, client=NoPriceModel())[0]
+        rejected = score_stage("attribution_tracks", [bad], [], as_of=cut, client=NoPriceModel())[0]
         assert rejected["status"] == "待分析"
     bad = deepcopy(explicit)
     bad["capital_track"]["rows"][1]["cumulative"] = 999
-    assert execute_stage("attribution_tracks", [bad], [], as_of=cut, client=NoPriceModel())[0]["status"] == "待分析"
-    assert execute_stage("attribution_labels", [explicit], [], as_of=cut, client=NoPriceModel())[0]["tracks"] == []
+    assert score_stage("attribution_tracks", [bad], [], as_of=cut, client=NoPriceModel())[0]["status"] == "待分析"
+    assert score_stage("attribution_labels", [explicit], [], as_of=cut, client=NoPriceModel())[0]["tracks"] == []
 
 
 @pytest.mark.phase1_blocking
@@ -6528,7 +6526,7 @@ def test_scheduled_job_fails_only_when_every_save_fails():
 
 @pytest.mark.phase1_blocking
 def test_attribution_chain_scores_from_rules_and_keeps_going():
-    from inves_cog.perception.attribution.chain import attribute_all
+    from inves_cog.perception.attribution.chain import score_all
     from inves_cog.perception.attribution.store import Store
 
     published = datetime(2026, 10, 2, 11, 0, tzinfo=timezone.utc)
@@ -6544,7 +6542,7 @@ def test_attribution_chain_scores_from_rules_and_keeps_going():
     unseen = {"info_id": "bare", "published_at": published, "headline": "no stamp"}
     client = _Propose()
     calls = _Calls()
-    rows = attribute_all(
+    rows = score_all(
         [
             _chain_anomaly("toshiba-2026-10-02", "WDC"),
             _chain_anomaly("boom-2026-10-02", "MU"),
