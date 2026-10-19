@@ -36,7 +36,7 @@ from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.links import fill_rule_layers, inspect_links, link_view
 from inves_cog.perception.attribution.magnitude import implied_magnitude
 from inves_cog.perception.attribution.material import material_fields
-from inves_cog.perception.attribution.move_card import NONE, daily_text, move_card
+from inves_cog.perception.attribution.move_card import NONE, classify, daily_text, move_card
 from inves_cog.perception.attribution.operating import operating_verdict
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
@@ -229,6 +229,7 @@ def run_scheduled(
     params_version=None,
     valuation=None,
     plan=None,
+    news_lookup=None,
 ):
     """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
@@ -239,7 +240,9 @@ def run_scheduled(
     if connection is None:
         material = _visible_items(items)
         rows = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
-        return _scheduled_result(slot, rows, anomalies, material, valuation, plan, recorded=False, when=when)
+        return _scheduled_result(
+            slot, rows, anomalies, material, valuation, plan, recorded=False, when=when, news_lookup=news_lookup
+        )
     from inves_cog.perception.anomaly.service import run_recorded
 
     holder = {}
@@ -267,7 +270,15 @@ def run_scheduled(
     )
     rows = holder.get("rows") or []
     result = _scheduled_result(
-        slot, rows, anomalies, holder.get("material") or [], valuation, plan, recorded=True, when=when
+        slot,
+        rows,
+        anomalies,
+        holder.get("material") or [],
+        valuation,
+        plan,
+        recorded=True,
+        when=when,
+        news_lookup=news_lookup,
     )
     result["job_id"] = row_id
     return result
@@ -291,10 +302,10 @@ def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan):
     )
 
 
-def _scheduled_result(slot, rows, anomalies, items, valuation, plan, *, recorded, when):
+def _scheduled_result(slot, rows, anomalies, items, valuation, plan, *, recorded, when, news_lookup=None):
     result = {**slot, "recorded": recorded, "ran": True, "count": len(rows), "rows": rows}
     if slot["task_name"] == "attribution_candidates":
-        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan, when)
+        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup)
     return result
 
 
@@ -341,7 +352,7 @@ def _news_day(item):
     return published.astimezone(_NEW_YORK).date().isoformat()
 
 
-def _daily_pages(anomalies, items, rows, valuation, plan, when):
+def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None):
     """One page for the session that just closed. Wide scans stay out of section 1."""
     day = _closed_trade_date(when)
     cards = []
@@ -361,13 +372,19 @@ def _daily_pages(anomalies, items, rows, valuation, plan, when):
         found = by_id.get(anomaly.get("anomaly_id")) or {}
         move = found.get("move_card") if isinstance(found.get("move_card"), dict) else {}
         moves.append(
-            {
-                "股票": _member_names(anomaly),
-                "方向": anomaly.get("direction") or "",
-                "幅度": anomaly.get("幅度") or anomaly.get("magnitude") or "",
-                "解释": move.get("解释") or [],
-                "归类": move.get("归类") or "",
-            }
+            _with_lookup(
+                anomaly,
+                items,
+                {
+                    "股票": _member_names(anomaly),
+                    "方向": anomaly.get("direction") or "",
+                    "幅度": anomaly.get("幅度") or anomaly.get("magnitude") or "",
+                    "解释": move.get("解释") or [],
+                    "归类": move.get("归类") or "",
+                },
+                news_lookup,
+                when,
+            )
         )
     return [
         {
@@ -544,6 +561,85 @@ def _news_card(item):
 def _before_move(item, start):
     published = item.get("published_at")
     return isinstance(published, datetime) and isinstance(start, datetime) and published < start
+
+
+def _sent_before(anomaly, items, as_of):
+    """The batch the move card already receives: retrieved, before the start, at most 40."""
+    start = anomaly.get("started_at")
+    visible = _retrieved(anomaly, items, as_of)
+    return [item for item in visible if _before_move(item, start)][:40]
+
+
+def _fresh_lookup(returned, known):
+    """Items the lookup found that were not already in this morning's input."""
+    if not isinstance(returned, list):
+        return []
+    seen = set(known)
+    fresh = []
+    for item in returned:
+        if not isinstance(item, dict):
+            continue
+        identifier = item.get("info_id")
+        if identifier in seen:
+            continue
+        seen.add(identifier)
+        fresh.append(item)
+    return fresh
+
+
+def _published_after(item, start):
+    published = item.get("published_at")
+    if not isinstance(published, datetime) or published.tzinfo is None or start.tzinfo is None:
+        return None
+    return published > start
+
+
+def _lookup_line(item, after):
+    card = _news_card(item) or {}
+    return {
+        "编号": item.get("info_id"),
+        "说了什么": card.get("说了什么") or item.get("headline") or "",
+        "波动后才公开": after,
+    }
+
+
+def _with_lookup(anomaly, items, move, news_lookup, when):
+    """One call per member when nothing matched, or fewer than five items were sent."""
+    if news_lookup is None:
+        return move
+    start = anomaly.get("started_at")
+    if not isinstance(start, datetime):
+        return move
+    sent = _sent_before(anomaly, items, when)
+    if move.get("解释") and len(sent) >= 5:
+        return move
+    known = {item.get("info_id") for item in items}
+    fresh = []
+    for ticker in _member_names(anomaly):
+        fresh.extend(_fresh_lookup(news_lookup(ticker, start - timedelta(days=7), when), known))
+        known.update(item.get("info_id") for item in fresh)
+    extras = []
+    missed = False
+    for item in fresh:
+        after = _published_after(item, start)
+        if after is None:
+            continue
+        missed = missed or not after
+        extras.append(_lookup_line(item, after))
+    if not extras:
+        return move
+    updated = dict(move)
+    updated["补查"] = extras
+    if missed:
+        updated["归类"] = classify(
+            {
+                "日期": str(anomaly.get("trade_date") or "")[:10],
+                "开始": start.isoformat(),
+                "补查到": True,
+            },
+            [_move_view(item) for item in sent],
+        )
+    return updated
 
 
 def _move_view(item):
