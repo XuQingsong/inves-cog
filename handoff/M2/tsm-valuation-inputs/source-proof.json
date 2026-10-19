@@ -21,6 +21,7 @@
   "weighted_ads": 5186120000,
   "annual_state_json": "fundamentals.fin_state.values_extra.valuation_annual_basis; no migration; original fields unchanged",
   "private_rebuild": "/private/tmp/inves-tsm-inputs/replay.py",
-  "private_output_sha256": "83b298c1dbcfdacce8869ce5c447bcc72c40e4fb732c008423552737d1d95e6c",
-  "private_source_sha256": "bb30181e6e0e015ed5510a3c7966f1c25b67fa3ac6ef5354a6a341ad07cd52db"
+  "private_output_sha256": "435bfe2ee5a20de332d360180035cb4cb8dec91ce241fe682d69e8c5cd37060f",
+  "private_source_sha256": "bb30181e6e0e015ed5510a3c7966f1c25b67fa3ac6ef5354a6a341ad07cd52db",
+  "comparison_base": "main 970e751fb87046bf1a8c95091d58736f334b7a99 (accepted PR36 input repairs included)"
 }

@@ -3,6 +3,7 @@
 import math
 from copy import deepcopy
 
+from inves_cog.valuation_v1.annual_inputs import valuation_state
 from inves_cog.valuation_v1.calculations import settings
 
 
@@ -68,6 +69,10 @@ def eps_proof(state, relation):
 
 
 def historical_eps(state, ticker, as_of):
+    try:
+        state = valuation_state(state, as_of)
+    except ValueError:
+        return None  # Invalid optional annual input excludes this historical sample only.
     if state is None:
         return None
     relation = settings().get("listed_units", {}).get(ticker)

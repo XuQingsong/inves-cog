@@ -21,6 +21,9 @@ def assert_tsm_annual_build():
     from inves_cog.valuation_v1.listed_units import historical_eps
 
     assert historical_eps(tsm, "TSM", date(2026, 10, 15)) == pytest.approx(2.1043409144073206 * 5)
+    bad = deepcopy(tsm)
+    bad.values["valuation_annual_basis"] = None
+    assert historical_eps(bad, "TSM", date(2026, 10, 15)) is None
     original = deepcopy(vars(tsm))
     day = date(2026, 10, 15)
     source = repo.inputs(day, ["AAA", "BBB"])

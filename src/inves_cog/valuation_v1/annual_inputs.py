@@ -16,7 +16,9 @@ def valuation_state(state, as_of):
     if proof.get("known_at", "9999") > str(as_of)[:10]:
         return state
     if (
-        data.get("contract") != "tsm_disclosed_annual_v1"
+        not isinstance(data, dict)
+        or not set(FinState.__dataclass_fields__).issubset(data)
+        or data.get("contract") != "tsm_disclosed_annual_v1"
         or data.get("ticker") != "TSM"
         or data.get("extractor") != "fixed"
         or data.get("period_end") != proof.get("period_end")
