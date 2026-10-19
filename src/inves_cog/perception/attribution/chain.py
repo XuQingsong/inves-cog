@@ -718,7 +718,8 @@ def _phase1_move(anomaly, visible, client, valuation, plan):
         "开始": start.isoformat() if hasattr(start, "isoformat") else str(start),
     }
     if chosen:
-        card = move_card(move, [_move_view(item) for item in chosen], client)
+        asked = {**move, "时段": anomaly.get("session") or "", "收益": _member_rets(anomaly)}
+        card = move_card(asked, [_move_view(item) for item in chosen], client)
     else:
         card = {"解释": [], "丢掉": 0, "归类": NONE}
     page = daily_text(
