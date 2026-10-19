@@ -182,7 +182,9 @@ def job_slot(when):
     return None
 
 
-def execute_stage(task_name, anomalies, items, *, as_of, client, store=None, components_by_id=None):
+def execute_stage(
+    task_name, anomalies, items, *, as_of, client, store=None, components_by_id=None, valuation=None, plan=None
+):
     """Run one of the three attribution jobs. This does not deploy a schedule."""
     if task_name not in _STAGE_NAMES:
         raise ValueError("未知任务")
@@ -194,6 +196,8 @@ def execute_stage(task_name, anomalies, items, *, as_of, client, store=None, com
         store=store,
         components_by_id=components_by_id,
         stage=task_name,
+        valuation=valuation,
+        plan=plan,
     )
 
 
@@ -223,6 +227,8 @@ def run_scheduled(
     clock=None,
     trade_date=None,
     params_version=None,
+    valuation=None,
+    plan=None,
 ):
     """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
@@ -231,28 +237,17 @@ def run_scheduled(
     if anomalies is None:
         return {**slot, "recorded": False, "ran": False}
     if connection is None:
-        rows = execute_stage(
-            slot["task_name"],
-            anomalies,
-            items or [],
-            as_of=when,
-            client=client,
-            store=store,
-        )
-        return {**slot, "recorded": False, "ran": True, "count": len(rows), "rows": rows}
+        material = _visible_items(items)
+        rows = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
+        return _scheduled_result(slot, rows, anomalies, material, valuation, plan, recorded=False)
     from inves_cog.perception.anomaly.service import run_recorded
 
     holder = {}
 
     def operation():
-        holder["rows"] = execute_stage(
-            slot["task_name"],
-            anomalies,
-            items or [],
-            as_of=when,
-            client=client,
-            store=store,
-        )
+        material = _visible_items(items)
+        holder["material"] = material
+        holder["rows"] = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
         rows = holder["rows"]
         if store is None:
             return len(rows)
@@ -271,7 +266,105 @@ def run_scheduled(
         operation=operation,
     )
     rows = holder.get("rows") or []
-    return {**slot, "recorded": True, "ran": True, "count": len(rows), "rows": rows, "job_id": row_id}
+    result = _scheduled_result(slot, rows, anomalies, holder.get("material") or [], valuation, plan, recorded=True)
+    result["job_id"] = row_id
+    return result
+
+
+def _visible_items(items):
+    """One pass over the caller's list. Later page assembly uses this copy."""
+    return [item for item in items or [] if item.get("published_at") is not None]
+
+
+def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan):
+    return execute_stage(
+        slot["task_name"],
+        anomalies,
+        items,
+        as_of=when,
+        client=client,
+        store=store,
+        valuation=valuation,
+        plan=plan,
+    )
+
+
+def _scheduled_result(slot, rows, anomalies, items, valuation, plan, *, recorded):
+    result = {**slot, "recorded": recorded, "ran": True, "count": len(rows), "rows": rows}
+    if slot["task_name"] == "attribution_candidates":
+        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan)
+    return result
+
+
+def _date_only(item):
+    flags = item.get("flags") or []
+    if isinstance(flags, str):
+        return flags == "published_at_date_only"
+    return "published_at_date_only" in flags
+
+
+def _news_day(item):
+    """New York date, except a date-only stamp keeps the stored calendar day."""
+    published = item.get("published_at")
+    if not isinstance(published, datetime):
+        return ""
+    if _date_only(item):
+        return published.date().isoformat()
+    return published.astimezone(_NEW_YORK).date().isoformat()
+
+
+def _daily_pages(anomalies, items, rows, valuation, plan):
+    """One page per day that had a tracked move or a news card. Wide scans stay out of section 1."""
+    days = {}
+
+    def bucket(day):
+        return days.setdefault(day, {"moves": [], "cards": []})
+
+    for item in items:
+        card = _news_card(item)
+        if not isinstance(card, dict):
+            continue
+        day = _news_day(item)
+        if not day:
+            continue
+        shown = dict(card)
+        if not shown.get("说了什么"):
+            shown["说了什么"] = item.get("headline") or ""
+        bucket(day)["cards"].append(shown)
+    by_id = {row.get("anomaly_id"): row for row in rows}
+    for anomaly in anomalies:
+        if anomaly.get("universe") == "wide":
+            continue
+        day = str(anomaly.get("trade_date") or "")[:10]
+        if not day:
+            continue
+        found = by_id.get(anomaly.get("anomaly_id")) or {}
+        move = found.get("move_card") if isinstance(found.get("move_card"), dict) else {}
+        bucket(day)["moves"].append(
+            {
+                "股票": _member_names(anomaly),
+                "方向": anomaly.get("direction") or "",
+                "幅度": anomaly.get("幅度") or anomaly.get("magnitude") or "",
+                "解释": move.get("解释") or [],
+                "归类": move.get("归类") or "",
+            }
+        )
+    pages = []
+    for day in sorted(days):
+        found = days[day]
+        pages.append(
+            {
+                "trade_date": day,
+                "text": daily_text(
+                    moves=found["moves"],
+                    news_cards=found["cards"],
+                    valuation=valuation,
+                    plan=plan,
+                    trade_date=day,
+                ),
+            }
+        )
+    return pages
 
 
 def adapt_m7(anomaly):
@@ -449,7 +542,7 @@ def _move_view(item):
     return {
         "编号": item.get("info_id"),
         "发布时间": published.isoformat() if hasattr(published, "isoformat") else published,
-        "钟点清楚": card.get("钟点清楚", True),
+        "钟点清楚": False if _date_only(item) else bool(card.get("钟点清楚", True)),
         "标题": item.get("headline"),
         "说了什么": card.get("说了什么", ""),
         "名单内": [dict(row) for row in card.get("名单内") or [] if isinstance(row, dict)],
@@ -476,8 +569,9 @@ def _phase1_move(anomaly, visible, client, valuation, plan):
     page = daily_text(
         moves=[{**move, "解释": card.get("解释") or [], "归类": card.get("归类") or ""}],
         news_cards=[_news_card(item) or {} for item in chosen],
-        valuation={} if valuation is None else valuation,
-        plan={} if plan is None else plan,
+        valuation=valuation,
+        plan=plan,
+        trade_date=move["日期"] or None,
     )
     return {
         "anomaly_id": anomaly.get("anomaly_id"),
