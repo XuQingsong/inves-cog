@@ -18,6 +18,9 @@ def assert_tsm_annual_build():
     repo = ReviewRepository(peers=True)
     data, tsm = recording(), carrier()
     attach_valuation_annual(tsm, data["facts"], filing=data["filing"], fx=FXBook(data["fx"]), as_of=tsm.filed)
+    from inves_cog.valuation_v1.listed_units import historical_eps
+
+    assert historical_eps(tsm, "TSM", date(2026, 10, 15)) == pytest.approx(2.1043409144073206 * 5)
     original = deepcopy(vars(tsm))
     day = date(2026, 10, 15)
     source = repo.inputs(day, ["AAA", "BBB"])
