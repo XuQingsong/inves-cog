@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
+_TRACKED = None
 QUESTION = (
     "这条新闻说了什么？会影响美股哪些行业？名单里哪些公司受影响："
     "每家写利好、利空或不确定，一句理由，以及和新闻的关系"
@@ -14,8 +15,7 @@ QUESTION = (
 )
 
 
-def tracked_list():
-    """59 pool names plus monitored entities. Meta AI keeps the Muse alias."""
+def _load_tracked():
     universe = yaml.safe_load((ROOT / "config/universe.yaml").read_text())
     companies = yaml.safe_load((ROOT / "config/news_entities.yaml").read_text())["companies"]
     monitored = yaml.safe_load((ROOT / "config/monitored_entities.yaml").read_text())["entities"]
@@ -29,6 +29,14 @@ def tracked_list():
         code = tickers[0] if len(tickers) == 1 else tickers
         rows.append({"名称": entity["name"], "别名": list(entity.get("aliases") or []), "代码": code})
     return rows
+
+
+def tracked_list():
+    """59 pool names plus monitored entities. Meta AI keeps the Muse alias."""
+    global _TRACKED
+    if _TRACKED is None:
+        _TRACKED = _load_tracked()
+    return [dict(row, 别名=list(row["别名"])) for row in _TRACKED]
 
 
 def news_card_payload(item):
