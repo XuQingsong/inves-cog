@@ -150,6 +150,14 @@ class ValuationBook:
         actual_unit_event = bool(
             old and unit_signature(old["inputs"], actual_only=True) != unit_signature(inputs, actual_only=True)
         )
+        input_contract_event = bool(
+            old
+            and (
+                old["inputs"].get("historical_pe_unit_audit", {}).get("contract")
+                != inputs.get("historical_pe_unit_audit", {}).get("contract")
+                or old["inputs"].get("valuation_input_errors", []) != inputs.get("valuation_input_errors", [])
+            )
+        )
         h = self.types.setdefault(ticker, TypeHistory())
         kind = h.observe(period, candidate) if new_report or method_refresh else h.current
         if manual:
@@ -169,7 +177,15 @@ class ValuationBook:
         consensus_event = (old_ntm is None) != (new_ntm is None) or (
             new_ntm is not None and bounds is not None and not bounds[0] <= new_ntm <= bounds[1]
         )
-        trigger = new_report or method_refresh or consensus_event or unit_event or month_refresh or manual is not None
+        trigger = (
+            new_report
+            or method_refresh
+            or consensus_event
+            or unit_event
+            or input_contract_event
+            or month_refresh
+            or manual is not None
+        )
         audit = {
             "new_report": new_report,
             "consensus_event": consensus_event,
@@ -177,6 +193,7 @@ class ValuationBook:
             "method_refresh": method_refresh,
             "unit_contract_event": unit_event,
             "actual_unit_contract_event": actual_unit_event,
+            "input_contract_event": input_contract_event,
             "invalid_forecast_withdrawn": withdrawn,
             "manual": manual is not None,
             "previous_eps_ntm": old_ntm,
@@ -192,6 +209,7 @@ class ValuationBook:
                 and not month_refresh
                 and not method_refresh
                 and not actual_unit_event
+                and not input_contract_event
                 and manual is None
             ):
                 # A consensus-only event updates E/g inputs, not daily PE history.
@@ -204,6 +222,7 @@ class ValuationBook:
                 and not consensus_event
                 and not method_refresh
                 and not unit_event
+                and not input_contract_event
                 and manual is None
             ):
                 inputs = {**old["inputs"], **{key: inputs.get(key) for key in MULTIPLES}}

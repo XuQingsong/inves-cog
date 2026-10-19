@@ -1,0 +1,157 @@
+{
+  "contract": "A012-historical-raw-close-EPS-v1",
+  "scope": "Own historical multiples of the five reviewed issuers only. Existing L2 peer inputs remain frozen by A012; not a formula or parameter change.",
+  "events": [
+    {
+      "id": "NVDA-split-2021-07-19-4",
+      "ticker": "NVDA",
+      "ratio": 4,
+      "announced_on": "2021-05-21",
+      "effective_at": "2021-07-20T00:00:00-04:00",
+      "effective_description": "distributed after close on 2021-07-19",
+      "split_trading_on": "2021-07-20",
+      "restated_from_filed": "2021-08-20",
+      "evidence": "https://www.sec.gov/Archives/edgar/data/1045810/000104581021000131/nvda-20210801.htm",
+      "aliases": [
+        {
+          "end": "2021-06-03",
+          "filed": "2021-08-20",
+          "accession": "0001045810-21-000131"
+        },
+        {
+          "end": "2021-06-03",
+          "filed": "2021-11-22",
+          "accession": "0001045810-21-000163"
+        },
+        {
+          "end": "2021-07-19",
+          "filed": "2022-03-18",
+          "accession": "0001045810-22-000036"
+        },
+        {
+          "end": "2021-07-19",
+          "filed": "2022-05-27",
+          "accession": "0001045810-22-000079"
+        }
+      ]
+    },
+    {
+      "id": "NVDA-split-2024-06-07-10",
+      "ticker": "NVDA",
+      "ratio": 10,
+      "announced_on": "2024-05-22",
+      "effective_at": "2024-06-07T16:01:00-04:00",
+      "split_trading_on": "2024-06-10",
+      "restated_from_filed": "2024-08-28",
+      "evidence": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000264/nvda-20240728.htm",
+      "aliases": [
+        {
+          "start": "2024-05-01",
+          "end": "2024-05-31",
+          "filed": "2024-08-28",
+          "accession": "0001045810-24-000264"
+        },
+        {
+          "start": "2024-05-01",
+          "end": "2024-05-31",
+          "filed": "2024-11-20",
+          "accession": "0001045810-24-000316"
+        },
+        {
+          "start": "2024-06-01",
+          "end": "2024-06-30",
+          "filed": "2025-05-28",
+          "accession": "0001045810-25-000116"
+        }
+      ]
+    },
+    {
+      "id": "PANW-split-2022-09-14-3",
+      "ticker": "PANW",
+      "ratio": 3,
+      "announced_on": "2022-08-22",
+      "effective_at": "2022-09-14T00:00:00-04:00",
+      "split_trading_on": "2022-09-14",
+      "restated_from_filed": "2022-11-18",
+      "evidence": "https://investors.paloaltonetworks.com/investor-resources/investor-faqs",
+      "aliases": [
+        {
+          "end": "2022-09-13",
+          "filed": "2022-11-18",
+          "accession": "0001327567-22-000038"
+        }
+      ]
+    },
+    {
+      "id": "PANW-split-2024-12-16-2",
+      "ticker": "PANW",
+      "ratio": 2,
+      "announced_on": "2024-11-20",
+      "effective_at": "2024-12-16T00:00:00-04:00",
+      "split_trading_on": "2024-12-16",
+      "restated_from_filed": "2025-02-14",
+      "evidence": "https://investors.paloaltonetworks.com/investor-resources/investor-faqs",
+      "aliases": [
+        {
+          "end": "2024-12-12",
+          "filed": "2025-02-14",
+          "accession": "0001327567-25-000010"
+        }
+      ]
+    },
+    {
+      "id": "LRCX-split-2024-10-03-10",
+      "ticker": "LRCX",
+      "ratio": 10,
+      "announced_on": "2024-05-21",
+      "effective_at": "2024-10-03T00:00:00-04:00",
+      "split_trading_on": "2024-10-03",
+      "restated_from_filed": "2024-10-28",
+      "evidence": "https://newsroom.lamresearch.com/2024-05-21-Lam-Research-Corporation-Announces-10-Billion-Share-Repurchase-Authorization-and-a-10-for-1-Stock-Split",
+      "aliases": [
+        {
+          "end": "2024-10-02",
+          "filed": "2025-01-31",
+          "accession": "0000707549-25-000014"
+        }
+      ]
+    },
+    {
+      "id": "SMCI-split-2024-10-01-10",
+      "ticker": "SMCI",
+      "ratio": 10,
+      "announced_on": "2024-08-06",
+      "effective_at": "2024-10-01T00:00:00-04:00",
+      "split_trading_on": "2024-10-01",
+      "restated_from_filed": "2025-02-25",
+      "evidence": "https://s204.q4cdn.com/707617056/files/doc_financials/2024/ar/8e6783e2-86ea-429d-90cc-46b2afae5e0d.pdf",
+      "aliases": [
+        {
+          "end": "2024-09-30",
+          "filed": "2025-02-25",
+          "accession": "0001375365-25-000005"
+        }
+      ]
+    },
+    {
+      "id": "CRWD-split-2026-07-02-4",
+      "ticker": "CRWD",
+      "ratio": 4,
+      "announced_on": "2026-06-03",
+      "effective_at": "2026-07-02T00:00:00-04:00",
+      "split_trading_on": "2026-07-02",
+      "restated_from_filed": "2026-08-27",
+      "evidence": "https://www.sec.gov/Archives/edgar/data/1535527/000153552726000031/crwd-20260731.htm",
+      "aliases": [
+        {
+          "end": "2026-06-03",
+          "filed": "2026-08-27",
+          "accession": "0001535527-26-000031"
+        }
+      ]
+    }
+  ],
+  "annual_basis_review_scope": [
+    "TSM"
+  ]
+}

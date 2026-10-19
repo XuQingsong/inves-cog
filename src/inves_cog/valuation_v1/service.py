@@ -6,12 +6,12 @@ from copy import deepcopy
 from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
-from inves_cog.ingest.fundamentals.state import StateStore
 from inves_cog.ingest.market import exchange
 from inves_cog.valuation_v1.calculations import LABEL, calculate, pe_percentiles, settings
 from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs, selected_consensus
 from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
-from inves_cog.valuation_v1.listed_units import historical_eps, normalize_listing
+from inves_cog.valuation_v1.listed_units import normalize_listing
+from inves_cog.valuation_v1.pe_units import annual_basis_errors, historical_multiples
 from inves_cog.valuation_v1.shadows import panel, shadow, summarize
 
 NY = ZoneInfo("America/New_York")
@@ -116,24 +116,9 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
     seen, bear_past = repository.shadow_history(as_of)
     cutoff = min(clock.now_utc(), datetime.combine(as_of, time(22, 30), NY).astimezone(timezone.utc))
     membership, peers = memberships(source["baskets"], as_of)
-    pe = {}
+    pe, peer_pe = {}, {}
     for ticker in tickers:
-        store = StateStore(source["states"].get(ticker, []))
-        rows = []
-        for bar in source["bars"].get(ticker, []):
-            # Current price is not an input to a historical multiple. Each PE uses
-            # the financial state that was visible on that historical trade date.
-            if bar["trade_date"] >= as_of:
-                continue
-            state = store.state_asof(ticker, bar["trade_date"], "fixed")
-            rows.append(
-                {
-                    "date": bar["trade_date"],
-                    "close": bar["close"],
-                    "eps_ttm": historical_eps(state, ticker, bar["trade_date"]),
-                }
-            )
-        pe[ticker] = pe_percentiles(rows, as_of)
+        pe[ticker], peer_pe[ticker] = historical_multiples(source, ticker, as_of)
     ranges = []
     shadows = []
     for entity in universe:
@@ -158,6 +143,9 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                     h.observe(prior.period_end, classify(prior_inputs))
                 book.types[ticker] = h
             inputs = financial_inputs(state, source["states"].get(ticker, []), entity, as_of=cutoff)
+            errors = annual_basis_errors(state, source["states"].get(ticker, []), ticker, as_of)
+            if errors:
+                inputs["valuation_input_errors"] = errors
             inputs.update(consensus_inputs(source["consensus"].get(ticker, []), as_of, cutoff=cutoff))
             inputs["price"] = price
             inputs = normalize_listing(
@@ -166,7 +154,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
             p = dict(pe[ticker])
             if p["insufficient_pe_history"]:
                 fallback = pe_percentiles(
-                    [], as_of, peer_p50=[pe[t]["own_p50"] for t in peers.get(ticker, []) if t in pe]
+                    [], as_of, peer_p50=[peer_pe[t]["own_p50"] for t in peers.get(ticker, []) if t in peer_pe]
                 )
                 p.pop("pe_reason", None)
                 p.update(

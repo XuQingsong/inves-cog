@@ -194,3 +194,5 @@
 | tests/fixtures/phase1/m8/five_day_visibility.json | 0034542eec61726a94530c772fbe14834e735b6c874290aa27b2e91350b73833 | 3bc0e7d035ed51a09756718afd1c5d59ae03bd6f4c06035b892493f2e086546d | Headlines without an entity, ticker, or approved vector stay out of the anomaly report | Q-M8-15; FR-M0-08 |
 
 - 2026-10-16 M5: freeze lifecycle dates, price-only updates and <=3% consensus changes. tests/fixtures/phase1/m5/lifecycle.json sha256 b1e17622cc1204f1fd577a988ff7d4067c72653ac60765e338754015a8d7f410
+
+2026-10-19 A012 real retained source inputs (no account data): tests/fixtures/phase1/m5/a012_real_inputs.json 9495ca7006f608d5d5580548aab5cd8c7107d48494c4cd76bfd12c1a1c886d5f
