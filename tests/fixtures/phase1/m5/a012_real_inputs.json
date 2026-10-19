@@ -1,0 +1,3014 @@
+{
+  "cases": [
+    {
+      "bars": [
+        {
+          "close": 92.39,
+          "ticker": "NVDA",
+          "trade_date": "2016-11-17"
+        },
+        {
+          "close": 128.28,
+          "ticker": "NVDA",
+          "trade_date": "2024-07-03"
+        },
+        {
+          "close": 217.23,
+          "ticker": "NVDA",
+          "trade_date": "2026-10-15"
+        }
+      ],
+      "entity": {
+        "foreign": false,
+        "sector": "AI 算力芯片",
+        "ticker": "NVDA"
+      },
+      "states": [
+        {
+          "accession": "0001045810-16-000300",
+          "extractor": "fixed",
+          "field_sources": {
+            "diluted_shares_weighted": {
+              "accn": "0001045810-16-000300",
+              "approximation": true,
+              "dimensions": {},
+              "duration_days": 91,
+              "end": "2016-07-31",
+              "filed": "2016-08-23",
+              "method": "diluted_weighted_disclosed",
+              "origin": "SEC_companyfacts",
+              "period_kind": "quarter",
+              "security_basis": "consolidated_common_equivalent",
+              "split_basis": {
+                "method": "as_disclosed_in_source_filing",
+                "original_adjustment_chain": [],
+                "source_filed": "2016-08-23"
+              },
+              "start": "2016-05-02",
+              "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+              "unit": "shares",
+              "valuation_use": "latest disclosed period denominator; not a TTM weighted average"
+            },
+            "eps_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2014-10-26",
+                  "filed": "2016-03-17",
+                  "start": "2014-07-28",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2015-01-25",
+                  "filed": "2016-03-17",
+                  "start": "2014-10-27",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2015-04-26",
+                  "filed": "2016-05-25",
+                  "start": "2015-01-26",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "end": "2015-07-26",
+                  "filed": "2016-08-23",
+                  "start": "2015-04-27",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2015-10-25",
+                  "filed": "2016-03-17",
+                  "start": "2015-07-27",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2016-01-31",
+                  "filed": "2016-03-17",
+                  "start": "2015-10-26",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2016-05-01",
+                  "filed": "2016-05-25",
+                  "start": "2016-02-01",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "end": "2016-07-31",
+                  "filed": "2016-08-23",
+                  "start": "2016-05-02",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                }
+              ]
+            },
+            "fcf_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-15-000173",
+                  "derivation": "ytd_derived",
+                  "end": "2014-10-26",
+                  "filed": "2015-11-18",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-15-000173",
+                      "end": "2014-10-26",
+                      "filed": "2015-11-18",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-15-000143",
+                      "end": "2014-07-27",
+                      "filed": "2015-08-19",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2014-07-28",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "derivation": "q4_derived",
+                  "end": "2015-01-25",
+                  "filed": "2016-03-17",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-16-000205",
+                      "end": "2015-01-25",
+                      "filed": "2016-03-17",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-15-000173",
+                      "end": "2014-10-26",
+                      "filed": "2015-11-18",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2014-10-27",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2015-04-26",
+                  "filed": "2016-05-25",
+                  "start": "2015-01-26",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "derivation": "ytd_derived",
+                  "end": "2015-07-26",
+                  "filed": "2016-08-23",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-16-000300",
+                      "end": "2015-07-26",
+                      "filed": "2016-08-23",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-16-000275",
+                      "end": "2015-04-26",
+                      "filed": "2016-05-25",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2015-04-27",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-15-000173",
+                  "derivation": "ytd_derived",
+                  "end": "2015-10-25",
+                  "filed": "2016-08-23",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-15-000173",
+                      "end": "2015-10-25",
+                      "filed": "2015-11-18",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-16-000300",
+                      "end": "2015-07-26",
+                      "filed": "2016-08-23",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2015-07-27",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "derivation": "q4_derived",
+                  "end": "2016-01-31",
+                  "filed": "2016-03-17",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-16-000205",
+                      "end": "2016-01-31",
+                      "filed": "2016-03-17",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-15-000173",
+                      "end": "2015-10-25",
+                      "filed": "2015-11-18",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2015-10-26",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2016-05-01",
+                  "filed": "2016-05-25",
+                  "start": "2016-02-01",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "derivation": "ytd_derived",
+                  "end": "2016-07-31",
+                  "filed": "2016-08-23",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-16-000300",
+                      "end": "2016-07-31",
+                      "filed": "2016-08-23",
+                      "start": "2016-02-01",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-16-000275",
+                      "end": "2016-05-01",
+                      "filed": "2016-05-25",
+                      "start": "2016-02-01",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2016-05-02",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-15-000097",
+                  "end": "2014-04-27",
+                  "filed": "2015-05-20",
+                  "start": "2014-01-27",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-15-000143",
+                  "derivation": "ytd_derived",
+                  "end": "2014-07-27",
+                  "filed": "2015-08-19",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-15-000143",
+                      "end": "2014-07-27",
+                      "filed": "2015-08-19",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-15-000097",
+                      "end": "2014-04-27",
+                      "filed": "2015-05-20",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2014-04-28",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-15-000173",
+                  "derivation": "ytd_derived",
+                  "end": "2014-10-26",
+                  "filed": "2015-11-18",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-15-000173",
+                      "end": "2014-10-26",
+                      "filed": "2015-11-18",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-15-000143",
+                      "end": "2014-07-27",
+                      "filed": "2015-08-19",
+                      "start": "2014-01-27",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2014-07-28",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2015-04-26",
+                  "filed": "2016-05-25",
+                  "start": "2015-01-26",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "derivation": "ytd_derived",
+                  "end": "2015-07-26",
+                  "filed": "2016-08-23",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-16-000300",
+                      "end": "2015-07-26",
+                      "filed": "2016-08-23",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-16-000275",
+                      "end": "2015-04-26",
+                      "filed": "2016-05-25",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2015-04-27",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-15-000173",
+                  "derivation": "ytd_derived",
+                  "end": "2015-10-25",
+                  "filed": "2016-08-23",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-15-000173",
+                      "end": "2015-10-25",
+                      "filed": "2015-11-18",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-16-000300",
+                      "end": "2015-07-26",
+                      "filed": "2016-08-23",
+                      "start": "2015-01-26",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2015-07-27",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2016-05-01",
+                  "filed": "2016-05-25",
+                  "start": "2016-02-01",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "derivation": "ytd_derived",
+                  "end": "2016-07-31",
+                  "filed": "2016-08-23",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-16-000300",
+                      "end": "2016-07-31",
+                      "filed": "2016-08-23",
+                      "start": "2016-02-01",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-16-000275",
+                      "end": "2016-05-01",
+                      "filed": "2016-05-25",
+                      "start": "2016-02-01",
+                      "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2016-05-02",
+                  "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+                  "unit": "USD"
+                }
+              ],
+              "reason": "required_tag_period_or_valid_denominator_missing"
+            },
+            "rev_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2014-10-26",
+                  "filed": "2016-03-17",
+                  "start": "2014-07-28",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2015-01-25",
+                  "filed": "2016-03-17",
+                  "start": "2014-10-27",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2015-04-26",
+                  "filed": "2016-05-25",
+                  "start": "2015-01-26",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "end": "2015-07-26",
+                  "filed": "2016-08-23",
+                  "start": "2015-04-27",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2015-10-25",
+                  "filed": "2016-03-17",
+                  "start": "2015-07-27",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000205",
+                  "end": "2016-01-31",
+                  "filed": "2016-03-17",
+                  "start": "2015-10-26",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000275",
+                  "end": "2016-05-01",
+                  "filed": "2016-05-25",
+                  "start": "2016-02-01",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-16-000300",
+                  "end": "2016-07-31",
+                  "filed": "2016-08-23",
+                  "start": "2016-05-02",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                }
+              ]
+            },
+            "shares": {
+              "components": [
+                {
+                  "accn": "0001045810-16-000300",
+                  "end": "2016-08-19",
+                  "filed": "2016-08-23",
+                  "tag": "dei:EntityCommonStockSharesOutstanding",
+                  "unit": "shares"
+                }
+              ],
+              "method": "instant"
+            }
+          },
+          "filed": "2016-08-23",
+          "fiscal_period": "2016-07-31",
+          "form": "10-Q",
+          "health_codes": [
+            "ok"
+          ],
+          "oracle_values": {},
+          "period_end": "2016-07-31",
+          "ticker": "NVDA",
+          "values": {
+            "cash": 426000000.0,
+            "current_ratio": 2.5575405068550063,
+            "data_flags": [],
+            "debt": 1413000000.0,
+            "diluted_shares_weighted": 631000000.0,
+            "eps_growth": 60.00000000000001,
+            "eps_ttm": 1.52,
+            "fcf_conversion": null,
+            "fcf_margin": null,
+            "fcf_margin_change_pp": null,
+            "fcf_ttm": null,
+            "gross_margin": 57.01415701415702,
+            "gross_margin_change_pp": 1.3028599430273147,
+            "net_debt": 987000000.0,
+            "net_debt_fcf": null,
+            "ni_ttm": 903000000.0,
+            "op_margin_ttm": 19.433719433719435,
+            "rev_accel_pp": 10.471154085251854,
+            "rev_growth": 13.786610878661087,
+            "rev_period": "2016-07-31",
+            "rev_q_yoy": 23.8508239375542,
+            "rev_ttm": 5439000000.0,
+            "roe": 20.15625,
+            "shares": 535002186.0,
+            "shares_date": "2016-08-19"
+          }
+        },
+        {
+          "accession": "0001045810-24-000124",
+          "extractor": "fixed",
+          "field_sources": {
+            "diluted_shares_weighted": {
+              "accn": "0001045810-24-000124",
+              "approximation": true,
+              "dimensions": {},
+              "duration_days": 91,
+              "end": "2024-04-28",
+              "filed": "2024-05-29",
+              "method": "diluted_weighted_disclosed",
+              "origin": "SEC_companyfacts",
+              "period_kind": "quarter",
+              "security_basis": "consolidated_common_equivalent",
+              "split_basis": {
+                "method": "as_disclosed_in_source_filing",
+                "original_adjustment_chain": [],
+                "source_filed": "2024-05-29"
+              },
+              "start": "2024-01-29",
+              "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+              "unit": "shares",
+              "valuation_use": "latest disclosed period denominator; not a TTM weighted average"
+            },
+            "eps_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-23-000175",
+                  "end": "2022-07-31",
+                  "filed": "2023-08-28",
+                  "start": "2022-05-02",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-23-000227",
+                  "end": "2022-10-30",
+                  "filed": "2023-11-21",
+                  "start": "2022-08-01",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "eps_q4_derived",
+                  "end": "2023-01-29",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2023-01-29",
+                      "filed": "2024-02-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-23-000093",
+                      "end": "2022-05-01",
+                      "filed": "2023-05-26",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2022-07-31",
+                      "filed": "2023-08-28",
+                      "start": "2022-05-02",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2022-10-30",
+                      "filed": "2023-11-21",
+                      "start": "2022-08-01",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    }
+                  ],
+                  "start": "2022-10-31",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2023-04-30",
+                  "filed": "2024-05-29",
+                  "start": "2023-01-30",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-23-000175",
+                  "end": "2023-07-30",
+                  "filed": "2023-08-28",
+                  "start": "2023-05-01",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-23-000227",
+                  "end": "2023-10-29",
+                  "filed": "2023-11-21",
+                  "start": "2023-07-31",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "eps_q4_derived",
+                  "end": "2024-01-28",
+                  "filed": "2024-05-29",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2024-01-28",
+                      "filed": "2024-02-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-24-000124",
+                      "end": "2023-04-30",
+                      "filed": "2024-05-29",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2023-07-30",
+                      "filed": "2023-08-28",
+                      "start": "2023-05-01",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2023-10-29",
+                      "filed": "2023-11-21",
+                      "start": "2023-07-31",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    }
+                  ],
+                  "start": "2023-10-30",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2024-04-28",
+                  "filed": "2024-05-29",
+                  "start": "2024-01-29",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                }
+              ]
+            },
+            "fcf_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-23-000175",
+                  "derivation": "ytd_derived",
+                  "end": "2022-07-31",
+                  "filed": "2023-08-28",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2022-07-31",
+                      "filed": "2023-08-28",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000093",
+                      "end": "2022-05-01",
+                      "filed": "2023-05-26",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2022-05-02",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-23-000227",
+                  "derivation": "ytd_derived",
+                  "end": "2022-10-30",
+                  "filed": "2023-11-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2022-10-30",
+                      "filed": "2023-11-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2022-07-31",
+                      "filed": "2023-08-28",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2022-08-01",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2023-01-29",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2023-01-29",
+                      "filed": "2024-02-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2022-10-30",
+                      "filed": "2023-11-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2022-10-31",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2023-04-30",
+                  "filed": "2024-05-29",
+                  "start": "2023-01-30",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-23-000175",
+                  "derivation": "ytd_derived",
+                  "end": "2023-07-30",
+                  "filed": "2024-05-29",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2023-07-30",
+                      "filed": "2023-08-28",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-24-000124",
+                      "end": "2023-04-30",
+                      "filed": "2024-05-29",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2023-05-01",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-23-000227",
+                  "derivation": "ytd_derived",
+                  "end": "2023-10-29",
+                  "filed": "2023-11-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2023-10-29",
+                      "filed": "2023-11-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2023-07-30",
+                      "filed": "2023-08-28",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2023-07-31",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2024-01-28",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2024-01-28",
+                      "filed": "2024-02-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2023-10-29",
+                      "filed": "2023-11-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2023-10-30",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2024-04-28",
+                  "filed": "2024-05-29",
+                  "start": "2024-01-29",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-21-000064",
+                  "end": "2021-05-02",
+                  "filed": "2021-05-26",
+                  "start": "2021-02-01",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-21-000131",
+                  "derivation": "ytd_derived",
+                  "end": "2021-08-01",
+                  "filed": "2021-08-20",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-21-000131",
+                      "end": "2021-08-01",
+                      "filed": "2021-08-20",
+                      "start": "2021-02-01",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-21-000064",
+                      "end": "2021-05-02",
+                      "filed": "2021-05-26",
+                      "start": "2021-02-01",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2021-05-03",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-21-000163",
+                  "derivation": "ytd_derived",
+                  "end": "2021-10-31",
+                  "filed": "2021-11-22",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-21-000163",
+                      "end": "2021-10-31",
+                      "filed": "2021-11-22",
+                      "start": "2021-02-01",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-21-000131",
+                      "end": "2021-08-01",
+                      "filed": "2021-08-20",
+                      "start": "2021-02-01",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2021-08-02",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2022-01-30",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2022-01-30",
+                      "filed": "2024-02-21",
+                      "start": "2021-02-01",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-21-000163",
+                      "end": "2021-10-31",
+                      "filed": "2021-11-22",
+                      "start": "2021-02-01",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2021-11-01",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2023-01-29",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2023-01-29",
+                      "filed": "2024-02-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2022-10-30",
+                      "filed": "2023-11-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2022-10-31",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2023-04-30",
+                  "filed": "2024-05-29",
+                  "start": "2023-01-30",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2024-01-28",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2024-01-28",
+                      "filed": "2024-02-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2023-10-29",
+                      "filed": "2023-11-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2023-10-30",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2024-04-28",
+                  "filed": "2024-05-29",
+                  "start": "2024-01-29",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                }
+              ],
+              "reason": "required_tag_period_or_valid_denominator_missing"
+            },
+            "rev_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-23-000175",
+                  "end": "2022-07-31",
+                  "filed": "2023-08-28",
+                  "start": "2022-05-02",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-23-000227",
+                  "end": "2022-10-30",
+                  "filed": "2023-11-21",
+                  "start": "2022-08-01",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2023-01-29",
+                  "filed": "2024-02-21",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2023-01-29",
+                      "filed": "2024-02-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2022-10-30",
+                      "filed": "2023-11-21",
+                      "start": "2022-01-31",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2022-10-31",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2023-04-30",
+                  "filed": "2024-05-29",
+                  "start": "2023-01-30",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-23-000175",
+                  "end": "2023-07-30",
+                  "filed": "2023-08-28",
+                  "start": "2023-05-01",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-23-000227",
+                  "end": "2023-10-29",
+                  "filed": "2023-11-21",
+                  "start": "2023-07-31",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000029",
+                  "derivation": "q4_derived",
+                  "end": "2024-01-28",
+                  "filed": "2024-05-29",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-24-000029",
+                      "end": "2024-01-28",
+                      "filed": "2024-02-21",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-24-000124",
+                      "end": "2023-04-30",
+                      "filed": "2024-05-29",
+                      "start": "2023-01-30",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000175",
+                      "end": "2023-07-30",
+                      "filed": "2023-08-28",
+                      "start": "2023-05-01",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-23-000227",
+                      "end": "2023-10-29",
+                      "filed": "2023-11-21",
+                      "start": "2023-07-31",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2023-10-30",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2024-04-28",
+                  "filed": "2024-05-29",
+                  "start": "2024-01-29",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                }
+              ]
+            },
+            "shares": {
+              "components": [
+                {
+                  "accn": "0001045810-24-000124",
+                  "end": "2024-05-24",
+                  "filed": "2024-05-29",
+                  "tag": "dei:EntityCommonStockSharesOutstanding",
+                  "unit": "shares"
+                }
+              ],
+              "method": "instant"
+            }
+          },
+          "filed": "2024-05-29",
+          "fiscal_period": "2024-04-28",
+          "form": "10-Q",
+          "health_codes": [
+            "ok"
+          ],
+          "oracle_values": {},
+          "period_end": "2024-04-28",
+          "ticker": "NVDA",
+          "values": {
+            "cash": 7587000000.0,
+            "current_ratio": 3.529461998292058,
+            "data_flags": [],
+            "debt": 9710000000.0,
+            "diluted_shares_weighted": 2489000000.0,
+            "eps_growth": 790.1041666666666,
+            "eps_ttm": 17.09,
+            "fcf_conversion": null,
+            "fcf_margin": null,
+            "fcf_margin_change_pp": null,
+            "fcf_ttm": null,
+            "gross_margin": 75.28643417654875,
+            "gross_margin_change_pp": 18.972190417371067,
+            "net_debt": 2123000000.0,
+            "net_debt_fcf": null,
+            "ni_ttm": 42598000000.0,
+            "op_margin_ttm": 59.845313009251136,
+            "rev_accel_pp": -3.15388349933977,
+            "rev_growth": 208.26957260993893,
+            "rev_period": "2024-04-28",
+            "rev_q_yoy": 262.1245828698554,
+            "rev_ttm": 79774000000.0,
+            "roe": 86.68348866549998,
+            "shares": 2460000000.0,
+            "shares_date": "2024-05-24"
+          }
+        },
+        {
+          "accession": "0001045810-26-000075",
+          "extractor": "fixed",
+          "field_sources": {
+            "diluted_shares_weighted": {
+              "accn": "0001045810-26-000075",
+              "approximation": true,
+              "dimensions": {},
+              "duration_days": 91,
+              "end": "2026-07-26",
+              "filed": "2026-08-26",
+              "method": "diluted_weighted_disclosed",
+              "origin": "SEC_companyfacts",
+              "period_kind": "quarter",
+              "security_basis": "consolidated_common_equivalent",
+              "split_basis": {
+                "method": "as_disclosed_in_source_filing",
+                "original_adjustment_chain": [],
+                "source_filed": "2026-08-26"
+              },
+              "start": "2026-04-27",
+              "tag": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+              "unit": "shares",
+              "valuation_use": "latest disclosed period denominator; not a TTM weighted average"
+            },
+            "eps_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-25-000230",
+                  "end": "2024-10-27",
+                  "filed": "2025-11-19",
+                  "start": "2024-07-29",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "eps_q4_derived",
+                  "end": "2025-01-26",
+                  "filed": "2026-02-25",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2025-01-26",
+                      "filed": "2026-02-25",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-25-000116",
+                      "end": "2024-04-28",
+                      "filed": "2025-05-28",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-25-000209",
+                      "end": "2024-07-28",
+                      "filed": "2025-08-27",
+                      "start": "2024-04-29",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2024-10-27",
+                      "filed": "2025-11-19",
+                      "start": "2024-07-29",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    }
+                  ],
+                  "start": "2024-10-28",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2025-04-27",
+                  "filed": "2026-05-20",
+                  "start": "2025-01-27",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "end": "2025-07-27",
+                  "filed": "2026-08-26",
+                  "start": "2025-04-28",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-25-000230",
+                  "end": "2025-10-26",
+                  "filed": "2025-11-19",
+                  "start": "2025-07-28",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "eps_q4_derived",
+                  "end": "2026-01-25",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2026-01-25",
+                      "filed": "2026-02-25",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-26-000052",
+                      "end": "2025-04-27",
+                      "filed": "2026-05-20",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2025-07-27",
+                      "filed": "2026-08-26",
+                      "start": "2025-04-28",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2025-10-26",
+                      "filed": "2025-11-19",
+                      "start": "2025-07-28",
+                      "tag": "us-gaap:EarningsPerShareDiluted",
+                      "unit": "USD/shares"
+                    }
+                  ],
+                  "start": "2025-10-27",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2026-04-26",
+                  "filed": "2026-05-20",
+                  "start": "2026-01-26",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "end": "2026-07-26",
+                  "filed": "2026-08-26",
+                  "start": "2026-04-27",
+                  "tag": "us-gaap:EarningsPerShareDiluted",
+                  "unit": "USD/shares"
+                }
+              ]
+            },
+            "fcf_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-25-000230",
+                  "derivation": "ytd_derived",
+                  "end": "2024-10-27",
+                  "filed": "2025-11-19",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2024-10-27",
+                      "filed": "2025-11-19",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000209",
+                      "end": "2024-07-28",
+                      "filed": "2025-08-27",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2024-07-29",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "q4_derived",
+                  "end": "2025-01-26",
+                  "filed": "2026-02-25",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2025-01-26",
+                      "filed": "2026-02-25",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2024-10-27",
+                      "filed": "2025-11-19",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2024-10-28",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2025-04-27",
+                  "filed": "2026-05-20",
+                  "start": "2025-01-27",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "derivation": "ytd_derived",
+                  "end": "2025-07-27",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2025-07-27",
+                      "filed": "2026-08-26",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000052",
+                      "end": "2025-04-27",
+                      "filed": "2026-05-20",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-04-28",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-25-000230",
+                  "derivation": "ytd_derived",
+                  "end": "2025-10-26",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2025-10-26",
+                      "filed": "2025-11-19",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2025-07-27",
+                      "filed": "2026-08-26",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-07-28",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "q4_derived",
+                  "end": "2026-01-25",
+                  "filed": "2026-02-25",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2026-01-25",
+                      "filed": "2026-02-25",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2025-10-26",
+                      "filed": "2025-11-19",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-10-27",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2026-04-26",
+                  "filed": "2026-05-20",
+                  "start": "2026-01-26",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "derivation": "ytd_derived",
+                  "end": "2026-07-26",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2026-07-26",
+                      "filed": "2026-08-26",
+                      "start": "2026-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000052",
+                      "end": "2026-04-26",
+                      "filed": "2026-05-20",
+                      "start": "2026-01-26",
+                      "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2026-04-27",
+                  "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-25-000230",
+                  "derivation": "ytd_derived",
+                  "end": "2024-10-27",
+                  "filed": "2025-11-19",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2024-10-27",
+                      "filed": "2025-11-19",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000209",
+                      "end": "2024-07-28",
+                      "filed": "2025-08-27",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2024-07-29",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "q4_derived",
+                  "end": "2025-01-26",
+                  "filed": "2026-02-25",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2025-01-26",
+                      "filed": "2026-02-25",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2024-10-27",
+                      "filed": "2025-11-19",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2024-10-28",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2025-04-27",
+                  "filed": "2026-05-20",
+                  "start": "2025-01-27",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "derivation": "ytd_derived",
+                  "end": "2025-07-27",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2025-07-27",
+                      "filed": "2026-08-26",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000052",
+                      "end": "2025-04-27",
+                      "filed": "2026-05-20",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-04-28",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-25-000230",
+                  "derivation": "ytd_derived",
+                  "end": "2025-10-26",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2025-10-26",
+                      "filed": "2025-11-19",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2025-07-27",
+                      "filed": "2026-08-26",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-07-28",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "q4_derived",
+                  "end": "2026-01-25",
+                  "filed": "2026-02-25",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2026-01-25",
+                      "filed": "2026-02-25",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2025-10-26",
+                      "filed": "2025-11-19",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-10-27",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2026-04-26",
+                  "filed": "2026-05-20",
+                  "start": "2026-01-26",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "derivation": "ytd_derived",
+                  "end": "2026-07-26",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2026-07-26",
+                      "filed": "2026-08-26",
+                      "start": "2026-01-26",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000052",
+                      "end": "2026-04-26",
+                      "filed": "2026-05-20",
+                      "start": "2026-01-26",
+                      "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2026-04-27",
+                  "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+                  "unit": "USD"
+                }
+              ]
+            },
+            "rev_ttm": {
+              "components": [
+                {
+                  "accn": "0001045810-25-000230",
+                  "end": "2024-10-27",
+                  "filed": "2025-11-19",
+                  "start": "2024-07-29",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "q4_derived",
+                  "end": "2025-01-26",
+                  "filed": "2026-02-25",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2025-01-26",
+                      "filed": "2026-02-25",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2024-10-27",
+                      "filed": "2025-11-19",
+                      "start": "2024-01-29",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2024-10-28",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2025-04-27",
+                  "filed": "2026-05-20",
+                  "start": "2025-01-27",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "end": "2025-07-27",
+                  "filed": "2026-08-26",
+                  "start": "2025-04-28",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-25-000230",
+                  "end": "2025-10-26",
+                  "filed": "2025-11-19",
+                  "start": "2025-07-28",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000021",
+                  "derivation": "q4_derived",
+                  "end": "2026-01-25",
+                  "filed": "2026-08-26",
+                  "inputs": [
+                    {
+                      "accn": "0001045810-26-000021",
+                      "end": "2026-01-25",
+                      "filed": "2026-02-25",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000052",
+                      "end": "2025-04-27",
+                      "filed": "2026-05-20",
+                      "start": "2025-01-27",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-26-000075",
+                      "end": "2025-07-27",
+                      "filed": "2026-08-26",
+                      "start": "2025-04-28",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    },
+                    {
+                      "accn": "0001045810-25-000230",
+                      "end": "2025-10-26",
+                      "filed": "2025-11-19",
+                      "start": "2025-07-28",
+                      "tag": "us-gaap:Revenues",
+                      "unit": "USD"
+                    }
+                  ],
+                  "start": "2025-10-27",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000052",
+                  "end": "2026-04-26",
+                  "filed": "2026-05-20",
+                  "start": "2026-01-26",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                },
+                {
+                  "accn": "0001045810-26-000075",
+                  "end": "2026-07-26",
+                  "filed": "2026-08-26",
+                  "start": "2026-04-27",
+                  "tag": "us-gaap:Revenues",
+                  "unit": "USD"
+                }
+              ]
+            },
+            "shares": {
+              "components": [
+                {
+                  "accn": "0001045810-26-000075",
+                  "end": "2026-08-21",
+                  "filed": "2026-08-26",
+                  "tag": "dei:EntityCommonStockSharesOutstanding",
+                  "unit": "shares"
+                }
+              ],
+              "method": "instant"
+            }
+          },
+          "filed": "2026-08-26",
+          "fiscal_period": "2026-07-26",
+          "form": "10-Q",
+          "health_codes": [
+            "ok"
+          ],
+          "oracle_values": {},
+          "period_end": "2026-07-26",
+          "ticker": "NVDA",
+          "values": {
+            "cash": 22443000000.0,
+            "current_ratio": 4.588949069016016,
+            "data_flags": [],
+            "debt": 33366000000.0,
+            "diluted_shares_weighted": 24285000000.0,
+            "eps_growth": 125.35612535612537,
+            "eps_ttm": 7.910000000000001,
+            "fcf_conversion": 0.6584750024626839,
+            "fcf_margin": 41.920460509161,
+            "fcf_margin_change_pp": -1.6722473071786226,
+            "fcf_ttm": 127006000000.0,
+            "gross_margin": 74.67463667900016,
+            "gross_margin_change_pp": 4.827525589409433,
+            "net_debt": 10923000000.0,
+            "net_debt_fcf": 0.08600381084358219,
+            "ni_ttm": 192879000000.0,
+            "op_margin_ttm": 65.21426284537361,
+            "rev_accel_pp": 20.623509697973034,
+            "rev_growth": 83.37529809100704,
+            "rev_period": "2026-07-26",
+            "rev_q_yoy": 105.85114348672526,
+            "rev_ttm": 302969000000.0,
+            "roe": 84.23252279635258,
+            "shares": 24100000000.0,
+            "shares_date": "2026-08-21"
+          }
+        }
+      ],
+      "ticker": "NVDA"
+    },
+    {
+      "bars": [
+        {
+          "close": 422.25,
+          "ticker": "TSM",
+          "trade_date": "2026-10-15"
+        }
+      ],
+      "entity": {
+        "foreign": true,
+        "sector": "CPU 与代工",
+        "ticker": "TSM"
+      },
+      "states": [
+        {
+          "accession": "0001046179-26-000451",
+          "extractor": "fixed",
+          "field_sources": {
+            "diluted_shares_weighted": {
+              "accn": "0001193125-25-083423",
+              "approximation": false,
+              "dimensions": {},
+              "duration_days": 366,
+              "end": "2024-12-31",
+              "filed": "2025-04-17",
+              "listed_share_ratio": 5,
+              "method": "diluted_weighted_disclosed",
+              "origin": "SEC_companyfacts",
+              "period_kind": "annual",
+              "security_basis": "ordinary_shares",
+              "security_basis_reference": "existing M2 interims.BASIS; ADS conversion must be established separately",
+              "split_basis": {
+                "method": "as_disclosed_in_source_filing",
+                "original_adjustment_chain": [],
+                "source_filed": "2025-04-17"
+              },
+              "start": "2024-01-01",
+              "tag": "ifrs-full:AdjustedWeightedAverageShares",
+              "unit": "shares",
+              "valuation_use": "latest disclosed period denominator; not a TTM weighted average"
+            },
+            "eps_ttm": {
+              "method": "interim_ttm",
+              "quarters": [
+                {
+                  "accession": "0001046179-26-000008",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 17.44,
+                  "filed": "2026-01-15",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 17.44,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 588543000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 452302000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 500685000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 989918000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 588543000000.0,
+                  "net_income": 452302000000.0,
+                  "operating_income": 500685000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2025-09-30",
+                  "period_start": "2025-07-01",
+                  "revenue": 989918000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                },
+                {
+                  "accession": "0001046179-26-000199",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 19.5,
+                  "filed": "2026-04-16",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 19.5,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 651987000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 505744000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 564903000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 1046090000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 651987000000.0,
+                  "net_income": 505744000000.0,
+                  "operating_income": 564903000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2025-12-31",
+                  "period_start": "2025-10-01",
+                  "revenue": 1046090000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000199/a1q26e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                },
+                {
+                  "accession": "0001046179-26-000451",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 22.08,
+                  "filed": "2026-07-16",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 22.08,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 751295000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 572480000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 658966000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 1134103000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 751295000000.0,
+                  "net_income": 572480000000.0,
+                  "operating_income": 658966000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2026-03-31",
+                  "period_start": "2026-01-01",
+                  "revenue": 1134103000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                },
+                {
+                  "accession": "0001046179-26-000451",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 27.25,
+                  "filed": "2026-07-16",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 27.25,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 860311000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 706562000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 766603000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 1270381000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 860311000000.0,
+                  "net_income": 706562000000.0,
+                  "operating_income": 766603000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2026-06-30",
+                  "period_start": "2026-04-01",
+                  "revenue": 1270381000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                }
+              ]
+            },
+            "fcf_ttm": {
+              "reason": "interim statement does not supply aligned cash flows, valuation or prior TTM"
+            },
+            "interim_ttm": {
+              "annual_accession": "0001628280-26-025362",
+              "annual_period_end": "2025-12-31",
+              "method": "four disclosed quarters anchored to latest annual; each quarter translated separately"
+            },
+            "rev_ttm": {
+              "method": "interim_ttm",
+              "quarters": [
+                {
+                  "accession": "0001046179-26-000008",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 17.44,
+                  "filed": "2026-01-15",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 17.44,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 588543000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 452302000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 500685000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-09-30",
+                      "factor": 0.03340465327439013,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 989918000000.0,
+                      "period_end": "2025-09-30",
+                      "period_start": "2025-07-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 588543000000.0,
+                  "net_income": 452302000000.0,
+                  "operating_income": 500685000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2025-09-30",
+                  "period_start": "2025-07-01",
+                  "revenue": 989918000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000008/a4q25e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                },
+                {
+                  "accession": "0001046179-26-000199",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 19.5,
+                  "filed": "2026-04-16",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 19.5,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 651987000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 505744000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 564903000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2025-12-31",
+                      "factor": 0.03223811916074072,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 1046090000000.0,
+                      "period_end": "2025-12-31",
+                      "period_start": "2025-10-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 651987000000.0,
+                  "net_income": 505744000000.0,
+                  "operating_income": 564903000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2025-12-31",
+                  "period_start": "2025-10-01",
+                  "revenue": 1046090000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000199/a1q26e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                },
+                {
+                  "accession": "0001046179-26-000451",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 22.08,
+                  "filed": "2026-07-16",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 22.08,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 751295000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 572480000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 658966000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-03-31",
+                      "factor": 0.03161683641569394,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 1134103000000.0,
+                      "period_end": "2026-03-31",
+                      "period_start": "2026-01-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 751295000000.0,
+                  "net_income": 572480000000.0,
+                  "operating_income": 658966000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2026-03-31",
+                  "period_start": "2026-01-01",
+                  "revenue": 1134103000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                },
+                {
+                  "accession": "0001046179-26-000451",
+                  "currency": "TWD",
+                  "eps_basis": "ordinary share; 1 ADS = 5 ordinary shares",
+                  "eps_diluted": 27.25,
+                  "filed": "2026-07-16",
+                  "fx": {
+                    "eps_diluted": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 27.25,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "gross_profit": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 860311000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "net_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 706562000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "operating_income": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 766603000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    },
+                    "revenue": {
+                      "direction": "USD/currency",
+                      "effective_quote_date": "2026-06-30",
+                      "factor": 0.03164337069947749,
+                      "lookback_days": null,
+                      "method": "daily_mean",
+                      "original_currency": "TWD",
+                      "original_value": 1270381000000.0,
+                      "period_end": "2026-06-30",
+                      "period_start": "2026-04-01",
+                      "series": "DEXTAUS",
+                      "visible_as_of": "2026-09-24"
+                    }
+                  },
+                  "gross_profit": 860311000000.0,
+                  "net_income": 706562000000.0,
+                  "operating_income": 766603000000.0,
+                  "parse_status": "parsed",
+                  "period_end": "2026-06-30",
+                  "period_start": "2026-04-01",
+                  "revenue": 1270381000000.0,
+                  "source_exhibit": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000451/a2q26e_withguidancexfinal.htm",
+                  "ticker": "TSM"
+                }
+              ]
+            },
+            "shares": {
+              "components": [
+                {
+                  "accn": "0001628280-26-025362",
+                  "end": "2025-12-31",
+                  "filed": "2026-04-16",
+                  "tag": "dei:EntityCommonStockSharesOutstanding",
+                  "unit": "shares"
+                }
+              ],
+              "method": "instant"
+            }
+          },
+          "filed": "2026-09-24",
+          "fiscal_period": "TTM",
+          "form": "6-K",
+          "health_codes": [
+            "interim_unaudited"
+          ],
+          "oracle_values": {},
+          "period_end": "2026-06-30",
+          "ticker": "TSM",
+          "values": {
+            "cash": 88232591648.07141,
+            "current_ratio": 2.5072882934602547,
+            "data_flags": [],
+            "debt": null,
+            "diluted_shares_weighted": 25929700000.0,
+            "eps_growth": null,
+            "eps_ttm": 2.771602076359092,
+            "fcf_conversion": null,
+            "fcf_margin": null,
+            "fcf_margin_change_pp": null,
+            "fcf_ttm": null,
+            "fcf_yield": null,
+            "gross_margin": 64.16316311782478,
+            "gross_margin_change_pp": null,
+            "net_debt": null,
+            "net_debt_fcf": null,
+            "ni_ttm": 71871236621.56354,
+            "op_margin_ttm": 56.02395189992322,
+            "pe": null,
+            "peg_rev_approx": null,
+            "ps": null,
+            "rev_accel_pp": null,
+            "rev_growth": null,
+            "rev_period": "2026-06-30",
+            "rev_q_yoy": null,
+            "rev_ttm": 142847727575.05765,
+            "roe": null,
+            "shares": 25932524521.0,
+            "shares_date": "2025-12-31"
+          }
+        },
+        {
+          "accession": "0001628280-26-025362",
+          "extractor": "fixed",
+          "field_sources": {
+            "diluted_shares_weighted": {
+              "accn": "0001193125-25-083423",
+              "approximation": false,
+              "dimensions": {},
+              "duration_days": 366,
+              "end": "2024-12-31",
+              "filed": "2025-04-17",
+              "listed_share_ratio": 5,
+              "method": "diluted_weighted_disclosed",
+              "origin": "SEC_companyfacts",
+              "period_kind": "annual",
+              "security_basis": "ordinary_shares",
+              "security_basis_reference": "existing M2 interims.BASIS; ADS conversion must be established separately",
+              "split_basis": {
+                "method": "as_disclosed_in_source_filing",
+                "original_adjustment_chain": [],
+                "source_filed": "2025-04-17"
+              },
+              "start": "2024-01-01",
+              "tag": "ifrs-full:AdjustedWeightedAverageShares",
+              "unit": "shares",
+              "valuation_use": "latest disclosed period denominator; not a TTM weighted average"
+            },
+            "eps_ttm": {
+              "components": [
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2023-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2023-12-29",
+                    "factor": 0.032116437269757735,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 32.85,
+                    "period_end": "2023-12-31",
+                    "period_start": "2023-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD/shares",
+                  "original_value": 32.85,
+                  "start": "2023-01-01",
+                  "tag": "ifrs-full:DilutedEarningsLossPerShare",
+                  "unit": "TWD/shares"
+                },
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2024-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2024-12-31",
+                    "factor": 0.031153094918905878,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 44.67,
+                    "period_end": "2024-12-31",
+                    "period_start": "2024-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD/shares",
+                  "original_value": 44.67,
+                  "start": "2024-01-01",
+                  "tag": "ifrs-full:DilutedEarningsLossPerShare",
+                  "unit": "TWD/shares"
+                }
+              ]
+            },
+            "fcf_ttm": {
+              "components": [
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2023-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2023-12-29",
+                    "factor": 0.032116437269757735,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 1241967300000.0,
+                    "period_end": "2023-12-31",
+                    "period_start": "2023-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD",
+                  "original_value": 1241967300000.0,
+                  "start": "2023-01-01",
+                  "tag": "ifrs-full:CashFlowsFromUsedInOperatingActivities",
+                  "unit": "TWD"
+                },
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2024-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2024-12-31",
+                    "factor": 0.031153094918905878,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 1826177100000.0,
+                    "period_end": "2024-12-31",
+                    "period_start": "2024-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD",
+                  "original_value": 1826177100000.0,
+                  "start": "2024-01-01",
+                  "tag": "ifrs-full:CashFlowsFromUsedInOperatingActivities",
+                  "unit": "TWD"
+                },
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2023-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2023-12-29",
+                    "factor": 0.032116437269757735,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 949816800000.0,
+                    "period_end": "2023-12-31",
+                    "period_start": "2023-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD",
+                  "original_value": 949816800000.0,
+                  "start": "2023-01-01",
+                  "tag": "ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities",
+                  "unit": "TWD"
+                },
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2024-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2024-12-31",
+                    "factor": 0.031153094918905878,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 956006500000.0,
+                    "period_end": "2024-12-31",
+                    "period_start": "2024-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD",
+                  "original_value": 956006500000.0,
+                  "start": "2024-01-01",
+                  "tag": "ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities",
+                  "unit": "TWD"
+                }
+              ]
+            },
+            "rev_ttm": {
+              "components": [
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2023-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2023-12-29",
+                    "factor": 0.032116437269757735,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 2161735800000.0,
+                    "period_end": "2023-12-31",
+                    "period_start": "2023-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD",
+                  "original_value": 2161735800000.0,
+                  "start": "2023-01-01",
+                  "tag": "ifrs-full:RevenueFromContractsWithCustomers",
+                  "unit": "TWD"
+                },
+                {
+                  "accn": "0001193125-25-083423",
+                  "end": "2024-12-31",
+                  "filed": "2025-04-17",
+                  "fx": {
+                    "direction": "USD/currency",
+                    "effective_quote_date": "2024-12-31",
+                    "factor": 0.031153094918905878,
+                    "lookback_days": null,
+                    "method": "daily_mean",
+                    "original_currency": "TWD",
+                    "original_value": 2894307700000.0,
+                    "period_end": "2024-12-31",
+                    "period_start": "2024-01-01",
+                    "series": "DEXTAUS",
+                    "visible_as_of": "2026-10-08"
+                  },
+                  "original_unit": "TWD",
+                  "original_value": 2894307700000.0,
+                  "start": "2024-01-01",
+                  "tag": "ifrs-full:RevenueFromContractsWithCustomers",
+                  "unit": "TWD"
+                }
+              ]
+            },
+            "shares": {
+              "components": [
+                {
+                  "accn": "0001628280-26-025362",
+                  "end": "2025-12-31",
+                  "filed": "2026-04-16",
+                  "tag": "dei:EntityCommonStockSharesOutstanding",
+                  "unit": "shares"
+                }
+              ],
+              "method": "instant"
+            }
+          },
+          "filed": "2026-10-08",
+          "fiscal_period": "2024-12-31",
+          "form": "20-F",
+          "health_codes": [
+            "annual_basis",
+            "stale_fundamentals"
+          ],
+          "oracle_values": {},
+          "period_end": "2024-12-31",
+          "ticker": "TSM",
+          "values": {
+            "cash": 64886459286.3678,
+            "current_ratio": 2.359942059635386,
+            "data_flags": [
+              "营收序列过期（最新只到 2024-12-31），基本面账不可靠"
+            ],
+            "debt": null,
+            "diluted_shares_weighted": 25929700000.0,
+            "eps_growth": 31.902921456993404,
+            "eps_ttm": 1.3916087500275256,
+            "fcf_conversion": 0.7511960235508169,
+            "fcf_margin": 30.064896002591567,
+            "fcf_margin_change_pp": 16.5502703947814,
+            "fcf_ttm": 27108507297.44128,
+            "fund_unreliable": true,
+            "gross_margin": 56.1223535424378,
+            "gross_margin_change_pp": 1.7627689900609482,
+            "net_debt": null,
+            "net_debt_fcf": null,
+            "ni_ttm": 36087128322.78117,
+            "op_margin_ttm": 45.67769349471723,
+            "rev_accel_pp": null,
+            "rev_growth": 29.8721173985945,
+            "rev_period": "2024-12-31",
+            "rev_q_yoy": null,
+            "rev_ttm": 90166642502.62016,
+            "roe": 27.87989250213187,
+            "shares": 25932524521.0,
+            "shares_date": "2025-12-31"
+          }
+        }
+      ],
+      "ticker": "TSM"
+    }
+  ],
+  "description": "Existing retained A009 real source rows; minimal M5-only input reproductions, not acquisition-time proof. No account or holding data."
+}
