@@ -186,7 +186,7 @@ class NewsTriage:
             return item
         item["flags"] = [f for f in item["flags"] if f != "entity_tagging_failed"]
         with usage_context(purpose="M1:layer2", info_ids=[item["info_id"]]):
-            result = enrich(item, llm=self.llm, embed=None, entities=self.entities, clock=self.clock)
+            result = enrich(item, llm=self.llm, embed=None, entities=self.entities, clock=self.clock, close_read=True)
         self.meta(result).update(layer=2, llm_full=True)
         return result
 

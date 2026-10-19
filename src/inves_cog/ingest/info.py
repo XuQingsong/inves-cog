@@ -152,7 +152,7 @@ def record_extraction_error(result, task, exc):
     result.setdefault("extraction_source", {}).setdefault("errors", {})[task] = detail
 
 
-def enrich(item, *, llm, embed, entities, clock):
+def enrich(item, *, llm, embed, entities, clock, close_read=False):
     result = deepcopy(item)
     prose = extraction_body(item["body"])
     payload = {"headline": item["headline"], "body": prose[:2000]}
@@ -164,18 +164,23 @@ def enrich(item, *, llm, embed, entities, clock):
             re.search(r"(?<!\w)" + re.escape(term.casefold()) + r"(?!\w)", haystack) for term in terms
         ):
             result["entities"].append(entity["entity_id"])
-    try:
-        tags = llm.call("entity_tagging", payload)
-        if not isinstance(tags.get("entities"), list) or not all(isinstance(e, str) for e in tags["entities"]):
-            raise ValueError("Invalid entity extraction shape")
-        allowed = {e["entity_id"] for e in entities}
-        result["entities"] = sorted(
-            set(result["entities"]) | {e for e in tags["entities"] if not allowed or e in allowed}
-        )
-    except Exception as exc:
-        record_extraction_error(result, "entity_tagging", exc)
-        failed = True
-        result["flags"].append("entity_tagging_failed")
+    if close_read:
+        from inves_cog.ingest.news_card import attach_news_card
+
+        attach_news_card(result, llm, entities)
+    else:
+        try:
+            tags = llm.call("entity_tagging", payload)
+            if not isinstance(tags.get("entities"), list) or not all(isinstance(e, str) for e in tags["entities"]):
+                raise ValueError("Invalid entity extraction shape")
+            allowed = {e["entity_id"] for e in entities}
+            result["entities"] = sorted(
+                set(result["entities"]) | {e for e in tags["entities"] if not allowed or e in allowed}
+            )
+        except Exception as exc:
+            record_extraction_error(result, "entity_tagging", exc)
+            failed = True
+            result["flags"].append("entity_tagging_failed")
     if item["kind"] in {"news", "sec_8k"}:
         try:
             fields = llm.call("info_fields_extraction", payload)

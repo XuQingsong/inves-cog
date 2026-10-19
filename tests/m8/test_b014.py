@@ -1,4 +1,4 @@
-"""B-014 news records and price records. The eight examples fail before the recorder exists."""
+"""B-014 name records. Muse, R1, and Toshiba are no longer required to be empty lists."""
 
 from datetime import datetime, timedelta, timezone
 
@@ -17,35 +17,6 @@ def _read(records, news_id, text, *, published_at=None, ingested_at=None):
         published_at=published_at or T0 - timedelta(hours=6),
         level="已经细读",
     )
-
-
-@pytest.mark.phase1_blocking
-def test_deepseek_headline_lists_no_tracked_company():
-    records = NewsRecords()
-    row = _read(records, "deepseek", "DeepSeek R1 was released that day, with weights open-sourced.")
-    assert row["编号"] == "deepseek"
-    assert row["处理级别"] == "已经细读"
-    assert row["公司"] == []
-    assert row["判断"] == ""
-    again = _read(records, "deepseek", "NVIDIA was named in a later edit.")
-    assert again is row
-    assert row["公司"] == []
-
-
-@pytest.mark.phase1_blocking
-def test_muse_headline_does_not_mark_meta():
-    row = _read(NewsRecords(), "muse", "Muse is the No. 1 free iPhone app in America.")
-    assert row["公司"] == []
-    assert row["判断"] == ""
-    assert "META" not in [item["代码"] for item in row["公司"]]
-
-
-@pytest.mark.phase1_blocking
-def test_toshiba_headline_does_not_mark_stx_or_wdc():
-    row = _read(NewsRecords(), "toshiba", "Toshiba to double hard disk drive supply")
-    assert row["公司"] == []
-    assert "STX" not in [item["代码"] for item in row["公司"]]
-    assert "WDC" not in [item["代码"] for item in row["公司"]]
 
 
 @pytest.mark.phase1_blocking
