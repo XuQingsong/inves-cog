@@ -36,6 +36,7 @@ from inves_cog.perception.attribution.lifecycle import transition
 from inves_cog.perception.attribution.links import fill_rule_layers, inspect_links, link_view
 from inves_cog.perception.attribution.magnitude import implied_magnitude
 from inves_cog.perception.attribution.material import material_fields
+from inves_cog.perception.attribution.move_card import daily_text, move_card
 from inves_cog.perception.attribution.operating import operating_verdict
 from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
 from inves_cog.perception.attribution.replay import replay_mode
@@ -62,7 +63,9 @@ _FUNDAMENTAL = {"供给", "需求", "竞争", "客户融资"}
 _STAGE_NAMES = {name for name, _slot in _SLOTS}
 
 
-def attribute_all(anomalies, items, *, as_of, client, store=None, components_by_id=None, stage=None):
+def attribute_all(
+    anomalies, items, *, as_of, client, store=None, components_by_id=None, stage=None, valuation=None, plan=None
+):
     """Retrieve, score, report, and save each anomaly. One failure stays on that row."""
     usable = [item for item in items if item.get("published_at") is not None]
     scores = components_by_id or {}
@@ -79,6 +82,8 @@ def attribute_all(anomalies, items, *, as_of, client, store=None, components_by_
                     store=store,
                     components=scores.get(prepared.get("anomaly_id")),
                     stage=stage,
+                    valuation=valuation,
+                    plan=plan,
                 )
             )
         except Exception as exc:
@@ -236,7 +241,7 @@ def adapt_m7(anomaly):
     return prepared
 
 
-def _one(anomaly, items, *, as_of, client, store, components, stage):
+def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None):
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
     previous, rejected = _stored_report(anomaly, store, as_of) if stage is not None else (None, False)
@@ -250,6 +255,8 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
             raise ValueError("价格轨道不能沿用范围或时点不符的旧报告")
         return _capital_only(anomaly, previous, prior, as_of, store, stage)
     visible = _retrieved(anomaly, items, as_of)
+    if anomaly.get("universe") != "wide" and any(_news_card(item) for item in visible):
+        return _phase1_move(anomaly, visible, client, valuation, plan)
     reused = False
     if stage in {"attribution_candidates", "attribution_tracks"} and anomaly.get("universe") != "wide":
         claimed, candidates, claim_note, model_note, reused = _resume_analysis(anomaly, visible, previous, as_of)
@@ -346,6 +353,63 @@ def _one(anomaly, items, *, as_of, client, store, components, stage):
         "operating_impact_proven": proven,
         "second_hit": conclusion,
         "tracks": tracks,
+    }
+
+
+def _news_card(item):
+    source = item.get("extraction_source")
+    if isinstance(source, dict) and isinstance(source.get("news_card"), dict):
+        return source["news_card"]
+    card = item.get("新闻卡")
+    return card if isinstance(card, dict) else None
+
+
+def _before_move(item, start):
+    published = item.get("published_at")
+    return isinstance(published, datetime) and isinstance(start, datetime) and published < start
+
+
+def _move_view(item):
+    card = _news_card(item) or {}
+    published = item.get("published_at")
+    return {
+        "编号": item.get("info_id"),
+        "发布时间": published.isoformat() if hasattr(published, "isoformat") else published,
+        "钟点清楚": card.get("钟点清楚", True),
+        "标题": item.get("headline"),
+        "说了什么": card.get("说了什么", ""),
+        "名单内": [dict(row) for row in card.get("名单内") or [] if isinstance(row, dict)],
+        "名单外": [dict(row) for row in card.get("名单外") or [] if isinstance(row, dict)],
+        "当时标到": bool(card.get("名单内")),
+    }
+
+
+def _phase1_move(anomaly, visible, client, valuation, plan):
+    """One DeepSeek question for this tracked move, then the daily page. Numbers stay put."""
+    start = anomaly.get("started_at")
+    chosen = [item for item in visible if _news_card(item) and _before_move(item, start)][:40]
+    move = {
+        "股票": _member_names(anomaly),
+        "方向": anomaly.get("direction") or "",
+        "幅度": anomaly.get("幅度") or anomaly.get("magnitude") or "",
+        "日期": str(anomaly.get("trade_date") or "")[:10],
+        "开始": start.isoformat() if hasattr(start, "isoformat") else str(start),
+    }
+    card = move_card(move, [_move_view(item) for item in chosen], client)
+    page = daily_text(
+        moves=[{**move, "解释": card.get("解释") or [], "归类": card.get("归类") or ""}],
+        news_cards=[_news_card(item) for item in chosen],
+        valuation={} if valuation is None else valuation,
+        plan={} if plan is None else plan,
+    )
+    return {
+        "anomaly_id": anomaly.get("anomaly_id"),
+        "status": "ok",
+        "daily_text": page,
+        "move_card": card,
+        "degraded": None,
+        "saved": False,
+        "operating_impact_proven": False,
     }
 
 
