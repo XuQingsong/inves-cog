@@ -83,7 +83,9 @@ def test_macro_leads_and_a_single_name_is_only_counted():
     assert "单一公司" not in text
     assert "还有 2 条标了高，这里不展开" in text
     assert "再看：持仓上影响大的" in text
-    assert "这档没有" in text
+    _, second = text.split("再看：持仓上影响大的", 1)
+    assert "利率上升" in second
+    assert "这档没有" not in second
 
 
 @pytest.mark.phase1_blocking
@@ -133,17 +135,17 @@ def test_one_medium_name_is_not_counted():
 
 
 @pytest.mark.phase1_blocking
-def test_macro_position_move_is_shown_once_in_the_first_tier():
+def test_macro_position_move_stays_in_both_tiers():
     text = _page(
         [_item(_card("news:rates2", "利率上升", "宏观 利率", [_company("META")]))],
         _positions({"META": 10}),
         [_move("META")],
     )
-    assert text.count("利率上升") == 1
+    assert text.count("利率上升") == 2
     first, second = text.split("再看：持仓上影响大的", 1)
     assert "利率上升" in first
     assert "含持仓" in first
     assert "碰上不寻常波动" in first
-    assert "利率上升" not in second
-    assert "这档没有" in second
+    assert "利率上升 碰上不寻常波动" in second
+    assert "这档没有" not in second
     assert "还有" not in text
