@@ -1,17 +1,3 @@
-test_valuation_synthetic | M5 | 等待 M5 实现
-test_growth_valuation_v11 | M5 | 等待 M5 实现
-test_valuation_ignores_price | M5 | 等待 M5 实现
-test_valuation_monotone_and_stable | M5 | 等待 M5 实现
-test_trading_without_valuation | M5 | 等待 M5 实现
-test_valuation_schema_revoke | M5 | 等待 M5 实现
-test_valuation_label | M5 | 等待 M5 实现
-test_type_switch_needs_two_periods | M5 | 等待 M5 实现
-test_change_decomposition_sums | M5 | 等待 M5 实现
-test_pending_review_over_25pct | M5 | 等待 M5 实现
-test_implied_growth_no_solution | M5 | 等待 M5 实现
-test_position_panel | M5 | 等待 M5 实现
-test_shadow_rules_no_orders | M5 | 等待 M5 实现
-test_valuation_live_smoke | M5 | 等待 R5
 test_anomaly_live_smoke | M7 | 等待 R5
 test_case_attribution | M8 | 等待 v3 真实录音（需用户授权调用）
 test_overlay_only_tightens | M9 | 等待 M9 实现

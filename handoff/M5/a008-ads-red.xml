@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.105" timestamp="2026-10-17T13:42:32.326031+08:00" hostname="192.168.1.101"><testcase classname="tests.m2.test_fundamentals" name="test_fin_state_pit" time="0.026"><failure message="AssertionError">def test_fin_state_pit():
+        from tests.m2.valuation_share_cases import assert_valuation_share_contract
+    
+&gt;       assert_valuation_share_contract(input_facts)
+
+tests/m2/test_fundamentals.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+input_facts = &lt;function input_facts at 0x108c4efc0&gt;
+
+    def assert_valuation_share_contract(input_facts):
+        from inves_cog.ingest.fundamentals.extractors import extract_state
+        from inves_cog.ingest.fundamentals.valuation_shares import select_weighted_shares
+    
+        day = date(2026, 10, 13)
+        raw = input_facts()
+        before = deepcopy(raw)
+        old = extract_state(raw, ticker="FIXTURE", as_of=day)
+        assert old.values["diluted_shares_weighted"] == 100_000_000
+        proof = old.field_sources["diluted_shares_weighted"]
+        assert proof["period_kind"] == "quarter" and proof["duration_days"] == 91
+        assert proof["start"] == "2026-04-01" and proof["end"] == "2026-06-30"
+        assert proof["unit"] == "shares" and proof["filed"] == "2026-08-01"
+&gt;       assert select_weighted_shares(raw, ticker="TSM", as_of=day)[1]["listed_share_ratio"] == 5
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m2/valuation_share_cases.py:20: AssertionError</failure></testcase></testsuite></testsuites>

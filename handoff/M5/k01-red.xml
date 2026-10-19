@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.092" timestamp="2026-10-16T21:12:32.996440+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_shadow_rules_no_orders" time="0.006"><failure message="assert None == 95">tests/m5/test_valuation.py:225: in test_shadow_rules_no_orders
+    assert actual['v1_score'] == expected
+E   assert None == 95</failure></testcase></testsuite></testsuites>

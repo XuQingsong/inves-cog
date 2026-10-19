@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.090" timestamp="2026-10-17T13:41:47.155295+08:00" hostname="192.168.1.101"><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.015"><failure message="AssertionError">@pytest.mark.phase1_blocking
+    def test_position_panel():
+        from tests.m5.coverage_cases import assert_coverage_contract
+    
+&gt;       assert_coverage_contract()
+
+tests/m5/test_valuation.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/m5/coverage_cases.py:63: in assert_coverage_contract
+    assert_annual_basis_history()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_annual_basis_history():
+        from inves_cog.ingest.fundamentals.state import FinState
+        from inves_cog.valuation_v1.inputs import financial_inputs
+    
+        rows = []
+        for year in range(2018, 2026):
+            rows.append(
+                FinState(
+                    ticker="FOREIGN",
+                    extractor="fixed",
+                    filed=date(year + 1, 3, 1),
+                    period_end=date(year, 12, 31),
+                    form="6-K",
+                    health_codes=["annual_basis"],
+                    values={"rev_ttm": 100, "ni_ttm": 10, "eps_ttm": 1},
+                    field_sources={
+                        "rev_ttm": {
+                            "components": [
+                                {
+                                    "start": f"{year}-01-01",
+                                    "end": f"{year}-12-31",
+                                    "filed": f"{year + 1}-03-01",
+                                    "accn": f"annual-{year}",
+                                }
+                            ]
+                        }
+                    },
+                )
+            )
+        out = financial_inputs(rows[-1], rows, {"ticker": "FOREIGN", "sector": "半导体设备", "foreign": True})
+&gt;       assert len(out["annual_sequence"]) == 8 and out["normal_net_margin"] == 0.1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m5/coverage_cases.py:96: AssertionError</failure></testcase></testsuite></testsuites>

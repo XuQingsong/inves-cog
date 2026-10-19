@@ -377,6 +377,9 @@ class FinancialService:
                     # monthly 6-K must not keep an obsolete annual state newer
                     # than a correctly reconstructed quarterly announcement.
                     current.filed = cutoff
+                    from inves_cog.ingest.fundamentals.valuation_cashflow import attach_valuation_cashflow
+
+                    attach_valuation_cashflow(current, data, as_of=cutoff)
                     self.repo.put_state(current)
                 if current.period_end and (self.as_of - current.period_end).days > 180:
                     current.health_codes.append("stale_fundamentals")

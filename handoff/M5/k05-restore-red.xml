@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.480" timestamp="2026-10-17T12:41:16.882993+08:00" hostname="192.168.1.101"><testcase classname="tests.m5.test_valuation" name="test_valuation_monotone_and_stable" time="0.390"><failure message="KeyError: 'method_refresh'">@pytest.mark.phase1_blocking
+    def test_valuation_monotone_and_stable():
+        from tests.m5.review_cases import assert_daily_candidate_trace
+    
+&gt;       assert_daily_candidate_trace()
+
+tests/m5/test_valuation.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_daily_candidate_trace():
+        from inves_cog.valuation_v1.lifecycle import ValuationBook
+    
+        repo, book = ReviewRepository(peers=True), ValuationBook()
+        first = run(9, repo, book)["ranges"][0]
+        second = run(12, repo, book)["ranges"][0]
+        assert second["inputs"]["eps_ntm"] == first["inputs"]["eps_ntm"] == 6
+        assert second["candidate_inputs"]["eps_ntm"] == 6.06
+        assert second["trigger_audit"]["recomputed"] is False
+        assert second["trigger_audit"]["consensus_event"] is False
+        evidence = second["source_evidence"]["consensus"]
+        assert evidence["captured_at"] is None and evidence["capture_status"] == "unknown_import_time"
+        assert evidence["snapshot_as_of"] == "2026-10-12"
+        assert second["source_evidence"]["financial"]["capture_status"] == "not_provided_by_M2_contract"
+        # Reopening a stored pre-repair result must not retain its obsolete type
+        # simply because no new financial filing arrived on the upgrade day.
+        legacy = ValuationBook()
+        run(9, repo, legacy)
+        legacy.published["AAA"]["method_version"] = "v1.1"
+        legacy.types["AAA"].current = "周期"
+        legacy.types["AAA"].observations = {"2026-06-30": "周期"}
+        upgraded = run(12, repo, legacy)["ranges"][0]
+&gt;       assert upgraded["trigger_audit"]["method_refresh"] is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'method_refresh'
+
+tests/m5/review_cases.py:114: KeyError</failure></testcase></testsuite></testsuites>

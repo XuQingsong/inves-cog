@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="2" time="0.464" timestamp="2026-10-17T12:07:07.330183+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_valuation_monotone_and_stable" time="0.391" /><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.003" /></testsuite></testsuites>

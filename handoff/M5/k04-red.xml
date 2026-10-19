@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.442" timestamp="2026-10-17T12:05:20.140399+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_valuation_monotone_and_stable" time="0.357"><failure message="KeyError: 'candidate_inputs'">tests/m5/test_valuation.py:84: in test_valuation_monotone_and_stable
+    assert_daily_candidate_trace()
+tests/m5/review_cases.py:93: in assert_daily_candidate_trace
+    assert second["candidate_inputs"]["eps_ntm"] == 6.06
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'candidate_inputs'</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.000"><failure message="AssertionError: L2 fallback succeeded; stale failure must disappear">tests/m5/test_valuation.py:224: in test_position_panel
+    assert_pe_reason_recovery()
+tests/m5/review_cases.py:81: in assert_pe_reason_recovery
+    assert not recovered.get("pe_reason"), "L2 fallback succeeded; stale failure must disappear"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: L2 fallback succeeded; stale failure must disappear</failure></testcase></testsuite></testsuites>

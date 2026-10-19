@@ -1,0 +1,63 @@
+{
+  "method_version": "v1.3",
+  "code_hashes": "code-manifest.sha256",
+  "raw_artifacts": "retained locally for independent readonly review; not uploaded",
+  "artifacts": [
+    {
+      "local_file_name": "source-index.json",
+      "sha256": "dc9227240322499c3b0275b06e2f30d0526ca7ba7071fe1ad843eb89b87da858",
+      "bytes": 24377,
+      "public_data": false
+    },
+    {
+      "local_file_name": "denominator-audit.json",
+      "sha256": "deb506597d5f11d3d702110bec4ec90735fb32221a495cabe92dd4c27a1bd800",
+      "bytes": 52624,
+      "public_data": false
+    },
+    {
+      "local_file_name": "old-fields-comparison.json",
+      "sha256": "cc96240429d484f43265e292c393893ffaaa50b9c77097988ccc0ee485ec6497",
+      "bytes": 13425,
+      "public_data": false
+    },
+    {
+      "local_file_name": "manual-checks.json",
+      "sha256": "0eabdf397f3f15c982ce2e85466f1cd8fe922f6a004c17876e999cd5aa458dd3",
+      "bytes": 3387,
+      "public_data": false
+    },
+    {
+      "local_file_name": "history-audit.json",
+      "sha256": "b02671b57fe255bc9eaacae34146f8725d5f116b2ecbf8f044a7170e2aac0266",
+      "bytes": 523,
+      "public_data": false
+    },
+    {
+      "local_file_name": "coverage-summary.json",
+      "sha256": "3f01799c5f8834f084c614b19782cc2b0b2a8ebc3a7d2e3a5558e1bc891bf8d2",
+      "bytes": 96921,
+      "public_data": false
+    },
+    {
+      "local_file_name": "five-day-after.json.gz",
+      "sha256": "96a2abfc242e5d9c95b312d9dca96612d31c8d96420e7bb4221467258edaa4cc",
+      "bytes": 3825610,
+      "public_data": false
+    },
+    {
+      "local_file_name": "rule-a-trading-proof.json",
+      "sha256": "3ba9a08a0a4f7bb630fffc8a55b474568a95a2f62bc0251b8c709e4a6a20a1a5",
+      "bytes": 1500,
+      "public_data": false
+    },
+    {
+      "local_file_name": "old-valued-invariance.json",
+      "sha256": "4b561435769ba42423f45cdc99f9c8b07724760dc22c4ac43b76c66d0ef7222f",
+      "bytes": 61,
+      "public_data": false
+    }
+  ],
+  "execution": "no external source calls, models, production writes, migrations or deployments",
+  "final_full_sha_and_ci": "PR #17 and ops/status/A.md identify the exact final head; code hashes here are invariant across evidence-only commits"
+}

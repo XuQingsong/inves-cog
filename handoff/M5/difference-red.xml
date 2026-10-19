@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.465" timestamp="2026-10-16T22:13:11.861791+08:00" hostname="test-runner"><testcase classname="tests.m5.test_valuation" name="test_position_panel" time="0.386"><failure message="KeyError: 'actual_buy_count'">tests/m5/test_valuation.py:219: in test_position_panel
+    assert_service()
+tests/m5/inputs_cases.py:119: in assert_service
+    assert shadows['BBB']['actual_buy_count']==2 and '2笔' in shadows['BBB']['difference']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'actual_buy_count'</failure></testcase></testsuite></testsuites>
