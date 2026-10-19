@@ -7,11 +7,14 @@ import yaml
 ROOT = Path(__file__).resolve().parents[3]
 _TRACKED = None
 QUESTION = (
-    "这条新闻说了什么？会影响美股哪些行业？名单里哪些公司受影响："
-    "每家写利好、利空或不确定，一句理由，以及和新闻的关系"
-    "（新闻点了名 / 是它的产品 / 它的供应商或客户 / 它的竞争对手 / 同行业）。"
-    "对每家的重要程度是高、中还是低？名单外明显受影响的公司也写上，单独列出。"
-    "没有受影响的公司就让两个名单都空着。"
+    "回答就用这些栏：说了什么、行业、名单内、名单外。"
+    "说了什么写这条新闻说了什么。"
+    "行业用文字；要写影响和理由时，写在行业名后面。"
+    "名单内和名单外的公司用代码、名称、方向、理由、关系、重要程度。"
+    "方向写利好、利空或不确定。"
+    "关系写新闻点了名、是它的产品、它的供应商或客户、它的竞争对手或同行业。"
+    "重要程度写高、中或低。"
+    "没有受影响的公司就让名单内和名单外都空着。"
 )
 
 
@@ -82,16 +85,16 @@ def _on_list(company, index):
 
 _TEXT = (
     ("说了什么", ("summary", "新闻摘要"), ""),
-    ("行业", ("industries", "受影响美股行业"), []),
+    ("行业", ("industries", "受影响美股行业", "affected_industries"), []),
 )
 _LISTS = (
-    ("名单内", ("companies_affected", "跟踪名单内受影响公司")),
-    ("名单外", ("companies_outside_list", "名单外明显受影响公司")),
+    ("名单内", ("companies_affected", "跟踪名单内受影响公司", "tracked_companies")),
+    ("名单外", ("companies_outside_list", "名单外明显受影响公司", "outside_companies")),
 )
 _COMPANY = (
     ("代码", ("code",)),
     ("名称", ("name",)),
-    ("方向", ("direction", "影响")),
+    ("方向", ("direction", "影响", "impact")),
     ("理由", ("reason",)),
     ("关系", ("relation", "与新闻关系")),
     ("重要程度", ("importance",)),
@@ -129,12 +132,19 @@ def _company(raw):
     return company
 
 
+def _industry_name(item):
+    for key in ("行业名", "行业"):
+        name = item.get(key)
+        if isinstance(name, str) and name:
+            return name
+    return ""
+
+
 def _industry_line(item):
     """A text industry stays. An object keeps its name, then the effect and reason."""
     if not isinstance(item, dict):
         return None
-    parts = [item.get("行业名")]
-    parts.extend(item.get(key) for key in ("影响", "理由"))
+    parts = [_industry_name(item), item.get("影响"), item.get("理由")]
     words = [part for part in parts if isinstance(part, str) and part]
     return " ".join(words) or None
 
