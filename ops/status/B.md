@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-015  已收到  2026-10-19 10:00 北京
+
+- 任务：新闻卡、波动卡、每天那一页。继续在 PR #21 的分支 `cursor/m8-b009-links-e013` 上提交，先把 `origin/main` 合进来。不新开 PR。
+- B-014 不验收。删掉或改掉「Muse / R1 / 东芝必须是空名单」的 blocking 测试。不得删除模型答出的公司。
+- 新闻卡只替换已经会细读的那一次。波动卡只在跟踪范围内一次不寻常波动时调一次，不走 `anomaly_candidates`。每天那一页是一段固定顺序的文字，不做网页。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`、估值、交易、规则 A。
+- 下一步：先写失败例子，再做卡片。
+
 ## B-014  已完成  2026-10-19 01:00 北京
 
 - PR #21，head `fb9cfda`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39147297944 。`phase1-blocking` 通过。没有合并。
