@@ -14,9 +14,22 @@ def rotation_names():
     return names
 
 
+_UNIVERSE = {}
+
+
+def _universe_document(root):
+    """Read the pool file once. Callers still get a new name set."""
+    resolved = root.resolve()
+    document = _UNIVERSE.get(resolved)
+    if document is None:
+        document = yaml.safe_load((resolved / "config/universe.yaml").read_text())
+        _UNIVERSE[resolved] = document
+    return document
+
+
 def pool_names(baskets, root=None):
     root = Path(root) if root is not None else Path(__file__).resolve().parents[4]
-    document = yaml.safe_load((root / "config/universe.yaml").read_text())
+    document = _universe_document(root)
     names = {row["ticker"] for row in document["stocks"]}
     names.update(document["etfs"])
     for basket in baskets:
