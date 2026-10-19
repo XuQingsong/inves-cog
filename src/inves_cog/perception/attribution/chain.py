@@ -230,6 +230,7 @@ def run_scheduled(
     valuation=None,
     plan=None,
     news_lookup=None,
+    holdings=None,
 ):
     """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
@@ -241,7 +242,16 @@ def run_scheduled(
         material = _visible_items(items)
         rows = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
         return _scheduled_result(
-            slot, rows, anomalies, material, valuation, plan, recorded=False, when=when, news_lookup=news_lookup
+            slot,
+            rows,
+            anomalies,
+            material,
+            valuation,
+            plan,
+            recorded=False,
+            when=when,
+            news_lookup=news_lookup,
+            holdings=holdings,
         )
     from inves_cog.perception.anomaly.service import run_recorded
 
@@ -279,6 +289,7 @@ def run_scheduled(
         recorded=True,
         when=when,
         news_lookup=news_lookup,
+        holdings=holdings,
     )
     result["job_id"] = row_id
     return result
@@ -302,10 +313,12 @@ def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan):
     )
 
 
-def _scheduled_result(slot, rows, anomalies, items, valuation, plan, *, recorded, when, news_lookup=None):
+def _scheduled_result(
+    slot, rows, anomalies, items, valuation, plan, *, recorded, when, news_lookup=None, holdings=None
+):
     result = {**slot, "recorded": recorded, "ran": True, "count": len(rows), "rows": rows}
     if slot["task_name"] == "attribution_candidates":
-        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup)
+        result["daily_pages"] = _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup, holdings)
     return result
 
 
@@ -352,7 +365,7 @@ def _news_day(item):
     return published.astimezone(_NEW_YORK).date().isoformat()
 
 
-def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None):
+def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None, holdings=None):
     """One page for the session that just closed. Wide scans stay out of section 1."""
     day = _closed_trade_date(when)
     cards = []
@@ -389,7 +402,13 @@ def _daily_pages(anomalies, items, rows, valuation, plan, when, news_lookup=None
         {
             "trade_date": day,
             "text": daily_text(
-                moves=moves, news_cards=cards, valuation=valuation, plan=plan, trade_date=day, received=heard
+                moves=moves,
+                news_cards=cards,
+                valuation=valuation,
+                plan=plan,
+                trade_date=day,
+                received=heard,
+                holdings=holdings,
             ),
         }
     ]

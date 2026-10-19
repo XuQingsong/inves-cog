@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal, InvalidOperation
 from zoneinfo import ZoneInfo
 
 MOVE_QUESTION = "这些新闻里哪几条可能解释这次波动？每条写编号、一句话说怎么影响、强中弱。都不像就说没有。"
@@ -482,7 +482,7 @@ def _raw_headline(move, index):
     if not numbers:
         return f"{index}. {_unnamed_move(names, word, post, codes)}"
     average = sum(numbers) / Decimal(len(numbers)) * Decimal(100)
-    rounded = average.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    rounded = average.quantize(Decimal("0.1"), rounding=ROUND_HALF_EVEN)
     if rounded == 0:
         return f"{index}. {_flat_move(names, post, _peer_clause(direction), codes)}"
     price = "跌" if average < 0 else "涨"
@@ -635,8 +635,9 @@ def _position_lines(scoped, held, move_names, accounted):
     return lines
 
 
-def _news_sections(cards, moves, plan, trade_date, received):
-    held = _held_names(plan, trade_date)
+def _news_sections(cards, moves, plan, trade_date, received, held=None):
+    if held is None:
+        held = _held_names(plan, trade_date)
     if received is False:
         macro = ["今天一条新闻都没收到"]
         if held:
@@ -659,7 +660,7 @@ def _news_sections(cards, moves, plan, trade_date, received):
     return macro, positions
 
 
-def daily_text(*, moves, news_cards, valuation, plan, trade_date=None, received=None):
+def daily_text(*, moves, news_cards, valuation, plan, trade_date=None, received=None, holdings=None):
     """One page of text. News and moves do not change valuation or the plan."""
     lines = [f"{trade_date} 收盘后"] if trade_date else []
     lines.append("一、昨天不寻常的波动")
@@ -667,13 +668,13 @@ def daily_text(*, moves, news_cards, valuation, plan, trade_date=None, received=
         lines.append("昨天没有不寻常的波动")
     for index, move in enumerate(moves or [], start=1):
         lines.extend(_move_block(move, index))
-    macro, positions = _news_sections(news_cards, moves, plan, trade_date, received)
+    held = _held_names(plan, trade_date) if holdings is None else (list(holdings) or None)
+    macro, positions = _news_sections(news_cards, moves, plan, trade_date, received, held)
     lines.append("二、影响大盘和多个行业的新闻（最多 5 条）")
     lines.extend(macro)
     lines.append("三、你的持仓")
     lines.extend(positions)
     lines.append("四、值多少（美元）")
-    held = _held_names(plan, trade_date)
     lines.extend(_valuation_lines(valuation, trade_date, _relevant_names(held, moves, plan, trade_date)))
     lines.append("五、今天的纸面计划（规则 A，不是真实交易）")
     lines.extend(_plan_lines(plan, trade_date))
