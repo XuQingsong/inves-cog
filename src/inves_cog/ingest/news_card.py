@@ -80,15 +80,21 @@ def _on_list(company, index):
     return False
 
 
-_TEXT = (("说了什么", "summary", ""), ("行业", "industries", []))
-_LISTS = (("名单内", "companies_affected"), ("名单外", "companies_outside_list"))
+_TEXT = (
+    ("说了什么", ("summary", "新闻摘要"), ""),
+    ("行业", ("industries", "受影响美股行业"), []),
+)
+_LISTS = (
+    ("名单内", ("companies_affected", "跟踪名单内受影响公司")),
+    ("名单外", ("companies_outside_list", "名单外明显受影响公司")),
+)
 _COMPANY = (
-    ("代码", "code"),
-    ("名称", "name"),
-    ("方向", "direction"),
-    ("理由", "reason"),
-    ("关系", "relation"),
-    ("重要程度", "importance"),
+    ("代码", ("code",)),
+    ("名称", ("name",)),
+    ("方向", ("direction", "影响")),
+    ("理由", ("reason",)),
+    ("关系", ("relation", "与新闻关系")),
+    ("重要程度", ("importance",)),
 )
 
 
@@ -96,36 +102,67 @@ def _blank(value):
     return value is None or value == "" or value == []
 
 
-def _prefer(source, chinese, english, default):
-    """A filled Chinese field wins. An empty or missing one takes the English field."""
+def _prefer(source, chinese, fallbacks, default):
+    """A filled Chinese field wins, then the English field, then the other name."""
     if chinese in source and not _blank(source.get(chinese)):
         return source.get(chinese)
-    if english in source and not _blank(source.get(english)):
-        return source.get(english)
+    for key in fallbacks:
+        if key in source and not _blank(source.get(key)):
+            return source.get(key)
     if chinese in source:
         return source.get(chinese)
-    if english in source:
-        return source.get(english)
+    for key in fallbacks:
+        if key in source:
+            return source.get(key)
     return default
 
 
 def _company(raw):
     company = dict(raw)
-    for chinese, english in _COMPANY:
-        if _blank(company.get(chinese)) and not _blank(raw.get(english)):
-            company[chinese] = raw.get(english)
+    for chinese, fallbacks in _COMPANY:
+        if not _blank(company.get(chinese)):
+            continue
+        for key in fallbacks:
+            if not _blank(raw.get(key)):
+                company[chinese] = raw.get(key)
+                break
     return company
+
+
+def _industry_line(item):
+    """A text industry stays. An object keeps its name, then the effect and reason."""
+    if not isinstance(item, dict):
+        return None
+    parts = [item.get("行业名")]
+    parts.extend(item.get(key) for key in ("影响", "理由"))
+    words = [part for part in parts if isinstance(part, str) and part]
+    return " ".join(words) or None
+
+
+def _industries(value):
+    if not isinstance(value, list):
+        return value
+    lines = []
+    for item in value:
+        if isinstance(item, str):
+            lines.append(item)
+            continue
+        line = _industry_line(item)
+        if line:
+            lines.append(line)
+    return lines
 
 
 def read_card(reply, catalog=None):
     """Keep every company the model named. Split only into on-list and off-list."""
     if not isinstance(reply, dict):
         raise ValueError("新闻卡回答不是对象")
-    chosen = {chinese: _prefer(reply, chinese, english, default) for chinese, english, default in _TEXT}
-    for chinese, english in _LISTS:
-        chosen[chinese] = _prefer(reply, chinese, english, [])
+    chosen = {chinese: _prefer(reply, chinese, fallbacks, default) for chinese, fallbacks, default in _TEXT}
+    for chinese, fallbacks in _LISTS:
+        chosen[chinese] = _prefer(reply, chinese, fallbacks, [])
     if not isinstance(chosen["名单内"], list) or not isinstance(chosen["名单外"], list):
         raise ValueError("新闻卡名单不是数组")
+    chosen["行业"] = _industries(chosen["行业"])
     if not isinstance(chosen["行业"], list):
         raise ValueError("新闻卡行业不是数组")
     index = _index(tracked_list() if catalog is None else catalog)
