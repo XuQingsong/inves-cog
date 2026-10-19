@@ -80,24 +80,64 @@ def _on_list(company, index):
     return False
 
 
+_TEXT = (("说了什么", "summary", ""), ("行业", "industries", []))
+_LISTS = (("名单内", "companies_affected"), ("名单外", "companies_outside_list"))
+_COMPANY = (
+    ("代码", "code"),
+    ("名称", "name"),
+    ("方向", "direction"),
+    ("理由", "reason"),
+    ("关系", "relation"),
+    ("重要程度", "importance"),
+)
+
+
+def _blank(value):
+    return value is None or value == "" or value == []
+
+
+def _prefer(source, chinese, english, default):
+    """A filled Chinese field wins. An empty or missing one takes the English field."""
+    if chinese in source and not _blank(source.get(chinese)):
+        return source.get(chinese)
+    if english in source and not _blank(source.get(english)):
+        return source.get(english)
+    if chinese in source:
+        return source.get(chinese)
+    if english in source:
+        return source.get(english)
+    return default
+
+
+def _company(raw):
+    company = dict(raw)
+    for chinese, english in _COMPANY:
+        if _blank(company.get(chinese)) and not _blank(raw.get(english)):
+            company[chinese] = raw.get(english)
+    return company
+
+
 def read_card(reply, catalog=None):
     """Keep every company the model named. Split only into on-list and off-list."""
     if not isinstance(reply, dict):
         raise ValueError("新闻卡回答不是对象")
-    inside = reply.get("名单内", [])
-    outside = reply.get("名单外", [])
-    if not isinstance(inside, list) or not isinstance(outside, list):
+    chosen = {chinese: _prefer(reply, chinese, english, default) for chinese, english, default in _TEXT}
+    for chinese, english in _LISTS:
+        chosen[chinese] = _prefer(reply, chinese, english, [])
+    if not isinstance(chosen["名单内"], list) or not isinstance(chosen["名单外"], list):
         raise ValueError("新闻卡名单不是数组")
+    if not isinstance(chosen["行业"], list):
+        raise ValueError("新闻卡行业不是数组")
     index = _index(tracked_list() if catalog is None else catalog)
     kept_in, kept_out = [], []
-    for raw in [*inside, *outside]:
+    for raw in [*chosen["名单内"], *chosen["名单外"]]:
         if not isinstance(raw, dict):
             raise ValueError("新闻卡公司不是对象")
-        company = dict(raw)
+        company = _company(raw)
         (kept_in if _on_list(company, index) else kept_out).append(company)
     return {
-        "说了什么": reply.get("说了什么", ""),
-        "行业": reply.get("行业", []),
+        "说了什么": chosen["说了什么"] if isinstance(chosen["说了什么"], str) else "",
+        "行业": chosen["行业"],
         "名单内": kept_in,
         "名单外": kept_out,
     }
