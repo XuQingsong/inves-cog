@@ -22,6 +22,9 @@ def stable():
 
 @pytest.mark.phase1_blocking
 def test_valuation_synthetic():
+    from tests.m5.tsm_annual_cases import assert_tsm_annual_build
+
+    assert_tsm_annual_build()
     from tests.m5.inputs_cases import assert_inputs
 
     assert_inputs()

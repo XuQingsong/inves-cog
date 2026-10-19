@@ -164,6 +164,9 @@ def test_industry_basis_na():
 
 
 def test_fin_state_pit():
+    from tests.m2.tsm_valuation_cases import assert_tsm_annual_input
+
+    assert_tsm_annual_input()
     from tests.m2.valuation_cashflow_cases import assert_valuation_cashflow_contract
 
     assert_valuation_cashflow_contract()
