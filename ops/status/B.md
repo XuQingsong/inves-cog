@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-023  已收到  2026-10-19 18:20 北京
+
+- 任务：新闻卡问明栏名，并认已经见过的栏。问法写明回答用「说了什么」「行业」「名单内」「名单外」，公司用代码、名称、方向、理由、关系、重要程度。行业用文字，影响和理由写在行业名后面。`affected_industries`、`tracked_companies`、`outside_companies`、`impact` 以及行业对象里的「行业」也进原来的中文栏。
+- 入口是 `enrich(..., close_read=True)`。从最新 `origin/main` 开新分支 `cursor/m8-b023-card-fields-e013`，开新 PR。
+- 标题初筛不写新闻卡。已经有内容的中文栏不用别的名字覆盖。模型没答或答坏了仍写原因。不改每天那一页，不改再查一次，不改波动卡问法。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`，不改估值和交易的计算。
+- 下一步：先写三个失败例子，再改问法和栏名。
+
 ## B-022  已完成  2026-10-19 18:07 北京
 
 - 草稿 PR #28，head `f64cb15`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39234618552 。`phase1-blocking` 305 passed，用时 151.20 秒，nightly 跳过。平台在 CI 绿后把它合并为 `b9a2b6f`。
