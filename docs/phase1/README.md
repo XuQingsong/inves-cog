@@ -160,7 +160,9 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | `graph_seed_draft` | 困难 | `glm-5.3` | M6 |
 | `exposure_draft` | 困难 | `glm-5.3` | M6 |
 | `segment_mapping_draft` | 困难 | `glm-5.3` | M2 |
-| `entity_tagging` | 其他 | `deepseek-v4.1-flash` | M1 |
+| `entity_tagging` | 其他 | `deepseek-v4.1-flash` | M1 标题初筛 |
+| `news_card` | 其他 | `deepseek-v4.1-flash` | M1 细读：这条新闻影响谁 |
+| `move_card` | 其他 | `deepseek-v4.1-flash` | M8 这次波动和哪几条新闻有关 |
 | `info_fields_extraction` | 其他 | `deepseek-v4.1-flash` | M1 |
 | `dedupe_assist` | 其他 | `deepseek-v4.1-flash` | M1 |
 | `claim_extraction` | 其他 | `deepseek-v4.1-flash` | M8 |
@@ -168,6 +170,7 @@ M0 ─┬─ M1 ─┬─ M3 ── M4 ─┬───────────�
 | `summary_oneliner` | 其他 | `deepseek-v4.1-flash` | M10 |
 
 - 困难档超时 900 秒，失败标"待分析"，**不降级**；其他档超时 120 秒，重试 2 次后标"抽取失败"。
+- 第一阶段解释股价波动走 `move_card`（DeepSeek），不调用 `anomaly_candidates`。`anomaly_candidates` 仍留在清单里，已有代码可以留着，这次验收不靠它。用户 2026-10-19：后面非必要不要用 `glm-5.3`。
 - 本仓库代码和配置里不得出现其他模型名（M0 的 FR-M0-10）。
 - 测试里只能用录音回放（按任务名 + 输入哈希索引），不能真调模型。
 - 向量嵌入（DashScope）不是对话 LLM，不在本表里。
