@@ -2,7 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## B-028  已完成  2026-10-19 22:48 北京
+## B-029  已收到  2026-10-19 23:00 北京
+
+- 任务：早上 09:15 自己取数据，写出那一页。新命令 `python -m inves_cog.perception.attribution.morning`。是早上那一页的时刻才取波动、新闻、估值、计划和持仓，只取那一刻已经知道的，交给 `run_scheduled`。页写到 `INVES_COG_PAGE_DIR`，没配就打印。运行照现有方式记一行。`--at` 用来补跑。
+- 入口是这个命令。从最新 `origin/main`（含 PR #34）开新分支 `cursor/m8-b029-morning-job-e013`，开新 PR。
+- 某一类数据没取到，页照写，用已有的「今天没有拿到」。问模型失败，那次波动写「可能的原因：这次没问到，下次运行再试」，运行记录写失败原因，页上不出现报错原文。不传 `news_lookup`。
+- 不改检测、估值、交易的计算，不改新闻摘要和波动的问法。不部署，不加定时任务配置。
+- 本任务不发起真实模型调用，不连真实数据库，不合并。不改 `docs/`、`golden/`、`milestones.txt`。
+- 下一步：先写七个失败例子，再做这个命令。
+
 
 - 草稿 PR #34，head `e371941`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39271858685 。`phase1-blocking` 333 passed，用时 109.21 秒，nightly 跳过。没有合并。
 - 证据：七个例子先失败，再通过。当时页面是「JNJ down」「9 只一起down」，盘后和基本没动没有写出来，没有新闻时持仓仍写「今天没有重要新闻」。本地 `make phase1-test` 333 passed、21 deselected，用时 65.20 秒；`make phase1-cases` 7 passed、1 xfailed。
