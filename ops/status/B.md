@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-015  已完成  2026-10-19 10:27 北京
+
+- PR #21，head `9726387`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39189799997 。`phase1-blocking` 通过。没有合并。
+- 证据：八个例子先因没有新闻卡模块而收集失败，再通过。本地 `make phase1-test` 279 passed、21 deselected；`make phase1-cases` 7 passed、1 xfailed。
+- 已自行决定：一条新闻把超过 8 家标成高或中、且没有高时，展开中的前 3 家，并写其余家数。新闻卡没答上时，卡上写原因，不把整条抽取判成失败，名字匹配仍然留下。
+- 没有发起模型调用，没有连接数据库。没有改 `docs/`、`golden/`、`milestones.txt`、估值、交易、规则 A。Muse / R1 / 东芝必须为空名单的 blocking 测试已删除。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-015  进行中  2026-10-19 10:15 北京
 
 - 草稿 PR #21，head `f9f3796`。已把 `origin/main` 合进 `cursor/m8-b009-links-e013`（`b205018`）。没有新开 PR。
