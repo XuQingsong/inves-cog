@@ -1,5 +1,14 @@
 # A 线回报
 
+## A-010  已完成（加密脱敏数据已交付；停止）  2026-10-19
+- 已推送空历史分支 **[data/a010-five-days](https://github.com/XuQingsong/inves-cog/tree/data/a010-five-days/handoff/A010)**，完整head **c639f5fca3f9f7959057cd2e012a4003a33abb9a**。GitHub API已核对parents=[]、仅一个根提交，8个文件全在handoff/A010/；七个密文与manifest的远端Git对象/字节数和本机逐一一致，密文SHA256全部匹配。不开PR、不合main；本纯数据孤立分支没有CI工作流，未声称CI通过。
+- [manifest.json](https://github.com/XuQingsong/inves-cog/blob/c639f5fca3f9f7959057cd2e012a4003a33abb9a/handoff/A010/manifest.json)含逐文件行数、压缩明文/密文hash与字节、SELECT原文/来源、逐日统计及新闻时间统计。行数：**info-items 44050；anomalies 10；valuation 295；plan 5；bars-daily 14597；marketstate 5869；graph 1085**。七个密文合计31649572字节，单文件均小于90MB。
+- UD-A-05已落实：完整五日计划源SHA先与A009 proof逐日比对相同，再递归移除账户/持仓字段；订单仍为**13/5/2/0/5**。manifest分别记录原源核验与实际脱敏文件hash，没有声称二者相同。估值可估数**49/49/49/50/50**、共295行一致；异常由已合并M7 **550b95794b8ff38108efc455146c6a8091e23bb7** 只读算出，估值/计划按任务指定用A009既有留存回退。
+- **真实限制已明确**：10-09、10-12、10-13的marketstate.daily只有59只池内记录，没有宽扫输入。manifest的anomalies.source.limitations与input_coverage_by_day逐日列明；这三天wide=0只代表未算出宽扫事件，不能证明完整扫描后无异常。未新增采集或补造。
+- 新闻保留原body/flags/extraction_source及时间、去除embedding；共44050条，第2层29934、日期标记57。first_seen最早2026-10-14T16:18:08.256124+08:00、最晚2026-10-19T08:49:42.164410+08:00，原样保留，不能将后见条目冒称当时已采集。公开manifest只含计数/来源/时间/hash，无正文、估值数字或凭据。
+- 全程既有**inves_cog_review**账号、只读事务与SELECT；数据先在仓库之外生成并按指定完整公钥指纹加密后才首次入Git，没有任何明文数据提交。未写业务库、不调模型、不改业务代码/配置/服务或部署；临时加密工具镜像已卸载。HTTPS无本机凭据后，使用既有已验证SSH登录完成推送，未新建账号/密钥。
+- **下一步由需求方解密核对、生成五日每天一页并按任务删除分支。A已完成本次数据交付并停止；删除前不再改数据分支，不领取下一项，不恢复自动接单或项目开发。** 数据交付完成不等于五日整体验证通过。
+
 ## A-010  进行中（用户确认最小脱敏交付）  2026-10-19
 - 用户决策 **UD-A-05**：用户已答复“按脱敏版交付（推荐）”。递归去除plan的账户/持仓字段，保留全部订单；完整源SHA已与A009逐日核验一致，manifest分别记录原源校验和实际脱敏文件校验，不声称二者相同。此冲突关闭，不等待合成持仓例外。
 - 七类只读数据已导出：info-items 44050、anomalies 10、valuation 295、plan 5、bars-daily 14597、marketstate 5869、graph 1085。估值49/49/49/50/50、订单13/5/2/0/5对账一致；未写库或调用模型。
