@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-016  已完成  2026-10-19 12:40 北京
+
+- PR #21，head `3e549a6`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39200189667 。`phase1-blocking` 通过，nightly 跳过。没有合并。
+- 证据：例子先因为 `attribute_all` 不接受 `valuation` 而失败，接上入口之后通过。本地 `make phase1-test` 280 passed、21 deselected；`make phase1-cases` 7 passed、1 xfailed。
+- 跟踪范围内、检索到的新闻已经有新闻卡时，这次运行只调一次 `move_card`，并用 `daily_text` 写出当天的文字，不走 `anomaly_candidates`。波动开始之时或之后的新闻不送进去。注入的 META 仍在，估值和规则 A 计划的数值没改。
+- 已自行决定：只有检索结果里已经有新闻卡、且不是宽宇宙时，才走波动卡。没有新闻卡的条目仍走原来的 `anomaly_candidates`，已有评分和生命周期测试保持不变。
+- 没有发起模型调用，没有连接数据库。没有改 `docs/`、`golden/`、`milestones.txt`，没有改估值和交易的计算。B-015 的新闻卡留下，不重做。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-016  已收到  2026-10-19 12:30 北京
 
 - 任务：把波动卡接到真正处理一次跟踪范围内不寻常波动的运行上。继续在 PR #21 的分支 `cursor/m8-b009-links-e013` 上提交，基线 `9726387`，先合入 `origin/main`。不新开 PR。
