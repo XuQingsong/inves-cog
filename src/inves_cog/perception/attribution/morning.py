@@ -7,6 +7,7 @@ from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from inves_cog.ingest.market import trading_day
 from inves_cog.perception.anomaly.service import run_recorded
 from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
 
@@ -103,7 +104,7 @@ def _is_morning(moment):
     slot = job_slot(moment)
     if slot is None or slot["task_name"] != "attribution_candidates":
         return False
-    return moment.astimezone(_SHANGHAI).weekday() != 5
+    return trading_day(moment.astimezone(_NEW_YORK).date())
 
 
 def _borrow(connection):

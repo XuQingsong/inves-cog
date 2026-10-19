@@ -367,7 +367,6 @@ def test_other_moments_do_nothing_and_winter_writes(tmp_path, monkeypatch):
     for moment in (
         datetime.fromisoformat("2026-10-16T09:14:00+08:00"),
         datetime.fromisoformat("2026-10-16T09:16:00+08:00"),
-        datetime.fromisoformat("2026-10-17T09:15:00+08:00"),
         datetime.fromisoformat("2026-10-16T09:30:00+08:00"),
         datetime.fromisoformat("2026-10-16T12:30:00+08:00"),
     ):

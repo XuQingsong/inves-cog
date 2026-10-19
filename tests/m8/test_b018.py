@@ -147,7 +147,8 @@ def test_morning_page_prints_one_valuation_and_one_plan_order():
     assert "META 估值待复核" in text
     assert "其余 1 只不在这一页" in text
     assert "INTC" not in text
-    assert "META buy_to 约 1,000.00 美元" in text
+    assert "META 约 1,000.00 美元" in text
+    assert "buy_" not in text
     assert "{}" not in text
     assert valuation == before_valuation
     assert plan == before_plan
@@ -197,7 +198,8 @@ def test_quiet_day_still_prints_high_news_valuation_and_plan():
     assert "今天没有拿到持仓" in text
     assert "另有 1 条较重要的新闻没有列出" in text
     assert "META 估值待复核" in text
-    assert "META buy_to 约 1,000.00 美元" in text
+    assert "META 约 1,000.00 美元" in text
+    assert "buy_" not in text
 
 
 @pytest.mark.phase1_blocking

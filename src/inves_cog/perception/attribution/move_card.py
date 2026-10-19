@@ -5,7 +5,12 @@ from datetime import datetime
 from decimal import ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal, InvalidOperation
 from zoneinfo import ZoneInfo
 
-MOVE_QUESTION = "这些新闻里哪几条可能解释这次波动？每条写编号、一句话说怎么影响、强中弱。都不像就说没有。"
+MOVE_QUESTION = (
+    "这些新闻里哪几条可能解释这次波动？"
+    "回答最外层是「解释」，它是一组。"
+    "每条写「编号」、「怎么影响」一句话、「强弱」用强或中或弱、「能解释」用是或否。"
+    '都不像就回 {"解释": "没有"}。'
+)
 UNCLEAR = "同一天，发布钟点不清楚"
 SEEN = "提前看到"
 UNTAGGED = "入库了但没标到"
@@ -112,33 +117,81 @@ def classify(move, cards):
     return NONE
 
 
+def _reply_rows(reply):
+    if not isinstance(reply, dict) or reply.get("没有") is True:
+        return []
+    for key in ("解释", "matches", "answer", "cards", "条目"):
+        if key not in reply:
+            continue
+        raw = reply[key]
+        if raw in (None, "没有"):
+            return []
+        return raw if isinstance(raw, list) else []
+    return []
+
+
+def _cited(entry):
+    for key in ("编号", "news_id"):
+        value = entry.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return None
+
+
+def _sentence(entry):
+    for key in ("怎么影响", "理由", "影响", "relation", "一句话"):
+        value = entry.get(key)
+        if value:
+            return str(value)
+    return ""
+
+
+_STRENGTH = {"strong": "强", "medium": "中", "weak": "弱", "强": "强", "中": "中", "弱": "弱"}
+
+
+def _strength(entry):
+    raw = ""
+    for key in ("强弱", "强中弱", "强度", "strength"):
+        value = entry.get(key)
+        if value not in (None, ""):
+            raw = value
+            break
+    text = str(raw).strip()
+    return _STRENGTH.get(text.casefold(), text)
+
+
+def _explains(entry):
+    if "能解释" not in entry:
+        return True
+    value = entry.get("能解释")
+    if isinstance(value, str):
+        return value.strip() != "否"
+    return value is not False
+
+
 def _explanations(reply, sent, move):
-    if not isinstance(reply, dict):
-        return [], 0
-    raw = reply.get("解释", reply.get("条目"))
-    if raw in (None, "没有") or reply.get("没有") is True:
-        return [], 0
-    if not isinstance(raw, list):
+    raw = _reply_rows(reply)
+    if not raw:
         return [], 0
     by_id = {card.get("编号"): card for card in sent}
     sent_ids = [card.get("编号") for card in sent if isinstance(card.get("编号"), str)]
     start = _parse(move.get("开始"))
     kept, dropped = [], 0
     for entry in raw:
-        if not isinstance(entry, dict):
+        if not isinstance(entry, dict) or not _explains(entry):
             dropped += 1
             continue
-        full = _resolve(entry.get("编号"), sent_ids)
+        full = _resolve(_cited(entry), sent_ids)
         if full is None:
             dropped += 1
             continue
         card = by_id.get(full, {})
-        sentence = entry.get("怎么影响") or entry.get("一句话") or ""
+        sentence = _sentence(entry)
         kept.append(
             {
                 "编号": full,
                 "怎么影响": sentence,
-                "强弱": entry.get("强弱") or entry.get("强中弱") or "",
+                "强弱": _strength(entry),
                 "新闻卡原句": card.get("说了什么", ""),
                 "波动卡原句": sentence,
                 "当时已经知道": _already(card, start),
@@ -152,13 +205,7 @@ def move_card(move, cards, client):
     """Ask once which of the recalled cards might explain this move."""
     sent = list(cards)[:_LIMIT]
     payload = {
-        "波动": {
-            "股票": move.get("股票"),
-            "方向": move.get("方向"),
-            "幅度": move.get("幅度"),
-            "日期": move.get("日期"),
-            "开始": move.get("开始"),
-        },
+        "波动": _asked_fields(move),
         "新闻": [_view(card) for card in sent],
         "问法": MOVE_QUESTION,
     }
@@ -267,6 +314,23 @@ def _valuation_lines(valuation, trade_date, shown):
     return lines or ["今天没有拿到估值"]
 
 
+def _order_action(order):
+    label = order.get("label")
+    if isinstance(label, str) and label.strip():
+        return label.strip()
+    action = str(order.get("action") or "").strip()
+    if not action or any(character.isascii() and character.isalpha() for character in action):
+        return ""
+    return action
+
+
+def _order_amount(order):
+    amount = _cents(order.get("value"))
+    if amount:
+        return amount
+    return _cents(order.get("notional_est"))
+
+
 def _plan_lines(plan, trade_date):
     if not isinstance(plan, list):
         return ["今天没有拿到计划"]
@@ -275,8 +339,8 @@ def _plan_lines(plan, trade_date):
         return ["今天没有计划单"]
     lines = []
     for order in orders:
-        bits = [part for part in (str(order.get("ticker") or ""), str(order.get("action") or "")) if part]
-        amount = _cents(order.get("value"))
+        bits = [part for part in (str(order.get("ticker") or ""), _order_action(order)) if part]
+        amount = _order_amount(order)
         if amount:
             bits.append(f"约 {amount} 美元")
         line = " ".join(bits)
@@ -472,6 +536,47 @@ def _peer_clause(direction):
     return ""
 
 
+def _peer_word(direction):
+    if direction == "down":
+        return "弱于同类"
+    if direction == "up":
+        return "强于同类"
+    return ""
+
+
+def _asked_fields(move):
+    """The question uses the same rise, fall, and peer words as the page line."""
+    fields = {"股票": move.get("股票"), "日期": move.get("日期"), "开始": move.get("开始")}
+    if _legacy_move(move):
+        fields["方向"] = move.get("方向")
+        fields["幅度"] = move.get("幅度")
+        return fields
+    direction = str(move.get("方向") or "")
+    fields["时段"] = "盘后" if (move.get("时段") or "") == "post" else "白天"
+    numbers = _numeric_returns(move)
+    if not numbers:
+        word = {"up": "涨", "down": "跌"}.get(direction, direction if direction in {"涨", "跌"} else "")
+        if word:
+            fields["方向"] = word
+        return fields
+    average = sum(numbers) / Decimal(len(numbers)) * Decimal(100)
+    rounded = average.quantize(Decimal("0.1"), rounding=ROUND_HALF_EVEN)
+    peer = _peer_word(direction)
+    if rounded == 0:
+        fields["方向"] = "基本没动"
+        fields["幅度"] = "0.0%"
+        if peer:
+            fields["和同类比"] = peer
+        return fields
+    price = "跌" if average < 0 else "涨"
+    fields["方向"] = price
+    fields["幅度"] = f"{abs(rounded):.1f}%"
+    opposite = (price == "涨" and direction == "down") or (price == "跌" and direction == "up")
+    if opposite and peer:
+        fields["和同类比"] = peer
+    return fields
+
+
 def _raw_headline(move, index):
     names = _move_names_line(move)
     direction = str(move.get("方向") or "")
@@ -521,12 +626,10 @@ def _reason_lines(move):
         sentence = str(item.get("怎么影响") or item.get("一句话") or "")
         if not sentence:
             continue
-        tail = " ".join(
-            part
-            for part in (str(item.get("强弱") or ""), _source_label(item.get("编号")), _beijing(item.get("发布时间")))
-            if part
-        )
-        kept.append(f"可能的原因：{sentence} {tail}".strip())
+        strength = str(item.get("强弱") or "")
+        spoken = f"{sentence}（{strength}）" if strength else sentence
+        tail = " ".join(part for part in (_source_label(item.get("编号")), _beijing(item.get("发布时间"))) if part)
+        kept.append(f"可能的原因：{spoken} {tail}".strip())
     return kept or ["可能的原因：没找到能解释这次波动的新闻"]
 
 
