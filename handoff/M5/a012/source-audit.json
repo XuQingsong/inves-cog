@@ -1,0 +1,644 @@
+[
+  {
+    "ticker": "PANW",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001327567.json",
+    "retained_companyfacts_sha256": "54c1d684dc95bb4ba0fb8aec95ad872acc8f39aecfae9434e159469bc902342a",
+    "accession": "0001327567-26-000023",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000023/0001327567-26-000023-index.html",
+    "period": "2026-07-31",
+    "filed": "2026-09-10",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001327567-26-000023",
+        "end": "2026-07-31",
+        "filed": "2026-09-10",
+        "start": "2025-08-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          0.4
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "WDC",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000106040.json",
+    "retained_companyfacts_sha256": "a474b793aa6efb8a3f596ef578c016bd894d9519638db0546c8d430584bcbc34",
+    "accession": "0001628280-26-057139",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/106040/000162828026057139/0001628280-26-057139-index.html",
+    "period": "2026-07-03",
+    "filed": "2026-08-14",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001628280-26-057139",
+        "end": "2026-07-03",
+        "filed": "2026-08-14",
+        "start": "2025-06-28",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          24.28
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "STX",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001137789.json",
+    "retained_companyfacts_sha256": "adb2c2e360ceba017bd78bd9b865e6099ed6d8d90543dccf25385cea53a1af1a",
+    "accession": "0001137789-26-000159",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1137789/000113778926000159/0001137789-26-000159-index.html",
+    "period": "2026-07-03",
+    "filed": "2026-08-04",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001137789-26-000159",
+        "end": "2026-07-03",
+        "filed": "2026-08-04",
+        "start": "2025-06-28",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          13.9
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "ARM",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001973239.json",
+    "retained_companyfacts_sha256": "20f8d925e56fa89649d629eb177d7c0c24546c70569b3d83577732008ef3c159",
+    "accession": "0001973239-26-000114",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000114/0001973239-26-000114-index.html",
+    "period": "2026-06-30",
+    "filed": "2026-09-23",
+    "eps_leaf_sources": []
+  },
+  {
+    "ticker": "BE",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001664703.json",
+    "retained_companyfacts_sha256": "7e227221cf9c76ef2286fcb2ac132a755f7ff577bbef06eb032e747087e59859",
+    "accession": "0001628280-26-050325",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1664703/000162828026050325/0001628280-26-050325-index.html",
+    "period": "2026-06-30",
+    "filed": "2026-07-29",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001628280-26-006516",
+        "end": "2025-12-31",
+        "filed": "2026-02-09",
+        "start": "2025-01-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          -0.37
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001628280-26-028021",
+        "end": "2025-03-31",
+        "filed": "2026-04-29",
+        "start": "2025-01-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          -0.1
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001628280-26-050325",
+        "end": "2025-06-30",
+        "filed": "2026-07-29",
+        "origin": "instance_parsed",
+        "start": "2025-04-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": []
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001628280-26-028021",
+        "end": "2026-03-31",
+        "filed": "2026-04-29",
+        "start": "2026-01-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          0.23
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001628280-26-050325",
+        "end": "2026-06-30",
+        "filed": "2026-07-29",
+        "origin": "instance_parsed",
+        "start": "2026-04-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": []
+      }
+    ]
+  },
+  {
+    "ticker": "CRWD",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001535527.json",
+    "retained_companyfacts_sha256": "a4a60529ff04151a04a3ddaacea8ff2af1a2a27fc527635a795391e96884b026",
+    "accession": "0001535527-26-000031",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1535527/000153552726000031/0001535527-26-000031-index.html",
+    "period": "2026-07-31",
+    "filed": "2026-08-27",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001535527-26-000010",
+        "end": "2026-01-31",
+        "filed": "2026-03-05",
+        "split_adjustment": [
+          {
+            "accession": "0001535527-26-000031",
+            "event_date": "2026-06-03",
+            "first_reported": "2026-08-27",
+            "ratio": 4
+          }
+        ],
+        "start": "2025-02-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          -0.65
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001535527-26-000025",
+        "end": "2025-04-30",
+        "filed": "2026-06-04",
+        "split_adjustment": [
+          {
+            "accession": "0001535527-26-000031",
+            "event_date": "2026-06-03",
+            "first_reported": "2026-08-27",
+            "ratio": 4
+          }
+        ],
+        "start": "2025-02-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          -0.42
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001535527-26-000031",
+        "end": "2025-07-31",
+        "filed": "2026-08-27",
+        "start": "2025-05-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          -0.07
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001535527-26-000025",
+        "end": "2026-04-30",
+        "filed": "2026-06-04",
+        "split_adjustment": [
+          {
+            "accession": "0001535527-26-000031",
+            "event_date": "2026-06-03",
+            "first_reported": "2026-08-27",
+            "ratio": 4
+          }
+        ],
+        "start": "2026-02-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          0.11
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001535527-26-000031",
+        "end": "2026-07-31",
+        "filed": "2026-08-27",
+        "start": "2026-05-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          0.01
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "COHR",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000820318.json",
+    "retained_companyfacts_sha256": "a124d39b9d630ef916e5590c6ed00b3a579de4fcb5dca1dbf6db9ec50a7b2be9",
+    "accession": "0000820318-26-000020",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000020/0000820318-26-000020-index.html",
+    "period": "2026-06-30",
+    "filed": "2026-08-14",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0000820318-26-000020",
+        "end": "2026-06-30",
+        "filed": "2026-08-14",
+        "start": "2025-07-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.12
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "MU",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000723125.json",
+    "retained_companyfacts_sha256": "45ab53424f7ac50d954f3915979f9df88e89ee77ddababfdb200cb8a7c42d0cb",
+    "accession": "0000723125-26-000023",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000023/0000723125-26-000023-index.html",
+    "period": "2026-09-03",
+    "filed": "2026-10-09",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0000723125-26-000023",
+        "end": "2026-09-03",
+        "filed": "2026-10-09",
+        "start": "2025-08-29",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          74.33
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "ASML",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000937966.json",
+    "retained_companyfacts_sha256": "dc0bde5c7d61847744ff81b9007fe32c1520f80ce82972e7d35d11b7cb347c8b",
+    "accession": "0001628280-26-011378",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026011378/0001628280-26-011378-index.html",
+    "period": "2025-12-31",
+    "filed": "2026-10-14",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001628280-26-011378",
+        "end": "2024-12-31",
+        "filed": "2026-02-25",
+        "start": "2024-01-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "EUR/shares",
+        "raw_values": [
+          19.24
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001628280-26-011378",
+        "end": "2025-12-31",
+        "filed": "2026-02-25",
+        "start": "2025-01-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "EUR/shares",
+        "raw_values": [
+          24.71
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "LRCX",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000707549.json",
+    "retained_companyfacts_sha256": "a9a4f0f89ba30bf457cef4b334937f7b0567567c9b84fba1b80c72a80097c42f",
+    "accession": "0000707549-26-000037",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/0000707549-26-000037-index.html",
+    "period": "2026-06-28",
+    "filed": "2026-08-07",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0000707549-26-000037",
+        "end": "2026-06-28",
+        "filed": "2026-08-07",
+        "start": "2025-06-30",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          5.76
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "TSM",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001046179.json",
+    "retained_companyfacts_sha256": "158033bce0e0eac5aaee0c9e84bf02bf7565e8e11c3f0dc6629c17f402be123b",
+    "accession": "0001628280-26-025362",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/0001628280-26-025362-index.html",
+    "period": "2024-12-31",
+    "filed": "2026-10-08",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001193125-25-083423",
+        "end": "2023-12-31",
+        "filed": "2025-04-17",
+        "start": "2023-01-01",
+        "tag": "ifrs-full:DilutedEarningsLossPerShare",
+        "unit": "TWD/shares",
+        "raw_values": [
+          32.85
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001193125-25-083423",
+        "end": "2024-12-31",
+        "filed": "2025-04-17",
+        "start": "2024-01-01",
+        "tag": "ifrs-full:DilutedEarningsLossPerShare",
+        "unit": "TWD/shares",
+        "raw_values": [
+          44.67
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "ADBE",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000796343.json",
+    "retained_companyfacts_sha256": "03c895e26d4f90a1a63510b96a6c6fdb5790afbf6745e9497aa1d5dd540ff06c",
+    "accession": "0000796343-26-000156",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000156/0000796343-26-000156-index.html",
+    "period": "2026-08-28",
+    "filed": "2026-09-22",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0000796343-26-000003",
+        "end": "2025-11-28",
+        "filed": "2026-01-15",
+        "start": "2024-11-30",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          16.7
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0000796343-26-000056",
+        "end": "2025-02-28",
+        "filed": "2026-03-25",
+        "start": "2024-11-30",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.14
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0000796343-26-000112",
+        "end": "2025-05-30",
+        "filed": "2026-06-15",
+        "start": "2025-03-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          3.94
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0000796343-26-000156",
+        "end": "2025-08-29",
+        "filed": "2026-09-22",
+        "start": "2025-05-31",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.18
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0000796343-26-000056",
+        "end": "2026-02-27",
+        "filed": "2026-03-25",
+        "start": "2025-11-29",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.6
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0000796343-26-000112",
+        "end": "2026-05-29",
+        "filed": "2026-06-15",
+        "start": "2026-02-28",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.25
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0000796343-26-000156",
+        "end": "2026-08-28",
+        "filed": "2026-09-22",
+        "start": "2026-05-30",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.62
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "NVDA",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045810.json",
+    "retained_companyfacts_sha256": "a7cf2857c67726f1627299e0e7533670272e37349da086efaebeb5b8a6c7970d",
+    "accession": "0001045810-26-000075",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/0001045810-26-000075-index.html",
+    "period": "2026-07-26",
+    "filed": "2026-08-26",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001045810-26-000021",
+        "end": "2026-01-25",
+        "filed": "2026-02-25",
+        "start": "2025-01-27",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.9
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001045810-26-000052",
+        "end": "2025-04-27",
+        "filed": "2026-05-20",
+        "start": "2025-01-27",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          0.76
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001045810-26-000075",
+        "end": "2025-07-27",
+        "filed": "2026-08-26",
+        "start": "2025-04-28",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          1.08
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001045810-26-000052",
+        "end": "2026-04-26",
+        "filed": "2026-05-20",
+        "start": "2026-01-26",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          2.39
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001045810-26-000075",
+        "end": "2026-07-26",
+        "filed": "2026-08-26",
+        "start": "2026-04-27",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          2.46
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "CRM",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001108524.json",
+    "retained_companyfacts_sha256": "0e8167a025effe6e16e826b9d5c666a30c80400fc6c9c5a6aaae04cd95c825ca",
+    "accession": "0001108524-26-000190",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000190/0001108524-26-000190-index.html",
+    "period": "2026-07-31",
+    "filed": "2026-08-27",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001108524-26-000060",
+        "end": "2026-01-31",
+        "filed": "2026-03-02",
+        "start": "2025-02-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          7.8
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001108524-26-000127",
+        "end": "2025-04-30",
+        "filed": "2026-05-28",
+        "start": "2025-02-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          1.59
+        ]
+      },
+      {
+        "coefficient": -1,
+        "accn": "0001108524-26-000190",
+        "end": "2025-07-31",
+        "filed": "2026-08-27",
+        "start": "2025-05-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          1.96
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001108524-26-000127",
+        "end": "2026-04-30",
+        "filed": "2026-05-28",
+        "start": "2026-02-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          2.42
+        ]
+      },
+      {
+        "coefficient": 1,
+        "accn": "0001108524-26-000190",
+        "end": "2026-07-31",
+        "filed": "2026-08-27",
+        "start": "2026-05-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          4.29
+        ]
+      }
+    ]
+  },
+  {
+    "ticker": "SMCI",
+    "companyfacts_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001375365.json",
+    "retained_companyfacts_sha256": "0384fc01da89eb26484de3c7bec39d23755d11742b2fd440c090828a3fc86014",
+    "accession": "0001375365-26-000022",
+    "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1375365/000137536526000022/0001375365-26-000022-index.html",
+    "period": "2026-06-30",
+    "filed": "2026-08-31",
+    "eps_leaf_sources": [
+      {
+        "coefficient": 1,
+        "accn": "0001375365-26-000022",
+        "end": "2026-06-30",
+        "filed": "2026-08-31",
+        "start": "2025-07-01",
+        "tag": "us-gaap:EarningsPerShareDiluted",
+        "unit": "USD/shares",
+        "raw_values": [
+          3.26
+        ]
+      }
+    ]
+  }
+]

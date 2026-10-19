@@ -44,6 +44,15 @@ def growth_value(e, growth, cap, p90=None):
     return {"growth": growth, "eps3": eps3, "exit_pe": pe, "value": eps3 * pe / (1 + c["discount_rate"]) ** 3}
 
 
+def validate_input_sources(data):
+    if data.get("valuation_input_errors"):
+        raise ValueError("; ".join(r["reason"] for r in data["valuation_input_errors"]))
+    if data.get("listed_unit_blockers"):
+        raise ValueError(
+            "上市单位链未核实：" + "; ".join(r["field"] + ": " + r["reason"] for r in data["listed_unit_blockers"])
+        )
+
+
 def calculate(kind, data):
     """Calculate an economic range without accepting or inspecting a current price."""
     cfg = settings()
@@ -73,10 +82,7 @@ def calculate(kind, data):
     if d.get("foreign_annual_only"):
         reasons.append("外国申报人只有年度数据")
     try:
-        if d.get("listed_unit_blockers"):
-            raise ValueError(
-                "上市单位链未核实：" + "; ".join(r["field"] + ": " + r["reason"] for r in d["listed_unit_blockers"])
-            )
+        validate_input_sources(d)
         if kind == "困境":
             raise ValueError("不估值：亏损且无增长")
         if kind == "稳定":
@@ -193,6 +199,7 @@ def calculate(kind, data):
     from inves_cog.valuation_v1.requirements import missing_inputs
 
     out["blocking_inputs"] = missing_inputs(kind, d) if out["status"] != "ok" else []
+    out["blocking_inputs"] += d.get("valuation_input_errors", [])
     if out["blocking_inputs"]:
         out["reason"] += "; 全部阻塞输入：" + ", ".join(r["field"] for r in out["blocking_inputs"])
     return confidence(out, kind, d)

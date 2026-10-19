@@ -1,0 +1,117 @@
+{
+  "baseline": "ad1c71a",
+  "baseline_matches_A009_all_295_ranges": true,
+  "unchanged_35": [
+    "AAPL",
+    "AMAT",
+    "AMD",
+    "AMZN",
+    "ANET",
+    "CAT",
+    "CEG",
+    "CIEN",
+    "COST",
+    "CRWV",
+    "CVX",
+    "DELL",
+    "ETN",
+    "FTNT",
+    "GEV",
+    "GOOGL",
+    "HD",
+    "JNJ",
+    "KLAC",
+    "LITE",
+    "LLY",
+    "MA",
+    "META",
+    "MRVL",
+    "MSFT",
+    "NFLX",
+    "NOW",
+    "ORCL",
+    "PLTR",
+    "QCOM",
+    "TSLA",
+    "V",
+    "VRT",
+    "WMT",
+    "ZS"
+  ],
+  "unchanged_9": [
+    "AVGO",
+    "GE",
+    "INTC",
+    "JPM",
+    "NOK",
+    "SKHY",
+    "SNDK",
+    "UNH",
+    "XOM"
+  ],
+  "days": [
+    {
+      "date": "2026-10-09",
+      "rows": 59,
+      "unaffected_35_equal": true,
+      "unaffected_9_equal": true,
+      "ok": 48,
+      "failed": 0,
+      "changed": [
+        "TSM",
+        "SMCI"
+      ]
+    },
+    {
+      "date": "2026-10-12",
+      "rows": 59,
+      "unaffected_35_equal": true,
+      "unaffected_9_equal": true,
+      "ok": 48,
+      "failed": 0,
+      "changed": [
+        "TSM",
+        "SMCI"
+      ]
+    },
+    {
+      "date": "2026-10-13",
+      "rows": 59,
+      "unaffected_35_equal": true,
+      "unaffected_9_equal": true,
+      "ok": 48,
+      "failed": 0,
+      "changed": [
+        "TSM",
+        "SMCI"
+      ]
+    },
+    {
+      "date": "2026-10-14",
+      "rows": 59,
+      "unaffected_35_equal": true,
+      "unaffected_9_equal": true,
+      "ok": 49,
+      "failed": 0,
+      "changed": [
+        "TSM",
+        "SMCI"
+      ]
+    },
+    {
+      "date": "2026-10-15",
+      "rows": 59,
+      "unaffected_35_equal": true,
+      "unaffected_9_equal": true,
+      "ok": 49,
+      "failed": 0,
+      "changed": [
+        "TSM",
+        "SMCI"
+      ]
+    }
+  ],
+  "before_sha256": "42e883d465aaa5575759f079e88a93ee96252a0fd93cbb1f15fbb57f62c1ebc4",
+  "after_sha256": "16cbc01082aa15b6b64cd13819759a9e27e27e136e37b1c2581caa41fbdbf02d",
+  "raw_data_kept_outside_repository": true
+}

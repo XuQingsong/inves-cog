@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.380" timestamp="2026-10-19T23:12:02.360759+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m5.test_valuation" name="test_valuation_synthetic" time="0.225"><failure message="AssertionError">@pytest.mark.phase1_blocking
+    def test_valuation_synthetic():
+        from tests.m5.a012_cases import assert_a012_historical_split_units
+    
+&gt;       assert_a012_historical_split_units()
+
+tests/m5/test_valuation.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_a012_historical_split_units():
+        row = real_build("NVDA")
+        # Raw M1 close 128.28 on 2024-07-03 is post 10:1 split; the then-visible
+        # 2024-05-29 TTM EPS 17.09 is pre-split. The other raw pair is 2016-11-17.
+        expected = (92.39 / 1.52 + 128.28 / 1.709) / 2
+&gt;       assert row["candidate_inputs"]["own_p50"] == pytest.approx(expected)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m5/a012_cases.py:75: AssertionError</failure></testcase><testcase classname="tests.m5.test_valuation" name="test_type_switch_needs_two_periods" time="0.003"><failure message="AssertionError">@pytest.mark.phase1_blocking
+    def test_type_switch_needs_two_periods():
+        from tests.m5.a012_cases import assert_a012_stale_annual_basis
+    
+&gt;       assert_a012_stale_annual_basis()
+
+tests/m5/test_valuation.py:171: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_a012_stale_annual_basis():
+        row = real_build("TSM")
+        # The 2026-09-24 retained 6-K state explicitly anchors the 2025 annual;
+        # a later-loaded 20-F state falls back to 2024. Never publish it as current.
+&gt;       assert row["status"] == "unvalued"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m5/a012_cases.py:82: AssertionError</failure></testcase></testsuite></testsuites>
