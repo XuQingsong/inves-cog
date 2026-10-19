@@ -42,4 +42,5 @@ def assert_tsm_annual_build():
     assert row["inputs"]["diluted_shares"] == 25930600000 / 5
     assert row["inputs"]["fcf_per_share"] == pytest.approx(32224511368.36515 / (25930600000 / 5))
     assert row["source_evidence"]["financial"]["valuation_annual_basis"]["known_at"] == "2026-04-17"
+    assert row["inputs"]["annual_sequence"][-1]["period_end"] == "2025-12-31"
     assert vars(tsm) == original, "Projection must not modify the Rule A source"

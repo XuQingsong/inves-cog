@@ -86,3 +86,27 @@ def assert_tsm_annual_input():
         assert rejected.field_sources["valuation_annual_basis"]["reason"]
     with pytest.raises(FXGap, match="TWD"):
         attach_valuation_annual(carrier(), data["facts"], filing=data["filing"], fx=FXBook(), as_of=state.filed)
+
+    # Both production write paths use this shared attachment method and loader;
+    # an optional parse failure must not prevent unchanged core rows from saving.
+    from inves_cog.ingest.fundamentals.service import FinancialService
+
+    service = FinancialService.__new__(FinancialService)
+    service.fx, service._budget = FXBook(data["fx"]), lambda: None
+    calls = []
+
+    class Loader:
+        def facts(self, filing):
+            calls.append(filing["accession"])
+            return data["facts"]
+
+    service.instance_loader = Loader()
+    service.attach_valuation_annual(carrier(), [data["filing"]])
+    service.attach_valuation_annual(carrier(), [data["filing"]])
+    assert calls == [data["filing"]["accession"]], "One parse per filing, not one per PIT state"
+    service.fx = FXBook()
+    failed = carrier()
+    old_values = deepcopy(failed.values)
+    service.attach_valuation_annual(failed, [data["filing"]])
+    assert failed.values.pop("valuation_annual_basis") is None and failed.values == old_values
+    assert "FXGap" in failed.field_sources["valuation_annual_basis"]["reason"]
