@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-016  已收到  2026-10-19 12:30 北京
+
+- 任务：把波动卡接到真正处理一次跟踪范围内不寻常波动的运行上。继续在 PR #21 的分支 `cursor/m8-b009-links-e013` 上提交，基线 `9726387`，先合入 `origin/main`。不新开 PR。
+- B-015 的新闻卡留下，不重做，也不改回「正文没写就留空」。
+- 这次运行只调 `move_card`，不走 `anomaly_candidates`。同一次运行用 `daily_text` 写出当天的文字。模型答出的公司不删。估值和规则 A 计划只读，不改数值。
+- 本任务不发起真实模型调用，不连数据库，不部署，不合并。不改 `docs/`、`golden/`、`milestones.txt`，不改估值和交易的计算。
+- 下一步：先写失败例子，再把入口接上。
+
 ## B-015  已完成  2026-10-19 10:27 北京
 
 - PR #21，head `9726387`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39189799997 。`phase1-blocking` 通过。没有合并。
