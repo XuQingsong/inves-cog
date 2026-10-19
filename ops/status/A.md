@@ -1,5 +1,15 @@
 # A 线回报
 
+## A-012  已完成（UD-A-07：TSM独立修复交付，待需求方验收）  2026-10-20
+- 独立正式PR **https://github.com/XuQingsong/inves-cog/pull/39**，「[M2/M5] 提交验收：TSM 估值专用年度输入」，draft=false、未合并。完整head **801c8f26d3c1cb6ec16eabf07cf5f7d1d77eed8b**，本机同SHA、干净。先失败测试9682842→实现2ca280b，历史PE入口补红77080fe→修复801c8f2；保留历史。
+- **准确head CI通过**：PR https://github.com/XuQingsong/inves-cog/actions/runs/39291410007 及push https://github.com/XuQingsong/inves-cog/actions/runs/39291402242 均已核对head_sha与completed/success，不是沿用旧SHA。已继承main **970e751fb87046bf1a8c95091d58736f334b7a99**；PR #36已由需求方验收合并（ops/answers/A-012.md），不再等待其草稿/CI，不重复提交或合并。
+- **用户问题已落实**：TSM原件完整，缺口确在M2→M5年度输入。仅TSM fixed增加估值专用年度JSON与来源，沿用现有实例解析/SEC客户端/FRED PIT日均；2025同申报同年度的OCF−纯PPE、EPS和稀释加权股本对齐，普通股/ADS转换一次。现值和历史PE读取同一可见年度，拒绝便利USD列、混期、分部、未来、错申报和冲突值。
+- 五日（10-09/12/13/14/15）从已验收main的“暂不估”恢复可估，三档 **144.86244 / 204.14827 / 240.76684美元/ADS**；已撤回的旧133.10345不再用。仍为成长类，公式/参数不变，五天三档稳定。中间/收盘0.45035/0.45943/0.45864/0.47476/0.48348；不按现价校准。
+- 对已验收main：**其他58只类型/状态/三档不变**（含SMCI保持已验196.08111）；3556状态原字段、来源、健康及oracle相同，仅追加可选JSON。**11494打分及完整五日计划逐字节相同，13/5/2/0/5单**；规则A旧eps/fcf/shares不动。完整计划/输入仍仓库之外，无账户/持仓或凭据发布。
+- 证据：[handoff/M2/tsm-valuation-inputs/self-test.md](https://github.com/XuQingsong/inves-cog/blob/801c8f26d3c1cb6ec16eabf07cf5f7d1d77eed8b/handoff/M2/tsm-valuation-inputs/self-test.md)，同目录五日CSV、source-proof、old-field-proof、rule-a-trading-proof及先红后绿XML。最终M2/M5及Harness **47 passed / 2 live未选**，未skip。只读复算入口与完整金融包在本机/private/tmp/inves-tsm-inputs/。
+- 变更：仅UD-A-07授权的M2可选JSON及M5投影/历史PE消费；无表结构/迁移、新来源/依赖、模型或生产写入。缺FX给具体原因，不影响旧RuleA行保存。原件Accepted时刻未知，已自行决定沿用A009的申报次日2026-04-17保守可见规则。
+- **下一步：需求方独立验收PR #39，再按用户批准决定合并/部署。A本次开发交付完成并停止，不自验收、不合并部署、不改服务/共享库，不恢复自动接单，不领取下一编号。** docs/golden/milestones只继承main，未自行修改。该修复未部署，不能说生产页面已更新；13只公式适用性待需求方决定仍属A012报告的其他范围。
+
 ## A-012  进行中（TSM独立输入修复已授权）  2026-10-20
 - 用户决策 **UD-A-07**：用户答复“允许独立修复 TSM 估值输入（推荐）”。授权独立PR补TSM估值专用年度输入及M5读取，保持规则A原字段不变；ops/README §5本次最小跨模块例外已明确，不再等待同一许可。
 - 已核实2025原始20-F披露完整。仅用既有留存原件与FRED历史汇率，先失败测试后实现，重算五日TSM并核对旧打分/计划及其他股票不变。新分支phase1/tsm-valuation-annual-inputs基于main 1c54c4e9ba3ffc5d646429e40480e8e8727af246。
