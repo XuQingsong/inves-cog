@@ -28,6 +28,11 @@ jobs:
           base = event.get('pull_request', {}).get('base', {}).get('sha') or event.get('before')
           if not base or set(base) == {'0'}:
               base = 'HEAD^'
+          # pull_request checkout is the merge commit. base.sha can stay at the
+          # commit recorded when the PR opened, so files added on main later
+          # look like this PR changed them. The first parent is that base tip.
+          if event.get('pull_request'):
+              base = subprocess.check_output(['git', 'rev-parse', 'HEAD^1'], text=True).strip()
           names = subprocess.check_output(['git', 'diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD'], text=True)
           Path('.harness').mkdir(exist_ok=True)
           Path('.harness/changed-python.json').write_text(json.dumps([n for n in names.splitlines() if n.endswith('.py')]))

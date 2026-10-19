@@ -45,8 +45,10 @@ def assert_news_triage(root, clock):
         )
 
     def full(row):
+        from inves_cog.ingest.news_card import news_card_payload
+
         payload = {"headline": row["headline"], "body": row["body"]}
-        recording("entity_tagging", payload, {"entities": []})
+        recording("news_card", news_card_payload(row), {"说了什么": "", "行业": [], "名单内": [], "名单外": []})
         recording("info_fields_extraction", payload, {"is_guidance": False, "is_rating_change": False})
 
     def engine(**kwargs):
@@ -179,7 +181,9 @@ def assert_news_triage(root, clock):
     empty["body"] = None
     empty["summary"] = None
     empty["source_root"] = None
-    recording("entity_tagging", {"headline": empty["headline"], "body": ""}, {"entities": []})
+    from inves_cog.ingest.news_card import news_card_payload
+
+    recording("news_card", news_card_payload(empty), {"说了什么": "", "行业": [], "名单内": [], "名单外": []})
     recording("info_fields_extraction", {"headline": empty["headline"], "body": ""}, {"is_guidance": False})
     cached = engine().process([empty])[0]
     before = len(usage)

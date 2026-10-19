@@ -1,0 +1,283 @@
+{
+  "fixture": "synthetic",
+  "closes_ac_m8_06": false,
+  "closes_case": false,
+  "operating_conclusion": "合成生命周期，不是真实经营结论",
+  "event_id": "evt-toshiba-2026-10-02",
+  "anomaly_id": "toshiba-2026-10-02",
+  "lifecycle": "已验证·有影响",
+  "history": [
+    {
+      "at": "2026-10-02T13:30:00Z",
+      "old": null,
+      "new": "已发现",
+      "trigger": "异常",
+      "evidence_ids": []
+    },
+    {
+      "at": "2026-10-02T13:40:00Z",
+      "old": "已发现",
+      "new": "假设中",
+      "trigger": "证据分达到假设",
+      "evidence_ids": [
+        "nikkei-hdd"
+      ]
+    },
+    {
+      "at": "2026-10-02T20:00:00Z",
+      "old": "假设中",
+      "new": "市场确认",
+      "trigger": "四项同时成立",
+      "evidence_ids": [
+        "nikkei-hdd"
+      ]
+    },
+    {
+      "at": "2026-10-02T20:05:00Z",
+      "old": "市场确认",
+      "new": "基本面核查中",
+      "trigger": "供给机制进入核查",
+      "evidence_ids": [
+        "nikkei-hdd"
+      ]
+    },
+    {
+      "at": "2026-10-20T13:30:00Z",
+      "old": "基本面核查中",
+      "new": "已验证·有影响",
+      "trigger": "截止日证据支持",
+      "evidence_ids": [
+        "synthetic-8k-guidance"
+      ]
+    }
+  ],
+  "report": {
+    "anomaly_id": "toshiba-2026-10-02",
+    "status": "已验证·有影响",
+    "impact": {
+      "event": -0.0225,
+      "amplification": -0.006875000000000001,
+      "unexplained": -0.020625000000000004
+    },
+    "candidates": [
+      {
+        "mechanism": "供给",
+        "info_ids": [
+          "nikkei-hdd"
+        ],
+        "affected": [
+          {
+            "ticker": "WDC"
+          }
+        ],
+        "chain": [
+          {
+            "entity_id": "toshiba"
+          }
+        ],
+        "control_baskets": [],
+        "direction": null,
+        "scored": true,
+        "score": 0.765,
+        "confidence": null,
+        "fundamental": null,
+        "evidence": {
+          "total": 0.765,
+          "confidence": "高",
+          "enters_hypothesis": true
+        }
+      },
+      {
+        "mechanism": "无事件/资金面",
+        "info_ids": [],
+        "affected": [],
+        "scored": false
+      }
+    ],
+    "valuation": "不变 / 待基本面轨道",
+    "trading": null,
+    "sources": {
+      "retrieved": [
+        "nikkei-hdd",
+        "tdk-heads"
+      ],
+      "gap": "synthetic fixture, not frozen news"
+    },
+    "unknowns": [
+      "投产与良率",
+      "产品代际",
+      "需求吸收",
+      "订单相对可交付",
+      "价格传导"
+    ],
+    "scope": [
+      {
+        "ticker": "WDC",
+        "direction": "down",
+        "mechanism": "供给",
+        "exposure": "纯共振",
+        "reason": "没有观察到的关系",
+        "exit_reason": null
+      }
+    ],
+    "tracking": [
+      {
+        "item": "新增供给占需求增量",
+        "question": "新增供给占需求增量",
+        "metric": "新增供给占需求增量",
+        "source": null,
+        "window": null,
+        "deadline": "2026-10-20",
+        "status": "有数据",
+        "is_evidence": false
+      },
+      {
+        "item": "投产与良率",
+        "question": "投产与良率",
+        "metric": "投产与良率",
+        "source": null,
+        "window": null,
+        "deadline": "2026-10-20",
+        "status": "未知",
+        "is_evidence": false
+      },
+      {
+        "item": "产品代际",
+        "question": "产品代际",
+        "metric": "产品代际",
+        "source": null,
+        "window": null,
+        "deadline": "2026-10-20",
+        "status": "未知",
+        "is_evidence": false
+      },
+      {
+        "item": "需求吸收",
+        "question": "需求吸收",
+        "metric": "需求吸收",
+        "source": null,
+        "window": null,
+        "deadline": "2026-10-20",
+        "status": "未知",
+        "is_evidence": false
+      },
+      {
+        "item": "订单相对可交付",
+        "question": "订单相对可交付",
+        "metric": "订单相对可交付",
+        "source": null,
+        "window": null,
+        "deadline": "2026-10-20",
+        "status": "未知",
+        "is_evidence": false
+      },
+      {
+        "item": "价格传导",
+        "question": "价格传导",
+        "metric": "价格传导",
+        "source": null,
+        "window": null,
+        "deadline": "2026-10-20",
+        "status": "未知",
+        "is_evidence": false
+      }
+    ],
+    "constraint_conclusion": {
+      "label": "约束不清但有上下界",
+      "has_bounds": false,
+      "operating_impact_proven": false,
+      "closes_case": false
+    },
+    "supplement": null,
+    "market_confidence": "高",
+    "fundamental_standing": "支持",
+    "retrieval_gap": null,
+    "magnitude_channels": null,
+    "sentiment_amplification": null,
+    "weak_signal": null,
+    "review_queue": null,
+    "rumor_split": null,
+    "weakest_link": null,
+    "later_report": null,
+    "source_check": null,
+    "denial_response": null,
+    "track_reading": null,
+    "market_fingerprint": null,
+    "explore_quota": null,
+    "discard_review": null,
+    "falsified_rumor": null,
+    "relation_step": null,
+    "primary_signal": null,
+    "research_order": null,
+    "market_consensus": null,
+    "coverage_check": null,
+    "retrace_windows": null,
+    "ntm_move": null,
+    "text_retention": null,
+    "consensus_lookback": null,
+    "revision_breadth": null,
+    "consensus_dispersion": null,
+    "surprise_history": null,
+    "ticker_status": [],
+    "type_candidates": [
+      "事件冲击"
+    ],
+    "lifecycle": "已验证·有影响",
+    "deadline_outcome": "支持",
+    "closing_reason": "截止日证据支持",
+    "operating_impact_proven": true,
+    "fixture": "synthetic",
+    "constraints": [
+      {
+        "item": "新增供给占需求增量",
+        "status": "有数据"
+      },
+      {
+        "item": "投产与良率",
+        "status": "未知"
+      },
+      {
+        "item": "产品代际",
+        "status": "未知"
+      },
+      {
+        "item": "需求吸收",
+        "status": "未知"
+      },
+      {
+        "item": "订单相对可交付",
+        "status": "未知"
+      },
+      {
+        "item": "价格传导",
+        "status": "未知"
+      }
+    ],
+    "second_hit": "确认",
+    "second_hit_info_id": "tdk-heads",
+    "deadline_sessions": 12,
+    "tracks": [
+      {
+        "trade_date": "2026-10-02",
+        "emotion": "初现",
+        "capital": "冲击中",
+        "fundamental": "待验证"
+      },
+      {
+        "trade_date": "2026-10-06",
+        "emotion": "扩散",
+        "capital": "已消化",
+        "fundamental": "局部支持"
+      },
+      {
+        "trade_date": "2026-10-20",
+        "emotion": "稳定",
+        "capital": "已消化",
+        "fundamental": "支持"
+      }
+    ],
+    "n_code": null,
+    "operating_evidence_from_market": false,
+    "operating_evidence_id": "synthetic-8k-guidance"
+  }
+}

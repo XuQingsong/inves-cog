@@ -1,0 +1,13 @@
+m8:
+  search_daily_budget: 200
+  embedding_model: text-embedding-async-v1
+  embedding_dimensions: 1536
+  evidence_weights:
+    time: 20
+    gradient: 20
+    specificity: 15
+    narrative: 15
+    magnitude: 15
+    alternatives: 15
+  income_change_cap: {1: 1.0, 2: 0.25, 3: 0.15, 4: 0.10}
+  counterparty_default_cap: {1: 1.0, 2: 0.15, 3: 0.10, 4: 0.05}

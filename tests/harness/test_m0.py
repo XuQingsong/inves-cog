@@ -317,7 +317,10 @@ def test_llm_models_allowed(tmp_path):
     from tests.harness.tools.checks import scan_models
 
     registry = Registry(ROOT / "config/llm_tasks.yaml")
-    assert len(registry.tasks) == 10
+    assert len(registry.tasks) == 12
+    assert registry.resolve("news_card").model == "deepseek-v4.1-flash"
+    assert registry.resolve("move_card").retries == 2
+    assert registry.resolve("move_card").failure_status == "抽取失败"
     assert registry.resolve("anomaly_candidates").model == "glm-5.3"
     assert registry.resolve("entity_tagging").model == "deepseek-v4.1-flash"
     assert registry.resolve("anomaly_candidates").timeout_seconds == 900
