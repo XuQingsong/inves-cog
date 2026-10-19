@@ -150,6 +150,9 @@ def _industry_line(item):
 
 
 def _industries(value):
+    """One sentence is one industry line. A list keeps its items."""
+    if isinstance(value, str):
+        return [value] if value else []
     if not isinstance(value, list):
         return value
     lines = []
