@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.209" timestamp="2026-10-20T01:04:08.955047+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m5.test_valuation" name="test_valuation_synthetic" time="0.049"><failure message="AssertionError">@pytest.mark.phase1_blocking
+    def test_valuation_synthetic():
+        from tests.m5.tsm_annual_cases import assert_tsm_annual_build
+    
+&gt;       assert_tsm_annual_build()
+
+tests/m5/test_valuation.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def assert_tsm_annual_build():
+        from inves_cog.clock import FrozenClock
+        from inves_cog.ingest.fundamentals.fx import FXBook
+        from inves_cog.ingest.fundamentals.state import StateStore
+        from inves_cog.ingest.fundamentals.valuation_annual import attach_valuation_annual
+        from inves_cog.valuation_v1.service import build
+        from tests.m2.tsm_valuation_cases import carrier, recording
+        from tests.m5.review_cases import ReviewRepository
+    
+        repo = ReviewRepository(peers=True)
+        data, tsm = recording(), carrier()
+        attach_valuation_annual(tsm, data["facts"], filing=data["filing"], fx=FXBook(data["fx"]), as_of=tsm.filed)
+        from inves_cog.valuation_v1.listed_units import historical_eps
+    
+&gt;       assert historical_eps(tsm, "TSM", date(2026, 10, 15)) == pytest.approx(2.1043409144073206 * 5)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/m5/tsm_annual_cases.py:23: AssertionError</failure></testcase></testsuite></testsuites>

@@ -266,6 +266,7 @@ class FinancialService:
                             "predecessor_ciks": [str(int(c)) for c in predecessors] if extractor == "fixed" else [],
                             "as_of": cutoff.isoformat(),
                         }
+                        self.attach_valuation_annual(state, filings)
                         self.repo.put_state(state)
                 current = self.repo.state_asof(ticker, self.as_of, "fixed")
                 if current is None:
@@ -380,6 +381,7 @@ class FinancialService:
                     from inves_cog.ingest.fundamentals.valuation_cashflow import attach_valuation_cashflow
 
                     attach_valuation_cashflow(current, data, as_of=cutoff)
+                    self.attach_valuation_annual(current, filings)
                     self.repo.put_state(current)
                 if current.period_end and (self.as_of - current.period_end).days > 180:
                     current.health_codes.append("stale_fundamentals")
@@ -435,6 +437,34 @@ class FinancialService:
             "status": "degraded" if any(r["failures"] for r in reports) else "ok",
             "issuers": reports,
         }
+
+    def attach_valuation_annual(self, state, filings):
+        from inves_cog.ingest.fundamentals.valuation_annual import attach_valuation_annual
+
+        if state.ticker != "TSM" or state.extractor != "fixed" or self.instance_loader is None:
+            return
+        visible = [
+            f for f in filings if str(f["form"]).removesuffix("/A") == "20-F" and day(f["filing_date"]) < state.filed
+        ]
+        filing = max(visible, key=lambda f: (day(f["filing_date"]), f["accession"]), default=None)
+        if not filing:
+            return
+        try:
+            cache = getattr(self, "_valuation_annual_cache", {})
+            if filing["accession"] not in cache:
+                self._budget()
+                cache[filing["accession"]] = self.instance_loader.facts(dict(filing, ticker="TSM"))
+                self._valuation_annual_cache = cache
+            attach_valuation_annual(state, cache[filing["accession"]], filing=filing, fx=self.fx, as_of=state.filed)
+        except Exception as exc:
+            # Optional valuation evidence must not prevent unchanged Rule A rows
+            # from being stored when the annual attachment or its FX is missing.
+            state.values["valuation_annual_basis"] = None
+            state.field_sources["valuation_annual_basis"] = {
+                "reason": type(exc).__name__ + ": " + str(exc),
+                "accession": filing["accession"],
+                "period_end": str(filing.get("report_date")),
+            }
 
     def merge_d9(self, parsed, extra):
         from inves_cog.ingest.fundamentals.repairs import merge_facts

@@ -1,0 +1,27 @@
+{
+  "original_sec_url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm",
+  "original_sha256": "9f21d7cebbdf16bb2dcf40cb1bc19f0fedb383167a900f020c5545ac5489de67",
+  "filed": "2026-04-16",
+  "known_at": "2026-04-17",
+  "period": [
+    "2025-01-01",
+    "2025-12-31"
+  ],
+  "original_currency": "TWD",
+  "fx": "Existing FRED DEXTAUS, period daily USD/TWD mean; PIT realtime_start <= 2026-04-17",
+  "ads_ratio": 5,
+  "ordinary_eps": 65.47,
+  "ordinary_weighted_shares": 25930600000,
+  "raw_ocf": 2274975600000,
+  "raw_pure_ppe": 1272410500000,
+  "raw_fcf": 1002565100000,
+  "usd_fcf": 32224511368.36515,
+  "usd_eps_ordinary": 2.1043409144073206,
+  "usd_eps_ads": 10.521704572036603,
+  "weighted_ads": 5186120000,
+  "annual_state_json": "fundamentals.fin_state.values_extra.valuation_annual_basis; no migration; original fields unchanged",
+  "private_rebuild": "/private/tmp/inves-tsm-inputs/replay.py",
+  "private_output_sha256": "435bfe2ee5a20de332d360180035cb4cb8dec91ce241fe682d69e8c5cd37060f",
+  "private_source_sha256": "bb30181e6e0e015ed5510a3c7966f1c25b67fa3ac6ef5354a6a341ad07cd52db",
+  "comparison_base": "main 970e751fb87046bf1a8c95091d58736f334b7a99 (accepted PR36 input repairs included)"
+}

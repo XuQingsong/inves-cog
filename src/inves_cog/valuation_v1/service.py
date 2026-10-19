@@ -7,6 +7,7 @@ from datetime import datetime, time, timezone
 from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import exchange
+from inves_cog.valuation_v1.annual_inputs import valuation_history, valuation_state
 from inves_cog.valuation_v1.calculations import LABEL, calculate, pe_percentiles, settings
 from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs, selected_consensus
 from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
@@ -80,6 +81,7 @@ def candidate_sources(state, rows, as_of, cutoff):
             "period_end": str(state.period_end) if state else None,
             "accession": state.accession if state else None,
             "form": state.form if state else None,
+            "valuation_annual_basis": deepcopy(state.field_sources.get("valuation_annual_basis")) if state else None,
             "captured_at": None,
             "capture_status": "not_provided_by_M2_contract",
             "raw_values": deepcopy(state.values) if state else None,
@@ -87,7 +89,9 @@ def candidate_sources(state, rows, as_of, cutoff):
                 "table": "fundamentals.fin_state",
                 "extractor": "fixed",
                 "ticker": state.ticker if state else None,
-                "filed": str(state.filed) if state else None,
+                "filed": state.field_sources.get("valuation_annual_basis", {}).get("carrier_filed", str(state.filed))
+                if state
+                else None,
             },
             "field_sources_sha256": hashlib.sha256(
                 json.dumps(state.field_sources, default=str, sort_keys=True, ensure_ascii=False).encode()
@@ -128,6 +132,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
         bars = [r for r in source["bars"].get(ticker, []) if r["trade_date"] == as_of]
         price = bars[-1]["close"] if bars else None
         try:
+            state = valuation_state(state, as_of)
             previous = book.published.get(ticker)
             if previous and previous.get("method_version") != settings()["method_version"]:
                 # Rebuild the affected history using only each filing's then-visible
@@ -142,7 +147,9 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                     prior_inputs.update(consensus_inputs(source["consensus"].get(ticker, []), prior.filed))
                     h.observe(prior.period_end, classify(prior_inputs))
                 book.types[ticker] = h
-            inputs = financial_inputs(state, source["states"].get(ticker, []), entity, as_of=cutoff)
+            inputs = financial_inputs(
+                state, valuation_history(state, source["states"].get(ticker, [])), entity, as_of=cutoff
+            )
             errors = annual_basis_errors(state, source["states"].get(ticker, []), ticker, as_of)
             if errors:
                 inputs["valuation_input_errors"] = errors
