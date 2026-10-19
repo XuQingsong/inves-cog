@@ -65,10 +65,13 @@ def _resolve(cited, sent_ids):
 
 
 def _already(card, start):
-    if not _clock_clear(card) or start is None:
+    if start is None:
         return False
-    published = _parse(card.get("发布时间"))
-    return published is not None and published <= start
+    if not _clock_clear(card):
+        published = str(card.get("发布时间") or "")[:10]
+        return bool(published) and published < start.date().isoformat()
+    published_at = _parse(card.get("发布时间"))
+    return published_at is not None and published_at <= start
 
 
 def classify(move, cards):
@@ -79,7 +82,12 @@ def classify(move, cards):
     for card in cards:
         if not _clock_clear(card):
             published = str(card.get("发布时间") or "")[:10]
-            if published and published == day:
+            if published and day and published < day:
+                if card.get("当时标到"):
+                    tagged = True
+                else:
+                    untagged = True
+            elif published and published == day:
                 unclear = True
             continue
         published_at = _parse(card.get("发布时间"))
@@ -181,7 +189,73 @@ def _move_line(move):
     return f"{label} {move.get('方向', '')} {move.get('幅度', '')}".strip()
 
 
-def daily_text(*, moves, news_cards, valuation, plan):
+def _number(value):
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return "" if value is None else str(value)
+
+
+def _scoped(value, trade_date):
+    if not isinstance(value, list) or not value:
+        return None
+    rows = []
+    for row in value:
+        if not isinstance(row, dict):
+            continue
+        row_day = str(row.get("trade_date") or "")[:10]
+        if trade_date and row_day and row_day != trade_date:
+            continue
+        rows.append(row)
+    return rows
+
+
+def _valuation_lines(valuation, trade_date):
+    rows = _scoped(valuation, trade_date)
+    if not rows:
+        return ["估值没有拿到"]
+    lines = []
+    for row in rows:
+        ticker = row.get("ticker") or ""
+        status = row.get("status")
+        if status == "ok":
+            bear = _number(row.get("bear"))
+            neutral = _number(row.get("neutral"))
+            bull = _number(row.get("bull"))
+            lines.append(f"{ticker} {bear} / {neutral} / {bull}")
+        elif status in {"unvalued", "failed"}:
+            payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
+            lines.append(f"{ticker} 不估：{payload.get('reason') or ''}")
+    return lines or ["估值没有拿到"]
+
+
+def _amount(order):
+    for key in ("qty", "fraction", "value"):
+        if order.get(key) is not None:
+            return _number(order[key])
+    return ""
+
+
+def _plan_lines(plan, trade_date):
+    rows = _scoped(plan, trade_date)
+    if not rows:
+        return ["计划没有拿到"]
+    orders = []
+    for row in rows:
+        payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
+        found = payload.get("orders") if isinstance(payload.get("orders"), list) else row.get("orders")
+        if isinstance(found, list):
+            orders.extend(order for order in found if isinstance(order, dict))
+    if not orders:
+        return ["今天没有计划单"]
+    lines = []
+    for order in orders:
+        text = f"{order.get('ticker') or ''} {order.get('action') or ''} {_amount(order)}".strip()
+        if text:
+            lines.append(text)
+    return lines or ["今天没有计划单"]
+
+
+def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
     """One page of text. News and moves do not change valuation or the plan."""
     lines = ["哪些股票或篮子波动不寻常"]
     if not moves:
@@ -199,9 +273,12 @@ def daily_text(*, moves, news_cards, valuation, plan):
     lines.extend(str(move.get("归类", "")) for move in moves)
     lines.append("股价没动但新闻卡标了高")
     for card in news_cards:
+        said = card.get("说了什么") or card.get("标题") or ""
+        if said:
+            lines.append(str(said))
         lines.extend(_fold(card))
     lines.append("估值和纸面计划")
-    lines.append(f"估值 {valuation}")
-    lines.append(f"计划 {plan}")
+    lines.extend(_valuation_lines(valuation, trade_date))
+    lines.extend(_plan_lines(plan, trade_date))
     lines.append("新闻和波动不改估值，不改计划")
     return "\n".join(line for line in lines if line != "")
