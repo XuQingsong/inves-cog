@@ -243,17 +243,15 @@ def test_daily_page_folds_a_wide_medium_list_and_keeps_the_card():
         valuation={"NVDA": "100"},
         plan={"规则": "A"},
     )
-    assert "标了名单里的一大片（62 家）" in text
-    assert "公司00" in text and "公司01" in text and "公司02" in text
-    assert "公司10" not in text and "公司61" not in text
-    assert "其余 59 家" in text
+    assert "CPI 高于预期 影响 62 家" in text
+    assert "公司00" not in text and "公司61" not in text
     assert len(card["名单内"]) == 62
-    assert "入库新闻里没有对得上的" in text
-    assert "新闻和波动不改估值，不改计划" in text
-    assert text.index("NVDA") < text.index("入库新闻里没有对得上的")
-    assert text.index("入库新闻里没有对得上的") < text.index("查过没有消息")
-    assert text.index("查过没有消息") < text.index("标了名单里的一大片（62 家）")
-    assert text.index("标了名单里的一大片（62 家）") < text.index("新闻和波动不改估值，不改计划")
+    assert "没找到能解释这次波动的新闻" in text
+    assert "新闻和波动的解释，不会改变估值和计划。" in text
+    assert text.index("NVDA") < text.index("没找到能解释这次波动的新闻")
+    assert text.index("没找到能解释这次波动的新闻") < text.index("没找到相关新闻")
+    assert text.index("没找到相关新闻") < text.index("CPI 高于预期 影响 62 家")
+    assert text.index("CPI 高于预期 影响 62 家") < text.index("新闻和波动的解释，不会改变估值和计划。")
 
 
 @pytest.mark.phase1_blocking

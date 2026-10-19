@@ -1,6 +1,9 @@
 """Move card and the daily page. This path does not call anomaly candidates."""
 
+import re
 from datetime import datetime
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from zoneinfo import ZoneInfo
 
 MOVE_QUESTION = "这些新闻里哪几条可能解释这次波动？每条写编号、一句话说怎么影响、强中弱。都不像就说没有。"
 UNCLEAR = "同一天，发布钟点不清楚"
@@ -9,6 +12,7 @@ UNTAGGED = "入库了但没标到"
 MISSED = "没采到"
 NONE = "查过没有消息"
 _LIMIT = 40
+_SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
 def _parse(value):
@@ -138,6 +142,7 @@ def _explanations(reply, sent, move):
                 "新闻卡原句": card.get("说了什么", ""),
                 "波动卡原句": sentence,
                 "当时已经知道": _already(card, start),
+                "发布时间": card.get("发布时间") or "",
             }
         )
     return kept, dropped
@@ -166,35 +171,6 @@ def _level(company):
     return company.get("重要程度") or company.get("高中低") or ""
 
 
-def _fold(card):
-    companies = list(card.get("名单内") or [])
-    high = [company for company in companies if _level(company) == "高"]
-    mid = [company for company in companies if _level(company) == "中"]
-    marked = len(high) + len(mid)
-    if marked > 8:
-        lines = [f"标了名单里的一大片（{marked} 家）"]
-        if high:
-            lines.extend(company.get("名称") or company.get("代码") or "" for company in high)
-        else:
-            shown = mid[:3]
-            lines.extend(company.get("名称") or "" for company in shown)
-            lines.append(f"其余 {marked - len(shown)} 家")
-        return lines
-    return [company.get("名称") or company.get("代码") or "" for company in high]
-
-
-def _move_line(move):
-    names = move.get("股票") or move.get("篮子") or []
-    label = "、".join(str(name) for name in names)
-    return f"{label} {move.get('方向', '')} {move.get('幅度', '')}".strip()
-
-
-def _number(value):
-    if isinstance(value, float) and value.is_integer():
-        return str(int(value))
-    return "" if value is None else str(value)
-
-
 def _scoped(value, trade_date):
     if not isinstance(value, list) or not value:
         return None
@@ -209,49 +185,107 @@ def _scoped(value, trade_date):
     return rows
 
 
-def _valuation_lines(valuation, trade_date):
-    rows = _scoped(valuation, trade_date)
-    if not rows:
-        return ["估值没有拿到"]
-    lines = []
-    for row in rows:
-        ticker = row.get("ticker") or ""
-        status = row.get("status")
-        if status == "ok":
-            bear = _number(row.get("bear"))
-            neutral = _number(row.get("neutral"))
-            bull = _number(row.get("bull"))
-            lines.append(f"{ticker} {bear} / {neutral} / {bull}")
-        elif status in {"unvalued", "failed"}:
-            payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
-            lines.append(f"{ticker} 不估：{payload.get('reason') or ''}")
-    return lines or ["估值没有拿到"]
+def _as_decimal(value):
+    if isinstance(value, bool) or value is None or value == "":
+        return None
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return None
 
 
-def _amount(order):
-    for key in ("qty", "fraction", "value"):
-        if order.get(key) is not None:
-            return _number(order[key])
-    return ""
+def _cents(value):
+    number = _as_decimal(value)
+    if number is None:
+        return ""
+    return f"{number.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP):,.2f}"
 
 
-def _plan_lines(plan, trade_date):
-    rows = _scoped(plan, trade_date)
-    if not rows:
-        return ["计划没有拿到"]
+def _row_price(row):
+    price = row.get("price")
+    payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
+    if price is None:
+        price = payload.get("price")
+    return _as_decimal(price)
+
+
+def _value_line(ticker, row):
+    status = row.get("status")
+    if status in {"unvalued", "failed"}:
+        payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
+        reason = str(payload.get("reason") or "")
+        if "金融" in reason:
+            return f"{ticker} 暂不估值：金融类公司，缺所需财务数据"
+        if "亏损" in reason:
+            return f"{ticker} 暂不估值：亏损且没有增长，按规则不估"
+        return f"{ticker} 暂不估值：所需财务数据不全"
+    price = _row_price(row)
+    bear = _as_decimal(row.get("bear"))
+    neutral = _as_decimal(row.get("neutral"))
+    bull = _as_decimal(row.get("bull"))
+    if price is None or bear is None or neutral is None or bull is None:
+        return f"{ticker} 估值待复核"
+    if neutral < price / Decimal(3) or neutral > price * Decimal(3):
+        return f"{ticker} 现价 {_cents(price)}｜估值待复核"
+    return f"{ticker} 现价 {_cents(price)}｜偏低 {_cents(bear)}｜中间 {_cents(neutral)}｜偏高 {_cents(bull)}"
+
+
+def _order_rows(plan, trade_date):
+    if not isinstance(plan, list):
+        return []
     orders = []
-    for row in rows:
+    for row in _scoped(plan, trade_date) or []:
         payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
         found = payload.get("orders") if isinstance(payload.get("orders"), list) else row.get("orders")
         if isinstance(found, list):
             orders.extend(order for order in found if isinstance(order, dict))
+    return orders
+
+
+def _relevant_names(held, moves, plan, trade_date):
+    names = set(held or [])
+    names.update(_move_names(moves))
+    for order in _order_rows(plan, trade_date):
+        ticker = order.get("ticker")
+        if ticker:
+            names.add(ticker)
+    return names
+
+
+def _valuation_lines(valuation, trade_date, shown):
+    if not isinstance(valuation, list) or not valuation:
+        return ["今天没有拿到估值"]
+    by_ticker = {}
+    for row in _scoped(valuation, trade_date) or []:
+        ticker = row.get("ticker")
+        if ticker:
+            by_ticker.setdefault(ticker, row)
+    lines = [_value_line(ticker, by_ticker[ticker]) for ticker in sorted(shown) if ticker in by_ticker]
+    hidden = [ticker for ticker in by_ticker if ticker not in shown]
+    if hidden:
+        lines.append(f"其余 {len(hidden)} 只不在这一页")
+    return lines or ["今天没有拿到估值"]
+
+
+def _plan_lines(plan, trade_date):
+    if not isinstance(plan, list):
+        return ["今天没有拿到计划"]
+    orders = _order_rows(plan, trade_date)
     if not orders:
         return ["今天没有计划单"]
     lines = []
     for order in orders:
-        text = f"{order.get('ticker') or ''} {order.get('action') or ''} {_amount(order)}".strip()
-        if text:
-            lines.append(text)
+        bits = [part for part in (str(order.get("ticker") or ""), str(order.get("action") or "")) if part]
+        amount = _cents(order.get("value"))
+        if amount:
+            bits.append(f"约 {amount} 美元")
+        line = " ".join(bits)
+        qty = _as_decimal(order.get("qty"))
+        if qty is not None:
+            shares = int(qty) if qty == qty.to_integral_value() else _cents(qty)
+            line += f"，{shares} 股"
+        if line:
+            lines.append(line)
     return lines or ["今天没有计划单"]
 
 
@@ -340,12 +374,6 @@ def _move_names(moves):
     return names
 
 
-def _position_hit(card, held):
-    if not held:
-        return []
-    return [code for code in _high_codes(card) if code in held]
-
-
 def _first_shown(scoped):
     """Macro and wide names, at most five. That cap is not a holding count."""
     first = [card for card in scoped if _macro(card) or _wide(card)]
@@ -361,62 +389,159 @@ def _cards_for(scoped, ticker):
     return [card for card in scoped if ticker in _high_codes(card)]
 
 
-def _holding_lines(cards, move_names):
-    """One line for this holding. Other high cards on the same name are counted, not repeated."""
+def _percent_number(raw):
+    match = re.search(r"-?\d+(?:\.\d+)?", str(raw or ""))
+    if match is None:
+        return None
+    return abs(Decimal(match.group()))
+
+
+def _percent_text(number):
+    if number is None:
+        return ""
+    rounded = number.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    text = f"{rounded:.2f}".rstrip("0").rstrip(".")
+    return text
+
+
+def _source_label(identifier):
+    text = str(identifier or "")
+    if text.startswith("sec_8k"):
+        return "SEC 8-K"
+    parts = text.split(":")
+    if len(parts) < 2 or not parts[1]:
+        return ""
+    word = parts[1]
+    if word.isascii() and word.isalpha():
+        return word[:1].upper() + word[1:]
+    return word
+
+
+def _beijing(value):
+    stamp = _parse(value)
+    if stamp is None or stamp.tzinfo is None:
+        return ""
+    local = stamp.astimezone(_SHANGHAI)
+    return f"{local.month}月{local.day}日 {local:%H:%M}"
+
+
+def _move_headline(move, index):
+    names = [str(name) for name in (move.get("股票") or []) if name]
+    direction = str(move.get("方向") or "")
+    number = _percent_text(_percent_number(move.get("幅度")))
+    percent = f" {number}%" if number else ""
+    if len(names) > 1:
+        body = f"{len(names)} 只一起{direction}，平均{direction}{percent}：{'、'.join(names)}"
+    else:
+        body = f"{names[0] if names else ''} {direction}{percent}".strip()
+    return f"{index}. {body}"
+
+
+def _reason_lines(move):
+    explanations = [item for item in move.get("解释") or [] if isinstance(item, dict)]
+    kept = []
+    for item in explanations:
+        sentence = str(item.get("怎么影响") or item.get("一句话") or "")
+        if not sentence:
+            continue
+        tail = " ".join(
+            part
+            for part in (str(item.get("强弱") or ""), _source_label(item.get("编号")), _beijing(item.get("发布时间")))
+            if part
+        )
+        kept.append(f"可能的原因：{sentence} {tail}".strip())
+    return kept or ["可能的原因：没找到能解释这次波动的新闻"]
+
+
+_SEEN_LINES = {
+    "入库了但没标到": "收到了新闻，但没认出和这只股票有关",
+    "没采到": "当时没收到这条新闻，事后才找到",
+    "查过没有消息": "没找到相关新闻",
+    "同一天，发布钟点不清楚": "新闻和波动是同一天，分不清先后",
+}
+
+
+def _seen_line(move):
+    explanations = [item for item in move.get("解释") or [] if isinstance(item, dict)]
+    if any(item.get("当时已经知道") is True for item in explanations):
+        return "波动前已经看到这条新闻"
+    label = str(move.get("归类") or "")
+    if label == "提前看到":
+        return "有相关新闻，但没认出是原因"
+    return _SEEN_LINES.get(label, "")
+
+
+def _later_lines(move):
+    extras = [item for item in move.get("补查") or [] if isinstance(item, dict)]
+    if not extras:
+        return []
+    lines = ["事后找到、当时还没收到的："]
+    for item in extras[:3]:
+        sentence = str(item.get("说了什么") or "")
+        tail = " ".join(part for part in (_source_label(item.get("编号")), _beijing(item.get("发布时间"))) if part)
+        suffix = "（波动开始后才发布）" if item.get("波动后才公开") else ""
+        lines.append(f"{sentence} {tail}".strip() + suffix)
+    extra = len(extras) - 3
+    if extra > 0:
+        lines.append(f"另有 {extra} 条")
+    return lines
+
+
+def _move_block(move, index):
+    lines = [_move_headline(move, index)]
+    lines.extend(_reason_lines(move))
+    seen = _seen_line(move)
+    if seen:
+        lines.append(f"我们当时看到了吗：{seen}")
+    lines.extend(_later_lines(move))
+    return lines
+
+
+def _impact_count(card):
+    high, mid = _marked(card)
+    if high + mid > 8:
+        return high + mid
+    codes = _high_codes(card)
+    return len(codes) if codes else high + mid
+
+
+def _macro_line(card, held):
+    said = str(card.get("说了什么") or card.get("标题") or "")
+    line = f"{said} 影响 {_impact_count(card)} 家".strip()
+    hit = [code for code in _high_codes(card) if held and code in held]
+    if hit:
+        line += "，含你的持仓 " + "、".join(hit)
+    return line
+
+
+def _direction_word(card, ticker):
+    for company in card.get("名单内") or []:
+        if not isinstance(company, dict):
+            continue
+        if (company.get("代码") or company.get("名称")) != ticker:
+            continue
+        word = company.get("方向") or ""
+        if word in {"利好", "利空", "不确定"}:
+            return word
+    return "不确定"
+
+
+def _holding_line(ticker, cards, move_names):
     chosen = min(
         cards,
         key=lambda card: (0 if _hits_move(card, move_names) else 1, str(card.get("编号") or "")),
     )
-    lines = []
     said = str(chosen.get("说了什么") or chosen.get("标题") or "")
-    if _hits_move(chosen, move_names):
-        said = f"{said} 碰上不寻常波动".strip()
-    if said:
-        lines.append(said)
-    lines.extend(_fold(chosen))
+    line = f"{ticker}：{said} {_direction_word(chosen, ticker)}".strip()
     extra = len(cards) - 1
     if extra:
-        lines.append(f"这只还有 {extra} 条")
-    return lines
+        line += f"。另有 {extra} 条"
+    if ticker in set(move_names):
+        line += "（今天也有不寻常波动）"
+    return line
 
 
-def _ranked_lines(cards, held, move_names, tier):
-    lines = []
-    for card in cards:
-        said = str(card.get("说了什么") or card.get("标题") or "")
-        flags = []
-        hit = _position_hit(card, held)
-        if tier == 1 and hit:
-            flags.append("含持仓")
-        if set(hit) & set(move_names):
-            flags.append("碰上不寻常波动")
-        if said:
-            lines.append(f"{said} {' '.join(flags)}".strip())
-        lines.extend(_fold(card))
-    return lines
-
-
-def _morning_news_lines(cards, moves, plan, trade_date):
-    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
-    held = _held_names(plan, trade_date)
-    move_names = _move_names(moves)
-    first = _first_shown(scoped)
-    lines = ["先看：宏观和影响面广的"]
-    lines.extend(_ranked_lines(first, held, move_names, 1) or ["这档没有"])
-    lines.append("再看：持仓上影响大的")
-    accounted = {id(card) for card in first}
-    if held:
-        lines.extend(_holding_section(scoped, held, move_names, accounted))
-    else:
-        lines.append("没有持仓快照")
-    rest = sum(1 for card in scoped if id(card) not in accounted)
-    if rest:
-        lines.append(f"还有 {rest} 条标了高，这里不展开")
-    return lines
-
-
-def _holding_section(scoped, held, move_names, accounted):
-    """Every positive holding, move names first. Unexpanded cards on that name are not counted again."""
+def _position_lines(scoped, held, move_names, accounted):
     lines = []
     quiet = []
     moved = set(move_names)
@@ -426,37 +551,47 @@ def _holding_section(scoped, held, move_names, accounted):
         if not owned:
             quiet.append(ticker)
             continue
-        lines.extend(_holding_lines(owned, move_names))
+        lines.append(_holding_line(ticker, owned, move_names))
         accounted.update(id(card) for card in owned)
     if quiet:
-        lines.append("今天没有标成高的：" + "、".join(sorted(quiet)))
+        lines.append("今天没有重要新闻：" + "、".join(sorted(quiet)))
     return lines
+
+
+def _news_sections(cards, moves, plan, trade_date):
+    scoped = [card for card in cards or [] if isinstance(card, dict) and _in_scope(card)]
+    held = _held_names(plan, trade_date)
+    move_names = _move_names(moves)
+    first = _first_shown(scoped)
+    macro = [_macro_line(card, held) for card in first] or ["今天没有"]
+    accounted = {id(card) for card in first}
+    if held:
+        positions = _position_lines(scoped, held, move_names, accounted)
+    else:
+        positions = ["今天没有拿到持仓"]
+    rest = sum(1 for card in scoped if id(card) not in accounted)
+    if rest:
+        positions.append(f"另有 {rest} 条较重要的新闻没有列出")
+    return macro, positions
 
 
 def daily_text(*, moves, news_cards, valuation, plan, trade_date=None):
     """One page of text. News and moves do not change valuation or the plan."""
-    lines = ["哪些股票或篮子波动不寻常"]
+    lines = [f"{trade_date} 收盘后"] if trade_date else []
+    lines.append("一、昨天不寻常的波动")
     if not moves:
-        lines.append("没有不寻常波动")
-    lines.extend(_move_line(move) for move in moves)
-    lines.append("哪几条新闻可能解释")
-    for move in moves:
-        explanations = move.get("解释") or []
-        if explanations:
-            for item in explanations:
-                lines.append(f"{item.get('编号')} {item.get('怎么影响')} {item.get('强弱')}")
-        else:
-            lines.append("入库新闻里没有对得上的")
-        for extra in move.get("补查") or []:
-            if not isinstance(extra, dict):
-                continue
-            suffix = " 波动后才公开" if extra.get("波动后才公开") else ""
-            lines.append(f"{extra.get('编号')} {extra.get('说了什么')}{suffix}".strip())
-    lines.append("归类")
-    lines.extend(str(move.get("归类", "")) for move in moves)
-    lines.extend(_morning_news_lines(news_cards, moves, plan, trade_date))
-    lines.append("估值和纸面计划")
-    lines.extend(_valuation_lines(valuation, trade_date))
+        lines.append("昨天没有不寻常的波动")
+    for index, move in enumerate(moves or [], start=1):
+        lines.extend(_move_block(move, index))
+    macro, positions = _news_sections(news_cards, moves, plan, trade_date)
+    lines.append("二、影响大盘和多个行业的新闻（最多 5 条）")
+    lines.extend(macro)
+    lines.append("三、你的持仓")
+    lines.extend(positions)
+    lines.append("四、值多少（美元）")
+    held = _held_names(plan, trade_date)
+    lines.extend(_valuation_lines(valuation, trade_date, _relevant_names(held, moves, plan, trade_date)))
+    lines.append("五、今天的纸面计划（规则 A，不是真实交易）")
     lines.extend(_plan_lines(plan, trade_date))
-    lines.append("新闻和波动不改估值，不改计划")
+    lines.append("新闻和波动的解释，不会改变估值和计划。")
     return "\n".join(line for line in lines if line != "")

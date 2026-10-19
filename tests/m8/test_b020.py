@@ -87,8 +87,8 @@ def test_section_four_keeps_high_and_drops_low():
     text = _run([], items)["daily_pages"][0]["text"]
     assert "高的这条" not in text
     assert "低的这条" not in text
-    assert "没有持仓快照" in text
-    assert "还有 1 条标了高，这里不展开" in text
+    assert "今天没有拿到持仓" in text
+    assert "另有 1 条较重要的新闻没有列出" in text
 
 
 @pytest.mark.phase1_blocking
@@ -97,7 +97,7 @@ def test_quiet_closed_session_does_not_print_an_older_high_card():
     result = _run([], [older])
     assert [page["trade_date"] for page in result["daily_pages"]] == ["2026-10-14"]
     text = result["daily_pages"][0]["text"]
-    assert "没有不寻常波动" in text
+    assert "昨天没有不寻常的波动" in text
     assert "十二日的高" not in text
 
 
