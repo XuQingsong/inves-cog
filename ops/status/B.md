@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-017  已完成  2026-10-19 13:33 北京
+
+- PR #21，head `c16a146`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39204825060 。`phase1-blocking` 通过，nightly 跳过。没有合并。
+- 证据：没有新闻卡的例子先因 `claim_extraction` 失败，一条新闻都没有的例子先因没有当天文字失败，再通过。含 META 的例子仍通过。本地 `make phase1-test` 283 passed、21 deselected；`make phase1-cases` 7 passed、1 xfailed。
+- 跟踪范围内、波动开始前有可送新闻时，`attribute_all` 只调一次 `move_card`，不走 `anomaly_candidates`，也不走 `claim_extraction`。一条可送新闻都没有时不调模型，归类是「查过没有消息」，当天文字仍在。注入的 META 仍在，估值和规则 A 计划的数值没改。
+- 已自行决定：没有可送新闻时，仍写出原来的规则报告（这条路径本来也不问模型），并附上当天文字。五日回放，以及直接调用 `score_all` / `score_stage`，仍走规则报告，冻结的五日文件不改。宽扫、只打标签、单独的价格轨道不走波动卡。
+- 没有发起模型调用，没有连接数据库。没有改 `docs/`、`golden/`、`milestones.txt`，没有改估值和交易的计算。B-016 有新闻卡的那一段留下，不重做。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-017  进行中  2026-10-19 13:26 北京
 
 - 草稿 PR #21，head `b202f82`。已把 `origin/main` 合进 `cursor/m8-b009-links-e013`（`2024bba`）。没有新开 PR。
