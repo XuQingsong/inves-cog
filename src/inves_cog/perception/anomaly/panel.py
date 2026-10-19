@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from inves_cog.marketstate.factors import basket_return, orthogonalize
-from inves_cog.marketstate.regression import fit_predict
+from inves_cog.marketstate.regression import fit_columns
 from inves_cog.marketstate.rotation import SECTORS, STYLES
 from inves_cog.marketstate.sic import load_sic, sector_etf
 from inves_cog.perception.anomaly.detect import detect_snapshot
@@ -100,28 +100,10 @@ def rolling_z(series):
 
 
 def model_frame(target, factors):
-    resid = np.full(len(target), np.nan)
-    resid_z = np.full(len(target), np.nan)
-    sigma = np.full(len(target), np.nan)
-    alpha = np.full(len(target), np.nan)
-    beta_m = np.full(len(target), np.nan)
-    for index in range(len(target)):
-        model = fit_predict(target, factors, signal_index=index)
-        if model["resid"] is not None:
-            resid[index] = model["resid"]
-        if model["resid_z"] is not None:
-            resid_z[index] = model["resid_z"]
-        if model["sigma"] is not None:
-            sigma[index] = model["sigma"]
-        if model["alpha"] is not None:
-            alpha[index] = model["alpha"]
-        beta = (model["betas"] or {}).get("m")
-        if beta is not None:
-            beta_m[index] = beta
-    index = target.index
+    resid, resid_z, sigma, alpha, beta_m = fit_columns(target, factors)
     return pd.DataFrame(
         {"resid": resid, "resid_z": resid_z, "sigma": sigma, "alpha": alpha, "beta_m": beta_m},
-        index=index,
+        index=target.index,
     )
 
 

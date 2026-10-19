@@ -598,10 +598,12 @@ def _published_after(item, start):
 
 def _lookup_line(item, after):
     card = _news_card(item) or {}
+    published = item.get("published_at")
     return {
         "编号": item.get("info_id"),
         "说了什么": card.get("说了什么") or item.get("headline") or "",
         "波动后才公开": after,
+        "发布时间": published.isoformat() if isinstance(published, datetime) else "",
     }
 
 

@@ -67,7 +67,7 @@ def test_tracked_move_with_no_news_writes_the_daily_page_without_a_model():
     client = Script()
     result = attribute_all([_anomaly()], [], as_of=START + timedelta(hours=1), client=client)[0]
     assert client.tasks == []
-    assert "查过没有消息" in result["daily_text"]
+    assert "没找到相关新闻" in result["daily_text"]
 
 
 @pytest.mark.phase1_blocking
@@ -93,4 +93,4 @@ def test_tracked_move_keeps_meta_and_does_not_rewrite_numbers():
     assert early["extraction_source"]["news_card"]["名单内"][0]["代码"] == "META"
     assert valuation["META"] == 100
     assert plan["weight"] == 0.05
-    assert "新闻和波动不改估值，不改计划" in result["daily_text"]
+    assert "新闻和波动的解释，不会改变估值和计划。" in result["daily_text"]

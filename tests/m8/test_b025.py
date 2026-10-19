@@ -78,14 +78,11 @@ def test_macro_leads_and_a_single_name_is_only_counted():
     ]
     text = _page(items, _positions({"META": 10}))
     assert text.index("利率上升") < text.index("芯片需求")
-    assert "利率上升 含持仓" in text
+    assert "含你的持仓 META" in text
     assert "持仓利空" not in text
     assert "单一公司" not in text
-    assert "还有 2 条标了高，这里不展开" in text
-    assert "再看：持仓上影响大的" in text
-    _, second = text.split("再看：持仓上影响大的", 1)
-    assert "利率上升" in second
-    assert "这档没有" not in second
+    assert "另有 2 条较重要的新闻没有列出" in text
+    assert "META：利率上升 利好" in text
 
 
 @pytest.mark.phase1_blocking
@@ -95,20 +92,20 @@ def test_a_position_in_a_move_leads_the_second_tier():
         _item(_card("news:trial", "试验数据", "医药", [_company("JNJ")])),
     ]
     text = _page(items, _positions({"JNJ": 10, "UNH": 5}), [_move("JNJ")])
-    assert "先看：宏观和影响面广的\n这档没有" in text
+    assert "二、影响大盘和多个行业的新闻（最多 5 条）\n今天没有" in text
     assert text.index("试验数据") < text.index("分红说明")
-    assert "试验数据 碰上不寻常波动" in text
-    assert "分红说明 碰上不寻常波动" not in text
-    assert "还有" not in text
+    assert "试验数据 利好（今天也有不寻常波动）" in text
+    assert "分红说明 利好" in text
+    assert "分红说明 利好（今天也有不寻常波动）" not in text
 
 
 @pytest.mark.phase1_blocking
 def test_missing_position_snapshot_does_not_use_orders():
     orders = [{"trade_date": "2026-10-14", "payload": {"orders": [{"ticker": "JNJ", "action": "buy", "qty": 1}]}}]
     text = _page([_item(_card("news:trial", "试验数据", "医药", [_company("JNJ")]))], orders, [_move("JNJ")])
-    assert "没有持仓快照" in text
+    assert "今天没有拿到持仓" in text
     assert "试验数据" not in text
-    assert "还有 1 条标了高，这里不展开" in text
+    assert "另有 1 条较重要的新闻没有列出" in text
 
 
 @pytest.mark.phase1_blocking
@@ -121,17 +118,17 @@ def test_the_first_tier_stops_at_five():
     for label in ("一", "二", "三", "四", "五"):
         assert f"宏观{label}" in text
     assert "宏观六" not in text
-    assert "还有 1 条标了高，这里不展开" in text
-    assert "没有持仓快照" in text
+    assert "另有 1 条较重要的新闻没有列出" in text
+    assert "今天没有拿到持仓" in text
 
 
 @pytest.mark.phase1_blocking
 def test_one_medium_name_is_not_counted():
     text = _page([_item(_card("news:mid", "中等一条", "软件", [_company("SNOW", "中")]))])
     assert "中等一条" not in text
-    assert "还有" not in text
-    assert "先看：宏观和影响面广的\n这档没有" in text
-    assert "没有持仓快照" in text
+    assert "另有" not in text
+    assert "二、影响大盘和多个行业的新闻（最多 5 条）\n今天没有" in text
+    assert "今天没有拿到持仓" in text
 
 
 @pytest.mark.phase1_blocking
@@ -142,10 +139,9 @@ def test_macro_position_move_stays_in_both_tiers():
         [_move("META")],
     )
     assert text.count("利率上升") == 2
-    first, second = text.split("再看：持仓上影响大的", 1)
+    first, second = text.split("三、你的持仓", 1)
     assert "利率上升" in first
-    assert "含持仓" in first
-    assert "碰上不寻常波动" in first
-    assert "利率上升 碰上不寻常波动" in second
-    assert "这档没有" not in second
-    assert "还有" not in text
+    assert "含你的持仓 META" in first
+    assert "利率上升" in second
+    assert "（今天也有不寻常波动）" in second
+    assert "另有" not in text

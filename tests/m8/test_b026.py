@@ -65,7 +65,7 @@ def _page(items, positions, moves=None):
 
 
 def _second(text):
-    return text.split("再看：持仓上影响大的", 1)[1]
+    return text.split("三、你的持仓", 1)[1]
 
 
 @pytest.mark.phase1_blocking
@@ -80,8 +80,7 @@ def test_six_holdings_are_all_listed():
     second = _second(text)
     for label in labels:
         assert f"持仓{label}" in second
-    assert "还有" not in text
-    assert "这只还有" not in text
+    assert "另有" not in text
 
 
 @pytest.mark.phase1_blocking
@@ -92,10 +91,9 @@ def test_one_holding_expands_the_earliest_id_and_counts_the_rest():
         _item(_card("news:a1", "试验数据", "医药", "JNJ")),
     ]
     text = _page(items, {"JNJ": 10}, [_move("JNJ")])
-    assert "试验数据 碰上不寻常波动" in text
+    assert "JNJ：试验数据 利好。另有 2 条（今天也有不寻常波动）" in text
     assert "分红说明" not in text
     assert "会议纪要" not in text
-    assert "这只还有 2 条" in text
 
 
 @pytest.mark.phase1_blocking
@@ -105,8 +103,8 @@ def test_holdings_without_a_high_mark_share_one_line():
         {"META": 10, "SNOW": 4},
     )
     assert "软件新闻" in text
-    assert "今天没有标成高的：SNOW" in text
-    assert "还有" not in text
+    assert "今天没有重要新闻：SNOW" in text
+    assert "另有" not in text
 
 
 @pytest.mark.phase1_blocking
@@ -115,7 +113,7 @@ def test_a_holding_stays_in_the_second_tier_after_the_first_tier():
         [_item(_card("news:rates", "利率上升", "宏观 利率", "META"))],
         {"META": 10},
     )
-    first, second = text.split("再看：持仓上影响大的", 1)
-    assert "利率上升 含持仓" in first
+    first, second = text.split("三、你的持仓", 1)
+    assert "含你的持仓 META" in first
     assert "利率上升" in second
-    assert "这档没有" not in second
+    assert "今天没有拿到持仓" not in text

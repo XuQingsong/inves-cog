@@ -17,6 +17,7 @@ def exchange(year):
     return exchange_calendars.get_calendar("XNYS", start=f"{year - 1}-01-01", end=f"{year + 1}-12-31")
 
 
+@lru_cache(maxsize=4096)
 def trading_day(day):
     return exchange(day.year).is_session(str(day))
 
@@ -28,6 +29,7 @@ def next_trading_day(day):
     return candidate
 
 
+@lru_cache(maxsize=4096)
 def regular_bounds(day):
     cal = exchange(day.year)
     if not cal.is_session(str(day)):

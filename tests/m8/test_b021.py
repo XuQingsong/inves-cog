@@ -84,8 +84,8 @@ def test_lookup_before_the_move_is_missed_not_already_seen():
     found = _item("news:found", START - timedelta(hours=3), "库里没有的这条")
     lookup = Lookup([found])
     text = _page(_run([_anomaly()], [], lookup))
-    assert "没采到" in text
-    assert "news:found" in text
+    assert "当时没收到这条新闻，事后才找到" in text
+    assert "news:found" not in text
     assert "提前看到" not in text
     assert text.count("库里没有的这条") == 1
     assert lookup.calls == [("META", WINDOW, MORNING)]
@@ -95,7 +95,7 @@ def test_lookup_before_the_move_is_missed_not_already_seen():
 def test_empty_lookup_stays_no_news():
     lookup = Lookup([])
     text = _page(_run([_anomaly()], [], lookup))
-    assert "查过没有消息" in text
+    assert "没找到相关新闻" in text
     assert "没采到" not in text
     assert lookup.calls == [("META", WINDOW, MORNING)]
 
@@ -105,7 +105,7 @@ def test_six_matched_items_skip_the_lookup():
     items = [_item(f"news:{index}", START - timedelta(hours=index), f"第{index}条") for index in range(1, 7)]
     lookup = Lookup([_item("news:extra", START - timedelta(hours=1), "不该再查")])
     text = _page(_run([_anomaly()], items, lookup))
-    assert "news:1" in text
+    assert "供应变化" in text
     assert "不该再查" not in text
     assert lookup.calls == []
 
@@ -115,9 +115,9 @@ def test_lookup_after_the_move_is_labeled_and_not_already_known():
     later = _item("news:after", START + timedelta(hours=2), "晚公开的这条")
     lookup = Lookup([later])
     text = _page(_run([_anomaly()], [], lookup))
-    assert "波动后才公开" in text
-    assert "news:after" in text
-    assert "查过没有消息" in text
+    assert "（波动开始后才发布）" in text
+    assert "news:after" not in text
+    assert "没找到相关新闻" in text
     assert "提前看到" not in text
     assert "没采到" not in text
     assert text.count("晚公开的这条") == 1

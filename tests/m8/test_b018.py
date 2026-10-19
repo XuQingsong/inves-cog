@@ -135,7 +135,7 @@ def test_one_morning_page_lists_both_tracked_moves():
     text = _page(result)
     assert "META 供应变化" in text
     assert "NVDA 供应变化" in text
-    assert text.count("提前看到") >= 2
+    assert text.count("波动前已经看到这条新闻") >= 2
 
 
 @pytest.mark.phase1_blocking
@@ -144,9 +144,10 @@ def test_morning_page_prints_one_valuation_and_one_plan_order():
     valuation, plan = _valuation(), _plan()
     before_valuation, before_plan = deepcopy(valuation), deepcopy(plan)
     text = _page(_run([_anomaly("meta-up", "META")], [news], valuation=valuation, plan=plan))
-    assert "META 424 / 478 / 531" in text
-    assert "INTC 不估：亏损且无增长" in text
-    assert "META buy_to 0.05" in text
+    assert "META 估值待复核" in text
+    assert "其余 1 只不在这一页" in text
+    assert "INTC" not in text
+    assert "META buy_to 约 1,000.00 美元" in text
     assert "{}" not in text
     assert valuation == before_valuation
     assert plan == before_plan
@@ -155,8 +156,8 @@ def test_morning_page_prints_one_valuation_and_one_plan_order():
 @pytest.mark.phase1_blocking
 def test_morning_page_names_a_missing_valuation_and_plan():
     text = _page(_run([_anomaly("meta-up", "META")], []))
-    assert "估值没有拿到" in text
-    assert "计划没有拿到" in text
+    assert "今天没有拿到估值" in text
+    assert "今天没有拿到计划" in text
     assert "{}" not in text
 
 
@@ -166,7 +167,7 @@ def test_same_day_date_only_news_is_not_already_seen():
     news = _item("news:meta", published, _card("只有日期"), "META", date_only=True)
     result = _run([_anomaly("meta-up", "META")], [news])
     text = _page(result)
-    assert "同一天，发布钟点不清楚" in text
+    assert "新闻和波动是同一天，分不清先后" in text
     assert "提前看到" not in text
     explanation = result["rows"][0]["move_card"]["解释"][0]
     assert explanation["当时已经知道"] is False
@@ -177,7 +178,7 @@ def test_earlier_date_only_news_was_already_known():
     published = datetime(2026, 10, 12, 0, 0, tzinfo=timezone.utc)
     news = _item("news:meta", published, _card("更早只有日期"), "META", date_only=True)
     result = _run([_anomaly("meta-up", "META")], [news])
-    assert "提前看到" in _page(result)
+    assert "波动前已经看到这条新闻" in _page(result)
     explanation = result["rows"][0]["move_card"]["解释"][0]
     assert result["rows"][0]["move_card"]["归类"] == "提前看到"
     assert explanation["当时已经知道"] is True
@@ -191,12 +192,12 @@ def test_quiet_day_still_prints_high_news_valuation_and_plan():
     result = _run([], [news], client, valuation=_valuation(), plan=_plan())
     assert client.tasks == []
     text = _page(result)
-    assert "没有不寻常波动" in text
+    assert "昨天没有不寻常的波动" in text
     assert "这条新闻" not in text
-    assert "没有持仓快照" in text
-    assert "还有 1 条标了高，这里不展开" in text
-    assert "META 424 / 478 / 531" in text
-    assert "META buy_to 0.05" in text
+    assert "今天没有拿到持仓" in text
+    assert "另有 1 条较重要的新闻没有列出" in text
+    assert "META 估值待复核" in text
+    assert "META buy_to 约 1,000.00 美元" in text
 
 
 @pytest.mark.phase1_blocking
@@ -206,7 +207,7 @@ def test_wide_medium_list_folds_without_a_move_card():
     client = Script()
     text = _page(_run([], [news], client))
     assert client.tasks == []
-    assert "标了名单里的一大片（9 家）" in text
+    assert "CPI 影响 9 家" in text
 
 
 @pytest.mark.phase1_blocking

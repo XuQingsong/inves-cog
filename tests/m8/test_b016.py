@@ -82,7 +82,7 @@ def test_tracked_move_run_calls_only_move_card_and_writes_the_daily_page():
     assert sent == ["news:muse"]
     text = result["daily_text"]
     assert "产品登顶" in text
-    assert "新闻和波动不改估值，不改计划" in text
+    assert "新闻和波动的解释，不会改变估值和计划。" in text
     assert (
         "daily_text(" in Path(__file__).parents[2].joinpath("src/inves_cog/perception/attribution/chain.py").read_text()
     )
