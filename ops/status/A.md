@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（M8缺表已修复；估值专用输入预演通过）  2026-10-20 19:43 北京
+- **UD-A-15已实际执行完成**：19:39:41北京，在服务器本项目独立库执行原migrations/phase1_m8_0001_attribution.sql，文件SHA256 **2213ea98429909f2c6e7b69420b7a25f2171593f19b81ce5c7913ef711c76446** 与已合并源码一致。管理员执行前逐表确认原10张表全部不存在，执行后10/10存在；role_perception自身10表SELECT/INSERT元数据均通过，linkage_events实际读取成功。未创建角色、未扩权、未写业务行或调模型。私有证据migration/m8-migration-result.json，盘前复核“缺表”停点已解除。
+- **估值只读预演已完成**：现存3552份fixed历史状态中3040份需要补既有三项可选字段；原字段/原来源逐状态哈希**零变化**。同日原生M5全新账本可估从15恢复到**49/59**、10家按已验收原因明确不估；56家最近状态能取到可核实稀释股本，未知不代理。只调用已合并提取函数、59家原有留存原件和本库FRED，业务写0、模型0。私有证据migration/m2-valuation-input-preview.json。
+- 已向用户提交具体M2写回范围：fundamentals.fin_state仅values_extra/field_sources内diluted_shares_weighted、valuation_fcf_ttm、valuation_annual_basis三键，先备份并核对旧字段；按ops §5跨模块写回等待明确答复。原规则A数值、财报日期和表结构保持。A继续准备部署及可恢复的M7原生历史计算，不把M5列为等待模糊输入。
+- **PR41合并仍待需求方执行**，用户UD-A-14已明确批准需求方merge commit，A不合并。M4历史已真实完成，可在合并安装后观察20:00窗口；M7上线仍需B线生成时间/早报读取过滤。三个worker尚未安装，不声称已全链路完成。
+
 ## A-014  进行中（UD-A-14/15 已批准；估值输入缺口已查实）  2026-10-20 19:34 北京
 - **UD-A-14**：用户直接答复「批准需求方合并并继续部署」。请需求方用 merge commit 合并 [PR #41](https://github.com/XuQingsong/inves-cog/pull/41)；准确 head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1** 的[完整 CI 成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)。这是需求方合并授权，A不自行合并；合并进入 main 后继续安装，M7 历史生成时间与早报过滤仍须 B 线单独修复。今晚北京时间20:00纸面计划窗口将至，请优先处理此已批准合并。
 - **UD-A-15**：用户直接答复「允许执行这份已合并迁移」。A获准仅在本项目独立 inves_cog 库执行已有 migrations/phase1_m8_0001_attribution.sql，补齐原设计10表，不新建角色、算法或数据源；先核对已合并文件哈希和目标库，再执行并用 role_perception 自身验证。此条记录批准，尚不冒称迁移完成。
