@@ -305,3 +305,22 @@ def test_a014_premarket_adapter_only_uses_scoped_visible_quotes_and_reports_gaps
     assert params[:2] == (date(2026, 10, 19), date(2026, 10, 19))
     assert params[3] == injected.now_utc()
     assert "基本面核查中" in db.statements[1][0]
+
+
+def test_a014_m7_rejects_missing_current_marketstate_even_if_job_was_finished(monkeypatch):
+    from inves_cog.perception.anomaly import database
+
+    class MissingMarket(RecordedConnection):
+        def fetchone(self):
+            if 'marketstate.market' in self.statements[-1][0]:
+                return None
+            return self.job
+
+    connection = MissingMarket()
+    monkeypatch.setattr(schedule, 'connect', lambda _: connection)
+    monkeypatch.setattr(database.DatabasePanel, 'from_connection', lambda *args, **kwargs: pytest.fail('missing structure'))
+    with pytest.raises(ValueError, match='marketstate'):
+        schedule.run_anomalies(
+            clock=clock('2026-10-21T00:55:00Z'), values={'INVES_COG_PERCEPTION_DATABASE_URL': 'fixture'},
+        )
+    assert connection.job['status'] == 'failed'
