@@ -160,3 +160,35 @@ def test_a014_valuation_failure_does_not_suppress_completed_scoring():
     assert result["valuation_v1"] == {"status": "failed", "error_type": "ValueError"}
     assert result["rule_a_scores"]["status"] == "ok"
     assert len(calls) == 3
+
+
+def test_a014_installer_lists_three_workers_without_duplicate_module_dispatch():
+    import shlex
+    from configparser import ConfigParser
+    from pathlib import Path
+
+    from scripts.install_ingest_service import configuration
+
+    config = ConfigParser(interpolation=None)
+    config.read_string(configuration(Path('/fixture/project'), Path('/fixture/python')))
+    expected = {
+        'daily_modules': ['market_structure', 'rule_a_scores'],
+        'anomaly_daily': ['anomaly_daily', 'premarket_review'],
+        'valuation_v1': ['valuation_v1'],
+        'paper_plan': ['paper_plan'],
+    }
+    for name, tasks in expected.items():
+        section = 'program:' + name
+        words = shlex.split(config.get(section, 'command'))
+        assert words[words.index('--tasks') + 1:] == tasks
+        assert config.getboolean(section, 'autostart')
+        assert config.getboolean(section, 'autorestart')
+
+
+def test_a014_worker_filter_never_calls_other_modules():
+    result = schedule.run_once(
+        clock=clock('2026-10-21T02:30:00Z'), values={}, names=['valuation_v1'], ready=lambda *args: True,
+        score_run=lambda **kwargs: pytest.fail('worker must not dispatch another module'),
+        valuation_run=lambda **kwargs: {'status': 'ok'},
+    )
+    assert result == {'valuation_v1': {'status': 'ok'}}
