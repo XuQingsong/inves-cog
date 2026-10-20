@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-014  进行中（最新CI绿；M4已查实基准起点冲突；M5转正式有界历史写入）  2026-10-20 16:39 北京
+- **PR #41最终代码已可审阅**：head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**，[准确head的完整容器CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)。ops54项通过，另补e6080fc先红、e7d6476修正“有完成job但当日marketstate实体为空”的门禁。PR仍未合并，A未安装任何新worker；工作树干净，docs/golden/milestones未改。
+- **M4真实历史核对job8714，未通过续接基准，产出写入0、模型0**：16:23:10至16:24:02北京，在服务器f3af8d8上重算2026-01-02至10-07，90笔逐笔零差异、权益1494527.3397979997、11只持仓全部吻合。保留这份实际重算状态、从10-08切paper后，10-09原生prepare得到**2单，任务要求13单**，即停止，没改规则或复制/初始化虚构持仓。私有证据migration/history-m4-verification.json。已核对handoff/M4/five-day-plans.json：首日是独立acceptance-fixed-five-days账户、100万、0持仓；连续v18账户起点为149.45万、11持仓。这两种初始条件确实不同，不能把独立账户13单硬套到连续账户。
+- **请需求方明确M4比较方式**：建议把13/5/2/0/5保留为独立验收账户核对，连续账户按真实v18完整状态续跑，分别记录、互不覆盖；不得为了13单把连续账户清空。当前按“对不上就停”保留M4写入停点，未自行改验收标准。
+- M5原生历史补算的慢取数诊断已收口：job8715用全股票StateStore逐价反复扫描，443秒后中止并回滚；job8718仅把同一对象按ticker分组、委托未改的原生state_asof，**11800个逐股票逐交易日查询的返回对象全部完全相同**，147秒内算到至少25天，再于总计算590秒边界停止并回滚，未增加模型调用。两次不算历史交付，ranges仍0，真实失败/取消记录保留。
+- **M5接下来是正式历史写入而非继续诊断**：复用已核对的等价读取适配器，原生估值build逐交易日运行；每个交易日单独原子提交、写实际observed_at，保存可恢复进度。按已测速度预计全区间约20分钟，本次执行上限30分钟；不改任何业务函数/公式/PIT截止、不再跑未变化的诊断。每天59行且无failed才提交，10-09起逐项对49/49/49/50/50，遇到基准差异即停并保留此前真实历史，不覆盖、不调参。M4持仓未交付时估值对照仍明确缺失。
+- M7现有角色无登录的缺口仍单列等待同一答复授权，不把它传播为M5停止理由。自动接单持续ACTIVE；新调度部署和真实按时运行仍待PR合并及相应时刻，A不自行合并。
+
 ## A-014  进行中（估值登录实测通过；调度PR #41已交；M4历史核对执行中）  2026-10-20 16:27 北京
 - **续三第1项完成**：服务器北京时间16:10:26，仅对已有role_valuation启用LOGIN、生成独立密码并写服务器私有.env；没有新角色/新授权。自身连接current_user=role_valuation，ranges/position_panel/shadow_rules的SELECT/INSERT/UPDATE/DELETE元数据均true；对fundamentals、graph、ingest、marketstate、trading可写表数均0；M5需要的七张上游表均真实只读成功。证据服务器私有migration/valuation-login-result.json。未将密码/连接串写进Git、聊天或日志；审查初次未识别委托授权，核对本线程信箱委托及d0521bc精确授权后同一动作获准，没有绕过。
 - **调度PR已提交**：[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)，完整head **f107df83e10aac4ed472cd6cc23802202544b9ec**。当前[准确head的容器CI](https://github.com/XuQingsong/inves-cog/actions/runs/39392821200)仍在运行，不写成成功。先红78dbe97/2896144/022a0ea后实现f107df8，ops53项通过；本机全仓382通过、6项因缺Docker/SciPy及AF_UNIX沙箱权限失败，未skip或放宽门禁。证据handoff/A014/runtime/。
