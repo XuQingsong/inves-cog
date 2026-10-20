@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="20" time="0.549" timestamp="2026-10-20T10:59:01.626372+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_poll_outside_slot_does_nothing[2026-10-20T01:14:59Z]" time="0.002"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_poll_outside_slot0')
+stamp = '2026-10-20T01:14:59Z'
+
+    @pytest.mark.parametrize(
+        "stamp", ["2026-10-20T01:14:59Z", "2026-10-20T01:16:00Z", "2026-11-03T01:15:00Z", "2026-10-19T01:15:00Z"]
+    )
+    def test_morning_poll_outside_slot_does_nothing(tmp_path, stamp):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:34: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_poll_outside_slot_does_nothing[2026-10-20T01:16:00Z]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_poll_outside_slot1')
+stamp = '2026-10-20T01:16:00Z'
+
+    @pytest.mark.parametrize(
+        "stamp", ["2026-10-20T01:14:59Z", "2026-10-20T01:16:00Z", "2026-11-03T01:15:00Z", "2026-10-19T01:15:00Z"]
+    )
+    def test_morning_poll_outside_slot_does_nothing(tmp_path, stamp):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:34: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_poll_outside_slot_does_nothing[2026-11-03T01:15:00Z]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_poll_outside_slot2')
+stamp = '2026-11-03T01:15:00Z'
+
+    @pytest.mark.parametrize(
+        "stamp", ["2026-10-20T01:14:59Z", "2026-10-20T01:16:00Z", "2026-11-03T01:15:00Z", "2026-10-19T01:15:00Z"]
+    )
+    def test_morning_poll_outside_slot_does_nothing(tmp_path, stamp):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:34: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_poll_outside_slot_does_nothing[2026-10-19T01:15:00Z]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_poll_outside_slot3')
+stamp = '2026-10-19T01:15:00Z'
+
+    @pytest.mark.parametrize(
+        "stamp", ["2026-10-20T01:14:59Z", "2026-10-20T01:16:00Z", "2026-11-03T01:15:00Z", "2026-10-19T01:15:00Z"]
+    )
+    def test_morning_poll_outside_slot_does_nothing(tmp_path, stamp):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:34: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_attempt_survives_failure_and_restart[0]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_attempt_survives_0')
+code = 0
+
+    @pytest.mark.parametrize("code", [0, 1])
+    def test_morning_attempt_survives_failure_and_restart(tmp_path, code):
+        root, calls = tmp_path / "repo", []
+&gt;       first = poll(root, "2026-10-20T01:15:00Z", calls, code=code)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_morning_scheduling.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_attempt_survives_0/repo')
+stamp = '2026-10-20T01:15:00Z', calls = [], code = 0, values = None
+
+    def poll(root, stamp, calls, *, code=0, values=None):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:15: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_attempt_survives_failure_and_restart[1]" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_attempt_survives_1')
+code = 1
+
+    @pytest.mark.parametrize("code", [0, 1])
+    def test_morning_attempt_survives_failure_and_restart(tmp_path, code):
+        root, calls = tmp_path / "repo", []
+&gt;       first = poll(root, "2026-10-20T01:15:00Z", calls, code=code)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_morning_scheduling.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_attempt_survives_1/repo')
+stamp = '2026-10-20T01:15:00Z', calls = [], code = 1, values = None
+
+    def poll(root, stamp, calls, *, code=0, values=None):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:15: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_poll_uses_existing_winter_slot" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_poll_uses_existin0')
+
+    def test_morning_poll_uses_existing_winter_slot(tmp_path):
+        calls = []
+&gt;       assert poll(tmp_path / "repo", "2026-11-03T01:15:00Z", calls)["status"] == "not_due"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_morning_scheduling.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_poll_uses_existin0/repo')
+stamp = '2026-11-03T01:15:00Z', calls = [], code = 0, values = None
+
+    def poll(root, stamp, calls, *, code=0, values=None):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:15: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_child_receives_private_environment_but_never_logs_page" time="0.001"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_child_receives_pr0')
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x10990ef90&gt;
+
+    def test_morning_child_receives_private_environment_but_never_logs_page(tmp_path, capsys):
+        import subprocess
+    
+        root, calls = tmp_path / "repo", []
+        root.mkdir()
+        (root / ".env").write_text("FIXTURE_PRIVATE_KEY=private-value\n")
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:74: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_morning_scheduling" name="test_morning_rejects_page_directory_inside_repository" time="0.000"><failure message="ModuleNotFoundError: No module named 'scripts.schedule_morning_page'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_rejects_page_dire0')
+
+    def test_morning_rejects_page_directory_inside_repository(tmp_path):
+        calls, root = [], tmp_path / "repo"
+&gt;       result = poll(root, "2026-10-20T01:15:00Z", calls, values={"INVES_COG_PAGE_DIR": str(root / "private-pages")})
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_morning_scheduling.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_rejects_page_dire0/repo')
+stamp = '2026-10-20T01:15:00Z', calls = [], code = 0
+values = {'INVES_COG_PAGE_DIR': '/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-308/test_morning_rejects_page_dire0/repo/private-pages'}
+
+    def poll(root, stamp, calls, *, code=0, values=None):
+&gt;       from scripts.schedule_morning_page import run_once
+E       ModuleNotFoundError: No module named 'scripts.schedule_morning_page'
+
+tests/ops/test_morning_scheduling.py:15: ModuleNotFoundError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_installer_registers_inputs_without_dropping_existing_sec_tasks" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = has_section(('program:' + 'morning_page'))&#10; +    where has_section = &lt;configparser.ConfigParser object at 0x1098bf810&gt;.has_section">def test_installer_registers_inputs_without_dropping_existing_sec_tasks():
+        config = ConfigParser(interpolation=None)
+        config.read_string(configuration(Path("/fixture/inves-cog"), Path("/fixture/python")))
+        command = config.get("program:scheduler", "command")
+        for name in (
+            "bars_prefill",
+            "bars_full",
+            "wide_universe",
+            "sec_submissions",
+            "sec_index",
+            "sec_atom",
+            "m6_market_inputs",
+            "issuer_profiles",
+        ):
+            assert name in command
+        assert "schedule_daily_modules.py" in config.get("program:daily_modules", "command")
+        assert config.getboolean("program:daily_modules", "autostart")
+        assert config.getboolean("program:daily_modules", "autorestart")
+        assert config.get("program:embedding", "autorestart") == "unexpected"
+        for name in ("scheduler", "daily_modules", "financials", "watchdog", "embedding", "morning_page"):
+&gt;           assert config.has_section("program:" + name)
+E           AssertionError: assert False
+E            +  where False = has_section(('program:' + 'morning_page'))
+E            +    where has_section = &lt;configparser.ConfigParser object at 0x1098bf810&gt;.has_section
+
+tests/ops/test_daily_scheduling.py:37: AssertionError</failure></testcase><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T00:44:00Z-names0]" time="0.375" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T00:45:00Z-names1]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T02:29:00Z-names2]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-10-17T02:30:00Z-names3]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T01:44:00Z-names4]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T01:45:00Z-names5]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_uses_et_boundaries_and_real_module_schedule_guards[2026-11-03T03:30:00Z-names6]" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_waits_for_inputs_and_financials_before_dispatch" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_market_failure_does_not_prevent_ready_scoring" time="0.000" /><testcase classname="tests.ops.test_daily_scheduling" name="test_module_poll_never_starts_on_weekend" time="0.000" /></testsuite></testsuites>
