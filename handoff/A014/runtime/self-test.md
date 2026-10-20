@@ -3,7 +3,7 @@
 这次解决服务器缺少 M7 日级判定/盘前复核、M5 估值、M4 纸面计划调度的问题。只改调度脚本、安装登记和离线测试；不改任何模块业务逻辑、规则 A、参数、表结构或需求。
 
 - 先提交失败测试 78dbe97；另以 2896144、022a0ea 冻结 M4 原生窗口和可见进程/互斥任务范围的失败断言。修前输出见 red.xml、m4-winter-red.xml、workers-red.xml。
-- 53 项 ops 离线测试通过，见 green.xml。包括夏令时/冬令时、周末和窗口边界、原有任务未丢失、按交易日查询依赖、M4 使用上一交易日评分、失败隔离、日志不带计划正文、M7 close/post 原生判定、成功/失败后重启不重跑、M7 专用连接缺失时拒绝借用其他角色、持仓与活动事件的盘前范围及报价时间上界。
+- 54 项 ops 离线测试通过，见 green.xml。包括夏令时/冬令时、周末和窗口边界、原有任务未丢失、按交易日查询依赖、M4 使用上一交易日评分、失败隔离、日志不带计划正文、M7 close/post 原生判定、当日marketstate实体行缺失拒绝运行（e6080fc先红）、成功/失败后重启不重跑、M7 专用连接缺失时拒绝借用其他角色、持仓与活动事件的盘前范围及报价时间上界。
 - M3/M6 原 daily_modules 继续存在；新增 anomaly_daily、valuation_v1、paper_plan 三个常驻 worker，均由同一调度封装执行互不重叠的 --tasks。其他旧进程保留，不重复登记同一业务任务。
 - M7：美东20:55至21:00之间，在同交易日 bars_full 和 market_structure 完成后调用既有 DatabasePanel.detect(close/post)、write_anomalies 和 run_recorded；过截止时刻不伪称按时运行。M7 已有失败记录也不自动重试。盘前复核按美东08:00调用既有 review_premarket，报价限制为该日04:00至注入 Clock 的当前时刻，缺报价/剩余sigma如实写 degraded。
 - M5：美东22:30那轮，在行情和最新财报采集完成后调用既有 scheduled；沿用模块自身 job_runs 护栏。冬令时按 README 顺延。

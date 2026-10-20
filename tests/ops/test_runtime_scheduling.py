@@ -312,15 +312,18 @@ def test_a014_m7_rejects_missing_current_marketstate_even_if_job_was_finished(mo
 
     class MissingMarket(RecordedConnection):
         def fetchone(self):
-            if 'marketstate.market' in self.statements[-1][0]:
+            if "marketstate.market" in self.statements[-1][0]:
                 return None
             return self.job
 
     connection = MissingMarket()
-    monkeypatch.setattr(schedule, 'connect', lambda _: connection)
-    monkeypatch.setattr(database.DatabasePanel, 'from_connection', lambda *args, **kwargs: pytest.fail('missing structure'))
-    with pytest.raises(ValueError, match='marketstate'):
+    monkeypatch.setattr(schedule, "connect", lambda _: connection)
+    monkeypatch.setattr(
+        database.DatabasePanel, "from_connection", lambda *args, **kwargs: pytest.fail("missing structure")
+    )
+    with pytest.raises(ValueError, match="marketstate"):
         schedule.run_anomalies(
-            clock=clock('2026-10-21T00:55:00Z'), values={'INVES_COG_PERCEPTION_DATABASE_URL': 'fixture'},
+            clock=clock("2026-10-21T00:55:00Z"),
+            values={"INVES_COG_PERCEPTION_DATABASE_URL": "fixture"},
         )
-    assert connection.job['status'] == 'failed'
+    assert connection.job["status"] == "failed"

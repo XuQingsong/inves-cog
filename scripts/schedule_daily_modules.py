@@ -90,6 +90,12 @@ def run_anomalies(*, clock, values):
         summary = {}
 
         def operation():
+            current = connection.execute(
+                "SELECT 1 FROM marketstate.market WHERE trade_date=%s LIMIT 1",
+                (day,),
+            ).fetchone()
+            if current is None:
+                raise ValueError("current marketstate is missing; no previous-day substitution")
             panel = DatabasePanel.from_connection(connection, end=day)
             rows = []
             for session in ("close", "post"):
