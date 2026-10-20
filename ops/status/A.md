@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-014  进行中（估值登录实测通过；调度PR #41已交；M4历史核对执行中）  2026-10-20 16:27 北京
+- **续三第1项完成**：服务器北京时间16:10:26，仅对已有role_valuation启用LOGIN、生成独立密码并写服务器私有.env；没有新角色/新授权。自身连接current_user=role_valuation，ranges/position_panel/shadow_rules的SELECT/INSERT/UPDATE/DELETE元数据均true；对fundamentals、graph、ingest、marketstate、trading可写表数均0；M5需要的七张上游表均真实只读成功。证据服务器私有migration/valuation-login-result.json。未将密码/连接串写进Git、聊天或日志；审查初次未识别委托授权，核对本线程信箱委托及d0521bc精确授权后同一动作获准，没有绕过。
+- **调度PR已提交**：[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)，完整head **f107df83e10aac4ed472cd6cc23802202544b9ec**。当前[准确head的容器CI](https://github.com/XuQingsong/inves-cog/actions/runs/39392821200)仍在运行，不写成成功。先红78dbe97/2896144/022a0ea后实现f107df8，ops53项通过；本机全仓382通过、6项因缺Docker/SciPy及AF_UNIX沙箱权限失败，未skip或放宽门禁。证据handoff/A014/runtime/。
+- 变更：只改scripts/schedule_daily_modules.py及安装登记，新增anomaly_daily/valuation_v1/paper_plan互斥任务worker，旧进程保留；M7新私有配置名INVES_COG_PERCEPTION_DATABASE_URL；不改业务包、算法、参数、schema、docs/golden/milestones。M4调用原生已验收的北京20:00–20:30入口，未把其固定北京窗口擅自改为冬令时21:00；M7盘前按美东08:00。所有新worker待PR合并后安装，服务器尚未换代码或服务。
+- **M7部署/历史写入的独立缺口已核实**：role_perception也是rolcanlogin=false、password_exists=false，继承它的可登录成员0，私有perception连接未配置；anomalies/premarket_review表实际存在。没有借管理员或交易登录写M7。请需求方在同一A014答复明确是否仅对**已有role_perception**启用LOGIN并本地生成私有密码，保留M0/M7原有授权、不新建角色/扩权；否则请提供现有获批登录的私有位置。这项只限制M7实写与部署，不限制M4或M5工作。
+- M4正在服务器上进行一次有界600秒的原生历史核对，已有历史job_runs护栏；先对90笔及权益，再从实际重算的完整状态续跑paper，不造持仓、不抄标准输出。任何基准差异停止产出写入；本轮不重复job8692、不重迁数据、不调模型。下一步核对真实结果，继续未受影响的历史与数据清单；CI成功后由需求方决定合并，A不合并。
+
 ## A-014  已收到（续三；估值登录已授权，M7/M4继续）  2026-10-20 16:08 北京
 - 已读最新main **d0521bca4a9c2bfccaa7248485af4b0d18d6c4ad** 的续三。用户确认只对已有role_valuation启用LOGIN并在服务器本地生成独立密码；只存服务器私有.env，不新增角色、不扩大M0授权。先实测自身身份、估值写权限元数据和上游读取；权限不足单列，不借管理员运行M5。
 - 变更：仅上述既有角色的登录属性及估值专用私有连接；随后依原授权新增M7/M5/M4调度封装与测试，先红后绿开PR，合并后才安装。M7/M4不依赖估值的部分继续，不再被估值条件一并挂起。
