@@ -14,7 +14,9 @@ def frozen(stamp):
     return FrozenClock(datetime.fromisoformat(stamp.replace("Z", "+00:00")))
 
 
-def test_installer_registers_inputs_without_dropping_existing_sec_tasks():
+@pytest.mark.parametrize("platform_name", ["Darwin", "Linux"])
+def test_installer_registers_inputs_without_dropping_existing_sec_tasks(platform_name, monkeypatch):
+    monkeypatch.setattr("scripts.install_ingest_service.platform.system", lambda: platform_name)
     config = ConfigParser(interpolation=None)
     config.read_string(configuration(Path("/fixture/inves-cog"), Path("/fixture/python")))
     command = config.get("program:scheduler", "command")
@@ -38,6 +40,7 @@ def test_installer_registers_inputs_without_dropping_existing_sec_tasks():
     assert "schedule_morning_page.py" in config.get("program:morning_page", "command")
     assert config.getboolean("program:morning_page", "autostart")
     assert config.getboolean("program:morning_page", "autorestart")
+    assert config.has_section("program:awake") is (platform_name == "Darwin")
     for section in config.sections():
         if section.startswith("program:") and config.has_option(section, "environment"):
             assert config.get(section, "environment") == 'PYTHONUNBUFFERED="1"'
