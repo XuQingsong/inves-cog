@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-014  进行中（第一段已合并，开始第二段部署核对）  2026-10-20
+- 本次是恢复自动化后的再次唤醒，已fetch并核实main **150b995e7f817bad3f030378eb209ac273bbff9c** 包含第一段head73560a4，合并提交 **58c1924131fc68c29c1cac470939715e29581bbc**；需求方验收报告docs/phase1/acceptance/A014-stage1-2026-10-20.md已发布。A未自行合并。
+- 按A014第二段授权开始只核对43.166.2.31上本项目目录/服务/独立库及Mac本项目源库。两边有不同内容则停止，不覆盖；检查表读写权限、补跑幂等记录后才安装/迁移本项目并一次补跑2026-10-20 09:15。
+- 变更：本阶段允许安装已合并服务及本项目单库迁移，仍不做表结构迁移或新角色、不触碰其他项目，不在Mac安装/补跑，不提前发模型请求。尚未登录/安装/写库或执行补跑，部署结果和真实模型次数随后据实回报。
+
 ## A-014  进行中（第一段已交付、CI通过；等待合并后再次唤醒）  2026-10-20
 - 原A线自动化a-github已恢复 **ACTIVE、每10分钟、原线程**，已读回本地配置核实；UD-A-08覆盖旧接单停点，未建立重复任务。A013/A011已撤回，不重复执行。
 - PR **https://github.com/XuQingsong/inves-cog/pull/40**，完整head **73560a4dde31f941454c6c8edde7beda58e30ba6**，本机同SHA且干净；先失败测试6f94a6b→实现73560a4。准确head CI **https://github.com/XuQingsong/inves-cog/actions/runs/39362085625** 已核对完整head_sha及completed/success；push https://github.com/XuQingsong/inves-cog/actions/runs/39362025953 也同SHA成功。干净Docker里的make phase1-test及原CI断言均通过。PR #40已转正式，draft=false、未合并。
