@@ -33,6 +33,14 @@ def test_installer_registers_inputs_without_dropping_existing_sec_tasks():
     assert config.getboolean("program:daily_modules", "autostart")
     assert config.getboolean("program:daily_modules", "autorestart")
     assert config.get("program:embedding", "autorestart") == "unexpected"
+    for name in ("scheduler", "daily_modules", "financials", "watchdog", "embedding", "morning_page"):
+        assert config.has_section("program:" + name)
+    assert "schedule_morning_page.py" in config.get("program:morning_page", "command")
+    assert config.getboolean("program:morning_page", "autostart")
+    assert config.getboolean("program:morning_page", "autorestart")
+    for section in config.sections():
+        if section.startswith("program:") and config.has_option(section, "environment"):
+            assert config.get(section, "environment") == 'PYTHONUNBUFFERED="1"'
 
 
 @pytest.mark.parametrize(
