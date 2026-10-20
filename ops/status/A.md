@@ -1,5 +1,15 @@
 # A 线回报
 
+## A-014  阻塞（第二段部署前：正式连接读不到必需表，且源库缺表）  2026-10-20
+- 本次已核实第一段PR #40合并58c1924131fc68c29c1cac470939715e29581bbc，main 150b995e7f817bad3f030378eb209ac273bbff9c包含head73560a4；原准确CI https://github.com/XuQingsong/inves-cog/actions/runs/39362085625 通过。第一段不是当前阻塞。
+- **已验证的读取阻塞**：以正式Mac服务当前私有.env的既有连接、只读事务查询，`perception.anomalies`、`valuation_v1.ranges`、`trading.ledger`、`trading.plan`四处均报 **InsufficientPrivilege / SQLSTATE 42501**。同一连接对ingest.info_items、ingest.bars_daily有SELECT，对ingest.job_runs有SELECT/INSERT；所以不是key、模型、网络连接或运行记录写权限问题。
+- 又用既有独立review只读账号核对同一host/port/database（仅比较，不公开连接值），四个完整表名的to_regclass均返回NULL：**四张表未部署**，不只是一处权限配置。它们分别由已有migrations/phase1_m7_0001_anomalies.sql、phase1_m5_0001_valuation_ranges_panel_shadow.sql、phase1_m4_0001_paper_ledger_orders_plan.sql定义；未运行这些SQL、未建表或新角色。即使只迁现库，也不会凭迁移文件出现缺失数据。
+- **已完成的授权范围准备**：43.166.2.31可通过既有SSH配置登录；仅检查/home/claudeuser/inves-cog本项目，干净旧checkout 0fffcc02b3dd84ba178bdd281eeebbdc0de5a233，系统Python3.12.3，本项目.env/.venv/服务配置均不存在，systemd inves-cog-ingest为not-found/inactive。仅见已退出的本项目一次性测试容器，没有查询/启动它，也未触碰其他项目代码或数据库。
+- Mac正式源库inves_cog仍在运行，约2.68GB。awake/daily_modules/financials/scheduler/watchdog仍RUNNING，embedding原本EXITED；**未停Mac服务**（迁移尚未完成）。未快进任何运行目录、未装依赖/服务、未开linger、未迁库、未改权限/角色/表、未执行早上命令或--at；**模型调用0次、补跑0次，没有页面明文/加密交付分支**。
+- 停点依据：A014第二段明确“现有连接读不了波动、新闻、估值、收盘价、纸面持仓、计划，或写不了运行记录时，停下来写阻塞”，同时“不改表、不新建数据库角色”。本次按此停止，未用管理员替换连接绕过该停点。脱敏核对证据在本机/private/tmp/inves-a014-deploy/source-permissions.json。
+- **需要需求方处理的下一步**：先补齐这四张表及2026-10-20 09:15之前真实可见的输入，并提供符合既有权限边界、能读上述表且写ingest.job_runs的正式连接；若需要A来应用已有迁移/生成历史输入，须另发明确扩展A014“不改表/不迁移”边界的授权任务。不能把不存在的表当空数据补出一页。补齐/授权后继续同一A014的服务器部署与一次补跑，不重做第一段。
+- A线自动化保持ACTIVE；阻塞输入未变化时不重复SSH/SQL、不反复刷状态或调用模型，也不另领下一条任务。本轮仅回报真实阻塞，不冒称已部署或已补页。
+
 ## A-014  进行中（第一段已合并，开始第二段部署核对）  2026-10-20
 - 本次是恢复自动化后的再次唤醒，已fetch并核实main **150b995e7f817bad3f030378eb209ac273bbff9c** 包含第一段head73560a4，合并提交 **58c1924131fc68c29c1cac470939715e29581bbc**；需求方验收报告docs/phase1/acceptance/A014-stage1-2026-10-20.md已发布。A未自行合并。
 - 按A014第二段授权开始只核对43.166.2.31上本项目目录/服务/独立库及Mac本项目源库。两边有不同内容则停止，不覆盖；检查表读写权限、补跑幂等记录后才安装/迁移本项目并一次补跑2026-10-20 09:15。
