@@ -1,5 +1,17 @@
 # A 线回报
 
+## A-014  进行中：部署完成，首次按时运行待验证  2026-10-20 14:47 北京
+- **已实际切换到43.166.2.31**：最新已合并代码 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**，准确main CI **https://github.com/XuQingsong/inves-cog/actions/runs/39379136179** completed/success。服务器Git工作目录干净；没有另开代码PR或合并任何PR，未改docs/golden/milestones/算法。
+- **数据迁移通过**：采用恢复执行后北京时间14:20:40冻结的一致性快照，50表全部计数相同，文件1503785735字节，SHA256 **038757d654199c64340484fa01b8102952d65bc4be48962e1b1ec6df0d71ed78**。原备份和Mac源库均保留；仅迁本项目及其原身份/ACL，无额外账号、其他项目数据或跨项目权限。目标独立PostgreSQL18.6、pgvector/pgvector:0.8.7-pg18容器，仅127.0.0.1:15432，不开放公网数据库端口。
+- **Mac项目调度已停并禁用登录自启**：launchctl确认本项目服务未加载、disabled，原Supervisor已退出；没有停止Mac数据库或其他项目。目标systemd用户服务enabled/active、Linger=yes，实际启动时间 **2026-10-20T14:37:22+08:00**。复核时scheduler、daily_modules、financials、morning_page、watchdog、embedding六个进程均RUNNING；没有把这些状态等同于业务链路通过。
+- **唯一历史补跑已交付**：交易日2026-10-19，原命令--at 2026-10-20T09:15:00+08:00仅执行一次，**job_runs.id=8692，status=ok，exit=0，processed_count=0，真实模型调用0次**。job内09:15是明确注入的历史时点，实际执行发生于部署之后。**这一次是补跑，不是按时运行。** 未额外探测模型、重问已存摘要或补更早日期。
+- **加密交付**：[data/a014-morning-page](https://github.com/XuQingsong/inves-cog/tree/22584f88e1ee9c12731adb6f45eb3b0812daa128/handoff/A014)，完整root提交 **22584f88e1ee9c12731adb6f45eb3b0812daa128**，远端与本地一致、无父提交、仅daily-page.gpg和manifest.json；不开PR、不合main。密文SHA256 **3931c46a6bf340aa379f918fa0adbc9fe83bbd4607e6afd308cb26d1130df830**；收件人指纹按原单核对。八项指定词均“没有”。页面明文只在服务器仓库外daily-pages，页面/.env均0600，外层项目数据目录/迁移目录/页面目录均0700。
+- **实际链路，分清迁入记录与服务器新运行**：迁入的10-19 bars_full#8191=ok、market_structure#8202=ok、rule_a_scores#8298=ok（59只）；m2_financials#8287=degraded（59只），bars_prefill#8045=failed（403），没有把它们当作服务器本轮成功。切换后新增自然采集sec_atom#8691=ok，info_enrichment#8693=degraded（1条）；未手工重发采集任务。下一轮尚未到点的采集/财报/评分明确为待观察，既有失败和degraded不冒称关闭。
+- **真实缺口已核实，不能把本页当作全链路验收通过**：10-19 perception.anomalies、valuation_v1.ranges、trading.ledger、trading.plan均0，页面按已有说法显示缺项。当前安装器/轮询代码实际未登记M4纸面执行、M5估值、M7异常检测的线上调用；M5 cli.py明确要求的 **INVES_COG_VALUATION_DATABASE_URL 未配置**。M3与M6专用写连接已配置，不混为缺key。未擅自给采集登录增加估值/持仓/计划写权限，未新增角色、改调度代码、初始化虚构持仓或补造历史数据。请需求方在信箱明确安排这些既有模块的上线接入及估值最小权限连接，A不越过本单边界修其他包。
+- 证据：服务器项目私有migration目录的restore-ok.json、service-installed.json、mac-service-stopped.json、backfill-result.json、deployment-observation.json；本机对照在/private/tmp/inves-a014-deploy/。私有日志、库备份、原身份密码散列和环境文件均未进Git。中途辅助脚本的列名/launchctl显示格式已按实际修正，没有因此重跑数据库恢复或历史命令；原0711方案被拒后保持0700、仅修正新目录所有者的安全方案已获准且生效。
+- **下一步**：保持A014进行中，下一次自然早上页面预计 **北京时间2026-10-21 09:15，交易日2026-10-20**，届时只读核对真实触发/运行记录/退出码/实际调用和页面，并按原公钥加密交证据；不带--at、不改钟、不为验证额外调用模型。此前只在新答复或已到点任务出现有意义变化时继续，重复缺口不刷状态，不领取下一编号。
+- UD-A-09已同步既有 **a-github ACTIVE、原线程、每10分钟** 并读回确认；未建立重复自动化。用户最新明确恢复已满足镜像AGENTS的恢复条件，其余行为约束及之后新暂停仍优先。估值方法改进仍按需求方要求暂放，不阻挡本次部署；完整线上链路未验证完成，不自验收。
+
 ## A-014  进行中（最新快照已传输，独立库正在恢复）  2026-10-20 14:34 北京
 - 暂停期间源库新增了新闻版本和运行记录，因此保留原备份，并于北京时间14:20:40冻结新的一致性快照：50表、1503785735字节、SHA256 **038757d654199c64340484fa01b8102952d65bc4be48962e1b1ec6df0d71ed78**。同一服务器收到文件后完整校验一致；私有环境/原身份ACL只在项目私有目录，不进Git。
 - 服务器代码已快进 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**，准确main CI **https://github.com/XuQingsong/inves-cog/actions/runs/39379136179** completed/success。
