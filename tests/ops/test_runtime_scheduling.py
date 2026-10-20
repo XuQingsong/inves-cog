@@ -53,8 +53,8 @@ def probe(stamp, ready=lambda *args: True, failure=None):
         ("2026-10-20T11:59:59Z", []),
         ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
         ("2026-10-20T12:30:00Z", []),
-        ("2026-11-03T12:00:00Z", []),
-        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-11-03T12:00:00Z", ["paper_plan"]),
+        ("2026-11-03T13:00:00Z", ["premarket_review"]),
         ("2026-10-18T12:00:00Z", []),
     ],
 )
@@ -146,3 +146,17 @@ def test_a014_m7_missing_writer_fails_closed_without_borrowing_admin(monkeypatch
     monkeypatch.setattr(schedule, "connect", lambda _: pytest.fail("must not use another role"))
     with pytest.raises(ValueError, match="INVES_COG_PERCEPTION_DATABASE_URL"):
         run_anomalies(clock=clock("2026-10-21T00:55:00Z"), values={"INVES_COG_DATABASE_URL": "operations"})
+
+
+def test_a014_preserves_accepted_m4_beijing_window_without_changing_business_guard():
+    from inves_cog.trading.execution.cli import due
+    assert due(clock("2026-11-03T12:00:00Z"))
+    assert not due(clock("2026-11-03T13:00:00Z"))
+    assert [name for name, _ in probe("2026-11-03T12:00:00Z")[1]] == ["paper_plan"]
+
+
+def test_a014_valuation_failure_does_not_suppress_completed_scoring():
+    result, calls = probe("2026-10-21T02:30:00Z", failure="valuation_v1")
+    assert result["valuation_v1"] == {"status": "failed", "error_type": "ValueError"}
+    assert result["rule_a_scores"]["status"] == "ok"
+    assert len(calls) == 3
