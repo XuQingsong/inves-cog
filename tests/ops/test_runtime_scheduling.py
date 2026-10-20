@@ -150,6 +150,7 @@ def test_a014_m7_missing_writer_fails_closed_without_borrowing_admin(monkeypatch
 
 def test_a014_preserves_accepted_m4_beijing_window_without_changing_business_guard():
     from inves_cog.trading.execution.cli import due
+
     assert due(clock("2026-11-03T12:00:00Z"))
     assert not due(clock("2026-11-03T13:00:00Z"))
     assert [name for name, _ in probe("2026-11-03T12:00:00Z")[1]] == ["paper_plan"]
@@ -170,25 +171,137 @@ def test_a014_installer_lists_three_workers_without_duplicate_module_dispatch():
     from scripts.install_ingest_service import configuration
 
     config = ConfigParser(interpolation=None)
-    config.read_string(configuration(Path('/fixture/project'), Path('/fixture/python')))
+    config.read_string(configuration(Path("/fixture/project"), Path("/fixture/python")))
     expected = {
-        'daily_modules': ['market_structure', 'rule_a_scores'],
-        'anomaly_daily': ['anomaly_daily', 'premarket_review'],
-        'valuation_v1': ['valuation_v1'],
-        'paper_plan': ['paper_plan'],
+        "daily_modules": ["market_structure", "rule_a_scores"],
+        "anomaly_daily": ["anomaly_daily", "premarket_review"],
+        "valuation_v1": ["valuation_v1"],
+        "paper_plan": ["paper_plan"],
     }
     for name, tasks in expected.items():
-        section = 'program:' + name
-        words = shlex.split(config.get(section, 'command'))
-        assert words[words.index('--tasks') + 1:] == tasks
-        assert config.getboolean(section, 'autostart')
-        assert config.getboolean(section, 'autorestart')
+        section = "program:" + name
+        words = shlex.split(config.get(section, "command"))
+        assert words[words.index("--tasks") + 1 :] == tasks
+        assert config.getboolean(section, "autostart")
+        assert config.getboolean(section, "autorestart")
 
 
 def test_a014_worker_filter_never_calls_other_modules():
     result = schedule.run_once(
-        clock=clock('2026-10-21T02:30:00Z'), values={}, names=['valuation_v1'], ready=lambda *args: True,
-        score_run=lambda **kwargs: pytest.fail('worker must not dispatch another module'),
-        valuation_run=lambda **kwargs: {'status': 'ok'},
+        clock=clock("2026-10-21T02:30:00Z"),
+        values={},
+        names=["valuation_v1"],
+        ready=lambda *args: True,
+        score_run=lambda **kwargs: pytest.fail("worker must not dispatch another module"),
+        valuation_run=lambda **kwargs: {"status": "ok"},
     )
-    assert result == {'valuation_v1': {'status': 'ok'}}
+    assert result == {"valuation_v1": {"status": "ok"}}
+
+
+class RecordedConnection:
+    def __init__(self):
+        self.statements = []
+        self.job = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def transaction(self):
+        from contextlib import nullcontext
+
+        return nullcontext()
+
+    def execute(self, statement, params=None):
+        self.statements.append((statement, params))
+        if "INSERT INTO ingest.job_runs" in statement:
+            self.job = {"id": 42, "status": "failed"}
+        if "UPDATE ingest.job_runs" in statement and params:
+            if "status = %s" in statement:
+                self.job["status"] = params[1]
+        return self
+
+    def fetchone(self):
+        return self.job
+
+
+def test_a014_m7_records_close_and_post_and_does_not_repeat_after_restart(monkeypatch):
+    from inves_cog.perception.anomaly import database, service
+
+    connection = RecordedConnection()
+    monkeypatch.setattr(schedule, "connect", lambda _: connection)
+    detected, written = [], []
+
+    class Panel:
+        def detect(self, day, session):
+            detected.append((day, session))
+            return [
+                {"session": session, "entry_paths": ["B"], "data_quality": ["thin_post"] if session == "post" else []}
+            ]
+
+    monkeypatch.setattr(database.DatabasePanel, "from_connection", lambda *args, **kwargs: Panel())
+    monkeypatch.setattr(service, "write_anomalies", lambda _, rows: written.extend(rows))
+    values = {"INVES_COG_PERCEPTION_DATABASE_URL": "perception-fixture"}
+    injected = clock("2026-10-21T00:55:00Z")
+    result = schedule.run_anomalies(clock=injected, values=values)
+    assert result == {"status": "ok", "job_id": 42, "entry_paths": {"B": 2}, "data_quality": {"thin_post": 1}}
+    assert detected == [(date(2026, 10, 20), "close"), (date(2026, 10, 20), "post")]
+    assert [row["anomaly_id"] for row in written] == ["2026-10-20:close:001", "2026-10-20:post:001"]
+    start = next(params for query, params in connection.statements if "INSERT INTO ingest.job_runs" in query)
+    assert start[2] == injected.now_utc()
+    assert schedule.run_anomalies(clock=injected, values=values) == {"status": "already_attempted"}
+    assert len(detected) == 2
+
+
+def test_a014_m7_failed_attempt_is_recorded_and_not_silently_retried(monkeypatch):
+    from inves_cog.perception.anomaly import database
+
+    connection = RecordedConnection()
+    monkeypatch.setattr(schedule, "connect", lambda _: connection)
+
+    def interrupted(*args, **kwargs):
+        raise ValueError("recorded input failure")
+
+    monkeypatch.setattr(database.DatabasePanel, "from_connection", interrupted)
+    values = {"INVES_COG_PERCEPTION_DATABASE_URL": "perception-fixture"}
+    with pytest.raises(ValueError, match="recorded input failure"):
+        schedule.run_anomalies(clock=clock("2026-10-21T00:55:00Z"), values=values)
+    assert connection.job["status"] == "failed"
+    assert any("UPDATE ingest.job_runs" in statement for statement, _ in connection.statements)
+    assert schedule.run_anomalies(clock=clock("2026-10-21T00:55:30Z"), values=values) == {"status": "already_attempted"}
+
+
+def test_a014_premarket_adapter_only_uses_scoped_visible_quotes_and_reports_gaps():
+    class Connection:
+        def __init__(self):
+            self.index = -1
+            self.statements = []
+
+        def execute(self, statement, params):
+            self.index += 1
+            self.statements.append((statement, params))
+            return self
+
+        def fetchone(self):
+            return {"state": {"positions": {"NVDA": {}, "MU": {}}}}
+
+        def fetchall(self):
+            if self.index == 1:
+                return [{"ticker": "AMD"}]
+            return [
+                {"ticker": "NVDA", "prev_close": 100, "premarket_last": 105, "sigma": 0.01},
+                {"ticker": "MU", "prev_close": 100, "premarket_last": 101, "sigma": None},
+            ]
+
+    db = Connection()
+    injected = clock("2026-10-20T12:00:00Z")
+    scope, missing = schedule.premarket_scope(db, clock=injected)
+    assert scope["holdings"] == ["MU", "NVDA"] and scope["linked"] == ["AMD"]
+    assert set(scope["quotes"]) == {"NVDA"} and missing == ["AMD", "MU"]
+    statement, params = db.statements[-1]
+    assert "m.ts_utc<=%s" in statement and "m.session='pre'" in statement
+    assert params[:2] == (date(2026, 10, 19), date(2026, 10, 19))
+    assert params[3] == injected.now_utc()
+    assert "基本面核查中" in db.statements[1][0]
