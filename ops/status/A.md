@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-014  进行中（第一段已提交PR #40；CI运行中）  2026-10-20
+- 原A线自动化a-github已恢复 **ACTIVE、每10分钟、原线程**，已读回本地配置核实；UD-A-08覆盖旧接单停点，未建立重复任务。A013/A011已撤回，不重复执行。
+- PR **https://github.com/XuQingsong/inves-cog/pull/40**，完整head **73560a4dde31f941454c6c8edde7beda58e30ba6**，本机同SHA且干净；先失败测试6f94a6b→实现73560a4。准确head CI **https://github.com/XuQingsong/inves-cog/actions/runs/39362085625** 当前运行中，正在干净Docker执行make phase1-test及原CI断言；push运行39362025953也运行中，不冒称已绿。
+- 第一段代码已实现：复用job_slot/Clock，美东交易日内夏令时北京09:15、冬令时10:15，每30秒轮询，只派发原morning命令不带--at。尝试先原子落.harness/service，失败/同分钟/重启不重发，次日再运行；环境只传子进程，页面目录默认仓库旁daily-pages，禁止仓库内路径，服务日志不写正文/环境值。
+- 新程序morning_page自启/自动拉起，原服务全部保留，Darwin才有awake；本机ops与时钟/导入/模型门禁 **32 passed**、Ruff通过，证据handoff/A014/stage1.md、red.xml、stage1-tests.xml。实际本机make提示缺Docker，交原干净CI验证，未skip或改门禁。
+- **按任务第一段停点：未登录服务器、未安装/重启任何服务、无模型调用、补跑、数据库/角色/表变更。** 状态保持进行中；只在需求方合并且之后再次唤醒，核对main包含本次代码后进入43.166.2.31第二段，不在本轮提前部署。自动化保持开启，等待门槛变化时不重复实施或刷状态。
+
 ## A-014  已收到（恢复自动接单；先登记早上页面轮询）  2026-10-20
 - 用户决策 **UD-A-08**：用户明确要求“打开a任务的定时任务，开始接单”。恢复原有a-github每10分钟的A线信箱自动接单，撤销此前“完成即停止接新单”的旧停点；只接A线，一次一单，仍遵守control新暂停、权限/预算边界及阶段停点，不自动合并PR。
 - 已读取main **cf17d7359e2db33b589b2e84c56da1776f1857ea** 的control/README/A014；A运行。第一段只新增scripts/schedule_morning_page.py并登记到既有服务生成器；复用job_slot、注入Clock，分钟内及重启去重，先提交失败测试、后实现，CI与准确head随PR回报。
