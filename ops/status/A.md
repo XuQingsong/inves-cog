@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-014  进行中（收到新答复，按管理员核对与最小SELECT授权继续）  2026-10-20
+- 已读取main **0a77e7f10b633c874f7cd6237b14919579947b4d** 的ops/answers/A-014.md。继续同一A014，不领新编号。需求方明确允许用Mac既有管理员核对、补四表SELECT；只有管理员确认缺表才执行指定三份已合并迁移；保持不新建角色、不新写表结构、不动算法/其他项目。
+- **更正上一轮证据边界**：正式连接的42501已独立确认；review账号to_regclass返回NULL不足以单独下“表不存在”的最终结论，该推断撤回为待管理员确认，不据此建表/覆盖数据。本轮只按新答复做管理员存在性/10-19行数核对。
+- 变更边界：授权对当前任务登录补四表读取（无估值/持仓/计划写权限），条件满足时应用原迁移；其后原样迁移Mac项目数据到43.166.2.31，行数一致才停Mac定时服务，再安装已合并服务及唯一补跑。调用日志写权限不足仍停止。尚未执行GRANT、迁移、安装或模型调用。
+
 ## A-014  阻塞（第二段部署前：正式连接读不到必需表，且源库缺表）  2026-10-20
 - 本次已核实第一段PR #40合并58c1924131fc68c29c1cac470939715e29581bbc，main 150b995e7f817bad3f030378eb209ac273bbff9c包含head73560a4；原准确CI https://github.com/XuQingsong/inves-cog/actions/runs/39362085625 通过。第一段不是当前阻塞。
 - **已验证的读取阻塞**：以正式Mac服务当前私有.env的既有连接、只读事务查询，`perception.anomalies`、`valuation_v1.ranges`、`trading.ledger`、`trading.plan`四处均报 **InsufficientPrivilege / SQLSTATE 42501**。同一连接对ingest.info_items、ingest.bars_daily有SELECT，对ingest.job_runs有SELECT/INSERT；所以不是key、模型、网络连接或运行记录写权限问题。
