@@ -1,5 +1,17 @@
 # A 线回报
 
+## A-014  已收到（恢复自动接单；先登记早上页面轮询）  2026-10-20
+- 用户决策 **UD-A-08**：用户明确要求“打开a任务的定时任务，开始接单”。恢复原有a-github每10分钟的A线信箱自动接单，撤销此前“完成即停止接新单”的旧停点；只接A线，一次一单，仍遵守control新暂停、权限/预算边界及阶段停点，不自动合并PR。
+- 已读取main **cf17d7359e2db33b589b2e84c56da1776f1857ea** 的control/README/A014；A运行。第一段只新增scripts/schedule_morning_page.py并登记到既有服务生成器；复用job_slot、注入Clock，分钟内及重启去重，先提交失败测试、后实现，CI与准确head随PR回报。
+- **第一段不登录服务器、不安装或重启任何服务、不调模型、不补跑、不迁移/写共享库。** 分支phase1/a014-deploy-server；交PR后保持进行中，等需求方合并且再次唤醒才进入43.166.2.31部署/一次补跑第二段。Mac不是部署目标。
+- 变更：恢复Codex信箱自动化；拟新增服务配置程序登记，尚未安装或运行。docs/golden/milestones及perception源码不改，既有服务全保留，私有环境内容不进入服务配置/日志。
+
+## A-013  已完成（撤回确认，不执行）  2026-10-20
+- A-013 已撤回，不执行。按最新main明确改领A-014；不改Mac服务，不开a013分支，不补跑。
+
+## A-011  已完成（撤回确认，不执行）  2026-10-20
+- A-011 已撤回，不执行。不取Muse持仓、不建分支。用户UD-A-08明确恢复接新任务，旧单“停止不领下一张”不再作为阻止新接单的停点。
+
 ## A-012  已完成（UD-A-07：TSM独立修复交付，待需求方验收）  2026-10-20
 - 独立正式PR **https://github.com/XuQingsong/inves-cog/pull/39**，「[M2/M5] 提交验收：TSM 估值专用年度输入」，draft=false、未合并。完整head **801c8f26d3c1cb6ec16eabf07cf5f7d1d77eed8b**，本机同SHA、干净。先失败测试9682842→实现2ca280b，历史PE入口补红77080fe→修复801c8f2；保留历史。
 - **准确head CI通过**：PR https://github.com/XuQingsong/inves-cog/actions/runs/39291410007 及push https://github.com/XuQingsong/inves-cog/actions/runs/39291402242 均已核对head_sha与completed/success，不是沿用旧SHA。已继承main **970e751fb87046bf1a8c95091d58736f334b7a99**；PR #36已由需求方验收合并（ops/answers/A-012.md），不再等待其草稿/CI，不重复提交或合并。
