@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-033  已完成  2026-10-21 11:22 北京
+
+- 草稿 PR #43，head `69caa6f`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39537938750 。`phase1-blocking` 409 passed，用时 74.98 秒，nightly 跳过。没有合并。
+- 证据：七个宽池例子先失败（因子仍是 NULL，失败运行没有标 degraded）。股票池原路径本来就通过。改完之后 `tests/m1/test_b033.py` 8 passed。本地 `make phase1-test` 409 passed、21 deselected，用时 68.40 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.75 秒。
+- 用户决策 UD-B-06：宽池日线的拆股因子怎么补。用户原话「m1修复就按照你推荐的做吧」。照做：只改 `Pipeline.wide`，用已有公司行动接口。核实无拆股写 1.0。失败、分页重复或不完整时留 NULL，运行标 degraded。一批失败不抹掉另一批。开高低收和成交量仍是 raw。`post_close` 不更新。股票池 `bars` 不改。
+- 报告计数：`adj_factor_split`、`adj_factor_unity`、`adj_factor_null`。代码测试通过不等于生产数据已修好。
+- 没有连接生产库，没有回填，没有跑线上 `wide_universe`，没有调模型。没有改其他 M1 模块、M6/M7、阈值、schema、`golden/`、`milestones.txt`。生产核对留到合并后，由 A-014 用一次自然 `wide_universe` 做。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-033  进行中  2026-10-21 11:21 北京
 
 - 草稿 PR #43，head `69caa6f`，分支 `cursor/m1-b033-wide-split-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/43
