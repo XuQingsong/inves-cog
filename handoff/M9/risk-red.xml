@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.415" timestamp="2026-10-21T14:38:28.040852+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_risk" name="test_m9_s10_keeps_each_price_order_and_residual_z" time="0.255"><failure message="TypeError: object of type 'NoneType' has no len()">tests/m9/test_m9_risk.py:20: in test_m9_s10_keeps_each_price_order_and_residual_z
+    assert len(row['value']) == 2
+           ^^^^^^^^^^^^^^^^^
+E   TypeError: object of type 'NoneType' has no len()</failure></testcase><testcase classname="tests.m9.test_m9_risk" name="test_m9_missing_s1_history_is_unknown_not_clear" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.risk_inputs'">tests/m9/test_m9_risk.py:27: in test_m9_missing_s1_history_is_unknown_not_clear
+    from inves_cog.shadow.risk_inputs import s1_from_history
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.risk_inputs'</failure></testcase></testsuite></testsuites>
