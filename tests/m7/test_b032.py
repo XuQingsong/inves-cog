@@ -53,11 +53,7 @@ class Pages:
             rows = [row for row in self.anomalies if _day(row["trade_date"]) == _day(params[0])]
             if "generated_at" in compact:
                 moment = params[1]
-                rows = [
-                    row
-                    for row in rows
-                    if row.get("generated_at") is not None and row["generated_at"] <= moment
-                ]
+                rows = [row for row in rows if row.get("generated_at") is not None and row["generated_at"] <= moment]
             rows.sort(key=lambda row: (row["session"], row["anomaly_id"]))
             self.served = [row["anomaly_id"] for row in rows]
             return Cursor(rows)
