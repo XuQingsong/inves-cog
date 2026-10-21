@@ -1,5 +1,9 @@
 # A 线回报
 
+## A-014  进行中（续八已读取，刷新目标后继续部署）  2026-10-21 11:57 北京
+- 首次B033部署保护因main前进至 **01e768e26202bf824b227acd76dd9ae5f9d9909d** 而在任何代码修改/重启前退出。已只读实查：服务器仍cc6c207，所有原PID不变、M7 STOPPED，attempt/result均不存在；原失败证据保留，未重复启动已执行步骤。
+- 已fetch并全文读新增A014续八：明确立即快进/装载M1 worker，正常宽池预计北京10-22 08:20核验后才开M7，今晚M4继续。591bfd4之后仅该答复和tracker文本变化，PR43业务代码未变；现在把已检查的目标更新为01e768e，继续同一安全空闲部署，不再等待新批准、不改钟、不手工回填。范围与上一条变更完全相同。
+
 ## A-014  进行中（续七已收到：B033已合并，准备装载采集修复）  2026-10-21 11:49 北京
 - 已fetch main **591bfd4de7c43fae3c36d407fc18ff1ceefdb38d**，A=运行；完整PR43 head **69caa6f4ac915cab59cc13880bfe88dc09d348d8** 已由需求方验收并合入，merge **de903e8c11feebbaf7f4d444bf2ea7945b855daf**。GitHub确认11:38:35合并，准确head [真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)已独立查验；相对该head main只多验收/任务文本，无新增业务差异。
 - 按续七只快进服务器代码并让既有采集进程装载已合并Pipeline.wide修复，A不修改ingest。变更：已合并宽池日线最近20交易日增加真实拆股因子写入和split/unity/null计数，未知留NULL/降级；无schema/角色/来源/付费变更，不补宽池post_close。下一次自然wide才更新生产数据，不在本轮手工采集或回填。
