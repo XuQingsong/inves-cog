@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-014  进行中（10:30评分/估值已自然完成并核对输入截点）  2026-10-21 10:40 北京
+- **自然评分job9004=ok**：交易日2026-10-20，实际北京 **10:30:23.878520至10:30:32.618097**，processed_count=59、无note。用原role_trading独立核对daily_scores固定规则A/p-2026.10流 **59行/59不同ticker**、正式名单无缺少/意外代码。54条无null_reason，另5条为insufficient_history1、missing_book:growth1、stale_fundamentals3；保存原生降级，未填分或换规则。
+- **新增M5 worker首次自然job9003=degraded，已经结束**：北京 **10:30:23.817913至10:31:34.637193**，processed_count=59、无异常note。role_valuation独立核对当日ranges59、shadow_rules59、position_panel15；ranges **50条ok、9条unvalued、failed0、不估缺原因0**。原生service以有不估结果标degraded，不能写成全59只均可估或任务异常失败。三表实际生成时间均为 **10:31:33.438361北京**，在真实job起止内。这些常驻worker直接调用原生函数，无独立子进程退出码，保留返回状态和job证据，不编造exit=0。
+- **输入截止独立核验**：59行/59代码均记录decision_cutoff **2026-10-21 02:30:00+00:00（北京10:30）**；缺cutoff0、财报filed晚于10-20为0、一致预期日期晚于10-20为0、captured_at晚于cutoff为0、生成时间在本次job外为0。输出不是历史重算，不回填进09:15早页。私有证据 **migration/scoring-natural-20261021-023648.json**、**natural-cutoff-and-upstream-20261021-023938.json**；只读核查未触发采集/模型/业务写。
+- **M6缺项的上游事实已独立核实**：当日1289个结构对象全部有收盘价；其中 **1230个adj_factor为空、1230个post_close为空**，有missing_current_return且收盘存在但adj_factor空的恰为 **1228个**。与B032的源码定位一致；不是市场结构未启动，也不能以收盘价齐全宣称收益/盘后输入齐全。未填adj_factor=1、未降低窗口、未改ingest或回写marketstate；输入修补须由需求方明确M1范围，A不代分配或越线实施。
+- **B032最新反馈**：10:32报告及GitHub实查为[草稿PR42](https://github.com/XuQingsong/inves-cog/pull/42)，head **3e55dbc6750417773d92c37d48096c51e7a08928**、open/未合并，全套验证尚待B回报。修复涉及generated_at实际生成时间、旧NULL行不可见、早页截点过滤；A不代B实现或验收。anomaly_daily仍STOPPED，M7和premarket_review均未启用。
+- **部署与后续**：运行版本 **d03383bf7a8471fb3f97d4a61ceae3195c721214**，含已批准PR41；代码相同的准确PR head e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1之[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)，d033无独立workflow，沿用上一阶段说明。M4/M5/daily_modules持续RUNNING，M7严格STOPPED。M4须等今晚北京20:00–20:30真实窗口；M7须等B032合并/迁移/部署后启用及安全回填。整体A014仍进行中，接单ACTIVE，不再等待PR41合并、不重复安装或历史job。
+
 ## A-014  进行中（M4/M5已安装；M7严格停用，10:30业务结果待验）  2026-10-21 10:28 北京
 - **已实际安装一次**：服务器main快进至 **d03383bf7a8471fb3f97d4a61ceae3195c721214**，实际北京时间 **10:27:16.053729至10:27:25.752966**。只用该已合并安装器的configuration生成配置，在任何写入/重载前先把anomaly_daily的autostart/autorestart置false；随后原Supervisor reread/update。未调用会整套重启的安装动作，原systemd持续active，原scheduler/financials/morning_page/watchdog PID未变，embedding维持原退出状态。
 - **实际进程核对**：daily_modules RUNNING pid3262553（明确仅market_structure/rule_a_scores）；paper_plan RUNNING pid3262554；valuation_v1 RUNNING pid3262555；**anomaly_daily STOPPED/Not started**（同时禁premarket_review），安装前后M7新增job=0。当前业务相关job仍只有已成功market_structure#8941，未把worker存活写成M4/M5业务成功。M5启用前复核私有独立终验job8775及11800行/五日49/49/49/50/50，不重算。
