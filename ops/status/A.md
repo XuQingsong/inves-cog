@@ -1,5 +1,15 @@
 # A 线回报
 
+## A-014  阻塞（B034具体部署的自动权限审核两次超时；安装未执行）  2026-10-21 17:52 北京
+- B034已合并/通过验收这一事实未变：完整head **2433af1fd09d67021f84895eb4c1fe4f061fa338** 的[准确CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39547698182)；准备装载已审阅main **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**，相对当前服务器仅morning.py/move_card.py两份运行代码。部署脚本 **/private/tmp/inves-a014-deploy/deploy_b034_morning.py** SHA256 **78815e729d94dc7c796470e4f65aedcdf305e049a59195224193f3da17cb0e40**，唯一attempt/result保护、原角色只读SQL核验、只重载morning_page、原页面/尝试哈希与其他PID保护均已备齐。
+- 两次早前程序保护退出都因main新增M9文本，均发生在任何快进/重载前。改为固定已审阅main、仍核最新A开关/无新增运行或部署指令变化后，具体部署请求遭遇 **自动权限审核未在期限内完成**；按工具允许原样重试一次，仍同样超时，工具两次均CreateProcess Rejected，未获启动。不是业务失败，也不是风险否决；没有换通道、拆命令绕过或第三次盲重试。已在本对话明确说明自动审批原因，并呈现本次具体操作请求确认。
+- **最后实际只读核对北京17:50:44**：服务器仍完整SHA **01e768e26202bf824b227acd76dd9ae5f9d9909d**、main分支/Git干净；morning_page仍原pid **3289325**、M7仍原pid **3348041**，M4/M5/daily/scheduler/financials/watchdog均原PID；无相关活动job，B034 attempt/result均不存在。systemd仍自10-20 14:37:22 active，配置SHA **79d84a6a34e5f3e95d864dda3c5b89fdb4e49107de55c321a60375d75112f32e**，原晨间attempt SHA **117f631e0ecda9633a445dfa058464da1e105afd2bfc044402c0eb727ea0ebfc**未变。没有生产迁移、模型、业务写/页面重跑，不能写B034已部署或早报线上通过。
+- 影响：早报仍运行旧的“只取同日估值”查询，修复尚未装载。需要用户明确批准本次已备好的具体远端操作，或提供操作指导以解除工具审核超时；原项目恢复/接单许可不重复索取。收到明确答复先记UD再执行；本轮不暂停a-github，今晚M4/M7及明早其他自然OPS只读核验继续。
+
+## A-015  进行中（K02最新窗口与B035交付状态已核对）  2026-10-21 17:52 北京
+- 最新答复 **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6** 将K02推荐明确为 **ET08:35–09:05**（北京夏20:35–21:05、冬21:35–22:05），留出M9 08:30前发布缓冲；保持原北京20:00意味着无法可靠影响当天计划，次日不会自动读前日overlay。此前“可供下一周期”的说法已纠正。已将本对话待选题更新为此具体窗口并明确替代旧08:30起提议，尚无用户答复，M4代码/窗口未改。
+- B035已报告完成，草稿 **PR46** https://github.com/XuQingsong/inves-cog/pull/46，完整head **513459f77624bff560faf78812b36524047025ef**；已独立查PR仍open/draft、未合并。已独立查询该完整head的[准确CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39579381063)，尚未合并/集成，不将CI成功冒称K01已接通。按B状态：三阶段job/截止时点完成标记、有事件缺PIT字段则incomplete；role_shadow尚不可读，调用方连接和真实可见字段仍须按验收合同接线，A不新增权限或拿当前报告反推历史。M9 PR45仍草稿、完整验收未通过，K01/K02均未伪称关闭。
+
 ## A-014  进行中（部署保护退出原因已核实；刷新已检查目标后继续）  2026-10-21 17:40 北京
 - B034首次部署在任何代码快进/重载前，因origin/main新增 **4979ab7b739e58e32414944b5063dd1dabf1c1d5** 而被严格版本保护退出；私有failure记录保留。已只读核实服务器仍 **01e768e26202bf824b227acd76dd9ae5f9d9909d**，morning_page原pid3289325、M7原pid3348041及其余PID全不变，attempt/result均不存在、相关活动job为空，未重复执行任何已完成部署步骤。
 - 已fetch并核新增提交仅M9验收/答复/tracker及B035任务文本；B034两份业务代码与已验收完整head **2433af1fd09d67021f84895eb4c1fe4f061fa338** 逐字节相同，无新增运行代码或迁移。继续同一B034部署，目标刷新为4979ab7，仍只重载早页并验证原角色SQL；M4/M5/M7及原页面/尝试保留，明早自然页面待核。
