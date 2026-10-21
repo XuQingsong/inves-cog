@@ -170,23 +170,138 @@ def test_complete_event_fields_use_the_injected_clock():
 
 
 def test_fields_without_a_source_time_stay_null():
-    pages = Memory(_jobs(), [_linkage()])
-    snapshot_id = capture_if_ready(pages, DAY, _clock(CUTOFF))
+    clock = _clock(CUTOFF)
+    pages = Memory(_jobs(), [_linkage(price_direction="down")])
+    snapshot_id = capture_if_ready(pages, DAY, clock)
     assert snapshot_id == 1
     stored = pages.snapshots[0]
     assert stored["status"] == "degraded"
     event = stored["events"][0]
     text = json.dumps(event, ensure_ascii=False)
     assert event["fields"]["lifecycle"]["value"] == "假设中"
-    assert event["fields"]["mechanism"]["value"] is None
+    assert event["fields"]["lifecycle"]["at"] == EARLIER.isoformat()
+    assert event["fields"]["mechanism"]["value"] == "供给"
+    assert event["fields"]["mechanism"]["at"] == clock.now_utc().isoformat()
+    assert event["fields"]["mechanism"]["at"] != BEFORE.isoformat()
     assert event["fields"]["direction"]["value"] is None
+    assert "涨跌" in event["fields"]["direction"]["missing_reason"]
     assert "市场确认" not in text
-    assert "供给" not in text
-    assert event["fields"]["mechanism"]["missing_reason"]
+    assert "down" not in text
+    for name in (
+        "ticker",
+        "exposure",
+        "divergence_tag",
+        "dimensions",
+        "next_filing_at",
+        "systemic_tag",
+        "deadline_outcome",
+    ):
+        assert event["fields"][name]["value"] is None
+        assert event["fields"][name]["missing_reason"]
     found = read_snapshot(pages, DAY, CUTOFF)
     assert found["complete"] is False
-    assert found["events"] == []
-    assert "mechanism" in str(found["missing"])
+    assert found["source_events_asof"] is None
+    assert found["events"][0]["mechanism"] == "供给"
+    assert found["events"][0]["lifecycle"] == "假设中"
+    assert found["events"][0]["direction"] is None
+    assert "ticker" in found["missing"]["fields"]["evt-1"]
+
+
+def _db_event(**changes):
+    row = {
+        "event_id": "evt-1",
+        "anomaly_id": "anom-1",
+        "history": [_entry(EARLIER, "假设中", ["info-1"])],
+        "generated_at": EARLIER,
+        "mechanism": "供给",
+        "deadline_outcome": "未到",
+        "tickers": [{"ticker": "NVDA", "exposure": "直接", "mechanism": "供给"}],
+        "candidates": [{"mechanism": "需求", "affected": [{"ticker": "AMD"}]}],
+        "tracks": [
+            {"trade_date": "2026-10-14", "emotion": "昨日", "capital": "昨日", "fundamental": "昨日"},
+            {"trade_date": DAY, "emotion": "初现", "capital": "观望", "fundamental": "未证"},
+        ],
+        "claims": [{"direction": "不利"}],
+        "report": {"divergence_label": "情绪性折价", "next_filing_at": "2026-11-01", "deadline_outcome": "条件风险"},
+        "systemic_event_tag": "无",
+        "price_direction": "down",
+        "direction": "down",
+    }
+    row.update(changes)
+    return row
+
+
+def test_a_full_m8_event_maps_every_available_field():
+    source = (ROOT / "src/inves_cog/perception/attribution/snapshot.py").read_text()
+    assert "perception.ticker_status" in source
+    assert "perception.tracks" in source
+    assert "perception.reports" in source
+    assert "perception.market_day" in source
+    assert "perception.claims" in source
+    assert "a.direction" not in source
+    assert "e.lifecycle" not in source
+    clock = _clock(CUTOFF)
+    pages = Memory(_jobs(), [_db_event()])
+    capture_if_ready(pages, DAY, clock)
+    stored = pages.snapshots[0]
+    assert stored["status"] == "complete"
+    assert stored["source_asof"] == BEFORE
+    event = stored["events"][0]
+    observed = clock.now_utc().isoformat()
+    assert event["fields"]["lifecycle"] == {"value": "假设中", "at": EARLIER.isoformat(), "missing_reason": None}
+    assert event["fields"]["mechanism"]["value"] == "供给"
+    assert event["fields"]["mechanism"]["at"] == observed
+    assert event["fields"]["ticker"]["value"] == "NVDA"
+    assert event["fields"]["exposure"]["value"] == "直接"
+    assert event["fields"]["direction"]["value"] == "不利"
+    assert event["fields"]["divergence_tag"]["value"] == "情绪性折价"
+    assert event["fields"]["dimensions"]["value"] == {"emotion": "初现", "capital": "观望", "fundamental": "未证"}
+    assert event["fields"]["next_filing_at"]["value"] == "2026-11-01"
+    assert event["fields"]["next_filing_at"]["at"] == observed
+    assert event["fields"]["systemic_tag"]["value"] == "无"
+    assert event["fields"]["deadline_outcome"]["value"] == "未到"
+    text = json.dumps(event, ensure_ascii=False)
+    assert "市场确认" not in text
+    assert "down" not in text
+    assert "昨日" not in text
+    assert "条件风险" not in text
+    assert "AMD" not in text
+    found = read_snapshot(pages, DAY, CUTOFF)
+    assert found["complete"] is True
+    assert found["events"][0]["direction"] == "不利"
+    assert found["events"][0]["affected"][0]["ticker"] == "NVDA"
+    assert found["events"][0]["affected"][0]["exposure"] == "直接"
+    assert found["source_events_asof"] == BEFORE.isoformat()
+
+
+def test_one_missing_field_keeps_the_others():
+    report = {"divergence_label": "情绪性折价"}
+    pages = Memory(_jobs(), [_db_event(report=report)])
+    capture_if_ready(pages, DAY, _clock(CUTOFF))
+    stored = pages.snapshots[0]
+    assert stored["status"] == "degraded"
+    event = stored["events"][0]
+    assert event["fields"]["mechanism"]["value"] == "供给"
+    assert event["fields"]["exposure"]["value"] == "直接"
+    assert event["fields"]["direction"]["value"] == "不利"
+    assert event["fields"]["divergence_tag"]["value"] == "情绪性折价"
+    assert event["fields"]["next_filing_at"]["value"] is None
+    assert event["fields"]["next_filing_at"]["missing_reason"]
+    assert stored["missing"]["fields"]["evt-1"] == {
+        "next_filing_at": event["fields"]["next_filing_at"]["missing_reason"]
+    }
+    found = read_snapshot(pages, DAY, CUTOFF)
+    assert found["complete"] is False
+    assert found["source_events_asof"] is None
+    assert found["events"][0]["mechanism"] == "供给"
+    assert found["events"][0]["next_filing_at"] is None
+    conflict = Memory(_jobs(), [_db_event(claims=[{"direction": "不利"}, {"direction": "有利"}])])
+    capture_if_ready(conflict, DAY, _clock(CUTOFF))
+    direction = conflict.snapshots[0]["events"][0]["fields"]["direction"]
+    assert direction["value"] is None
+    assert direction["missing_reason"] == "多条说法的方向不一致"
+    assert conflict.snapshots[0]["events"][0]["fields"]["mechanism"]["value"] == "供给"
+    assert "down" not in json.dumps(conflict.snapshots[0]["events"], ensure_ascii=False)
 
 
 def test_missing_or_failed_job_does_not_write():

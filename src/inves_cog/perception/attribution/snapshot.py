@@ -1,8 +1,11 @@
 """Append-only M8 snapshot for M9. The caller supplies the connection.
 
 A snapshot is written only after the three attribution stages have ended
-successfully. Fields without a source time stay null. The reader returns the
-newest complete snapshot already generated at the cutoff.
+successfully. At that capture, a current value is kept and stamped with the
+injected clock. A field with no value stays null and does not clear the
+others. Historical backfill still requires each field's original time. The
+reader returns the newest complete snapshot already generated at the cutoff.
+A degraded row stays incomplete.
 """
 
 import json
@@ -43,9 +46,37 @@ WHERE trade_date = %s AND task_name = ANY(%s)
 """
 
 _EVENTS = """
-SELECT e.event_id, e.anomaly_id, e.history, a.generated_at
+SELECT e.event_id, e.anomaly_id, e.history, a.generated_at, e.mechanism, e.deadline_outcome,
+       tickers.rows AS tickers, candidates.rows AS candidates, tracks.rows AS tracks,
+       claims.rows AS claims, r.report, m.systemic_event_tag
 FROM perception.linkage_events AS e
 LEFT JOIN perception.anomalies AS a ON a.anomaly_id = e.anomaly_id
+LEFT JOIN LATERAL (
+    SELECT jsonb_agg(jsonb_build_object('ticker', ticker, 'exposure', exposure, 'mechanism', mechanism)) AS rows
+    FROM perception.ticker_status
+    WHERE anomaly_id = e.anomaly_id
+) AS tickers ON true
+LEFT JOIN LATERAL (
+    SELECT jsonb_agg(jsonb_build_object('mechanism', mechanism, 'affected', affected)) AS rows
+    FROM perception.candidates
+    WHERE anomaly_id = e.anomaly_id
+) AS candidates ON true
+LEFT JOIN LATERAL (
+    SELECT jsonb_agg(jsonb_build_object(
+        'trade_date', trade_date, 'emotion', emotion, 'capital', capital, 'fundamental', fundamental
+    )) AS rows
+    FROM perception.tracks
+    WHERE event_id = e.event_id
+) AS tracks ON true
+LEFT JOIN LATERAL (
+    SELECT jsonb_agg(jsonb_build_object('direction', direction)) AS rows
+    FROM perception.claims
+    WHERE info_id IN (
+        SELECT unnest(info_ids) FROM perception.candidates WHERE anomaly_id = e.anomaly_id
+    )
+) AS claims ON true
+LEFT JOIN perception.reports AS r ON r.anomaly_id = e.anomaly_id
+LEFT JOIN perception.market_day AS m ON m.trade_date = %s
 """
 
 _INSERT = """
@@ -88,7 +119,7 @@ def capture_if_ready(connection, trade_date, clock, *, events=None):
     if gaps:
         return None
     source_asof = max(_aware(_cell(row, "ended_at", 4)) for row in chosen.values())
-    built, missing = _bundle(connection, events, now)
+    built, missing = _bundle(connection, events, now, trade_date)
     status = "complete" if _bundle_complete(missing) else "degraded"
     return _insert(connection, trade_date, now, source_asof, status, "stage_completion", chosen, built, missing)
 
@@ -124,18 +155,20 @@ def _ready_stages(connection, trade_date, now):
     return _stages(rows, now)
 
 
-def _bundle(connection, events, now):
+def _bundle(connection, events, now, trade_date):
     if events is None:
-        return _from_rows(connection.execute(_EVENTS).fetchall(), now)
+        day = str(trade_date)[:10]
+        rows = connection.execute(_EVENTS, (day,)).fetchall()
+        return _from_rows(rows, now, day)
     return _from_supplied(events, now)
 
 
-def _from_rows(rows, now):
+def _from_rows(rows, now, day):
     built = []
     unproven = []
     fields = {}
     for row in rows:
-        event, reason = _row_event(row, now)
+        event, reason = _row_event(row, now, day)
         if reason:
             unproven.append(reason)
             continue
@@ -148,7 +181,7 @@ def _from_rows(rows, now):
     return built, {"stages": [], "events": unproven, "fields": fields}
 
 
-def _row_event(row, now):
+def _row_event(row, now, day):
     event_id = _cell(row, "event_id", 0)
     generated = _aware(_cell(row, "generated_at", 3))
     if generated is not None and generated > now:
@@ -157,9 +190,23 @@ def _row_event(row, now):
     if version is None:
         return None, f"{event_id} 没有不晚于 cutoff 的历史时间"
     when, entry = version
-    fields = {name: _empty(name) for name in _REQUIRED}
-    if entry.get("new") is not None:
-        fields["lifecycle"] = {"value": entry.get("new"), "at": when.isoformat(), "missing_reason": None}
+    ticker, exposure = _affected(row)
+    fields = {
+        "lifecycle": _lifecycle(entry, when),
+        "mechanism": _observed(_mechanism(row), now, _DB_REASONS["mechanism"]),
+        "ticker": _observed(ticker, now, _DB_REASONS["ticker"]),
+        "exposure": _observed(exposure, now, _DB_REASONS["exposure"]),
+        "direction": _direction_field(row, now),
+        "divergence_tag": _observed(
+            _report_value(row, "divergence_label", "divergence_tag"),
+            now,
+            _DB_REASONS["divergence_tag"],
+        ),
+        "dimensions": _observed(_dimensions(row, day), now, _DB_REASONS["dimensions"]),
+        "next_filing_at": _observed(_report_value(row, "next_filing_at"), now, _DB_REASONS["next_filing_at"]),
+        "systemic_tag": _observed(_cell(row, "systemic_event_tag", 11), now, _DB_REASONS["systemic_tag"]),
+        "deadline_outcome": _observed(_deadline(row), now, _DB_REASONS["deadline_outcome"]),
+    }
     return _event_row(event_id, _cell(row, "anomaly_id", 1), when.isoformat(), entry.get("evidence_ids"), fields), None
 
 
@@ -216,6 +263,116 @@ def _event_row(event_id, anomaly_id, observed_at, evidence_ids, fields):
 
 def _empty(name):
     return {"value": None, "at": None, "missing_reason": _DB_REASONS[name]}
+
+
+def _observed(value, now, reason):
+    if value is None or value == "" or value == [] or value == {}:
+        return {"value": None, "at": None, "missing_reason": reason}
+    return {"value": _plain(value), "at": now.isoformat(), "missing_reason": None}
+
+
+def _lifecycle(entry, when):
+    if entry.get("new") is None:
+        return _empty("lifecycle")
+    return {"value": entry.get("new"), "at": when.isoformat(), "missing_reason": None}
+
+
+def _mechanism(row):
+    direct = _cell(row, "mechanism", 4)
+    if direct:
+        return direct
+    tickers = _distinct(item.get("mechanism") for item in _dicts(row, "tickers", 6))
+    if len(tickers) == 1:
+        return tickers[0]
+    candidates = _distinct(item.get("mechanism") for item in _dicts(row, "candidates", 7))
+    if len(candidates) == 1:
+        return candidates[0]
+    return None
+
+
+def _direction_field(row, now):
+    found = _distinct(item.get("direction") for item in _dicts(row, "claims", 9))
+    if len(found) == 1:
+        return _observed(found[0], now, _DB_REASONS["direction"])
+    if len(found) > 1:
+        return {"value": None, "at": None, "missing_reason": "多条说法的方向不一致"}
+    return _empty("direction")
+
+
+def _affected(row):
+    rows = _dicts(row, "tickers", 6)
+    named = [item for item in rows if item.get("ticker")]
+    if named:
+        tickers = [item.get("ticker") for item in named]
+        exposures = [item.get("exposure") for item in named]
+        if len(named) == 1:
+            return tickers[0], exposures[0]
+        if all(exposures):
+            return tickers, exposures
+        return tickers, None
+    names = []
+    for candidate in _dicts(row, "candidates", 7):
+        for item in candidate.get("affected") or []:
+            if isinstance(item, dict) and item.get("ticker"):
+                names.append(item.get("ticker"))
+    names = _distinct(names)
+    if len(names) == 1:
+        return names[0], None
+    if names:
+        return names, None
+    return None, None
+
+
+def _dimensions(row, day):
+    matched = []
+    for item in _dicts(row, "tracks", 8):
+        if str(item.get("trade_date"))[:10] != day:
+            continue
+        value = {key: item.get(key) for key in ("emotion", "capital", "fundamental") if item.get(key) is not None}
+        if value:
+            matched.append(value)
+    if len(matched) == 1:
+        return matched[0]
+    return None
+
+
+def _deadline(row):
+    direct = _cell(row, "deadline_outcome", 5)
+    if direct:
+        return direct
+    return _report(row).get("deadline_outcome")
+
+
+def _report_value(row, *names):
+    report = _report(row)
+    for name in names:
+        value = report.get(name)
+        if value is not None and value != "":
+            return value
+    return None
+
+
+def _report(row):
+    value = _loads(_cell(row, "report", 10))
+    return value if isinstance(value, dict) else {}
+
+
+def _dicts(row, name, index):
+    return [item for item in _list(_cell(row, name, index)) if isinstance(item, dict)]
+
+
+def _list(value):
+    loaded = _loads(value)
+    return list(loaded or [])
+
+
+def _distinct(values):
+    found = []
+    for value in values:
+        if value is None or value == "" or value in found:
+            continue
+        found.append(value)
+    return found
 
 
 def _gaps(event):
@@ -343,10 +500,13 @@ def _gap(degraded):
             "jobs": list(degraded["jobs"] or []),
             "events": [_source_event(event) for event in degraded["events"] or []],
         }
+        kept = [_flatten(event) for event in degraded["events"] or []]
+    else:
+        kept = []
     return {
         "complete": False,
         "source_events_asof": None,
-        "events": [],
+        "events": kept,
         "source_ids": source_ids,
         "missing": missing,
     }

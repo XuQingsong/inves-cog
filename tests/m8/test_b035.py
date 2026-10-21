@@ -126,9 +126,20 @@ def test_degraded_snapshot_is_not_a_complete_overlay():
         ]
     )
     assert found["complete"] is False
-    assert found["events"] == []
-    assert "市场确认" not in str(found["events"])
+    assert found["source_events_asof"] is None
+    assert found["events"][0]["lifecycle"] == "市场确认"
+    assert found["events"][0]["mechanism"] == "供给"
+    assert found["events"][0]["affected"] == []
     assert "没有生成时间" in str(found["missing"])
+
+
+def test_a_newer_degraded_snapshot_does_not_hide_an_older_complete_one():
+    older = _stored(snapshot_id=1, snapshot_generated_at=EARLIER)
+    newer = _stored(snapshot_id=2, snapshot_generated_at=BEFORE, status="degraded")
+    found = _read([newer, older])
+    assert found["complete"] is True
+    assert found["source_events_asof"] == EARLIER.isoformat()
+    assert found["events"][0]["lifecycle"] == "假设中"
 
 
 def test_visible_complete_snapshot_is_returned():
