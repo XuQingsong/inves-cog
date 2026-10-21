@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-014  已收到（续十三：B034已合并，装载早报最新可见估值修复）  2026-10-21 17:36 北京
+- 已fetch最新main **67739b63b2c6616488c4f81809b570828a64aa2b**，A=运行，已读续十三与B034独立验收；PR44完整head **2433af1fd09d67021f84895eb4c1fe4f061fa338** 已合并，merge **3740edf2bbeb4b394044c75c227aba2e4cd6d25b**，GitHub确认北京17:32:31 merged。准确head的[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39547698182)已独立查询，需求方已验收414项blocking及26项相邻PIT回归；不代B再开发或将合并冒称部署。
+- **变更：只装载已合并早报读取/显示代码**。每ticker取trade_date不晚于报告日、observed_at不晚于页面cutoff的最近估值，标明实际估值日与报告日价格；无符合值保留缺失。不改M5算法、数据、阈值、schema、角色、来源或依赖，不重复B032迁移/M7启用或历史批次；M9未合并代码不部署。
+- 先核服务器本项目Git干净、原进程/自然任务状态、既有部署证据与09:15尝试文件；快进已确认main，再仅重载受影响早页进程并用原角色只读核新SQL可执行，保持M4/M5/M7及其他进程配置/PID。现在只记录开始，未声称部署成功；明早10-22自然09:15页面估值/价格日期与cutoff作为独立OPS核验，不手工生成早页或改钟。M9的K01/K02局部阻塞不影响本项继续；接单保持ACTIVE。
+
 ## A-015  阻塞（仅真实M8适配/共享调度；离线核心及准确head CI通过）  2026-10-21 15:31 北京
 - 最新草稿 **PR45** https://github.com/XuQingsong/inves-cog/pull/45 的完整head **2de34aa17230a14eac5ad3a486d7294b4f2f22ef** [准确CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39561913979)已独立查日志：实际checkout为该head合入已核main d57277a243451c5f6fb69da2699d9de69f86579b的测试merge；干净容器 **make phase1-test 432 passed、21 deselected**，另 **M0 CI assertions 2 passed**，后续selfcheck成功，未改/跳过门禁。M9本地23项及原M4合计40项结果见上一阶段；未用测试数量冒称真实业务验收。
 - 已在原授权范围实际完成独立规则/投递/输入/版本/影子入口及缺项权重修复。**剩余K01/K02需要需求方行动**：定位已验收M8当日完成标记和原历史PIT快照；确认覆盖层先发布、M4后消费的共享调度及冬令最小修复范围。具体证据/影响/备好工作在上一条、handoff/M9/questions.md和integration-timing.json。收到答复后A继续真实适配及五日核验；不反复索取用户已给的执行授权、不伪造历史时间、不改上游表或M4门禁。当前无可独立继续的M9真实接线步骤；PR保持草稿，不声称A015已完成或正式验收通过。
