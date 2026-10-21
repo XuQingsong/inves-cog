@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-014  进行中（手动生产验证已独立实查；自然运行验收仍待窗口）  2026-10-21 12:51 北京
+- **续九的两次手动job已独立核实**：原采集连接只读查得wide_universe **9321=ok**，北京 **12:19:55.444846至12:30:01.877791**、processed13227、无note；market_structure **9379=ok**，北京 **12:34:08.703360至12:40:40.243865**、processed2703、无note。两个均已结束，当前同类活动job为空。运行类型按需求方记录为部署后手动验证，明确区别于08:28自然wide8907、08:45自然结构8941，不替代明早自然调度验收；没有独立子进程退出码证据，不编造exit=0。
+- **因子与正式成员覆盖**：原wide-report游标status=ok，split **1059**、unity **261347**、null **0**（这些是更新窗口内报告计数，不是当日ticker数）。独立当日正式included成员 **1277/1277有close、1277/1277有adj_factor、缺因子0**；1230成员post_close仍为空。monthly=false、startup_baseline=false，无重新生成基线。
+- **M6真实改善及剩余限制**：用原 **role_marketstate** 只读聚合，close共1289：1123无null_reason；sector_unmapped141、l3_same_as_l2 23均仍有resid；insufficient_history2无resid。missing_current_return原因（含旧组合原因）从原 **1228降至0**；单独missing_current_return原1087亦已为0。正式wide成员 **1275/1277有resid**。post仍missing_post_price1089、sector_unmapped;missing_post_price141，另36无原因/23个l3_same_as_l2；不宣称盘后输入修好。表行数daily2578、baskets58、rotation66、market1，合计2703，不能把有原因的行全部当成无效，也不能称全部指标齐全。
+- **版本与边界**：实查服务器仍已部署完整main **01e768e26202bf824b227acd76dd9ae5f9d9909d**，PR43准确head **69caa6f4ac915cab59cc13880bfe88dc09d348d8** 的[CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)复用，最新答复main6673508c8dcf0f7e1a36af396748ace1c511b0ff只多任务文本。anomaly_daily（含premarket_review）仍 **STOPPED/Not started**；scheduler3307289、daily_modules3262553、paper_plan3262554均保持原PID。本轮上游请求/模型/业务启动/业务写均0；私有聚合证据 **migration/manual-b033-verification-20261021-045055.json**。没有重新安装、迁库或重跑今天手动批次。
+- **下一步按最新续九**：今晚北京20:00–20:30核M4真实计划job；明早10-22正常wide/market_structure及09:15早页继续验收。M7须等B032已部署与自然输入窗口确认后启用，若错过窗口等下一自然窗口，不改钟、不补造按时运行。A014整体继续进行中；接单保持ACTIVE，此阶段没有需要用户另行授权的阻塞。
+
 ## A-014  已收到（续九：接续需求方手动验证，独立只读核对）  2026-10-21 12:45 北京
 - 已fetch并读取最新main **6673508c8dcf0f7e1a36af396748ace1c511b0ff** 的A014续九，A开关运行；相对已部署01e768e26202bf824b227acd76dd9ae5f9d9909d仅答复/tracker变化，无新增业务代码。需求方报告手动wide_universe **9321=ok**、market_structure **9379=ok**，生产因子覆盖及close missing_current_return改善；A尚未把答复数字冒称自己独立实查。
 - 现在只用本项目原角色核对上述已结束job、宽池因子计数/正式纳入成员覆盖、M6剩余原因及M7仍停止。一次有界只读核验（远端55秒、单查询15秒），不重新启动宽池或市场结构，不调模型，不重装/迁库/补历史。完整结果与原自然批次分开：本次是部署后手动验证，明早自然窗口仍待验。
