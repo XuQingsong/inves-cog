@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（全市场股票池及M6行情输入自然完成，落库核对通过）  2026-10-21 08:46 北京
+- **自然wide_universe#8907=ok**：交易日2026-10-20，北京 **08:28:15.642390至08:38:31.883769**，processed_count=13227、无note，处于20:45截止前。08:44独立SQL核对当日wide_universe **13227行/13227不同ticker**、included=**1277**，入池股票缺当日收盘价 **0**；原生wide-report为monthly=false、startup_baseline=false，沿用迁入的正式既有成员，不重新初始化基线或把补算当准时。排除原因有原生明确分类，未凑入池数量。
+- **自然m6_market_inputs#8908=ok**：北京 **08:38:31.898667至08:38:55.983724**、processed_count=13644、无note。源为服务器已合并 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**；行情#8906的真实按时、73/73、最低97.18%/平均99.95%及健康通过证据复用，不额外采集或重做。私有证据 **migration/natural-run-20261021-004242.json** 及 **structure-observation-20261021-004454.json**；只读观察网络请求/模型调用/业务写0。
+- **下一环尚待真实结果**：08:44:54用现有role_marketstate自身连接只读实查，当日marketstate.daily/baskets/rotation/market均0，market_structure当日记录未出现；此刻尚未到08:45窗口，**不判失败，也不冒充已有结构结果**。后续直接读取自然市场结构任务、当日业务行，再核对09:15早页、10:30评分，不手工提前触发或改钟。常驻服务仍正常，原一次性embedding不重复运行。
+- **部署阻塞仍需需求方行动**：08:42实查[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)仍open/merged=false，head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**、[准确CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)未变。请需求方执行UD-A-14已批准合并；A不代合并，M4/M5新调度未安装，M7业务入库/启用仍待B线生成时间与早报过滤修复。main **d0521bca4a9c2bfccaa7248485af4b0d18d6c4ad**、答复和B状态未变化。本线程已直接反馈实际完成与缺口，整体A014仍进行中，不改milestones，接单保持ACTIVE。
+
 ## A-014  进行中（首次服务器正式行情已按时完成并独立核验）  2026-10-21 08:34 北京
 - **自然bars_full#8906=ok**，交易日2026-10-20：北京 **08:20:16.602416启动、08:28:15.628424结束**，耗时 **479.026008秒**；处于ET20:20分钟并在20:45截止前完成。原生报告run_mode=current_day、deadline_met=true、exhausted=true、无note，73/73日线、不可用0，processed_count **228994**（包含原生历史更新，**不写成228994条新增当日数据**）。未手工触发、补跑、改钟或换源。服务源码 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**；该已安装SHA的[既有CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39379136179)复用，未把未合并PR源码冒充已安装版本。
 - **08:32独立只读复核通过**：73个代码都有分钟及当日日线，共48255分钟行；以交易所当日390个正常交易分钟作分母，已完成全部代码最低覆盖 **0.9717948717948718**、平均 **0.9995433789954338**，达到原生min>=0.95/avg>=0.99。Alpaca当前health=ok、consecutive_failures=0；Scheduler:bars_full在本次08:30检查点之后已更新为ok，实读last_attempt=08:32:49.193911，不能把旧日期健康行充作本次证据。证据 **migration/natural-run-20261021-003249.json**，详细原生游标及运行说明留私有natural-run-20261021-private.json。本轮仅读取与记录证据，没有额外网络采集、模型或业务写入。
