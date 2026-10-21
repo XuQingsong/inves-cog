@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-037  已完成  2026-10-22 00:42 北京
+
+- 草稿 PR #47，head `e584e34`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39636642198 。`phase1-blocking` 432 passed、21 deselected，用时 98.55 秒，nightly 跳过。没有合并。
+- 证据：例子先失败，因为有 mechanism 时仍被要求整行清空，降级快照也不返回已保存的字段。改完之后 `tests/m8/test_b035.py` 5 项、`tests/m8/test_b036.py` 13 项通过。本地 `make phase1-test` 432 passed、21 deselected，用时 67.97 秒；`make phase1-cases` 7 passed、1 xfailed，用时 26.11 秒。
+- 三个阶段成功后的同一次读取保留当时已有的 mechanism、暴露、claim 方向、当日 tracks、报告里的 divergence 和 next filing、deadline、当日系统性标记。缺一项只记这一项。lifecycle 仍只取 `history.at` 不晚于时钟的版本。异常涨跌方向不写入事件方向。
+- 没有自己时间戳的当前值，字段时间是这次注入时钟，不回写成更早的作业结束时间。`source_asof` 仍是三个作业结束时间的最晚值。缺任一必需字段时快照保持 degraded，`complete` 为 false，`source_events_asof` 为空。
+- 报告里没有 divergence 或 next filing、没有唯一 claim 方向、没有 cutoff 前的 lifecycle 历史时，这些字段仍是 NULL，不能标完整。历史回填仍只接受原来带时间的来源。
+- 只追加。没有新迁移，没有新角色。没有改 M9、M4、规则 A。没有生产迁移或回填。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-037  进行中  2026-10-22 00:41 北京
 
 - 草稿 PR #47，head `e584e34`，分支 `cursor/m8-b036-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
