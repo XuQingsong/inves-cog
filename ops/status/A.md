@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（续七已收到：B033已合并，准备装载采集修复）  2026-10-21 11:49 北京
+- 已fetch main **591bfd4de7c43fae3c36d407fc18ff1ceefdb38d**，A=运行；完整PR43 head **69caa6f4ac915cab59cc13880bfe88dc09d348d8** 已由需求方验收并合入，merge **de903e8c11feebbaf7f4d444bf2ea7945b855daf**。GitHub确认11:38:35合并，准确head [真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)已独立查验；相对该head main只多验收/任务文本，无新增业务差异。
+- 按续七只快进服务器代码并让既有采集进程装载已合并Pipeline.wide修复，A不修改ingest。变更：已合并宽池日线最近20交易日增加真实拆股因子写入和split/unity/null计数，未知留NULL/降级；无schema/角色/来源/付费变更，不补宽池post_close。下一次自然wide才更新生产数据，不在本轮手工采集或回填。
+- 部署前先查8个原采集任务有无未完成job，并用原角色和原生has_pending_info/最近日志核对新闻处理是否空闲；采集scheduler会连带其enrichment子进程，不能在进行中批次上盲目restart。安全空闲后仅更新该进程，M4/M5/早页及M7关闭配置保留，不重复安装、迁移B032或历史补算。当前为开始记录，尚未把代码装载/下一次数据修复说成完成。
+- M7的anomaly_daily（含premarket_review）继续STOPPED；等B033自然宽池因子覆盖和后续M6 missing_current_return实际核验后再按条件启用/安全回填。20日因子更新不等于全部历史回归输入已完整，保留原生缺失原因，不提前宣布全部指标修好。今晚M4自然窗口仍按20:00–20:30核验。接单保持ACTIVE。
+
 ## A-014  进行中（B032迁移及早页过滤已部署；M7等待B033）  2026-10-21 11:23 北京
 - **已实际部署**：服务器main从d03383bf7a8471fb3f97d4a61ceae3195c721214快进到 **cc6c207fac30134f917ba2414a416b89e70f8cb9**，实际北京 **11:21:57.329193至11:22:08.136132**，确认包含已验收PR42完整head **3e55dbc6750417773d92c37d48096c51e7a08928**。业务/脚本代码与该head相同，此后差异仅文档/README/任务；准确head的[CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39533772102)复用，cc6c本身查无独立workflow，不把此链接冒称cc6c独立CI。
 - **原迁移真实执行一次**：执行前generated_at不存在；按已合并原文件phase1_m7_0002_anomaly_generated_at.sql（SHA256 **184abfe05b91400861f19fee77bef55f9c120dd653a66ccff79fb7d7ddcf1df4**）在本项目独立库用既有管理员执行DDL。执行后字段为timestamp with time zone、nullable=YES、default=NULL；异常行数前后均0、非空生成时间0，无历史写入/回填，无新角色/权限。已有列则只验证不执行的保护及唯一尝试文件已保留。
