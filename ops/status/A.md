@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-014  进行中（市场结构准时完成；09:15自然早报已加密交付）  2026-10-21 09:42 北京
+- **已查清并纠正“市场结构未启动”判断**：自然job **8941=ok**，交易日2026-10-20，实际北京时间 **08:45:31.339444启动、08:53:30.989294结束**，耗时479.649850秒，无note，processed_count=2703。安装版本 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409** 的marketstate.cli未传persist_start，JobRunner只在finally持久化记录，故08:52运行中查不到job不等于未启动。无需补跑/改钟/重启，未改B线或ingest代码。09:36以原role_marketstate独立只读核对：daily2578（close/post各1289）、baskets58、rotation66、market1，与2703逐项相符。私有证据 **migration/structure-observation-20261021-013610.json**。
+- **结果完整性不冒充指标完整**：每个session的1289对象中36条null_reason为空、1253条有原因。close为missing_current_return1087、sector_unmapped;missing_current_return141、l3_same_as_l2 23、insufficient_history2；post为missing_post_price1089、sector_unmapped;missing_post_price141、l3_same_as_l2 23。保留原生原因，不填造结构值，不把1289/1289覆盖对象数写成全部可计算。原因分布在下项私有证据。
+- **09:15首次服务器自然早报已完成**：job **8989=ok**，交易日2026-10-20，真实触发 **09:15:06.573436**，attempt完成 **09:15:07.508869**，退出码0、处理异常0、move_card调用0。job的started_at=ended_at是原生冻结任务时点，不能据此宣称耗时0秒；另用attempt及页面文件时间核对真实自然执行。页面确实生成，明文留仓库外且已收紧0600。09:37只读核对：当日异常0、当日可见估值0；既有paper-fixed账本/已发布计划各8条符合读取截止，未披露明细。M5当日10:30轮次尚未到，M7尚未启用，不把0异常页面说成完整解释链路通过。私有证据 **migration/morning-natural-20261021-013745.json**。
+- **自然页面密文已发布**：[data/a014-morning-page完整提交](https://github.com/XuQingsong/inves-cog/tree/f1b52b57dad9b9bfe5b64230d92fca5798b40932/handoff/A014)，SHA **f1b52b57dad9b9bfe5b64230d92fca5798b40932**，密文SHA256 **808e9785a02061059ee2447cb3eeb8729ac44371587278a89b94becb39a745d6**。固定路径为本次自然页，旧10-19补跑密文及manifest保留在backfill-2026-10-19/，没有删除导出分支、不开放明文。指定八词均“没有”。服务SHA仍f3af8d8d1066b8a9772dac9f1d052f71f9e33409，重启时间沿用10-20 14:37:22北京，[对应真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39379136179)，未重装或重迁库。
+- **剩余部署需需求方落实已有批准**：[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)仍open/merged=false，head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**，[准确head CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)。请需求方按UD-A-14执行merge commit；A不代合并，main包含后才安装M4/M5，M7继续等UD-A-13已批准由B处理的真实生成时间和早报过滤修复。M4历史8734/M5历史8775/M7只读历史8750等均不重跑。10:30原有评分待真实窗口核对，未运行的检查不算通过。
+- **接单读回确认**：原a-github **ACTIVE、每10分钟、原线程**，本轮只查看未修改。UD-A-17持续有效，不重复询问同一恢复授权。本轮业务/模型手工调用0，无接口/schema/数据源/依赖变更；仅安全加密交付及A状态回报。整体A014仍进行中。
+
 ## A-014  进行中（UD-A-17：用户直接恢复，先定位市场结构未启动）  2026-10-21 09:35 北京
 - **用户最新直接指令**：「恢复 A 线执行，继续原授权范围内的诊断和部署核验。先查清市场结构任务为什么没启动，把部署继续做完，接单保持开启，不要再反复问同一个授权。」本决定解除上一轮自动审批因镜像停止条款导致的拦截；继续当前A014，不领新编号、不新建或关闭接单自动化、不重新索取已有授权。
 - 已fetch最新main **d0521bca4a9c2bfccaa7248485af4b0d18d6c4ad**，A=运行，A014及答复未变。原服务版本 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**、[对应CI](https://github.com/XuQingsong/inves-cog/actions/runs/39379136179)沿用；本轮尚未实查服务器，不把上轮08:52无market_structure记录及四表空的证据当作现在状态。
