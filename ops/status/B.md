@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-033  已收到  2026-10-21 11:14 北京
+
+- 用户决策 UD-B-06：宽池日线的拆股因子怎么补。用户原话「m1修复就按照你推荐的做吧」。照做：只改 `Pipeline.wide`，用已有 `Alpaca.daily_bars`、`alpaca_splits`、`split_factors` 给宽池原始日线写入核实过的 `adj_factor`。确认窗口内没有拆股时写 1.0；查询失败或不完整时保持 NULL，并让任务结果标成 degraded。不补 `post_close`，不改其他 M1 模块、M6/M7 计算、阈值、schema、权限、规则 A、golden。
+- 任务是一次性跨线修复。B-032 已验收合并，PIT 生成时间保护保留，不回填旧异常时间。原 M1/M2 只读边界其余保持。
+- 从最新 `origin/main` 开新分支，开新 PR。不连生产库，不回填生产数据，不跑线上 `wide_universe`。不调模型。不改 `docs/`、`golden/`、`milestones.txt`。
+- 变更：宽池 `bars_daily` 的 upsert 更新列加上 `adj_factor`。开高低收和成交量仍是 raw。
+- 下一步：先写会失败的例子，再改 `Pipeline.wide`。
+
 ## B-032  已完成  2026-10-21 10:38 北京
 
 - 草稿 PR #42，head `3e55dbc`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39533772102 。`phase1-blocking` 401 passed，用时 115.98 秒，nightly 跳过。没有合并。
