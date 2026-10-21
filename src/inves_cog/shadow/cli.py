@@ -8,6 +8,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import yaml
+from psycopg import Error as DatabaseError
 
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.cli import connect
@@ -16,6 +17,7 @@ from inves_cog.ingest.market import trading_day
 from inves_cog.ingest.repository import Repository as Operations
 from inves_cog.ingest.settings import read_environment
 from inves_cog.overlay.rules import timestamp
+from inves_cog.perception.attribution.snapshot import m8_provider as native_m8_provider
 from inves_cog.shadow.inputs import ReadInputs, validate_snapshot
 from inves_cog.shadow.outputs import DatabaseOutputs
 from inves_cog.shadow.pipeline import MemoryOutputs, run_overlay, run_shadows
@@ -32,11 +34,29 @@ def _scoped(values, key):
 
 
 def _summary(result):
-    summary = {key: result[key] for key in ("status", "processed_count", "null_factors", "note") if key in result}
+    keys = ("status", "processed_count", "null_factors", "note", "source_ids", "missing", "source_events_asof")
+    summary = {key: result[key] for key in keys if key in result}
     summary.update(signal_count=len(result.get("signals") or []), n9_count=len(result.get("n9") or []))
     if result.get("overlay"):
         summary["overlay_version"] = result["overlay"]["version"]
     return summary
+
+
+def _read_m8(values, target, cutoff):
+    try:
+        # The accepted provider owns BEGIN/ROLLBACK; never nest it in the M9 input transaction.
+        with _scoped(values, "INVES_COG_SHADOW_DATABASE_URL") as reader:
+            reader.execute("SET statement_timeout='10s'")
+            return native_m8_provider(reader)(target, cutoff)
+    except DatabaseError as exc:
+        return {
+            "complete": False,
+            "source_events_asof": None,
+            "events": [],
+            "source_ids": {},
+            "missing": {"reader": type(exc).__name__},
+            "null_reason": "M8快照读取失败；保留缺失，不切换账号或扩大权限",
+        }
 
 
 def scheduled(*, clock, values, m8_provider=None):
@@ -48,9 +68,12 @@ def scheduled(*, clock, values, m8_provider=None):
         shadow = stack.enter_context(_scoped(values, "INVES_COG_SHADOW_DATABASE_URL"))
         operations = stack.enter_context(connect(values))
         cutoff = clock.now_utc()
+        provider = m8_provider if m8_provider is not None else lambda day, at: _read_m8(values, day, at)
         with shadow.transaction():
             shadow.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
-            bundle = ReadInputs(shadow, m8_provider=m8_provider).load(clock=clock, target=target, tickers=tickers)
+            bundle = ReadInputs(shadow, m8_provider=provider).load(
+                clock=clock, target=target, tickers=tickers, cutoff=cutoff
+            )
         rows = operations.execute(
             "SELECT task_name,status,ended_at FROM ingest.job_runs WHERE trade_date=%s ORDER BY started_at DESC",
             (target,),
@@ -108,7 +131,7 @@ def scheduled(*, clock, values, m8_provider=None):
                     if stage.startswith("overlay"):
                         source = bundle.get("m8") or {}
                         if stage == "overlay_deadline":
-                            source = {"complete": False, "null_reason": "自然发布窗口已过；不补造按时覆盖层"}
+                            source = {**source, "complete": False, "null_reason": "自然发布窗口已过；不补造按时覆盖层"}
                         result = run_overlay(clock=clock, target=target, source=source, outputs=outputs)
                     else:
                         result = run_shadows(

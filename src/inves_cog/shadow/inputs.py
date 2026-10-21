@@ -47,12 +47,14 @@ class ReadInputs:
     def __init__(self, connection, m8_provider=None):
         self.connection, self.m8_provider = connection, m8_provider
 
-    def load(self, *, clock, target, tickers):
+    def load(self, *, clock, target, tickers, cutoff=None):
         target = date.fromisoformat(str(target))
         if target != clock.today_trade_date():
             raise ValueError("Historical days require an original PIT snapshot, not mutable latest DB rows")
         signal_day = exchange(target.year).previous_session(str(target)).date()
-        cutoff = clock.now_utc()
+        cutoff = cutoff or clock.now_utc()
+        if cutoff > clock.now_utc():
+            raise ValueError("M9 input cutoff cannot be in the future")
         db = self.connection
         scores = db.execute(
             "SELECT * FROM trading.daily_scores WHERE signal_date=%s AND ticker=ANY(%s) "
@@ -91,7 +93,7 @@ class ReadInputs:
             (target, cutoff),
         ).fetchone()
         m8 = (
-            self.m8_provider(target, cutoff)
+            self.m8_provider(signal_day, cutoff)
             if self.m8_provider
             else {"complete": False, "null_reason": "K01：M8当日完成标记/快照接口未接通", "events": []}
         )
@@ -175,6 +177,8 @@ class ReadInputs:
             "source_ids": {
                 "signal_date": signal_day.isoformat(),
                 "plan_generated_at": str(plan["generated_at"]) if plan else None,
+                "m8_trade_date": signal_day.isoformat(),
+                "m8": deepcopy(m8.get("source_ids") or {}),
             },
         }
         return validate_snapshot(bundle, cutoff=cutoff, target=target)

@@ -1,5 +1,6 @@
 """M9 end-to-end operations over explicit snapshots and scoped output repositories."""
 
+import json
 from copy import deepcopy
 
 from inves_cog.overlay.delivery import FileDelivery
@@ -67,14 +68,23 @@ class MemoryOutputs:
 
 def run_overlay(*, clock, target, source, outputs):
     previous = outputs.last_overlay(target)
+    diagnostics = {
+        "source_ids": deepcopy(source.get("source_ids") or {}),
+        "missing": deepcopy(source.get("missing") or {}),
+        "source_events_asof": source.get("source_events_asof"),
+    }
     if source.get("complete") is not True:
         if previous is not None:
             outputs.retain_overlay(target, previous)
+        note = source.get("null_reason") or "M8当日完成快照未接通，保留旧版本及生成时间"
+        if diagnostics["missing"]:
+            note += "；缺失=" + json.dumps(diagnostics["missing"], ensure_ascii=False, sort_keys=True)
         return {
+            **diagnostics,
             "status": "degraded",
             "processed_count": 0,
             "overlay": previous,
-            "note": source.get("null_reason") or "M8当日完成快照未接通，保留旧版本及生成时间",
+            "note": note,
         }
     payload = generate_overlay(
         source.get("events") or [],
@@ -84,7 +94,13 @@ def run_overlay(*, clock, target, source, outputs):
         market=source.get("market"),
     )
     outputs.publish_overlay(target, payload)
-    return {"status": "ok", "processed_count": len(payload["tickers"]), "overlay": payload}
+    return {
+        **diagnostics,
+        "status": "ok",
+        "processed_count": len(payload["tickers"]),
+        "overlay": payload,
+        "note": "M8来源=" + json.dumps(diagnostics["source_ids"], ensure_ascii=False, sort_keys=True),
+    }
 
 
 def run_shadows(*, clock, target, bundle, tickers, outputs):
