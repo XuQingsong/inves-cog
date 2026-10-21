@@ -39,8 +39,8 @@ _RANGES = """
 SELECT DISTINCT ON (ticker)
     trade_date, ticker, status, bear, neutral, bull, payload, observed_at
 FROM valuation_v1.ranges
-WHERE trade_date = %s AND observed_at <= %s
-ORDER BY ticker, observed_at DESC
+WHERE trade_date <= %s AND observed_at <= %s
+ORDER BY ticker, trade_date DESC, observed_at DESC
 """
 
 _BARS = """
@@ -211,7 +211,7 @@ def _valuation(connection, moment, day):
     rows = []
     for row in ranges:
         prepared = dict(row)
-        prepared["trade_date"] = day
+        prepared["trade_date"] = str(prepared.get("trade_date") or "")[:10]
         prepared["payload"] = _object(prepared.get("payload"))
         if prepared.get("ticker") in closes:
             prepared["price"] = closes[prepared["ticker"]]
