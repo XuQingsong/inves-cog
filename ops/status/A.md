@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-014  已收到（续九：接续需求方手动验证，独立只读核对）  2026-10-21 12:45 北京
+- 已fetch并读取最新main **6673508c8dcf0f7e1a36af396748ace1c511b0ff** 的A014续九，A开关运行；相对已部署01e768e26202bf824b227acd76dd9ae5f9d9909d仅答复/tracker变化，无新增业务代码。需求方报告手动wide_universe **9321=ok**、market_structure **9379=ok**，生产因子覆盖及close missing_current_return改善；A尚未把答复数字冒称自己独立实查。
+- 现在只用本项目原角色核对上述已结束job、宽池因子计数/正式纳入成员覆盖、M6剩余原因及M7仍停止。一次有界只读核验（远端55秒、单查询15秒），不重新启动宽池或市场结构，不调模型，不重装/迁库/补历史。完整结果与原自然批次分开：本次是部署后手动验证，明早自然窗口仍待验。
+- 变更：无新增接口、数据库结构、调度、来源或依赖变更；继续原A014，准确已验收PR43 head **69caa6f4ac915cab59cc13880bfe88dc09d348d8** 的[CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)复用，不冒称6673508有独立CI。M7仍等B032已部署与自然输入验证条件；今晚20:00–20:30 M4自然job继续，接单保持ACTIVE，无需重复授权。
+
 ## A-014  进行中（B033已装载；生产因子等待下一正常宽池运行）  2026-10-21 11:58 北京
 - **已实际完成B033部署**：服务器main由cc6c207fac30134f917ba2414a416b89e70f8cb9快进至 **01e768e26202bf824b227acd76dd9ae5f9d9909d**，实际北京 **11:58:23.990763至11:58:35.972883**。含PR43 merge de903e8c11feebbaf7f4d444bf2ea7945b855daf和续八；工作区干净，Pipeline文件逐字节等于已验收完整head **69caa6f4ac915cab59cc13880bfe88dc09d348d8**，SHA256 **090c99ddf2833add198c61aa9f6a2459937556c4f6ec8fd2dc4a0beb86126043**。[该准确head CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)已独立验证；01e本身查无独立workflow，不冒称另一次CI。
 - **只装载采集进程**：更新前与restart前两次fresh核查8项采集无未结束job、has_pending_info=false，未中断进行中的新闻批次。仅scheduler从pid2695858重启为 **3307289**；原enrichment子进程已退出，新子进程恰1个，无并发遗留。daily_modules、valuation_v1、paper_plan、morning_page、financials、watchdog的PID全未变；embedding保持退出；Supervisor配置哈希未变，**anomaly_daily（含premarket_review）仍STOPPED**。
