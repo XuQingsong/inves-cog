@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-014  进行中（B033已装载；生产因子等待下一正常宽池运行）  2026-10-21 11:58 北京
+- **已实际完成B033部署**：服务器main由cc6c207fac30134f917ba2414a416b89e70f8cb9快进至 **01e768e26202bf824b227acd76dd9ae5f9d9909d**，实际北京 **11:58:23.990763至11:58:35.972883**。含PR43 merge de903e8c11feebbaf7f4d444bf2ea7945b855daf和续八；工作区干净，Pipeline文件逐字节等于已验收完整head **69caa6f4ac915cab59cc13880bfe88dc09d348d8**，SHA256 **090c99ddf2833add198c61aa9f6a2459937556c4f6ec8fd2dc4a0beb86126043**。[该准确head CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)已独立验证；01e本身查无独立workflow，不冒称另一次CI。
+- **只装载采集进程**：更新前与restart前两次fresh核查8项采集无未结束job、has_pending_info=false，未中断进行中的新闻批次。仅scheduler从pid2695858重启为 **3307289**；原enrichment子进程已退出，新子进程恰1个，无并发遗留。daily_modules、valuation_v1、paper_plan、morning_page、financials、watchdog的PID全未变；embedding保持退出；Supervisor配置哈希未变，**anomaly_daily（含premarket_review）仍STOPPED**。
+- **没有把安装当作数据修复**：部署前/后最近wide_universe均为 **job8907**（10-20交易日，北京08:28至08:38原成功批次），没有新wide job、手工回填或模型探测。生产adj_factor本轮未手工更新，原宽池post_close限制保留。原历史job及B032迁移不重复。私有成功证据 **migration/b033-scheduler-deployment-result.json**、b033-scheduler-deployment-attempt.json；先前main变化保护退出的失败证据单独保留，该轮未修改/重启，后续已安全完成，不再重做安装。
+- **下一真实核验**：按续八等正常wide_universe窗口（预计北京 **2026-10-22 08:20**起，实际按job记录），读取adj_factor_split/unity/null、未知/失败降级和近期20交易日因子覆盖，再比较后续market_structure的missing_current_return与旧基准1228。不能以只有20日更新推称全部回归输入完整；post_close未采集，不将其NULL写成修好。不改钟、不补造按时运行。
+- **M7与M4**：B032生成时间迁移/早页过滤已应用，但M7继续停止；自然wide及market_structure输入核验后才按A014启用/安全回填，若M7当天窗口已过则等下一自然窗口。今晚M4北京20:00–20:30真实job仍待验，已有评分9004/M5自然9003证据复用。整体A014仍进行中、接单ACTIVE；此刻无需新的同范围授权。
+
 ## A-014  进行中（续八已读取，刷新目标后继续部署）  2026-10-21 11:57 北京
 - 首次B033部署保护因main前进至 **01e768e26202bf824b227acd76dd9ae5f9d9909d** 而在任何代码修改/重启前退出。已只读实查：服务器仍cc6c207，所有原PID不变、M7 STOPPED，attempt/result均不存在；原失败证据保留，未重复启动已执行步骤。
 - 已fetch并全文读新增A014续八：明确立即快进/装载M1 worker，正常宽池预计北京10-22 08:20核验后才开M7，今晚M4继续。591bfd4之后仅该答复和tracker文本变化，PR43业务代码未变；现在把已检查的目标更新为01e768e，继续同一安全空闲部署，不再等待新批准、不改钟、不手工回填。范围与上一条变更完全相同。
