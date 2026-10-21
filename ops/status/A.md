@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（M4/M5已安装；M7严格停用，10:30业务结果待验）  2026-10-21 10:28 北京
+- **已实际安装一次**：服务器main快进至 **d03383bf7a8471fb3f97d4a61ceae3195c721214**，实际北京时间 **10:27:16.053729至10:27:25.752966**。只用该已合并安装器的configuration生成配置，在任何写入/重载前先把anomaly_daily的autostart/autorestart置false；随后原Supervisor reread/update。未调用会整套重启的安装动作，原systemd持续active，原scheduler/financials/morning_page/watchdog PID未变，embedding维持原退出状态。
+- **实际进程核对**：daily_modules RUNNING pid3262553（明确仅market_structure/rule_a_scores）；paper_plan RUNNING pid3262554；valuation_v1 RUNNING pid3262555；**anomaly_daily STOPPED/Not started**（同时禁premarket_review），安装前后M7新增job=0。当前业务相关job仍只有已成功market_structure#8941，未把worker存活写成M4/M5业务成功。M5启用前复核私有独立终验job8775及11800行/五日49/49/49/50/50，不重算。
+- **版本与证据**：PR41准确head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1** 的[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)；已安装d033该SHA查无独立workflow run，不能把该链接说成d033的独立CI。已核对e7至d033仅docs/tracker、A014答复及B032任务文本差异，业务/调度代码一致。服务器私有证据 **migration/runtime-pr41-install-result.json**，配置备份SHA **eec4cddedeff08386c1a9ccbdaffb9b3c532daedb2924fa94e9e5a3b6346cee9**、安装配置SHA **14af73f2ee169201d285b6ec2125b0bb6e5e48dd688022133865daa49cef35d2**，备份与新配置均私有；未写入凭据值。
+- 安装时已核对Git干净、main包含已批准merge head、无同日相关未完成job、无重复安装结果后才执行；没有迁移、角色/权限变更、历史重跑或手工模型/业务调用。下一步核对10:30自然评分/估值，M4等待北京20:00–20:30真实窗口；M7继续等B032合并/迁移，不绕过。接单保持ACTIVE。
+
 ## A-014  进行中（续五已收到：PR41已合并，开始分阶段安装）  2026-10-21 10:24 北京
 - 已fetch最新main **d03383bf7a8471fb3f97d4a61ceae3195c721214**，A=运行；本地祖先检查确认完整PR head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1** 已包含，merge commit **b5dfb9f0451c185902791035d3648e403c83ba59**。GitHub亦确认[PR41已合并](https://github.com/XuQingsong/inves-cog/pull/41)，合并时间10:15:22北京，[准确head CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用，不再等待同一批准或由A代合并。
 - 按续五先安装M4/M5：先核对服务器工作区与活动任务、已核验M5 job8775，再快进已确认的main；用已合并安装器的configuration在内存生成配置，**写入前把anomaly_daily（含premarket_review）设为不自启/不重启**，再对现有Supervisor reread/update。只增加M4/M5、更新daily_modules明确任务范围，不重启整套服务或已完成embedding，不生成启用M7的时间空隙。配置先私有备份，安装后核实M7为STOPPED和其无新业务job。
