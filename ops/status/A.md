@@ -1,5 +1,14 @@
 # A 线回报
 
+## A-015  已收到（T09/M9开工；A014剩余自然验证转OPS）  2026-10-21 13:24 北京
+- 已fetch main **d57277a243451c5f6fb69da2699d9de69f86579b**，读取A015、T09、M9全文、更新后的README与A014续十二。按用户UD-COORD-24，**A014开发交付完成；OPS自然验证待完成**，未来窗口不占开发任务位。今晚M4/盘前复核、明早wide/M6/M7及早页仍由A按原授权核验，不把线上或第一阶段整体验收说成通过；接单保持ACTIVE。
+- A015只做M9：覆盖层冷静期/撤买只收紧；X1–X4、F01–F08、单因子替换/N9及S10资格只读影子，不下订单、不改规则A或M4/M5/M8/M1/M6业务。用冻结接口与离线fixtures，缺失写NULL/原因，不等待自然数据开工。先建独立分支/开工复述草稿PR，按更新后的任务书§4.1/4.6处理疑问，再保留先失败测试/夹具、后实现历史。
+- **拟变更**：仅M9自己的overlay/perception_shadow/factor_shadow迁移及交易角色REVOKE、HTTP+文件投递合同、因子登记/每日影子和M9任务入口；具体字段与版本规则写kickoff后实施。不执行生产迁移、部署、真实模型调用或历史生产回填，不改docs/golden/milestones，不代做B034/M10。PR/head/CI将在草稿实际创建和运行后回报，当前不冒称已实现或通过。
+
+## A-014  已完成（开发/部署交付；OPS自然运行验证待完成）  2026-10-21 13:24 北京
+- 依据A015及A014续十二结束开发任务位：PR41/M4-M5-M7调度、B032迁移/早页过滤、B033宽池修复已合并且部署，最新服务器完整SHA **01e768e26202bf824b227acd76dd9ae5f9d9909d**；准确head CI与实际部署/手动9321/9379独立核验证据见以下各阶段。M7在13:17已按UD-A-18启用，不重新安装、迁库或补跑已完成job。
+- **仍未通过的OPS**：今晚20:00–20:30 M4自然计划与M7盘前门禁；明早10-22正常wide/M6、M7日判、09:15早页；B034实际合并后早报最新可见估值PIT展示。按需求方tracker单列OPS持续跟进，A不修改只读docs；发现真实缺陷则按范围报告，不伪造自然按时证据。本条完成仅指开发/部署交付，不是线上全链路或第一阶段验收完成。
+
 ## A-014  进行中（UD-A-18已落实：M7常驻进程已启用，业务自然运行待验）  2026-10-21 13:17 北京
 - **已实际启用M7**：北京 **13:17:11.446158至13:17:16.392996**，仅现有Supervisor program **anomaly_daily** 从STOPPED改为 **RUNNING pid3348041**，进程命令已核实同时包含原任务过滤anomaly_daily、premarket_review。只将该program的autostart/autorestart从false恢复true并定向update，没有整套重装或重启。原scheduler3307289、daily_modules3262553、valuation_v13262555、paper_plan3262554、morning_page3289325、financials2695856、watchdog2809787的PID全未变；embedding保持原EXITED，systemd自10-20 14:37:22启动时间未变。
 - **不是M7业务成功**：启用前后原角色查得anomaly_daily/premarket_review业务job均为空，perception.anomalies均0行、generated_at非空0行；当前在美东01:17，确实不在两项原生运行窗。没有手工调用M7、模型或历史写入。B032生成时间字段以原 **role_perception** 复核timestamptz、nullable=YES、default=NULL；手动前置9321/9379仍ok且结束，不重复执行。
