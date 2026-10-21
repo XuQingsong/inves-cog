@@ -5,6 +5,8 @@ import os
 from datetime import date
 from pathlib import Path
 
+from inves_cog.overlay.rules import timestamp
+
 ROOT_FIELDS = {"version", "generated_at", "source_events_asof", "params_version", "tickers", "market"}
 TICKER_FIELDS = {
     "linkage_events",
@@ -19,10 +21,19 @@ TICKER_FIELDS = {
 def validate_payload(payload):
     if not isinstance(payload, dict) or set(payload) != ROOT_FIELDS:
         raise ValueError("I24: overlay root contract differs")
+    if type(payload["version"]) is not int or payload["version"] < 1:
+        raise ValueError("I24: invalid overlay version")
+    generated, source = timestamp(payload["generated_at"]), timestamp(payload["source_events_asof"])
+    if generated is None or source is None or source > generated:
+        raise ValueError("I24: overlay source must be visible at generation")
     for item in payload["tickers"].values():
         if set(item) != TICKER_FIELDS or type(item["cooling_off"]) is not bool:
             raise ValueError("I24: unsupported action or ticker field")
-        if item["first_lot_multiplier"] != 1.0 or item["stop_review_eligible"] is not False:
+        if (
+            type(item["first_lot_multiplier"]) not in (int, float)
+            or item["first_lot_multiplier"] != 1.0
+            or item["stop_review_eligible"] is not False
+        ):
             raise ValueError("I24: multiplier and stop review are frozen")
     json.dumps(payload, allow_nan=False)
     return payload

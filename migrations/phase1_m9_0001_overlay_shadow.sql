@@ -4,7 +4,7 @@ SET LOCAL ROLE inves_cog_admin;
 CREATE TABLE IF NOT EXISTS overlay.versions (
  version bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  date date NOT NULL, generated_at timestamptz NOT NULL, source_events_asof timestamptz NOT NULL,
- params_version text NOT NULL, payload jsonb NOT NULL,
+ params_version text NOT NULL, payload jsonb NOT NULL, published boolean NOT NULL DEFAULT false,
  CHECK (source_events_asof <= generated_at)
 );
 CREATE INDEX IF NOT EXISTS overlay_versions_date ON overlay.versions (date, version DESC);

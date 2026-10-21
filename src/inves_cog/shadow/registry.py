@@ -1,6 +1,45 @@
 """Append-only factor definitions; a changed definition creates another version."""
 
+import json
 from copy import deepcopy
+
+from inves_cog.shadow.settings import settings
+
+INPUTS = {
+    "F-01": [
+        "M3.growth",
+        "M2.rev_growth",
+        "M3.ps",
+        "M3.pe",
+        "M2.eps_growth",
+        "M2.prev_eps_ttm",
+        "M2.prev_net_margin",
+        "M3.fcf_yield",
+    ],
+    "F-02": [
+        "M3.quality",
+        "M3.growth",
+        "M2.rev_accel_pp",
+        "M2.rev_q_yoy",
+        "M2.gross_margin_change_pp",
+        "M2.fcf_margin_change_pp",
+        "M2.ni_ttm",
+    ],
+    "F-03": ["M2.consensus_snapshot.eps_cy", "M2.fy_cy", "captured_at", "as_of"],
+    "F-04": ["M2.segments.revenue", "M2.margin_pct", "M2.recast_group", "filed", "period_end"],
+    "F-05": ["M2.segments.revenue", "M2.yoy_pct", "M2.recast_group", "filed", "period_end"],
+    "F-06": ["M4.tier", "rule_a.cap", "M3.vol60", "M3.vol20", "M4.plan.notional_est"],
+    "F-07": ["M5.shadow_rules.vt1", "M5.vt2", "M5.version", "M5.observed_at"],
+    "F-08": [
+        "M4.price_sell",
+        "M4.holding_id",
+        "M4.equity",
+        "M6.shock_flag",
+        "M6.resid_5d_z",
+        "M1.earnings_events",
+        "M2.S1_inputs",
+    ],
+}
 
 DEFINITIONS = (
     ("F-01", "成长调整估值分B1；PSG50/EPS增长调整PE30/FCF收益率20；缺项重配", "估值账/M31", "高PE成长股买入路径"),
@@ -24,8 +63,12 @@ class Registry:
             {
                 "factor_id": key,
                 "version": "v1",
-                "definition": text,
-                "inputs": "按M9 FR11–18既有只读输入",
+                "definition": text
+                + "；参数="
+                + json.dumps(
+                    settings().get("s10" if key == "F-08" else "f" + key[-2:], {}), sort_keys=True, ensure_ascii=False
+                ),
+                "inputs": INPUTS[key],
                 "pit_note": "filed/observed_at/captured_at不晚于cutoff，缺失保留NULL及原因",
                 "target": target,
                 "rationale": reason,

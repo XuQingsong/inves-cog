@@ -1,5 +1,6 @@
 """Auditable X1–X4 observations with durable deduplication keys, never orders."""
 
+from copy import deepcopy
 from datetime import date
 from hashlib import sha256
 
@@ -18,7 +19,7 @@ def _row(signal, ticker, event, day, observation, conditions, action, *, holding
         "signal_key": key,
         "condition_detail": {
             "conditions": conditions,
-            "inputs": observation,
+            "inputs": deepcopy(observation),
             "evidence_ids": list(event.get("evidence_ids") or []),
             "source_order_ids": list(observation.get("source_order_ids") or []),
             "holding_id": holding,
@@ -35,7 +36,9 @@ def generate_signals(events, observations, *, day, seen):
     for event in events:
         for member in event.get("affected") or []:
             ticker = member.get("ticker")
-            obs = observations.get(ticker) or {}
+            obs = deepcopy(observations.get(ticker) or {})
+            if "event_inputs" in obs:
+                obs.update((obs["event_inputs"] or {}).get(event.get("event_id")) or {"eps_change_pct": None})
             eps, price, ma50 = obs.get("eps_change_pct"), obs.get("close"), obs.get("ma50")
             conditions = {
                 "holding": obs.get("holding") is True and bool(obs.get("holding_id")),
@@ -61,7 +64,7 @@ def generate_signals(events, observations, *, day, seen):
                     result.append(row)
                     emitted.add(row["signal_key"])
     for ticker, obs in observations.items():
-        tag = obs.get("divergence_tag") == "情绪性折价"
+        tag = obs["divergence_tag"] == "情绪性折价" if obs.get("divergence_tag") is not None else None
         actual = obs.get("actual_watchlist_wave_buy") is True
         qualified = obs.get("watchlist_wave_eligible") is True
         if actual or (tag and qualified):
@@ -81,7 +84,10 @@ def generate_signals(events, observations, *, day, seen):
             "X4", ticker, {}, day, obs, {"snapshot_mature": mature}, "按F03记录单因子替换" if mature else "快照不足"
         )
         row["condition_detail"].update(
-            raw_revision_pct=obs.get("eps_revision_30d_pct"), status="可计算" if mature else "快照不足"
+            raw_revision_pct=obs.get("eps_revision_30d_pct"),
+            status=("可计算" if obs.get("eps_revision_30d_pct") is not None else "修订输入缺失")
+            if mature
+            else "快照不足",
         )
         result.append(row)
     return [row for row in result if row["signal_key"] not in seen]
