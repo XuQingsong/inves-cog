@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  已收到（UD-A-18：依续十一现在启用已合并M7常驻进程）  2026-10-21 13:15 北京
+- **用户决策UD-A-18（需求方A014续十一转达）**：用户明确要求依据已完成的部署后手动验证继续，不因等待明早自然wide/M6而让M7常驻进程继续停止。已读取main **afcfe5dcbebcb10c49899e647cf0ced2fa78150d**；9321/9379的原角色独立验证已在上一阶段完成，不重复运行。现在允许启用已合并PR41的anomaly_daily、premarket_review常驻任务，不手工调用/补跑M7，不扩大历史回填、schema、角色、来源或权限。
+- **变更：仅启用现有M7服务配置**。原安装器实际将两项任务放在同一Supervisor program **anomaly_daily**（schedule_daily_modules.py --tasks anomaly_daily premarket_review），不是两个独立进程；只把该现有program的autostart/autorestart恢复true并定向update，其他program配置/PID保持不动。先核原代码哈希、B032字段/原角色可读、无同类未结束job及当前不在M7执行时间窗，保存私有配置备份和尝试证据，再启用并核对新进程、业务job/异常表前后变化。
+- **原生门禁事实**：anomaly_daily在美东20:55–21:00检查bars_full和market_structure已结束且ok/degraded；premarket_review在美东08:00–08:30检查bars_prefill已结束且ok/degraded。源代码没有单独的wide_universe直接门禁，盘前复核也不直接检查market_structure；本授权要求沿用已合并原生门禁，A不擅改调度逻辑、不把其写成新增直接wide门禁。明早自然wide/M6、M7和09:15页面分别核验，不能以进程启动替代业务成功。
+- **版本边界**：PR41准确head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1** [CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)，B032准确head **3e55dbc6750417773d92c37d48096c51e7a08928** [CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39533772102)及已执行迁移证据复用。B034另行交付PR44，目前未合并，不在本轮装载或声称其已上线。今晚M4自然计划仍须核验，接单保持ACTIVE。
+
 ## A-014  已收到（续十：B034合并后核对早报最新可见估值）  2026-10-21 13:03 北京
 - 已fetch main **15d048e5179ad9da4ab9cf72cddce75de313afa4** 并读取新增续十，A=运行，A信箱仍止于A014；status已同步保留B034接收记录。B034由B负责实现早报读取/展示修复，A不代做或代分配B任务。当前无新合并业务代码，不重装服务；旧宽池9321/M6 9379手动验证及12:50原角色独立核验复用，不重复运行。
 - **变更（待B034验收合并）**：早报每ticker取trade_date<=report_date且observed_at<=页面cutoff的最新真实估值，同日再按observed_at取最新；显示实际估值日期，不把上一交易日标成当日。价格仍取报告日收盘价，估值/价格日期不同需明确。无符合条件值仍显示缺失，不读取未来10:30结果、不回填时间、不改M5算法或陈旧阈值。该查询/展示合同尚未在服务器装载，不冒称早报已修好；暂无B034 PR/head/CI，后续只用实际已验收合并版本及准确CI。
