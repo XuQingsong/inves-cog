@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-035  已完成  2026-10-21 17:47 北京
+
+- 草稿 PR #46，head `513459f`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39579381063 。`phase1-blocking` 420 passed、21 deselected，用时 53.61 秒，nightly 跳过。没有合并。
+- 证据：例子先因没有 `snapshot` 模块而失败。改完之后 `tests/m8/test_b035.py` 6 passed。本地 `make phase1-test` 420 passed、21 deselected，用时 67.05 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.60 秒。
+- `complete` 需要 `attribution_candidates`、`attribution_tracks`、`attribution_labels` 都在该交易日、cutoff 前以 `ok` 结束。三阶段都成功且没有事件时，空列表表示已经查过。事件版本只取 `history.at` 不晚于 cutoff 的最后一条。`generated_at` 更晚的异常不进入快照。`source_events_asof` 用作业真实结束时间，不用 cutoff 本身。
+- 有事件时不算完整输入。`mechanism`、`deadline_outcome`、`exposure`、`affected`、`direction`、`divergence_tag`、`dimensions`、`next_filing_at` 没有可证明的历史时间，原因写在 `missing.fields`。没有历史时间的行不会被当成当时的生命周期。不回填，不从当前报告反推。
+- 读取使用调用方连接上的 `REPEATABLE READ READ ONLY`，读完回滚。不 `SET ROLE`，不加 schema、角色或权限。`role_shadow` 仍不能读这些表。不改 M9、M4、规则 A，不连生产库，不调模型，不部署，不手动跑线上 M8/M9。
+- 下一步：等需求方验收。不取新任务。合并后由 A-015 接上这个适配器。
+
 ## B-035  进行中  2026-10-21 17:46 北京
 
 - 草稿 PR #46，head `513459f`，分支 `cursor/m8-b035-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/46
