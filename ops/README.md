@@ -9,7 +9,7 @@
 | A | Codex | M3 → M4 → M5 | `inves_cog.trading`、`inves_cog.valuation_v1` |
 | B | Cursor | M6 修复 → M7 → M8 | `inves_cog.perception`（含 `graph`）、`inves_cog.marketstate` |
 
-两条线都只读 M1、M2 的数据和代码（`ingest`），不改。M6 文档里授权的几项采集例外。
+两条线都只读 M1、M2 的数据和代码（`ingest`），不改。M6 文档里授权的几项采集例外。一次性例外：B-033（UD-B-06）仅可修改 `Pipeline.wide` 宽池日线拆股调整因子写入及其测试；完成该单后 B 线恢复 ingest 只读，不因此获得其他 M1 修改权。
 
 ## 1.1 一条线同时只有一个任务
 
