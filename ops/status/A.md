@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（服务器首次正式行情已按时自然启动，仍运行）  2026-10-21 08:24 北京
+- **本轮真实bars_full#8906已自然启动**：交易日2026-10-20，实际北京 **08:20:16.602416**（ET20:20:16），处于要求的20:20分钟；服务器仍为已合并源码 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**。08:23:41只读实查仍status=running、ended_at=NULL，**不算完成或全链路通过**。未手工触发、改钟、补造记录或重试接口。
+- 已观察到本轮数据库增量：73个请求代码均有分钟行、共48255行；已有22个代码的当日日线（尚未完整）。已提交日线代码的分钟覆盖中间值为1.0，但这只是运行中部分观测，**不能替代最终73代码/不可用清单、原生报告、min>=0.95/avg>=0.99和08:45截止核验**。当前bars-report游标尚未生成；wide_universe及后续当日任务尚未见记录。私有原始观测migration/natural-run-20261021-002342.json；完整运行说明仅在私有natural-run-20261021-private.json。
+- 08:23 scheduler/daily_modules/financials/morning_page/watchdog均RUNNING，embedding保持原一次性退出。本轮未到08:30检查点，Scheduler:bars_full当前健康行仍为旧日期，不能冒充本次20:30健康检查已通过；Alpaca旧预取403健康状态尚未被本轮结算更新，预取问题未冒称关闭。下一次只读观察核对本次job是否结束及08:30健康行，再观察08:45市场结构和09:15早页；不并发启动第二份采集。
+- 最新main **d0521bca4a9c2bfccaa7248485af4b0d18d6c4ad**、A=运行、信箱及答复未变。新增调度[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)仍待需求方执行UD-A-14已批准合并；head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**及[准确CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)沿用。A不代合并；M7仍待B线生成时间与早报过滤交付，不跨线修改。M4/M5/M7历史结果不重跑；新状态检出继续用/private/tmp/inves-cog-agent-status-20261021，只改A.md，接单持续ACTIVE。
+
 ## A-014  进行中（今早窗口前服务实查完成；新增调度仍待合并）  2026-10-21 07:36 北京
 - **07:33服务器实际状态**：源码 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**，systemd active/running/enabled、Linger=yes；scheduler、daily_modules、financials、morning_page、watchdog均RUNNING。embedding保留原10-20 14:43正常退出，未重启或耗用额度。四项专用连接配置存在；原身份/权限实测证据复用，不把配置存在冒充权限复验。服务自10-20 14:37:22持续，未重启本项目或其他项目。
 - **只读核对预取403的来源**：服务器bars_prefill#8753（10-20）failed/403/0行；迁移前Mac上的#8045（10-19）也是failed/403/0行，而其后的正式bars_full#8191为ok/226540行。因此已证实预取403在迁移前存在，**尚不能认定是迁移引入或今早正式采集必然失败**；现有错误仅HTTP403，没有保留更具体响应，底层原因未证实。未重试受限接口、未换源/密钥、未发额外采集或模型请求。私有证据migration/prefill-existing-failure-20261021.json。下一步按真实08:20自然bars_full、08:45市场结构、09:15早页、10:30评分等实际窗口核对，不提前触发或伪造时间。
