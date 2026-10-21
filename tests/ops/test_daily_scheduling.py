@@ -52,10 +52,10 @@ def test_installer_registers_inputs_without_dropping_existing_sec_tasks(platform
         ("2026-10-17T00:44:00Z", []),
         ("2026-10-17T00:45:00Z", ["market_structure"]),
         ("2026-10-17T02:29:00Z", ["market_structure"]),
-        ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores"]),
+        ("2026-10-17T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
         ("2026-11-03T01:44:00Z", []),
         ("2026-11-03T01:45:00Z", ["market_structure"]),
-        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
     ],
 )
 def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, names):
@@ -71,13 +71,26 @@ def test_module_poll_uses_et_boundaries_and_real_module_schedule_guards(stamp, n
         calls.append(("rule_a_scores", kwargs))
         return {"status": "ok", "processed_count": 2}
 
+    def valuation(**kwargs):
+        calls.append(("valuation_v1", kwargs))
+        return {"status": "ok", "processed_count": 59}
+
     clock = frozen(stamp)
-    result = run_once(clock=clock, values={}, ready=lambda *args: True, market_run=market, score_run=scores)
+    result = run_once(
+        clock=clock,
+        values={},
+        ready=lambda *args: True,
+        market_run=market,
+        score_run=scores,
+        valuation_run=valuation,
+    )
     assert list(result) == names
     assert [name for name, kwargs in calls] == names
     for name, kwargs in calls:
-        assert kwargs["schedule"] is True and kwargs["clock"] is clock
-        assert kwargs["day" if name == "market_structure" else "signal_date"] == clock.today_trade_date()
+        assert kwargs["clock"] is clock
+        if name != "valuation_v1":
+            assert kwargs["schedule"] is True
+            assert kwargs["day" if name == "market_structure" else "signal_date"] == clock.today_trade_date()
 
 
 def test_module_poll_waits_for_inputs_and_financials_before_dispatch():

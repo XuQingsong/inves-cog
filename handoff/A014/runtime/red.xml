@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="17" skipped="0" tests="17" time="0.223" timestamp="2026-10-20T16:12:54.246012+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-21T00:54:59Z-names0]" time="0.001"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-21T00:54:59Z', names = ['market_structure']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-21T00:54:59Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-21T00:55:00Z-names1]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-21T00:55:00Z', names = ['market_structure', 'anomaly_daily']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-21T00:55:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-21T01:00:00Z-names2]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-21T01:00:00Z', names = ['market_structure']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-21T01:00:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-21T02:30:00Z-names3]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-21T02:30:00Z'
+names = ['market_structure', 'rule_a_scores', 'valuation_v1']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-21T02:30:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-11-03T01:55:00Z-names4]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-11-03T01:55:00Z', names = ['market_structure', 'anomaly_daily']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-11-03T01:55:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-11-03T03:30:00Z-names5]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-11-03T03:30:00Z'
+names = ['market_structure', 'rule_a_scores', 'valuation_v1']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-11-03T03:30:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-20T11:59:59Z-names6]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-20T11:59:59Z', names = []
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-20T11:59:59Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-20T12:00:00Z-names7]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-20T12:00:00Z', names = ['premarket_review', 'paper_plan']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-20T12:00:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-20T12:30:00Z-names8]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-20T12:30:00Z', names = []
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-20T12:30:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-11-03T12:00:00Z-names9]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-11-03T12:00:00Z', names = []
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-11-03T12:00:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-11-03T13:00:00Z-names10]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-11-03T13:00:00Z', names = ['premarket_review', 'paper_plan']
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-11-03T13:00:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_runtime_windows_and_dst[2026-10-18T12:00:00Z-names11]" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">stamp = '2026-10-18T12:00:00Z', names = []
+
+    @pytest.mark.parametrize("stamp,names", [
+        ("2026-10-21T00:54:59Z", ["market_structure"]),
+        ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
+        ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
+        ("2026-10-20T11:59:59Z", []),
+        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:30:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
+        ("2026-11-03T13:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-18T12:00:00Z", []),
+    ])
+    def test_a014_runtime_windows_and_dst(stamp, names):
+&gt;       result, calls = probe(stamp)
+                        ^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-18T12:00:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_paper_uses_previous_session_scores_and_current_premarket_inputs" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">def test_a014_paper_uses_previous_session_scores_and_current_premarket_inputs():
+        seen = []
+        def ready(name, day):
+            seen.append((name, day))
+            return False
+&gt;       result, calls = probe("2026-10-19T12:00:00Z", ready=ready)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-19T12:00:00Z'
+ready = &lt;function test_a014_paper_uses_previous_session_scores_and_current_premarket_inputs.&lt;locals&gt;.ready at 0x1096af4c0&gt;
+failure = None
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_dependencies_both_reject_incomplete_and_allow_degraded_finished" time="0.000"><failure message="ValueError: Unknown module task">def test_a014_dependencies_both_reject_incomplete_and_allow_degraded_finished():
+        done = {"status": "degraded", "ended_at": datetime(2026, 10, 20, tzinfo=timezone.utc)}
+        cases = {
+            "anomaly_daily": {"bars_full": done, "market_structure": done},
+            "valuation_v1": {"bars_full": done, "m2_financials": done},
+            "paper_plan": {"rule_a_scores": done},
+            "premarket_review": {"bars_prefill": done},
+        }
+        for name, records in cases.items():
+&gt;           assert schedule.dependencies_met(name, records)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'anomaly_daily'
+records = {'bars_full': {'status': 'degraded', 'ended_at': datetime.datetime(2026, 10, 20, 0, 0, tzinfo=datetime.timezone.utc)},...et_structure': {'status': 'degraded', 'ended_at': datetime.datetime(2026, 10, 20, 0, 0, tzinfo=datetime.timezone.utc)}}
+
+    def dependencies_met(name, records):
+        def completed(row):
+            return bool(row and row["status"] in {"ok", "degraded"} and row.get("ended_at") is not None)
+    
+        if name == "market_structure":
+            return all(completed(records.get(task)) for task in ("bars_full", "m6_market_inputs"))
+        if name == "rule_a_scores":
+            financial = [records[task] for task in ("financials", "m2_financials") if task in records]
+            floor = datetime.min.replace(tzinfo=timezone.utc)
+            latest = max(financial, key=lambda row: row.get("started_at") or row.get("ended_at") or floor, default=None)
+            return completed(latest)
+&gt;       raise ValueError("Unknown module task")
+E       ValueError: Unknown module task
+
+scripts/schedule_daily_modules.py:26: ValueError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_valuation_failure_does_not_suppress_paper_or_anomaly_dispatch" time="0.000"><failure message="TypeError: run_once() got an unexpected keyword argument 'anomaly_run'">def test_a014_valuation_failure_does_not_suppress_paper_or_anomaly_dispatch():
+&gt;       result, calls = probe("2026-10-20T12:00:00Z", failure="premarket_review")
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/ops/test_runtime_scheduling.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+stamp = '2026-10-20T12:00:00Z', ready = &lt;function &lt;lambda&gt; at 0x1096485e0&gt;
+failure = 'premarket_review'
+
+    def probe(stamp, ready=lambda *args: True, failure=None):
+        calls = []
+    
+        def operation(name):
+            def run(**kwargs):
+                calls.append((name, kwargs))
+                if name == failure:
+                    raise ValueError("private fixture value must not be logged")
+                return {"status": "ok", "processed_count": 4, "plan": {"private": "must not be logged"}}
+            return run
+    
+&gt;       result = schedule.run_once(
+            clock=clock(stamp), values={}, ready=ready,
+            market_run=operation("market_structure"), score_run=operation("rule_a_scores"),
+            anomaly_run=operation("anomaly_daily"), valuation_run=operation("valuation_v1"),
+            paper_run=operation("paper_plan"), premarket_run=operation("premarket_review"),
+        )
+E       TypeError: run_once() got an unexpected keyword argument 'anomaly_run'
+
+tests/ops/test_runtime_scheduling.py:28: TypeError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_m7_dispatch_uses_own_login_and_existing_recorded_guard" time="0.000"><failure message="ImportError: cannot import name 'run_anomalies' from 'scripts.schedule_daily_modules' (/private/tmp/inves-cog-a014/scripts/schedule_daily_modules.py)">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10967d350&gt;
+
+    def test_a014_m7_dispatch_uses_own_login_and_existing_recorded_guard(monkeypatch):
+&gt;       from scripts.schedule_daily_modules import run_anomalies
+E       ImportError: cannot import name 'run_anomalies' from 'scripts.schedule_daily_modules' (/private/tmp/inves-cog-a014/scripts/schedule_daily_modules.py)
+
+tests/ops/test_runtime_scheduling.py:99: ImportError</failure></testcase><testcase classname="tests.ops.test_runtime_scheduling" name="test_a014_m7_missing_writer_fails_closed_without_borrowing_admin" time="0.000"><failure message="ImportError: cannot import name 'run_anomalies' from 'scripts.schedule_daily_modules' (/private/tmp/inves-cog-a014/scripts/schedule_daily_modules.py)">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1096cf790&gt;
+
+    def test_a014_m7_missing_writer_fails_closed_without_borrowing_admin(monkeypatch):
+&gt;       from scripts.schedule_daily_modules import run_anomalies
+E       ImportError: cannot import name 'run_anomalies' from 'scripts.schedule_daily_modules' (/private/tmp/inves-cog-a014/scripts/schedule_daily_modules.py)
+
+tests/ops/test_runtime_scheduling.py:119: ImportError</failure></testcase></testsuite></testsuites>
