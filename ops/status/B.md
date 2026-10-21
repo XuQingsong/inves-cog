@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-032  进行中  2026-10-21 10:32 北京
+
+- 草稿 PR #42，head `3e55dbc`，分支 `cursor/m7-b032-pit-visibility-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/42
+- 五个早报例子先失败：晚生成的仍可见，没有生成时间的旧行仍可见，`--at` 只传了交易日，写入还不接收 `generated_at`。改完之后 `tests/m7/test_b032.py` 通过。全套测试还在跑。
+- `perception.anomalies.generated_at` 可空，迁移不回填。新写入用注入时钟的 `now_utc()`。早报只取交易日对上、生成时间非空且不晚于这次运行的异常。`--at` 重出旧早报时，后补的行不可见。
+- M6 空原因不在本线改计算。当日收盘价在，宽池 `adj_factor` 和 `post_close` 为空，写入者是 `Pipeline.wide` / `Alpaca.daily_bars`（`adjustment=raw`，`source=Alpaca`）。`missing_current_return` 和 `missing_post_price` 是上游缺口。`sector_unmapped`、`l3_same_as_l2`、`insufficient_history` 是预期降级。`l3_same_as_l2` 的收益和残差仍有效。那 2 个样本不足在 post 上被 `missing_post_price` 盖住，本单不改标签。1,253 个空原因没有清掉。
+- 已自行决定：不把空的 `adj_factor` 填成 1.0，不降低 60 天窗口，不改 `ingest`。逐票名单在 A 的私有证据里，不在本仓库，报告不列 1,228 个代码。
+- 没有发起真实模型调用，没有连接生产库。没有改 `docs/`、`golden/`、`milestones.txt`。不回填历史异常，不重跑 job 8750。
+- 下一步：全套测试和 CI 绿了再写已完成。
+
 ## B-032  已收到  2026-10-21 10:20 北京
 
 - 任务分两块。A：`perception.anomalies` 增加实际生成时间，新写入用注入的 `Clock`，历史回放记真实计算时间。早报只取 `trade_date` 对应且 `generated_at` 不晚于页面运行时刻的异常；NULL 或更晚的都不可见。旧行不按交易日回填。B：按 close/post、pool/wide、ticker/source 分层，查清 2026-10-21 自然运行里 `null_reason` 的直接原因。能在本线修的、且不改冻结阈值和接口的，先红后绿修；上游缺口只报告，不越界改。
