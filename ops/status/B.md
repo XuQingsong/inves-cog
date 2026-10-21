@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-036  已完成  2026-10-21 19:18 北京
+
+- 草稿 PR #47，head `36abb4d`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39590365749 。`phase1-blocking` 429 passed、21 deselected，用时 114.97 秒，nightly 跳过。没有合并。
+- 证据：读取原先把当时的作业当成完整快照，例子因此失败。改完之后 `tests/m8/test_b035.py` 4 项、`tests/m8/test_b036.py` 11 项通过。本地 `make phase1-test` 429 passed、21 deselected，用时 65.08 秒；`make phase1-cases` 7 passed、1 xfailed，用时 26.22 秒。
+- 三个阶段都成功且没有事件时，追加一份 complete 空快照。`snapshot_generated_at` 是注入时钟。`source_asof` 是三个作业结束时间的最晚值。
+- 从现有表组装时，只有 `history.at` 能证明 lifecycle 和 evidence_ids。mechanism、exposure、direction、divergence、dimensions、next filing、systemic tag、deadline outcome 没有来源时间，快照是 degraded，不会被读成 complete。
+- 只追加。`role_perception` 只有 SELECT 和 INSERT，`role_shadow` 只有 SELECT。没有新角色。没有改 M9、M4、规则 A。没有生产迁移或回填。
+- 下一步：等需求方验收。不取新任务。合并后由 A 在 M9 分支接入 provider。
+
 ## B-036  进行中  2026-10-21 19:16 北京
 
 - 草稿 PR #47，head `36abb4d`，分支 `cursor/m8-b036-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
