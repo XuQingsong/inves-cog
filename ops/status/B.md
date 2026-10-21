@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-036  已收到  2026-10-21 19:00 北京
+
+- 用户决策 UD-COORD-26：M8 PIT provider 是必须项，直接开始。任务书记载用户要求直接开始。照做：只为本单新增最小 append-only `perception.m9_input_snapshots`，以及 `role_perception` 的 INSERT/必要只读和 `role_shadow` 的 SELECT。不是一般性放开 schema 或权限。不新建角色。
+- 任务：三个归因阶段都在 cutoff 前以成功结束时，用注入时钟写下不可变快照。M9 只读 `snapshot_generated_at` 不晚于 cutoff 的最近完整快照。没有可信来源时间的字段写 NULL 和原因，不用当前值追认历史。不能 UPDATE 或 DELETE。历史回填只在原始来源编号和发布时间能证明时才允许，并标明 backfill，不让它出现在更早的页面。
+- 从最新 `origin/main` 开新分支，开新 PR。只改快照迁移、M8 完成后的写入、provider 读取和对应测试。不改 `overlay`/`shadow`、M4、规则 A、阈值、外部数据源或模型。不连生产库，不回填生产，不部署。
+- 下一步：先写会失败的例子，再补迁移和写入。
+
 ## B-035  已完成  2026-10-21 17:47 北京
 
 - 草稿 PR #46，head `513459f`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39579381063 。`phase1-blocking` 420 passed、21 deselected，用时 53.61 秒，nightly 跳过。没有合并。
