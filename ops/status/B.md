@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-032  已收到  2026-10-21 10:20 北京
+
+- 任务分两块。A：`perception.anomalies` 增加实际生成时间，新写入用注入的 `Clock`，历史回放记真实计算时间。早报只取 `trade_date` 对应且 `generated_at` 不晚于页面运行时刻的异常；NULL 或更晚的都不可见。旧行不按交易日回填。B：按 close/post、pool/wide、ticker/source 分层，查清 2026-10-21 自然运行里 `null_reason` 的直接原因。能在本线修的、且不改冻结阈值和接口的，先红后绿修；上游缺口只报告，不越界改。
+- 从最新 `origin/main` 开新分支 `cursor/m7-b032-pit-visibility-e013`，开新 PR。不改异常阈值、golden、规则 A、M1 ingestion 契约。不跑生产写任务，不回填历史异常或 marketstate，不重跑 job 8750。不调模型，不连生产库，不改 `docs/`、`golden/`、`milestones.txt`。
+- 变更：新增一列生成时间，迁移遵守 M0 schema/权限合同。生产迁移留到 PR 合并后按 A-014 执行。
+- 下一步：先写五个失败例子，再补迁移和早报过滤；同时追查 M6 缺失来自哪一行、哪一步。
+
 ## B-031  已完成  2026-10-20 00:43 北京
 
 - 草稿 PR #38，head `f110f82`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39286958913 。`phase1-blocking` 354 passed，用时 109.24 秒，nightly 跳过。没有合并。
