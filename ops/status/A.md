@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（续六已收到：部署B032迁移/早页过滤，M7继续停用）  2026-10-21 11:17 北京
+- 已fetch main **cc6c207fac30134f917ba2414a416b89e70f8cb9**，A=运行，完整PR42 head **3e55dbc6750417773d92c37d48096c51e7a08928** 祖先检查通过，merge **a66687c92573a769d5c4ffb1d7a604a53ce2b400**；GitHub确认11:10:34合并。需求方已独立验收37项相关测试，准确head [CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39533772102)401通过。此后main相对该head仅文档/任务/README差异，不冒称main有另一次CI。
+- 按原A014及续四/五/六，先落地已合并 **migrations/phase1_m7_0002_anomaly_generated_at.sql** 与早页PIT过滤代码。变更：perception.anomalies只新增可空generated_at，无默认值，不回填旧行、不新增角色/权限。执行前实查列是否已存在，已存在只验证、不重复迁移；迁移只用本项目已有管理员，业务查询仍用各自原角色，原SQL不改。
+- 部署保持M7的anomaly_daily/premarket_review均STOPPED；不执行历史异常写入或重跑job8750。先验证Git干净、无同类作业及原自然job已完成，快进已确认main，验证新列/原角色可读与新早页查询，再只重启morning_page以装载新代码，保留M4/M5及其他进程/既有09:15尝试状态。记录实际迁移/部署时间和证据，不把装好当成M7已启用。
+- **新停点以续六为准**：B033（UD-B-06）仅由B按一次性例外修复Pipeline.wide的真实拆股因子，A不改ingest；B033合并后A安装，并用一次真实自然wide_universe核对因子及M6原因。M7须等B032迁移应用和B033上游修复实际完成后再启用，不能只凭代码合并启动。今晚M4真实窗口仍待验；既有评分9004/M5自然9003及原历史证据不重跑。接单保持ACTIVE。
+
 ## A-014  进行中（10:30评分/估值已自然完成并核对输入截点）  2026-10-21 10:40 北京
 - **自然评分job9004=ok**：交易日2026-10-20，实际北京 **10:30:23.878520至10:30:32.618097**，processed_count=59、无note。用原role_trading独立核对daily_scores固定规则A/p-2026.10流 **59行/59不同ticker**、正式名单无缺少/意外代码。54条无null_reason，另5条为insufficient_history1、missing_book:growth1、stale_fundamentals3；保存原生降级，未填分或换规则。
 - **新增M5 worker首次自然job9003=degraded，已经结束**：北京 **10:30:23.817913至10:31:34.637193**，processed_count=59、无异常note。role_valuation独立核对当日ranges59、shadow_rules59、position_panel15；ranges **50条ok、9条unvalued、failed0、不估缺原因0**。原生service以有不估结果标degraded，不能写成全59只均可估或任务异常失败。三表实际生成时间均为 **10:31:33.438361北京**，在真实job起止内。这些常驻worker直接调用原生函数，无独立子进程退出码，保留返回状态和job证据，不编造exit=0。
