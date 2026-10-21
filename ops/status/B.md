@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-035  已收到  2026-10-21 17:40 北京
+
+- 任务：为 M9 提供 PIT 安全的 M8 只读快照。完成与否看 `ingest.job_runs` 的交易日、成功状态和 `ended_at <= cutoff`。返回 `complete`、`source_events_asof`、事件、source IDs 和逐字段缺失原因。晚于 cutoff 的事件不进入快照。历史没有可证实的生成时间时显式 incomplete，不从当前报告反推，不伪造时间，不回填。
+- 从最新 `origin/main` 开新分支，开新 PR。只改 `perception.attribution` 和对应测试。不改 A-015 的 `overlay`/`shadow`，不改 M9、M4、规则 A。不新增 schema、角色、权限或数据源。不连生产库，不调模型，不部署，不手动跑线上 M8/M9。
+- 下一步：对照 PR #45 head `2de34aa` 的 `m8_provider` 合同和现有 M8 作业记录，先写会失败的例子。
+
 ## B-034  已完成  2026-10-21 13:10 北京
 
 - 草稿 PR #44，head `2433af1`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39547698182 。`phase1-blocking` 414 passed、21 deselected，用时 97.14 秒，nightly 跳过。没有合并。
