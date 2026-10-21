@@ -256,25 +256,33 @@ def _row_price(row):
     return _as_decimal(price)
 
 
-def _value_line(ticker, row):
+def _value_line(ticker, row, price_day=""):
     status = row.get("status")
     if status in {"unvalued", "failed"}:
         payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
         reason = str(payload.get("reason") or "")
         if "金融" in reason:
-            return f"{ticker} 暂不估值：金融类公司，缺所需财务数据"
-        if "亏损" in reason:
-            return f"{ticker} 暂不估值：亏损且没有增长，按规则不估"
-        return f"{ticker} 暂不估值：所需财务数据不全"
-    price = _row_price(row)
-    bear = _as_decimal(row.get("bear"))
-    neutral = _as_decimal(row.get("neutral"))
-    bull = _as_decimal(row.get("bull"))
-    if price is None or bear is None or neutral is None or bull is None:
-        return f"{ticker} 估值待复核"
-    if neutral < price / Decimal(3) or neutral > price * Decimal(3):
-        return f"{ticker} 现价 {_cents(price)}｜估值待复核"
-    return f"{ticker} 现价 {_cents(price)}｜偏低 {_cents(bear)}｜中间 {_cents(neutral)}｜偏高 {_cents(bull)}"
+            line = f"{ticker} 暂不估值：金融类公司，缺所需财务数据"
+        elif "亏损" in reason:
+            line = f"{ticker} 暂不估值：亏损且没有增长，按规则不估"
+        else:
+            line = f"{ticker} 暂不估值：所需财务数据不全"
+    else:
+        price = _row_price(row)
+        bear = _as_decimal(row.get("bear"))
+        neutral = _as_decimal(row.get("neutral"))
+        bull = _as_decimal(row.get("bull"))
+        if price is None or bear is None or neutral is None or bull is None:
+            line = f"{ticker} 估值待复核"
+        elif neutral < price / Decimal(3) or neutral > price * Decimal(3):
+            line = f"{ticker} 现价 {_cents(price)}｜估值待复核"
+        else:
+            line = f"{ticker} 现价 {_cents(price)}｜偏低 {_cents(bear)}｜中间 {_cents(neutral)}｜偏高 {_cents(bull)}"
+    valued = str(row.get("trade_date") or "")[:10]
+    priced = str(price_day or "")[:10]
+    if valued and priced and valued != priced:
+        return f"{line}（估值 {valued}，价格 {priced}）"
+    return line
 
 
 def _order_rows(plan, trade_date):
@@ -302,12 +310,18 @@ def _relevant_names(held, moves, plan, trade_date):
 def _valuation_lines(valuation, trade_date, shown):
     if not isinstance(valuation, list) or not valuation:
         return ["今天没有拿到估值"]
+    page_day = str(trade_date or "")[:10]
     by_ticker = {}
-    for row in _scoped(valuation, trade_date) or []:
+    for row in valuation:
+        if not isinstance(row, dict):
+            continue
+        row_day = str(row.get("trade_date") or "")[:10]
+        if page_day and row_day and row_day > page_day:
+            continue
         ticker = row.get("ticker")
-        if ticker:
-            by_ticker.setdefault(ticker, row)
-    lines = [_value_line(ticker, by_ticker[ticker]) for ticker in sorted(shown) if ticker in by_ticker]
+        if ticker and ticker not in by_ticker:
+            by_ticker[ticker] = row
+    lines = [_value_line(ticker, by_ticker[ticker], page_day) for ticker in sorted(shown) if ticker in by_ticker]
     hidden = [ticker for ticker in by_ticker if ticker not in shown]
     if hidden:
         lines.append(f"其余 {len(hidden)} 只不在这一页")

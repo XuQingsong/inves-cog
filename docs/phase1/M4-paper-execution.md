@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档版本 | v4（2026-10-16 答复开工复述 K01–K03，**自此冻结**，见阶段任务书 §4.7） |
+| 文档版本 | v5（2026-10-21：增加计划输入完整性清单；不改变规则 A、阈值或现有缺失时行为） |
 | 规格章节 | 9.1、9.8（M-34 起）–9.15、11.2（读取部分）、12.5、16.6 |
 | 依赖 | M3（`daily_scores`）；覆盖层标记来自 M9（M9 完成前用夹具） |
 | 关闭的不变量 | I05、I06、I07、I14、I15、I16 |
@@ -51,6 +51,18 @@
   "trade_date", "signal_date", "rule_set": "A", "params_version",
   "overlay": {"version": str|null, "status": "ok|missing|stale"},
   "data_coverage": {"tradable": int, "with_bars": int, "pct": float},
+  "input_completeness": {
+    "status": "complete|degraded|unpublished",
+    "sources": [
+      {
+        "source": str, "status": "ok|degraded|missing|stale|unknown",
+        "required": bool, "as_of": str|null,
+        "expected_count": int|null, "available_count": int|null,
+        "missing": [{"ticker": str|null, "field": str, "reason": str}],
+        "fallback": str|null, "decision_effect": str
+      }
+    ]
+  },
   "published": bool, "unpublished_reason": str|null,
   "orders":  [{"ticker","side","kind","qty","notional_est","rule_ids":[],"reason_zh","tier"}],
   "cancels": [{"ticker","original_order","n_code":"N5","overlay_event_ids":[],"reason_zh"}],
@@ -82,7 +94,8 @@
 | FR-M4-12 | 停机条件：可交易股票行情覆盖率 < 95% → `published = false`，写缺失清单，不生成订单 |
 | FR-M4-13 | 纸面任务写死 `rule_set = 'A'`；纸面运行用 `fixed` 提取器的打分，v18 回放用 `legacy` |
 | FR-M4-14 | v18 回放入口：只吃 `golden/v18/` 的冻结输入和 M2 的 `legacy` 提取器，不读 `ingest.bars_daily` 和 R7 导入的数据；回放区间 2026-01-02 至 2026-10-07；输出交易清单和摘要，与标准答案对比，生成逐笔差异报告 |
-| FR-M4-15 | 每日运行写 `job_runs`；计划 JSON 在北京 20:30 前发布 |
+| FR-M4-15 | 每日运行写 `job_runs`；美东 ET 08:35–09:05 生成/发布计划（对应北京时间夏令时 20:35–21:05、冬令时 21:35–22:05），在 M9 ET 08:00–08:30 覆盖层窗口之后读取同交易日 overlay。overlay 缺失/失败时仍按 FR-M4-11 照常运行并标记缺失，不改规则 A |
+| FR-M4-16 | 每份计划都写 `input_completeness`：逐项报告实际消费的分数、价格 bars、VIX、成员/上市日期、内部人事件、M9 覆盖层和 M4 账本状态的可见时点、预期/可用覆盖、缺失字段/标的、fallback 和对计划的影响。每个输入标记 `ok / degraded / missing / stale / unknown`；不能以“没有行”推断“已检查且无事件”，无法证明时标 `unknown`。汇总状态只反映完整度，**不得因此新增停机门槛或改变现有规则 A 行为**。现有策略保持不变：bars 覆盖率 <95% 按 FR-M4-12 不发布；分数缺失的标的不买并标注；VIX 缺失按“非恐慌”并标注；overlay 缺失照常计划但标明未生效。M2/M5/M6/M8 的具体缺失只在 M4 实际消费的输入中有可证明原因时透传，不补造零值 |
 
 ## 6. 异常与降级
 
@@ -142,4 +155,3 @@
 | Q-M4-9（K02） | 最小成交额检查和手续费的现金边界 | **按 Muse 源码**：0.5% 门槛用取整前的 `spend` 比较，手续费成交后单独扣，不预留。账本如实记录现金；**现金出现负值时在计划和健康页标 `cash_negative`**，不改股数。中期检查点报告 v18 回放中出现负现金的天数和最小值 |
 | Q-M4-10（K03） | 成交日的分层用成交日当天的打分快照吗？ | **两种模式分开**：v18 回放（`mode = replay_v18`）按 Muse，用成交日的 `tier`，否则对不上标准答案；每日纸面运行（`mode = paper`）用**计划发布时（北京 20:00）已经可见的最新分层**，开盘时不知道的信息不能用（I08）。两者差异登记为规则 A 兼容例外，代码注明源码位置。中期检查点报告：90 笔里有几笔会因这条而不同 |
 | Q-M4-11（K04，用户外出期间需求方按授权决定，2026-10-16） | 组合 12 只上限是否包含尚未成交的观察波段仓？ | **按 Muse 源码（选 B）**：12 只上限只数核心持仓和当天的新开仓挂单（`buy_to`），观察波段仓不计入，它另有最多 3 只的上限。理由：与 Q-M4-8、Q-M4-9 一致，规则 A 锁定为 v18；改成 A 会改变规则 A 的交易结果，须由用户决定。因此纸面组合最多可能出现 12 只核心仓 + 3 只观察仓。`test_plan_json_contract` 的容量断言改为"核心 ≤ 12 且观察 ≤ 3"，并保留真实 10-09 的 13 只（12 核心 + 1 观察）作为正例。规格 M-34 第 4 项已按此更正。**用户回来后可以改为 A**，届时先核对冻结 90 笔是否受影响 |
-
