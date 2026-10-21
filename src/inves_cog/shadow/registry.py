@@ -25,9 +25,9 @@ INPUTS = {
         "M2.fcf_margin_change_pp",
         "M2.ni_ttm",
     ],
-    "F-03": ["M2.consensus_snapshot.eps_cy", "M2.fy_cy", "captured_at", "as_of"],
-    "F-04": ["M2.segments.revenue", "M2.margin_pct", "M2.recast_group", "filed", "period_end"],
-    "F-05": ["M2.segments.revenue", "M2.yoy_pct", "M2.recast_group", "filed", "period_end"],
+    "F-03": ["M3.growth_subitems", "M2.consensus_snapshot.eps_cy", "M2.fy_cy", "captured_at", "as_of"],
+    "F-04": ["M3.quality_subitems", "M2.segments.revenue", "M2.margin_pct", "M2.recast_group", "filed", "period_end"],
+    "F-05": ["M3.growth_subitems", "M2.segments.revenue", "M2.yoy_pct", "M2.recast_group", "filed", "period_end"],
     "F-06": ["M4.tier", "rule_a.cap", "M3.vol60", "M3.vol20", "M4.plan.notional_est"],
     "F-07": ["M5.shadow_rules.vt1", "M5.vt2", "M5.version", "M5.observed_at"],
     "F-08": [

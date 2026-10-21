@@ -4,7 +4,8 @@ from datetime import date
 
 from inves_cog.shadow.settings import settings
 from inves_cog.shadow.substitution import substitute
-from inves_cog.trading.scoring.curves import CURVES, finite, interp
+from inves_cog.trading.scoring.books import WEIGHTS
+from inves_cog.trading.scoring.curves import CURVES, finite, interp, weighted_book
 
 
 def weighted(items):
@@ -172,8 +173,20 @@ def _new_book(factor_id, snapshot, inputs, day):
             value = interp(core.get("revenue_yoy_pct"), CURVES["rev_growth"])
             book, weight = "growth", c["f05"]["weight"]
     raw = books.get(book)
-    adjusted = (raw * (100 - weight) + value * weight) / 100 if finite(raw) and finite(value) else None
-    return value, adjusted, book, None if adjusted is not None else factor_id + "新增项或原账本缺失"
+    if not finite(raw) or not finite(value):
+        return value, None, book, factor_id + "新增项或原账本缺失"
+    weights = WEIGHTS[book]
+    if not weights.keys() <= inputs.keys():
+        return value, None, book, factor_id + "原账本子项快照不完整"
+    original = [(interp(inputs[key], CURVES[key]), item_weight) for key, item_weight in weights.items()]
+    if weighted_book(original) != raw:
+        return value, None, book, factor_id + "原子项不能复现规则A账本"
+    # Keep the new item's fixed weight while M11 reweights all usable subitems.
+    # Mixing the already-normalized book with the new item overweights missing inputs.
+    adjusted = weighted(
+        [(score, item_weight * (100 - weight) / 100) for score, item_weight in original] + [(value, weight)]
+    )
+    return value, adjusted, book, None
 
 
 def evaluate_factors(snapshot, inputs, *, day):

@@ -34,3 +34,8 @@ def test_m9_augmented_books_reweight_original_subitems():
     missing = {row["factor_id"]: row for row in evaluate_factors(base, {"eps_revision_30d_pct": 3}, day="2027-04-08")}
     assert missing["F-03"]["substituted_value"] is None
     assert missing["F-03"]["would_pass"] is None
+    assert "快照不完整" in missing["F-03"]["gap_detail"]["null_reason"]
+    mismatch = snapshot(books={**base["books"], "growth": 83})
+    row = evaluate_factors(mismatch, raw, day="2027-04-08")[2]
+    assert row["substituted_value"] is None and row["would_pass"] is None
+    assert "不能复现" in row["gap_detail"]["null_reason"]
