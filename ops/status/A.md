@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  阻塞（今晚窗口已收口：M4自然验证完成；M7盘前当日未运行）  2026-10-21 20:39 北京
+- **窗口结束后的实际复核**：北京 **20:38:39.882215** 用现有三条业务读取连接只读确认；服务器完整SHA仍 **01e768e26202bf824b227acd76dd9ae5f9d9909d**。20:00–20:30窗口已结束，M4仍只有自然 **job9469=ok**，同日发布计划/账本实际生成时间 **20:00:50.208744**、7笔纸面订单、0撤单，输入10-20、54/54行情、无缺评分/行情、overlay缺失。没有新增重复job或计划重写；M4本次自然发布验证已完成。对应已验收PR41完整head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1** [准确CI证据](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用，本轮无开发或新CI。
+- **M7当日盘前复核未发生**：截至窗口结束后仍无premarket_review job，复核表仍0行；前置 **bars_prefill job9466=failed/HTTP403/0行** 未变化。日志最后仍为waiting_dependencies，不能当作窗口内完成或“无异常”。当前已核实为既有Alpaca/SIP预取被源拒绝，账户权限/请求时间限制的具体原因未查实；需求方/M1负责人核对现有账户对该路径的许可及时间限制后明确修复范围。A不在M1只读范围外改源、key、采集时点或门禁，不用窗口外补跑冒充自然成功。
+- **证据**：私有 `migration/evening-natural-20261021-123839.json`；检查模型/源请求/业务启动/业务写均0，paper_plan/M7/scheduler/morning_page原PID和配置SHA256 **79d84a6a34e5f3e95d864dda3c5b89fdb4e49107de55c321a60375d75112f32e**未变。19:56基线与20:04明细沿用下条。M7该日自然窗口已明确失败，结束此窗口的重复诊断；有查实答复再执行授权范围内的处理。
+- **仍可接续事项**：main **9e69621e615fc67c11fb3131be963c9e3955a8ee**、A运行、无新A任务或答复，B036/PR47仍未合并，A015在原PR45等待已接受provider合同，不提前部署。B034早报代码仍因自动权限审核两次超时未安装，具体操作确认未收到；已在本对话20:28提醒，不以heartbeat代答复。明早10-22自然wide/M6/M7日判/09:15早页依原授权核验，接单保持ACTIVE/每10分钟/原线程。
+
 ## A-014  进行中（首次自然M4计划已发布；M7盘前被行情预取403阻断）  2026-10-21 20:12 北京
 - **实际业务结果**：服务器已部署完整SHA **01e768e26202bf824b227acd76dd9ae5f9d9909d**，自然 `paper_plan` **job9469=ok**，北京时间 **20:00:24.543625→20:00:50.401780**，trade_date=2026-10-21，processed_count=7。现有 `role_trading` 独立只读核实同日 `paper-fixed` 计划 **published=true**、实际生成 **20:00:50.208744**、同日plan-phase账本已落库；**7笔计划订单、0撤单**。signal_date/input_asof均为前一已闭市日 **2026-10-20**，读取 `trading.daily_scores`；当时可交易54只/有行情54只、覆盖100%、missing_scores=0、missing_bars=0、health_codes=[ok]。没有披露持仓、金额或逐笔内容，未把纸面计划当成真实券商成交。
 - **覆盖层实际缺失**：该自然计划overlay.status=missing、version=NULL，原规则A仍照常发布。M9 PR45未合并/未部署，不将其离线CI或已批准未来M4窗口冒称今晚已生效；实际仍是原北京20:00窗口。M4入口来自已验收PR41，完整head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1** 的[准确CI](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用；本轮无代码变更、无新PR或新CI，不虚构当前服务器SHA的CI链接。
