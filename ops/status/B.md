@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-032  已完成  2026-10-21 10:38 北京
+
+- 草稿 PR #42，head `3e55dbc`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39533772102 。`phase1-blocking` 401 passed，用时 115.98 秒，nightly 跳过。没有合并。
+- 证据：五个早报例子先失败（晚生成的仍可见，没有生成时间的旧行仍可见，`--at` 只传了交易日，写入还不接收 `generated_at`）。改完之后通过。本地 `make phase1-test` 401 passed、21 deselected，用时 66.42 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.51 秒。
+- `perception.anomalies.generated_at` 可空，迁移不回填。新写入用注入时钟的 `now_utc()`。早报只取交易日对上、生成时间非空且不晚于这次运行的异常。`--at` 重出旧早报时，后补的行不可见。
+- M6：当日收盘价在，宽池 `adj_factor` 和 `post_close` 为空，写入者是 `Pipeline.wide` / `Alpaca.daily_bars`（`adjustment=raw`，`source=Alpaca`）。`missing_current_return` 1087 与 `sector_unmapped;missing_current_return` 141 是上游缺口。`missing_post_price` 1089 含那 2 个 close 上的 `insufficient_history`，盘后空价盖住了模型原因，本单不改标签。`sector_unmapped`、`l3_same_as_l2`、`insufficient_history` 是预期降级。`l3_same_as_l2` 的收益和残差仍有效。1,253 个空原因没有清掉。
+- 已自行决定：不把空的 `adj_factor` 填成 1.0，不降低 60 天窗口，不改 `ingest`。逐票名单在 A 的私有证据里，不在本仓库，报告不列 1,228 个代码。
+- 没有发起真实模型调用，没有连接生产库。没有改 `docs/`、`golden/`、`milestones.txt`。不回填历史异常，不重跑 job 8750。生产迁移留到合并后按 A-014 执行。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-032  进行中  2026-10-21 10:32 北京
 
 - 草稿 PR #42，head `3e55dbc`，分支 `cursor/m7-b032-pit-visibility-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/42
