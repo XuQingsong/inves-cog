@@ -359,3 +359,4 @@ B-013 只撤回我此前多加的「正文必须出现公司名」检查，不�
 - 2026-10-21：B-032 准确 PR #42（head `3e55dbc`）独立复核通过：准确 CI 401 passed；PR head worktree 中 M7/M6/runtime 相关本地测试 37 passed。M7 生成时间字段及早报 PIT 过滤有效，B 证据确认宽池 `adj_factor`/`post_close` 缺失源自 M1 的 Alpaca raw wide-bar 写入路径；`sector_unmapped`、`l3_same_as_l2`、`insufficient_history` 按当前合同属于预期降级。PR #42 已验收合并；M7 生产迁移/启用仍受 A-014 控制，不把合并视为线上已修。
 - 2026-10-21 用户授权按建议修复 M1 宽池拆股调整因子。B-032 已独立验收并合并（`a66687c`）；已派 B-033，作为一次性跨线例外，只用现有 Alpaca corporate-actions/split 给 `Pipeline.wide` 写经核实的 `adj_factor`，未知继续 NULL、不新增数据源或盘后采集。B-033 PR 合并后由 A 用自然 wide job 核验输入，不手工生产回填。M7 等 B-032 迁移及 B-033 上游修复完成后再启用。
 - 2026-10-21：B-033 已独立验收：准确 PR #43 head `69caa6f` CI 409 passed，`tests/m1/test_b033.py` 8 passed；merge `de903e8`。生产库未改，A-014 下一次自然 `wide_universe` job 负责核验因子覆盖和缺失分类；M7 继续停止直到自然输入核对完成。
+- 2026-10-21：用户问 A 是否已收到部署要求。最新 A 回报停在 11:23，早于 PR #43 合并；已在 A-014 续八重发明确指令：快进至含 `de903e8` 的 main、只重载 M1 wide worker、下一自然窗口核对，M7 保持停止至输入核验通过。自动接单开启，续八尚待 A 确认收到/执行。
