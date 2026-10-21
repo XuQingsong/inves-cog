@@ -1,17 +1,5 @@
 test_anomaly_live_smoke | M7 | 等待 R5
 test_case_attribution | M8 | 等待 v3 真实录音（需用户授权调用）
-test_overlay_only_tightens | M9 | 等待 M9 实现
-test_overlay_cooling_rules | M9 | 等待 M9 实现
-test_overlay_contract | M9 | 等待 M9 实现
-test_shadow_signals_no_orders | M9 | 等待 M9 实现
-test_factor_shadow_no_orders | M9 | 等待 M9 实现
-test_x1_once_per_event | M9 | 等待 M9 实现
-test_f01_values | M9 | 等待 M9 实现
-test_f02_values | M9 | 等待 M9 实现
-test_f02_shadow_hysteresis | M9 | 等待 M9 实现
-test_single_factor_substitution | M9 | 等待 M9 实现
-test_factor_versioning | M9 | 等待 M9 实现
-test_s10_eligibility_shadow | M9 | 等待 M9 实现
 test_page_json_contracts | M10 | 等待 M10 实现
 test_pages_no_recompute | M10 | 等待 M10 实现
 test_system_log_counts_match | M10 | 等待 M10 实现
