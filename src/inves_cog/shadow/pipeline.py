@@ -76,7 +76,7 @@ def run_overlay(*, clock, target, source, outputs):
     if source.get("complete") is not True:
         if previous is not None:
             outputs.retain_overlay(target, previous)
-        note = source.get("null_reason") or "M8当日完成快照未接通，保留旧版本及生成时间"
+        note = source.get("null_reason") or "M8当日快照输入不完整，保留旧版本及生成时间"
         if diagnostics["missing"]:
             note += "；缺失=" + json.dumps(diagnostics["missing"], ensure_ascii=False, sort_keys=True)
         return {

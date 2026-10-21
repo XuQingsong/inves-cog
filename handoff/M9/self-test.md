@@ -1,17 +1,20 @@
 # M9 自测与剩余接口问题（草稿，未提交验收）
 
-模块：M9 / A-015；规格：M9 v2、T09 2026-10-21更新。
-业务实现提交：`48719ee31b7ceff5b0b13b8198fdc8ffe4631129`。PR45保持草稿；最终完整head和对应真实CI由A状态回报标识。
+模块：M9 / A-015；规格：M9 v3、T09 2026-10-21更新。
+业务实现提交：`e18beb15c29394c3cf14425e8f8a7886cb77cf09`（最新说明文案及完整head见A状态）。PR45保持草稿，未通过完整模块验收。
 
 ## 1. 已实际验证
 
 - 指定12项测试真实先失败提交`e63629dafee13772e7efdef36bffa55e6fabcd4b`，`red.xml`；核心实现在其后提交，未篡改golden或跳过测试。
-- M9目前23项离线测试通过；与原M4覆盖层/纸面行为回归合并为 **40 passed、3 deselected**，证据`green.xml`。没有真实数据库、行情、模型或生产订单调用。
+- M9目前27项离线测试通过；与原M4及已合并B035适配器回归合并为 **50 passed、3 deselected**，证据`provider-green.xml`。此前23项M9/合计40项的证据为`green.xml`。没有真实数据库、行情、模型或生产订单调用。
 - 新增pipeline/input/risk测试也各自保留实现前失败证据：`pipeline-red.xml`（4失败1通过）、`inputs-red.xml`（3失败）、`risk-red.xml`（2失败）。S1夹具在实现阶段补明确财报period_end，避免用缺财报身份的两行数据冒充连续两期。
 - 权重回归先失败提交`b660e1e8cf95c84e2eb455f37708b7e7ec50a7a9`、`weights-red.xml`，再修复F03/F04/F05：逐原子项缩放后按M11对可用项重配，不能用旧账本总分直接混合。原子项未提供或不能复现当日原账本时，替换结果/过线判断保留NULL和原因；因子登记输入包含原子项快照。
-- Ruff check及format通过。M9的12行pending已因实际转绿删除；其他pending原样保留。milestones、docs、golden未修改。
+- 默认入口接线先失败提交`85ad25a18b69199b89dde89bb2beb4aab12837b2`、`provider-red.xml`真实4失败，再实现：无手工注入时调用已合并B035 provider；M8三阶段job取前一已闭市输入交易日，overlay目标仍为当天；固定同一cutoff，独立只读事务，不让provider的ROLLBACK结束主输入事务；来源job/event IDs及字段缺口贯通摘要和日志。权限失败只记错误类型/未知，不暴露数据库错误文本、不换账号。
+- Ruff check及format通过。M9的12行pending已因实际转绿删除；原有其他pending项均保留，另补下述新规格漏登记项。milestones、docs、golden仅继承main，未自行修改。
+- 继承main的新增M10 FR-M10-15后，发现文档新测试`test_paper_input_completeness_passthrough`未登记，pytest在收集前被FR-M0-05拒绝。按既有registry规则将该精确M10名称登记为待实现；未定义假测试、未标完成、未跳过任何现有检查，未实现M10或改只读文档。
 - 完整核心head`311380cb9832890b2e260236fb88dccfb750e30c`的[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39551966469)。该CI不能冒称后续head的CI；后续完整head须另查并记录。
 - 权重修复前head`1f6a076623150636a803c0326e7c58e7260ff015`的[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39559528454)已查；该结果不代替本次权重修复后的准确head CI。
+- 上一次完整head`2de34aa17230a14eac5ad3a486d7294b4f2f22ef`的[准确CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39561913979)：432项、M0两项自检；这不能替代本次接线后新head的CI。最新完整head CI由A状态另行核实。
 - 本地整仓直跑记录`local-environment.xml`：415通过、6失败、21 deselected；失败涉及本机无Docker/SciPy及沙箱拒绝AF_UNIX。没有改门禁或跳过；干净容器的make phase1-test以准确head CI为准。本机没有Docker，未将直跑pytest冒称本机make clean-container全绿。
 
 ## 2. 不变量和边界
@@ -28,9 +31,9 @@
 
 | AC | 当前自评与范围 |
 |---|---|
-| AC-M9-01 | 12个指定blocking存在且通过；额外11项、原M4回归也通过。最终完整head make CI仍需独立确认，未据此宣称整模块关闭。 |
+| AC-M9-01 | 12个指定blocking存在且通过；额外15项、原M4及B035回归也通过。最新完整head make CI另行确认，未据此宣称整模块关闭。 |
 | AC-M9-02 | `synthetic-contract-evidence.json`明确标为合成：WDC/STX冷静、MU不冻，A分支到期解除，B分支延续至合成下一份10-Q；只是分支规则验证，不冒充真实经营/历史证据。真实源快照定位见K01。 |
-| AC-M9-03 | **真实5日PIT回放尚未证明**：现有M8可变report不能冒充历史快照，未造5份空“成功”覆盖层。缺失源保留旧版本及M4照常出计划已有离线回归。一次自然运行单列OPS，不阻塞代码开工；共享调度接线另见K02。 |
+| AC-M9-03 | **真实5日PIT回放尚未证明**：已接入B035，但真实事件机制/暴露等无原不可变PIT快照时仍incomplete；不能用当前report或5份合成空结果冒充成功。旧覆盖层保留和M4缺失照常计划已离线验证。一次自然运行单列OPS；M4时序已获用户决定，实际调度按最新答复在A015后另派任务实施。 |
 | AC-M9-04 | 合成正式59只×8=472项完整样例，非适用或缺输入均NULL/原因；LITE/BE有逐项book_shortfall，BE-like F01为29.166917、距30约0.833083，LITE示例估值过线但质量不足，不把组合替换当单因子N9。其余标的缺输入明说，不冒充59只真实批次。 |
 | AC-M9-05 | 合成X1/X2/X3/X4的源事件/信息/订单ID、逐条件输入已验证；X1使用每事件独立EPS基线、持仓段/事件一次。真实M8/M4逐记录对账待K01真实快照；不生成假信号充数。 |
 
@@ -44,9 +47,9 @@
 
 ## 5. 真实适配与数据限制
 
-K01：请需求方定位既有M8当日完成标记与历史PIT事件快照。默认未接通时不会发布一份假新覆盖层，原生成时间保留。
+K01：B035已验收合并并接入默认生产路径，三阶段真实结束时间作为完成标记；源日取前一已闭市交易日。现有真实事件缺不可变PIT字段仍返回incomplete，需后续获授权的M8快照合同；A不扩权、建M8表或回填历史。
 
-K02：`integration-timing.json`已用FrozenClock复现现有M4固定北京时间20:00、M9按美东08:00的冬令错位，以及缺少先发布后读计划的明确顺序。需需求方确认共享调度合同，A不擅自改M4规则或一次运行保护。
+K02：UD-COORD-25/UD-A-19已批准M4改到ET08:35–09:05、M9仍ET08:00–08:30，失败仍照常计划并标缺失。不再等待同一答复。最新A015答复要求M4实际调度代码在A015后另派任务，PR45未改M4窗口或一次运行保护；`integration-timing.json`保留的是旧代码真实错位复现，不能冒称新窗口已安装。
 
 真实旧持仓的B2入场适用快照未明确时，f02_state写出入场状态缺失原因，不能拿今天分数追认原入场资格。多轴/多重述分部或四季不足不猜核心分部；事件建立日前EPS快照不够则X1该条件未知；S10缺历史时不判资格成立。这些均不以0替代，也不修改上游输入。
 
