@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-034  已收到  2026-10-21 13:00 北京
+
+- 任务：早报每只股票取页面截止时刻已经可见的最新估值。`trade_date` 不晚于报告交易日，`observed_at` 不晚于页面时刻。同一 ticker 取交易日最大的一份，同一天再取 `observed_at` 最新的一份。页上写出这份估值的实际日期，不把上一交易日写成当天。价格仍用报告日收盘价；估值日和价格日不同时标出来。没有任何符合条件的估值时，仍写「今天没有拿到估值」。
+- 从最新 `origin/main` 开新分支，开新 PR。只改 `perception.attribution.morning` 的估值读取和展示。不改 M5 算法、参数或库里的估值。不连生产库，不调模型，不回填，不部署。
+- 下一步：先写会失败的例子，再改早报查询。
+
 ## B-033  已完成  2026-10-21 11:22 北京
 
 - 草稿 PR #43，head `69caa6f`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39537938750 。`phase1-blocking` 409 passed，用时 74.98 秒，nightly 跳过。没有合并。
