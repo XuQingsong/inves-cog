@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  进行中（首次服务器正式行情已按时完成并独立核验）  2026-10-21 08:34 北京
+- **自然bars_full#8906=ok**，交易日2026-10-20：北京 **08:20:16.602416启动、08:28:15.628424结束**，耗时 **479.026008秒**；处于ET20:20分钟并在20:45截止前完成。原生报告run_mode=current_day、deadline_met=true、exhausted=true、无note，73/73日线、不可用0，processed_count **228994**（包含原生历史更新，**不写成228994条新增当日数据**）。未手工触发、补跑、改钟或换源。服务源码 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**；该已安装SHA的[既有CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39379136179)复用，未把未合并PR源码冒充已安装版本。
+- **08:32独立只读复核通过**：73个代码都有分钟及当日日线，共48255分钟行；以交易所当日390个正常交易分钟作分母，已完成全部代码最低覆盖 **0.9717948717948718**、平均 **0.9995433789954338**，达到原生min>=0.95/avg>=0.99。Alpaca当前health=ok、consecutive_failures=0；Scheduler:bars_full在本次08:30检查点之后已更新为ok，实读last_attempt=08:32:49.193911，不能把旧日期健康行充作本次证据。证据 **migration/natural-run-20261021-003249.json**，详细原生游标及运行说明留私有natural-run-20261021-private.json。本轮仅读取与记录证据，没有额外网络采集、模型或业务写入。
+- **仍在进行的后续**：wide_universe#8907于08:28:15.642390自然启动，08:32观测仍running/ended_at=NULL，**尚未算通过**；m6_market_inputs、08:45市场结构、09:15早页、10:30评分等本轮记录尚未取得。scheduler/daily_modules/financials/morning_page/watchdog均RUNNING，原embedding保持退出。旧预取403单独保留未关闭；本次正式全日采集成功不能冒称预取问题已修复。
+- **部署尚未全部完成**：最新main **d0521bca4a9c2bfccaa7248485af4b0d18d6c4ad** 和信箱答复未变，新增调度[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)仍待需求方执行UD-A-14已批准合并；head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**，[准确head CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)。M4/M5新worker未安装；M7业务入库/启用仍待B线生成时间/早报过滤。A不代合并、不越线改schema，不将单项行情通过写成全链路或整项验收通过。下一步只读跟进wide与后续真实窗口，原接单ACTIVE不关闭。
+
 ## A-014  进行中（服务器首次正式行情已按时自然启动，仍运行）  2026-10-21 08:24 北京
 - **本轮真实bars_full#8906已自然启动**：交易日2026-10-20，实际北京 **08:20:16.602416**（ET20:20:16），处于要求的20:20分钟；服务器仍为已合并源码 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409**。08:23:41只读实查仍status=running、ended_at=NULL，**不算完成或全链路通过**。未手工触发、改钟、补造记录或重试接口。
 - 已观察到本轮数据库增量：73个请求代码均有分钟行、共48255行；已有22个代码的当日日线（尚未完整）。已提交日线代码的分钟覆盖中间值为1.0，但这只是运行中部分观测，**不能替代最终73代码/不可用清单、原生报告、min>=0.95/avg>=0.99和08:45截止核验**。当前bars-report游标尚未生成；wide_universe及后续当日任务尚未见记录。私有原始观测migration/natural-run-20261021-002342.json；完整运行说明仅在私有natural-run-20261021-private.json。
