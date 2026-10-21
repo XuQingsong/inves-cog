@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-015  进行中（PR45开工已交；12项先失败后核心实现转绿）  2026-10-21 13:52 北京
+- 草稿 **PR45** https://github.com/XuQingsong/inves-cog/pull/45，分支phase1/m9-overlay-shadow。开工复述完整head **ecb137f863e274ab3246eb84fab543531e322e79**；先失败测试提交 **e63629dafee13772e7efdef36bffa55e6fabcd4b**，真实12 failed证据handoff/M9/red.xml；之后核心实现head **311380cb9832890b2e260236fb88dccfb750e30c**，指定12项本地离线12 passed，golden只经load_golden、无模型/网络/生产输入。Ruff已通过，只删除转绿M9 pending，milestones/docs/golden未改。
+- 旧红灯head e63629d的[准确CI失败](https://github.com/XuQingsong/inves-cog/actions/runs/39551231945)已独立查日志：408 passed、12 xfailed，失败为新tests/m9夹具格式检查；已修正格式，不改门禁。当前311380c的[准确CI](https://github.com/XuQingsong/inves-cog/actions/runs/39551966469)刚查询仍in_progress，未冒称通过。全仓本地检查也在进行中，不把12项通过当最终交付。
+- 已实现的核心：只收紧冷静期及HTTP/原子文件投递、F01–F08纯计算与单因子N9、F02持有滞回、X1–X4记录及X1持仓段/事件幂等键、独立schema迁移及交易角色REVOKE。仍需完成运行/真实输入适配、五日回放与59只输出证据、额外边界及整仓回归；草稿不转正式、不部署或自动合并。
+- **K01仅影响真实适配/AC03**：handoff/M9/questions.md请需求方定位既有M8当日完成标记/job名与按cutoff的历史事件快照入口；不能拿当前可变report当过去5日已知结论。无新上游表/权限/模型请求，纯规则和离线开发继续，不等待自然运行。A014自然OPS仍按今晚/明早窗口另行核验；B034/PR44独立，已查其仍open且draft，不代B开发或先部署。
+
 ## A-015  已收到（T09/M9开工；A014剩余自然验证转OPS）  2026-10-21 13:24 北京
 - 已fetch main **d57277a243451c5f6fb69da2699d9de69f86579b**，读取A015、T09、M9全文、更新后的README与A014续十二。按用户UD-COORD-24，**A014开发交付完成；OPS自然验证待完成**，未来窗口不占开发任务位。今晚M4/盘前复核、明早wide/M6/M7及早页仍由A按原授权核验，不把线上或第一阶段整体验收说成通过；接单保持ACTIVE。
 - A015只做M9：覆盖层冷静期/撤买只收紧；X1–X4、F01–F08、单因子替换/N9及S10资格只读影子，不下订单、不改规则A或M4/M5/M8/M1/M6业务。用冻结接口与离线fixtures，缺失写NULL/原因，不等待自然数据开工。先建独立分支/开工复述草稿PR，按更新后的任务书§4.1/4.6处理疑问，再保留先失败测试/夹具、后实现历史。
