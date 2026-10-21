@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-014  进行中（B032迁移及早页过滤已部署；M7等待B033）  2026-10-21 11:23 北京
+- **已实际部署**：服务器main从d03383bf7a8471fb3f97d4a61ceae3195c721214快进到 **cc6c207fac30134f917ba2414a416b89e70f8cb9**，实际北京 **11:21:57.329193至11:22:08.136132**，确认包含已验收PR42完整head **3e55dbc6750417773d92c37d48096c51e7a08928**。业务/脚本代码与该head相同，此后差异仅文档/README/任务；准确head的[CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39533772102)复用，cc6c本身查无独立workflow，不把此链接冒称cc6c独立CI。
+- **原迁移真实执行一次**：执行前generated_at不存在；按已合并原文件phase1_m7_0002_anomaly_generated_at.sql（SHA256 **184abfe05b91400861f19fee77bef55f9c120dd653a66ccff79fb7d7ddcf1df4**）在本项目独立库用既有管理员执行DDL。执行后字段为timestamp with time zone、nullable=YES、default=NULL；异常行数前后均0、非空生成时间0，无历史写入/回填，无新角色/权限。已有列则只验证不执行的保护及唯一尝试文件已保留。
+- **原角色真实核对**：inves_cog_ingest直接执行已部署morning模块的原生新_ANOMALIES查询，带10-20交易日与09:15:06.573436当时截点，正常返回0行，证明权限及SQL可用；旧NULL/晚生成排除的语义复用B032已验收测试，不用空表声称完成真实异常链路。role_perception对新列INSERT/SELECT权限元数据均true，未实际插入测试行或用管理员运行业务。
+- **服务边界实证**：只重启morning_page以装载新代码，RUNNING pid3289325；09:15原attempt文件哈希不变。daily_modules、valuation_v1、paper_plan、scheduler、financials、watchdog PID全未变，embedding保持退出。**anomaly_daily仍STOPPED/Not started**，含premarket_review；未调用M7历史或自然业务。私有证据 **migration/b032-pit-deployment-result.json**、b032-pit-deployment-attempt.json，模型/业务行手工写均0。
+- **继续事项**：B033在11:14已收到（UD-B-06），只由B修宽池真实拆股因子，不扩展盘后采集。A等其实际合并后安装，并用一次真实自然wide_universe核对adj_factor与M6原因，再满足续六条件启用M7；不能因B032部署就提前开M7。M4仍等今晚北京20:00–20:30自然job；自然评分9004/M5估值9003及既有历史证据不重跑。整体A014仍进行中，接单ACTIVE。
+
 ## A-014  进行中（续六已收到：部署B032迁移/早页过滤，M7继续停用）  2026-10-21 11:17 北京
 - 已fetch main **cc6c207fac30134f917ba2414a416b89e70f8cb9**，A=运行，完整PR42 head **3e55dbc6750417773d92c37d48096c51e7a08928** 祖先检查通过，merge **a66687c92573a769d5c4ffb1d7a604a53ce2b400**；GitHub确认11:10:34合并。需求方已独立验收37项相关测试，准确head [CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39533772102)401通过。此后main相对该head仅文档/任务/README差异，不冒称main有另一次CI。
 - 按原A014及续四/五/六，先落地已合并 **migrations/phase1_m7_0002_anomaly_generated_at.sql** 与早页PIT过滤代码。变更：perception.anomalies只新增可空generated_at，无默认值，不回填旧行、不新增角色/权限。执行前实查列是否已存在，已存在只验证、不重复迁移；迁移只用本项目已有管理员，业务查询仍用各自原角色，原SQL不改。
