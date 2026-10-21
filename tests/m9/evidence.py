@@ -102,7 +102,15 @@ def generate():
         ],
     }
     path = ROOT / "handoff/M9/synthetic-contract-evidence.json"
-    path.write_text(json.dumps(report, ensure_ascii=False, default=str, allow_nan=False, indent=2) + "\n")
+    metadata = {key: value for key, value in report.items() if key != "factor_sample"}
+    header = json.dumps(metadata, ensure_ascii=False, default=str, allow_nan=False, indent=2)[:-2]
+    rows = ",\n    ".join(
+        json.dumps(row, ensure_ascii=False, default=str, allow_nan=False, sort_keys=True)
+        for row in report["factor_sample"]
+    )
+    encoded = header + ',\n  "factor_sample": [\n    ' + rows + "\n  ]\n}\n"
+    assert json.loads(encoded) == report
+    path.write_text(encoded)
     print(
         json.dumps(
             {
