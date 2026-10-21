@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-035  进行中  2026-10-21 17:46 北京
+
+- 草稿 PR #46，head `513459f`，分支 `cursor/m8-b035-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/46
+- 例子先因没有 `snapshot` 模块而失败。改完之后 `tests/m8/test_b035.py` 6 passed。本地 `make phase1-test` 420 passed、21 deselected，用时 67.05 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.60 秒。CI 还在跑。
+- `complete` 需要 `attribution_candidates`、`attribution_tracks`、`attribution_labels` 都在该交易日、cutoff 前以 `ok` 结束。三阶段都成功且没有事件时，空列表表示已经查过。事件版本只取 `history.at` 不晚于 cutoff 的最后一条。`generated_at` 更晚的异常不进入快照。
+- 有事件时不算完整输入。`mechanism`、`deadline_outcome`、`exposure`、`affected`、`direction`、`divergence_tag`、`dimensions`、`next_filing_at` 没有可证明的历史时间，原因写在 `missing.fields`。没有历史时间的行不会被当成当时的生命周期。
+- 读取使用调用方连接上的 `REPEATABLE READ READ ONLY`，读完回滚。不 `SET ROLE`，不加 schema、角色或权限。不改 M9、M4、规则 A，不连生产库，不调模型，不部署。
+- 下一步：CI 绿了再写已完成。
+
 ## B-035  已收到  2026-10-21 17:40 北京
 
 - 任务：为 M9 提供 PIT 安全的 M8 只读快照。完成与否看 `ingest.job_runs` 的交易日、成功状态和 `ended_at <= cutoff`。返回 `complete`、`source_events_asof`、事件、source IDs 和逐字段缺失原因。晚于 cutoff 的事件不进入快照。历史没有可证实的生成时间时显式 incomplete，不从当前报告反推，不伪造时间，不回填。
