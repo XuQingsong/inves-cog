@@ -47,6 +47,35 @@ def bar_run_mode(clock, day):
     return "historical_backfill" if day < observed_day else "current_day"
 
 
+def wide_bar_adjustments(alpaca, batch, first, last):
+    """Verified split factors for one wide-universe batch. Unknown stays NULL."""
+    rows = list(alpaca.daily_bars(batch, first, last))
+    gap = None
+    try:
+        splits = alpaca_splits(alpaca, batch, first, last)
+    except SourceError as exc:
+        splits, gap = None, str(exc)
+    grouped = defaultdict(list)
+    for row in rows:
+        grouped[row["ticker"]].append(row)
+    counts = {"split": 0, "unity": 0, "null": 0}
+    stamped = []
+    for ticker, ticker_rows in grouped.items():
+        ticker_rows.sort(key=lambda item: item["trade_date"])
+        if splits is None:
+            for row in ticker_rows:
+                row["adj_factor"] = None
+                counts["null"] += 1
+        else:
+            factors = split_factors([row["trade_date"] for row in ticker_rows], splits.get(ticker, []))
+            bucket = "split" if splits.get(ticker) else "unity"
+            for row, factor in zip(ticker_rows, factors, strict=True):
+                row["adj_factor"] = factor
+                counts[bucket] += 1
+        stamped.extend(ticker_rows)
+    return stamped, counts, gap
+
+
 def select_membership(candidates, previous, adv, day, *, monthly):
     """K18: first observed close is a labelled baseline, never a backdated run."""
     if monthly or not previous:
@@ -262,11 +291,23 @@ class Pipeline:
         ][-20:]
         codes = [a["ticker"] for a in eligible]
         history = defaultdict(list)
+        factors = {"split": 0, "unity": 0, "null": 0}
+        gaps = []
         for start in range(0, len(codes), 200):
             check()
-            for row in alpaca.daily_bars(codes[start : start + 200], sessions[0], self.day):
+            batch = codes[start : start + 200]
+            stamped, batch_counts, gap = wide_bar_adjustments(alpaca, batch, sessions[0], self.day)
+            for key in factors:
+                factors[key] += batch_counts[key]
+            if gap:
+                gaps.append(gap)
+            for row in stamped:
                 history[row["ticker"]].append(row)
-                self.repo.write("bars_daily", row, update=("open", "high", "low", "close", "volume"))
+                self.repo.write(
+                    "bars_daily",
+                    row,
+                    update=("open", "high", "low", "close", "volume", "adj_factor"),
+                )
         counts = Counter(mapping.get(a["ticker"]) for a in eligible if mapping.get(a["ticker"]))
         candidates, adv = [], {}
         for asset in eligible:
@@ -297,6 +338,11 @@ class Pipeline:
             "exclusions": dict(Counter(r["exclude_reason"] for r in rows if not r["included"])),
             "monthly": monthly,
             "startup_baseline": not monthly and not previous,
+            "status": "degraded" if gaps else "ok",
+            "note": "; ".join(gaps) if gaps else None,
+            "adj_factor_split": factors["split"],
+            "adj_factor_unity": factors["unity"],
+            "adj_factor_null": factors["null"],
         }
         self.repo.set_cursor("wide-report:" + self.day.isoformat(), report, self.clock.now_utc())
         return report
