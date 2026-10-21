@@ -1,0 +1,20 @@
+{
+  "trade_date": "2026-10-19",
+  "job_run_id": 8692,
+  "exit_code": 0,
+  "ciphertext_sha256": "3931c46a6bf340aa379f918fa0adbc9fe83bbd4607e6afd308cb26d1130df830",
+  "running_service_sha": "f3af8d8d1066b8a9772dac9f1d052f71f9e33409",
+  "service_restart_beijing": "2026-10-20T14:37:22+08:00",
+  "model_call_count": 0,
+  "target_host": "43.166.2.31",
+  "terms": {
+    "库里": "没有",
+    "数据库": "没有",
+    "入库": "没有",
+    "新闻卡": "没有",
+    "标了高": "没有",
+    "篮子": "没有",
+    "None": "没有",
+    "buy_": "没有"
+  }
+}
