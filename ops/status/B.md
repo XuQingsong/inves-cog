@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-034  已完成  2026-10-21 13:10 北京
+
+- 草稿 PR #44，head `2433af1`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39547698182 。`phase1-blocking` 414 passed、21 deselected，用时 97.14 秒，nightly 跳过。没有合并。
+- 证据：三个早报例子先失败（九点十五把前一交易日已经可见的估值漏成「今天没有拿到估值」；一只没有估值时另一只也没出现；缺失句的检查范围写宽了，计划金额里的 `10.00` 被当成填了 0）。改完之后 `tests/m8/test_b034.py` 5 passed。同一天的旧文案没有改。本地 `make phase1-test` 414 passed、21 deselected，用时 66.66 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.89 秒。
+- 早报每只股票取 `trade_date` 不晚于报告交易日、`observed_at` 不晚于页面时刻的最新一行。页上保留估值自己的日期。价格仍用报告日收盘价。两个日期不同时写成「估值 YYYY-MM-DD，价格 YYYY-MM-DD」。没有可见行时仍写「今天没有拿到估值」。没有新增过期天数门槛。
+- 没有改 M5 算法、参数或库里的估值。没有改 M1、M4、M7、规则 A。没有回填，没有连接生产库，没有调模型，没有部署，没有重算估值。合并后由 A-014 看一次自然九点十五的早报。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-034  进行中  2026-10-21 13:09 北京
 
 - 草稿 PR #44，head `2433af1`，分支 `cursor/m8-b034-valuation-pit-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/44
