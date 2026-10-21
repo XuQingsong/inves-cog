@@ -1,15 +1,17 @@
 # M9 自测与剩余接口问题（草稿，未提交验收）
 
 模块：M9 / A-015；规格：M9 v2、T09 2026-10-21更新。
-业务实现提交：`4ef3ceb2ebcee61372acf883e0e343302f6e0061`。PR45保持草稿；最终完整head和对应真实CI由A状态回报标识。
+业务实现提交：`48719ee31b7ceff5b0b13b8198fdc8ffe4631129`。PR45保持草稿；最终完整head和对应真实CI由A状态回报标识。
 
 ## 1. 已实际验证
 
 - 指定12项测试真实先失败提交`e63629dafee13772e7efdef36bffa55e6fabcd4b`，`red.xml`；核心实现在其后提交，未篡改golden或跳过测试。
-- M9目前22项离线测试通过；与原M4覆盖层/纸面行为回归合并为 **39 passed、3 deselected**，证据`green.xml`。没有真实数据库、行情、模型或生产订单调用。
+- M9目前23项离线测试通过；与原M4覆盖层/纸面行为回归合并为 **40 passed、3 deselected**，证据`green.xml`。没有真实数据库、行情、模型或生产订单调用。
 - 新增pipeline/input/risk测试也各自保留实现前失败证据：`pipeline-red.xml`（4失败1通过）、`inputs-red.xml`（3失败）、`risk-red.xml`（2失败）。S1夹具在实现阶段补明确财报period_end，避免用缺财报身份的两行数据冒充连续两期。
+- 权重回归先失败提交`b660e1e8cf95c84e2eb455f37708b7e7ec50a7a9`、`weights-red.xml`，再修复F03/F04/F05：逐原子项缩放后按M11对可用项重配，不能用旧账本总分直接混合。原子项未提供或不能复现当日原账本时，替换结果/过线判断保留NULL和原因；因子登记输入包含原子项快照。
 - Ruff check及format通过。M9的12行pending已因实际转绿删除；其他pending原样保留。milestones、docs、golden未修改。
 - 完整核心head`311380cb9832890b2e260236fb88dccfb750e30c`的[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39551966469)。该CI不能冒称后续head的CI；后续完整head须另查并记录。
+- 权重修复前head`1f6a076623150636a803c0326e7c58e7260ff015`的[真实CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39559528454)已查；该结果不代替本次权重修复后的准确head CI。
 - 本地整仓直跑记录`local-environment.xml`：415通过、6失败、21 deselected；失败涉及本机无Docker/SciPy及沙箱拒绝AF_UNIX。没有改门禁或跳过；干净容器的make phase1-test以准确head CI为准。本机没有Docker，未将直跑pytest冒称本机make clean-container全绿。
 
 ## 2. 不变量和边界
@@ -26,7 +28,7 @@
 
 | AC | 当前自评与范围 |
 |---|---|
-| AC-M9-01 | 12个指定blocking存在且通过；额外10项、原M4回归也通过。最终完整head make CI仍需独立确认，未据此宣称整模块关闭。 |
+| AC-M9-01 | 12个指定blocking存在且通过；额外11项、原M4回归也通过。最终完整head make CI仍需独立确认，未据此宣称整模块关闭。 |
 | AC-M9-02 | `synthetic-contract-evidence.json`明确标为合成：WDC/STX冷静、MU不冻，A分支到期解除，B分支延续至合成下一份10-Q；只是分支规则验证，不冒充真实经营/历史证据。真实源快照定位见K01。 |
 | AC-M9-03 | **真实5日PIT回放尚未证明**：现有M8可变report不能冒充历史快照，未造5份空“成功”覆盖层。缺失源保留旧版本及M4照常出计划已有离线回归。一次自然运行单列OPS，不阻塞代码开工；共享调度接线另见K02。 |
 | AC-M9-04 | 合成正式59只×8=472项完整样例，非适用或缺输入均NULL/原因；LITE/BE有逐项book_shortfall，BE-like F01为29.166917、距30约0.833083，LITE示例估值过线但质量不足，不把组合替换当单因子N9。其余标的缺输入明说，不冒充59只真实批次。 |
