@@ -63,6 +63,7 @@ def f02(inputs):
 def s10(inputs):
     c = settings()["s10"]
     output = {
+        **{key: inputs.get(key) for key in ("holding_id", "shock_id", "source_order_id")},
         "eligible": None,
         "secondary_price": None,
         "shadow_sell_fraction": None,
@@ -79,6 +80,8 @@ def s10(inputs):
     resid, sigma = inputs.get("resid_5d"), inputs.get("sigma_5d")
     beta = resid >= -c["residual_sigma_multiplier"] * sigma if finite(resid) and finite(sigma) and sigma >= 0 else None
     earnings, s4 = inputs.get("earnings_reaction_5d"), inputs.get("s4_triggered")
+    if finite(inputs.get("resid_5d_z")):
+        beta = inputs["resid_5d_z"] >= -c["residual_sigma_multiplier"]
     m50, s1 = inputs.get("m50_triggered"), inputs.get("new_s1")
     no_company = not earnings and not s4 if type(earnings) is bool and type(s4) is bool else None
     fundamentals = not m50 and not s1 if type(m50) is bool and type(s1) is bool else None
@@ -223,6 +226,13 @@ def evaluate_factors(snapshot, inputs, *, day):
                 row["gap_detail"]["source"] = "valuation_v1.shadow_rules；未重新计算"
             else:
                 row["gap_detail"]["null_reason"] = "M5当时可见V-T1/V-T2缺失"
+        elif inputs.get("s10_orders"):
+            results = [s10(item) for item in inputs["s10_orders"]]
+            row["value"] = results if any(item["eligible"] is not None for item in results) else None
+            row["gap_detail"]["per_order"] = results
+            row["gap_detail"]["null_reason"] = (
+                "部分价格型卖出资格输入缺失" if any(item["eligible"] is None for item in results) else None
+            )
         else:
             result = s10(inputs.get("s10") or {})
             row["value"] = result["eligible"] if inputs.get("s10") else None

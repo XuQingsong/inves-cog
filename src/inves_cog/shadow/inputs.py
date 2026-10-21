@@ -6,9 +6,24 @@ from datetime import date
 from inves_cog.ingest.market import exchange
 from inves_cog.overlay.rules import timestamp
 from inves_cog.shadow.normalization import consensus_revision, contract_observations, segment_inputs
+from inves_cog.shadow.risk_inputs import attach_risk_inputs
 from inves_cog.trading.scoring.rules import EXCLUDED, load_rule_a
 
 KINDS = {"synthetic", "recorded_fixture", "historical_snapshot", "live_readonly"}
+
+
+def _visible_timestamps(value, cutoff):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key in {"observed_at", "captured_at", "created_at", "generated_at", "at"} and item is not None:
+                instant = timestamp(item)
+                if instant > cutoff:
+                    raise ValueError("snapshot contains an input observation after cutoff")
+            else:
+                _visible_timestamps(item, cutoff)
+    elif isinstance(value, list):
+        for item in value:
+            _visible_timestamps(item, cutoff)
 
 
 def validate_snapshot(bundle, *, cutoff, target):
@@ -17,6 +32,7 @@ def validate_snapshot(bundle, *, cutoff, target):
     source = timestamp(bundle.get("source_events_asof"))
     if source is None or source > cutoff:
         raise ValueError("snapshot source time missing or after cutoff")
+    _visible_timestamps(bundle, cutoff)
     m8 = bundle.get("m8") or {}
     if m8.get("complete") is True:
         stamp = timestamp(m8.get("source_events_asof"))
@@ -134,6 +150,17 @@ class ReadInputs:
             events=m8.get("events") or [],
             consensus=consensus_map,
             signal_day=signal_day,
+            cutoff=cutoff,
+        )
+        attach_risk_inputs(
+            db,
+            factor_inputs=factor_inputs,
+            observations=observations,
+            history=grouped,
+            plan=plan["payload"] if plan else None,
+            ledger=ledger,
+            m8=m8,
+            day=signal_day,
             cutoff=cutoff,
         )
         bundle = {

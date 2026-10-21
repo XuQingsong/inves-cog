@@ -10,10 +10,10 @@ from inves_cog.shadow.settings import settings
 def due_stages(clock, *, premarket_ready, plan_ready, source_ready):
     local = clock.now_utc().astimezone(ZoneInfo("America/New_York"))
     start, end = [time.fromisoformat(value) for value in settings()["publish_window_et"]]
-    if not trading_day(local.date()) or not start <= local.time() < end:
+    if not trading_day(local.date()):
         return []
     stages = []
-    if premarket_ready and source_ready:
+    if start <= local.time() < end and premarket_ready and source_ready:
         stages.append("overlay")
     if plan_ready:
         stages.append("shadows")

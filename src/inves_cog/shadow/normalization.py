@@ -5,6 +5,7 @@ from datetime import date
 
 from inves_cog.ingest.fundamentals.consensus import derive_consensus
 from inves_cog.overlay.rules import timestamp
+from inves_cog.trading.execution.state import PARAMS as M4_PARAMS
 from inves_cog.trading.scoring.curves import finite
 
 
@@ -54,6 +55,8 @@ def segment_inputs(rows, *, asof):
                 "source_row_ids": [row.get("row_id") for row in recent],
             }
         )
+    if len({row["name"] for row in result}) != len(result):
+        return None
     return result if len(result) >= 2 else None
 
 
@@ -133,6 +136,8 @@ def contract_observations(*, scores, factor_inputs, plan, ledger, events, consen
             else None
         )
         factor_inputs[ticker]["plan_buy_amount"] = amount
+        current_tier = (position or {}).get("tier_now", score.get("tier"))
+        quality_line = M4_PARAMS["sell"]["death_quality"].get(current_tier)
         result[ticker] = {
             "holding": holding,
             "holding_id": holding_id,
@@ -147,8 +152,9 @@ def contract_observations(*, scores, factor_inputs, plan, ledger, events, consen
             "event_inputs": event_inputs,
             "eps_revision_30d_pct": financial.get("eps_revision_30d_pct"),
             "hysteresis": {
+                "quality_line": quality_line,
                 "event": "filing" if financial.get("filed") else "daily",
-                "filing_id": str(financial["filed"]) if financial.get("filed") else None,
+                "filing_id": str(financial["period_end"]) if financial.get("period_end") else None,
                 "growth": (score.get("books") or {}).get("growth"),
                 "raw_quality": (score.get("books") or {}).get("quality"),
                 "rev_accel_pp": financial.get("rev_accel_pp"),

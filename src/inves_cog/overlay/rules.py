@@ -37,7 +37,7 @@ def generate_overlay(events, *, clock, version, source_asof, source_complete=Tru
         raise ValueError("M8 completed snapshot needs a visible source_events_asof")
     if not isinstance(version, int) or isinstance(version, bool) or version < 1:
         raise ValueError("overlay version must be a positive integer")
-    tickers = {}
+    tickers, tags_by_ticker = {}, {}
     for event in events:
         created = timestamp(event.get("created_at"))
         observed = timestamp(event.get("observed_at"))
@@ -74,6 +74,7 @@ def generate_overlay(events, *, clock, version, source_asof, source_complete=Tru
             )
             tag = affected.get("divergence_tag")
             if tag is not None:
+                tags_by_ticker.setdefault(ticker, set()).add(tag)
                 # Conflicting tags remain explicit, never choose the more actionable one.
                 if item["divergence_tag"] not in (None, tag):
                     gaps.append("不同事件背离标签冲突，未合成标签")
@@ -84,6 +85,8 @@ def generate_overlay(events, *, clock, version, source_asof, source_complete=Tru
             item["reason"] += ("；" if item["reason"] else "") + f"{reason}：联动事件 {event['event_id']}"
             if gaps:
                 item["reason"] += "（" + "；".join(gaps) + "）"
+    for ticker, tags in tags_by_ticker.items():
+        tickers[ticker]["divergence_tag"] = next(iter(tags)) if len(tags) == 1 else None
     return {
         "version": version,
         "generated_at": now.isoformat(),

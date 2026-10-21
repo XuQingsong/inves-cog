@@ -48,6 +48,10 @@ def test_m9_segment_core_uses_four_visible_quarters_and_one_axis():
     normalized = segment_inputs(rows, asof=date(2026, 2, 1))
     assert len(normalized) == 2 and max(normalized, key=lambda x: sum(x["revenue_4q"]))["name"] == "core"
     assert segment_inputs(rows + [{**rows[-1], "axis": "GeographicAxis"}], asof=date(2026, 2, 1)) is None
+    assert (
+        segment_inputs(rows + [{**row, "recast_group": "second-definition"} for row in rows], asof=date(2026, 2, 1))
+        is None
+    )
     assert segment_inputs([{**row, "filed": date(2026, 3, 1)} for row in rows], asof=date(2026, 2, 1)) is None
 
 

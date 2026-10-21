@@ -42,5 +42,8 @@ m9:
     hard_loss_equity_pct: 1.5
     maximum_sessions: 5
     secondary_drop: {defense: 0.04, normal: 0.06, attack: 0.09}
+    earnings_sessions: 5
+    s1_acceleration_max: -10
+    s1_prior_year_ratio: 0.5
   x1:
     eps_revision_pct: -5

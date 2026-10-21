@@ -43,4 +43,9 @@ def test_m9_missing_s1_history_is_unknown_not_clear():
     from inves_cog.shadow.risk_inputs import s1_from_history
 
     assert s1_from_history([]) is None
-    assert s1_from_history([{"rev_accel_pp": -11}, {"rev_accel_pp": -10}]) is True
+    assert (
+        s1_from_history(
+            [{"period_end": "2026-09-30", "rev_accel_pp": -11}, {"period_end": "2026-06-30", "rev_accel_pp": -10}]
+        )
+        is True
+    )

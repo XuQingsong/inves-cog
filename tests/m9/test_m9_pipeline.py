@@ -86,7 +86,8 @@ def test_m9_schedule_uses_native_window_plan_and_premarket_dependencies():
     before = FrozenClock(datetime.fromisoformat("2026-11-03T12:05:00Z"))
     after = FrozenClock(datetime.fromisoformat("2026-10-20T12:30:00Z"))
     for clock in (before, after):
-        assert due_stages(clock, premarket_ready=True, plan_ready=True, source_ready=True) == []
+        # FR20 runs shadows after the actual plan; only overlay publication owns the 08:30 deadline.
+        assert due_stages(clock, premarket_ready=True, plan_ready=True, source_ready=True) == ["shadows"]
 
 
 def test_m9_extra_factors_and_signal_boundary_contracts():
@@ -140,5 +141,9 @@ def test_m9_snapshot_rejects_future_and_unlabelled_history():
         "source_events_asof": cutoff.isoformat(),
         "m8": {"complete": True, "source_events_asof": "2026-10-21T00:00:00Z"},
     }
+    with pytest.raises(ValueError):
+        validate_snapshot(row, cutoff=cutoff, target=date(2026, 10, 20))
+    row["m8"] = {"complete": False}
+    row["scores"] = {"SYNTH": {"observed_at": "2026-10-21T00:00:00Z"}}
     with pytest.raises(ValueError):
         validate_snapshot(row, cutoff=cutoff, target=date(2026, 10, 20))
