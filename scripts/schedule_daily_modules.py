@@ -101,7 +101,7 @@ def run_anomalies(*, clock, values):
             for session in ("close", "post"):
                 rows.extend(_identify(day, panel.detect(day, session)))
             with connection.transaction():
-                write_anomalies(connection, rows)
+                write_anomalies(connection, rows, generated_at=clock.now_utc())
             summary.update(
                 entry_paths=dict(Counter(path for row in rows for path in row["entry_paths"])),
                 data_quality=dict(Counter(key for row in rows for key in row["data_quality"])),

@@ -20,9 +20,10 @@ WHERE id = %s
 INSERT_ANOMALY = """
 INSERT INTO perception.anomalies (
     anomaly_id, trade_date, session, entry_paths, layer, severity, baskets, members, direction,
-    max_abs_z, data_quality, coverage, amplification, type_candidates_prelim, status, universe, params_version
+    max_abs_z, data_quality, coverage, amplification, type_candidates_prelim, status, universe, params_version,
+    generated_at
 ) VALUES (
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
 )
 """
 
@@ -46,7 +47,9 @@ def run_recorded(connection, *, clock, task_name, trade_date, params_version, op
     return row_id
 
 
-def write_anomalies(connection, anomalies):
+def write_anomalies(connection, anomalies, *, generated_at):
+    if generated_at is None or getattr(generated_at, "tzinfo", None) is None or generated_at.utcoffset() is None:
+        raise ValueError("generated_at must be a timezone-aware timestamp from the injected clock")
     for anomaly in anomalies:
         connection.execute(
             INSERT_ANOMALY,
@@ -68,6 +71,7 @@ def write_anomalies(connection, anomalies):
                 anomaly["status"],
                 anomaly["universe"],
                 anomaly["params_version"],
+                generated_at,
             ),
         )
     return len(anomalies)

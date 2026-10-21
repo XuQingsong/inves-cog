@@ -21,6 +21,8 @@ _ANOMALIES = """
 SELECT anomaly_id, trade_date, session, direction, members, universe
 FROM perception.anomalies
 WHERE trade_date = %s
+  AND generated_at IS NOT NULL
+  AND generated_at <= %s
 ORDER BY session, anomaly_id
 """
 
@@ -161,7 +163,7 @@ def _execute(connection, moment, client):
 
 
 def _load(connection, moment, day):
-    anomalies = [_anomaly(row) for row in _all(connection, _ANOMALIES, (day,))]
+    anomalies = [_anomaly(row) for row in _all(connection, _ANOMALIES, (day, moment))]
     items = [_item(row) for row in _all(connection, _NEWS, (moment, _news_start(day), moment))]
     valuation = _valuation(connection, moment, day)
     holdings, plan = _book(connection, moment, day)

@@ -242,13 +242,19 @@ def test_a014_m7_records_close_and_post_and_does_not_repeat_after_restart(monkey
             ]
 
     monkeypatch.setattr(database.DatabasePanel, "from_connection", lambda *args, **kwargs: Panel())
-    monkeypatch.setattr(service, "write_anomalies", lambda _, rows: written.extend(rows))
+    stamped = []
+    monkeypatch.setattr(
+        service,
+        "write_anomalies",
+        lambda _, rows, *, generated_at: (written.extend(rows), stamped.append(generated_at)),
+    )
     values = {"INVES_COG_PERCEPTION_DATABASE_URL": "perception-fixture"}
     injected = clock("2026-10-21T00:55:00Z")
     result = schedule.run_anomalies(clock=injected, values=values)
     assert result == {"status": "ok", "job_id": 42, "entry_paths": {"B": 2}, "data_quality": {"thin_post": 1}}
     assert detected == [(date(2026, 10, 20), "close"), (date(2026, 10, 20), "post")]
     assert [row["anomaly_id"] for row in written] == ["2026-10-20:close:001", "2026-10-20:post:001"]
+    assert stamped == [injected.now_utc()]
     start = next(params for query, params in connection.statements if "INSERT INTO ingest.job_runs" in query)
     assert start[2] == injected.now_utc()
     assert schedule.run_anomalies(clock=injected, values=values) == {"status": "already_attempted"}
