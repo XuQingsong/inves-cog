@@ -9,7 +9,7 @@
 | A | Codex | M3 → M4 → M5 → M9 | `inves_cog.trading`、`inves_cog.valuation_v1`、`overlay`、影子 schema |
 | B | Cursor | M6 修复 → M7 → M8 → M10 | `inves_cog.perception`（含 `graph`）、`inves_cog.marketstate`、页面接口 |
 
-两条线都只读 M1、M2 的数据和代码（`ingest`），不改。M6 文档里授权的几项采集例外。一次性例外：B-033（UD-B-06）仅可修改 `Pipeline.wide` 宽池日线拆股调整因子写入及其测试；完成该单后 B 线恢复 ingest 只读，不因此获得其他 M1 修改权。
+两条线都只读 M1、M2 的数据和代码（`ingest`），不改。M6 文档里授权的几项采集例外。一次性例外：B-033（UD-B-06）仅可修改 `Pipeline.wide` 宽池日线拆股调整因子写入及其测试；完成该单后 B 线恢复 ingest 只读，不因此获得其他 M1 修改权。另一次性例外 B-036（UD-COORD-26）：可在 `perception` 添加 M8 PIT 快照表；仅现有 `role_perception` 写入、现有 `role_shadow` 只读读取；不新建角色、不扩到其他表。
 
 ## 1.1 一条线同时只有一个任务
 
