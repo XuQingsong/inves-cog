@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-014  已收到（续四：按最新答复继续线上收尾）  2026-10-21 10:15 北京
+- 已fetch并读main **40b4eaef24e4297bf81e7d780e11a9a8a93479a1** 的A014续四，A=运行；沿用当前任务和UD-A-17直接恢复授权，不重复开工、迁库或补跑。M4 job8734、M5 job8775、M7只读job8750、原页job8692及自然页8989的已核验证据复用。
+- 续四已明确：早页8989的0异常是截点无可见异常记录；09:15无当日估值是10:30尚未生成，**不得把10:30后的结果回填早页**。M6自然结构虽2703结果行完整写出，1253/1289每session带原因的诊断由需求方下发的B-032承接；A不改marketstate/ingest。M7历史写入和线上启用等B-032生成时间/早页过滤实际合并后，再按批准范围执行；未知生成时间默认历史不可见。
+- 10:14实查[PR #41](https://github.com/XuQingsong/inves-cog/pull/41)仍open/merged=false，完整head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**，[准确head既有CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用。请需求方落实UD-A-14及本次续四重申的已批准merge commit；A不合并，main包含后只安装一次M4/M5，M7保持停用直至B合同修复。当前已安装代码仍f3af8d8d1066b8a9772dac9f1d052f71f9e33409（此后main仅文档答复），不伪称已安装新worker。
+- 下一步：在10:30真实窗口后只读核对原有rule_a_scores的job、59个正式股票输出及原生日志；其入口同样结束才保存job，运行中无记录不再误判未启动。不提前触发、不改钟、不并发补跑、不调模型。接单保持ACTIVE/每10分钟/原线程，无新接口/schema/调度/来源/依赖变更。
+
 ## A-014  进行中（市场结构准时完成；09:15自然早报已加密交付）  2026-10-21 09:42 北京
 - **已查清并纠正“市场结构未启动”判断**：自然job **8941=ok**，交易日2026-10-20，实际北京时间 **08:45:31.339444启动、08:53:30.989294结束**，耗时479.649850秒，无note，processed_count=2703。安装版本 **f3af8d8d1066b8a9772dac9f1d052f71f9e33409** 的marketstate.cli未传persist_start，JobRunner只在finally持久化记录，故08:52运行中查不到job不等于未启动。无需补跑/改钟/重启，未改B线或ingest代码。09:36以原role_marketstate独立只读核对：daily2578（close/post各1289）、baskets58、rotation66、market1，与2703逐项相符。私有证据 **migration/structure-observation-20261021-013610.json**。
 - **结果完整性不冒充指标完整**：每个session的1289对象中36条null_reason为空、1253条有原因。close为missing_current_return1087、sector_unmapped;missing_current_return141、l3_same_as_l2 23、insufficient_history2；post为missing_post_price1089、sector_unmapped;missing_post_price141、l3_same_as_l2 23。保留原生原因，不填造结构值，不把1289/1289覆盖对象数写成全部可计算。原因分布在下项私有证据。
