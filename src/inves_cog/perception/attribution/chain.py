@@ -292,6 +292,10 @@ def run_scheduled(
         holdings=holdings,
     )
     result["job_id"] = row_id
+    if slot["task_name"] == "attribution_labels" and trade_date is not None and clock is not None:
+        from inves_cog.perception.attribution.snapshot import capture_if_ready
+
+        result["snapshot_id"] = capture_if_ready(connection, trade_date, clock)
     return result
 
 

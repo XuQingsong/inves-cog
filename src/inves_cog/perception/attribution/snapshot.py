@@ -1,9 +1,40 @@
-"""Read-only M8 snapshot for M9. The caller supplies the connection."""
+"""Append-only M8 snapshot for M9. The caller supplies the connection.
+
+A snapshot is written only after the three attribution stages have ended
+successfully. Fields without a source time stay null. The reader returns the
+newest complete snapshot already generated at the cutoff.
+"""
 
 import json
 from datetime import datetime
 
+from psycopg.types.json import Jsonb
+
 STAGES = ("attribution_candidates", "attribution_tracks", "attribution_labels")
+_REQUIRED = (
+    "lifecycle",
+    "mechanism",
+    "ticker",
+    "exposure",
+    "direction",
+    "divergence_tag",
+    "dimensions",
+    "next_filing_at",
+    "systemic_tag",
+    "deadline_outcome",
+)
+_DB_REASONS = {
+    "lifecycle": "没有不晚于 cutoff 的历史时间",
+    "mechanism": "linkage_events.mechanism 只有当前值，历史里没有当时的机制",
+    "ticker": "perception.ticker_status 没有生成时间，不能证明当时的标的",
+    "exposure": "perception.ticker_status 没有生成时间，不能证明当时的暴露",
+    "direction": "联动事件表没有方向；异常表的涨跌方向不是这件事的方向",
+    "divergence_tag": "perception.reports 是可变的当前结果，没有生成时间",
+    "dimensions": "现有表没有五维状态的历史快照",
+    "next_filing_at": "现有表没有下一份财报的生效时间",
+    "systemic_tag": "perception.market_day 没有生成时间，不能证明当时的系统性标记",
+    "deadline_outcome": "linkage_events.deadline_outcome 只有当前值，没有 cutoff 前的版本",
+}
 
 _JOBS = """
 SELECT id, task_name, trade_date, status, ended_at
@@ -12,21 +43,24 @@ WHERE trade_date = %s AND task_name = ANY(%s)
 """
 
 _EVENTS = """
-SELECT e.event_id, e.anomaly_id, e.lifecycle, e.history, e.mechanism, e.deadline_outcome, a.generated_at
+SELECT e.event_id, e.anomaly_id, e.history, a.generated_at
 FROM perception.linkage_events AS e
 LEFT JOIN perception.anomalies AS a ON a.anomaly_id = e.anomaly_id
 """
 
-_FIELD_GAPS = {
-    "mechanism": "linkage_events.mechanism 只有当前值，历史里没有当时的机制",
-    "deadline_outcome": "linkage_events.deadline_outcome 只有当前值，没有 cutoff 前的版本",
-    "exposure": "perception.ticker_status 没有生成时间，不能证明当时的暴露",
-    "affected": "perception.candidates.affected 会原地更新，没有生成时间",
-    "direction": "联动事件表没有方向；异常表的涨跌方向不是这件事的方向",
-    "divergence_tag": "perception.reports 是可变的当前结果，没有生成时间",
-    "dimensions": "现有表没有五维状态的历史快照",
-    "next_filing_at": "现有表没有下一份财报的生效时间",
-}
+_INSERT = """
+INSERT INTO perception.m9_input_snapshots (
+    trade_date, snapshot_generated_at, source_asof, status, kind, jobs, events, missing
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+RETURNING snapshot_id
+"""
+
+_SNAPSHOTS = """
+SELECT snapshot_id, trade_date, snapshot_generated_at, source_asof, status, kind, jobs, events, missing
+FROM perception.m9_input_snapshots
+WHERE trade_date = %s AND snapshot_generated_at <= %s AND source_asof <= %s
+ORDER BY snapshot_generated_at DESC, snapshot_id DESC
+"""
 
 
 def m8_provider(connection):
@@ -39,7 +73,7 @@ def m8_provider(connection):
 
 
 def read_snapshot(connection, target, cutoff):
-    """Jobs must have ended successfully by the cutoff. Event versions come from history."""
+    """Newest complete snapshot with snapshot_generated_at and source_asof at or before cutoff."""
     connection.execute("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY")
     try:
         return _snapshot(connection, target, cutoff)
@@ -47,39 +81,315 @@ def read_snapshot(connection, target, cutoff):
         connection.execute("ROLLBACK")
 
 
+def capture_if_ready(connection, trade_date, clock, *, events=None):
+    """Append one stage snapshot when all three jobs ended successfully by the clock."""
+    now = _require_now(clock)
+    chosen, gaps = _ready_stages(connection, trade_date, now)
+    if gaps:
+        return None
+    source_asof = max(_aware(_cell(row, "ended_at", 4)) for row in chosen.values())
+    built, missing = _bundle(connection, events, now)
+    status = "complete" if _bundle_complete(missing) else "degraded"
+    return _insert(connection, trade_date, now, source_asof, status, "stage_completion", chosen, built, missing)
+
+
+def capture_backfill(connection, trade_date, clock, events):
+    """Append a backfill only when original field times prove what was visible."""
+    now = _require_now(clock)
+    built, missing = _from_supplied(events or [], now)
+    times = _proven_times(built)
+    if not times or max(times) > now:
+        return None
+    chosen, _gaps = _ready_stages(connection, trade_date, now)
+    status = "complete" if _bundle_complete(missing) else "degraded"
+    return _insert(connection, trade_date, now, max(times), status, "historical_backfill", chosen, built, missing)
+
+
 def _snapshot(connection, target, cutoff):
-    day = str(target)[:10]
-    jobs = connection.execute(_JOBS, (day, list(STAGES))).fetchall()
-    chosen, stage_gaps = _stages(jobs, cutoff)
-    events, unproven = _events(connection.execute(_EVENTS).fetchall(), cutoff)
-    complete = not stage_gaps and not unproven and not events
-    times = [_aware(_cell(row, "ended_at", 4)) for row in chosen.values()]
-    if events:
-        times.extend(_aware(row["observed_at"]) for row in events)
-    visible = [item for item in times if item is not None and item <= cutoff]
-    source = max(visible).isoformat() if complete or (not stage_gaps and visible) else None
-    if stage_gaps:
-        source = None
+    moment = _aware(cutoff)
+    if moment is None:
+        return _gap(None)
+    rows = connection.execute(_SNAPSHOTS, (str(target)[:10], moment, moment)).fetchall()
+    visible = [item for item in (_stored(row) for row in rows) if _visible(item, moment)]
+    visible.sort(key=lambda item: (item["snapshot_generated_at"], item["snapshot_id"]), reverse=True)
+    complete = next((item for item in visible if _usable(item, moment)), None)
+    if complete is not None:
+        return _from_complete(complete)
+    degraded = next((item for item in visible if item["status"] == "degraded"), None)
+    return _gap(degraded)
+
+
+def _ready_stages(connection, trade_date, now):
+    rows = connection.execute(_JOBS, (str(trade_date)[:10], list(STAGES))).fetchall()
+    return _stages(rows, now)
+
+
+def _bundle(connection, events, now):
+    if events is None:
+        return _from_rows(connection.execute(_EVENTS).fetchall(), now)
+    return _from_supplied(events, now)
+
+
+def _from_rows(rows, now):
+    built = []
+    unproven = []
+    fields = {}
+    for row in rows:
+        event, reason = _row_event(row, now)
+        if reason:
+            unproven.append(reason)
+            continue
+        if event is None:
+            continue
+        built.append(event)
+        gaps = _gaps(event)
+        if gaps:
+            fields[event["event_id"]] = gaps
+    return built, {"stages": [], "events": unproven, "fields": fields}
+
+
+def _row_event(row, now):
+    event_id = _cell(row, "event_id", 0)
+    generated = _aware(_cell(row, "generated_at", 3))
+    if generated is not None and generated > now:
+        return None, None
+    version = _version(_history(_cell(row, "history", 2)), now)
+    if version is None:
+        return None, f"{event_id} 没有不晚于 cutoff 的历史时间"
+    when, entry = version
+    fields = {name: _empty(name) for name in _REQUIRED}
+    if entry.get("new") is not None:
+        fields["lifecycle"] = {"value": entry.get("new"), "at": when.isoformat(), "missing_reason": None}
+    return _event_row(event_id, _cell(row, "anomaly_id", 1), when.isoformat(), entry.get("evidence_ids"), fields), None
+
+
+def _from_supplied(events, now):
+    built = []
+    fields = {}
+    for raw in events:
+        event = _supplied_event(raw, now)
+        if event is None:
+            continue
+        built.append(event)
+        gaps = _gaps(event)
+        if gaps:
+            fields[event["event_id"]] = gaps
+    return built, {"stages": [], "events": [], "fields": fields}
+
+
+def _supplied_event(raw, now):
+    if not isinstance(raw, dict) or not raw.get("event_id"):
+        return None
+    fields = {}
+    for name in _REQUIRED:
+        fields[name] = _accept(raw, name, now)
+    observed = fields["lifecycle"]["at"]
+    if observed is None:
+        times = [item for item in (_aware(fields[name]["at"]) for name in _REQUIRED) if item is not None]
+        observed = max(times).isoformat() if times else None
+    return _event_row(raw.get("event_id"), raw.get("anomaly_id"), observed, raw.get("evidence_ids"), fields)
+
+
+def _accept(raw, name, now):
+    cell = raw.get(name)
+    value = cell.get("value") if isinstance(cell, dict) else None
+    at = _aware(cell.get("at")) if isinstance(cell, dict) else None
+    if value is not None and at is not None and at <= now:
+        return {"value": _plain(value), "at": at.isoformat(), "missing_reason": None}
+    reason = _DB_REASONS[name]
+    if at is not None and at > now:
+        reason = "来源时间晚于 cutoff"
+    elif value is not None and at is None:
+        reason = "没有来源时间"
+    return {"value": None, "at": None, "missing_reason": reason}
+
+
+def _event_row(event_id, anomaly_id, observed_at, evidence_ids, fields):
     return {
-        "complete": complete,
-        "source_events_asof": source,
+        "event_id": event_id,
+        "anomaly_id": anomaly_id,
+        "observed_at": observed_at,
+        "evidence_ids": list(evidence_ids or []),
+        "fields": fields,
+    }
+
+
+def _empty(name):
+    return {"value": None, "at": None, "missing_reason": _DB_REASONS[name]}
+
+
+def _gaps(event):
+    found = {}
+    for name in _REQUIRED:
+        cell = event["fields"][name]
+        if cell["value"] is None or cell["at"] is None:
+            found[name] = cell["missing_reason"]
+    return found
+
+
+def _bundle_complete(missing):
+    return not missing["events"] and not missing["fields"]
+
+
+def _proven_times(events):
+    times = []
+    for event in events:
+        for name in _REQUIRED:
+            cell = event["fields"][name]
+            at = _aware(cell["at"])
+            if cell["value"] is not None and at is not None:
+                times.append(at)
+    return times
+
+
+def _insert(connection, trade_date, generated, source_asof, status, kind, chosen, events, missing):
+    jobs = [_job_id(chosen[name]) for name in STAGES if name in chosen]
+    inserted = connection.execute(
+        _INSERT,
+        (str(trade_date)[:10], generated, source_asof, status, kind, _json(jobs), _json(events), _json(missing)),
+    ).fetchone()
+    if inserted is None:
+        raise RuntimeError("snapshot insert did not return an id")
+    return inserted["snapshot_id"] if isinstance(inserted, dict) else inserted[0]
+
+
+def _json(value):
+    return Jsonb(value, dumps=lambda item: json.dumps(item, default=_dump, ensure_ascii=False))
+
+
+def _dump(value):
+    if isinstance(value, datetime):
+        return value.isoformat()
+    raise TypeError(type(value).__name__)
+
+
+def _plain(value):
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
+def _require_now(clock):
+    if clock is None or not hasattr(clock, "now_utc"):
+        raise ValueError("snapshot requires an injected clock")
+    now = clock.now_utc()
+    if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
+        raise ValueError("snapshot clock must be timezone-aware")
+    return now
+
+
+def _stored(row):
+    return {
+        "snapshot_id": _cell(row, "snapshot_id", 0) or 0,
+        "snapshot_generated_at": _aware(_cell(row, "snapshot_generated_at", 2)),
+        "source_asof": _aware(_cell(row, "source_asof", 3)),
+        "status": _cell(row, "status", 4),
+        "jobs": _loads(_cell(row, "jobs", 6)) or [],
+        "events": _loads(_cell(row, "events", 7)) or [],
+        "missing": _loads(_cell(row, "missing", 8)) or {},
+    }
+
+
+def _visible(item, cutoff):
+    generated = item["snapshot_generated_at"]
+    source = item["source_asof"]
+    return generated is not None and generated <= cutoff and source is not None and source <= cutoff
+
+
+def _usable(item, cutoff):
+    if item["status"] != "complete" or not _visible(item, cutoff):
+        return False
+    for event in item["events"]:
+        if not _event_usable(event, cutoff):
+            return False
+    return True
+
+
+def _event_usable(event, cutoff):
+    observed = _aware(event.get("observed_at"))
+    if observed is None or observed > cutoff:
+        return False
+    fields = event.get("fields") or {}
+    for name in _REQUIRED:
+        cell = fields.get(name) or {}
+        at = _aware(cell.get("at"))
+        if cell.get("value") is None or at is None or at > cutoff:
+            return False
+    return True
+
+
+def _from_complete(item):
+    events = [_flatten(event) for event in item["events"]]
+    return {
+        "complete": True,
+        "source_events_asof": item["source_asof"].isoformat(),
         "events": events,
         "source_ids": {
-            "jobs": [_job_id(chosen[name]) for name in STAGES if name in chosen],
-            "events": [
-                {
-                    "event_id": row["event_id"],
-                    "anomaly_id": row["anomaly_id"],
-                    "evidence_ids": list(row["evidence_ids"]),
-                }
-                for row in events
-            ],
+            "jobs": list(item["jobs"]),
+            "events": [_source_event(event) for event in item["events"]],
         },
-        "missing": {
-            "stages": stage_gaps,
-            "events": unproven,
-            "fields": dict(_FIELD_GAPS) if events else {},
-        },
+        "missing": {"stages": [], "events": [], "fields": {}},
+    }
+
+
+def _gap(degraded):
+    missing = {"stages": ["没有不晚于 cutoff 的完整快照"], "events": [], "fields": {}}
+    source_ids = {"jobs": [], "events": []}
+    if degraded is not None:
+        stored = degraded["missing"] if isinstance(degraded["missing"], dict) else {}
+        missing["events"] = list(stored.get("events") or [])
+        missing["fields"] = dict(stored.get("fields") or {})
+        source_ids = {
+            "jobs": list(degraded["jobs"] or []),
+            "events": [_source_event(event) for event in degraded["events"] or []],
+        }
+    return {
+        "complete": False,
+        "source_events_asof": None,
+        "events": [],
+        "source_ids": source_ids,
+        "missing": missing,
+    }
+
+
+def _flatten(event):
+    fields = event.get("fields") or {}
+
+    def value(name):
+        return (fields.get(name) or {}).get("value")
+
+    affected = []
+    if value("ticker") is not None or value("exposure") is not None:
+        affected.append(
+            {
+                "ticker": value("ticker"),
+                "exposure": value("exposure"),
+                "divergence_tag": value("divergence_tag"),
+                "next_filing_at": value("next_filing_at"),
+            }
+        )
+    return {
+        "event_id": event.get("event_id"),
+        "anomaly_id": event.get("anomaly_id"),
+        "lifecycle": value("lifecycle"),
+        "observed_at": event.get("observed_at"),
+        "mechanism": value("mechanism"),
+        "affected": affected,
+        "direction": value("direction"),
+        "divergence_tag": value("divergence_tag"),
+        "dimensions": value("dimensions"),
+        "next_filing_at": value("next_filing_at"),
+        "systemic_tag": value("systemic_tag"),
+        "deadline_outcome": value("deadline_outcome"),
+        "evidence_ids": list(event.get("evidence_ids") or []),
+    }
+
+
+def _source_event(event):
+    return {
+        "event_id": event.get("event_id"),
+        "anomaly_id": event.get("anomaly_id"),
+        "evidence_ids": list(event.get("evidence_ids") or []),
     }
 
 
@@ -107,31 +417,6 @@ def _stages(rows, cutoff):
         if _cell(row, "status", 3) != "ok":
             gaps.append(f"{name} 结束状态是 {_cell(row, 'status', 3)}")
     return kept, gaps
-
-
-def _events(rows, cutoff):
-    emitted = []
-    unproven = []
-    for row in rows:
-        event_id = _cell(row, "event_id", 0)
-        generated = _aware(_cell(row, "generated_at", 6))
-        if generated is not None and generated > cutoff:
-            continue
-        version = _version(_history(_cell(row, "history", 3)), cutoff)
-        if version is None:
-            unproven.append(f"{event_id} 没有不晚于 cutoff 的历史时间")
-            continue
-        when, entry = version
-        emitted.append(
-            {
-                "event_id": event_id,
-                "anomaly_id": _cell(row, "anomaly_id", 1),
-                "lifecycle": entry.get("new"),
-                "observed_at": when.isoformat(),
-                "evidence_ids": list(entry.get("evidence_ids") or []),
-            }
-        )
-    return emitted, unproven
 
 
 def _version(history, cutoff):
@@ -167,6 +452,14 @@ def _cell(row, name, index):
     if isinstance(row, dict):
         return row.get(name)
     return row[index]
+
+
+def _loads(value):
+    if isinstance(value, str):
+        return json.loads(value)
+    if hasattr(value, "obj"):
+        return value.obj
+    return value
 
 
 def _aware(value):
