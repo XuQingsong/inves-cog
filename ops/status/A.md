@@ -1,5 +1,14 @@
 # A 线回报
 
+## A-015  进行中（离线实现及自测已推送；真实接线局部阻塞）  2026-10-21 15:28 北京
+- 草稿 **PR45** https://github.com/XuQingsong/inves-cog/pull/45，最新完整head **2de34aa17230a14eac5ad3a486d7294b4f2f22ef**，业务实现 **48719ee31b7ceff5b0b13b8198fdc8ffe4631129**；已实际推送并更新PR描述，仍draft/open、未合并。当前准确head的[真实CI](https://github.com/XuQingsong/inves-cog/actions/runs/39561913979)正在干净容器make阶段，未冒称成功。先前head **1f6a076623150636a803c0326e7c58e7260ff015** 的[CI成功](https://github.com/XuQingsong/inves-cog/actions/runs/39559528454)只作历史记录，不替代新head。
+- **实际本地结果**：M9的23项离线测试通过；与原M4相关回归合计 **40 passed、3 deselected**，handoff/M9/green.xml。12项指定测试及pipeline/input/risk/weight回归均保留先失败提交；新增权重测试完整red提交 **b660e1e8cf95c84e2eb455f37708b7e7ec50a7a9**，复现F03缺项时80.95错误、应79.857142857；后实现逐原子项缩放及M11缺项重配，F03/F04/F05均核对，不再混合旧账本总分。原子项未提供或不能复现当日原账本时，替换结果和would_pass保留NULL/原因。Ruff通过；docs/golden/milestones及M1/M4/M5/M6/M8业务代码未改，golden只经load_golden。
+- **变更（均在A015 M9自有范围）**：新增只读输入适配、显式快照回放/原生job入口、独立角色写入器和发布后标记、F02持仓段状态、S10逐订单/冲击来源、8项注册定义/版本及影子每日结果。HTTP/文件输出仍只收紧；不修改交易规则/订单，不借管理员或其他角色。没有生产迁移、服务安装、模型调用或历史回填，不能据入口存在声称已上线。
+- **真实接线阻塞一 K01**：目前未接通M8当日完成标记和原历史PIT快照入口；当前可变report/history不能证明所有暴露/机制/背离字段当时已可见。影响实际新覆盖层发布、真实五日PIT/源记录对账；缺源时原generated_at保留、M4沿用原缺失降级。请需求方定位已验收的现有完成job/标记及历史快照，A负责据此完成适配，不要求重做授权、源调用或新增上游表。
+- **真实接线阻塞二 K02**：注入时钟实证handoff/M9/integration-timing.json：M4固定北京20:00、M9美东08:00在冬令差一小时；夏令也没有先发布后读取保证，M4已有一次运行保护。请需求方确认共享调度顺序及最小修复范围，A不擅改M4窗口/门禁。独立规则/投递/版本/影子实现已继续完成；具体复现和所需决定在questions.md，未因问题停下所有工作。
+- **验收边界**：59×8=472和东芝分支样例明确为合成，真实五日PIT和逐真实源对账仍未完成；self-test.md逐AC列出差额，PR不转正式验收。旧持仓若无B2入场快照同样记录缺失，不能用今天资格追认过去。
+- **A014 OPS继续**：市场结构已启动完成的结论与手动9321/9379独立证据复用，不再误报未启动或重跑。今晚10-21北京20:00–20:30核M4及M7盘前；明早10-22核wide/M6/M7日判/早页。PR44最新仍draft/open、未合并，准确head **2433af1fd09d67021f84895eb4c1fe4f061fa338**；仅合并后部署B034，不代B或先安装。接单保持ACTIVE/每10分钟/原线程；此刻无需用户重复同范围许可。
+
 ## A-015  进行中（PR45开工已交；12项先失败后核心实现转绿）  2026-10-21 13:52 北京
 - 草稿 **PR45** https://github.com/XuQingsong/inves-cog/pull/45，分支phase1/m9-overlay-shadow。开工复述完整head **ecb137f863e274ab3246eb84fab543531e322e79**；先失败测试提交 **e63629dafee13772e7efdef36bffa55e6fabcd4b**，真实12 failed证据handoff/M9/red.xml；之后核心实现head **311380cb9832890b2e260236fb88dccfb750e30c**，指定12项本地离线12 passed，golden只经load_golden、无模型/网络/生产输入。Ruff已通过，只删除转绿M9 pending，milestones/docs/golden未改。
 - 旧红灯head e63629d的[准确CI失败](https://github.com/XuQingsong/inves-cog/actions/runs/39551231945)已独立查日志：408 passed、12 xfailed，失败为新tests/m9夹具格式检查；已修正格式，不改门禁。当前311380c的[准确CI](https://github.com/XuQingsong/inves-cog/actions/runs/39551966469)刚查询仍in_progress，未冒称通过。全仓本地检查也在进行中，不把12项通过当最终交付。
