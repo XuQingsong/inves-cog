@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015  进行中（新依赖准确CI530项通过；四日追加付费范围已明确提交用户决定）  2026-10-23 00:51 北京
+- 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head **c0ff0c242408896538ad76e3684a774385804f08** 的[CI39815338438](https://github.com/XuQingsong/inves-cog/actions/runs/39815338438)已 **completed/success**。独立核[实际job119952309785](https://github.com/XuQingsong/inves-cog/actions/runs/39815338438/job/119952309785)完整日志：测试merge **f4843f6c2ff8b5922add06cff4114721201eecba**将本head合入main **13095cb8994d725f3e6b61e3d0f1cfd8574ba28f**，干净容器 **530 passed、21 deselected（169.82秒）**，M0另 **2 passed**、9项预期失败自检均red=True。PR描述及[实际评论6346257845](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6346257845)已更新，旧queued状态结束，不改源码制造下一轮CI。
+- **授权停点已给出具体可审阅准备**：已在原对话提交明确问题，请用户仅追加批准剩余10-16/19/20/21最多新增21模型任务/49HTTP（包含重算10-16未持久保存部分；累计最多38逻辑/68HTTP，新增费用参考8–10.3元非硬上限、固定3小时30分及逐次留存）。尚无这次新增范围答复，因此模型/远端新单位仍0；原27/63及UD-A-33导出授权均继续承认，不重复索取。原生四日dry-run、3项断点离线验证、包装编译和首日实际M9消费均已完成，后续取得直接批准先记新UD再执行；不以等待批准停止其他独立工作。
+- A1–A4/代码集成/A6当前准确CI已核，**A5真实五日仍只完成10-15**，M9服务仍未合并部署；四日快照真实生成后还需原生provider导出→M9隔离消费及独立核验。原回放MainPID0/result.stopped，10-15 id1保留，实时七表未改，不重复已完成IO/M7/迁移/安装。接单保持ACTIVE原线程，不新增自动化。
+
 ## OPS-A014  阻塞（原批期限停止；已完成首日M9真实消费，剩余四日最小续跑准备就绪）  2026-10-23 00:46 北京
 - **原批实际结束而非成功**：包装实际开始2026-10-22 **15:41:06.173412 UTC**，**16:25:36.230231 UTC**因2670秒期限停止；原单位inves-cog-a014-m8-replay-20261022.service现在MainPID=0、ActiveState=failed、ExecMainStatus=2，私有result.status=stopped/error_type=SystemExit。实际逻辑17（16返回、第17中断）/HTTP19，独立原llm_calls回执 **16 ok、2 failed、1 failed_usage_missing**；最后请求用量/费用未知，未记为零。A设置的45分钟整批期限估计不足，非新IO故障/B043 loader回归。没有重置旧单位期限或重启批次。
 - **已完成的业务结果**：只提交10-15 id1（complete/historical_backfill、2事件、实际生成15:58:21.254641UTC、source_asof10-16 04:30UTC），实时七张M8表计数停止后仍与启动前相同。UD-A-33批准后原生provider经感知账号只读导出，已由M9生产generate_overlay/validate_payload实际消费为1标的/off1；另四日无快照→unavailable/overlay=null，未把10-19未运行伪作已验空日。模型0/业务写0/实时投递未改。私有provider导出SHA256 **b38689b862cc503a94557d2cc9f41a389b776f6ad26e5bb78538471b76704d71**；Git仅计数/来源SHA/文件哈希，无事件正文、密钥、页面、持仓。之前跨端导出自动审批拒绝已被用户UD-A-33明确答复解除，未绕过。
