@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015  进行中（已收到方向字段裁定；继承新版合同并重验直接消费）  2026-10-22 17:12 北京
+- 已fetch最新main **fe0b45127e2733ecab348e12dbecabd6d0f28edb**，A运行；需求方在A015补充五/B041答复及唯一JSON统一方向为原M8的up/down，明确down对应M9“不利”，A1预期不变。原方向措辞冲突已解除，不再等待或重复索取该答复。
+- **本阶段先记录后执行**：在原PR45继承已合并main中的文档/合同，重跑直接读取唯一JSON的14项消费测试，更新合同SHA256与真实测试证据；原M9判定已兼容down，不更改业务规则。新版JSON SHA256 **f5fbc99f1b1f2106f149fb865fe2a8588817caf97b91230df7588841a180f4bb**。不加载未合并B代码、不部署、不调模型，不重复四日M7或I/O恢复。
+- 开始前A工作区干净，head **ced5a75db0f289686750a5224159a1cb63d6cd13** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [该旧head真实成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39740116561)；新head CI后续独立核对，不沿用旧结果冒充。B041两PR仍待验收合并，真实provider接线/A5及已授权迁移部署按该依赖继续；原接单保持开启。
+
 ## A-015  进行中（独立M9合同消费已推送；准确head整仓CI通过）  2026-10-22 15:26 北京
 - 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已实际推送，完整head **ced5a75db0f289686750a5224159a1cb63d6cd13**，仍draft/open/未合并。先合入main **7b72d1c82ec2f3485822a33bd1ccf40bc352c73e**（只从main继承docs/合同），再提交先失败测试 **4e6bc2ca954db6f46ce2f0ba343610d05af01919**（10 failed/2 passed），之后实现；未引入未验收B业务代码、未改M4/规则A或其他模块。
 - **已实际实现**：逐标的cooling_status与结构化m8_gaps；只依据provider missing.fields判缺，不自行把null判缺。只在缺项表出现的NVDA也保留unknown；展示字段缺失不阻断冷静期，正常为空不变成假缺项。完整事件触发的原冷静期并集保留，另一个未知事件不抹掉已成立冷静期。顶层m8_completeness透传complete/source_events_asof和未知标的数/列表；严格投递验证器继续拒绝新动作，并兼容读旧格式覆盖层。
