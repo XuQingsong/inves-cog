@@ -3,7 +3,7 @@
 模块：M9 / A-015；规格：M9 v3、T09 2026-10-21更新。
 业务实现提交：`e18beb15c29394c3cf14425e8f8a7886cb77cf09`（最新说明文案及完整head见A状态）。PR45保持草稿，未通过完整模块验收。
 
-2026-10-22 增量：已合入需求方统一的deadline语义与唯一JSON，完成独立M9逐标的缺项消费；A1–A6分项证据和尚未满足的真实接线/回放见 `provider-contract-checklist.md`。本地M9/M4相关58 passed / 3 deselected。以下旧K01“不完整”的描述仅记录此前B035读取路径，不取代最新provider的整日complete/逐字段missing合同；B041验收合并后才更新真实读取接线。
+2026-10-22 增量：已合入需求方统一的deadline语义与唯一JSON，完成独立M9逐标的缺项消费；A1–A6分项证据和尚未满足的真实接线/回放见 `provider-contract-checklist.md`。消费实现阶段本地M9/M4相关58 passed / 3 deselected。随后继承main fe0b451的up/down统一方向合同，直接消费新版JSON重验14 passed，`provider-direction-green.xml`；原判定已兼容，无业务规则改动。以下旧K01“不完整”的描述仅记录此前B035读取路径，不取代最新provider的整日complete/逐字段missing合同；B041验收合并后才更新真实读取接线。
 
 ## 1. 已实际验证
 
