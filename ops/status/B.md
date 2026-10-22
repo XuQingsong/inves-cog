@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  进行中  2026-10-22 20:41 北京
+
+- 收到 20:10 裁定（main `aefc62b`，`ops/answers/B-041.md`）。停下报告是对的，错在合同样例。保留 `report._exposure`：没有关系就是「纯共振」。不改 N 码，不改方向词。
+- V1 逐键比较只针对 evt-toshiba 和 evt-expired。evt-gap 不要求 M8 产生。夹具里没有关系的 NVDA 输出 `exposure=纯共振`，不进缺失。其余 V2–V10 不变。
+- 按这条继续交 V1–V10 的证据。不标已完成。不合并。
+
 ## B-041  进行中  2026-10-22 17:19 北京
 
 - 停下。V1 要求 NVDA 只出现在 `missing.fields[event]["NVDA.exposure"]`。同一条链实测做不到，而且和已经生效的暴露规则冲突。没有改暴露规则，没有新造 N 码，没有改写方向。不标已完成。不合并。
