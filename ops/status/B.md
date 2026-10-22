@@ -11,6 +11,8 @@
 - V1 的方向：说法入库是 up/down，合同样例是「不利」。先实测。对不上就停下写明，不自行改方向词。
 - 下一步：先写会失败的截止日例子。
 
+## B-040  已完成  2026-10-22 13:36 北京
+
 - 草稿 PR #47，head `2389ebb`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39727391542 。`phase1-blocking` 443 passed、21 deselected，用时 115.30 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
 - 草稿 PR #48，head `ffde349`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39728350138 。`phase1-blocking` 452 passed、21 deselected，用时 80.77 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
 - members 恢复每只标的自己的背离标签和下一份财报时间。事件级时间晚于 cutoff 时，这一项仍按缺失。
