@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-015  进行中（UD-A-23：用户直接再次确认继续原授权范围）  2026-10-22 10:48 北京
+- **用户决策UD-A-23**：针对自动权限审核依据镜像AGENTS旧停止段落两次拦截git fetch，已向用户明确展示“恢复A线仓库同步并继续原已授权任务，覆盖镜像AGENTS中的旧停止段落；不涉及新增模型回放或扩大业务范围”。用户本轮直接选择 **“批准继续原授权范围”**。这次恢复批准持续有效，不将旧静态停止条款当新暂停、不重复索取同一恢复授权；后续用户新停止或control暂停仍立即尊重，a-github保持原ACTIVE/每10分钟/原线程。
+- 已实际重新同步成功，main **be793cbb46c4b1cdf17f7054b7ae50f1e7be891b**，A=运行，最新README/A014/A015未变。审批拦截的仓库同步已解除，不再把本轮写成“未获取最新任务”。未运行模型、回放、部署或生产任务。
+- **变更**：仅将本聊天本地镜像AGENTS的“当前停止状态”对齐这条用户直接恢复决定，保留其余行为约束及sources只读；不改项目docs/golden/milestones，不改变业务、数据库、接口、调度、来源或依赖。
+- 任务实质阻塞仍分别存在：B038/PR47待需求方验收合并；M8生产归因三阶段无运行/持久化结论，需需求方落实运行接线任务；需要模型的历史回放不在本次恢复批准内。A不代派/执行B任务，不提前接未合并新快照。今天已完成自然M1/M6/M7日级及早页job9698和密文d147a0ffa31b41f61dbd437f5b56307a7f1f31d7证据复用，不重做。
+- 原A015代码[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da**、[准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)447 passed/21 deselected及M0另2 passed未变；本轮不重跑CI。已自行决定：无新增业务决定；下一步按原合同等依赖验收/明确M8运行范围，出现可执行新答复即继续原任务。
+
 ## A-015  阻塞（M8生产归因链未运行；需与快照代码验收分别解决）  2026-10-22 10:14 北京
 - 已fetch最新main **be793cbb46c4b1cdf17f7054b7ae50f1e7be891b**，A运行，README/A014/A015合同未新增变化。读到tracker中**需求方直接只读实查**的新证据：M8 linkage_events/ticker_status/candidates/tracks/claims/reports/market_day均0行，attribution_tracks与attribution_labels从未运行，supervisor无M8归因链worker；anomalies只有今日首次M7自然9行。此处明确归属需求方检查，不冒称A重复实查。
 - A补做**仓库入口只读核对**：chain.py定义候选/跟踪/标签三个时点；现有schedule_morning_page.py只接受attribution_candidates，并调用早页命令，未登记09:30 tracks或12:30 labels。今天job9698成功证明早页处理9条异常、估值PIT读取和密文交付，**不证明M8三阶段事件结论已有数据**。B038/PR47即使完成快照修复，也不能单凭合并让缺少的M8真实结论自动出现。
