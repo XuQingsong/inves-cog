@@ -3,6 +3,8 @@
 模块：M9 / A-015；规格：M9 v3、T09 2026-10-21更新。
 业务实现提交：`e18beb15c29394c3cf14425e8f8a7886cb77cf09`（最新说明文案及完整head见A状态）。PR45保持草稿，未通过完整模块验收。
 
+最新实际阶段（2026-10-23 00:28 北京）：已继承main13095cb/B043，70 passed/3 deselected，`b043-integration-green.xml`。历史loader已解决、模型批准已取得；一次真实M8回放因A设置的运行期限不足停止，只提交10-15快照。经UD-A-33明确批准导出后，M9生产纯函数实际消费该日2事件/1标的/off1，其余4日为unavailable/overlay=null。`actual-source-partial-20261023.json`只记录摘要与哈希；私有事件正文不入Git。五日A5尚未完成，不能把旧合成五日或首日真实消费当整体验收；已通过PR45评论6345811944直接核定最小恢复路径，未重开付费回放或提前部署M9。下面各日期段为历史阶段记录，旧费用/账号/loader等待均已被本段替代。
+
 2026-10-22 增量：已合入需求方统一的deadline语义与唯一JSON，完成独立M9逐标的缺项消费；A1–A6分项证据和尚未满足的真实接线/回放见 `provider-contract-checklist.md`。消费实现阶段本地M9/M4相关58 passed / 3 deselected。随后up/down合同14 passed记录为 `provider-direction-green.xml`。最新继承main aefc62b的check_scope裁定：M8真实链保留“无关系→纯共振”，M9防御输入单独验证；新增纯共振off用例并直接消费新版合同，15 passed、Ruff通过，`provider-scope-green.xml`，原业务判定未变。以下旧K01“不完整”的描述仅记录此前B035读取路径，不取代最新provider的整日complete/逐字段missing合同；最新已合并快照接线验证见下节。
 
 ## 最新依赖增量（2026-10-22 22:46 北京）
