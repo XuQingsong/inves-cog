@@ -1,5 +1,11 @@
 # A 线回报
 
+## OPS-A014  已收到（UD-A-30：B042已验收合并，用户已确认一次五日回放）  2026-10-22 22:34 北京
+- **用户决定UD-A-30（转记UD-COORD-28，来源main A014续十四补充三）**：用户确认按21:38 dry-run执行一次10-15/16/19/20/21五日M8回放，27次逻辑调用、最多63次既定HTTP尝试、参考4–15.2元；超过27次逻辑调用即停下回报，不扩大日期、不重复执行。费用确认停点已解除，不重复索取授权。
+- **部署前置已满足**：已fetch main **0096d5fbd7a1279e346d2f2a22af4f96a17e2dd2**；GitHub实查[PR49](https://github.com/XuQingsong/inves-cog/pull/49) merged，准确head **4ea2e393b963664e5c339f5ee1e69db9d5292550** 的[CI39794168503](https://github.com/XuQingsong/inves-cog/actions/runs/39794168503) completed/success。README/范围、A015答复未变；M9尚未合并部署，不混入本步骤。
+- **先记录后执行**：实际核对远端本项目进程/job、已提交历史快照和运维前缀；确认无并发/已完成五日结果后，快进服务器到上述已合并main，只给现有supervisor配置追加M8 tracks/labels两个program并重启morning_page，不动其他worker/项目或重做已完成快照迁移。沿用现有感知账号/权限，无新角色/源/GRANT。
+- 然后只通过B042原生replay_window.main的--execute入口执行一次指定日期；使用原Client并在逻辑调用外层设27次保护，保留既定HTTP重试与默认llm_calls记账。用本项目独立有界远端作业（最多45分钟）、私有进度/日志/逐日快照和实际生成时间留证；若失败先核对远端作业/已提交前缀，不取消本地SSH后直接重启。完成后独立核逐日实际调用、llm_calls行数、historical_backfill快照及dry-run差异。自然三阶段仍待部署后下一交易日，不把进程启动当业务成功。
+
 ## A-015  进行中（默认快照接线与隔离回放入口完成；准确head阻塞CI通过）  2026-10-22 22:29 北京
 - 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已推送完整head **839c17694f3ebd9d1860f377fedc656235a5c742**，继承验收main **6ee26bbbc52fc47ce8e88e4961d22378595dfa50**/merge3326a3b。默认原生读取接线现已消费已合并不可变快照，不再等待B041合并；A未合并PR或改B业务。只读docs/golden/milestones及M4/M5相对main均零差异。合并冲突仅M10待实现登记的文字，继承main原文，未伪造M10完成。
 - **A1/A4默认读取离线集成通过**：fixture由原生capture_if_ready生成真实存储形态；test_native_scheduled_default_reads_real_provider空/非空两例经不注入provider的scheduled，读取独立shadow连接不可变快照，保留来源job/event IDs、不回退可变表。字段缺失正常发布unknown（test_native_snapshot_field_gap_publishes_unknown_and_keeps_source_ids）；完整快照为空正常发布空覆盖层；source来源与unknown列表贯通。原旧B035夹具2 failed/2 passed真实记录为immutable-integration-red.xml，不把旧断言失败称成业务缺陷。
