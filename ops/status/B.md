@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-042  已收到  2026-10-22 22:00 北京
+
+- 任务：M8 运行账号双连接。新 PR，基于 main `6ee26bb`（含 merge `3326a3b`）。授权沿用 UD-COORD-26/27。不新增 schema、角色、权限、数据源。不改 M8 业务规则、M9、M4、规则 A、合同文件。不部署，不在生产执行。
+- 默认连接继续读异常、新闻、估值、计划和持仓，并读写 `ingest.job_runs`。模型调用记录仍由默认连接写 `ingest.llm_calls`。`INVES_COG_PERCEPTION_DATABASE_URL` 只承担 M8 表和 `m9_input_snapshots` 的写入。`.env.example` 只加变量名。
+- 缺这个变量时，在调用模型之前把 job 记为失败，原因写明缺变量。早页在链已经跑起来之后照常写出的行为保持不变。测试可以注入两个连接。
+- 回放增加仓库内入口：`--dry-run` 只读、不写、不调模型；`--execute` 才调模型，快照走感知账号。两个都不带就拒绝运行。
+- 提交前按 `ops/answers/B-042.md` 的 W1–W7 交证据。做不到或和约束冲突就停下写清。不标已完成。
+
 ## B-041  已完成  2026-10-22 20:59 北京
 
 - 草稿 PR #48，head `b344bda`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39782003890 。`phase1-blocking` 469 passed、21 deselected，用时 130.36 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
