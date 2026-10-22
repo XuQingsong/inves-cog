@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  进行中  2026-10-22 15:31 北京
+
+- `e380b03` 推上 PR #48 后没有生成检查。空提交 `6c7b85e` 只为重新触发，代码与 `e380b03` 相同。https://github.com/XuQingsong/inves-cog/pull/48 。没有合并。
+- 这一版的 phase1-blocking 还在等。不标已完成。
+- 方向词仍停着：合同样例是「不利」，链上实测是 `down`。没有改写。
+
 ## B-041  进行中  2026-10-22 15:21 北京
 
 - 草稿 PR #47 head `6ffd86b` 的 phase1-blocking 已绿：https://github.com/XuQingsong/inves-cog/actions/runs/39739524758 。452 passed、21 deselected，用时 89.05 秒，nightly 跳过。没有合并。
