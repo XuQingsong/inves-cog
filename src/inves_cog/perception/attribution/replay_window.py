@@ -1,6 +1,7 @@
 """Replay five trade days in memory. Live M8 tables are not written."""
 
 import json
+import sys
 from datetime import date, datetime, time, timedelta
 from hashlib import sha256
 from pathlib import Path
@@ -451,3 +452,102 @@ def _dump(value):
     if isinstance(value, datetime):
         return value.isoformat()
     raise TypeError(type(value).__name__)
+
+
+def main(argv=None, *, connection=None, perception=None, clock=None, client=None):
+    """Read inputs on the default connection. --execute writes the replay snapshot on the perception connection."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    mode = _cli_mode(args)
+    days = _cli_days(args)
+    from inves_cog.perception.attribution.morning import _connections
+
+    borrowed, writer, owned = _connections(connection, perception)
+    try:
+        return _cli_run(borrowed, writer, days, mode, clock, client)
+    finally:
+        for item in owned:
+            item.close()
+
+
+def _cli_mode(args):
+    dry = "--dry-run" in args
+    execute = "--execute" in args
+    if dry and execute:
+        raise SystemExit("不能同时 --dry-run 和 --execute")
+    if not dry and not execute:
+        raise SystemExit("需要 --dry-run 或 --execute")
+    return "dry-run" if dry else "execute"
+
+
+def _cli_days(args):
+    if "--days" not in args:
+        return DAYS
+    index = args.index("--days")
+    if index + 1 >= len(args):
+        raise SystemExit("需要 --days 后面的日期")
+    found = tuple(part for part in args[index + 1].split(",") if part)
+    if not found:
+        raise SystemExit("需要 --days 后面的日期")
+    return found
+
+
+def _cli_run(connection, writer, days, mode, clock, client):
+    from inves_cog.perception.attribution.morning import _require_writer
+
+    if mode == "execute" and writer is None:
+        raise SystemExit("缺少 INVES_COG_PERCEPTION_DATABASE_URL")
+    if mode == "execute" and writer is not connection:
+        _require_writer(writer)
+    anomalies, items = _load_window(connection, days)
+    if clock is None:
+        from inves_cog.clock import SystemClock
+
+        clock = SystemClock()
+    actor = None
+    if mode == "execute":
+        if client is None:
+            from inves_cog.llm.client import Client
+
+            client = Client.from_environment()
+        actor = client
+    result = replay_window(
+        writer if mode == "execute" else connection,
+        clock,
+        anomalies=anomalies,
+        items=items,
+        days=days,
+        client=actor,
+        dry_run=mode == "dry-run",
+    )
+    body = {"dry_run": result["dry_run"], "calls": result["calls"], "days": result["days"]}
+    json.dump(body, sys.stdout, default=_dump)
+    sys.stdout.write("\n")
+    return 0
+
+
+def _load_window(connection, days):
+    from inves_cog.perception.attribution.morning import _load
+
+    anomalies = []
+    items = []
+    seen_anomalies = set()
+    seen_items = set()
+    for day in days:
+        loaded = _load(connection, slot_moment(day, "attribution_labels"), day)
+        for row in loaded["anomalies"]:
+            identity = row.get("anomaly_id")
+            if identity in seen_anomalies:
+                continue
+            seen_anomalies.add(identity)
+            anomalies.append(row)
+        for item in loaded["items"]:
+            identity = item.get("info_id")
+            if identity in seen_items:
+                continue
+            seen_items.add(identity)
+            items.append(item)
+    return anomalies, items
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -231,6 +231,7 @@ def run_scheduled(
     plan=None,
     news_lookup=None,
     holdings=None,
+    writer=None,
 ):
     """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
@@ -295,7 +296,7 @@ def run_scheduled(
     if slot["task_name"] == "attribution_labels" and trade_date is not None and clock is not None:
         from inves_cog.perception.attribution.snapshot import capture_if_ready
 
-        result["snapshot_id"] = capture_if_ready(connection, trade_date, clock)
+        result["snapshot_id"] = capture_if_ready(writer or connection, trade_date, clock)
     return result
 
 
