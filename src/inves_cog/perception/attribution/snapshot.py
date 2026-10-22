@@ -93,6 +93,13 @@ WHERE trade_date = %s AND snapshot_generated_at <= %s AND source_asof <= %s
 ORDER BY snapshot_generated_at DESC, snapshot_id DESC
 """
 
+_REPLAY = """
+SELECT snapshot_id, trade_date, snapshot_generated_at, source_asof, status, kind, jobs, events, missing
+FROM perception.m9_input_snapshots
+WHERE trade_date = %s AND kind = 'historical_backfill'
+ORDER BY snapshot_generated_at DESC, snapshot_id DESC
+"""
+
 
 def m8_provider(connection):
     """Return the (target, cutoff) reader. It only reads the supplied connection."""
@@ -457,8 +464,42 @@ def _proven_times(events):
     return times
 
 
+def append_replay_snapshot(connection, trade_date, clock, *, source_asof, events, stages, missing=None):
+    """Append one historical replay. The live reader stays on its own cutoff."""
+    now = _require_now(clock)
+    source = _aware(source_asof)
+    if source is None:
+        raise ValueError("replay source_asof must be timezone-aware")
+    jobs = [{"task_name": name, "replay": True, "as_of": _plain(_aware(stages[name]))} for name in STAGES]
+    kept = missing or {"stages": [], "events": [], "fields": {}}
+    return _execute_insert(connection, trade_date, now, source, "complete", "historical_backfill", jobs, events, kept)
+
+
+def read_replay_snapshot(connection, target):
+    """Newest historical replay for one day. This is not the live M9 reader."""
+    rows = connection.execute(_REPLAY, (str(target)[:10],)).fetchall()
+    found = []
+    for row in rows:
+        if _cell(row, "kind", 5) != "historical_backfill":
+            continue
+        item = _stored(row)
+        found.append(item)
+    found.sort(key=lambda item: (item["snapshot_generated_at"], item["snapshot_id"]), reverse=True)
+    if not found:
+        gap = _gap(None)
+        gap["replay"] = True
+        return gap
+    viewed = _from_complete(found[0], found[0]["snapshot_generated_at"])
+    viewed["replay"] = True
+    return viewed
+
+
 def _insert(connection, trade_date, generated, source_asof, status, kind, chosen, events, missing):
     jobs = [_job_id(chosen[name]) for name in STAGES if name in chosen]
+    return _execute_insert(connection, trade_date, generated, source_asof, status, kind, jobs, events, missing)
+
+
+def _execute_insert(connection, trade_date, generated, source_asof, status, kind, jobs, events, missing):
     inserted = connection.execute(
         _INSERT,
         (str(trade_date)[:10], generated, source_asof, status, kind, _json(jobs), _json(events), _json(missing)),

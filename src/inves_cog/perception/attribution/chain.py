@@ -469,7 +469,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=N
     if tracked and stage != "attribution_labels" and anomaly.get("capital_track") is None:
         visible = _retrieved(anomaly, items, as_of)
         if any(_before_move(item, anomaly.get("started_at")) for item in visible):
-            return _phase1_move(anomaly, visible, client, valuation, plan)
+            return _phase1_move(anomaly, visible, client, valuation, plan, store)
         scored = _score_one(anomaly, [], as_of=as_of, client=client, store=store, components=components, stage=stage)
         page = _phase1_move(anomaly, [], client, valuation, plan)
         scored["daily_text"] = page["daily_text"]
@@ -710,7 +710,7 @@ def _move_view(item):
     }
 
 
-def _phase1_move(anomaly, visible, client, valuation, plan):
+def _phase1_move(anomaly, visible, client, valuation, plan, store=None):
     """One DeepSeek question for this tracked move, then the daily page. Numbers stay put."""
     start = anomaly.get("started_at")
     chosen = [item for item in visible if _before_move(item, start)][:40]
@@ -739,9 +739,28 @@ def _phase1_move(anomaly, visible, client, valuation, plan):
         "daily_text": page,
         "move_card": card,
         "degraded": None,
-        "saved": False,
+        "saved": _save_move(store, anomaly, page, card),
         "operating_impact_proven": False,
     }
+
+
+def _save_move(store, anomaly, page, card):
+    """The morning page already asked once. Saving that result does not ask again."""
+    if store is None:
+        return False
+    store.save(
+        {
+            "anomaly_id": anomaly["anomaly_id"],
+            "universe": anomaly.get("universe"),
+            "report": {
+                "anomaly_id": anomaly.get("anomaly_id"),
+                "status": "ok",
+                "daily_text": page,
+                "move_card": card,
+            },
+        }
+    )
+    return True
 
 
 def _stamp(value):
