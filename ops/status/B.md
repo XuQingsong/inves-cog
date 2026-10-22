@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-043  已收到  2026-10-22 23:00 北京
+
+- 任务：回放入口按交易日选入补算异常。新 PR，基于 main `da31721`（含 merge `0096d5f`）。授权沿用 UD-COORD-26/27/28。不新增 schema、角色、权限、数据源。不改实时路径、M8 业务规则、M9、M4、规则 A、合同。不部署，不在生产执行。
+- `--days` 指定的每个交易日，异常按 `trade_date = 该日` 从 `perception.anomalies` 选入，不按 `generated_at <= 历史时点` 过滤。只取该日自己的异常。每条保留原 `generated_at`。晚于该日 09:15 时点的，在 CLI JSON 与回放日志里列出 `anomaly_id`、真实 `generated_at`、`generated_after_slot=true`。不改写、不倒填任何时间。
+- 新闻仍按各 stage 时点的 `published_at`/`first_seen_at` 过滤。`morning._load` 与 `scheduled` 的实时过滤不改。快照仍为 `kind='historical_backfill'`、`replay=true`。
+- 提交前按 `ops/answers/B-043.md` 的 X1–X6 交证据。做不到或和约束冲突就停下写清。不标已完成。
+
 ## B-042  已完成  2026-10-22 22:28 北京
 
 - 草稿 PR #49，head `4ea2e39`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39794168503 。`phase1-blocking` 475 passed、21 deselected，用时 139.61 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/49
