@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-015  进行中（独立M9合同消费已推送；准确head整仓CI通过）  2026-10-22 15:26 北京
+- 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已实际推送，完整head **ced5a75db0f289686750a5224159a1cb63d6cd13**，仍draft/open/未合并。先合入main **7b72d1c82ec2f3485822a33bd1ccf40bc352c73e**（只从main继承docs/合同），再提交先失败测试 **4e6bc2ca954db6f46ce2f0ba343610d05af01919**（10 failed/2 passed），之后实现；未引入未验收B业务代码、未改M4/规则A或其他模块。
+- **已实际实现**：逐标的cooling_status与结构化m8_gaps；只依据provider missing.fields判缺，不自行把null判缺。只在缺项表出现的NVDA也保留unknown；展示字段缺失不阻断冷静期，正常为空不变成假缺项。完整事件触发的原冷静期并集保留，另一个未知事件不抹掉已成立冷静期。顶层m8_completeness透传complete/source_events_asof和未知标的数/列表；严格投递验证器继续拒绝新动作，并兼容读旧格式覆盖层。
+- **A1/A3/A4独立消费自验通过**：`test_a1_a3_a4_actual_contract_via_native_provider` 直接读取唯一JSON output，经生产scheduled的provider参数注入，逐项比较expected_m9：WDC/STX on、MU off、NVDA exposure unknown、AMD到期结果unknown；first_lot_multiplier=1、stop_review_eligible=false，无增买/卖出/订单字段，unknown列表AMD/NVDA。不是手抄输入、不是生产运行。**A2通过**：不完整快照沿用原payload/生成时间、首次没有旧版则无覆盖层；原M4缺失照常计划回归仍通过。
+- **A5未执行**：真实read_replay_snapshot/指定五日回放仍等B041验收合并，且真实模型先准确dry-run估算并等需求方确认。空结果消费测试只验证纯逻辑，不冒称10-19生产回放已验。**A6本阶段通过**：本地M9/M4 phase1_blocking **58 passed、3 deselected**、Ruff通过；本机make phase1-test明确因无Docker退出，未跳过门禁。准确head [CI39740116561](https://github.com/XuQingsong/inves-cog/actions/runs/39740116561)已真实success；独立核job119695025382日志：测试merge **2b98b932f34500b441b8e9ae2d45e7a6416ae81e** 包含ced5a75完整head和main7b72d1c，干净容器make **461 passed、21 deselected**，M0另 **2 passed**，selfcheck五项均按预期触发红灯，未将其误作业务失败。后续真实接线若再改head仍须重新核准确CI。
+- 证据已随PR推送：handoff/M9/provider-contract-{red,green}.xml、provider-contract-checklist.md、更新self-test.md；唯一JSON SHA256 **a65e4b08293bee367157a1625ea3bc4e560bbbc13b5cd2816478011c629325b1**，只读继承。PR描述已按新最终代码/剩余边界重写，未把旧61e535d CI当作新head结果；[实际PR进度沟通](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6335225146)已发送，附A侧兼容down/不利的原代码事实，请需求方统一B041方向词合同，不替B选映射。
+- **上游真实停点**：最新B回报15:21表明B041仍进行中、两PR未合并，另报告V1方向用词“down”与合成合同“不利”未统一；这是B来源证据，A不代做或替需求方裁定。M9原规则已兼容两种不利方向，独立消费层继续完成，不因该上游细节停下所有A工作。合同/上游验收合并后继续真实接线与已授权部署。四日M7/IO及M5原结果不重做，a-github保持开启。
+
 ## A-015  进行中（合同冲突已裁定；先推进独立M9合同消费与离线测试）  2026-10-22 15:06 北京
 - 已fetch main **7b72d1c82ec2f3485822a33bd1ccf40bc352c73e**，A运行；需求方在A015补充四承认原样例矛盾并统一规则/JSON：provider新增deadline_on（ET日期），未到期的deadline_outcome=null为正常；已到期或截止日未知且无结果才写missing.fields。M9 **只依据provider的missing.fields认定缺项，不自行把null判缺失**。原冲突已解除，不再重复要求裁定。
 - **本阶段变更先记录**：按A015已批准的消费端范围及UD-A-26“其他能做继续”，在原PR45合入已合并main的文档/唯一合同，先写真实output经provider注入的失败测试，再实现M9自身逐ticker cooling_status/m8_gaps/m8_completeness消费逻辑；以修订样例验证WDC/STX on、MU off、NVDA exposure缺失unknown、AMD过期结果缺失unknown。不接任何未合并B业务代码、不提前接真实provider、不改M4/规则A，不部署/迁库/跑生产/调模型。真实read_replay_snapshot及五日回放仍等B041代码验收合并和原估算确认停点。
