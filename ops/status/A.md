@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-015  阻塞（M8生产归因链未运行；需与快照代码验收分别解决）  2026-10-22 10:14 北京
+- 已fetch最新main **be793cbb46c4b1cdf17f7054b7ae50f1e7be891b**，A运行，README/A014/A015合同未新增变化。读到tracker中**需求方直接只读实查**的新证据：M8 linkage_events/ticker_status/candidates/tracks/claims/reports/market_day均0行，attribution_tracks与attribution_labels从未运行，supervisor无M8归因链worker；anomalies只有今日首次M7自然9行。此处明确归属需求方检查，不冒称A重复实查。
+- A补做**仓库入口只读核对**：chain.py定义候选/跟踪/标签三个时点；现有schedule_morning_page.py只接受attribution_candidates，并调用早页命令，未登记09:30 tracks或12:30 labels。今天job9698成功证明早页处理9条异常、估值PIT读取和密文交付，**不证明M8三阶段事件结论已有数据**。B038/PR47即使完成快照修复，也不能单凭合并让缺少的M8真实结论自动出现。
+- **用户影响**：真实M9事件覆盖层和五日PIT内容验收同时缺M8生产输入；不能只把阻塞写成旧历史字段缺版本，不能用synthetic或早页move_card=1次替代M8结论。已完成的M1/M6/M7日级与B034自然早页证据保持有效，不重跑。
+- **授权边界与具体下一步**：当前A015仅M9消费端；A014明确M8历史波动解释不补。需求方需落实M8三阶段的实际运行接线/持久化任务及部署范围；若选择用PIT原始输入回放最近五个真实交易日并调用模型，须另获用户明确的有界日期/模型/预算/时间授权。A不自行启用M8 worker、不做模型历史回放、不代派或执行B任务，也不把现有已批准自然早报调用授权扩展为M8回放授权。当前仅记录具体缺口，没有向用户重复索取任何旧授权。
+- A代码仍[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da**、[准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)447 passed/21 deselected及M0另2 passed。B038代码CI绿已见B回报，仍待需求方验收合并；M9按已记消费端缺项合同在合并后继续，不重新问已决定的接口或调度问题。无代码/DB/调度/来源/依赖变更操作、无生产查询、无模型调用。
+- 已自行决定：使用需求方新证据并核对实际入口，不重复生产诊断；把M8未运行与B038合同验收列为独立依赖，保留盘前403独立OPS，不混成同一个问题。
+
 ## A-015  阻塞（已收到按标的缺项合同；B038验收合并后执行）  2026-10-22 10:03 北京
 - 已fetch并读main **7ee605432438ee86fbf7d49b99db8cb08421ff29** 的最新A015答复（SHA256 b486e52bdfc689090bcde5f905f5c7bd90677b1f8e971ce164d8d997dc336c97）。需求方已明确：B038修复后的complete仅表示M8三个阶段在cutoff前成功；字段缺口按事件返回missing.fields，affected逐ticker scalar；**B038验收合并后**在原PR45继续A015，不另开任务。当前PR47仍未合并，不提前接入或部署。
 - **变更合同已记录、待依赖合并后实施**：完整快照可发布并保留字段缺口；仅complete=false沿用上一版。冷静期所需lifecycle/mechanism/逐ticker exposure/deadline_outcome，以及“已验证·有影响”时的direction缺失时，该ticker不新增冷静期，写cooling_status=unknown、结构化m8_gaps和“冷静期判断未完成：缺X”，不能报“不触发”。仅展示的divergence_tag/dimensions/systemic_tag缺失保留NULL与gap，不影响判定。顶层m8_completeness透传快照complete/source_events_asof及unknown ticker数和列表；判定齐全时cooling_status=on/off。不改只收紧规则、first_lot_multiplier=1.0、stop_review_eligible=false或M4/规则A；next_filing_at沿用现有保守语义。
