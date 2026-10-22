@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-039  进行中  2026-10-22 11:11 北京
+
+- 第 1 部分可验收。草稿 PR #47，head `f4f4223`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39715004161 。`phase1-blocking` 442 passed、21 deselected，用时 115.52 秒，nightly 跳过。没有合并。
+- 证据：本地 `make phase1-test` 442 passed、21 deselected，用时 66.64 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.41 秒。三个阶段在时钟前 ok 就写 complete。字段缺口留在事件和 `missing.fields`。没有可见 lifecycle 的事件保留。阶段缺失、失败或晚于时钟仍不写快照。
+- 第 2、3 部分另开 PR，从这一版接着做。早页用现有 store 落库，不额外加模型调用。09:30 和 12:30 读上一阶段并保存，labels 成功后写快照。五日回放用隔离存储，不写生产 M8 实时表。
+- 下一步：不把 B-039 标成已完成。第 2、3 部分的 head 上 phase1-blocking 绿了再交。
+
 ## B-039  进行中  2026-10-22 11:08 北京
 
 - 草稿 PR #47，head `f4f4223`，分支 `cursor/m8-b036-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
