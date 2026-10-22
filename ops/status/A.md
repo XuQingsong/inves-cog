@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  阻塞（10-22盘前窗口已结束但未运行；纸面计划发布已完成）  2026-10-22 20:39 北京
+- **窗口最终状态已实查**：北京 **20:38:35.213977**（晚于20:30截止）仍无10-22 premarket_review job，复核表0行，anomaly_daily日志waiting_dependencies。前置bars_prefill **10177=failed/HTTP403/0行**，实际20:00:24.384838→20:00:25.053972；没有新增成功预填或复核。不能把0行写成“没有异常”，不在窗口外补跑冒充自然按时成功。
+- **成功部分保留**：M4 paper_plan **10179=ok**，published=true、generated_at仍 **20:00:41.368404**，54/54行情、缺评分/行情0；没有重跑或改写计划。安装完整SHA仍 **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**；M4来源[PR41](https://github.com/XuQingsong/inves-cog/pull/41)准确head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**及[对应原成功CI39393827222](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用，配置SHA256仍79d84a6a34e5f3e95d864dda3c5b89fdb4e49107de55c321a60375d75112f32e。私有证据 **migration/evening-natural-20261022-123835.json**；只读观察，无额外模型/上游请求/业务启动/业务写入。
+- **需要的下一步不变且具体**：需求方/M1负责人核实原Alpaca账户对盘前SIP分钟请求的许可与时间限制，按查实原因明确允许修复的范围；A现有M1只读权限不能自行换源/key、改采集时点或失败门禁，现有HTTP错误元数据不足以判定根因。不重新诊断已恢复IO或重做四日M7。GitHub本轮main仍fe0b451，A015/B041/PR45/47无新答复，M9接线部署继续保留原验收合并停点；接单保持开启。
+
 ## OPS-A014  进行中（10-22自然纸面计划已发布；盘前预填再次403）  2026-10-22 20:16 北京
 - **M4今日自然计划已核实**：paper_plan **job10179=ok**，北京 **20:00:16.321467→20:00:41.541176**，processed_count=5；原连续账户paper-fixed的10-22计划published=true，实际generated_at/plan账本observed_at均 **20:00:41.368404**，signal_date/input_asof均10-21，score_source=trading.daily_scores。仅报告计数，不输出私人持仓/订单明细；此处证明自然计划发布，不冒称后续撮合或交易完成。
 - **输入与覆盖**：54/54可交易标的有行情，覆盖100%，missing_score_count=0、missing_bar_count=0、health_codes=[ok]，5条纸面订单/0撤单。M9 overlay status=missing（尚未部署），原规则A仍正常出计划；不将缺失覆盖层说成已上线，也不将纸面发布说成第一阶段整体验收通过。
