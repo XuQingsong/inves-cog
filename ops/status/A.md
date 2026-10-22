@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015  进行中（新依赖准确head CI528项通过；已收到B043限定修复安排）  2026-10-22 22:59 北京
+- 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head仍 **7630a69da6f06693333f9a11ee99ed161e518d41**，干净工作区，无重复启动/源码变更。准确[CI39798628607](https://github.com/XuQingsong/inves-cog/actions/runs/39798628607) **completed/success**；独立读job **119892638057**完整日志：测试merge **08c86996a27a1185451dd1b334b73d5cbf6e8f3c**将本head合入main **661b0ff9381927d625f058d4f710301ae57a3ec5**，干净容器 **528 passed、21 deselected**（91.61秒）、M0另 **2 passed**，9项预期失败自检均red=True。此前queued状态已结束，PR描述与GitHub评论已更新，不改源码制造新的CI循环。
+- 当前main **da3172182fbbfdd7e7ab5f33c9b8607629a63ad3** 已由需求方下发 **B-043**，不是A代派：只改历史回放loader按trade_date选入补算异常，保留原generated_at并逐日显式generated_after_slot；新闻PIT和实时过滤保持；X1–X6用2/5/0/11/9真实生产形态回归。已全文读任务/清单；该修复尚未验收合并，A不执行B代码或绕过过滤。README、A015答复、A线inbox未变，A仍运行。
+- **实际业务状态保持清楚**：每日M8已安装0096d5f、两后续worker/早页已就绪，下一自然交易日三阶段尚未到点；快照迁移/四日M7/IO恢复均不重做。一次真实五日回放尚未开始，模型0/历史快照0，费用/27逻辑上限授权继续有效，无需用户再次批准。B043验收合并后，先核对新原生dry-run恢复2/5/0/11/9选入，再按已准备的限额/远端期限保护执行原一次回放并完成A5隔离消费。M9未合并/部署，接单开启；本轮无须用户新增操作，不重复提醒旧授权。
+
 ## A-015  进行中（B042新依赖集成70项通过；真实回放执行保护已准备）  2026-10-22 22:53 北京
 - 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已推送完整head **7630a69da6f06693333f9a11ee99ed161e518d41**，继承已验收main **661b0ff**（业务代码0096d5f/B042）。M9业务代码未变，M9/M4新依赖回归 **70 passed、3 deselected**，Ruff check/format通过，证据handoff/M9/b042-integration-green.xml；相对main的docs/golden/milestones、M4、M8均无A新增修改。PR描述/当前停点已同步，保持draft。
 - 准确新head [CI39798628607](https://github.com/XuQingsong/inves-cog/actions/runs/39798628607) **queued**，job119892638057尚未运行；旧head839c176的CI522项成功只作旧依赖证据，未冒充本次整仓检查。A1–A4消费及A5隔离入口已有实测，不重复生产数据或模型。
