@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  进行中  2026-10-22 15:45 北京
+
+- 草稿 PR #48 head `ce819d8` 的 phase1-blocking 已绿：https://github.com/XuQingsong/inves-cog/actions/runs/39742264835 。462 passed、21 deselected，用时 122.74 秒，nightly 跳过。没有合并。
+- 草稿 PR #47 head `6ffd86b` 此前已绿。两个 head 的检查都过了，仍不标已完成。
+- 方向词仍停着：合同样例是「不利」，链上实测是 `down`。没有改写。V1–V9 的合同夹具仍不逐项交齐。
+
 ## B-041  进行中  2026-10-22 15:41 北京
 
 - PR #48 与基线 `cursor/m8-b036-pit-snapshot-e013` 冲突，所以 `e380b03` 和空提交都没有生成检查。合并基线后 head `ce819d8`，可以合并。phase1-blocking 正在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39742264835 。没有合并进 main。
