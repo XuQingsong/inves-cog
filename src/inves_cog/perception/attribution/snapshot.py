@@ -190,24 +190,26 @@ def _row_event(row, now, day):
     if version is None:
         return None, f"{event_id} 没有不晚于 cutoff 的历史时间"
     when, entry = version
-    ticker, exposure = _affected(row)
+    divergence = _report_value(row, "divergence_label", "divergence_tag")
+    filing = _report_value(row, "next_filing_at")
+    members, member_gaps = _members(row, divergence, filing)
+    ticker, exposure = _event_targets(members)
     fields = {
         "lifecycle": _lifecycle(entry, when),
         "mechanism": _observed(_mechanism(row), now, _DB_REASONS["mechanism"]),
         "ticker": _observed(ticker, now, _DB_REASONS["ticker"]),
         "exposure": _observed(exposure, now, _DB_REASONS["exposure"]),
         "direction": _direction_field(row, now),
-        "divergence_tag": _observed(
-            _report_value(row, "divergence_label", "divergence_tag"),
-            now,
-            _DB_REASONS["divergence_tag"],
-        ),
+        "divergence_tag": _observed(divergence, now, _DB_REASONS["divergence_tag"]),
         "dimensions": _observed(_dimensions(row, day), now, _DB_REASONS["dimensions"]),
-        "next_filing_at": _observed(_report_value(row, "next_filing_at"), now, _DB_REASONS["next_filing_at"]),
+        "next_filing_at": _observed(filing, now, _DB_REASONS["next_filing_at"]),
         "systemic_tag": _observed(_cell(row, "systemic_event_tag", 11), now, _DB_REASONS["systemic_tag"]),
         "deadline_outcome": _observed(_deadline(row), now, _DB_REASONS["deadline_outcome"]),
     }
-    return _event_row(event_id, _cell(row, "anomaly_id", 1), when.isoformat(), entry.get("evidence_ids"), fields), None
+    event = _event_row(event_id, _cell(row, "anomaly_id", 1), when.isoformat(), entry.get("evidence_ids"), fields)
+    event["members"] = [item for item in members if item["exposure"] not in (None, "")]
+    event["member_gaps"] = member_gaps
+    return event, None
 
 
 def _from_supplied(events, now):
@@ -299,28 +301,79 @@ def _direction_field(row, now):
     return _empty("direction")
 
 
-def _affected(row):
-    rows = _dicts(row, "tickers", 6)
-    named = [item for item in rows if item.get("ticker")]
-    if named:
-        tickers = [item.get("ticker") for item in named]
-        exposures = [item.get("exposure") for item in named]
-        if len(named) == 1:
-            return tickers[0], exposures[0]
-        if all(exposures):
-            return tickers, exposures
-        return tickers, None
-    names = []
+def _members(row, divergence, filing):
+    grouped = {}
+    order = []
+
+    def add(ticker, exposure, extra):
+        if not isinstance(ticker, str) or not ticker:
+            return
+        slot = grouped.get(ticker)
+        if slot is None:
+            slot = {"exposures": [], "divergence": [], "filing": []}
+            grouped[ticker] = slot
+            order.append(ticker)
+        if exposure not in (None, ""):
+            slot["exposures"].append(exposure)
+        if isinstance(extra, dict) and extra.get("divergence_tag") not in (None, ""):
+            slot["divergence"].append(extra.get("divergence_tag"))
+        if isinstance(extra, dict) and extra.get("next_filing_at") not in (None, ""):
+            slot["filing"].append(extra.get("next_filing_at"))
+
+    for item in _dicts(row, "tickers", 6):
+        add(item.get("ticker"), item.get("exposure"), item)
+    named = set(grouped)
     for candidate in _dicts(row, "candidates", 7):
         for item in candidate.get("affected") or []:
-            if isinstance(item, dict) and item.get("ticker"):
-                names.append(item.get("ticker"))
-    names = _distinct(names)
-    if len(names) == 1:
-        return names[0], None
-    if names:
-        return names, None
-    return None, None
+            if not isinstance(item, dict):
+                continue
+            if named and item.get("ticker") not in named:
+                continue
+            add(item.get("ticker"), item.get("exposure"), item)
+    members = []
+    gaps = {}
+    for ticker in order:
+        slot = grouped[ticker]
+        exposures = _distinct(slot["exposures"])
+        if len(exposures) > 1:
+            exposure = None
+            gaps[f"{ticker}.exposure"] = "同一标的的暴露不一致"
+        elif len(exposures) == 1:
+            exposure = exposures[0]
+        else:
+            exposure = None
+            gaps[f"{ticker}.exposure"] = _DB_REASONS["exposure"]
+        tag, tag_reason = _own_or_shared(slot["divergence"], divergence, "同一标的的背离标签不一致")
+        when, when_reason = _own_or_shared(slot["filing"], filing, "同一标的的下一份财报时间不一致")
+        if tag_reason:
+            gaps[f"{ticker}.divergence_tag"] = tag_reason
+        if when_reason:
+            gaps[f"{ticker}.next_filing_at"] = when_reason
+        members.append({"ticker": ticker, "exposure": exposure, "divergence_tag": tag, "next_filing_at": when})
+    return members, gaps
+
+
+def _own_or_shared(own, shared, conflict):
+    found = _distinct(own)
+    if len(found) > 1:
+        return None, conflict
+    if len(found) == 1 and shared not in (None, "", found[0]):
+        return None, conflict
+    if len(found) == 1:
+        return found[0], None
+    return shared, None
+
+
+def _event_targets(members):
+    if not members:
+        return None, None
+    names = [item["ticker"] for item in members]
+    exposures = [item["exposure"] for item in members]
+    ticker = names[0] if len(names) == 1 else names
+    exposure = exposures[0] if len(exposures) == 1 and exposures[0] else None
+    if len(exposures) > 1 and all(exposures):
+        exposure = exposures
+    return ticker, exposure
 
 
 def _dimensions(row, day):
@@ -381,6 +434,8 @@ def _gaps(event):
         cell = event["fields"][name]
         if cell["value"] is None or cell["at"] is None:
             found[name] = cell["missing_reason"]
+    for key, reason in (event.get("member_gaps") or {}).items():
+        found[key] = reason
     return found
 
 
@@ -519,7 +574,20 @@ def _flatten(event):
         return (fields.get(name) or {}).get("value")
 
     affected = []
-    if value("ticker") is not None or value("exposure") is not None:
+    if "members" in event:
+        for item in event.get("members") or []:
+            ticker = item.get("ticker")
+            if not isinstance(ticker, str) or not ticker or item.get("exposure") in (None, ""):
+                continue
+            affected.append(
+                {
+                    "ticker": ticker,
+                    "exposure": item.get("exposure"),
+                    "divergence_tag": item.get("divergence_tag"),
+                    "next_filing_at": item.get("next_filing_at"),
+                }
+            )
+    elif value("ticker") is not None or value("exposure") is not None:
         affected.append(
             {
                 "ticker": value("ticker"),
