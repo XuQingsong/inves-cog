@@ -462,13 +462,27 @@ def adapt_m7(anomaly):
 
 
 def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None):
-    """Tracked news goes to the move card. Labels, price tracks, and wide scans do not."""
+    """09:15 keeps the move card and the structured chain. Later slots do not ask again."""
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
     tracked = anomaly.get("universe") != "wide"
-    if tracked and stage != "attribution_labels" and anomaly.get("capital_track") is None:
+    if tracked and stage not in {"attribution_tracks", "attribution_labels"} and anomaly.get("capital_track") is None:
         visible = _retrieved(anomaly, items, as_of)
         if any(_before_move(item, anomaly.get("started_at")) for item in visible):
+            if stage == "attribution_candidates":
+                page = _phase1_move(anomaly, visible, client, valuation, plan)
+                return _score_one(
+                    anomaly,
+                    items,
+                    as_of=as_of,
+                    client=client,
+                    store=store,
+                    components=components,
+                    stage=stage,
+                    valuation=valuation,
+                    plan=plan,
+                    page=page,
+                )
             return _phase1_move(anomaly, visible, client, valuation, plan, store)
         scored = _score_one(anomaly, [], as_of=as_of, client=client, store=store, components=components, stage=stage)
         page = _phase1_move(anomaly, [], client, valuation, plan)
@@ -488,7 +502,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=N
     )
 
 
-def _score_one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None):
+def _score_one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None, page=None):
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
     previous, rejected = _stored_report(anomaly, store, as_of) if stage is not None else (None, False)
@@ -509,8 +523,11 @@ def _score_one(anomaly, items, *, as_of, client, store, components, stage, valua
             claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
             candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of, claim_note=claim_note)
     else:
-        claimed, claim_note = _claims(visible, client, anomaly.get("universe"))
-        candidates, model_note = _candidates(anomaly, claimed, client, as_of=as_of, claim_note=claim_note)
+        caller = None if stage == "attribution_tracks" else client
+        claimed, claim_note = _claims(visible, caller, anomaly.get("universe"))
+        if stage == "attribution_tracks" and anomaly.get("universe") != "wide" and visible:
+            claim_note = claim_note or "缺少此前分析，未重新调用模型"
+        candidates, model_note = _candidates(anomaly, claimed, caller, as_of=as_of, claim_note=claim_note)
     candidates = _apply_score(candidates, anomaly, claimed, components)
     when = as_of.isoformat() if hasattr(as_of, "isoformat") else str(as_of)
     due_on = earliest_deadline(
@@ -574,6 +591,7 @@ def _score_one(anomaly, items, *, as_of, client, store, components, stage, valua
             report["previous_candidates"] = deepcopy(previous.get("candidates") or [])
     hits, conclusion, coverage = _second_hits(anomaly, candidates, as_of)
     _sync_market_layer(report, candidates, confirmation, conclusion, coverage, anomaly)
+    _stamp_scope(candidates, report.get("scope"))
     analysis = report.get("stage_analysis")
     if isinstance(analysis, dict):
         analysis["candidate_rows_hash"] = _hash_input({"candidates": candidates})
@@ -583,11 +601,12 @@ def _score_one(anomaly, items, *, as_of, client, store, components, stage, valua
         notes = ["沿用此前分析降级：" + "；".join(notes)]
     if stage is not None and notes:
         report["analysis_note"] = "；".join(notes)
+    _keep_page(report, page, previous, stage)
     saved = False
     if store is not None:
         store.save(_bundle(anomaly, claimed, candidates, report, state, history, impact, hits, tracks, deadline))
         saved = True
-    return {
+    result = {
         "anomaly_id": anomaly.get("anomaly_id"),
         "status": report["status"],
         "report": report,
@@ -599,6 +618,24 @@ def _score_one(anomaly, items, *, as_of, client, store, components, stage, valua
         "second_hit": conclusion,
         "tracks": tracks,
     }
+    if isinstance(report.get("move_card"), dict):
+        result["daily_text"] = report.get("daily_text")
+        result["move_card"] = report["move_card"]
+    return result
+
+
+def _keep_page(report, page, previous, stage):
+    """The morning card stays on the saved report. 09:30 does not replace it with a thin page."""
+    if isinstance(page, dict):
+        report["daily_text"] = page.get("daily_text")
+        report["move_card"] = page.get("move_card")
+        return
+    if stage != "attribution_tracks" or not isinstance(previous, dict):
+        return
+    if "daily_text" in previous:
+        report["daily_text"] = previous["daily_text"]
+    if "move_card" in previous:
+        report["move_card"] = previous["move_card"]
 
 
 def _news_card(item):
@@ -1705,6 +1742,7 @@ def _report_source(item):
 
 def _bundle(anomaly, items, candidates, report, state, history, impact, hits, tracks, deadline):
     mode = retrieval_mode(anomaly.get("embeddings") or [])
+    _stamp_scope(candidates, report.get("scope"))
     bundle = {
         "anomaly_id": anomaly["anomaly_id"],
         "universe": anomaly.get("universe"),
@@ -1726,11 +1764,16 @@ def _bundle(anomaly, items, candidates, report, state, history, impact, hits, tr
         bundle.pop("claims")
         return bundle
     bundle["candidates"] = candidates
-    codes = [row for row in report.get("ticker_status") or [] if row.get("n_code")]
+    codes = _fill_ticker_exposure(report.get("ticker_status"), report.get("scope"))
     if codes:
         bundle["ticker_status"] = codes
     if state not in {None, "已发现"}:
-        linkage = {"event_id": f"evt-{anomaly['anomaly_id']}", "lifecycle": state, "history": history}
+        linkage = {
+            "event_id": f"evt-{anomaly['anomaly_id']}",
+            "lifecycle": state,
+            "history": history,
+            "mechanism": _lead_mechanism(candidates),
+        }
         if deadline is not None:
             linkage["deadline_outcome"] = deadline["deadline_outcome"]
             linkage["closing_reason"] = deadline["closing_reason"]
@@ -1743,6 +1786,42 @@ def _bundle(anomaly, items, candidates, report, state, history, impact, hits, tr
         if impact is not None:
             bundle["impact"] = impact
     return bundle
+
+
+def _stamp_scope(candidates, scope):
+    """The rule exposure stays on the saved candidate so the snapshot can read it."""
+    by_ticker = {}
+    for row in scope or []:
+        if isinstance(row, dict) and row.get("ticker") and row.get("exposure"):
+            by_ticker.setdefault(row["ticker"], row["exposure"])
+    for candidate in candidates or []:
+        if not isinstance(candidate, dict):
+            continue
+        for affected in candidate.get("affected") or []:
+            if not isinstance(affected, dict) or affected.get("exposure"):
+                continue
+            exposure = by_ticker.get(affected.get("ticker"))
+            if exposure:
+                affected["exposure"] = exposure
+
+
+def _fill_ticker_exposure(rows, scope):
+    found = {}
+    for row in scope or []:
+        if isinstance(row, dict) and row.get("ticker"):
+            found[row["ticker"]] = row
+    filled = []
+    for row in rows or []:
+        if not isinstance(row, dict) or not row.get("n_code"):
+            continue
+        copied = dict(row)
+        extra = found.get(copied.get("ticker")) or {}
+        if not copied.get("exposure") and extra.get("exposure"):
+            copied["exposure"] = extra["exposure"]
+        if not copied.get("mechanism") and extra.get("mechanism"):
+            copied["mechanism"] = extra["mechanism"]
+        filled.append(copied)
+    return filled
 
 
 def _claim_rows(items):

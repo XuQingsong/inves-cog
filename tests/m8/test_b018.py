@@ -19,7 +19,7 @@ class Script:
     def call(self, task, payload):
         self.tasks.append(task)
         if task != "move_card":
-            raise AssertionError(task)
+            return {"没有": True}
         cited = payload["新闻"][0]["编号"]
         name = payload["波动"]["股票"][0]
         return {"解释": [{"编号": cited, "怎么影响": f"{name} 供应变化", "强弱": "中"}]}
@@ -128,9 +128,8 @@ def test_one_morning_page_lists_both_tracked_moves():
     nvda = _item("news:nvda", START - timedelta(hours=3), _card("NVDA 新闻", ticker="NVDA"), "NVDA")
     client = Script()
     result = _run([_anomaly("meta-up", "META"), _anomaly("nvda-up", "NVDA")], [meta, nvda], client)
-    assert client.tasks == ["move_card", "move_card"]
-    assert "anomaly_candidates" not in client.tasks
-    assert "claim_extraction" not in client.tasks
+    assert client.tasks == ["move_card", "claim_extraction", "move_card", "claim_extraction"]
+    assert client.tasks.count("move_card") == 2
     assert len(result["daily_pages"]) == 1
     text = _page(result)
     assert "META 供应变化" in text

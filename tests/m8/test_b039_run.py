@@ -143,7 +143,7 @@ def test_morning_persists_and_the_job_is_ok_only_after_save(tmp_path, monkeypatc
     pages.execute = execute
     client = Quiet()
     assert morning_main([], connection=pages, clock=FrozenClock(MORNING), client=client) == 0
-    assert client.tasks == ["move_card"]
+    assert client.tasks == ["move_card", "claim_extraction"]
     assert pages.jobs[0]["status"] == "ok"
     assert any(statement.startswith("INSERT INTO perception.reports") for statement, _params in pages.calls)
     text = (tmp_path / f"daily_page_{DAY}.txt").read_text(encoding="utf-8")
@@ -236,7 +236,7 @@ def test_replay_uses_seen_news_and_dry_run_does_not_call_or_write(tmp_path):
     assert stage["info_ids"] == ["seen"]
     assert stage["anomalies"] == 1
     assert stage["news"] == 1
-    assert stage["calls"] == {"move_card": 1}
+    assert stage["calls"] == {"move_card": 1, "claim_extraction": 1, "anomaly_candidates": 1}
     assert result["days"][0]["stages"][1]["calls"] == {}
     assert result["days"][0]["stages"][2]["calls"] == {}
     logged = json.loads((tmp_path / "dry.json").read_text(encoding="utf-8"))

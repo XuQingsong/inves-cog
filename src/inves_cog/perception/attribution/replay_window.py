@@ -7,7 +7,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from inves_cog.llm.client import canonical_payload
-from inves_cog.perception.attribution.chain import _before_move, _closed_trade_date, _retrieved, job_slot, run_scheduled
+from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
 from inves_cog.perception.attribution.snapshot import STAGES, append_replay_snapshot
 from inves_cog.perception.attribution.store import _guard
 
@@ -67,8 +67,11 @@ class MemoryStore:
         return linkage.get("event_id") == event_id
 
     def save(self, bundle):
+        """Upsert like the database store. A later report does not erase linkage."""
         _guard(bundle)
-        self.bundles[bundle["anomaly_id"]] = bundle
+        current = dict(self.bundles.get(bundle["anomaly_id"]) or {})
+        current.update(bundle)
+        self.bundles[bundle["anomaly_id"]] = current
 
 
 class Recording:
@@ -110,20 +113,28 @@ def slot_moment(trade_date, task_name):
     raise ValueError(f"没有{trade_date}的{task_name}时点")
 
 
-def expected_calls(anomaly, items, as_of, stage):
-    """Count the model calls this stage would make. It does not make them."""
-    if stage != "attribution_candidates":
-        return {}
-    if anomaly.get("started_at") is None or "universe" not in anomaly:
-        return {}
-    if anomaly.get("capital_track") is not None or anomaly.get("universe") == "wide":
-        return {}
-    visible = _retrieved(anomaly, [item for item in items if item.get("published_at") is not None], as_of)
-    if any(_before_move(item, anomaly.get("started_at")) for item in visible):
-        return {"move_card": 1}
-    if not visible:
-        return {}
-    return {"claim_extraction": 1, "anomaly_candidates": 1}
+class Counting:
+    """Walk the real chain and count calls. The reply is local and is not a model."""
+
+    def __init__(self):
+        self.tasks = []
+
+    def call(self, task, payload):
+        self.tasks.append(task)
+        if task == "claim_extraction":
+            return {
+                "items": [
+                    {
+                        "info_id": row.get("info_id"),
+                        "claims": [{"subject": "公司", "mechanism": "供给", "direction": "down"}],
+                    }
+                    for row in payload.get("items") or []
+                    if isinstance(row, dict) and row.get("info_id")
+                ]
+            }
+        if task == "anomaly_candidates":
+            return {"candidates": [_counted_candidate(payload)]}
+        return {"没有": True}
 
 
 def replay_window(connection, clock, *, anomalies, items, days=DAYS, client=None, dry_run=False, log_path=None):
@@ -152,37 +163,39 @@ def replay_window(connection, clock, *, anomalies, items, days=DAYS, client=None
 
 def _day(connection, clock, store, recorder, trade_date, anomalies, items, *, dry_run):
     due = [row for row in anomalies or [] if str(row.get("trade_date") or "")[:10] == trade_date]
+    actor = Counting() if dry_run else recorder
+    holder = MemoryStore() if dry_run else store
     stages = []
     for name in STAGES:
         moment = slot_moment(trade_date, name)
         seen = visible_news(items, moment)
+        info_ids = [item.get("info_id") for item in seen]
+        before = _call_count(actor)
+        rows = run_scheduled(
+            moment,
+            anomalies=due,
+            items=[item for item in items or [] if item.get("info_id") in info_ids],
+            client=actor,
+            store=holder,
+        )
         stages.append(
             {
                 "task_name": name,
                 "as_of": moment.isoformat(),
                 "anomalies": len(due),
                 "news": len(seen),
-                "info_ids": [item.get("info_id") for item in seen],
-                "calls": _sum_calls(due, seen, moment, name),
+                "info_ids": info_ids,
+                "calls": _tally(_new_calls(actor, before)),
             }
         )
-    result = {"trade_date": trade_date, "stages": stages, "snapshot_id": None}
-    if dry_run:
-        return result
-    for stage in stages:
-        rows = run_scheduled(
-            datetime.fromisoformat(stage["as_of"]),
-            anomalies=due,
-            items=[item for item in items or [] if item.get("info_id") in stage["info_ids"]],
-            client=recorder,
-            store=store,
-        )
         failed = [row for row in (rows or {}).get("rows") or [] if not row.get("saved")]
-        if due and failed:
-            result["error"] = "未保存"
-            return result
+        if not dry_run and due and failed:
+            return {"trade_date": trade_date, "stages": stages, "snapshot_id": None, "error": "未保存"}
+    result = {"trade_date": trade_date, "stages": stages, "snapshot_id": None}
+    if dry_run or not stages:
+        return result
     labels = datetime.fromisoformat(stages[-1]["as_of"])
-    events, missing = _events(store, [row.get("anomaly_id") for row in due], labels)
+    events, missing = _events(holder, [row.get("anomaly_id") for row in due], labels)
     result["snapshot_id"] = append_replay_snapshot(
         connection,
         trade_date,
@@ -195,12 +208,65 @@ def _day(connection, clock, store, recorder, trade_date, anomalies, items, *, dr
     return result
 
 
-def _sum_calls(anomalies, items, as_of, stage):
+def _call_count(actor):
+    if actor is None:
+        return 0
+    return len(getattr(actor, "calls", None) or getattr(actor, "tasks", None) or [])
+
+
+def _new_calls(actor, before):
+    if actor is None:
+        return []
+    found = getattr(actor, "calls", None)
+    if found is None:
+        found = getattr(actor, "tasks", None) or []
+    return list(found)[before:]
+
+
+def _tally(calls):
     totals = {}
-    for anomaly in anomalies:
-        for name, count in expected_calls(anomaly, items, as_of, stage).items():
-            totals[name] = totals.get(name, 0) + count
+    for item in calls:
+        name = item.get("task") if isinstance(item, dict) else item
+        if not name:
+            continue
+        totals[name] = totals.get(name, 0) + 1
     return totals
+
+
+def _counted_candidate(payload):
+    anomaly = payload.get("anomaly") if isinstance(payload, dict) else {}
+    anomaly = anomaly if isinstance(anomaly, dict) else {}
+    info_ids = [
+        row.get("info_id")
+        for row in (payload.get("items") or [])
+        if isinstance(row, dict) and isinstance(row.get("info_id"), str) and row.get("info_id")
+    ]
+    ticker = "NVDA"
+    for member in anomaly.get("members") or []:
+        name = member.get("ticker") if isinstance(member, dict) else member
+        if isinstance(name, str) and name:
+            ticker = name
+            break
+    return {
+        "mechanism": "供给",
+        "info_ids": info_ids[:1],
+        "affected": [{"ticker": ticker}],
+        "chain": [{"entity_id": ticker}],
+        "control_baskets": [],
+        "links": [
+            {
+                "kind": "声明的假设",
+                "from": "新闻",
+                "to": ticker,
+                "hypothesis": "供应变化影响该标的",
+                "hypothesis_type": "暴露关系",
+                "falsify": {"metric": "收入", "direction": "下降", "window": "下一季"},
+            }
+        ],
+        "竞争解释": [],
+        "反证条件": "下一季收入没有下降",
+        "证伪预测": [{"ticker": ticker, "control_basket": "存储", "direction": "down", "window": "下一季"}],
+    }
 
 
 def _events(store, anomaly_ids, as_of):
@@ -224,9 +290,9 @@ def _event(bundle, as_of):
     stamp = as_of.isoformat()
     values = {
         "lifecycle": linkage.get("lifecycle"),
-        "mechanism": report.get("mechanism") or linkage.get("mechanism"),
+        "mechanism": report.get("mechanism") or linkage.get("mechanism") or _lead(report),
         "ticker": _ticker(bundle),
-        "exposure": _exposure(bundle),
+        "exposure": _exposure(bundle) or _scope_value(report, "exposure"),
         "direction": _direction(bundle),
         "divergence_tag": report.get("divergence_label") or report.get("divergence_tag"),
         "dimensions": report.get("dimensions"),
@@ -243,17 +309,7 @@ def _event(bundle, as_of):
             gaps[name] = "回放没有该字段"
         else:
             cells[name] = {"value": value, "at": stamp, "missing_reason": None}
-    members = []
-    for row in bundle.get("ticker_status") or []:
-        if row.get("ticker") and row.get("exposure"):
-            members.append(
-                {
-                    "ticker": row["ticker"],
-                    "exposure": row["exposure"],
-                    "divergence_tag": values["divergence_tag"],
-                    "next_filing_at": values["next_filing_at"],
-                }
-            )
+    members = _members(bundle, report, values)
     return (
         {
             "event_id": event_id,
@@ -265,6 +321,61 @@ def _event(bundle, as_of):
         },
         gaps,
     )
+
+
+def _lead(report):
+    scored = [
+        row
+        for row in report.get("candidates") or []
+        if isinstance(row, dict) and row.get("scored") and row.get("score") is not None
+    ]
+    if not scored:
+        return None
+    return max(scored, key=lambda row: row["score"]).get("mechanism")
+
+
+def _scope_value(report, name):
+    found = []
+    for row in report.get("scope") or []:
+        if isinstance(row, dict) and row.get(name) not in (None, "") and row.get(name) not in found:
+            found.append(row[name])
+    if len(found) == 1:
+        return found[0]
+    return None
+
+
+def _members(bundle, report, values):
+    members = []
+    seen = set()
+    for row in bundle.get("ticker_status") or []:
+        ticker = row.get("ticker")
+        exposure = row.get("exposure")
+        if ticker and exposure:
+            members.append(_member(ticker, exposure, values))
+            seen.add(ticker)
+    for row in report.get("scope") or []:
+        if not isinstance(row, dict) or not row.get("ticker") or not row.get("exposure") or row["ticker"] in seen:
+            continue
+        members.append(_member(row["ticker"], row["exposure"], values))
+        seen.add(row["ticker"])
+    for candidate in bundle.get("candidates") or []:
+        for affected in candidate.get("affected") or []:
+            if not isinstance(affected, dict) or not affected.get("ticker") or not affected.get("exposure"):
+                continue
+            if affected["ticker"] in seen:
+                continue
+            members.append(_member(affected["ticker"], affected["exposure"], values))
+            seen.add(affected["ticker"])
+    return members
+
+
+def _member(ticker, exposure, values):
+    return {
+        "ticker": ticker,
+        "exposure": exposure,
+        "divergence_tag": values["divergence_tag"],
+        "next_filing_at": values["next_filing_at"],
+    }
 
 
 def _ticker(bundle):
