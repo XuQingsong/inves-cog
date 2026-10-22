@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-039  进行中  2026-10-22 11:23 北京
+
+- 第 2、3 部分：草稿 PR #48，head `2b6dc89`，分支 `cursor/m8-b039-persist-replay-e013`，叠在 PR #47 上。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
+- 09:15 用现有 store 落库，不额外加模型调用。保存失败则作业失败，页面仍写出。09:30 和 12:30 读上一阶段并保存；上一阶段没成功就记失败，不改钟，也不再跑一次冒充成功。labels 成功后写快照。supervisor 只加定义，不部署。
+- 五日回放用内存 store，不写生产 M8 实时表。`snapshot_generated_at` 是实际运行时钟。`--dry-run` 不调模型。09:15 问法不变。09:30 和 12:30 的模型调用是 0。
+- 证据：本地 `make phase1-test` 448 passed、21 deselected，用时 66.58 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.79 秒。
+- CI 还在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39716433062
+- 第 1 部分仍是 PR #47 head `f4f4223`，CI 已绿。
+- 下一步：这一版 phase1-blocking 绿了再把第 2、3 部分交给验收。不把 B-039 标成已完成。
+
 ## B-039  进行中  2026-10-22 11:11 北京
 
 - 第 1 部分可验收。草稿 PR #47，head `f4f4223`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39715004161 。`phase1-blocking` 442 passed、21 deselected，用时 115.52 秒，nightly 跳过。没有合并。
