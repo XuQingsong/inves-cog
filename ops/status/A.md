@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  已收到（UD-A-31：B043验收合并，执行原一次五日回放）  2026-10-22 23:31 北京
+- **接口执行记录UD-A-31（沿用UD-A-30/UD-COORD-28，来源A014续十四补充五）**：main **13095cb8994d725f3e6b61e3d0f1cfd8574ba28f**已确认B043按X1–X6验收；GitHub实查[PR50](https://github.com/XuQingsong/inves-cog/pull/50) merged，准确head **a9c4366dc27c7ef3cc7cb4e7e72141f43de9f7c6**，merge **04631bbf5e8c3aaadbf978427754188dcb101a72**；[对应CI39803809585](https://github.com/XuQingsong/inves-cog/actions/runs/39803809585)来源已列477项通过。历史loader问题已解除，不再等待同一修复或费用授权。
+- **先记录后执行**：核本项目真实进程/单位、已提交快照和执行前缀；若仍无一次回放结果，服务器只快进到04631bb（业务diff仅回放模块）、不重载任何worker、不重复迁移/四日M7。原生同参数--dry-run须恢复选入2/5/0/11/9、调用6/15/0/3/3=27，并核18条晚生成标识/真实时间保留，才通过原生--execute一次执行。新闻仍按历史stage可见、实际快照生成时间用真实Clock，严格区分回放/自然运行。
+- 原执行包装只作27逻辑/63HTTP调用前限额、默认记账与私有进度、逐日快照留证，不替换输入SQL/业务逻辑；远端独立有界作业45分钟，不取消本地连接后重复启动。完成后独立核实际调用/llm_calls/五日historical_backfill、实时七表未写及dry-run差异，再用已准备M9隔离消费路径完成A5；M9服务不提前部署，其他项目不改。
+
 ## A-015  进行中（新依赖准确head CI528项通过；已收到B043限定修复安排）  2026-10-22 22:59 北京
 - 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head仍 **7630a69da6f06693333f9a11ee99ed161e518d41**，干净工作区，无重复启动/源码变更。准确[CI39798628607](https://github.com/XuQingsong/inves-cog/actions/runs/39798628607) **completed/success**；独立读job **119892638057**完整日志：测试merge **08c86996a27a1185451dd1b334b73d5cbf6e8f3c**将本head合入main **661b0ff9381927d625f058d4f710301ae57a3ec5**，干净容器 **528 passed、21 deselected**（91.61秒）、M0另 **2 passed**，9项预期失败自检均red=True。此前queued状态已结束，PR描述与GitHub评论已更新，不改源码制造新的CI循环。
 - 当前main **da3172182fbbfdd7e7ab5f33c9b8607629a63ad3** 已由需求方下发 **B-043**，不是A代派：只改历史回放loader按trade_date选入补算异常，保留原generated_at并逐日显式generated_after_slot；新闻PIT和实时过滤保持；X1–X6用2/5/0/11/9真实生产形态回归。已全文读任务/清单；该修复尚未验收合并，A不执行B代码或绕过过滤。README、A015答复、A线inbox未变，A仍运行。
