@@ -9,9 +9,12 @@ A degraded row stays incomplete.
 """
 
 import json
-from datetime import datetime
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from psycopg.types.json import Jsonb
+
+_NEW_YORK = ZoneInfo("America/New_York")
 
 STAGES = ("attribution_candidates", "attribution_tracks", "attribution_labels")
 _REQUIRED = (
@@ -213,7 +216,8 @@ def _row_event(row, now, day):
         "dimensions": _observed(_dimensions(row, day), now, _DB_REASONS["dimensions"]),
         "next_filing_at": _observed(filing, now, _DB_REASONS["next_filing_at"]),
         "systemic_tag": _observed(_cell(row, "systemic_event_tag", 11), now, _DB_REASONS["systemic_tag"]),
-        "deadline_outcome": _observed(_deadline(row), now, _DB_REASONS["deadline_outcome"]),
+        "deadline_on": _dated(_date_text(_report_value(row, "deadline_on")), now),
+        "deadline_outcome": _deadline_cell(_deadline(row), _date_text(_report_value(row, "deadline_on")), now),
     }
     observed = when.isoformat() if when is not None else None
     event = _event_row(event_id, _cell(row, "anomaly_id", 1), observed, entry.get("evidence_ids"), fields)
@@ -399,6 +403,68 @@ def _dimensions(row, day):
     return None
 
 
+def _dated(text, now):
+    if text is None:
+        return {"value": None, "at": None, "missing_reason": None}
+    return {"value": text, "at": now.isoformat(), "missing_reason": None}
+
+
+def _deadline_cell(outcome, deadline_on, now):
+    if outcome not in (None, ""):
+        return _observed(outcome, now, _DB_REASONS["deadline_outcome"])
+    reason = _null_deadline_reason(deadline_on, now)
+    if reason is None:
+        return {"value": None, "at": None, "missing_reason": None}
+    return {"value": None, "at": None, "missing_reason": reason}
+
+
+def _settle_deadline(flat, late, cutoff, bucket):
+    if "deadline_outcome" in late:
+        return bucket
+    deadline_on = None if "deadline_on" in late else flat.get("deadline_on")
+    if flat.get("deadline_outcome") not in (None, ""):
+        bucket.pop("deadline_outcome", None)
+        return bucket
+    flat["deadline_outcome"] = None
+    reason = _null_deadline_reason(deadline_on, cutoff)
+    if reason is None:
+        bucket.pop("deadline_outcome", None)
+    else:
+        bucket["deadline_outcome"] = reason
+    return bucket
+
+
+def _null_deadline_reason(deadline_on, cutoff):
+    text = _date_text(deadline_on)
+    day = _et_day(cutoff)
+    if text is None or day is None:
+        return "截止日未知"
+    if date.fromisoformat(text) > day:
+        return None
+    return f"截止日已到（{text}）但没有支持/反证/条件风险结果"
+
+
+def _date_text(value):
+    if value is None or value == "":
+        return None
+    if isinstance(value, datetime):
+        value = value.date()
+    if isinstance(value, date):
+        return value.isoformat()
+    text = str(value)[:10]
+    try:
+        date.fromisoformat(text)
+    except ValueError:
+        return None
+    return text
+
+
+def _et_day(moment):
+    if not isinstance(moment, datetime) or moment.tzinfo is None:
+        return None
+    return moment.astimezone(_NEW_YORK).date()
+
+
 def _deadline(row):
     direct = _cell(row, "deadline_outcome", 5)
     if direct:
@@ -442,6 +508,8 @@ def _gaps(event):
     found = {}
     for name in _REQUIRED:
         cell = event["fields"][name]
+        if name == "deadline_outcome" and cell["value"] is None and cell.get("missing_reason") is None:
+            continue
         if cell["value"] is None or cell["at"] is None:
             found[name] = cell["missing_reason"]
     for key, reason in (event.get("member_gaps") or {}).items():
@@ -565,10 +633,14 @@ def _from_complete(item, cutoff):
             continue
         flat, late = _flatten(event, cutoff)
         events.append(flat)
-        if late:
-            bucket = dict(missing["fields"].get(event.get("event_id")) or {})
-            bucket.update(late)
-            missing["fields"][event.get("event_id")] = bucket
+        event_id = event.get("event_id")
+        bucket = dict(missing["fields"].get(event_id) or {})
+        bucket.update(late)
+        bucket = _settle_deadline(flat, late, cutoff, bucket)
+        if bucket:
+            missing["fields"][event_id] = bucket
+        else:
+            missing["fields"].pop(event_id, None)
     return {
         "complete": True,
         "source_events_asof": item["source_asof"].isoformat(),
@@ -675,6 +747,7 @@ def _flatten(event, cutoff=None):
         "next_filing_at": filing,
         "systemic_tag": value("systemic_tag"),
         "deadline_outcome": value("deadline_outcome"),
+        "deadline_on": value("deadline_on"),
         "evidence_ids": list(event.get("evidence_ids") or []),
     }
     return flat, late
