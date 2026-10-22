@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-039  已收到  2026-10-22 11:01 北京
+
+- 用户决策 UD-COORD-27：M8 归因链可以进生产每日运行，并对最近 5 个交易日做一次回放。由此产生的模型调用已同意，但执行前先报次数和费用，需求方确认后由 A 线执行。B 不调模型，不部署，不在生产执行回放。
+- 第 1 部分仍在草稿 PR #47，分支 `cursor/m8-b036-pit-snapshot-e013`。整日 `complete` 只看三个阶段在快照时钟前以 `ok` 结束并且快照写上。字段缺口留在事件和 `missing.fields`，不再把整日降成 degraded。没有 cutoff 前 lifecycle 的事件保留，`lifecycle` 为空并写原因，不删事件，也不降级整日。读取只拒绝晚于 cutoff 的时间。阶段缺失、失败或晚于 cutoff 仍不写快照。
+- 第 2、3 部分另开 PR。早页用现有 store 落库，不额外加模型调用；09:30 和 12:30 读上一阶段并保存，labels 成功后写快照。五日回放用隔离存储，不写生产 M8 实时表。`historical_backfill` 的 `snapshot_generated_at` 是实际运行时钟。`--dry-run` 不调模型，只报预计次数。
+- 不改 M7、M9、M4、规则 A、来源、角色或权限。不新增正式 schema。
+- 下一步：先改第 1 部分会失败的例子。
+
 ## B-038  已完成  2026-10-22 10:00 北京
 
 - 草稿 PR #47，head `b659c75`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39708622204 。`phase1-blocking` 438 passed、21 deselected，用时 119.57 秒，nightly 跳过。没有合并。
