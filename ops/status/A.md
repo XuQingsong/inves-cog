@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-015  阻塞（已收到按标的缺项合同；B038验收合并后执行）  2026-10-22 10:03 北京
+- 已fetch并读main **7ee605432438ee86fbf7d49b99db8cb08421ff29** 的最新A015答复（SHA256 b486e52bdfc689090bcde5f905f5c7bd90677b1f8e971ce164d8d997dc336c97）。需求方已明确：B038修复后的complete仅表示M8三个阶段在cutoff前成功；字段缺口按事件返回missing.fields，affected逐ticker scalar；**B038验收合并后**在原PR45继续A015，不另开任务。当前PR47仍未合并，不提前接入或部署。
+- **变更合同已记录、待依赖合并后实施**：完整快照可发布并保留字段缺口；仅complete=false沿用上一版。冷静期所需lifecycle/mechanism/逐ticker exposure/deadline_outcome，以及“已验证·有影响”时的direction缺失时，该ticker不新增冷静期，写cooling_status=unknown、结构化m8_gaps和“冷静期判断未完成：缺X”，不能报“不触发”。仅展示的divergence_tag/dimensions/systemic_tag缺失保留NULL与gap，不影响判定。顶层m8_completeness透传快照complete/source_events_asof及unknown ticker数和列表；判定齐全时cooling_status=on/off。不改只收紧规则、first_lot_multiplier=1.0、stop_review_eligible=false或M4/规则A；next_filing_at沿用现有保守语义。
+- 五日证据边界已明确：部署前只回放有history.at证明的lifecycle，其余字段逐项unknown；完整五日证据取部署后连续五个自然交易日作为OPS，不伪造旧快照、不以等待未来五日阻塞代码验收。后续M4调度ET08:35–09:05和input_completeness仍另派A任务，不并入本单。
+- 原A分支[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head仍 **61e535d5f41e631733a2ee0547f06bbc6c5664da**、[准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)447 passed/21 deselected、M0另2 passed，未改代码/DB/调度或接入未验收依赖。没有新增用户授权问题。
+- 已自行决定：无新增业务决定，按最新答复约束后续实施，不重复问已决定项。下一步：B038需求方验收并合并后继承main，在原A015保留失败测试→实现历史，补逐ticker/判定缺项/仅展示缺项/complete=false专项回归，再交准确head CI。今天自然M6/M7日级/早页证据已交，不重复运行；盘前403独立OPS保留。
+
 ## A-015  阻塞（已收到B038多标的快照验收修复；不接未合并PR47）  2026-10-22 09:52 北京
 - 已fetch最新main **2c0526e6ec3345f67a75d68995e6feb0502bf350**，A运行；读到tracker最新复验结论和B038依赖合同。B037/PR47 head e584e34 的快照在多ticker事件中返回ticker/exposure数组，而M9合同要求逐ticker scalar affected项；需求方已派 **B038** 在同一草稿PR47定向修复，明确修复通过前不合并。A继续当前A015，不代做/派发B任务，不集成该未验收版本。
 - 当前M9代码仍为[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da**，只接已验收合并的B035边界；其[准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)447 passed/21 deselected、M0另2 passed证据复用。没有因上游新缺陷重复改写已验收接线或重跑未变化测试。
