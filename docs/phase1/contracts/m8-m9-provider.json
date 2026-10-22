@@ -1,5 +1,5 @@
 {
-  "_comment": "M8→M9 provider 合同样例（合成数据，非生产）。M8 侧测试：用真实形态夹具跑三阶段后，m8_provider(conn)(target, cutoff) 的输出必须与本文件同结构（键、类型、嵌套），且 Toshiba 夹具的值一致。M9 侧测试：把本文件的 output 直接交给 M9，必须得到 expected_m9。 2026-10-22 修订：deadline_outcome 按 M8 FR-M8-21 只在截止日到期时填写；provider 每个事件增加 deadline_on（ET 日期）。deadline_on 晚于 cutoff 所在交易日且 deadline_outcome 为 null 表示“截止日未到”，不是缺失、不进 missing.fields；deadline_on 不晚于该日（或 deadline_on 为 null）而 deadline_outcome 仍为 null 才是缺失。",
+  "_comment": "M8→M9 provider 合同样例（合成数据，非生产）。M8 侧测试：用真实形态夹具跑三阶段后，m8_provider(conn)(target, cutoff) 的输出必须与本文件同结构（键、类型、嵌套），且 Toshiba 夹具的值一致。M9 侧测试：把本文件的 output 直接交给 M9，必须得到 expected_m9。 2026-10-22 修订：deadline_outcome 按 M8 FR-M8-21 只在截止日到期时填写；provider 每个事件增加 deadline_on（ET 日期）。deadline_on 晚于 cutoff 所在交易日且 deadline_outcome 为 null 表示“截止日未到”，不是缺失、不进 missing.fields；deadline_on 不晚于该日（或 deadline_on 为 null）而 deadline_outcome 仍为 null 才是缺失。 2026-10-22 二次修订：direction 采用 M8 实际词表 up/down（预期对受影响标的的方向，down 即 M9 规格中的“不利”）；不在 M8 侧改写成中文。",
   "target": "2026-10-20",
   "cutoff": "2026-10-21T12:00:00+00:00",
   "output": {
@@ -32,7 +32,7 @@
             "next_filing_at": null
           }
         ],
-        "direction": "不利",
+        "direction": "down",
         "divergence_tag": null,
         "dimensions": {
           "emotion": "初现",
@@ -79,7 +79,7 @@
             "next_filing_at": null
           }
         ],
-        "direction": "不利",
+        "direction": "down",
         "divergence_tag": null,
         "dimensions": null,
         "next_filing_at": null,
