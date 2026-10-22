@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  进行中  2026-10-22 17:19 北京
+
+- 停下。V1 要求 NVDA 只出现在 `missing.fields[event]["NVDA.exposure"]`。同一条链实测做不到，而且和已经生效的暴露规则冲突。没有改暴露规则，没有新造 N 码，没有改写方向。不标已完成。不合并。
+- 交易日 2026-10-20，09:15 时点 `2026-10-21T09:15:00+08:00`，内存 store，计数客户端。东芝这条（WDC/STX 关系「直接/观察到」，MU 关系「概念关联/候选」，`deadline_on` 2026-11-06，每只标的一条假设链）可以：lifecycle `假设中`，mechanism `供给`，direction `down`，affected 为 WDC/STX「直接」、MU「概念关联」，`deadline_on` 2026-11-06，`deadline_outcome` 空，`ticker_status` 不写。样例里的「基本面核查中」仍只是示例。
+- NVDA 没有关系、同一套打分：scope 和 affected 的暴露都是「纯共振」，不进缺失。这是 `report._exposure` 的现有规则：没有关系的价格成员是纯共振。`tests/m8/test_attribution.py` 的 `test_scope_is_a_relation_label_and_tracking_is_not_evidence` 锁着这条。
+- 候选受影响名单里不放 NVDA：NVDA 不进 scope、affected、`ticker_status`，也不进缺失。快照上看不到这只标的。
+- 说法不合格、候选没有生成（只调用了 `move_card` 和 `claim_extraction`）：lifecycle 停在「已发现」，不写 linkage，`ticker_status` 是 NVDA 的 N6 且没有暴露。实时快照从 `linkage_events` 起读，这条事件不出现，缺失暴露也不会出现。给已经打分的供给再写 N6，会新造现在 `ticker_codes` 不写的码；`n_code` 又不能空。
+- 所以「只在缺失里出现 NVDA.exposure」要改纯共振规则，或者改 N 码规则。两处都没有这次任务的授权。V1–V10 不逐项标通过。等这条怎么取舍。
+
 ## B-041  进行中  2026-10-22 17:14 北京
 
 - 收到 17:10 裁定（main `fe0b451`，`ops/answers/B-041.md`）。停下报告是对的。方向采用 M8 实际词表：`direction` 取 `up`/`down`，不改写成中文。`down` 即 M9 规格里的“方向不利”。合同样例已改为 `down`（evt-toshiba、evt-expired）。不改写链上的方向。
