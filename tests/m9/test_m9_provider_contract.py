@@ -98,6 +98,35 @@ def test_a1_a3_a4_actual_contract_via_native_provider(contract, native):
     assert contract == before
 
 
+def test_a1_pure_resonance_contract_is_off(contract, native):
+    before = deepcopy(contract)
+    case = contract["expected_m9_pure_resonance"]
+    source = deepcopy(contract["output"])
+    event_id = case["input"]["event"]
+    event = next(row for row in source["events"] if row["event_id"] == event_id)
+    known = {row["ticker"] for row in event["affected"]}
+    event["affected"].append(
+        {
+            "ticker": case["input"]["ticker"],
+            "exposure": case["input"]["exposure"],
+            "divergence_tag": None,
+            "next_filing_at": None,
+        }
+    )
+    source["events"] = [event]
+    source["source_ids"]["events"] = [row for row in source["source_ids"]["events"] if row["event_id"] == event_id]
+    source["missing"]["fields"] = {key: value for key, value in source["missing"]["fields"].items() if key == event_id}
+    result, store, calls = native(contract, source=source)
+    assert result["m9_overlay"]["status"] == "ok"
+    wanted = {ticker: expected for ticker, expected in contract["expected_m9"].items() if ticker in known}
+    wanted[case["input"]["ticker"]] = case["expected"]
+    assert_expected(store.overlays[0], wanted)
+    assert store.overlays[0]["tickers"][case["input"]["ticker"]]["m8_gaps"] == []
+    assert store.overlays[0]["m8_completeness"]["unknown_tickers"] == []
+    assert store.overlays[0]["m8_completeness"]["unknown_ticker_count"] == 0
+    assert calls[0][2] == source and contract == before
+
+
 def test_a2_incomplete_contract_retains_previous_generated_at(contract, native):
     _, store, _ = native(contract)
     previous = deepcopy(store.overlays[0])
