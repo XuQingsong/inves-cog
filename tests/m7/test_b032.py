@@ -61,6 +61,8 @@ class Pages:
             return Cursor([])
         if "trading.ledger" in compact or "trading.plan" in compact:
             return Cursor([])
+        if compact.startswith("INSERT INTO perception.") or compact.startswith("SELECT "):
+            return Cursor([])
         raise AssertionError(compact)
 
 

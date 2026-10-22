@@ -55,6 +55,8 @@ serverurl=unix://{state}/supervisor.sock
         "valuation_v1": [str(root / "scripts/schedule_daily_modules.py"), "--tasks", "valuation_v1"],
         "paper_plan": [str(root / "scripts/schedule_daily_modules.py"), "--tasks", "paper_plan"],
         "morning_page": [str(root / "scripts/schedule_morning_page.py")],
+        "attribution_tracks": [str(root / "scripts/schedule_attribution_stage.py"), "--task", "attribution_tracks"],
+        "attribution_labels": [str(root / "scripts/schedule_attribution_stage.py"), "--task", "attribution_labels"],
         "financials": [str(root / "scripts/schedule_financials.py")],
         "watchdog": ["-m", "inves_cog.ingest.service"],
         "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
