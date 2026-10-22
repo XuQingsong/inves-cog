@@ -1,5 +1,14 @@
 # A 线回报
 
+## OPS-A014  进行中（B034自然早页核验与加密交付完成；其余独立OPS保留）  2026-10-22 09:26 北京
+- **本次早页的自然运行、PIT读取和密文交付已完成**。服务完整SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**；交易日2026-10-21的 **attribution_candidates job9698=ok**、processed_count=9，实际自然触发北京 **09:15:18.548463**，轮询attempt状态ok、**returncode=0**，attempt文件完成mtime为 **09:15:28.164784**，页面写出mtime **09:15:27.862781**。job表started_at=ended_at是早页注入同一个冻结截点的实现，不将其差值当作实际零耗时。
+- **B032/M7可见性**：读取到9条日级异常，全部真实generated_at=08:57:44.906038，均早于该页实际cutoff **09:15:18.548463**，NULL或晚于截点0。自然任务本次 **move_card/deepseek-v4.1-flash 1次，status=ok**；观察者额外模型调用0，没有重问历史新闻摘要或手工重跑早报。
+- **B034估值读取**：实际cutoff前59/59最新估值来自 **2026-10-20**（50 ok、9 unvalued），最新observed_at为10-21 **10:31:33.438361**；未来交易日/晚于cutoff行0。59条均取得报告日10-21价格。已生成页不再出现“今天没有拿到估值”，页面展示的 **16/16估值行逐条精确匹配当时原生查询/格式化值**，16条均标明 **估值2026-10-20、价格2026-10-21**。这验证了采用上一可见交易日估值，不是把今天10:30后结果回填到09:15。
+- **计划/持仓读取**：cutoff前已有连续纸面账户ledger和published plan，均为10-21、实际生成10-21 20:00:50.208744，plan signal_date=10-20。只记录存在与时间，不输出持仓、金额、订单明细。页面3197字节、明文SHA256 **c755ade70d7eb8eb6e2bbb90deec18427e1ee8fdfb752a66a9ab6ea4ad07f89c**；仅留服务器仓库外，权限已收紧600。页上库里/数据库/入库/新闻卡/标了高/篮子/None/buy_均没有。
+- **原授权加密交付已推送**：[data/a014-morning-page](https://github.com/XuQingsong/inves-cog/tree/data/a014-morning-page)，完整提交 **d147a0ffa31b41f61dbd437f5b56307a7f1f31d7**，根目录handoff/A014/daily-page.gpg、manifest.json对应job9698；密文SHA256 **cfc7c0fbd3c26098d6c64489f0c1a1819220d60753e027e24bd18e3a0dacfc79**，只用原指定协调方公钥，不上传明文。上一自然10-20页面原样保留到natural-2026-10-20/，早先backfill-2026-10-19/保留。未开PR、未合main。
+- 只读证据 **migration/m7-morning-natural-20261022-012055.json**。B034来自[PR44](https://github.com/XuQingsong/inves-cog/pull/44)，准确head **2433af1fd09d67021f84895eb4c1fe4f061fa338** 的[真实成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39547698182)复用；部署已于本日00:23完成，本轮没有代码、接口、DB、调度、来源或依赖变更，没有新采集或业务启动。
+- 已自行决定：按原交付合同保留旧密文、更新最新密文对；未扩展业务范围。下一步：需求方解密独立核对内容与解释质量，不将技术读取/自然运行成功替代七场景或整体最终验收。**仍未解决**的是昨晚盘前prefill9466 HTTP403导致M7盘前复核未运行（需需求方/M1落实原账户请求权限/时间约束结论与限定修复范围）；B033自然wide/M6、M7日级和本次B034早页已各自完成，无需重做。A015继续等B037需求方验收合并，没有新增用户授权问题，不接未合并快照。
+
 ## OPS-A014  进行中（自然M6、M7日级完成；09:15页面待实际核验）  2026-10-22 09:02 北京
 - 最新main仍 **d2d0d56f6b5c4b57fa88a5c10c19952db20796ff**，服务完整SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**。交易日2026-10-21 **market_structure job9651=ok**，自然北京时间 **08:45:20.552334→08:52:52.542058**，processed_count=2,699；实际daily=2,574、baskets=58、rotation=66、market=1。08:50未见完成记录是仍在执行，不是没启动，未重跑。
 - 每session 1,287条。close：无null reason 1,121、sector_unmapped 141、l3_same_as_l2 23、insufficient_history 2；**missing_current_return=0**。纳入wide中 **1,273/1,275有resid**，2条历史不足仍缺失。相较旧自然10-20输入因子缺失导致的1,087条missing_current_return，本次新交易日自然结果已没有该原因；不把不同交易日的对象数作逐一同样本比较。B033自然宽池及下游close链路取得实证。
