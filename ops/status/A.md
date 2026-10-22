@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015  进行中（UD-A-27：已收到NVDA合同裁定，恢复独立消费验证）  2026-10-22 20:45 北京
+- **接口裁定执行记录UD-A-27（来源需求方A015补充六/B041 20:10裁定，非新增用户业务授权）**：main **aefc62ba9eb8953a0d7905af77b21a50dbdf9adf** 已统一check_scope，保留M8“无关系→纯共振”规则；evt-gap/NVDA缺项仅作M9防御输入，A1原预期不变；新增expected_m9_pure_resonance要求纯共振标的cooling_status=off。原NVDA合同冲突已解决，不再等待同一答复。B20:41已确认恢复V1–V10，未完成未合并。
+- **先记录后执行**：在原PR45继承main只读合同，新增直接消费JSON中纯共振预期的离线测试，重跑原14项及新例，更新JSON SHA256/证据/准确head CI；不改原冷静期/暴露/N码规则，不引入未合并B代码，不部署或调模型。开始前工作区干净，head **7f2b0b6fe31bfec9b8f35d64abff6f1d869cc705** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [该旧head成功CI39754217529](https://github.com/XuQingsong/inves-cog/actions/runs/39754217529)；新head结果另核，不沿用旧CI冒充。
+- 下一步：先完成当前A015消费验证；真实provider接线/A5及M8已授权迁移部署仍在B041验收合并后落实，真实模型回放仍先准确dry-run估算及需求方确认。今晚M4发布/盘前403最终证据复用、不重跑，接单保持开启。
+
 ## OPS-A014  阻塞（10-22盘前窗口已结束但未运行；纸面计划发布已完成）  2026-10-22 20:39 北京
 - **窗口最终状态已实查**：北京 **20:38:35.213977**（晚于20:30截止）仍无10-22 premarket_review job，复核表0行，anomaly_daily日志waiting_dependencies。前置bars_prefill **10177=failed/HTTP403/0行**，实际20:00:24.384838→20:00:25.053972；没有新增成功预填或复核。不能把0行写成“没有异常”，不在窗口外补跑冒充自然按时成功。
 - **成功部分保留**：M4 paper_plan **10179=ok**，published=true、generated_at仍 **20:00:41.368404**，54/54行情、缺评分/行情0；没有重跑或改写计划。安装完整SHA仍 **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**；M4来源[PR41](https://github.com/XuQingsong/inves-cog/pull/41)准确head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**及[对应原成功CI39393827222](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用，配置SHA256仍79d84a6a34e5f3e95d864dda3c5b89fdb4e49107de55c321a60375d75112f32e。私有证据 **migration/evening-natural-20261022-123835.json**；只读观察，无额外模型/上游请求/业务启动/业务写入。
