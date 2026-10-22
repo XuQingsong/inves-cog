@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-039  已完成  2026-10-22 11:25 北京
+
+- 第 1 部分：草稿 PR #47，head `f4f4223`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39715004161 。`phase1-blocking` 442 passed、21 deselected，用时 115.52 秒，nightly 跳过。没有合并。
+- 第 2、3 部分：草稿 PR #48，head `2b6dc89`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39716433062 。`phase1-blocking` 448 passed、21 deselected，用时 117.22 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
+- 证据：第 1 部分本地 `make phase1-test` 442 passed、21 deselected，用时 66.64 秒。第 2、3 部分本地 `make phase1-test` 448 passed、21 deselected，用时 66.58 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.79 秒。
+- 三个阶段在时钟前 ok 就写 complete。字段缺口留在事件和 `missing.fields`。09:15 用现有 store 落库，不额外加模型调用。09:30 和 12:30 不调模型，读上一阶段并保存，labels 成功后写快照。五日回放用内存 store，不写生产 M8 实时表。`--dry-run` 不调模型。
+- 没有新迁移，没有新角色。没有改 M7、M9、M4、规则 A。没有部署，没有在生产执行回放。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-039  进行中  2026-10-22 11:23 北京
 
 - 第 2、3 部分：草稿 PR #48，head `2b6dc89`，分支 `cursor/m8-b039-persist-replay-e013`，叠在 PR #47 上。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
