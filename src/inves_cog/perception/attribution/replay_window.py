@@ -274,7 +274,7 @@ def _events(store, anomaly_ids, as_of):
     fields = {}
     for anomaly_id in anomaly_ids:
         bundle = store.bundles.get(anomaly_id)
-        if bundle is None:
+        if bundle is None or not (bundle.get("linkage") or {}).get("lifecycle"):
             continue
         event, gaps = _event(bundle, as_of)
         events.append(event)
@@ -288,14 +288,15 @@ def _event(bundle, as_of):
     linkage = bundle.get("linkage") or {}
     event_id = linkage.get("event_id") or f"evt-{bundle.get('anomaly_id')}"
     stamp = as_of.isoformat()
+    scope_ticker, scope_exposure = _scope_pair(report)
     values = {
         "lifecycle": linkage.get("lifecycle"),
         "mechanism": report.get("mechanism") or linkage.get("mechanism") or _lead(report),
-        "ticker": _ticker(bundle),
-        "exposure": _exposure(bundle) or _scope_value(report, "exposure"),
+        "ticker": _ticker(bundle) or scope_ticker,
+        "exposure": _exposure(bundle) or scope_exposure,
         "direction": _direction(bundle),
         "divergence_tag": report.get("divergence_label") or report.get("divergence_tag"),
-        "dimensions": report.get("dimensions"),
+        "dimensions": report.get("dimensions") or _track_dimensions(bundle),
         "next_filing_at": report.get("next_filing_at"),
         "systemic_tag": (bundle.get("market_day") or {}).get("systemic_event_tag"),
         "deadline_outcome": linkage.get("deadline_outcome") or report.get("deadline_outcome"),
@@ -356,13 +357,35 @@ def _lead(report):
     return max(scored, key=lambda row: row["score"]).get("mechanism")
 
 
-def _scope_value(report, name):
-    found = []
+def _scope_pair(report):
+    """Tickers and exposures the chain already stamped. Several exposures stay a list."""
+    names = []
+    exposures = []
     for row in report.get("scope") or []:
-        if isinstance(row, dict) and row.get(name) not in (None, "") and row.get(name) not in found:
-            found.append(row[name])
-    if len(found) == 1:
-        return found[0]
+        if not isinstance(row, dict) or not row.get("ticker") or not row.get("exposure"):
+            continue
+        names.append(row["ticker"])
+        exposures.append(row["exposure"])
+    ticker = names[0] if len(names) == 1 else names or None
+    if len(exposures) == 1:
+        exposure = exposures[0]
+    elif exposures:
+        exposure = exposures
+    else:
+        exposure = None
+    return ticker, exposure
+
+
+def _track_dimensions(bundle):
+    matched = []
+    for item in bundle.get("tracks") or []:
+        if not isinstance(item, dict):
+            continue
+        value = {key: item.get(key) for key in ("emotion", "capital", "fundamental") if item.get(key) is not None}
+        if value:
+            matched.append(value)
+    if len(matched) == 1:
+        return matched[0]
     return None
 
 
