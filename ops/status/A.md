@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A014  进行中（每日M8安装完成；真实回放前查实历史loader漏掉补算异常）  2026-10-22 22:43 北京
+- **安装已实际完成**：服务器北京时间 **22:38:12.110312→22:38:22.157536**，从cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6快进到已验收main **0096d5fbd7a1279e346d2f2a22af4f96a17e2dd2**，包含[PR49](https://github.com/XuQingsong/inves-cog/pull/49)准确head **4ea2e393b963664e5c339f5ee1e69db9d5292550**及[成功CI39794168503](https://github.com/XuQingsong/inves-cog/actions/runs/39794168503)。8个受影响运行文件逐件哈希匹配；未重复迁移。只追加attribution_tracks/labels两个program，pid **103648/103647**；morning_page **3661711→103651**。其余7个运行worker PID、systemd父服务启动时间、原morning-page自然attempt文件全保持；配置SHA256 **92e09e34aabdedb569af5a3aba9c0eacd520d93b2d21fe5e7db55416bbc91c86**。这只是安装成功，下一交易日三阶段自然job/快照还未到点。私有证据migration/b042-deployment-20261022-result.json，models0/业务job0/业务写0。
+- **新B042原生CLI只读核对已实际完成**：**22:39:25.559238→22:39:36.755353**，--dry-run原生main入口，27条SELECT、模型0/写0。指定五日按stage实际选入异常 **0/0/0/0/9**，预计调用 **0/0/0/0/3**（最后日move_card/claim_extraction/anomaly_candidates各1）；与此前直接原生函数读取现有补算记录得到的 **2/5/0/11/9异常、6/15/0/3/3调用**不等价。数据库独立核对10-15/16/20仍有 **2/5/11** 条，generated_at分别保持10-22实际03:49:19/20/21 UTC；10-19本来0。私有证据migration/b042-native-dry-run-20261022.json。
+- **原因与影响已查实/直接沟通**：replay_window._load_window复用morning._load，实时_ANOMALIES的generated_at<=历史slot过滤掉补算记录。此时执行会把三天有数据的日期写成空historical_backfill，不能冒充用户要求的五日结果；因此真实--execute尚未启动、0次模型、0回放快照，无可重复付费前缀。已[在原PR49直接提出可审阅最小修复及真实形态回归要求](https://github.com/XuQingsong/inves-cog/pull/49#issuecomment-6343508016)：仅历史入口按指定trade_date选择补算记录，保留真实generated_at/晚生成标识与replay，不修改实时PIT过滤；新闻仍按各stage的published_at/first_seen_at。A不代派B任务/改B代码、不用连接适配器绕过过滤，也不重做M7或改写时间。
+- **费用确认仍有效，非等待用户再授权**：UD-A-30/UD-COORD-28已确认一次五日、27次逻辑调用上限/既定最多63HTTP；这次阻塞是明确的历史入口代码缺口。首次实质影响及证据/具体修复归属已在本对话直接说明，不只写Git。需求方推动限定修复并验收合并后，A立即继续原一次回放，仍在第28逻辑调用前停止保护；每日服务不受此历史入口问题阻断，继续等自然窗口。
+- **其他可做部分继续**：在原PR45继承已验收0096d5f，核对新双连接依赖与M9消费者集成，原head839c176/CI522项只为旧依赖准确证据；新head另核CI。M9生产未获合并，不提前部署。全部当前迁移、IO恢复和四日M7均复用已有结果，不重跑；其他项目未改，接单开启。
+
 ## OPS-A014  已收到（UD-A-30：B042已验收合并，用户已确认一次五日回放）  2026-10-22 22:34 北京
 - **用户决定UD-A-30（转记UD-COORD-28，来源main A014续十四补充三）**：用户确认按21:38 dry-run执行一次10-15/16/19/20/21五日M8回放，27次逻辑调用、最多63次既定HTTP尝试、参考4–15.2元；超过27次逻辑调用即停下回报，不扩大日期、不重复执行。费用确认停点已解除，不重复索取授权。
 - **部署前置已满足**：已fetch main **0096d5fbd7a1279e346d2f2a22af4f96a17e2dd2**；GitHub实查[PR49](https://github.com/XuQingsong/inves-cog/pull/49) merged，准确head **4ea2e393b963664e5c339f5ee1e69db9d5292550** 的[CI39794168503](https://github.com/XuQingsong/inves-cog/actions/runs/39794168503) completed/success。README/范围、A015答复未变；M9尚未合并部署，不混入本步骤。
