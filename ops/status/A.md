@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-015  进行中（统一方向合同已重验；新head整仓CI真实通过）  2026-10-22 17:21 北京
+- 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已继承需求方合并的main **fe0b45127e2733ecab348e12dbecabd6d0f28edb**，最新完整head **7f2b0b6fe31bfec9b8f35d64abff6f1d869cc705**，仍draft/open/未合并。仅继承main文档/合同并更新A自验证据；原M9已兼容up/down，无业务规则变更、无未合并B代码。
+- **新版唯一JSON直接消费14 passed**，证据handoff/M9/provider-direction-green.xml；SHA256 **f5fbc99f1b1f2106f149fb865fe2a8588817caf97b91230df7588841a180f4bb** 已实查并同步checklist/self-test。WDC/STX on、MU off、NVDA/AMD unknown，A1预期不变；旧58 passed/3 deselected记录明确保留为此前实现阶段，不覆盖成新head结果。
+- **准确新head [CI39754217529](https://github.com/XuQingsong/inves-cog/actions/runs/39754217529)真实success**，独立读job **119742026481**日志：测试merge **3b15d6caa32e2eff9a84861a6cb92f4cfc730269** 将本head合入main fe0b451，干净容器make **461 passed、21 deselected**（120.25秒），M0另 **2 passed**；9项网络/时钟/skip/golden/frozen/import/model等预期失败自检全部red=True、整体成功，nightly skipped。PR描述已更新为本head及准确CI，未把旧CI当新结果。
+- 已在[原PR47实际确认收到裁定](https://github.com/XuQingsong/inves-cog/pull/47#issuecomment-6337195281)，并重新读取核实。合同的deadline/方向冲突均已解决，无需用户或需求方重复决定；B最新17:14回报也已恢复V1–V10。17:17实查PR47 head **6ffd86b650df123020406ede029457120fe15c3b**、PR48 head **ce819d8672dc20803e9286cb7d5266040e2cc28c**，两者仍draft/open/未合并。
+- **新上游停点（B17:19）**：完整链无经营关系时按既有规则输出NVDA“纯共振”，V1却要求NVDA只存在于exposure缺项中；三种实测路径均无法同时满足，B未改规则/新造N码。A已独立只读核验main的report._exposure与锁定该行为的原test_scope_is_a_relation_label_and_tracking_is_not_evidence，确认此处与旧deadline/方向冲突不同；后两项已经解决。A已[直接在原PR47提交具体可审阅方案](https://github.com/XuQingsong/inves-cog/pull/47#issuecomment-6337337996)：真实链V1保留原纯共振规则，M9缺项防御输入单独验证；请需求方统一合同的两个测试域，或明确可达的缺失来源夹具。没有代派/执行B工作，也没有自行修改只读合同或验收标准。
+- **剩余明确边界**：A1–A4独立消费层自验已过，真实provider接线/A5仍须上述V1裁定及B041验收合并；之后继续已授权迁移/相关进程部署，真实五日模型执行仍先准确dry-run估算、需求方确认后一次有界运行。不把代码测试当生产验收；四日M7/I/O及M5旧证据不重做。未部署、迁库、调模型或改其他项目；接单保持开启。
+
 ## A-015  进行中（已收到方向字段裁定；继承新版合同并重验直接消费）  2026-10-22 17:12 北京
 - 已fetch最新main **fe0b45127e2733ecab348e12dbecabd6d0f28edb**，A运行；需求方在A015补充五/B041答复及唯一JSON统一方向为原M8的up/down，明确down对应M9“不利”，A1预期不变。原方向措辞冲突已解除，不再等待或重复索取该答复。
 - **本阶段先记录后执行**：在原PR45继承已合并main中的文档/合同，重跑直接读取唯一JSON的14项消费测试，更新合同SHA256与真实测试证据；原M9判定已兼容down，不更改业务规则。新版JSON SHA256 **f5fbc99f1b1f2106f149fb865fe2a8588817caf97b91230df7588841a180f4bb**。不加载未合并B代码、不部署、不调模型，不重复四日M7或I/O恢复。
