@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A014  进行中（I/O已恢复，四日M7原生补算已启动）  2026-10-22 11:49 北京
+- **UD-A-25实际处置完成**：未改父级2.5GiB MemoryHigh/3GiB MemoryMax及任何共享资源；仅在核实本项目worker空闲、无活动job且原supervisor会自动恢复后，逐次回收paper_plan 3262554→3980186、daily_modules 3262553→3981530、anomaly_daily 3348041→3981531、valuation_v1 3262555→3983422。M5先等实际job结束才回收，没有中断运行或重跑业务。服务配置和已安装代码未改，其他项目未访问/停启。
+- **恢复核验**：父级memory.current从约2.687GB降至845,254,656字节，IO与memory pressure的avg10均降至0；本项目Python+最小角色SQL重新在约5秒返回。四日完整预检已成功落私有 `migration/m7-four-day-preflight-20261022-034126.json`：10-15/16/19/20异常均0、无活动M7，四日均有market/daily/baskets/rotation且80/80原生行情close与factor齐全。10-15/16/19宽池旧M6大部分return/residual仍缺，明确保留质量限制，不越权补M6或造字段；10-21自然9行不重写。
+- **四日补算实际启动**：北京时间11:47:02开始原生DatabasePanel/PricePanel计算，临时本项目user scope `inves-cog-m7-fourdays-20261022`限制CPU100%、MemoryHigh1200M/MemoryMax1400M；单线程数值库，远端600秒期限及外层620秒终止保护。实际阶段已进入native_panel:_ranks，峰值RSS约335MiB、父级约1.17GB；不是仅发出命令。原生算法/参数不改、模型与外源调用0，逐日事务、实际generated_at、防已有结果/活动job重复守卫。私有 `migration/ud25-m7-four-days/progress.json` 可核查；最终result及独立SQL对账尚待返回，不能冒称四日已完成。
+- **独立发现的今日M5失败**：job9712于10:30:13启动、11:37:40结束，status=failed、processed_count59；原生作业超过30分钟会在操作返回后记失败，故不凭59或进程退出称成功，也不直接补跑覆盖可能已提交结果。下一步独立核真实三表行数/时间与错误分类，保留原失败证据；M7继续，不让此项阻断已授权部分。
+- 服务器完整已合并SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**；M7原生B032准确head **3e55dbc6750417773d92c37d48096c51e7a08928** / [PR42](https://github.com/XuQingsong/inves-cog/pull/42) / [准确成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39533772102)复用。本次无代码提交，不虚构新CI。A015完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [准确成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)未变。已自行决定：仅释放本项目已空闲内存并对补算加临时资源限额；不提高共享限制、不重启主机、不重跑已完成账户/估值或自然早页。
+
 ## OPS-A014  进行中（IO根因：父级MemoryHigh；先回收本项目空闲M4 worker）  2026-10-22 11:34 北京
 - UD-A-25继续执行已获实证：本项目service自身memory.high/max=max，但父级 **user-1002.slice memory.high=2,684,354,560（2.5GiB）、memory.max=3,221,225,472（3GiB）**，实际memory.current≈2,687,549,440，high事件累计16,592,574；父级file仅782,336字节、workingset_refault_file≈301,653,023，反复回收代码/文件页。主机available仍约4GiB，故“主机还有内存”不能解除这个父级限额。两秒磁盘实时读约138–139MiB/s、CPU iowait64–70%；本项目多PID持续读放大。未修改任何父级/共享限制。
 - **拟执行的最小项目内处置**：仅对本项目 **paper_plan PID3262554、PPID2695828** 发一次SIGTERM，让已核实`autorestart=true`的原supervisor重建同一worker，释放其约341,868KiB驻留内存。当前远离M4 20:00–20:30窗口；该worker最后日志为10-21 20:00自然7单ok，本日未到计划窗口。不调用计划/交易入口、不改计划/持仓、不重跑订单。执行前再核PID/cwd/父PID/配置/真实北京时间，并留私有一次性claim。
