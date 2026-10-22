@@ -1,5 +1,11 @@
 # A 线回报
 
+## OPS-A014  进行中（UD-A-28：已收到M8验收合并，开始迁移部署与五日dry-run）  2026-10-22 21:16 北京
+- **接口/迁移/调度执行记录UD-A-28（沿用UD-COORD-27，来源A014续十四21:10补充）**：已fetch main **673be6f93d3fa1fad71226f3a9a8f2f65603dcd4**，包含已验收merge **3326a3b63883311f6238498c5a136fe0e46925f0**及B041完整head **b344bdaa944f622009cb9634eb8ffbecde5b10c3**；GitHub已核PR47/48均merged，PR48[准确head CI39782003890](https://github.com/XuQingsong/inves-cog/actions/runs/39782003890)success。需求方已完成V1–V10验收及M8→M9交叉验证，不再等待合并或重复索取原授权。
+- **先记录后执行的具体范围**：先核对本项目远端进程/job、未提交修改与已有迁移/回放前缀，防止并发/重复；应用原批准 `migrations/phase1_m8_0002_m9_input_snapshots.sql`（SHA256 **ef7042352933b190c9166ea689c9876fb2bd4dfd36a903b46b9cb83a5237d965**），装载上述已合并main，使09:15早页落库，新增attribution_tracks/attribution_labels两worker，只重载相关进程，保留其他项目/本项目其他worker。管理员仅用于已批准DDL，不作为业务运行账号；不新增角色、来源或业务规则。
+- 然后按已合并原生replay_window的dry_run路径，使用真实库现有输入，仅计数不调模型/不写业务表，回报指定10-15/16/19/20/21逐日逐阶段/按task次数、总数、单价依据/费用估算、异常数和旧宽池return缺失限制。原生模块目前提供函数dry_run=True而无独立CLI；用仓库外只允许--dry-run的运维包装调用该函数，不改B业务实现或补造数据。**真实回放仍等需求方转用户确认**，不提前调用模型、不扩大日期或重做四日M7。
+- M9生产部署明确不在本步；原PR45仍head **1fa73f03c2784ad4b0ad183041a02dba773b2935** / [准确成功CI39781532548](https://github.com/XuQingsong/inves-cog/actions/runs/39781532548)，后续A015真实接线继续。M8安装/迁移、dry-run、真实回放、下个自然交易日三阶段验证分别取证，不把进程存活或命令发出当业务成功。接单保持开启。
+
 ## A-015  进行中（NVDA裁定已落实；15项消费验证及准确head整仓CI通过）  2026-10-22 20:54 北京
 - 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已实际推送最新完整head **1fa73f03c2784ad4b0ad183041a02dba773b2935**，继承已合并main **aefc62ba9eb8953a0d7905af77b21a50dbdf9adf** 的只读合同。新版JSON SHA256实查 **72c05c6ed1fd793673ee4dd5ce572bb4f2d2e6eec49791cc59a07badd86a8fd3**，A015补充六/check_scope已落实，旧NVDA验收冲突已解决，不再等待或重问同一裁定。
 - **A1新增纯共振正例已实际通过**：test_a1_pure_resonance_contract_is_off从同一JSON的expected_m9_pure_resonance取输入/预期，选指定原事件经生产scheduled的provider注入，验证NVDA off、无gap/unknown、WDC/STX仍on、MU仍off；不混入evt-gap防御负例。原整份output直接消费仍验证NVDA缺暴露unknown、AMD到期结果unknown。合计 **15 passed**、Ruff check/format通过，证据handoff/M9/provider-scope-green.xml、checklist/self-test已推送；没有业务规则实现变更或伪造红灯，原先失败测试历史保留。
