@@ -2,6 +2,23 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  已完成  2026-10-22 20:59 北京
+
+- 草稿 PR #48，head `b344bda`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39782003890 。`phase1-blocking` 469 passed、21 deselected，用时 130.36 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
+- 草稿 PR #47 head `6ffd86b` 此前已绿，这一轮没有再动。三阶段合同夹具在 PR #48，没有搬回 PR #47。
+- 保留「没有关系 → 纯共振」，不改 N 码，不改方向词。合同文件是 main `aefc62b` 的原件，没有手改。evt-gap 不由这条链产生。NVDA 输出 `exposure=纯共振`，不进缺失。没有新 schema、新角色、新数据源。没有部署，没有在生产执行。
+- V1｜通过｜`test_v1_live_provider_on_disposable_database`、`test_v1_replay_matches_the_named_contract_fields`｜真实库 `m8_provider`：东芝 mechanism `供给`、direction `down`、deadline `2026-11-06`、WDC/STX「直接」、MU「概念关联」、lifecycle `假设中`；AMD 截止日缺失原因是「截止日已到（2026-10-19）但没有支持/反证/条件风险结果」；NVDA「纯共振」。
+- V2｜通过｜`test_v2_and_v3_counts_match_and_later_slots_are_quiet`｜09:15 三条有盘前新闻的 pool 各是 `move_card` 1、`claim_extraction` 1、`anomaly_candidates` 1；wide 是 0；09:30 和 12:30 是 0。
+- V3｜通过｜同一测试｜dry-run 逐阶段计数与实测相同，没有 INSERT，传入的客户端没有被调用。
+- V4｜通过｜`test_v4_tracks_keep_the_morning_page`｜09:30 后东芝的 `daily_text` 和 `move_card` 与 09:15 逐字相同。真实库那条测试也核对了报告列。
+- V5｜通过｜`test_v5_late_news_never_enters_a_stage_payload`｜两条 `first_seen_at` 晚于 12:30 的新闻没有进入任何阶段的 payload。`generated_at` 晚于捕获时钟的 future 异常不在实时快照里。
+- V6｜通过｜`test_v6_missing_stage_matches_the_incomplete_contract_and_a_field_gap_stays_complete`｜没有快照时与合同 `incomplete_case.output` 同键，`complete` 为 false。字段缺口仍是 `complete` true。
+- V7｜通过｜`tests/m8/test_b038.py::test_two_tickers_keep_their_own_divergence_and_filing`｜两只标的各自的背离标签和下一份财报时间仍保留。候选解析会丢掉模型带回的这两项，所以合同夹具不靠模型塞这两列。
+- V8｜通过｜`test_v8_five_day_replay_does_not_write_live_tables`｜五日回放没有写 linkage、ticker_status、candidates、tracks、claims、reports、market_day。新行是 `historical_backfill`，`snapshot_generated_at` 等于注入时钟。`read_replay_snapshot` 的 `replay` 为 true。历史 cutoff 的实时读取看不到它们。五日里只有 2026-10-20 09:15 有 9 次调用，这是夹具数字。
+- V9｜通过｜`make phase1-test`、`make phase1-cases`｜本地 469 passed、21 deselected，用时 78.04 秒；cases 7 passed、1 xfailed，用时 25.84 秒。CI 同一 head 469 passed、21 deselected，用时 130.36 秒。
+- V10｜通过｜`tests/m8/test_b041.py`｜未到期不进缺失，到期含日期，未知是「截止日未知」，支持/反证/条件风险原样保留，回放四种情形都有断言。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-041  进行中  2026-10-22 20:55 北京
 
 - 合同夹具已写上草稿 PR #48，head `b344bda`。https://github.com/XuQingsong/inves-cog/pull/48 。没有合并。phase1-blocking 正在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39782003890 。不标已完成。
