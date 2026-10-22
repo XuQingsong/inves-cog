@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-040  已收到  2026-10-22 13:13 北京
+
+- 任务：B-039 验收修复。暂不验收、不合并。仍在草稿 PR #47（`cursor/m8-b036-pit-snapshot-e013`）和草稿 PR #48（`cursor/m8-b039-persist-replay-e013`）。授权沿用 UD-COORD-26/27。不新增 schema、角色、数据源。不部署，不在生产执行。
+- 第 4 点先改 PR #47：`_flatten` 的 members 恢复每只标的自己的 `divergence_tag` 和 `next_filing_at`。字段时间晚于 cutoff 时这一项仍按缺失。补回归测试。然后把这一提交拣到 PR #48，不 force-push。
+- 第 1、2、3 点只改 PR #48。09:15（`attribution_candidates`）对有盘前新闻的 pool 异常：先做一次 move_card（不把薄报告当最终落库），再走现有 `_score_one` 完整链落库，并把 daily_text、move_card 抄到这条结果上，早页文字不变。未排程、stage 为空的旧路径仍只走 move_card，不额外加调用。09:30 和 12:30 不再进 `_phase1_move`。tracks 复用 09:15 分析，不覆盖结构化报告，模型调用为 0。wide 若 tracks 会再调模型，改为复用；不能复用就记下、不再调。labels 保持 0 次。
+- 删掉手写 `expected_calls`。dry-run 与真实运行同一路径，注入只计数不调用的客户端，store 用内存、不写库。同一夹具上 dry-run 计数等于三阶段实测，并断言 09:30 和 12:30 为 0。回放的 pool 结构化事件进内存 store，快照 events 来自完整链。
+- 不改 M9、M4、规则 A。不调真实模型。
+- 下一步：先写会失败的例子。
+
 ## B-039  已完成  2026-10-22 11:25 北京
 
 - 第 1 部分：草稿 PR #47，head `f4f4223`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39715004161 。`phase1-blocking` 442 passed、21 deselected，用时 115.52 秒，nightly 跳过。没有合并。
