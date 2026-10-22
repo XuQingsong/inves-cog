@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A014  进行中（10-22自然纸面计划已发布；盘前预填再次403）  2026-10-22 20:16 北京
+- **M4今日自然计划已核实**：paper_plan **job10179=ok**，北京 **20:00:16.321467→20:00:41.541176**，processed_count=5；原连续账户paper-fixed的10-22计划published=true，实际generated_at/plan账本observed_at均 **20:00:41.368404**，signal_date/input_asof均10-21，score_source=trading.daily_scores。仅报告计数，不输出私人持仓/订单明细；此处证明自然计划发布，不冒称后续撮合或交易完成。
+- **输入与覆盖**：54/54可交易标的有行情，覆盖100%，missing_score_count=0、missing_bar_count=0、health_codes=[ok]，5条纸面订单/0撤单。M9 overlay status=missing（尚未部署），原规则A仍正常出计划；不将缺失覆盖层说成已上线，也不将纸面发布说成第一阶段整体验收通过。
+- **独立盘前失败再次自然复现**：bars_prefill **job10177=failed**，北京 **20:00:24.384838→20:00:25.053972**，processed_count=0，记录HTTP403。截至实查 **20:15:03.821778**，10-22 premarket_review无job、复核表0行，anomaly_daily日志waiting_dependencies；窗口尚未结束，这只是当前状态，不能把0行说成“无异常”。既有Alpaca/SIP路径403跨迁移前后已重复证明；现有HTTP元数据仍不能判定账户权限或请求时点限制。需求方/M1负责人需核实原账户对盘前SIP分钟请求的许可/时间限制并明确修复范围；A不在M1只读边界外改源/key、时点或门禁，不手工重试受限请求。
+- **真实运行版本与证据**：安装SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**；M4已验收来源[PR41](https://github.com/XuQingsong/inves-cog/pull/41)准确head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**及[原成功CI39393827222](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)复用，不将PR head CI冒充合并SHA的新CI。服务配置SHA256 **79d84a6a34e5f3e95d864dda3c5b89fdb4e49107de55c321a60375d75112f32e**未变。私有只读证据 **migration/evening-natural-20261022-121503.json**；分别由inves_cog_ingest/role_trading/role_perception读取本项目，观察额外模型0、上游请求0、启动业务任务0、业务写入0，未访问其他项目。
+- **下一步与边界**：20:30后核盘前窗口最终状态，保留已完成的M4发布；不重复M4计划、四日M7、M5或IO恢复。M9真实接线/M8部署仍按A015的NVDA验收裁定及B041合并停点推进；本轮main仍fe0b451、PR45/47无新答复，没有拿OPS检查替代合同解决，接单保持开启。
+
 ## A-015  阻塞（NVDA验收裁定未返回；已在原GitHub讨论直接跟进）  2026-10-22 18:00 北京
 - 已重新fetch main **fe0b45127e2733ecab348e12dbecabd6d0f28edb**，A运行，信箱/README/A014/A015/B041无新变化；原PR45/47讨论无新答复，未见上游修复合入main。真实M9接线及M8迁移部署继续受NVDA验收裁定/B041合并阻断，不能将独立消费测试冒充上游真实链路验收。
 - 已按UD-A-26在[原PR47实际跟进](https://github.com/XuQingsong/inves-cog/pull/47#issuecomment-6338031965)，再次给出唯一待决差异和建议：保留既有“无关系→纯共振”规则，真实链V1与M9缺项防御输入分别验证；请需求方统一合同，或给出不改原规则时可达的缺项数据来源。不再索取已解决的deadline/方向决定，不向用户重问同范围授权。此项是需求方合同裁定，不代派/执行B工作。
