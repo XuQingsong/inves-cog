@@ -70,7 +70,15 @@ def test_overlay_contract(tmp_path):
     from inves_cog.overlay.rules import generate_overlay
 
     result = generate_overlay([event()], clock=clock(), version=7, source_asof=clock().now_utc())
-    assert set(result) == {"version", "generated_at", "source_events_asof", "params_version", "tickers", "market"}
+    assert set(result) == {
+        "version",
+        "generated_at",
+        "source_events_asof",
+        "params_version",
+        "tickers",
+        "market",
+        "m8_completeness",
+    }
     assert result["params_version"] == "p-2026.10"
     assert "synthetic-E1" in result["tickers"]["WDC"]["reason"]
     delivery = FileDelivery(tmp_path)
