@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-015  进行中（UD-A-26：直接通过GitHub与需求方收口合同冲突）  2026-10-22 14:21 北京
+- **用户直接决定UD-A-26**：“合同冲突直接通过GitHub和需求方沟通解决，别只写报告等着；其他已授权、能做的工作继续推进，修复验收合并后继续部署。”A主动在原PR45提出可审阅的合同修正建议并跟进需求方答复；继续原任务，不将同范围授权重新问用户，也不代派/执行B任务。此条先记录新决定，随后执行PR沟通。
+- 已实际重新fetch：main仍 **7220b06da3c8029e7f36b6f2aceb3e61843fbe7a**、A运行，A015/唯一合同尚未修正；已通过GitHub读取PR45及PR47讨论，均无已有答复。B040已交代码，但PR47/48仍未验收合并；不能以修复者自报完成替代需求方接受。
+- **准备向需求方核定的最小方案**：保留既定必需字段规则，把现有明确缺deadline_outcome的样例作为unknown负例；另提供判定字段齐备的合成正例来验证WDC/STX=on、MU=off。若需求方意图让该字段按lifecycle条件必需，则需先统一A015文字、唯一JSON及A1预期。A不修改只读docs/合同、不自行选择业务规则；在PR给出原文与同一事件的具体矛盾，避免笼统“等口径”。
+- 原A开发head **61e535d5f41e631733a2ee0547f06bbc6c5664da** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)未变；四日M7与IO恢复均已完成且不重做。其他剩余任务的实际停点是B040验收合并、合同冲突修正，以及真实五日回放前的准确估算确认；无可独立重复运行的作业，不以无关测试/报告充当进展。合并后由A继续已授权迁移、相关进程部署及逐项验证；新模型执行停点保留。
+
 ## A-015  阻塞（已收到A1–A6；合同样例与缺项规则冲突，需需求方修正）  2026-10-22 13:23 北京
 - 已fetch最新main **7220b06da3c8029e7f36b6f2aceb3e61843fbe7a**，A运行；读取新版README提交前自验要求、A015补充三及唯一M8→M9合同样例。后续交付须直接加载合同output经provider注入生产入口，按A1消费/A2不完整沿用/A3只收紧/A4完整性/A5五日隔离回放/A6回归逐项列结果、测试名、证据。当前未执行这些尚待B040合并的实现/回放，不冒称已通过。
 - **只读核对已证实具体冲突**：合同 `docs/phase1/contracts/m8-m9-provider.json` SHA256 **e0b71d28fb3e3c2f6c9c248550879396b4d2a1f083376a87bc158e2d7875ed32** 中evt-toshiba的deadline_outcome=null，且missing.fields显式写该字段缺少cutoff前版本；expected_m9/A1却要求WDC/STX=on、MU=off。A015前节仍规定deadline_outcome属于必需判定字段，缺任一判定字段应cooling_status=unknown。故同一样例对这三只同时要求unknown和on/off，无法同时满足；不是把JSON null误当缺项，而是样例自己声明了字段缺失。
