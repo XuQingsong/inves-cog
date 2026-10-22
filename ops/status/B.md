@@ -2,7 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## B-040  已完成  2026-10-22 13:36 北京
+## B-041  已收到  2026-10-22 15:15 北京
+
+- 任务：截止日语义，并按 `ops/answers/B-041.md` 的 V1–V10 交付。仍在草稿 PR #47 和草稿 PR #48，不新开 PR。授权沿用 UD-COORD-26/27。不新增 schema、角色、数据源。不部署，不在生产执行。不改合同文件 `docs/phase1/contracts/m8-m9-provider.json`。不改 M9、M4、规则 A。
+- `deadline_on` 用报告里已经算好的 `report.deadline_on`（`earliest_deadline` 的结果）。实时读取走现有 reports，不加列。每个事件输出这个 ET 日期字符串。格子带来源时间：实时是注入时钟，回放是该阶段 as_of。读取时来源时间晚于 cutoff，这项为空，原因「来源时间晚于 cutoff」。
+- `deadline_outcome` 为空时，用 cutoff 的 America/New_York 日历日比较。`deadline_on` 晚于该日：值为空，不进 `missing.fields`。不晚于该日：进缺失，原因「截止日已到（日期）但没有支持/反证/条件风险结果」（与合同样例一致）。`deadline_on` 为空或看不见：原因「截止日未知」。有值则原样输出，不进缺失。结果自己的来源时间晚于 cutoff 时，仍是「来源时间晚于 cutoff」，不用未到期把这条盖掉。读取时按这次 cutoff 重算。
+- 回放 `_event` 用同一套判断。过期夹具的 `trade_date` 放在当天，`started_at` 不晚于 `deadline_on`，避免现有规则拒绝「期限早于事件」。不把这条推进到「基本面核查中」，避免链在到期时自动填上结果。
+- V1 的方向：说法入库是 up/down，合同样例是「不利」。先实测。对不上就停下写明，不自行改方向词。
+- 下一步：先写会失败的截止日例子。
 
 - 草稿 PR #47，head `2389ebb`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39727391542 。`phase1-blocking` 443 passed、21 deselected，用时 115.30 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
 - 草稿 PR #48，head `ffde349`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39728350138 。`phase1-blocking` 452 passed、21 deselected，用时 80.77 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
