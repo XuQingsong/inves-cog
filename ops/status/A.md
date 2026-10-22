@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015  进行中（UD-A-29：继承已验收M8快照接口，继续真实读取接线验证）  2026-10-22 22:04 北京
+- **接口依赖执行记录UD-A-29（沿用A015补充一至六、UD-A-26，不新增业务授权）**：main **6ee26bbbc52fc47ce8e88e4961d22378595dfa50** 已包含验收merge3326a3b；原PR45当前干净head **1fa73f03c2784ad4b0ad183041a02dba773b2935**。现在合入已合并main，针对默认原生m8_provider的不可变快照读取、整日未完成沿用/逐字段缺失正常发布作真实形态离线接线验证；旧B035可变事件夹具和“字段缺失整日不完整”的断言按已批准合同更新。保留真实失败证据及原先失败/实现历史，不造红灯，不改B模块、M4/规则A或只读docs/golden。
+- **A014新答复已落实到下一步**：需求方22:00采纳双连接方案并派B-042；已有私有实查m8-role-paths-20261022.json证明服务器.env的INVES_COG_PERCEPTION_DATABASE_URL已存在且以role_perception登录本项目库、M8读写可用，准备条件已满足，不重复改env/建角色/扩权。活动代码与worker保持原版本，B042验收合并后继续安装；已有快照迁移/dry-run/费用证据复用，不重复运行。
+- **执行边界**：本阶段只做M9消费端离线集成与必要回放路径准备，不装M9生产服务、不连生产做模型调用。A5真实五日read_replay_snapshot仍依赖真实回放已完成，真实M8回放仍等需求方转用户确认费用。准确新head CI将另核，不沿用旧head CI冒充。
+
 ## OPS-A014  进行中（M8快照迁移和真实五日dry-run完成；活动部署受账号接线阻塞）  2026-10-22 21:38 北京
 - **已实际应用原批准迁移**：北京 **21:25:18.702623**，`phase1_m8_0002_m9_input_snapshots.sql` SHA256 **ef7042352933b190c9166ea689c9876fb2bd4dfd36a903b46b9cb83a5237d965**。用原role_perception独立核验perception.m9_input_snapshots为0行、SELECT/INSERT=true、UPDATE/DELETE=false、append-only触发器启用。管理员只执行该DDL，不作业务运行账号；未重做旧M8迁移/建角色/写业务结果。证据migration/m8-snapshot-migration-20261022-result.json。
 - **部署前新缺口已核实并直接沟通**：默认INVES_COG_DATABASE_URL实际账号inves_cog_ingest可读输入/估值/纸面数据并写job及llm_calls，但10张M8表读写全部false；两个新/旧M8入口均沿用该默认连接。原role_perception可写M8、可写job并只读行情/新闻/计划，但不能读valuation_v1.ranges、不能INSERT ingest.llm_calls，故简单全局换账号也不成立。已[在原PR48提交实际权限矩阵和最小双连接建议](https://github.com/XuQingsong/inves-cog/pull/48#issuecomment-6341851380)，请需求方明确限定修复归属；A不代派/改B代码、不扩权、不借管理员绕过。私有证据m8-preflight-20261022-131807.json、m8-role-paths-20261022.json。
