@@ -5,9 +5,15 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import trading_day
-from inves_cog.perception.anomaly.service import run_recorded
 from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
-from inves_cog.perception.attribution.morning import PARAMS, _borrow, _load, _moment
+from inves_cog.perception.attribution.morning import (
+    PARAMS,
+    _connections,
+    _fail_job,
+    _load,
+    _moment,
+    _require_writer,
+)
 from inves_cog.perception.attribution.store import Store
 
 _TASKS = ("attribution_tracks", "attribution_labels")
@@ -26,19 +32,19 @@ class _Frozen:
         return self._moment
 
 
-def main(argv=None, *, connection=None, clock=None, client=None):
-    """Run only the named stage at its own minute. Tests inject the connection and clock."""
+def main(argv=None, *, connection=None, perception=None, clock=None, client=None):
+    """Run only the named stage at its own minute. Tests inject both connections and the clock."""
     args = list(sys.argv[1:] if argv is None else argv)
     task_name = _named(args)
     moment = _moment(args, clock)
     if not _due(moment, task_name):
         return 0
-    borrowed, owned = _borrow(connection)
+    borrowed, writer, owned = _connections(connection, perception)
     try:
-        return _execute(borrowed, moment, task_name, client)
+        return _execute(borrowed, writer, moment, task_name, client)
     finally:
-        if owned:
-            borrowed.close()
+        for item in owned:
+            item.close()
 
 
 def _named(args):
@@ -60,28 +66,36 @@ def _due(moment, task_name):
     return trading_day(moment.astimezone(_NEW_YORK).date())
 
 
-def _execute(connection, moment, task_name, client):
+def _execute(connection, writer, moment, task_name, client):
+    day = _closed_trade_date(moment)
+    if writer is None:
+        return _fail_job(connection, moment, task_name, day, "缺少 INVES_COG_PERCEPTION_DATABASE_URL")
+    if writer is not connection:
+        try:
+            _require_writer(writer)
+        except Exception as exc:
+            return _fail_job(connection, moment, task_name, day, str(exc))
     if client is None:
         from inves_cog.llm.client import Client
 
         client = Client.from_environment()
-    day = _closed_trade_date(moment)
     clock = _Frozen(moment)
     previous = _PREVIOUS[task_name]
     if not _previous_ready(connection, day, previous, moment):
-        return _record_failure(connection, clock, task_name, day, f"缺少已成功的{previous}")
+        return _fail_job(connection, moment, task_name, day, f"缺少已成功的{previous}")
     try:
         loaded = _load(connection, moment, day)
     except Exception:
-        return _record_failure(connection, clock, task_name, day, "读取上一阶段失败")
+        return _fail_job(connection, moment, task_name, day, "读取上一阶段失败")
     try:
         run_scheduled(
             moment,
             anomalies=loaded["anomalies"],
             items=loaded["items"],
             client=client,
-            store=Store(connection),
+            store=Store(writer),
             connection=connection,
+            writer=None if writer is connection else writer,
             clock=clock,
             trade_date=day,
             params_version=PARAMS,
@@ -92,24 +106,6 @@ def _execute(connection, moment, task_name, client):
     except Exception:
         return 1
     return 0
-
-
-def _record_failure(connection, clock, task_name, day, reason):
-    def refuse():
-        raise RuntimeError(reason)
-
-    try:
-        run_recorded(
-            connection,
-            clock=clock,
-            task_name=task_name,
-            trade_date=day,
-            params_version=PARAMS,
-            operation=refuse,
-        )
-    except Exception:
-        return 1
-    return 1
 
 
 def _previous_ready(connection, trade_date, previous, moment):
