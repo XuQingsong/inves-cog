@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-015  进行中（B042新依赖集成70项通过；真实回放执行保护已准备）  2026-10-22 22:53 北京
+- 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已推送完整head **7630a69da6f06693333f9a11ee99ed161e518d41**，继承已验收main **661b0ff**（业务代码0096d5f/B042）。M9业务代码未变，M9/M4新依赖回归 **70 passed、3 deselected**，Ruff check/format通过，证据handoff/M9/b042-integration-green.xml；相对main的docs/golden/milestones、M4、M8均无A新增修改。PR描述/当前停点已同步，保持draft。
+- 准确新head [CI39798628607](https://github.com/XuQingsong/inves-cog/actions/runs/39798628607) **queued**，job119892638057尚未运行；旧head839c176的CI522项成功只作旧依赖证据，未冒充本次整仓检查。A1–A4消费及A5隔离入口已有实测，不重复生产数据或模型。
+- 已在仓库外准备原生--execute入口的执行包装：沿用原Client/default recorder与两原账号，调用前27次逻辑/63HTTP上限，私有逐次及逐日进度、原生快照/llm_calls精确ID留证，远端45分钟上限及已有attempt/result拒重跑。只做语法核验，**包装未上传运行、未创建远端长作业、实际模型0/历史快照0**；待历史loader限定修复验收合并、选入2/5/0/11/9异常的原生dry-run核对后，才配置批准source SHA并执行一次。不会用包装改SQL、假造时间或绕过实时过滤。
+- 当前main仍661b0ff，原PR49尚无需求方新回复/限定修复；已在评论6343508016直接请求处理并保留实际源代码+生产只读证据，费用确认继续有效。每日M8已完成安装，下一交易日自然三阶段另验；A5真实数据仍被历史loader漏数挡住，未声称已完成。M9未合并/部署，接单保持开启，其他项目未改。
+
 ## OPS-A014  进行中（每日M8安装完成；真实回放前查实历史loader漏掉补算异常）  2026-10-22 22:43 北京
 - **安装已实际完成**：服务器北京时间 **22:38:12.110312→22:38:22.157536**，从cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6快进到已验收main **0096d5fbd7a1279e346d2f2a22af4f96a17e2dd2**，包含[PR49](https://github.com/XuQingsong/inves-cog/pull/49)准确head **4ea2e393b963664e5c339f5ee1e69db9d5292550**及[成功CI39794168503](https://github.com/XuQingsong/inves-cog/actions/runs/39794168503)。8个受影响运行文件逐件哈希匹配；未重复迁移。只追加attribution_tracks/labels两个program，pid **103648/103647**；morning_page **3661711→103651**。其余7个运行worker PID、systemd父服务启动时间、原morning-page自然attempt文件全保持；配置SHA256 **92e09e34aabdedb569af5a3aba9c0eacd520d93b2d21fe5e7db55416bbc91c86**。这只是安装成功，下一交易日三阶段自然job/快照还未到点。私有证据migration/b042-deployment-20261022-result.json，models0/业务job0/业务写0。
 - **新B042原生CLI只读核对已实际完成**：**22:39:25.559238→22:39:36.755353**，--dry-run原生main入口，27条SELECT、模型0/写0。指定五日按stage实际选入异常 **0/0/0/0/9**，预计调用 **0/0/0/0/3**（最后日move_card/claim_extraction/anomaly_candidates各1）；与此前直接原生函数读取现有补算记录得到的 **2/5/0/11/9异常、6/15/0/3/3调用**不等价。数据库独立核对10-15/16/20仍有 **2/5/11** 条，generated_at分别保持10-22实际03:49:19/20/21 UTC；10-19本来0。私有证据migration/b042-native-dry-run-20261022.json。
