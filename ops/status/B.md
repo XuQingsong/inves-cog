@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-038  已收到  2026-10-22 09:52 北京
+
+- 任务：B-037 验收修复。PR #47 保持草稿，仍在 `cursor/m8-b036-pit-snapshot-e013`。一个事件有多只标的时，`affected` 一条记录对应一只标的。每条的 `ticker`、`exposure` 都是单值，M9 能拿它当映射键。
+- 同一标的上多来源的暴露不一致时，只把这一只的暴露留空并写冲突原因，不挑一个更可行动的值，也不清掉其他已经完整的标的。某一只没有暴露时，只标这一只。没有标的来源时不造受影响标的。单标的仍是一条记录。
+- 事件级的 divergence 和 next filing 仍来自报告；抄到每条记录上。某一只自己的来源和报告或其他来源冲突时，只把这一只的该项留空。完成标记、`source_asof`、注入时钟和 lifecycle 规则不改。缺任一必需字段时快照仍是 degraded，`complete` 为 false。
+- 不改 M9、M4、schema、角色或来源。不部署，不回填生产。
+- 下一步：先写会失败的例子，再改展开。
+
 ## B-037  已完成  2026-10-22 00:42 北京
 
 - 草稿 PR #47，head `e584e34`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39636642198 。`phase1-blocking` 432 passed、21 deselected，用时 98.55 秒，nightly 跳过。没有合并。
