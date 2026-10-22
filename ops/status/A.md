@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-015  进行中（合同冲突已裁定；先推进独立M9合同消费与离线测试）  2026-10-22 15:06 北京
+- 已fetch main **7b72d1c82ec2f3485822a33bd1ccf40bc352c73e**，A运行；需求方在A015补充四承认原样例矛盾并统一规则/JSON：provider新增deadline_on（ET日期），未到期的deadline_outcome=null为正常；已到期或截止日未知且无结果才写missing.fields。M9 **只依据provider的missing.fields认定缺项，不自行把null判缺失**。原冲突已解除，不再重复要求裁定。
+- **本阶段变更先记录**：按A015已批准的消费端范围及UD-A-26“其他能做继续”，在原PR45合入已合并main的文档/唯一合同，先写真实output经provider注入的失败测试，再实现M9自身逐ticker cooling_status/m8_gaps/m8_completeness消费逻辑；以修订样例验证WDC/STX on、MU off、NVDA exposure缺失unknown、AMD过期结果缺失unknown。不接任何未合并B业务代码、不提前接真实provider、不改M4/规则A，不部署/迁库/跑生产/调模型。真实read_replay_snapshot及五日回放仍等B041代码验收合并和原估算确认停点。
+- 此处是继续当前A015，未另开任务或派B工作。B041由需求方派发，在原PR47/48落实deadline_on和V1–V10；A只处理自身消费层，不替B实现字段来源或判缺失。先推进独立离线部分，不因上游实现尚未合并而停止所有A工作。
+- 开始前原工作区干净，完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [准确旧head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)；旧CI不代表新合同已验证。后续实际先失败提交、实现head与对应真实CI分别回报。四日M7/IO/M5证据复用、不重跑，接单保持开启。
+
 ## A-015  进行中（UD-A-26：直接通过GitHub与需求方收口合同冲突）  2026-10-22 14:21 北京
 - **用户直接决定UD-A-26**：“合同冲突直接通过GitHub和需求方沟通解决，别只写报告等着；其他已授权、能做的工作继续推进，修复验收合并后继续部署。”A已先记录并推送本决定，随后通过GitHub在原PR45直接提出可审阅的合同修正建议；[实际评论6334239185](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6334239185)已发送成功并重新读取核实。继续原任务，不将同范围授权重新问用户，也不代派/执行B任务。
 - 已实际重新fetch：main仍 **7220b06da3c8029e7f36b6f2aceb3e61843fbe7a**、A运行，A015/唯一合同尚未修正；已通过GitHub读取PR45及PR47讨论，均无已有答复。B040已交代码，但PR47/48仍未验收合并；不能以修复者自报完成替代需求方接受。
