@@ -16,6 +16,9 @@ CLOCK = FrozenClock(datetime.fromisoformat("2026-10-22T14:00:00Z"))
 
 class ReplayDatabase(Memory):
     def execute(self, statement, params=None):
+        if statement.startswith("SET statement_timeout="):
+            self.statements.append(statement)
+            return Cursor([])
         if "FROM perception.m9_input_snapshots" in statement:
             self.statements.append(" ".join(statement.split()))
             return Cursor([row for row in self.snapshots if str(row["trade_date"]) == str(params[0])])
