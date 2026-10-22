@@ -5,7 +5,11 @@
 
 2026-10-22 增量：已合入需求方统一的deadline语义与唯一JSON，完成独立M9逐标的缺项消费；A1–A6分项证据和尚未满足的真实接线/回放见 `provider-contract-checklist.md`。消费实现阶段本地M9/M4相关58 passed / 3 deselected。随后up/down合同14 passed记录为 `provider-direction-green.xml`。最新继承main aefc62b的check_scope裁定：M8真实链保留“无关系→纯共振”，M9防御输入单独验证；新增纯共振off用例并直接消费新版合同，15 passed、Ruff通过，`provider-scope-green.xml`，原业务判定未变。以下旧K01“不完整”的描述仅记录此前B035读取路径，不取代最新provider的整日complete/逐字段missing合同；最新已合并快照接线验证见下节。
 
-## 最新集成结果（2026-10-22 22:18 北京）
+## 最新依赖增量（2026-10-22 22:46 北京）
+
+已继承main661b0ff/B042（业务代码0096d5f），M9业务代码未变；新依赖下70 passed/3 deselected、Ruff通过，b042-integration-green.xml。A014每日M8服务已安装，费用授权已确认；真实A5现在的具体停点是历史CLI loader误用实时generated_at过滤，漏掉补算异常，见PR49评论6343508016。未执行模型或制造空历史结果，修复验收合并后继续原一次回放。
+
+## 已验证快照及隔离入口（2026-10-22 22:18 北京）
 
 已继承验收合并 main 6ee26bb/B036–B041，默认原生 provider 已由真实形态不可变快照 fixture 验证；单字段缺失正常发布 unknown，只有整日缺快照沿用旧版本。旧 B035 夹具与“字段缺失导致整日不完整”的描述仅为历史记录，当前语义见 provider-contract-checklist.md。
 

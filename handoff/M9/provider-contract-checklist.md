@@ -30,3 +30,9 @@ JSON 由 main 合入，未编辑 docs。所有数据均为合同的合成输入�
 - 新 A5 回放测试先失败提交 `1d13d10`，5 failed（模块不存在），`m8-replay-red.xml`，后实现 `shadow/replay.py` 及 CLI `replay-m8`。新增路径重叠/未来或重复日期/已有证据目录/独立账号边界验证。最新 M9/M4 **70 passed、3 deselected**，`m8-replay-green.xml`；Ruff check/format通过。
 - 扩展相邻 B036 数据库检查的一次本机结果为95通过、1项因Docker不存在失败、3 deselected，保留 `immutable-integration-local-environment.xml`；未改测试/跳过/门禁，不将该集合称全绿。干净容器整体结论以新完整head CI为准。
 - 真实运行方式（仅在M8回放完成并获既有批准后）：`python -m inves_cog.shadow.cli replay-m8 --trade-dates 2026-10-15 2026-10-16 2026-10-19 2026-10-20 2026-10-21 --output-directory <本项目新的隔离目录>`。必须配置 INVES_COG_SHADOW_DATABASE_URL 和实时 INVES_COG_OVERLAY_DIR 用于目录隔离校验。摘要不输出事件/私人持仓；文件私有0600。无模型调用、业务写表、M4读写或实际服务安装。
+
+## B042 依赖集成（2026-10-22 22:46 北京）
+
+已继承 main 661b0ff（运行代码0096d5f、B042准确head4ea2e39），M9自身业务代码未变。新双连接依赖下 M9/M4仍 **70 passed / 3 deselected**，Ruff check/format通过，b042-integration-green.xml。相对main的docs/golden/milestones、M4、M8均无A新增修改。新完整head CI由PR/A状态另核。
+
+A014已完成M8每日服务实际安装，用户也已确认27次逻辑调用上限的一次五日回放，费用授权不再是A5停点。执行前原生CLI只读核对发现历史loader复用实时generated_at过滤，漏掉10-22补算的10-15/16/20记录；已在PR49评论6343508016直接交需求方最小限定修复。模型/回放快照尚未写入，A5真实结果仍不能以本地合成五日替代。已完成安装、迁移、四日M7不重复执行。
