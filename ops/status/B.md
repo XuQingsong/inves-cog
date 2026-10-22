@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-040  已完成  2026-10-22 13:36 北京
+
+- 草稿 PR #47，head `2389ebb`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39727391542 。`phase1-blocking` 443 passed、21 deselected，用时 115.30 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
+- 草稿 PR #48，head `ffde349`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39728350138 。`phase1-blocking` 452 passed、21 deselected，用时 80.77 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/48
+- members 恢复每只标的自己的背离标签和下一份财报时间。事件级时间晚于 cutoff 时，这一项仍按缺失。
+- 09:15 对有盘前新闻的 pool 先问一次 move_card，再走完整链落库。09:30 和 12:30 不再问模型。dry-run 与同一计数客户端实测一致。本地 `make phase1-test`：PR #47 443 passed、21 deselected，用时 68.76 秒；PR #48 452 passed、21 deselected，用时 68.98 秒，`make phase1-cases` 7 passed、1 xfailed，用时 25.34 秒。
+- 有盘前新闻的 pool：09:15 是 `move_card` 1、`claim_extraction` 1、`anomaly_candidates` 1。没有盘前新闻的 pool 是 0。wide 三个阶段都是 0。09:30 和 12:30 都是 0。五日合计 3 次，全部在 10-15 的 09:15。不估费用。
+- 证据分达到假设的供给异常，现有 N1/N2/N6 规则不写 `ticker_status`。lifecycle、mechanism、exposure 在快照上。没有新迁移，没有新角色。没有改 M9、M4、规则 A。没有部署，没有在生产执行。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-040  进行中  2026-10-22 13:33 北京
 
 - 草稿 PR #47，head `2389ebb`，https://github.com/XuQingsong/inves-cog/pull/47 。members 恢复每只标的自己的背离标签和下一份财报时间。事件级时间晚于 cutoff 时，这一项仍按缺失。本地 `make phase1-test` 443 passed、21 deselected，用时 68.76 秒。CI 还在跑。没有合并。
