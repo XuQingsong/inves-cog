@@ -120,8 +120,7 @@ def capture_if_ready(connection, trade_date, clock, *, events=None):
         return None
     source_asof = max(_aware(_cell(row, "ended_at", 4)) for row in chosen.values())
     built, missing = _bundle(connection, events, now, trade_date)
-    status = "complete" if _bundle_complete(missing) else "degraded"
-    return _insert(connection, trade_date, now, source_asof, status, "stage_completion", chosen, built, missing)
+    return _insert(connection, trade_date, now, source_asof, "complete", "stage_completion", chosen, built, missing)
 
 
 def capture_backfill(connection, trade_date, clock, events):
@@ -145,7 +144,7 @@ def _snapshot(connection, target, cutoff):
     visible.sort(key=lambda item: (item["snapshot_generated_at"], item["snapshot_id"]), reverse=True)
     complete = next((item for item in visible if _usable(item, moment)), None)
     if complete is not None:
-        return _from_complete(complete)
+        return _from_complete(complete, moment)
     degraded = next((item for item in visible if item["status"] == "degraded"), None)
     return _gap(degraded)
 
@@ -188,14 +187,17 @@ def _row_event(row, now, day):
         return None, None
     version = _version(_history(_cell(row, "history", 2)), now)
     if version is None:
-        return None, f"{event_id} 没有不晚于 cutoff 的历史时间"
-    when, entry = version
+        when, entry = None, {}
+        lifecycle = _empty("lifecycle")
+    else:
+        when, entry = version
+        lifecycle = _lifecycle(entry, when)
     divergence = _report_value(row, "divergence_label", "divergence_tag")
     filing = _report_value(row, "next_filing_at")
     members, member_gaps = _members(row, divergence, filing)
     ticker, exposure = _event_targets(members)
     fields = {
-        "lifecycle": _lifecycle(entry, when),
+        "lifecycle": lifecycle,
         "mechanism": _observed(_mechanism(row), now, _DB_REASONS["mechanism"]),
         "ticker": _observed(ticker, now, _DB_REASONS["ticker"]),
         "exposure": _observed(exposure, now, _DB_REASONS["exposure"]),
@@ -206,7 +208,8 @@ def _row_event(row, now, day):
         "systemic_tag": _observed(_cell(row, "systemic_event_tag", 11), now, _DB_REASONS["systemic_tag"]),
         "deadline_outcome": _observed(_deadline(row), now, _DB_REASONS["deadline_outcome"]),
     }
-    event = _event_row(event_id, _cell(row, "anomaly_id", 1), when.isoformat(), entry.get("evidence_ids"), fields)
+    observed = when.isoformat() if when is not None else None
+    event = _event_row(event_id, _cell(row, "anomaly_id", 1), observed, entry.get("evidence_ids"), fields)
     event["members"] = [item for item in members if item["exposure"] not in (None, "")]
     event["member_gaps"] = member_gaps
     return event, None
@@ -509,38 +512,49 @@ def _visible(item, cutoff):
 
 
 def _usable(item, cutoff):
-    if item["status"] != "complete" or not _visible(item, cutoff):
-        return False
+    return item["status"] == "complete" and _visible(item, cutoff)
+
+
+def _from_complete(item, cutoff):
+    events = []
+    missing = _returned_missing(item.get("missing"))
     for event in item["events"]:
-        if not _event_usable(event, cutoff):
-            return False
-    return True
-
-
-def _event_usable(event, cutoff):
-    observed = _aware(event.get("observed_at"))
-    if observed is None or observed > cutoff:
-        return False
-    fields = event.get("fields") or {}
-    for name in _REQUIRED:
-        cell = fields.get(name) or {}
-        at = _aware(cell.get("at"))
-        if cell.get("value") is None or at is None or at > cutoff:
-            return False
-    return True
-
-
-def _from_complete(item):
-    events = [_flatten(event) for event in item["events"]]
+        observed = _aware(event.get("observed_at"))
+        if observed is not None and observed > cutoff:
+            continue
+        flat, late = _flatten(event, cutoff)
+        events.append(flat)
+        if late:
+            bucket = dict(missing["fields"].get(event.get("event_id")) or {})
+            bucket.update(late)
+            missing["fields"][event.get("event_id")] = bucket
     return {
         "complete": True,
         "source_events_asof": item["source_asof"].isoformat(),
         "events": events,
         "source_ids": {
             "jobs": list(item["jobs"]),
-            "events": [_source_event(event) for event in item["events"]],
+            "events": [_source_event(event) for event in item["events"] if _kept_event(event, cutoff)],
         },
-        "missing": {"stages": [], "events": [], "fields": {}},
+        "missing": missing,
+    }
+
+
+def _kept_event(event, cutoff):
+    observed = _aware(event.get("observed_at"))
+    return observed is None or observed <= cutoff
+
+
+def _returned_missing(stored):
+    data = stored if isinstance(stored, dict) else {}
+    fields = data.get("fields") if isinstance(data.get("fields"), dict) else {}
+    copied = {}
+    for key, value in fields.items():
+        copied[key] = dict(value) if isinstance(value, dict) else value
+    return {
+        "stages": list(data.get("stages") or []),
+        "events": list(data.get("events") or []),
+        "fields": copied,
     }
 
 
@@ -555,7 +569,7 @@ def _gap(degraded):
             "jobs": list(degraded["jobs"] or []),
             "events": [_source_event(event) for event in degraded["events"] or []],
         }
-        kept = [_flatten(event) for event in degraded["events"] or []]
+        kept = [_flatten(event)[0] for event in degraded["events"] or []]
     else:
         kept = []
     return {
@@ -567,14 +581,25 @@ def _gap(degraded):
     }
 
 
-def _flatten(event):
+def _flatten(event, cutoff=None):
     fields = event.get("fields") or {}
+    late = {}
 
     def value(name):
-        return (fields.get(name) or {}).get("value")
+        cell = fields.get(name) or {}
+        shown = cell.get("value")
+        at = _aware(cell.get("at")) if isinstance(cell, dict) else None
+        if cutoff is not None and at is not None and at > cutoff:
+            late[name] = "来源时间晚于 cutoff"
+            return None
+        return shown
 
+    shown_ticker = value("ticker")
+    shown_exposure = value("exposure")
+    divergence = value("divergence_tag")
+    filing = value("next_filing_at")
     affected = []
-    if "members" in event:
+    if "members" in event and "ticker" not in late:
         for item in event.get("members") or []:
             ticker = item.get("ticker")
             if not isinstance(ticker, str) or not ticker or item.get("exposure") in (None, ""):
@@ -582,21 +607,21 @@ def _flatten(event):
             affected.append(
                 {
                     "ticker": ticker,
-                    "exposure": item.get("exposure"),
-                    "divergence_tag": item.get("divergence_tag"),
-                    "next_filing_at": item.get("next_filing_at"),
+                    "exposure": None if "exposure" in late else item.get("exposure"),
+                    "divergence_tag": divergence,
+                    "next_filing_at": filing,
                 }
             )
-    elif value("ticker") is not None or value("exposure") is not None:
+    elif shown_ticker is not None or shown_exposure is not None:
         affected.append(
             {
-                "ticker": value("ticker"),
-                "exposure": value("exposure"),
-                "divergence_tag": value("divergence_tag"),
-                "next_filing_at": value("next_filing_at"),
+                "ticker": shown_ticker,
+                "exposure": shown_exposure,
+                "divergence_tag": divergence,
+                "next_filing_at": filing,
             }
         )
-    return {
+    flat = {
         "event_id": event.get("event_id"),
         "anomaly_id": event.get("anomaly_id"),
         "lifecycle": value("lifecycle"),
@@ -604,13 +629,14 @@ def _flatten(event):
         "mechanism": value("mechanism"),
         "affected": affected,
         "direction": value("direction"),
-        "divergence_tag": value("divergence_tag"),
+        "divergence_tag": divergence,
         "dimensions": value("dimensions"),
-        "next_filing_at": value("next_filing_at"),
+        "next_filing_at": filing,
         "systemic_tag": value("systemic_tag"),
         "deadline_outcome": value("deadline_outcome"),
         "evidence_ids": list(event.get("evidence_ids") or []),
     }
+    return flat, late
 
 
 def _source_event(event):

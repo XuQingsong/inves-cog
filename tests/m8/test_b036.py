@@ -175,7 +175,7 @@ def test_fields_without_a_source_time_stay_null():
     snapshot_id = capture_if_ready(pages, DAY, clock)
     assert snapshot_id == 1
     stored = pages.snapshots[0]
-    assert stored["status"] == "degraded"
+    assert stored["status"] == "complete"
     event = stored["events"][0]
     text = json.dumps(event, ensure_ascii=False)
     assert event["fields"]["lifecycle"]["value"] == "假设中"
@@ -199,8 +199,8 @@ def test_fields_without_a_source_time_stay_null():
         assert event["fields"][name]["value"] is None
         assert event["fields"][name]["missing_reason"]
     found = read_snapshot(pages, DAY, CUTOFF)
-    assert found["complete"] is False
-    assert found["source_events_asof"] is None
+    assert found["complete"] is True
+    assert found["source_events_asof"] == BEFORE.isoformat()
     assert found["events"][0]["mechanism"] == "供给"
     assert found["events"][0]["lifecycle"] == "假设中"
     assert found["events"][0]["direction"] is None
@@ -279,7 +279,7 @@ def test_one_missing_field_keeps_the_others():
     pages = Memory(_jobs(), [_db_event(report=report)])
     capture_if_ready(pages, DAY, _clock(CUTOFF))
     stored = pages.snapshots[0]
-    assert stored["status"] == "degraded"
+    assert stored["status"] == "complete"
     event = stored["events"][0]
     assert event["fields"]["mechanism"]["value"] == "供给"
     assert event["fields"]["exposure"]["value"] == "直接"
@@ -291,10 +291,11 @@ def test_one_missing_field_keeps_the_others():
         "next_filing_at": event["fields"]["next_filing_at"]["missing_reason"]
     }
     found = read_snapshot(pages, DAY, CUTOFF)
-    assert found["complete"] is False
-    assert found["source_events_asof"] is None
+    assert found["complete"] is True
+    assert found["source_events_asof"] == BEFORE.isoformat()
     assert found["events"][0]["mechanism"] == "供给"
     assert found["events"][0]["next_filing_at"] is None
+    assert "next_filing_at" in found["missing"]["fields"]["evt-1"]
     conflict = Memory(_jobs(), [_db_event(claims=[{"direction": "不利"}, {"direction": "有利"}])])
     capture_if_ready(conflict, DAY, _clock(CUTOFF))
     direction = conflict.snapshots[0]["events"][0]["fields"]["direction"]
@@ -327,11 +328,13 @@ def test_jobs_and_events_after_the_cutoff_stay_out():
     )
     capture_if_ready(future, DAY, _clock(CUTOFF))
     stored = future.snapshots[0]
-    assert stored["status"] == "degraded"
-    assert stored["events"] == []
+    assert stored["status"] == "complete"
+    assert [item["event_id"] for item in stored["events"]] == ["unproven"]
+    assert stored["events"][0]["fields"]["lifecycle"]["value"] is None
+    assert "历史时间" in stored["events"][0]["fields"]["lifecycle"]["missing_reason"]
     assert "future" not in str(stored["events"])
     assert "市场确认" not in json.dumps(stored["events"], ensure_ascii=False)
-    assert any("unproven" in item for item in stored["missing"]["events"])
+    assert "lifecycle" in stored["missing"]["fields"]["unproven"]
     only_future = Memory(_jobs(), [_linkage(generated_at=AFTER, history=[_entry(AFTER, "市场确认", ["info-9"])])])
     capture_if_ready(only_future, DAY, _clock(CUTOFF))
     assert only_future.snapshots[0]["status"] == "complete"

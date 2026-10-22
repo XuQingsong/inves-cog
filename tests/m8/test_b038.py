@@ -5,7 +5,7 @@ import json
 import pytest
 
 from inves_cog.perception.attribution.snapshot import capture_if_ready, read_snapshot
-from tests.m8.test_b036 import CUTOFF, DAY, EARLIER, Memory, _clock, _entry, _jobs
+from tests.m8.test_b036 import BEFORE, CUTOFF, DAY, EARLIER, Memory, _clock, _entry, _jobs
 
 pytestmark = pytest.mark.phase1_blocking
 
@@ -68,8 +68,8 @@ def test_a_missing_or_conflicting_exposure_stays_on_that_ticker():
     missing, found = _capture(
         _row(tickers=[{"ticker": "NVDA", "exposure": "直接"}, {"ticker": "AMD", "exposure": None}])
     )
-    assert found["complete"] is False
-    assert found["source_events_asof"] is None
+    assert found["complete"] is True
+    assert found["source_events_asof"] == BEFORE.isoformat()
     mapped = _by_ticker(found)
     assert mapped["NVDA"]["exposure"] == "直接"
     assert "AMD" not in mapped
@@ -86,7 +86,7 @@ def test_a_missing_or_conflicting_exposure_stays_on_that_ticker():
             ]
         )
     )
-    assert hidden["complete"] is False
+    assert hidden["complete"] is True
     mapped = _by_ticker(hidden)
     assert mapped["AMD"]["exposure"] == "直接"
     assert "NVDA" not in mapped
@@ -122,9 +122,10 @@ def test_one_ticker_stays_a_single_record():
 
 def test_no_ticker_does_not_invent_an_affected_row():
     _stored, found = _capture(_row(tickers=[], candidates=[]))
-    assert found["complete"] is False
+    assert found["complete"] is True
     assert found["events"][0]["affected"] == []
-    assert found["source_events_asof"] is None
+    assert found["source_events_asof"] == BEFORE.isoformat()
+    assert "ticker" in found["missing"]["fields"]["evt-1"]
 
 
 def test_m9_can_key_each_ticker():
