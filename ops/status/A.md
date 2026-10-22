@@ -1,5 +1,23 @@
 # A 线回报
 
+## OPS-A014  进行中（M8快照迁移和真实五日dry-run完成；活动部署受账号接线阻塞）  2026-10-22 21:38 北京
+- **已实际应用原批准迁移**：北京 **21:25:18.702623**，`phase1_m8_0002_m9_input_snapshots.sql` SHA256 **ef7042352933b190c9166ea689c9876fb2bd4dfd36a903b46b9cb83a5237d965**。用原role_perception独立核验perception.m9_input_snapshots为0行、SELECT/INSERT=true、UPDATE/DELETE=false、append-only触发器启用。管理员只执行该DDL，不作业务运行账号；未重做旧M8迁移/建角色/写业务结果。证据migration/m8-snapshot-migration-20261022-result.json。
+- **部署前新缺口已核实并直接沟通**：默认INVES_COG_DATABASE_URL实际账号inves_cog_ingest可读输入/估值/纸面数据并写job及llm_calls，但10张M8表读写全部false；两个新/旧M8入口均沿用该默认连接。原role_perception可写M8、可写job并只读行情/新闻/计划，但不能读valuation_v1.ranges、不能INSERT ingest.llm_calls，故简单全局换账号也不成立。已[在原PR48提交实际权限矩阵和最小双连接建议](https://github.com/XuQingsong/inves-cog/pull/48#issuecomment-6341851380)，请需求方明确限定修复归属；A不代派/改B代码、不扩权、不借管理员绕过。私有证据m8-preflight-20261022-131807.json、m8-role-paths-20261022.json。
+- **活动运行未被冒称已部署**：服务器仍干净main **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**，相关worker未重载/新增，其他worker/项目未改。部署候选来自已验收main **673be6f93d3fa1fad71226f3a9a8f2f65603dcd4**（包含merge3326a3b及[PR48](https://github.com/XuQingsong/inves-cog/pull/48)完整head **b344bdaa944f622009cb9634eb8ffbecde5b10c3**，[准确成功CI39782003890](https://github.com/XuQingsong/inves-cog/actions/runs/39782003890)）；仅归档到仓库外m8-accepted-673be6f-20261022供dry-run。先防止明早付费模型完成后因写账号错误失败，接线修复验收合并后再装活动代码及两worker。
+- **五日原生dry-run已实际完成**：北京 **21:29:36.808008→21:29:52.611942**，只读inves_cog_ingest，调用已合并原生replay_window(dry_run=True)，无伪装CLI/业务实现替换。逐日现有异常及09:15按task计数如下；各日09:30/12:30三种task均0次，wide总18条均0模型调用。总 **27逻辑调用**：move_card9/claim_extraction9（DeepSeek共18）、anomaly_candidates9（GLM9）；按原registry标准任务重试2次/GLM重试0，最多 **63 HTTP尝试**。本次实际模型0、上游请求0、业务写0、快照写0；三条业务SELECT及身份核验，SQL只读和执行白名单双保护。证据migration/m8-five-day-dry-run-20261022-{result,progress}.json。
+
+|交易日|异常数（pool/wide）|09:15 move_card|09:15 claim_extraction|09:15 anomaly_candidates|09:30合计|12:30合计|
+|---|---:|---:|---:|---:|---:|---:|
+|2026-10-15|2（2/0）|2|2|2|0|0|
+|2026-10-16|5（5/0）|5|5|5|0|0|
+|2026-10-19|0|0|0|0|0|0|
+|2026-10-20|11（1/10）|1|1|1|0|0|
+|2026-10-21|9（1/8）|1|1|1|0|0|
+
+- **费用估算及单价依据**：官方[DeepSeek北京/全球价](https://help.aliyun.com/zh/model-studio/deepseek-v4-1-flash)为忙时输入2/输出8元每百万token、闲时1/4；[GLM5.3价](https://help.aliyun.com/en/model-studio/glm-5-3)输入8/输出28。按当前payload字节+每请求512作为输入token预算代理（非精确tokenizer/保证上限），输出取本项目同task历史usage中位数/P95（样本move_card1、claim19、GLM38）：忙时总参考 **3.953334元/14.373534元**；P95且标准任务全部重试至上限的情景 **15.229466元**。未算缓存/赠送/促销，不是硬费用上限；GLM长尾输出可能更高。现有端点为[Token Plan订阅](https://help.aliyun.com/zh/model-studio/token-plan-personal-overview)，实际Credits换算和剩余额度未核；上述是公开按量等值参考，不能冒充套餐实扣或说实际0费用，未购买/改key/换套餐。完整假设见migration/m8-five-day-cost-estimate-20261022.json。
+- **PIT和数据限制保留**：四日M7真实generated_at仍10-22重建时间，不能说当时可见；10-21自然9行仍原时间。新闻按各原生stage时点的first_seen_at/published_at与7日检索窗口筛选；当前enrichment未恢复历史字段版本。10-15/16/19宽池M6 return/residual多数缺失仍沿用UD25独立证据；0异常日不造事件，不重做M6/M7/IO恢复。干跑是计划计数，不是历史事件结论已成立。
+- **下一步**：按上述真实数量/费用交需求方转用户确认一次指定五日回放，未确认不调模型；账号双连接修复验收合并后继续活动代码、09:15落库及tracks/labels安装，随后核下个自然交易日，不能把迁移/干跑当线上三阶段成功。M9生产部署仍属A015、不混入本步骤。今晚M4发布和盘前403最终结果保留；接单保持开启。
+
 ## OPS-A014  进行中（UD-A-28：已收到M8验收合并，开始迁移部署与五日dry-run）  2026-10-22 21:16 北京
 - **接口/迁移/调度执行记录UD-A-28（沿用UD-COORD-27，来源A014续十四21:10补充）**：已fetch main **673be6f93d3fa1fad71226f3a9a8f2f65603dcd4**，包含已验收merge **3326a3b63883311f6238498c5a136fe0e46925f0**及B041完整head **b344bdaa944f622009cb9634eb8ffbecde5b10c3**；GitHub已核PR47/48均merged，PR48[准确head CI39782003890](https://github.com/XuQingsong/inves-cog/actions/runs/39782003890)success。需求方已完成V1–V10验收及M8→M9交叉验证，不再等待合并或重复索取原授权。
 - **先记录后执行的具体范围**：先核对本项目远端进程/job、未提交修改与已有迁移/回放前缀，防止并发/重复；应用原批准 `migrations/phase1_m8_0002_m9_input_snapshots.sql`（SHA256 **ef7042352933b190c9166ea689c9876fb2bd4dfd36a903b46b9cb83a5237d965**），装载上述已合并main，使09:15早页落库，新增attribution_tracks/attribution_labels两worker，只重载相关进程，保留其他项目/本项目其他worker。管理员仅用于已批准DDL，不作为业务运行账号；不新增角色、来源或业务规则。
