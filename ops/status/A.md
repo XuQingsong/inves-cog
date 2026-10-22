@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-015  进行中（NVDA裁定已落实；15项消费验证及准确head整仓CI通过）  2026-10-22 20:54 北京
+- 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已实际推送最新完整head **1fa73f03c2784ad4b0ad183041a02dba773b2935**，继承已合并main **aefc62ba9eb8953a0d7905af77b21a50dbdf9adf** 的只读合同。新版JSON SHA256实查 **72c05c6ed1fd793673ee4dd5ce572bb4f2d2e6eec49791cc59a07badd86a8fd3**，A015补充六/check_scope已落实，旧NVDA验收冲突已解决，不再等待或重问同一裁定。
+- **A1新增纯共振正例已实际通过**：test_a1_pure_resonance_contract_is_off从同一JSON的expected_m9_pure_resonance取输入/预期，选指定原事件经生产scheduled的provider注入，验证NVDA off、无gap/unknown、WDC/STX仍on、MU仍off；不混入evt-gap防御负例。原整份output直接消费仍验证NVDA缺暴露unknown、AMD到期结果unknown。合计 **15 passed**、Ruff check/format通过，证据handoff/M9/provider-scope-green.xml、checklist/self-test已推送；没有业务规则实现变更或伪造红灯，原先失败测试历史保留。
+- **准确新head [CI39781532548](https://github.com/XuQingsong/inves-cog/actions/runs/39781532548)真实success**，独立核job **119833741810**：测试merge **abb58e3e423540c3c12327dc7a5dfb624efc137d** 将本head合入main aefc62b，干净容器make **462 passed、21 deselected**（124.97秒），M0另 **2 passed**；9项预期失败自检均red=True、整体成功，nightly skipped。本机既有无Docker限制未反复测试/修改门禁，旧14/58项及旧head CI只作历史证据，不冒充本次结果。
+- 已[在原PR47确认收到裁定并完成新增测试](https://github.com/XuQingsong/inves-cog/pull/47#issuecomment-6341160961)，[原PR45实际完成回报](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6341272753)及描述/真实CI均已更新。补核B20:55回报：PR48完整head **b344bdaa944f622009cb9634eb8ffbecde5b10c3**已交V1–V10本地证据，[该版CI39782003890](https://github.com/XuQingsong/inves-cog/actions/runs/39782003890)仍运行，B未标完成；此为B来源证据，不冒称A生产实测。本轮main仍aefc62b，PR47/48尚未合入main；A不代验收合并、不加载未合并B业务代码。首次推送遇B线并发更新被拒，已正常rebase保留B内容，未强推。
+- **尚未完成的边界**：A1–A4独立消费层自验已过；真实默认provider接线、A5五日read_replay_snapshot及M8已授权迁移部署仍在B041验收合并后继续，模型回放仍先准确dry-run估算并获需求方确认。PR45保持draft、未声称模块/生产验收完成。今晚M4发布与盘前403最终证据复用，不重跑；未部署、迁库、调模型或改其他项目，接单保持开启。
+
 ## A-015  进行中（UD-A-27：已收到NVDA合同裁定，恢复独立消费验证）  2026-10-22 20:45 北京
 - **接口裁定执行记录UD-A-27（来源需求方A015补充六/B041 20:10裁定，非新增用户业务授权）**：main **aefc62ba9eb8953a0d7905af77b21a50dbdf9adf** 已统一check_scope，保留M8“无关系→纯共振”规则；evt-gap/NVDA缺项仅作M9防御输入，A1原预期不变；新增expected_m9_pure_resonance要求纯共振标的cooling_status=off。原NVDA合同冲突已解决，不再等待同一答复。B20:41已确认恢复V1–V10，未完成未合并。
 - **先记录后执行**：在原PR45继承main只读合同，新增直接消费JSON中纯共振预期的离线测试，重跑原14项及新例，更新JSON SHA256/证据/准确head CI；不改原冷静期/暴露/N码规则，不引入未合并B代码，不部署或调模型。开始前工作区干净，head **7f2b0b6fe31bfec9b8f35d64abff6f1d869cc705** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [该旧head成功CI39754217529](https://github.com/XuQingsong/inves-cog/actions/runs/39754217529)；新head结果另核，不沿用旧CI冒充。
