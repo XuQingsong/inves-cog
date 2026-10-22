@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  进行中  2026-10-22 15:19 北京
+
+- 截止日语义已写上，还没标已完成。草稿 PR #47 head `6ffd86b`，https://github.com/XuQingsong/inves-cog/pull/47 。草稿 PR #48 head `e380b03`，https://github.com/XuQingsong/inves-cog/pull/48 。没有合并。
+- `deadline_on` 取报告里已有的日期。空的 `deadline_outcome`：日期晚于 cutoff 的纽约日历日则不进缺失；不晚于该日则原因「截止日已到（日期）但没有支持/反证/条件风险结果」；没有日期则「截止日未知」。已有结果原样保留。来源时间晚于 cutoff 的日期看不见。回放用同一条规则。
+- 证据：`tests/m8/test_b041.py` 覆盖未到期、到期、当天、未知、支持/反证/条件风险、后一个 cutoff，以及回放四种情形。PR #47 上这条和 `test_b036`、`test_b038` 本地 28 passed。PR #48 上 `test_b041`、`test_b039_run`、`test_b040` 本地 19 passed。两个新 head 的 phase1-blocking 还在等。
+- 停下的一项：V1 要求 Toshiba 的 direction 与合同样例一致，样例是「不利」。同一条链实测写入的说法方向是 `down`。说法校验只接受 up/down。没有把 `down` 改写成「不利」。
+- 下一步：等方向词怎么对齐。V1–V9 的合同夹具在这之前不逐项交齐，也不标已完成。
+
 ## B-041  已收到  2026-10-22 15:15 北京
 
 - 任务：截止日语义，并按 `ops/answers/B-041.md` 的 V1–V10 交付。仍在草稿 PR #47 和草稿 PR #48，不新开 PR。授权沿用 UD-COORD-26/27。不新增 schema、角色、数据源。不部署，不在生产执行。不改合同文件 `docs/phase1/contracts/m8-m9-provider.json`。不改 M9、M4、规则 A。
