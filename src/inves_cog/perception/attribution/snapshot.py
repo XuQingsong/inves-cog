@@ -649,8 +649,8 @@ def _flatten(event, cutoff=None):
                 {
                     "ticker": ticker,
                     "exposure": None if "exposure" in late else item.get("exposure"),
-                    "divergence_tag": divergence,
-                    "next_filing_at": filing,
+                    "divergence_tag": None if "divergence_tag" in late else item.get("divergence_tag"),
+                    "next_filing_at": None if "next_filing_at" in late else item.get("next_filing_at"),
                 }
             )
     elif shown_ticker is not None or shown_exposure is not None:

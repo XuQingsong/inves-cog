@@ -5,7 +5,7 @@ import json
 import pytest
 
 from inves_cog.perception.attribution.snapshot import capture_if_ready, read_snapshot
-from tests.m8.test_b036 import BEFORE, CUTOFF, DAY, EARLIER, Memory, _clock, _entry, _jobs
+from tests.m8.test_b036 import AFTER, BEFORE, CUTOFF, DAY, EARLIER, Memory, _clock, _entry, _jobs
 
 pytestmark = pytest.mark.phase1_blocking
 
@@ -126,6 +126,52 @@ def test_no_ticker_does_not_invent_an_affected_row():
     assert found["events"][0]["affected"] == []
     assert found["source_events_asof"] == BEFORE.isoformat()
     assert "ticker" in found["missing"]["fields"]["evt-1"]
+
+
+def test_two_tickers_keep_their_own_divergence_and_filing():
+    stored, found = _capture(
+        _row(
+            report={},
+            tickers=[
+                {
+                    "ticker": "NVDA",
+                    "exposure": "直接",
+                    "divergence_tag": "情绪性折价",
+                    "next_filing_at": "2026-11-01",
+                },
+                {
+                    "ticker": "AMD",
+                    "exposure": "间接",
+                    "divergence_tag": "基本面折价",
+                    "next_filing_at": "2026-12-15",
+                },
+            ],
+        )
+    )
+    mapped = _by_ticker(found)
+    assert mapped["NVDA"]["divergence_tag"] == "情绪性折价"
+    assert mapped["AMD"]["divergence_tag"] == "基本面折价"
+    assert mapped["NVDA"]["next_filing_at"] == "2026-11-01"
+    assert mapped["AMD"]["next_filing_at"] == "2026-12-15"
+    assert found["events"][0]["divergence_tag"] is None
+    assert found["events"][0]["next_filing_at"] is None
+
+    event = stored["events"][0]
+    event["fields"]["next_filing_at"] = {
+        "value": "2026-11-01",
+        "at": AFTER.isoformat(),
+        "missing_reason": None,
+    }
+    pages = Memory(_jobs(), [])
+    pages.snapshots.append(stored)
+    late = read_snapshot(pages, DAY, CUTOFF)
+    assert late["complete"] is True
+    late_map = _by_ticker(late)
+    assert late_map["NVDA"]["next_filing_at"] is None
+    assert late_map["AMD"]["next_filing_at"] is None
+    assert late_map["NVDA"]["divergence_tag"] == "情绪性折价"
+    assert late_map["AMD"]["divergence_tag"] == "基本面折价"
+    assert late["missing"]["fields"]["evt-1"]["next_filing_at"] == "来源时间晚于 cutoff"
 
 
 def test_m9_can_key_each_ticker():
