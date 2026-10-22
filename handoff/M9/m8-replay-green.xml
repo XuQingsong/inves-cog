@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="70" time="1.011" timestamp="2026-10-22T22:16:44.244884+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_only_tightens" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_cooling_rules" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_contract" time="0.179" /><testcase classname="tests.m9.test_m9_contracts" name="test_shadow_signals_no_orders" time="0.003" /><testcase classname="tests.m9.test_m9_contracts" name="test_factor_shadow_no_orders" time="0.013" /><testcase classname="tests.m9.test_m9_contracts" name="test_x1_once_per_event" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_f01_values" time="0.007" /><testcase classname="tests.m9.test_m9_contracts" name="test_f02_values" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_f02_shadow_hysteresis" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_single_factor_substitution" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_factor_versioning" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_s10_eligibility_shadow" time="0.000" /><testcase classname="tests.m9.test_m9_inputs" name="test_m9_event_eps_baseline_is_specific_to_each_event" time="0.000" /><testcase classname="tests.m9.test_m9_inputs" name="test_m9_segment_core_uses_four_visible_quarters_and_one_axis" time="0.000" /><testcase classname="tests.m9.test_m9_inputs" name="test_m9_event_consensus_rejects_late_or_different_fiscal_year" time="0.000" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_missing_source_keeps_original_overlay_timestamp" time="0.001" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_shadow_pipeline_has_all_59_and_source_links" time="0.010" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_schedule_uses_native_window_plan_and_premarket_dependencies" time="0.117" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_extra_factors_and_signal_boundary_contracts" time="0.000" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_snapshot_rejects_future_and_unlabelled_history" time="0.000" /><testcase classname="tests.m9.test_m9_provider" name="test_native_scheduled_default_reads_real_provider[False]" time="0.007" /><testcase classname="tests.m9.test_m9_provider" name="test_native_scheduled_default_reads_real_provider[True]" time="0.005" /><testcase classname="tests.m9.test_m9_provider" name="test_m8_reader_uses_closed_input_day_and_keeps_source_ids" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_native_snapshot_field_gap_publishes_unknown_and_keeps_source_ids" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_native_missing_stage_snapshot_keeps_old_overlay" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_reader_permission_failure_stays_unknown_without_role_fallback" time="0.000" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a1_a3_a4_actual_contract_via_native_provider" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a1_pure_resonance_contract_is_off" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a2_incomplete_contract_retains_previous_generated_at" time="0.009" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a2_first_incomplete_contract_has_no_overlay" time="0.004" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_display_only_gaps_do_not_block_cooling" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[lifecycle]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[mechanism]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[exposure]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[deadline_outcome]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[direction]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_normal_nulls_are_not_reclassified_as_missing" time="0.004" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_known_cooling_survives_another_event_gap" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_empty_complete_input_publishes_empty_overlay" time="0.001" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_extended_delivery_rejects_inconsistent_diagnostics" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_incomplete_input_keeps_legacy_overlay_without_rewriting" time="0.009" /><testcase classname="tests.m9.test_m9_replay" name="test_five_day_m8_replay_is_explicit_and_never_publishes_live" time="0.001" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_paths_overlapping_live_before_reading[live]" time="0.000" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_paths_overlapping_live_before_reading[live/replay]" time="0.000" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_paths_overlapping_live_before_reading[.]" time="0.000" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_missing_snapshot_is_unavailable_not_an_empty_success" time="0.001" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_duplicate_or_future_dates_before_reading[days0]" time="0.000" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_duplicate_or_future_dates_before_reading[days1]" time="0.000" /><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_keeps_an_existing_run_untouched" time="0.001" /><testcase classname="tests.m9.test_m9_replay" name="test_native_m8_replay_entry_uses_only_the_scoped_shadow_reader" time="0.000"><failure message="AssertionError: SET statement_timeout='10s'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10efc83d0&gt;
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-352/test_native_m8_replay_entry_us0')
+
+    def test_native_m8_replay_entry_uses_only_the_scoped_shadow_reader(monkeypatch, tmp_path):
+        from contextlib import nullcontext
+        from types import SimpleNamespace
+    
+        from inves_cog.shadow import cli
+    
+        db, keys = source(), []
+        monkeypatch.setattr(cli, "read_environment", lambda: {"INVES_COG_OVERLAY_DIR": str(tmp_path / "live")})
+    
+        def scoped(values, key):
+            keys.append(key)
+            return nullcontext(db)
+    
+        monkeypatch.setattr(cli, "_scoped", scoped)
+&gt;       result = cli._replay_m8(SimpleNamespace(trade_dates=DAYS, output_directory=tmp_path / "replay"), CLOCK)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m9/test_m9_replay.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/inves_cog/shadow/cli.py:155: in _replay_m8
+    reader.execute("SET statement_timeout='10s'")
+tests/m9/test_m9_replay.py:22: in execute
+    return super().execute(statement, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tests.m9.test_m9_replay.ReplayDatabase object at 0x10efc8490&gt;
+statement = "SET statement_timeout='10s'", params = None
+
+    def execute(self, statement, params=None):
+        compact = " ".join(statement.split())
+        self.statements.append(compact)
+        if compact.upper().startswith(("BEGIN", "ROLLBACK")):
+            return Cursor([])
+        if compact.upper().startswith("INSERT INTO PERCEPTION.M9_INPUT_SNAPSHOTS"):
+            row = {
+                "snapshot_id": len(self.snapshots) + 1,
+                "trade_date": params[0],
+                "snapshot_generated_at": params[1],
+                "source_asof": params[2],
+                "status": params[3],
+                "kind": params[4],
+                "jobs": _unwrap(params[5]),
+                "events": _unwrap(params[6]),
+                "missing": _unwrap(params[7]),
+            }
+            self.snapshots.append(row)
+            return Cursor([{"snapshot_id": row["snapshot_id"]}])
+        if "FROM perception.m9_input_snapshots" in compact:
+            return Cursor(self.snapshots)
+        if "ingest.job_runs" in compact:
+            day = str(params[0])[:10]
+            return Cursor([row for row in self.jobs if str(row["trade_date"])[:10] == day])
+        if "perception.linkage_events" in compact:
+            return Cursor(self.events)
+&gt;       raise AssertionError(compact)
+E       AssertionError: SET statement_timeout='10s'
+
+tests/m8/test_b036.py:71: AssertionError</failure></testcase><testcase classname="tests.m9.test_m9_risk" name="test_m9_s10_keeps_each_price_order_and_residual_z" time="0.000" /><testcase classname="tests.m9.test_m9_risk" name="test_m9_missing_s1_history_is_unknown_not_clear" time="0.000" /><testcase classname="tests.m9.test_m9_weights" name="test_m9_augmented_books_reweight_original_subitems" time="0.000" /><testcase classname="tests.m4.test_b011" name="test_exact_minus_eight_sells_one_third_of_each_attack_name" time="0.001" /><testcase classname="tests.m4.test_b011" name="test_exact_minus_six_releases_the_deep_brake" time="0.000" /><testcase classname="tests.m4.test_b011" name="test_neighboring_amounts_keep_each_operator" time="0.000" /><testcase classname="tests.m4.test_closeout" name="test_plan_zero_amount_becomes_explained_skip" time="0.002" /><testcase classname="tests.m4.test_closeout" name="test_plan_skip_identifies_one_actual_gate" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_order_reason_tokens" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_orders_only_from_engine" time="0.026" /><testcase classname="tests.m4.test_execution" name="test_fill_timing_and_cost" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_membership_asof" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_sell_priority" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_panic_gate_scope" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_cooldown_m58" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_overlay_cooling_skip_and_cancel" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_overlay_missing_marked" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_plan_unpublished_low_coverage" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.003" /><testcase classname="tests.m4.test_execution" name="test_vix_missing_not_panic" time="0.001" /></testsuite></testsuites>

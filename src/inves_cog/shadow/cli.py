@@ -21,6 +21,7 @@ from inves_cog.perception.attribution.snapshot import m8_provider as native_m8_p
 from inves_cog.shadow.inputs import ReadInputs, validate_snapshot
 from inves_cog.shadow.outputs import DatabaseOutputs
 from inves_cog.shadow.pipeline import MemoryOutputs, run_overlay, run_shadows
+from inves_cog.shadow.replay import replay_m8
 from inves_cog.shadow.scheduling import due_stages
 from inves_cog.shadow.settings import settings
 
@@ -145,9 +146,26 @@ def scheduled(*, clock, values, m8_provider=None):
         return output or {"status": "waiting_dependencies"}
 
 
+def _replay_m8(args, clock):
+    values = read_environment()
+    live = values.get("INVES_COG_OVERLAY_DIR")
+    if not args.trade_dates or not args.output_directory or not live:
+        raise ValueError("replay-m8 requires explicit trade dates, output directory, and configured live directory")
+    with _scoped(values, "INVES_COG_SHADOW_DATABASE_URL") as reader:
+        reader.execute("SET statement_timeout='10s'")
+        return replay_m8(
+            reader,
+            days=args.trade_dates,
+            clock=clock,
+            output_directory=args.output_directory,
+            live_directory=live,
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["scheduled", "replay"])
+    parser.add_argument("action", choices=["scheduled", "replay", "replay-m8"])
+    parser.add_argument("--trade-dates", nargs="+", type=date.fromisoformat)
     parser.add_argument("--snapshot", type=Path)
     parser.add_argument("--cutoff")
     parser.add_argument("--output-directory", type=Path)
@@ -156,6 +174,8 @@ def main():
     try:
         if args.action == "scheduled":
             result = scheduled(clock=clock, values=read_environment())
+        elif args.action == "replay-m8":
+            result = _replay_m8(args, clock)
         else:
             if not args.snapshot or not args.cutoff or not args.output_directory:
                 raise ValueError("replay requires snapshot, original cutoff, and separate output directory")
