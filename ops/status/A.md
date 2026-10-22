@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-015  阻塞（已收到B038多标的快照验收修复；不接未合并PR47）  2026-10-22 09:52 北京
+- 已fetch最新main **2c0526e6ec3345f67a75d68995e6feb0502bf350**，A运行；读到tracker最新复验结论和B038依赖合同。B037/PR47 head e584e34 的快照在多ticker事件中返回ticker/exposure数组，而M9合同要求逐ticker scalar affected项；需求方已派 **B038** 在同一草稿PR47定向修复，明确修复通过前不合并。A继续当前A015，不代做/派发B任务，不集成该未验收版本。
+- 当前M9代码仍为[PR45](https://github.com/XuQingsong/inves-cog/pull/45)完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da**，只接已验收合并的B035边界；其[准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)447 passed/21 deselected、M0另2 passed证据复用。没有因上游新缺陷重复改写已验收接线或重跑未变化测试。
+- **用户影响**：M9新快照接入、带真实事件的完整覆盖层合同验收仍受阻；不影响今天已完成的M1宽池/M6/M7日级与09:15 B034自然早页核验，已交密文d147a0ffa31b41f61dbd437f5b56307a7f1f31d7无需重交。尚未把M9或第一阶段最终验收写成通过。
+- 已自行决定：无新增业务决定。无接口、DB、调度、来源或依赖变更操作；没有新增用户授权要求。下一步：需求方验收并合并B038/PR47后，在原A分支继承已合并main、按新逐ticker快照合同接线并离线核验；此前保留阻塞。盘前prefill403仍为独立OPS事项，未用今日早报成功掩盖。
+
 ## OPS-A014  进行中（B034自然早页核验与加密交付完成；其余独立OPS保留）  2026-10-22 09:26 北京
 - **本次早页的自然运行、PIT读取和密文交付已完成**。服务完整SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**；交易日2026-10-21的 **attribution_candidates job9698=ok**、processed_count=9，实际自然触发北京 **09:15:18.548463**，轮询attempt状态ok、**returncode=0**，attempt文件完成mtime为 **09:15:28.164784**，页面写出mtime **09:15:27.862781**。job表started_at=ended_at是早页注入同一个冻结截点的实现，不将其差值当作实际零耗时。
 - **B032/M7可见性**：读取到9条日级异常，全部真实generated_at=08:57:44.906038，均早于该页实际cutoff **09:15:18.548463**，NULL或晚于截点0。自然任务本次 **move_card/deepseek-v4.1-flash 1次，status=ok**；观察者额外模型调用0，没有重问历史新闻摘要或手工重跑早报。
