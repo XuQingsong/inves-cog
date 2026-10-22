@@ -1,5 +1,13 @@
 # A 线回报
 
+## OPS-A014  进行中（自然M6、M7日级完成；09:15页面待实际核验）  2026-10-22 09:02 北京
+- 最新main仍 **d2d0d56f6b5c4b57fa88a5c10c19952db20796ff**，服务完整SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**。交易日2026-10-21 **market_structure job9651=ok**，自然北京时间 **08:45:20.552334→08:52:52.542058**，processed_count=2,699；实际daily=2,574、baskets=58、rotation=66、market=1。08:50未见完成记录是仍在执行，不是没启动，未重跑。
+- 每session 1,287条。close：无null reason 1,121、sector_unmapped 141、l3_same_as_l2 23、insufficient_history 2；**missing_current_return=0**。纳入wide中 **1,273/1,275有resid**，2条历史不足仍缺失。相较旧自然10-20输入因子缺失导致的1,087条missing_current_return，本次新交易日自然结果已没有该原因；不把不同交易日的对象数作逐一同样本比较。B033自然宽池及下游close链路取得实证。
+- post：无原因36、l3_same_as_l2 23、missing_post_price 1,087、sector_unmapped;missing_post_price 141。盘后输入未采集的1,228条限制保持，不能据close通过声称盘后全量完整。
+- **anomaly_daily job9655=ok**，**08:55:16.159771→08:57:44.937670**，processed_count=9；真实异常表close **9行**，全部generated_at=**08:57:44.906038**，无NULL，早于计划09:15 cutoff。此为首次已核实的M7日级自然运行，不是历史8750或手工任务；尚未发生的自然页面读取仍待核，不能提前算页面验收通过。昨晚盘前bars_prefill9466 HTTP403导致premarket未运行的独立OPS阻塞仍未解决，日级成功不替代盘前验收。
+- 证据：**migration/structure-observation-20261022-010052.json**、**migration/m7-morning-natural-20261022-010052.json**；只读观察调用模型0、源请求0、业务启动0。已安装代码来自B033[PR43](https://github.com/XuQingsong/inves-cog/pull/43)准确head **69caa6f4ac915cab59cc13880bfe88dc09d348d8**/[成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39537938750)，M7 worker[PR41](https://github.com/XuQingsong/inves-cog/pull/41)准确head **e7d6476c5cc8ae587b9af1a2ed99cec6fda050e1**/[成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39393827222)；本轮没有代码或接口/DB/调度/来源/依赖变更。
+- 已自行决定：复用前阶段已核验73/73行情和1,275/1,275因子证据，不重复采集、模型诊断或历史补算。下一步：09:15自然早页结束后核实际job/退出码/模型次数/加密页面、M7生成时间过滤及B034估值/价格日期，不触发手工早报；A015仍待B037需求方验收合并。
+
 ## OPS-A014  进行中（B033自然宽池因子核验通过；M6/M7/早页待观察）  2026-10-22 08:42 北京
 - 08:41实际只读核验，服务完整SHA **cbdbaf901f2f68fdbc66f0f61dcca15e4f75e7b6**。交易日2026-10-21 **wide_universe job9619=ok**，自然北京时间 **08:28:44.877574→08:39:26.548354**，processed_count=13,227；报告拆股因子1,080、确认单位因子261,396、未知0（为任务累计价格行计数，不是独立ticker数）。当日纳入宽池 **1,275/1,275有close且有adj_factor**，未知因子0；不是昨天的手工9321结果。B033的自然宽池输入修复已取得真实证据。
 - **m6_market_inputs job9620=ok**，**08:39:26.562642→08:39:52.325905**，processed_count=13,646。08:41时尚未到08:45市场结构窗口，当天marketstate四张产出表0行是未到点，不能判任务失败；wide_resid查询此刻0同样不是最终缺失原因验收。
