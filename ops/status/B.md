@@ -2,6 +2,17 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-039  进行中  2026-10-22 11:08 北京
+
+- 草稿 PR #47，head `f4f4223`，分支 `cursor/m8-b036-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
+- 第 1 部分：三个阶段在快照时钟前以 ok 结束就写 complete。字段缺口留在事件和 `missing.fields`，不再把整日降级。没有可见 lifecycle 的事件保留，lifecycle 为空并写原因。读取只拒绝晚于 cutoff 的时间。阶段缺失、失败或晚于时钟仍不写。
+- 改过的旧断言：`test_fields_without_a_source_time_stay_null`、`test_one_missing_field_keeps_the_others`、`test_jobs_and_events_after_the_cutoff_stay_out`、`test_a_missing_or_conflicting_exposure_stays_on_that_ticker`、`test_no_ticker_does_not_invent_an_affected_row`。原因写在 PR #47。
+- 证据：`tests/m8/test_b039.py` 4 项。本地 `make phase1-test` 442 passed、21 deselected，用时 66.64 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.41 秒。
+- CI 还在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39715004161
+- 历史回补仍按整包完整。已经存下的 degraded 行读出来仍不完整。没有新迁移，没有新角色。没有改 M9、M4、规则 A。没有部署，没有生产回放。
+- 第 2、3 部分还没开始。
+- 下一步：这一版 phase1-blocking 绿了再记第 1 部分可验收。不把 B-039 标成已完成。
+
 ## B-039  已收到  2026-10-22 11:01 北京
 
 - 用户决策 UD-COORD-27：M8 归因链可以进生产每日运行，并对最近 5 个交易日做一次回放。由此产生的模型调用已同意，但执行前先报次数和费用，需求方确认后由 A 线执行。B 不调模型，不部署，不在生产执行回放。
