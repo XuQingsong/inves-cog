@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-041  进行中  2026-10-22 17:14 北京
+
+- 收到 17:10 裁定（main `fe0b451`，`ops/answers/B-041.md`）。停下报告是对的。方向采用 M8 实际词表：`direction` 取 `up`/`down`，不改写成中文。`down` 即 M9 规格里的“方向不利”。合同样例已改为 `down`（evt-toshiba、evt-expired）。不改写链上的方向。
+- 按这条裁定继续交 V1–V10，不再等其他答复。不标已完成。不合并。
+
 ## B-041  进行中  2026-10-22 15:45 北京
 
 - 草稿 PR #48 head `ce819d8` 的 phase1-blocking 已绿：https://github.com/XuQingsong/inves-cog/actions/runs/39742264835 。462 passed、21 deselected，用时 122.74 秒，nightly 跳过。没有合并。
