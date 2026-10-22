@@ -7,9 +7,10 @@ import psycopg
 import pytest
 
 from inves_cog.clock import FrozenClock
-from inves_cog.perception.attribution.snapshot import STAGES
+from inves_cog.perception.attribution.snapshot import STAGES, capture_if_ready
 from inves_cog.shadow.inputs import ReadInputs
 from inves_cog.shadow.pipeline import MemoryOutputs, run_overlay
+from tests.m8.test_b036 import Memory
 
 pytestmark = pytest.mark.phase1_blocking
 TARGET = date(2026, 10, 21)
@@ -30,9 +31,21 @@ class Cursor:
 
 
 class Database:
-    def __init__(self, kind, events=()):
-        self.kind, self.events = kind, list(events)
+    def __init__(self, kind, events=(), *, snapshots=None):
+        self.kind = kind
         self.statements, self.depth, self.closed = [], 0, False
+        self.snapshots = list(snapshots or [])
+        if kind == "source" and snapshots is None:
+            # Use the accepted writer to build the stored shape, including per-field gaps.
+            capture = Memory(
+                [
+                    {"id": n, "task_name": name, "trade_date": SOURCE_DAY, "status": "ok", "ended_at": ENDED}
+                    for n, name in enumerate(STAGES, 1)
+                ],
+                events=events,
+            )
+            capture_if_ready(capture, SOURCE_DAY, FrozenClock(ENDED))
+            self.snapshots = capture.snapshots
 
     def __enter__(self):
         return self
@@ -53,14 +66,8 @@ class Database:
         self.statements.append((sql, params))
         if sql.startswith("BEGIN"):
             assert self.depth == 0, "provider must not roll back the main input transaction"
-        if self.kind == "source" and "FROM ingest.job_runs" in sql:
-            return Cursor(
-                {"id": n, "task_name": name, "trade_date": SOURCE_DAY, "status": "ok", "ended_at": ENDED}
-                for n, name in enumerate(STAGES, 1)
-                if str(params[0]) == str(SOURCE_DAY)
-            )
-        if self.kind == "source" and "FROM perception.linkage_events" in sql:
-            return Cursor(self.events)
+        if self.kind == "source" and "FROM perception.m9_input_snapshots" in sql:
+            return Cursor(self.snapshots)
         if self.kind == "operations":
             if "SELECT task_name,status,ended_at" in sql:
                 return Cursor([{"task_name": "premarket_review", "status": "ok", "ended_at": ENDED}])
@@ -69,10 +76,24 @@ class Database:
         return Cursor()
 
 
-def test_native_scheduled_default_reads_real_provider(monkeypatch, tmp_path):
+@pytest.mark.parametrize("with_event", [False, True])
+def test_native_scheduled_default_reads_real_provider(monkeypatch, tmp_path, with_event):
     from inves_cog.shadow import cli
 
-    data, source, operations = Database("data"), Database("source"), Database("operations")
+    events = (
+        [
+            {
+                "event_id": "synthetic-native-event",
+                "anomaly_id": "synthetic-anomaly",
+                "generated_at": ENDED,
+                "history": [{"at": ENDED.isoformat(), "new": "市场确认", "evidence_ids": ["synthetic-info"]}],
+                "tickers": [{"ticker": "NVDA", "exposure": "直接"}],
+            }
+        ]
+        if with_event
+        else []
+    )
+    data, source, operations = Database("data"), Database("source", events), Database("operations")
     shadow_connections = iter([data, source])
     calls, jobs = [], []
 
@@ -111,12 +132,21 @@ def test_native_scheduled_default_reads_real_provider(monkeypatch, tmp_path):
         },
     )
     assert result["m9_overlay"]["status"] == "ok"
-    assert len(store.overlays) == 1 and store.overlays[0]["tickers"] == {}
+    assert len(store.overlays) == 1
+    if with_event:
+        item = store.overlays[0]["tickers"]["NVDA"]
+        assert item["cooling_status"] == "unknown" and item["cooling_off"] is False
+        assert any(gap["field"] == "mechanism" for gap in item["m8_gaps"])
+        assert result["m9_overlay"]["source_ids"]["events"][0]["event_id"] == "synthetic-native-event"
+    else:
+        assert store.overlays[0]["tickers"] == {}
     assert store.overlays[0]["source_events_asof"] == ENDED.isoformat()
     assert result["m9_overlay"]["source_ids"]["jobs"][0]["id"] == 1
     assert calls.count("synthetic-shadow") == 2 and source.closed
     statements = " ".join(sql for sql, _ in source.statements)
     assert "REPEATABLE READ READ ONLY" in statements and "ROLLBACK" in statements
+    assert "FROM perception.m9_input_snapshots" in statements
+    assert "FROM perception.linkage_events" not in statements
     assert not any(word in statements for word in ("SET ROLE", "INSERT", "UPDATE"))
     assert [row["status"] for row in jobs] == ["running", "ok"]
 
@@ -134,7 +164,7 @@ def test_m8_reader_uses_closed_input_day_and_keeps_source_ids():
     assert bundle["source_ids"]["m8_trade_date"] == str(SOURCE_DAY)
 
 
-def test_incomplete_native_event_keeps_old_overlay_and_reports_fields(monkeypatch, tmp_path):
+def test_native_snapshot_field_gap_publishes_unknown_and_keeps_source_ids(monkeypatch, tmp_path):
     from inves_cog.shadow import cli
 
     source = Database(
@@ -145,6 +175,7 @@ def test_incomplete_native_event_keeps_old_overlay_and_reports_fields(monkeypatc
                 "anomaly_id": "synthetic-anomaly",
                 "generated_at": ENDED,
                 "history": [{"at": ENDED.isoformat(), "new": "市场确认", "evidence_ids": ["synthetic-info"]}],
+                "tickers": [{"ticker": "NVDA", "exposure": "直接"}],
             }
         ],
     )
@@ -158,9 +189,34 @@ def test_incomplete_native_event_keeps_old_overlay_and_reports_fields(monkeypatc
         outputs=store,
     )["overlay"]
     result = run_overlay(clock=CLOCK, target=TARGET, source=snapshot, outputs=store)
+    assert snapshot["complete"] is True and result["status"] == "ok"
+    assert result["overlay"]["version"] == old["version"] + 1 and len(store.overlays) == 2
+    item = result["overlay"]["tickers"]["NVDA"]
+    assert item["cooling_status"] == "unknown" and item["cooling_off"] is False
+    assert "冷静期判断未完成" in item["reason"]
+    assert any(gap["field"] == "mechanism" for gap in item["m8_gaps"])
+    assert result["overlay"]["m8_completeness"]["unknown_tickers"] == ["NVDA"]
+    assert "mechanism" in result["missing"]["fields"]["synthetic-event"]
+    assert result["source_ids"]["events"][0]["event_id"] == "synthetic-event"
+
+
+def test_native_missing_stage_snapshot_keeps_old_overlay(monkeypatch, tmp_path):
+    from inves_cog.shadow import cli
+
+    source = Database("source", snapshots=[])
+    monkeypatch.setattr(cli, "_scoped", lambda *_: source)
+    snapshot = cli._read_m8({}, SOURCE_DAY, CLOCK.now_utc())
+    store = MemoryOutputs(tmp_path)
+    old = run_overlay(
+        clock=CLOCK,
+        target=TARGET,
+        source={"complete": True, "events": [], "source_events_asof": ENDED.isoformat()},
+        outputs=store,
+    )["overlay"]
+    result = run_overlay(clock=CLOCK, target=TARGET, source=snapshot, outputs=store)
+    assert snapshot["complete"] is False
     assert result["status"] == "degraded" and result["overlay"] == old and len(store.overlays) == 1
-    assert "mechanism" in result["missing"]["fields"] and "affected" in result["missing"]["fields"]
-    assert "mechanism" in result["note"] and result["source_ids"]["events"][0]["event_id"] == "synthetic-event"
+    assert result["overlay"]["generated_at"] == old["generated_at"]
 
 
 def test_reader_permission_failure_stays_unknown_without_role_fallback(monkeypatch):

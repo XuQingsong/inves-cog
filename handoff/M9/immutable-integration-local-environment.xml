@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="96" time="1.128" timestamp="2026-10-22T22:08:49.387153+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_only_tightens" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_cooling_rules" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_contract" time="0.134" /><testcase classname="tests.m9.test_m9_contracts" name="test_shadow_signals_no_orders" time="0.003" /><testcase classname="tests.m9.test_m9_contracts" name="test_factor_shadow_no_orders" time="0.013" /><testcase classname="tests.m9.test_m9_contracts" name="test_x1_once_per_event" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_f01_values" time="0.007" /><testcase classname="tests.m9.test_m9_contracts" name="test_f02_values" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_f02_shadow_hysteresis" time="0.001" /><testcase classname="tests.m9.test_m9_contracts" name="test_single_factor_substitution" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_factor_versioning" time="0.000" /><testcase classname="tests.m9.test_m9_contracts" name="test_s10_eligibility_shadow" time="0.000" /><testcase classname="tests.m9.test_m9_inputs" name="test_m9_event_eps_baseline_is_specific_to_each_event" time="0.000" /><testcase classname="tests.m9.test_m9_inputs" name="test_m9_segment_core_uses_four_visible_quarters_and_one_axis" time="0.000" /><testcase classname="tests.m9.test_m9_inputs" name="test_m9_event_consensus_rejects_late_or_different_fiscal_year" time="0.000" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_missing_source_keeps_original_overlay_timestamp" time="0.001" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_shadow_pipeline_has_all_59_and_source_links" time="0.010" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_schedule_uses_native_window_plan_and_premarket_dependencies" time="0.124" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_extra_factors_and_signal_boundary_contracts" time="0.000" /><testcase classname="tests.m9.test_m9_pipeline" name="test_m9_snapshot_rejects_future_and_unlabelled_history" time="0.000" /><testcase classname="tests.m9.test_m9_provider" name="test_native_scheduled_default_reads_real_provider[False]" time="0.007" /><testcase classname="tests.m9.test_m9_provider" name="test_native_scheduled_default_reads_real_provider[True]" time="0.005" /><testcase classname="tests.m9.test_m9_provider" name="test_m8_reader_uses_closed_input_day_and_keeps_source_ids" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_native_snapshot_field_gap_publishes_unknown_and_keeps_source_ids" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_native_missing_stage_snapshot_keeps_old_overlay" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_reader_permission_failure_stays_unknown_without_role_fallback" time="0.000" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a1_a3_a4_actual_contract_via_native_provider" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a1_pure_resonance_contract_is_off" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a2_incomplete_contract_retains_previous_generated_at" time="0.024" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a2_first_incomplete_contract_has_no_overlay" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_display_only_gaps_do_not_block_cooling" time="0.006" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[lifecycle]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[mechanism]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[exposure]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[deadline_outcome]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[direction]" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_normal_nulls_are_not_reclassified_as_missing" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_known_cooling_survives_another_event_gap" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_empty_complete_input_publishes_empty_overlay" time="0.001" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_extended_delivery_rejects_inconsistent_diagnostics" time="0.005" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_incomplete_input_keeps_legacy_overlay_without_rewriting" time="0.011" /><testcase classname="tests.m9.test_m9_risk" name="test_m9_s10_keeps_each_price_order_and_residual_z" time="0.000" /><testcase classname="tests.m9.test_m9_risk" name="test_m9_missing_s1_history_is_unknown_not_clear" time="0.000" /><testcase classname="tests.m9.test_m9_weights" name="test_m9_augmented_books_reweight_original_subitems" time="0.000" /><testcase classname="tests.m4.test_b011" name="test_exact_minus_eight_sells_one_third_of_each_attack_name" time="0.001" /><testcase classname="tests.m4.test_b011" name="test_exact_minus_six_releases_the_deep_brake" time="0.000" /><testcase classname="tests.m4.test_b011" name="test_neighboring_amounts_keep_each_operator" time="0.000" /><testcase classname="tests.m4.test_closeout" name="test_plan_zero_amount_becomes_explained_skip" time="0.002" /><testcase classname="tests.m4.test_closeout" name="test_plan_skip_identifies_one_actual_gate" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_order_reason_tokens" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_orders_only_from_engine" time="0.024" /><testcase classname="tests.m4.test_execution" name="test_fill_timing_and_cost" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_membership_asof" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_sell_priority" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_panic_gate_scope" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_cooldown_m58" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_overlay_cooling_skip_and_cancel" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_overlay_missing_marked" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_plan_unpublished_low_coverage" time="0.000" /><testcase classname="tests.m4.test_execution" name="test_plan_json_contract" time="0.003" /><testcase classname="tests.m4.test_execution" name="test_vix_missing_not_panic" time="0.001" /><testcase classname="tests.m8.test_b035" name="test_live_jobs_without_a_stored_snapshot_are_not_complete" time="0.000" /><testcase classname="tests.m8.test_b035" name="test_future_snapshot_stays_out" time="0.000" /><testcase classname="tests.m8.test_b035" name="test_degraded_snapshot_is_not_a_complete_overlay" time="0.000" /><testcase classname="tests.m8.test_b035" name="test_a_newer_degraded_snapshot_does_not_hide_an_older_complete_one" time="0.000" /><testcase classname="tests.m8.test_b035" name="test_visible_complete_snapshot_is_returned" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_successful_stages_with_no_events_write_a_complete_snapshot" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_complete_event_fields_use_the_injected_clock" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_fields_without_a_source_time_stay_null" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_a_full_m8_event_maps_every_available_field" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_one_missing_field_keeps_the_others" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_missing_or_failed_job_does_not_write" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_jobs_and_events_after_the_cutoff_stay_out" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_only_the_history_version_at_the_clock_is_stored" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_append_only_snapshot_cannot_be_overwritten" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_backfill_uses_original_times_and_the_real_generation_time" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_naive_clock_is_rejected" time="0.000" /><testcase classname="tests.m8.test_b036" name="test_labels_success_captures_a_snapshot" time="0.001" /><testcase classname="tests.m8.test_b036" name="test_roles_cannot_update_the_snapshot_on_disposable_database" time="0.012"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'docker'">def test_roles_cannot_update_the_snapshot_on_disposable_database():
+        import psycopg
+    
+        from tests.m8.test_attribution import _disposable_database
+    
+&gt;       host = _disposable_database()
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m8/test_b036.py:471: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/m8/test_attribution.py:4275: in _disposable_database
+    listed = subprocess.run(
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:548: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1026: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Popen: returncode: 255 args: ['docker', 'ps', '--filter', 'name=inves-cog-t...&gt;
+args = ['docker', 'ps', '--filter', 'name=inves-cog-test-', '--format', '{{.Names}}']
+executable = b'docker', preexec_fn = None, close_fds = True, pass_fds = ()
+cwd = None, env = None, startupinfo = None, creationflags = 0, shell = False
+p2cread = -1, p2cwrite = -1, c2pread = 11, c2pwrite = 12, errread = 13
+errwrite = 14, restore_signals = True, gid = None, gids = None, uid = None
+umask = -1, start_new_session = False, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and not close_fds
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread &gt; 2)
+                and (c2pwrite == -1 or c2pwrite &gt; 2)
+                and (errwrite == -1 or errwrite &gt; 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask &lt; 0):
+            self._posix_spawn(args, executable, env, restore_signals,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write &lt; 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+                self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+                self._child_created = True
+            finally:
+                # be sure the FD is closed no matter what
+                os.close(errpipe_write)
+    
+            self._close_pipe_fds(p2cread, p2cwrite,
+                                 c2pread, c2pwrite,
+                                 errread, errwrite)
+    
+            # Wait for exec to fail or succeed; possibly raising an
+            # exception (limited in size)
+            errpipe_data = bytearray()
+            while True:
+                part = os.read(errpipe_read, 50000)
+                errpipe_data += part
+                if not part or len(errpipe_data) &gt; 50000:
+                    break
+        finally:
+            # be sure the FD is closed no matter what
+            os.close(errpipe_read)
+    
+        if errpipe_data:
+            try:
+                pid, sts = os.waitpid(self.pid, 0)
+                if pid == self.pid:
+                    self._handle_exitstatus(sts)
+                else:
+                    self.returncode = sys.maxsize
+            except ChildProcessError:
+                pass
+    
+            try:
+                exception_name, hex_errno, err_msg = (
+                        errpipe_data.split(b':', 2))
+                # The encoding here should match the encoding
+                # written in by the subprocess implementations
+                # like _posixsubprocess
+                err_msg = err_msg.decode()
+            except ValueError:
+                exception_name = b'SubprocessError'
+                hex_errno = b'0'
+                err_msg = 'Bad exception data from child: {!r}'.format(
+                              bytes(errpipe_data))
+            child_exception_type = getattr(
+                    builtins, exception_name.decode('ascii'),
+                    SubprocessError)
+            if issubclass(child_exception_type, OSError) and hex_errno:
+                errno_num = int(hex_errno, 16)
+                if err_msg == "noexec:chdir":
+                    err_msg = ""
+                    # The error must be from chdir(cwd).
+                    err_filename = cwd
+                elif err_msg == "noexec":
+                    err_msg = ""
+                    err_filename = None
+                else:
+                    err_filename = orig_executable
+                if errno_num != 0:
+                    err_msg = os.strerror(errno_num)
+                if err_filename is not None:
+&gt;                   raise child_exception_type(errno_num, err_msg, err_filename)
+E                   FileNotFoundError: [Errno 2] No such file or directory: 'docker'
+
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/subprocess.py:1955: FileNotFoundError</failure></testcase><testcase classname="tests.m8.test_b038" name="test_two_tickers_keep_their_own_exposure" time="0.000" /><testcase classname="tests.m8.test_b038" name="test_a_missing_or_conflicting_exposure_stays_on_that_ticker" time="0.000" /><testcase classname="tests.m8.test_b038" name="test_candidate_tickers_stay_separate_when_status_is_empty" time="0.000" /><testcase classname="tests.m8.test_b038" name="test_one_ticker_stays_a_single_record" time="0.000" /><testcase classname="tests.m8.test_b038" name="test_no_ticker_does_not_invent_an_affected_row" time="0.000" /><testcase classname="tests.m8.test_b038" name="test_two_tickers_keep_their_own_divergence_and_filing" time="0.000" /><testcase classname="tests.m8.test_b038" name="test_m9_can_key_each_ticker" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_a_future_deadline_is_not_a_missing_result" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_an_arrived_deadline_without_a_result_is_missing" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_the_deadline_day_itself_counts_as_arrived" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_an_unknown_deadline_is_missing" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_a_recorded_deadline_result_stays_visible[\u652f\u6301]" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_a_recorded_deadline_result_stays_visible[\u53cd\u8bc1]" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_a_recorded_deadline_result_stays_visible[\u6761\u4ef6\u98ce\u9669]" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_a_later_cutoff_marks_a_deadline_that_has_since_arrived" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_a_deadline_seen_after_cutoff_is_unknown" time="0.000" /><testcase classname="tests.m8.test_b041" name="test_replay_snapshot_uses_the_same_four_deadline_cases" time="0.000" /></testsuite></testsuites>
