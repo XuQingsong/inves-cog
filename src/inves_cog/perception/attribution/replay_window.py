@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
-from inves_cog.perception.attribution.snapshot import STAGES, append_replay_snapshot
+from inves_cog.perception.attribution.snapshot import STAGES, _date_text, _null_deadline_reason, append_replay_snapshot
 from inves_cog.perception.attribution.store import _guard
 
 DAYS = ("2026-10-15", "2026-10-16", "2026-10-19", "2026-10-20", "2026-10-21")
@@ -300,15 +300,22 @@ def _event(bundle, as_of):
         "systemic_tag": (bundle.get("market_day") or {}).get("systemic_event_tag"),
         "deadline_outcome": linkage.get("deadline_outcome") or report.get("deadline_outcome"),
     }
+    deadline_on = _date_text(report.get("deadline_on"))
     cells = {}
     gaps = {}
     for name in _FIELDS:
         value = values[name]
+        if name == "deadline_outcome":
+            continue
         if value in (None, ""):
             cells[name] = {"value": None, "at": stamp, "missing_reason": "回放没有该字段"}
             gaps[name] = "回放没有该字段"
         else:
             cells[name] = {"value": value, "at": stamp, "missing_reason": None}
+    cells["deadline_on"] = _replay_deadline_on(deadline_on, stamp)
+    cells["deadline_outcome"], outcome_gap = _replay_outcome(values["deadline_outcome"], deadline_on, as_of, stamp)
+    if outcome_gap is not None:
+        gaps["deadline_outcome"] = outcome_gap
     members = _members(bundle, report, values)
     return (
         {
@@ -321,6 +328,21 @@ def _event(bundle, as_of):
         },
         gaps,
     )
+
+
+def _replay_deadline_on(deadline_on, stamp):
+    if deadline_on is None:
+        return {"value": None, "at": None, "missing_reason": None}
+    return {"value": deadline_on, "at": stamp, "missing_reason": None}
+
+
+def _replay_outcome(outcome, deadline_on, as_of, stamp):
+    if outcome not in (None, ""):
+        return {"value": outcome, "at": stamp, "missing_reason": None}, None
+    reason = _null_deadline_reason(deadline_on, as_of)
+    if reason is None:
+        return {"value": None, "at": None, "missing_reason": None}, None
+    return {"value": None, "at": None, "missing_reason": reason}, reason
 
 
 def _lead(report):

@@ -4,7 +4,13 @@ from datetime import datetime
 
 import pytest
 
-from inves_cog.perception.attribution.snapshot import capture_if_ready, read_snapshot
+from inves_cog.perception.attribution.replay_window import _event
+from inves_cog.perception.attribution.snapshot import (
+    append_replay_snapshot,
+    capture_if_ready,
+    read_replay_snapshot,
+    read_snapshot,
+)
 from tests.m8.test_b036 import AFTER, BEFORE, CUTOFF, DAY, EARLIER, Memory, _clock, _entry, _jobs
 
 pytestmark = pytest.mark.phase1_blocking
@@ -119,3 +125,60 @@ def test_a_deadline_seen_after_cutoff_is_unknown():
     gaps = found["missing"]["fields"]["evt-1"]
     assert gaps["deadline_on"] == "来源时间晚于 cutoff"
     assert gaps["deadline_outcome"] == UNKNOWN
+
+
+def _replay_bundle(name, deadline_on, outcome=None):
+    report = {"mechanism": "供给", "deadline_on": deadline_on}
+    linkage = {"event_id": f"evt-{name}", "lifecycle": "假设中", "mechanism": "供给"}
+    if outcome is not None:
+        report["deadline_outcome"] = outcome
+        linkage["deadline_outcome"] = outcome
+    return {
+        "anomaly_id": name,
+        "report": report,
+        "linkage": linkage,
+        "candidates": [],
+        "claims": [{"direction": "不利"}],
+    }
+
+
+def test_replay_snapshot_uses_the_same_four_deadline_cases():
+    cases = (
+        ("future", "2026-11-06", None, None),
+        ("arrived", "2026-10-15", None, ARRIVED.format(day="2026-10-15")),
+        ("unknown", None, None, UNKNOWN),
+        ("kept", "2026-10-15", "支持", None),
+    )
+    events = []
+    missing_fields = {}
+    for name, deadline_on, outcome, reason in cases:
+        bundle = _replay_bundle(name, deadline_on, outcome)
+        event, gaps = _event(bundle, BEFORE)
+        assert event["fields"]["deadline_on"]["value"] == deadline_on
+        if reason is None:
+            assert "deadline_outcome" not in gaps
+        else:
+            assert gaps["deadline_outcome"] == reason
+        events.append(event)
+        if gaps:
+            missing_fields[event["event_id"]] = gaps
+    pages = Memory([])
+    append_replay_snapshot(
+        pages,
+        DAY,
+        _clock(CUTOFF),
+        source_asof=BEFORE,
+        events=events,
+        stages={name: BEFORE for name in ("attribution_candidates", "attribution_tracks", "attribution_labels")},
+        missing={"stages": [], "events": [], "fields": missing_fields},
+    )
+    found = read_replay_snapshot(pages, DAY)
+    assert found["replay"] is True
+    by_id = {event["event_id"]: event for event in found["events"]}
+    assert by_id["evt-future"]["deadline_on"] == "2026-11-06"
+    assert by_id["evt-future"]["deadline_outcome"] is None
+    assert "deadline_outcome" not in found["missing"]["fields"].get("evt-future", {})
+    assert found["missing"]["fields"]["evt-arrived"]["deadline_outcome"] == ARRIVED.format(day="2026-10-15")
+    assert found["missing"]["fields"]["evt-unknown"]["deadline_outcome"] == UNKNOWN
+    assert by_id["evt-kept"]["deadline_outcome"] == "支持"
+    assert "deadline_outcome" not in found["missing"]["fields"].get("evt-kept", {})
