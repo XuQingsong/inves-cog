@@ -14,4 +14,4 @@ test_precursor_snapshot_daily | M10 | 等待 M10 实现
 test_miss_sample_frame | M10 | 等待 M10 实现
 test_reports_contents | M10 | 等待 M10 实现
 test_unconnected_shown | M10 | 等待 M10 实现
-test_paper_input_completeness_passthrough | M10 | 最新M10 FR-M10-15已登记；等待后续M10实现
+test_paper_input_completeness_passthrough | M10 | 等待 M10 实现

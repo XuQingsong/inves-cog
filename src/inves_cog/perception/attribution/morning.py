@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 from inves_cog.ingest.market import trading_day
 from inves_cog.perception.anomaly.service import run_recorded
 from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
+from inves_cog.perception.attribution.store import Store
 
 PORTFOLIO = "paper-fixed"
 PARAMS = "p-2026.10"
@@ -135,18 +136,25 @@ def _execute(connection, moment, client):
             anomalies=loaded["anomalies"],
             items=loaded["items"],
             client=client,
+            store=Store(connection),
             valuation=loaded["valuation"],
             plan=loaded["plan"],
             holdings=loaded["holdings"],
         )
+        rows = (result or {}).get("rows") or []
         pages = (result or {}).get("daily_pages") or []
-        flags = _failed(loaded["anomalies"], (result or {}).get("rows") or [], day)
+        flags = _failed(loaded["anomalies"], rows, day)
         text = _soften(pages[0]["text"] if pages else "", flags)
         _emit(day, text)
-        reasons = _reasons(loaded["anomalies"], (result or {}).get("rows") or [], day)
+        reasons = _reasons(loaded["anomalies"], rows, day)
+        saved = [row for row in rows if row.get("saved")]
+        if rows and not saved:
+            detail = "；".join(row.get("degraded") or row.get("status") or "未保存" for row in rows) or "未保存"
+            if "；".join(reasons) != detail:
+                reasons.append(detail)
         if reasons:
             raise RuntimeError("；".join(reasons))
-        return len((result or {}).get("rows") or [])
+        return len(saved)
 
     try:
         run_recorded(

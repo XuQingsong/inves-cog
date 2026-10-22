@@ -144,6 +144,8 @@ class Database:
             if "published" in compact:
                 rows = [row for row in rows if row.get("published") is True]
             return Cursor(self._book(rows, params, "signal_date", "generated_at", compact))
+        if compact.startswith("INSERT INTO perception.") or compact.startswith("SELECT "):
+            return Cursor([])
         raise AssertionError(compact)
 
     def _book(self, rows, params, day_key, stamp_key, compact):
