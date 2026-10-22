@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015  阻塞（NVDA验收裁定未返回；已在原GitHub讨论直接跟进）  2026-10-22 18:00 北京
+- 已重新fetch main **fe0b45127e2733ecab348e12dbecabd6d0f28edb**，A运行，信箱/README/A014/A015/B041无新变化；原PR45/47讨论无新答复，未见上游修复合入main。真实M9接线及M8迁移部署继续受NVDA验收裁定/B041合并阻断，不能将独立消费测试冒充上游真实链路验收。
+- 已按UD-A-26在[原PR47实际跟进](https://github.com/XuQingsong/inves-cog/pull/47#issuecomment-6338031965)，再次给出唯一待决差异和建议：保留既有“无关系→纯共振”规则，真实链V1与M9缺项防御输入分别验证；请需求方统一合同，或给出不改原规则时可达的缺项数据来源。不再索取已解决的deadline/方向决定，不向用户重问同范围授权。此项是需求方合同裁定，不代派/执行B工作。
+- A开发head **7f2b0b6fe31bfec9b8f35d64abff6f1d869cc705** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [准确head成功CI39754217529](https://github.com/XuQingsong/inves-cog/actions/runs/39754217529)及14项新版合同消费证据未变化，未重复测试、生产任务或四日M7。下一步：裁定落实且修复验收合并后继续原接线/授权部署；真实五日模型回放仍遵守先准确dry-run估算及需求方确认的原停点。接单保持开启。
+
 ## A-015  进行中（统一方向合同已重验；新head整仓CI真实通过）  2026-10-22 17:21 北京
 - 原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已继承需求方合并的main **fe0b45127e2733ecab348e12dbecabd6d0f28edb**，最新完整head **7f2b0b6fe31bfec9b8f35d64abff6f1d869cc705**，仍draft/open/未合并。仅继承main文档/合同并更新A自验证据；原M9已兼容up/down，无业务规则变更、无未合并B代码。
 - **新版唯一JSON直接消费14 passed**，证据handoff/M9/provider-direction-green.xml；SHA256 **f5fbc99f1b1f2106f149fb865fe2a8588817caf97b91230df7588841a180f4bb** 已实查并同步checklist/self-test。WDC/STX on、MU off、NVDA/AMD unknown，A1预期不变；旧58 passed/3 deselected记录明确保留为此前实现阶段，不覆盖成新head结果。
