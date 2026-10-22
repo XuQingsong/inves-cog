@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-015  阻塞（已收到A1–A6；合同样例与缺项规则冲突，需需求方修正）  2026-10-22 13:23 北京
+- 已fetch最新main **7220b06da3c8029e7f36b6f2aceb3e61843fbe7a**，A运行；读取新版README提交前自验要求、A015补充三及唯一M8→M9合同样例。后续交付须直接加载合同output经provider注入生产入口，按A1消费/A2不完整沿用/A3只收紧/A4完整性/A5五日隔离回放/A6回归逐项列结果、测试名、证据。当前未执行这些尚待B040合并的实现/回放，不冒称已通过。
+- **只读核对已证实具体冲突**：合同 `docs/phase1/contracts/m8-m9-provider.json` SHA256 **e0b71d28fb3e3c2f6c9c248550879396b4d2a1f083376a87bc158e2d7875ed32** 中evt-toshiba的deadline_outcome=null，且missing.fields显式写该字段缺少cutoff前版本；expected_m9/A1却要求WDC/STX=on、MU=off。A015前节仍规定deadline_outcome属于必需判定字段，缺任一判定字段应cooling_status=unknown。故同一样例对这三只同时要求unknown和on/off，无法同时满足；不是把JSON null误当缺项，而是样例自己声明了字段缺失。
+- **影响与需要的具体处理**：A1合同消费测试和冷静期缺项分支无法按两套要求同时交付。请需求方在合并B040前修正合同：若沿用已定必需字段规则，为样例补充PIT可证明的deadline_outcome，或将相应expected_m9改unknown；若拟按lifecycle使该字段条件必需，请明确修订规则及预期。A不自行选较宽/较严语义，不改只读docs/合同，不把该冲突推给用户猜代码。仅同步本项矛盾，原授权不重新申请。
+- **其他已授权结果继续有效**：四日M7 job9720–9723的2/5/0/11行、10-21自然9行、IO恢复与M5超时的真实结果不重做；B040仍负责M8四项修复，PR47/48未验收合并前不接入/部署。五日模型回放继续保持先准确dry-run估算、需求方确认后才执行的停点，没有模型或生产写入。
+- A015原开发工作区干净，完整head **61e535d5f41e631733a2ee0547f06bbc6c5664da** / [PR45](https://github.com/XuQingsong/inves-cog/pull/45) / [准确head成功CI](https://github.com/XuQingsong/inves-cog/actions/runs/39590699897)447 passed/21 deselected及M0另2 passed复用；新合同没有在该旧head上被测试，不以旧CI代替A1–A6。已自行决定：依README“约束互相冲突先停下报告”保留冲突证据，未改业务/DB/接口/调度/来源/权限或代做B；原接单与a-github保持开启。
+
 ## A-015  阻塞（已收到B-040验收修复；M8仍未合并，不提前部署）  2026-10-22 13:13 北京
 - 已fetch并读取最新main **6415ff1fc0f512ce71c60fc21ffef5b08a1c1431**，A仍运行、A信箱仍止于A015，README/A014/A015合同未改变。本次新增的是需求方对B039的独立审查及B040修复任务，不是A的新开发单；A不代做/派发B任务。
 - **新依赖证据（明确归属需求方审查）**：PR47/48暂不验收、不合并，原因是①pool有盘前新闻时仅保存move_card/report，缺结构化事件供M9判断；②09:30 tracks重走move_card，重复模型并覆盖09:15报告；③dry-run手写规则可能低估tracks/wide真实调用；④members分支回退逐ticker的divergence_tag/next_filing_at。B040要求在原两个PR修复、计数客户端沿真实三阶段路径证明dry-run与实测一致且tracks/labels零调用。B已于13:13实际回报接收B040；A未把这些源审查结论冒称自己的生产运行结果。
