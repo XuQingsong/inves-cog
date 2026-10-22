@@ -355,10 +355,15 @@ def _assert_matrix(ingest, perception):
 
 
 def _allowed(connection, table, privilege):
-    row = connection.execute(
-        "SELECT has_table_privilege(current_user, %s, %s) AS allowed",
-        (table, privilege),
-    ).fetchone()
+    try:
+        row = connection.execute(
+            "SELECT has_table_privilege(current_user, %s, %s) AS allowed",
+            (table, privilege),
+        ).fetchone()
+    except Exception as exc:
+        if "permission denied" not in str(exc):
+            raise
+        return False
     return row["allowed"]
 
 
@@ -374,7 +379,6 @@ def _seed(admin, anomalies, items):
         "2026-11-06",
     )
     ids = [row["anomaly_id"] for row in anomalies] + [future["anomaly_id"]]
-    admin.execute("DELETE FROM perception.claims WHERE anomaly_id = ANY(%s)", (ids,))
     _clear(admin, ids)
     admin.execute("DELETE FROM perception.market_day WHERE trade_date = %s", (DAY,))
     write_anomalies(admin, [_db_anomaly(row) for row in anomalies], generated_at=TOSHIBA_START)
@@ -404,7 +408,6 @@ def _insert_news(connection, item):
 
 def _cleanup(admin, anomalies, items):
     ids = [row["anomaly_id"] for row in anomalies] + ["future"]
-    admin.execute("DELETE FROM perception.claims WHERE anomaly_id = ANY(%s)", (ids,))
     _clear(admin, ids)
     admin.execute("DELETE FROM perception.market_day WHERE trade_date = %s", (DAY,))
     info_ids = [item["info_id"] for item in items]
