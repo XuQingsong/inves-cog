@@ -76,17 +76,17 @@ class _Frozen:
         return self._moment
 
 
-def main(argv=None, *, connection=None, clock=None, client=None):
-    """Run only at the morning page's minute. Tests inject the connection, clock, and client."""
+def main(argv=None, *, connection=None, perception=None, clock=None, client=None):
+    """Run only at the morning page's minute. Tests inject both connections, the clock, and the client."""
     moment = _moment(argv, clock)
     if not _is_morning(moment):
         return 0
-    borrowed, owned = _borrow(connection)
+    borrowed, writer, owned = _connections(connection, perception)
     try:
-        return _execute(borrowed, moment, client)
+        return _execute(borrowed, writer, moment, client)
     finally:
-        if owned:
-            borrowed.close()
+        for item in owned:
+            item.close()
 
 
 def _moment(argv, clock):
@@ -110,24 +110,78 @@ def _is_morning(moment):
     return trading_day(moment.astimezone(_NEW_YORK).date())
 
 
-def _borrow(connection):
+_WRITE_TABLES = (
+    "perception.linkage_events",
+    "perception.ticker_status",
+    "perception.candidates",
+    "perception.tracks",
+    "perception.claims",
+    "perception.reports",
+    "perception.market_day",
+    "perception.m9_input_snapshots",
+)
+
+
+def _connections(connection, perception):
+    """Inputs and jobs stay on the default connection. M8 writes use the perception connection."""
     if connection is not None:
-        return connection, False
+        return connection, connection if perception is None else perception, []
     url = os.environ.get("INVES_COG_DATABASE_URL")
     if not url:
         raise SystemExit("写出这一页需要 INVES_COG_DATABASE_URL，仓库里不保存连接串")
     import psycopg
     from psycopg.rows import dict_row
 
-    return psycopg.connect(url, row_factory=dict_row, autocommit=True), True
+    borrowed = psycopg.connect(url, row_factory=dict_row, autocommit=True)
+    writer_url = os.environ.get("INVES_COG_PERCEPTION_DATABASE_URL")
+    if not writer_url:
+        return borrowed, None, [borrowed]
+    writer = psycopg.connect(writer_url, row_factory=dict_row, autocommit=True)
+    return borrowed, writer, [borrowed, writer]
 
 
-def _execute(connection, moment, client):
+def _require_writer(connection):
+    for table in _WRITE_TABLES:
+        row = connection.execute(
+            "SELECT has_table_privilege(current_user, %s, 'INSERT') AS allowed",
+            (table,),
+        ).fetchone()
+        allowed = row["allowed"] if isinstance(row, dict) else row[0]
+        if not allowed:
+            raise RuntimeError(f"没有写入权限：{table}")
+
+
+def _fail_job(connection, moment, task_name, day, reason):
+    def refuse():
+        raise RuntimeError(reason)
+
+    try:
+        run_recorded(
+            connection,
+            clock=_Frozen(moment),
+            task_name=task_name,
+            trade_date=day,
+            params_version=PARAMS,
+            operation=refuse,
+        )
+    except Exception:
+        return 1
+    return 1
+
+
+def _execute(connection, writer, moment, client):
+    day = _closed_trade_date(moment)
+    if writer is None:
+        return _fail_job(connection, moment, "attribution_candidates", day, "缺少 INVES_COG_PERCEPTION_DATABASE_URL")
+    if writer is not connection:
+        try:
+            _require_writer(writer)
+        except Exception as exc:
+            return _fail_job(connection, moment, "attribution_candidates", day, str(exc))
     if client is None:
         from inves_cog.llm.client import Client
 
         client = Client.from_environment()
-    day = _closed_trade_date(moment)
 
     def operation():
         loaded = _load(connection, moment, day)
@@ -136,7 +190,7 @@ def _execute(connection, moment, client):
             anomalies=loaded["anomalies"],
             items=loaded["items"],
             client=client,
-            store=Store(connection),
+            store=Store(writer),
             valuation=loaded["valuation"],
             plan=loaded["plan"],
             holdings=loaded["holdings"],
