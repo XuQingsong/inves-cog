@@ -1,0 +1,159 @@
+{
+  "verified_at": "2026-10-22T17:34:52.203442+00:00",
+  "status": "five_snapshots_independently_verified",
+  "unit": [
+    "MainPID=0",
+    "Result=success",
+    "ExecMainStatus=0",
+    "MemoryPeak=[not set]",
+    "ActiveState=inactive"
+  ],
+  "started_at": "2026-10-22T17:27:10.174435+00:00",
+  "finished_at": "2026-10-22T17:33:16.827208+00:00",
+  "logical_calls": 20,
+  "http_attempts": 21,
+  "all_wire_non_thinking": true,
+  "receipt_status_counts": {
+    "ok": 20,
+    "failed": 1
+  },
+  "receipt_task_counts": {
+    "move_card": 7,
+    "claim_extraction": 8,
+    "anomaly_candidates": 6
+  },
+  "input_tokens": 75302,
+  "output_tokens": 46850,
+  "durable_return_count": 20,
+  "first_day_preserved": true,
+  "live_counts_unchanged": true,
+  "snapshots": [
+    {
+      "snapshot_id": 1,
+      "trade_date": "2026-10-15",
+      "status": "complete",
+      "kind": "historical_backfill",
+      "snapshot_generated_at": "2026-10-22 15:58:21.254641+00:00",
+      "source_asof": "2026-10-16 04:30:00+00:00",
+      "events": 2
+    },
+    {
+      "snapshot_id": 5,
+      "trade_date": "2026-10-16",
+      "status": "complete",
+      "kind": "historical_backfill",
+      "snapshot_generated_at": "2026-10-22 17:33:16.757765+00:00",
+      "source_asof": "2026-10-17 04:30:00+00:00",
+      "events": 4
+    },
+    {
+      "snapshot_id": 2,
+      "trade_date": "2026-10-19",
+      "status": "complete",
+      "kind": "historical_backfill",
+      "snapshot_generated_at": "2026-10-22 17:27:11.713868+00:00",
+      "source_asof": "2026-10-20 04:30:00+00:00",
+      "events": 0
+    },
+    {
+      "snapshot_id": 3,
+      "trade_date": "2026-10-20",
+      "status": "complete",
+      "kind": "historical_backfill",
+      "snapshot_generated_at": "2026-10-22 17:27:40.073390+00:00",
+      "source_asof": "2026-10-21 04:30:00+00:00",
+      "events": 1
+    },
+    {
+      "snapshot_id": 4,
+      "trade_date": "2026-10-21",
+      "status": "complete",
+      "kind": "historical_backfill",
+      "snapshot_generated_at": "2026-10-22 17:28:16.952849+00:00",
+      "source_asof": "2026-10-22 04:30:00+00:00",
+      "events": 1
+    }
+  ],
+  "providers": [
+    {
+      "trade_date": "2026-10-15",
+      "complete": true,
+      "events": 2,
+      "field_gap_event_count": 2
+    },
+    {
+      "trade_date": "2026-10-16",
+      "complete": true,
+      "events": 4,
+      "field_gap_event_count": 4
+    },
+    {
+      "trade_date": "2026-10-19",
+      "complete": true,
+      "events": 0,
+      "field_gap_event_count": 0
+    },
+    {
+      "trade_date": "2026-10-20",
+      "complete": true,
+      "events": 1,
+      "field_gap_event_count": 1
+    },
+    {
+      "trade_date": "2026-10-21",
+      "complete": true,
+      "events": 1,
+      "field_gap_event_count": 1
+    }
+  ],
+  "late_generation_checks": [
+    {
+      "trade_date": "2026-10-16",
+      "late_generated_count": 5,
+      "stage_task_counts": {
+        "attribution_candidates": {
+          "move_card": 5,
+          "claim_extraction": 5,
+          "anomaly_candidates": 4
+        },
+        "attribution_tracks": {},
+        "attribution_labels": {}
+      }
+    },
+    {
+      "trade_date": "2026-10-19",
+      "late_generated_count": 0,
+      "stage_task_counts": {
+        "attribution_candidates": {},
+        "attribution_tracks": {},
+        "attribution_labels": {}
+      }
+    },
+    {
+      "trade_date": "2026-10-20",
+      "late_generated_count": 11,
+      "stage_task_counts": {
+        "attribution_candidates": {
+          "move_card": 1,
+          "claim_extraction": 1,
+          "anomaly_candidates": 1
+        },
+        "attribution_tracks": {},
+        "attribution_labels": {}
+      }
+    },
+    {
+      "trade_date": "2026-10-21",
+      "late_generated_count": 0,
+      "stage_task_counts": {
+        "attribution_candidates": {
+          "move_card": 1,
+          "claim_extraction": 1,
+          "anomaly_candidates": 1
+        },
+        "attribution_tracks": {},
+        "attribution_labels": {}
+      }
+    }
+  ]
+}

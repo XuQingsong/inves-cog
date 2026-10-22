@@ -1,8 +1,8 @@
 # M8→M9 合同消费自验（独立消费层阶段）
 
-依据：已合并 main `6ee26bbbc52fc47ce8e88e4961d22378595dfa50` 的 A-015 补充一至六与 B036–B041 快照接口。
+依据：已合并 main `13095cb8994d725f3e6b61e3d0f1cfd8574ba28f` 的 A-015 补充一至六与 B036–B043 快照接口。
 唯一 JSON SHA256：`72c05c6ed1fd793673ee4dd5ce572bb4f2d2e6eec49791cc59a07badd86a8fd3`。
-JSON 由 main 合入，未编辑 docs。所有数据均为合同的合成输入，不是生产事件或持仓。
+JSON 由 main 合入，未编辑 docs。A1–A4使用合同合成输入；五日实际历史来源的统计证据见A5与下节，事件正文/持仓不入Git。
 2026-10-22 20:47 北京重验：合同新增 `check_scope`，真实 M8 链路保留“无关系→纯共振”；evt-gap/NVDA 缺项仅作 M9 防御输入。原 M9 判定已符合，无业务规则修改；直接消费新版合同的15项测试通过，证据 `provider-scope-green.xml`。此前 up/down 版本的14项结果保留在 `provider-direction-green.xml`，不当作本次新head结果。
 
 先失败提交：`4e6bc2ca954db6f46ce2f0ba343610d05af01919`，`provider-contract-red.xml` 为 10 failed / 2 passed；随后实现消费逻辑。
@@ -14,7 +14,7 @@ JSON 由 main 合入，未编辑 docs。所有数据均为合同的合成输入�
 | A2 | 通过 | `test_a2_incomplete_contract_retains_previous_generated_at`、`test_a2_first_incomplete_contract_has_no_overlay`；`test_incomplete_input_keeps_legacy_overlay_without_rewriting` 保留旧格式完整 payload。原 M4 `test_overlay_missing_marked` 仍验证缺失照常出纸面计划。 |
 | A3 | 通过 | A1 同时断言 multiplier=1、stop_review_eligible=false、无订单/增买字段；`test_extended_delivery_rejects_inconsistent_diagnostics` 拒绝新增 buy 和不一致状态。 |
 | A4 | 通过 | A1 对 `m8_completeness` 的 complete/source_events_asof/unknown_ticker_count/unknown_tickers 作精确比较；未知列表为 AMD、NVDA。 |
-| A5 | 隔离入口通过；首日真实数据消费通过，五日尚未完成 | 新 `replay-m8` 入口调用已合并 `read_replay_snapshot`，生产入口只用 shadow 只读连接；9项回放测试通过。实际M8回放因A设置的期限不足，只提交10-15快照。UD-A-33批准感知账号只读导出后，本机M9生产纯函数实际消费10-15；其余4日保留unavailable/overlay=null。摘要见 `actual-source-partial-20261023.json`，不含事件正文。不是五日A5完成、不是生产M9账号或服务验收。 |
+| A5 | 五日实际历史来源隔离消费通过 | 用户UD-A-34/35/36批准剩余四日两路DeepSeek非思考补跑，五日真实历史快照现已齐备。原生 `read_replay_snapshot` 经既有感知账号只读导出到获UD-A-33批准的私有目录；M9生产 `generate_overlay` / `validate_payload` 逐日消费同一完整provider结果，5份replay_overlay封装均replay=true，10-19为实际空日，其余保留来源/字段缺口。证据 `actual-five-day-{m8-verification,m9-consumption}-20261023.json`、`actual-five-day-20261023.md`。模型0/业务写0/实时投递未改；没有将其称作生产M9账号/服务或自然按时发布验收。 |
 | A6 | 本地最新70项相关回归通过，整仓以准确 head CI 为准 | 新版check_scope合同：`provider-scope-green.xml` 15 passed、Ruff check/format通过。此前 `provider-direction-green.xml` 14 passed、消费实现的 `provider-contract-green.xml` 58 passed / 3 deselected保留为历史阶段记录。本机 `make phase1-test` 明确因无Docker退出，未修改门禁、未宣称本地整仓通过。准确head CI链接由A状态及PR记录。 |
 
 消费语义：缺失只来自 provider 的 `missing.fields`。不根据 null、deadline_on 或日期自行重判缺失。逐标的 exposure gap 即使标的不在 affected 中也保留该标的 unknown；展示字段缺失保留 NULL 和结构化 gap，但不阻断冷静期；direction 只在“已验证·有影响”时为判定字段。
@@ -44,3 +44,9 @@ A014已完成M8每日服务实际安装，用户也已确认27次逻辑调用上
 - 10-15真实快照id=1，complete/historical_backfill、2事件，实际生成15:58:21.254641 UTC；source_asof仍为10-16 04:30 UTC。UD-A-33直接授权后，通过既有感知业务账号的原生read_replay_snapshot只读导出，本机使用当前M9 `generate_overlay` / `validate_payload`，得到1标的、off1，模型0/业务写0。原始provider导出和回放封装仅存私有目录；Git只保存计数/来源SHA/文件哈希。
 - 同次读取另外4个日期均无快照，明确输出unavailable与overlay=null。尤其10-19虽然M7真实为0异常，本次M8尚未执行到该日，不能称作已验证空覆盖层。每份封装replay=true/实际生成时间，文件名replay_overlay_*，不使用或写入实时FileDelivery目录。
 - 此项证明首日真实native provider→M9纯函数兼容，以及缺快照的诚实降级；未运行生产M9 scoped-shadow账号/服务，不代表五日A5或自然连续五日完整字段证据。生产M9仍未合并/部署。实时七张M8表计数在原回放停止后仍与启动前一致。
+
+## 五日实际来源已齐备（2026-10-23 01:36 北京）
+
+上节部分完成保留为真实历史记录，当前由本节与 `actual-five-day-20261023.md` 替代。四日补跑在17:27:10.174435→17:33:16.827208 UTC完成，约366.65秒，实际20逻辑/21HTTP（20 ok/1失败后原定重试成功），全部DeepSeek非思考；原10-15 id1保持。独立原角色SQL核5日status=complete、事件2/4/0/1/1、精确call_id/参数/持久原返回哈希/晚生成时间及实时七表未改。
+
+五日M9隔离消费实际输出ticker数1/4/0/2/0，映射标的均off；这只是本批真实来源的结果，不把上游缺字段或无法确定ticker的事件称作完备。正例on/unknown继续由A1唯一合同验证。10-19的0现在已由真实M8空快照证明，不再是未执行状态。此证据是历史回放，不是旧时实际可见字段或部署后连续五日自然运行。
