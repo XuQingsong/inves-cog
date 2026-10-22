@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-038  已完成  2026-10-22 10:00 北京
+
+- 草稿 PR #47，head `b659c75`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39708622204 。`phase1-blocking` 438 passed、21 deselected，用时 119.57 秒，nightly 跳过。没有合并。
+- 证据：例子先失败，两只股票被收成一个列表，不能当映射键。改完之后 `tests/m8/test_b038.py` 6 项通过，`tests/m8/test_b035.py` 5 项、`tests/m8/test_b036.py` 13 项仍通过。本地 `make phase1-test` 438 passed、21 deselected，用时 66.95 秒；`make phase1-cases` 7 passed、1 xfailed，用时 26.15 秒。
+- 一个事件多只标的时，`affected` 一条记录对应一只，ticker 和 exposure 都是单值。某一只暴露缺失或冲突时只标这一只，不挑值，也不清掉其他标的。没有标的来源时不造记录。单标的仍是一条。
+- 报告里没有 divergence 或 next filing、没有唯一 claim 方向、没有 cutoff 前的 lifecycle 历史、某一只暴露缺失或冲突时，这些字段仍是 NULL，不能标完整。完成标记、`source_asof`、注入时钟和 lifecycle 不改。
+- 只追加。没有新迁移，没有新角色。没有改 M9、M4、规则 A。没有生产迁移或回填。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-038  进行中  2026-10-22 09:59 北京
 
 - 草稿 PR #47，head `b659c75`，分支 `cursor/m8-b036-pit-snapshot-e013`。没有合并。https://github.com/XuQingsong/inves-cog/pull/47
