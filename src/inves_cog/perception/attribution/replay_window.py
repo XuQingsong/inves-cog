@@ -164,18 +164,19 @@ def replay_window(connection, clock, *, anomalies, items, days=DAYS, client=None
 
 def _day(connection, clock, store, recorder, trade_date, anomalies, items, *, dry_run):
     due = [row for row in anomalies or [] if str(row.get("trade_date") or "")[:10] == trade_date]
+    late = _generated_after_slot(due, trade_date)
     actor = Counting() if dry_run else recorder
     holder = MemoryStore() if dry_run else store
     stages = []
     for name in STAGES:
         moment = slot_moment(trade_date, name)
-        seen = visible_news(items, moment)
+        seen = _stage_news(items, trade_date, moment)
         info_ids = [item.get("info_id") for item in seen]
         before = _call_count(actor)
         rows = run_scheduled(
             moment,
             anomalies=due,
-            items=[item for item in items or [] if item.get("info_id") in info_ids],
+            items=seen,
             client=actor,
             store=holder,
         )
@@ -191,8 +192,14 @@ def _day(connection, clock, store, recorder, trade_date, anomalies, items, *, dr
         )
         failed = [row for row in (rows or {}).get("rows") or [] if not row.get("saved")]
         if not dry_run and due and failed:
-            return {"trade_date": trade_date, "stages": stages, "snapshot_id": None, "error": "未保存"}
-    result = {"trade_date": trade_date, "stages": stages, "snapshot_id": None}
+            return {
+                "trade_date": trade_date,
+                "stages": stages,
+                "snapshot_id": None,
+                "generated_after_slot": late,
+                "error": "未保存",
+            }
+    result = {"trade_date": trade_date, "stages": stages, "snapshot_id": None, "generated_after_slot": late}
     if dry_run or not stages:
         return result
     labels = datetime.fromisoformat(stages[-1]["as_of"])
@@ -525,21 +532,64 @@ def _cli_run(connection, writer, days, mode, clock, client):
     return 0
 
 
+_BY_TRADE_DATE = """
+SELECT anomaly_id, trade_date, session, direction, members, universe, generated_at
+FROM perception.anomalies
+WHERE trade_date = %s
+  AND generated_at IS NOT NULL
+ORDER BY session, anomaly_id
+"""
+
+
+def _generated_after_slot(anomalies, trade_date):
+    """Keep the stored stamp. Only a stamp after that day's 09:15 is listed."""
+    slot = slot_moment(trade_date, "attribution_candidates")
+    found = []
+    for row in anomalies:
+        generated = row.get("generated_at")
+        if not isinstance(generated, datetime) or generated.tzinfo is None or generated <= slot:
+            continue
+        found.append(
+            {
+                "anomaly_id": row.get("anomaly_id"),
+                "generated_at": generated,
+                "generated_after_slot": True,
+            }
+        )
+    return found
+
+
+def _stage_news(items, trade_date, moment):
+    """The live news window at this stage. A later publication or a late sighting stays out."""
+    from inves_cog.perception.attribution.morning import _news_start
+
+    opened = _news_start(trade_date)
+    kept = []
+    for item in visible_news(items, moment):
+        published = item.get("published_at")
+        if not isinstance(published, datetime) or published < opened or published > moment:
+            continue
+        kept.append(item)
+    return kept
+
+
 def _load_window(connection, days):
-    from inves_cog.perception.attribution.morning import _load
+    """Replay anomalies by trade date. News stays on the live point-in-time query."""
+    from inves_cog.perception.attribution.morning import _all, _anomaly, _load
 
     anomalies = []
     items = []
     seen_anomalies = set()
     seen_items = set()
     for day in days:
-        loaded = _load(connection, slot_moment(day, "attribution_labels"), day)
-        for row in loaded["anomalies"]:
-            identity = row.get("anomaly_id")
+        for row in _all(connection, _BY_TRADE_DATE, (day,)):
+            prepared = _anomaly(row)
+            identity = prepared.get("anomaly_id")
             if identity in seen_anomalies:
                 continue
             seen_anomalies.add(identity)
-            anomalies.append(row)
+            anomalies.append(prepared)
+        loaded = _load(connection, slot_moment(day, "attribution_labels"), day)
         for item in loaded["items"]:
             identity = item.get("info_id")
             if identity in seen_items:
