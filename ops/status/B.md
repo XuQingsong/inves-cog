@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-043  进行中  2026-10-22 23:22 北京
+
+- 草稿 PR #50，head `a9c4366`。https://github.com/XuQingsong/inves-cog/pull/50 。没有合并。phase1-blocking 正在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39803809585 。不标已完成。
+- 回放按 `trade_date = 该日` 选入异常，不再用 `generated_at <= 历史时点` 过滤。晚于该日 09:15 的，在 CLI JSON 和回放日志里列出 `anomaly_id`、真实 `generated_at`、`generated_after_slot=true`。新闻仍按各 stage 时点过滤。实时 `morning` / `scheduled` 没改。没有新 schema、角色、GRANT、迁移或合同。没有部署，没有在生产执行。
+- X1｜通过｜`test_replay_cli_selects_backfilled_anomalies_on_disposable_database`、`test_backfilled_window_keeps_trade_date_and_news_time`｜`--dry-run` 逐日选入 2/5/0/11/9，调用计数与同一夹具 `replay_window(dry_run=True)` 一致。pool 在 09:15 每条 3 次，09:30 和 12:30 为 0。没有 INSERT，传入的客户端没有被调用。
+- X2｜通过｜同一测试｜某日 `anomaly_id` 不出现在其他日的模型 payload 和逐日结果里。
+- X3｜通过｜同一测试｜10-15、10-16、10-20 每条带真实 `generated_at`（2026-10-22 03:49 UTC）和 `generated_after_slot=true`，日志与 CLI JSON 一致。10-21 不带该标记。库内 `generated_at` 与写入值逐条相等。
+- X4｜通过｜同一测试｜晚到新闻 `late-*` 和其他交易日新闻 `other-day` 不进入任何 stage 的模型 payload。盘前新闻 `pre-*` 在。
+- X5｜通过｜同一测试｜实时 `morning` 和 `scheduled` 在 10-15 时点选入 0 条补算异常，调用次数是 0。
+- X6｜通过｜同一测试｜`--execute` 写入 `historical_backfill`，`replay` 为 true。语句里没有实时七张表。本地 `make phase1-test` 477 passed、21 deselected，用时 94.34 秒；`make phase1-cases` 7 passed、1 xfailed，用时 25.90 秒。没有 `*b043*` 迁移。这一版 CI 还在跑。
+- 下一步：这一版 phase1-blocking 绿了再写已完成。不取新任务。
+
 ## B-043  已收到  2026-10-22 23:00 北京
 
 - 任务：回放入口按交易日选入补算异常。新 PR，基于 main `da31721`（含 merge `0096d5f`）。授权沿用 UD-COORD-26/27/28。不新增 schema、角色、权限、数据源。不改实时路径、M8 业务规则、M9、M4、规则 A、合同。不部署，不在生产执行。
