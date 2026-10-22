@@ -2,6 +2,19 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-042  已完成  2026-10-22 22:28 北京
+
+- 草稿 PR #49，head `4ea2e39`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39794168503 。`phase1-blocking` 475 passed、21 deselected，用时 139.61 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/49
+- 默认连接读输入并读写 job。感知连接写 M8 表和快照。缺 `INVES_COG_PERCEPTION_DATABASE_URL`，或这个连接没有 M8 写入权限时，job 在调用模型之前失败。没有新 schema、角色、GRANT 或迁移。没有改合同。没有部署，没有在生产执行。
+- W1｜通过｜`test_w1_two_accounts_run_the_contract_on_disposable_database`｜两个登录账号按生产权限跑合同夹具。三阶段 job 为 ok。reports 和 `m9_input_snapshots` 有新行。`m8_provider` 复用 B-041 的 V1 断言。`evt-future` 不在快照里。
+- W2｜通过｜同一测试｜`ingest.llm_calls` 里 purpose `b042` 的行数等于计数客户端调用次数。感知账号插入该表被拒绝。
+- W3｜通过｜`test_w3_missing_perception_url_fails_before_the_model_on_disposable_database`｜不设感知连接时调用次数是 0。job 失败，原因含变量名。没有写出早页文件。链跑起来之后的早页写出没有改。
+- W4｜通过｜`test_w4_ingest_writer_is_rejected_before_the_model_on_disposable_database`｜感知连接也指向 ingest 账号时，调用次数是 0。job 失败，原因是「没有写入权限」。
+- W5｜通过｜`test_w5_replay_cli_on_disposable_database`、`test_w5_replay_cli_requires_a_mode`｜`--dry-run` 的逐阶段计数与同一夹具的内存 dry-run 相同，没有 INSERT，传入的客户端没有被调用。`--execute` 写入 `historical_backfill`，`snapshot_generated_at` 等于注入时钟，`replay` 为 true。这条快照的生成时间晚于 12:30，实时 cutoff 看不见它。语句里没有 linkage、ticker_status、candidates、tracks、claims、reports、market_day。不带 `--dry-run` 或 `--execute` 就拒绝运行。
+- W6｜通过｜`test_w6_env_example_names_the_variable_without_a_value`｜`.env.example` 只有空的变量名。没有 `*b042*` 迁移。合同文件没有改。
+- W7｜通过｜`make phase1-test`、`make phase1-cases`｜本地 475 passed、21 deselected，用时 79.90 秒；cases 7 passed、1 xfailed，用时 25.69 秒。CI 同一 head 475 passed、21 deselected，用时 139.61 秒。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-042  进行中  2026-10-22 22:15 北京
 
 - 草稿 PR #49，head `4ea2e39`。https://github.com/XuQingsong/inves-cog/pull/49 。没有合并。phase1-blocking 正在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39794168503 。上一版 `cf105f3` 的 CI 失败，测试清理用了 claims 上不存在的列，已修。不标已完成。
