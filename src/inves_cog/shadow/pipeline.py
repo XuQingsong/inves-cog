@@ -92,6 +92,7 @@ def run_overlay(*, clock, target, source, outputs):
         version=outputs.next_version(),
         source_asof=source.get("source_events_asof"),
         market=source.get("market"),
+        missing=source.get("missing"),
     )
     outputs.publish_overlay(target, payload)
     return {

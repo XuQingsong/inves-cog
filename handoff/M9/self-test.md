@@ -3,6 +3,8 @@
 模块：M9 / A-015；规格：M9 v3、T09 2026-10-21更新。
 业务实现提交：`e18beb15c29394c3cf14425e8f8a7886cb77cf09`（最新说明文案及完整head见A状态）。PR45保持草稿，未通过完整模块验收。
 
+2026-10-22 增量：已合入需求方统一的deadline语义与唯一JSON，完成独立M9逐标的缺项消费；A1–A6分项证据和尚未满足的真实接线/回放见 `provider-contract-checklist.md`。本地M9/M4相关58 passed / 3 deselected。以下旧K01“不完整”的描述仅记录此前B035读取路径，不取代最新provider的整日complete/逐字段missing合同；B041验收合并后才更新真实读取接线。
+
 ## 1. 已实际验证
 
 - 指定12项测试真实先失败提交`e63629dafee13772e7efdef36bffa55e6fabcd4b`，`red.xml`；核心实现在其后提交，未篡改golden或跳过测试。

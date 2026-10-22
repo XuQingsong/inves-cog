@@ -179,3 +179,36 @@ def test_empty_complete_input_publishes_empty_overlay(tmp_path, contract):
     )
     assert out["status"] == "ok" and out["overlay"]["tickers"] == {}
     assert out["overlay"]["m8_completeness"]["unknown_tickers"] == []
+
+
+def test_extended_delivery_rejects_inconsistent_diagnostics(contract, native):
+    from inves_cog.overlay.delivery import validate_payload
+
+    _, store, _ = native(contract)
+    for change in ("status", "summary", "gap", "action"):
+        invalid = deepcopy(store.overlays[0])
+        if change == "status":
+            invalid["tickers"]["NVDA"]["cooling_status"] = "on"
+        elif change == "summary":
+            invalid["m8_completeness"]["unknown_ticker_count"] = 0
+        elif change == "gap":
+            invalid["tickers"]["NVDA"]["m8_gaps"][0]["reason"] = ""
+        else:
+            invalid["tickers"]["NVDA"]["buy"] = True
+        with pytest.raises(ValueError):
+            validate_payload(invalid)
+
+
+def test_incomplete_input_keeps_legacy_overlay_without_rewriting(contract, native):
+    from inves_cog.overlay.delivery import validate_payload
+
+    _, store, _ = native(contract)
+    old = deepcopy(store.overlays[0])
+    del old["m8_completeness"]
+    for row in old["tickers"].values():
+        del row["cooling_status"], row["m8_gaps"]
+    validate_payload(old)
+    store.delivery._path("2026-10-21").write_text(json.dumps(old))
+    result, store, _ = native(contract, source=contract["incomplete_case"]["output"], later=31)
+    assert result["m9_overlay"]["status"] == "degraded"
+    assert store.delivery.read("2026-10-21") == old
