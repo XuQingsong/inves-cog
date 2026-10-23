@@ -2,6 +2,19 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-051  已完成  2026-10-24 00:35 北京
+
+- PR #60，head `67b52d9`。https://github.com/XuQingsong/inves-cog/pull/60 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39987482146 ：`phase1-blocking` 成功，612 passed，`blocking.json` 为 exit_code 0、duration 127.480 秒（≤ 300）。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 的另一次运行 https://github.com/XuQingsong/inves-cog/actions/runs/39987482266 也成功，duration 160.296 秒。没有部署，没有调用真实模型。
+- 相对 main 的 diff：`src/inves_cog/web/html_page.py`、`api.py`、`public.py`，以及 `tests/m10/test_b051.py`。没有新依赖，没有上游、迁移、合同。
+- H1｜通过｜`test_html_paths_render_the_same_numbers`、`test_default_and_closed_dates`｜junit 0.286 秒、0.052 秒。13 个 HTML 路径均为 200，`Content-Type` 为 `text/html; charset=utf-8`。不带 `date` 时首页含 `b048-a1`，对应截点已到的 2031-04-17。截点前一分钟不含该异常。周六正文为「非交易日」。
+- H2｜通过｜`test_html_paths_render_the_same_numbers`、`test_render_page_takes_only_the_payload`｜每个页面的可见数字都能在同名 JSON 里找到。`render_page` 只接收 `payload`，源码没有 `connection`、`open_reader`、`psycopg`。
+- H3｜通过｜`test_home_is_readable_and_highlights_unhandled`、`test_passthrough_phrases_and_paper_labels`｜junit 0.057 秒、0.089 秒。首页顺序是一句话、异常数、未处置。截点前 `b048-a1` 不标红，截点后标红。六类计数和 ①–⑤ 的中文含义都在。今日未更新、数据暂缺、未接通、输入完整性未报告原样出现。六个 `/paper/*` 含「纸面跟踪，非投资建议」和「估值参考 v1，不参与仓位」。
+- H4｜通过｜`test_research_html_hides_trading_fields`｜junit 0.078 秒。市场与研究七个页面的可见词不含 B-048 交易字段名，也不含这些字段的中文标签。
+- H5｜通过｜`test_dynamic_text_is_escaped`｜`<script>`、引号和 `&` 被转义，正文没有可执行标签。
+- H6｜通过｜`test_new_paths_reject_other_methods_and_unknown_urls`、`test_html_rate_limit_and_redacted_errors`｜junit 0.012 秒、0.320 秒。新路径非 GET 为 405。`/nope`、`/paper`、`/linkage`、`/paper/stock/`、`/api/secret` 为 404。HTML 路径第 61 次返回 429。异常为 503「页面暂不可用」，正文没有连接串。页面没有 http/https 资源。
+- H7｜通过｜`test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_a017.py` 8 项｜本 head CI 612 passed，duration 127.480 秒。diff 只含 `src/inves_cog/web/` 与 `tests/m10/`。无新依赖。不取 B-052。
+
+
 ## B-051  进行中  2026-10-24 00:33 北京
 
 - PR #60，head `67b52d9`。https://github.com/XuQingsong/inves-cog/pull/60 。没有合并。这一 head 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39987482146 与 https://github.com/XuQingsong/inves-cog/actions/runs/39987482266 还在跑。不标已完成。
