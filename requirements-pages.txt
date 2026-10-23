@@ -1,0 +1,5 @@
+# A017 page-service runtime only; business uv.lock remains unchanged.
+# Install with: pip install --require-hashes -r requirements-pages.txt
+uvicorn==0.38.0 --hash=sha256:48c0afd214ceb59340075b4a052ea1ee91c16fbc2a9b1469cca0e54566977b02
+click==8.1.8 --hash=sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2
+h11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
