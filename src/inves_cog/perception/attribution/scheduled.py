@@ -1,11 +1,8 @@
 """Run the stored 09:30 and 12:30 stages. The morning page stays the 09:15 entry."""
 
 import sys
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
-from inves_cog.ingest.market import trading_day
-from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
+from inves_cog.perception.attribution.chain import _closed_trade_date, run_scheduled
 from inves_cog.perception.attribution.morning import (
     PARAMS,
     _connections,
@@ -14,6 +11,10 @@ from inves_cog.perception.attribution.morning import (
     _moment,
     _record_clock,
     _require_writer,
+    in_stage_window,
+    job_rows,
+    stage_cutoff,
+    upstream_ready,
 )
 from inves_cog.perception.attribution.store import Store
 
@@ -22,7 +23,6 @@ _PREVIOUS = {
     "attribution_tracks": "attribution_candidates",
     "attribution_labels": "attribution_tracks",
 }
-_NEW_YORK = ZoneInfo("America/New_York")
 
 
 def main(argv=None, *, connection=None, perception=None, clock=None, client=None, record_clock=None):
@@ -54,14 +54,13 @@ def _named(args):
 
 
 def _due(moment, task_name):
-    slot = job_slot(moment)
-    if slot is None or slot["task_name"] != task_name:
-        return False
-    return trading_day(moment.astimezone(_NEW_YORK).date())
+    """The whole wait window is due. The visibility cutoff stays at the window open."""
+    return in_stage_window(task_name, moment)
 
 
 def _execute(connection, writer, moment, task_name, client, record_clock):
-    day = _closed_trade_date(moment)
+    cutoff = stage_cutoff(task_name, moment)
+    day = _closed_trade_date(cutoff)
     if writer is None:
         return _fail_job(
             connection,
@@ -81,15 +80,15 @@ def _execute(connection, writer, moment, task_name, client, record_clock):
 
         client = Client.from_environment()
     previous = _PREVIOUS[task_name]
-    if not _previous_ready(connection, day, previous, moment):
+    if not upstream_ready(job_rows(connection, day, previous), moment, previous):
         return _fail_job(connection, moment, task_name, day, f"缺少已成功的{previous}", clock=record_clock)
     try:
-        loaded = _load(connection, moment, day)
+        loaded = _load(connection, cutoff, day)
     except Exception:
         return _fail_job(connection, moment, task_name, day, "读取上一阶段失败", clock=record_clock)
     try:
         run_scheduled(
-            moment,
+            cutoff,
             anomalies=loaded["anomalies"],
             items=loaded["items"],
             client=client,
@@ -106,29 +105,6 @@ def _execute(connection, writer, moment, task_name, client, record_clock):
     except Exception:
         return 1
     return 0
-
-
-def _previous_ready(connection, trade_date, previous, moment):
-    rows = connection.execute(
-        "SELECT task_name, status, ended_at FROM ingest.job_runs WHERE trade_date = %s AND task_name = %s",
-        (trade_date, previous),
-    ).fetchall()
-    for row in rows:
-        name = row["task_name"] if isinstance(row, dict) else row[0]
-        status = row["status"] if isinstance(row, dict) else row[1]
-        ended = row["ended_at"] if isinstance(row, dict) else row[2]
-        ended = _aware(ended)
-        if name == previous and status == "ok" and ended is not None and ended <= moment:
-            return True
-    return False
-
-
-def _aware(value):
-    if isinstance(value, str):
-        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    if isinstance(value, datetime) and value.tzinfo is not None:
-        return value
-    return None
 
 
 if __name__ == "__main__":

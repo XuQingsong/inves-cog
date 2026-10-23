@@ -46,7 +46,7 @@ def probe(stamp, ready=lambda *args: True, failure=None):
     [
         ("2026-10-21T00:54:59Z", ["market_structure"]),
         ("2026-10-21T00:55:00Z", ["market_structure", "anomaly_daily"]),
-        ("2026-10-21T01:00:00Z", ["market_structure"]),
+        ("2026-10-21T01:00:00Z", ["market_structure", "anomaly_daily"]),
         ("2026-10-21T02:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
         ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
         ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
@@ -121,7 +121,10 @@ def test_a014_m7_dispatch_uses_own_login_and_existing_recorded_guard(monkeypatch
             return self
 
         def fetchone(self):
-            return {"id": 123, "status": "failed"}
+            return {"id": 123, "status": "ok"}
+
+        def fetchall(self):
+            return [{"id": 123, "task_name": "anomaly_daily", "status": "ok", "error_summary": None}]
 
     seen = []
 
@@ -226,6 +229,9 @@ class RecordedConnection:
     def fetchone(self):
         return self.job
 
+    def fetchall(self):
+        return [self.job] if self.job else []
+
 
 def test_a014_m7_records_close_and_post_and_does_not_repeat_after_restart(monkeypatch):
     from inves_cog.perception.anomaly import database, service
@@ -276,7 +282,8 @@ def test_a014_m7_failed_attempt_is_recorded_and_not_silently_retried(monkeypatch
         schedule.run_anomalies(clock=clock("2026-10-21T00:55:00Z"), values=values)
     assert connection.job["status"] == "failed"
     assert any("UPDATE ingest.job_runs" in statement for statement, _ in connection.statements)
-    assert schedule.run_anomalies(clock=clock("2026-10-21T00:55:30Z"), values=values) == {"status": "already_attempted"}
+    with pytest.raises(ValueError, match="recorded input failure"):
+        schedule.run_anomalies(clock=clock("2026-10-21T00:55:30Z"), values=values)
 
 
 def test_a014_premarket_adapter_only_uses_scoped_visible_quotes_and_reports_gaps():
