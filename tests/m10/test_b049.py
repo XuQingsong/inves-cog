@@ -247,7 +247,9 @@ def test_miss_sample_frame(admin, host):
     _anomaly(admin, "b049-miss", "MSFT", period, seen)
     _anomaly(admin, "b049-plain", "AMD", period, seen)
     record_judgment(admin, _sample_id("weekly_info", period, rest[2]), "应发现", clock, anomaly_id="b049-miss")
-    client = TestClient(create_app(dsn=f"postgresql://b049_web@{host}/inves_cog", clock=clock))
+    client = TestClient(
+        create_app(dsn=f"postgresql://b049_web@{host}/inves_cog", clock=FrozenClock(seen + timedelta(minutes=1)))
+    )
     market = client.get("/api/pages/market", params={"date": period.isoformat()}).json()
     cards = {row["anomaly_id"]: row["disposition"] for row in market["anomalies"]}
     assert cards["b049-miss"] == "⑤" and cards["b049-plain"] == "①"
@@ -473,7 +475,12 @@ def test_review_page_blocks(admin, host):
     clock = FrozenClock(datetime.combine(day, time(4, 0), tzinfo=UTC))
     weekly = store_weekly(admin, day, clock)
     monthly = store_monthly(admin, day, clock)
-    client = TestClient(create_app(dsn=f"postgresql://b049_web@{host}/inves_cog", clock=clock))
+    client = TestClient(
+        create_app(
+            dsn=f"postgresql://b049_web@{host}/inves_cog",
+            clock=FrozenClock(clock.now_utc() + timedelta(minutes=1)),
+        )
+    )
     review = client.get("/api/pages/review", params={"date": day.isoformat()}).json()
     for name in ("案例库", "周报", "月报", "漏检报告", "模式库候选"):
         assert name in review
