@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-044  进行中  2026-10-23 11:30 北京
+
+- 需求方 11:25 裁定已在 main `92ea956`：示例用词改为 `broad sector risk-off selling`，`assert "wide" not in asked` 保持原样；`registry.py` 仅为 `anomaly_candidates` 设 300 秒预期超时已接受，其他困难任务仍 900。
+- 正在把该提交合入 PR #51 并重跑。不标已完成。https://github.com/XuQingsong/inves-cog/pull/51
+
 ## B-044  阻塞  2026-10-23 11:18 北京
 
 - PR #51，head `14de3b7`。https://github.com/XuQingsong/inves-cog/pull/51 。没有合并。不标已完成。
