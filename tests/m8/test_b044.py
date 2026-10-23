@@ -102,7 +102,7 @@ def test_prompt_files_are_the_request_and_other_tasks_keep_their_bodies():
         else:
             assert "reasoning_effort" not in request
             assert "max_tokens" not in request
-        assert registry.resolve(task).timeout_seconds != 300 or task != "anomaly_candidates"
+        assert registry.resolve(task).timeout_seconds != 300
 
 
 class _Example:
