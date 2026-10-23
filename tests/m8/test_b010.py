@@ -167,7 +167,7 @@ def test_delete_keeps_other_items_byte_for_byte_and_refuses_a_missing_target():
 @pytest.mark.phase1_blocking
 def test_six_payloads_use_the_recording_hash_and_the_run_cap(tmp_path):
     from inves_cog.perception.attribution.diagnose import build_packet
-    from inves_cog.perception.attribution.propose import PROMPT_VERSION
+    from inves_cog.perception.attribution.propose import PROMPT_VERSION, candidate_output
 
     spec = _spec()
     packet = build_packet(spec)
@@ -192,7 +192,8 @@ def test_six_payloads_use_the_recording_hash_and_the_run_cap(tmp_path):
         digest = _payload_hash(row["payload"])
         assert digest == row["payload_sha256"]
         assert recording_path("anomaly_candidates", row["payload"], tmp_path).name == f"{digest}.json"
-        assert row["payload"]["output"]["selection_policy"]["version"] == PROMPT_VERSION
+        assert row["payload"]["output"] == candidate_output()
+        assert PROMPT_VERSION == "evidence-bridge-v4-links"
         seen[row["group"]] = row
         assert all(call["payload_sha256"] == digest for call in plan["calls"] if call["id"] == row["id"])
         assert sum(call["id"] == row["id"] for call in plan["calls"]) == 3

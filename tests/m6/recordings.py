@@ -31,7 +31,11 @@ def assert_graph_request_bounds():
     assert requests[-1]["model"] == "glm-5.3"
     assert requests[-1]["max_tokens"] == 4096 and requests[-1]["reasoning_effort"] == "low"
     client.call("anomaly_candidates", {})
-    assert "reasoning_effort" not in requests[-1] and "max_tokens" not in requests[-1]
+    assert requests[-1]["model"] == "glm-5.3"
+    assert requests[-1]["reasoning_effort"] == "low" and "max_tokens" not in requests[-1]
+    from inves_cog.perception.attribution.propose import candidate_instruction
+
+    assert requests[-1]["messages"][0]["content"] == candidate_instruction()
 
 
 def recorded_draft(fixture, *, clock, recordings):

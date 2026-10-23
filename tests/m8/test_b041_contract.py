@@ -76,7 +76,7 @@ def _candidate(payload):
     return {
         "mechanism": "供给",
         "info_ids": info_ids[:1],
-        "affected": [{"ticker": name} for name in names],
+        "affected": [{"ticker": name, "direction": "down"} for name in names],
         "chain": [{"entity_id": name} for name in names],
         "control_baskets": [],
         "links": [_link(name) for name in names],

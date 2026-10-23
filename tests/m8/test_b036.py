@@ -184,7 +184,7 @@ def test_fields_without_a_source_time_stay_null():
     assert event["fields"]["mechanism"]["at"] == clock.now_utc().isoformat()
     assert event["fields"]["mechanism"]["at"] != BEFORE.isoformat()
     assert event["fields"]["direction"]["value"] is None
-    assert "涨跌" in event["fields"]["direction"]["missing_reason"]
+    assert event["fields"]["direction"]["missing_reason"] == "没有保留的受影响标的"
     assert "市场确认" not in text
     assert "down" not in text
     for name in (
@@ -216,7 +216,14 @@ def _db_event(**changes):
         "mechanism": "供给",
         "deadline_outcome": "未到",
         "tickers": [{"ticker": "NVDA", "exposure": "直接", "mechanism": "供给"}],
-        "candidates": [{"mechanism": "需求", "affected": [{"ticker": "AMD"}]}],
+        "candidates": [
+            {
+                "mechanism": "供给",
+                "score": 1,
+                "scored": True,
+                "affected": [{"ticker": "NVDA", "direction": "不利"}],
+            }
+        ],
         "tracks": [
             {"trade_date": "2026-10-14", "emotion": "昨日", "capital": "昨日", "fundamental": "昨日"},
             {"trade_date": DAY, "emotion": "初现", "capital": "观望", "fundamental": "未证"},
@@ -296,11 +303,29 @@ def test_one_missing_field_keeps_the_others():
     assert found["events"][0]["mechanism"] == "供给"
     assert found["events"][0]["next_filing_at"] is None
     assert "next_filing_at" in found["missing"]["fields"]["evt-1"]
-    conflict = Memory(_jobs(), [_db_event(claims=[{"direction": "不利"}, {"direction": "有利"}])])
+    conflict = Memory(
+        _jobs(),
+        [
+            _db_event(
+                claims=[{"direction": "不利"}, {"direction": "有利"}],
+                candidates=[
+                    {
+                        "mechanism": "供给",
+                        "score": 1,
+                        "scored": True,
+                        "affected": [
+                            {"ticker": "NVDA", "direction": "down"},
+                            {"ticker": "AMD", "direction": "up"},
+                        ],
+                    }
+                ],
+            )
+        ],
+    )
     capture_if_ready(conflict, DAY, _clock(CUTOFF))
     direction = conflict.snapshots[0]["events"][0]["fields"]["direction"]
     assert direction["value"] is None
-    assert direction["missing_reason"] == "多条说法的方向不一致"
+    assert direction["missing_reason"] == "受影响标的方向不一致"
     assert conflict.snapshots[0]["events"][0]["fields"]["mechanism"]["value"] == "供给"
     assert "down" not in json.dumps(conflict.snapshots[0]["events"], ensure_ascii=False)
 

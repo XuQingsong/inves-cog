@@ -1,6 +1,8 @@
 """Candidate proposals. A wide anomaly is stored without asking the model."""
 
+import json
 from copy import deepcopy
+from pathlib import Path
 
 from inves_cog.perception.attribution.candidates import validate_candidates
 from inves_cog.perception.attribution.documents import document_fields, passage_schema
@@ -9,104 +11,46 @@ from inves_cog.perception.attribution.links import inspect_links
 from inves_cog.perception.attribution.material import material_fields
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
-PROMPT_VERSION = "evidence-bridge-v3-links"
+PROMPT_VERSION = "evidence-bridge-v4-links"
+_CONTRACT = Path(__file__).resolve().parents[4] / "docs/phase1/contracts/m8-candidate-prompt-v4"
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
-_FORBIDDEN = (
-    "score",
-    "confidence",
-    "fundamental",
-    "evidence",
-    "operating_impact_proven",
-    "enters_hypothesis",
-    "已支持的市场关联",
-    "已量化或验证的经营暴露",
-)
 _LINK_KEYS = ("links", "竞争解释", "反证条件", "证伪预测")
 
 
+def candidate_instruction():
+    """The v4 system message. The file is the only source."""
+    return (_CONTRACT / "instruction.txt").read_text(encoding="utf-8")
+
+
 def candidate_output():
-    """Return schema carried in the payload. Candidates are an array; rules sit beside it."""
-    return {
-        "candidates": [
-            {
-                "mechanism": "string",
-                "chain": [{"entity_id": "string", "new": "boolean"}],
-                "affected": [{"basket_id": "string", "ticker": "string", "direction": "up|down"}],
-                "control_baskets": ["string"],
-                "info_ids": ["string"],
-                "direction": "up|down",
-                "links": [
-                    {
-                        "from": "string",
-                        "to": "string",
-                        "kind": "来源陈述|已有关系|声明的假设",
-                        "anchors": [
-                            {
-                                "info_id": "string",
-                                "source_field": "headline|summary",
-                                "quote": "exact supplied text",
-                                "provides": "what this anchor contributes",
-                            }
-                        ],
-                        "组合": "boolean",
-                        "relation_id": "string",
-                        "hypothesis": "string",
-                        "hypothesis_type": "产业结构|需求弹性|暴露关系|其他",
-                        "falsify": {"metric": "string", "direction": "string", "window": "string"},
-                    }
-                ],
-                "竞争解释": ["string"],
-                "反证条件": "string",
-                "证伪预测": [
-                    {"ticker": "string", "control_basket": "string", "direction": "up|down", "window": "string"}
-                ],
-                "support": [
-                    {
-                        "ticker": "string",
-                        "info_id": "string",
-                        "source_field": "headline|summary",
-                        "quote": "exact supplied text",
-                        "inference": "bounded hypothesis bridge",
-                    }
-                ],
-            }
-        ],
-        "max": 5,
-        "mechanism": sorted(MECHANISMS),
-        "selection_policy": {
-            "version": PROMPT_VERSION,
-            "anchors": (
-                "For each affected ticker provide cited exact headline/summary facts and a bounded "
-                "inference bridge. A quote match only confirms provenance; it does not verify the "
-                "inference. Missing per-ticker support remains a research gap. Do not use a ticker list "
-                "or basket membership as proof."
-            ),
-            "count": (
-                "Return zero to five supported hypotheses. Allowed mechanisms are not a checklist; "
-                "do not fill one per type or pad to the maximum."
-            ),
-            "basis": (
-                "Each candidate needs a cited supplied fact and a defensible bridge from that fact "
-                "to its mechanism and specific affected scope. Basket membership alone is not that bridge."
-            ),
-            "inference": (
-                "Reasonable hypotheses are allowed without proven earnings or causation. Do not invent "
-                "product identity, deployment, supply-chain, financing or operating facts to complete a chain."
-            ),
-            "missing": (
-                "Omit candidates with no factual bridge; zero is allowed. Missing evidence remains a research "
-                "gap, not an operating conclusion. The application adds its own unscored default."
-            ),
-        },
-        "forbidden": list(_FORBIDDEN),
-    }
+    """Payload output contract. The file is the only source."""
+    return json.loads((_CONTRACT / "output.json").read_text(encoding="utf-8"))
+
+
+def _passage_output(output):
+    """Add the passage option inside the v4 anchor template, not the filled example."""
+    extra = passage_schema()
+    schema = output.get("schema")
+    if not isinstance(schema, dict):
+        return output
+    for candidate in schema.get("candidates") or []:
+        if not isinstance(candidate, dict):
+            continue
+        for link in candidate.get("links") or []:
+            anchors = link.get("anchors") if isinstance(link, dict) else None
+            if not isinstance(anchors, list):
+                continue
+            for anchor in anchors:
+                if isinstance(anchor, dict):
+                    anchor.update(extra)
+    return output
 
 
 def candidate_payload(anomaly, items, neighbors):
     rows = [_item_view(item) for item in items[:40]]
     output = candidate_output()
     if any("source_document" in row for row in rows):
-        output["candidates"][0]["support"][0].update(passage_schema())
+        _passage_output(output)
     return {
         "anomaly": {key: anomaly[key] for key in _ANOMALY_KEYS if key in anomaly},
         "items": rows,

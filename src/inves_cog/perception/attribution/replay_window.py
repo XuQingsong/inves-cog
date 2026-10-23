@@ -9,7 +9,13 @@ from zoneinfo import ZoneInfo
 
 from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
-from inves_cog.perception.attribution.snapshot import STAGES, _date_text, _null_deadline_reason, append_replay_snapshot
+from inves_cog.perception.attribution.snapshot import (
+    STAGES,
+    _date_text,
+    _null_deadline_reason,
+    append_replay_snapshot,
+    retained_direction,
+)
 from inves_cog.perception.attribution.store import _guard
 
 DAYS = ("2026-10-15", "2026-10-16", "2026-10-19", "2026-10-20", "2026-10-21")
@@ -302,7 +308,7 @@ def _event(bundle, as_of):
         "mechanism": report.get("mechanism") or linkage.get("mechanism") or _lead(report),
         "ticker": _ticker(bundle) or scope_ticker,
         "exposure": _exposure(bundle) or scope_exposure,
-        "direction": _direction(bundle),
+        "direction": _direction(bundle)[0],
         "divergence_tag": report.get("divergence_label") or report.get("divergence_tag"),
         "dimensions": report.get("dimensions") or _track_dimensions(bundle),
         "next_filing_at": report.get("next_filing_at"),
@@ -312,8 +318,13 @@ def _event(bundle, as_of):
     deadline_on = _date_text(report.get("deadline_on"))
     cells = {}
     gaps = {}
+    _value, direction_reason = _direction(bundle)
     for name in _FIELDS:
         value = values[name]
+        if name == "direction" and direction_reason:
+            cells[name] = {"value": None, "at": stamp, "missing_reason": direction_reason}
+            gaps[name] = direction_reason
+            continue
         if name == "deadline_outcome":
             continue
         if value in (None, ""):
@@ -446,13 +457,10 @@ def _exposure(bundle):
 
 
 def _direction(bundle):
-    found = []
-    for row in bundle.get("claims") or []:
-        if row.get("direction") and row["direction"] not in found:
-            found.append(row["direction"])
-    if len(found) == 1:
-        return found[0]
-    return None
+    linkage = bundle.get("linkage") or {}
+    report = bundle.get("report") if isinstance(bundle.get("report"), dict) else {}
+    candidates = bundle.get("candidates") or report.get("candidates") or []
+    return retained_direction(candidates, linkage.get("mechanism"))
 
 
 def _dump(value):

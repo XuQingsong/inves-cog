@@ -3252,10 +3252,10 @@ def test_model_output_contract_rejects_a_bad_structure():
     forbidden = {"score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis"}
     candidate_schema = candidate_output()
     claim_schema = claim_output()
-    assert isinstance(candidate_schema["candidates"], list)
-    assert candidate_schema["candidates"][0]["affected"][0]["basket_id"] == "string"
+    assert isinstance(candidate_schema["schema"]["candidates"], list)
+    assert candidate_schema["schema"]["candidates"][0]["affected"][0]["basket_id"] == "basket name or empty string"
     assert isinstance(claim_schema["items"][0]["claims"], list)
-    assert set(candidate_schema["mechanism"]) == {"供给", "需求", "竞争", "客户融资", "估值倍数"}
+    assert set(candidate_schema["mechanisms"]) == {"供给", "需求", "竞争", "客户融资", "估值倍数"}
     assert forbidden <= set(candidate_schema["forbidden"])
     assert forbidden <= set(claim_schema["forbidden"])
     assert candidate_payload({"anomaly_id": "a"}, [], [])["output"] == candidate_output()

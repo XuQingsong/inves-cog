@@ -64,7 +64,17 @@ _STAGE_NAMES = {name for name, _slot in _SLOTS}
 
 
 def attribute_all(
-    anomalies, items, *, as_of, client, store=None, components_by_id=None, stage=None, valuation=None, plan=None
+    anomalies,
+    items,
+    *,
+    as_of,
+    client,
+    store=None,
+    components_by_id=None,
+    stage=None,
+    valuation=None,
+    plan=None,
+    prepared_pages=None,
 ):
     """A tracked move asks the move card. Wide scans still use the rule report."""
     return _rows(
@@ -78,6 +88,7 @@ def attribute_all(
         valuation=valuation,
         plan=plan,
         runner=_one,
+        prepared_pages=prepared_pages,
     )
 
 
@@ -99,11 +110,14 @@ def score_all(
     )
 
 
-def _rows(anomalies, items, *, as_of, client, store, components_by_id, stage, valuation, plan, runner):
+def _rows(
+    anomalies, items, *, as_of, client, store, components_by_id, stage, valuation, plan, runner, prepared_pages=None
+):
     """One failure stays on that row."""
     usable = [item for item in items if item.get("published_at") is not None]
     scores = components_by_id or {}
     rows = []
+    extra = {} if prepared_pages is None else {"prepared_pages": prepared_pages}
     for anomaly in anomalies:
         prepared = adapt_m7(anomaly)
         try:
@@ -118,6 +132,7 @@ def _rows(anomalies, items, *, as_of, client, store, components_by_id, stage, va
                     stage=stage,
                     valuation=valuation,
                     plan=plan,
+                    **extra,
                 )
             )
         except Exception as exc:
@@ -183,7 +198,17 @@ def job_slot(when):
 
 
 def execute_stage(
-    task_name, anomalies, items, *, as_of, client, store=None, components_by_id=None, valuation=None, plan=None
+    task_name,
+    anomalies,
+    items,
+    *,
+    as_of,
+    client,
+    store=None,
+    components_by_id=None,
+    valuation=None,
+    plan=None,
+    prepared_pages=None,
 ):
     """Run one of the three attribution jobs. This does not deploy a schedule."""
     if task_name not in _STAGE_NAMES:
@@ -198,6 +223,7 @@ def execute_stage(
         stage=task_name,
         valuation=valuation,
         plan=plan,
+        prepared_pages=prepared_pages,
     )
 
 
@@ -232,6 +258,7 @@ def run_scheduled(
     news_lookup=None,
     holdings=None,
     writer=None,
+    prepared_pages=None,
 ):
     """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
@@ -241,7 +268,9 @@ def run_scheduled(
         return {**slot, "recorded": False, "ran": False}
     if connection is None:
         material = _visible_items(items)
-        rows = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
+        rows = _execute_slot(
+            slot, anomalies, material, when, client, store, valuation, plan, prepared_pages=prepared_pages
+        )
         return _scheduled_result(
             slot,
             rows,
@@ -261,7 +290,9 @@ def run_scheduled(
     def operation():
         material = _visible_items(items)
         holder["material"] = material
-        holder["rows"] = _execute_slot(slot, anomalies, material, when, client, store, valuation, plan)
+        holder["rows"] = _execute_slot(
+            slot, anomalies, material, when, client, store, valuation, plan, prepared_pages=prepared_pages
+        )
         rows = holder["rows"]
         if store is None:
             return len(rows)
@@ -305,7 +336,7 @@ def _visible_items(items):
     return [item for item in items or [] if item.get("published_at") is not None]
 
 
-def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan):
+def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan, prepared_pages=None):
     return execute_stage(
         slot["task_name"],
         anomalies,
@@ -315,6 +346,7 @@ def _execute_slot(slot, anomalies, items, when, client, store, valuation, plan):
         store=store,
         valuation=valuation,
         plan=plan,
+        prepared_pages=prepared_pages,
     )
 
 
@@ -462,10 +494,53 @@ def adapt_m7(anomaly):
     return prepared
 
 
-def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None):
+def prepare_move_pages(anomalies, items, *, as_of, client, valuation=None, plan=None):
+    """Ask every pool move card before the structured chain. A failure stays on that anomaly."""
+    pages = {}
+    usable = [item for item in items if item.get("published_at") is not None]
+    for anomaly in anomalies:
+        prepared = adapt_m7(anomaly)
+        if prepared.get("universe") == "wide" or prepared.get("capital_track") is not None:
+            continue
+        identifier = prepared.get("anomaly_id")
+        if prepared.get("started_at") is None or "universe" not in prepared:
+            pages[identifier] = ValueError("异常缺少起点或范围")
+            continue
+        try:
+            visible = _retrieved(prepared, usable, as_of)
+            chosen = visible if any(_before_move(item, prepared.get("started_at")) for item in visible) else []
+            pages[identifier] = _phase1_move(prepared, chosen, client, valuation, plan)
+        except Exception as exc:
+            pages[identifier] = exc
+    return pages
+
+
+def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None, prepared_pages=None):
     """09:15 keeps the move card and the structured chain. Later slots do not ask again."""
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
+    ready = None if prepared_pages is None else prepared_pages.get(anomaly.get("anomaly_id"))
+    if ready is not None and stage == "attribution_candidates":
+        if isinstance(ready, Exception):
+            raise ready
+        visible = _retrieved(anomaly, items, as_of)
+        if any(_before_move(item, anomaly.get("started_at")) for item in visible):
+            return _score_one(
+                anomaly,
+                items,
+                as_of=as_of,
+                client=client,
+                store=store,
+                components=components,
+                stage=stage,
+                valuation=valuation,
+                plan=plan,
+                page=ready,
+            )
+        scored = _score_one(anomaly, [], as_of=as_of, client=client, store=store, components=components, stage=stage)
+        scored["daily_text"] = ready.get("daily_text")
+        scored["move_card"] = ready.get("move_card")
+        return scored
     tracked = anomaly.get("universe") != "wide"
     if tracked and stage not in {"attribution_tracks", "attribution_labels"} and anomaly.get("capital_track") is None:
         visible = _retrieved(anomaly, items, as_of)
