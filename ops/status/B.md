@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-049  进行中  2026-10-23 23:44 北京
+
+- PR #58，head `a303f8d`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。已并入 UD-COORD-32 之后的 main（`7754650`）。插件读取的 `config/params/p-2026.10/m0.yaml` 里 `harness.blocking_max_seconds` 从 180 改为 300，与文档和 `test_blocking_duration` 一致。这一 head 的 `phase1-blocking` CI 未出。不标已完成，不取 B-050。
+- 上一 head `d2a457e` 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39974136702 ：596 passed、21 deselected，业务断言没有失败，但 `FR-M0-12: blocking took 183.128s > 180s`。门槛当时仍由参数文件的 180 秒执行。
+- 七张复盘表。`role_perception` 可写，`role_web` 只读。没有部署，没有在生产执行迁移，没有调用真实模型。
+
+
 ## B-049  进行中  2026-10-23 23:06 北京
 
 - PR #58，head `d2a457e`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39974136702 ：596 passed、21 deselected（含 main 上 A-017 的合并结果），业务断言没有失败，但 `FR-M0-12: blocking took 183.128s > 180s`。B-049 九个测试在这份 junit 里合计 1.23 秒。不放宽 180 秒门槛，不改上游算法。不标已完成，不取新任务。
