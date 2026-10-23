@@ -7607,7 +7607,7 @@ def test_case_inputs_are_the_payload_bytes(tmp_path, capsys):
         candidate_body = json.loads(candidate.read_text())
         claim_body = json.loads(claim.read_text())
         assert "result" not in candidate_body and "result" not in claim_body
-        assert isinstance(candidate_body["output"]["candidates"], list)
+        assert isinstance(candidate_body["output"]["schema"]["candidates"], list)
         assert candidate_body["output"]["forbidden"]
         assert isinstance(claim_body["output"]["items"][0]["claims"], list)
         assert claim_body["output"]["forbidden"]
