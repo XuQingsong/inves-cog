@@ -1,5 +1,11 @@
 # A 线回报
 
+## OPS-A014  阻塞（已收到补充十三/十四；代码先上与迁移后置存在依赖冲突）  2026-10-24 00:05 北京
+- 已收到B049部署交接；独立核[PR58](https://github.com/XuQingsong/inves-cog/pull/58) merged=true，merge **1eca1b695b230575d06bcf9e732d5464b5b41c5d**，准确head **a303f8da31615b484158181744480f5adfb62882** 的[CI39980804343](https://github.com/XuQingsong/inves-cog/actions/runs/39980804343)completed/success。main564a5db已含B049，B050尚未合并；补充十四记录UD-COORD33明确迁移/新增review调度须B050验收合并后执行，现不提前执行。
+- 实质冲突已核实：B049 page_home无条件_confirmed_misses读取perception.miss_samples及_stored_oneliner读取perception.reports_weekly，market同样依赖miss_samples；实际生产用role_web只读pg_catalog核七张复盘表全部不存在。生产仍 **7cbe4151c299eca7da318b80d27523f7aca69aef** 且干净。现在按补充十三仅快进代码/重载pages会令现有首页查询缺表返回错误，故尚未写生产或重载，保留已验外部200页面。
+- [需求方依赖反馈6369180080](https://github.com/XuQingsong/inves-cog/pull/58#issuecomment-6369180080)已同步：请确认按补充十四B050合并后唯一迁移→权限核验→pages及新增review程序一并安装的顺序。已在本对话说明用户受影响功能与证据，不重新索取持续接单/已授权部署许可。当前需要需求方交接顺序确认与B050验收合并，用户无需重复批准。
+- 下一步满足前置后核真实作业/已执行前缀防重复，仅phase1_m10_0001_review七表、role_perception写/role_web读，调度每日一句话一次模型预算按明确授权但不人工触发/历史补跑；回报迁移、权限、首日先兆行数。M4/M9自然观察独立保留。首次git fetch自动审核超时未执行，按工具允许仅重试一次成功，无绕过拒绝。
+
 ## A-017  已完成（公网HTTP200；页面部署验收收口）  2026-10-23 23:32 北京
 - 用户回传ufw status numbered已新增8080/tcp IPv4/IPv6 ALLOW IN规则，A未更改防火墙。实际外部探针2026-10-23 **15:31:51.221076UTC** GET http://43.166.2.31:8080/api/pages/?date=2026-10-23 返回 **HTTP200**，JSON对象且含counts。公网超时阻塞解除，不是仅用户报告/进程存活。外部回执a017-external-after-ufw-20261023.json只存元数据，无正文/持仓/凭据。
 - 生产完整SHA **7cbe4151c299eca7da318b80d27523f7aca69aef** 包含验收merge **4a86895a89a31b64bcd509e6cbac72087bad24ff**；[PR57](https://github.com/XuQingsong/inves-cog/pull/57)准确head **fa4441f7cbb0bf174b6b2efc302469e3cac45138** / [CI39972307325](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325)587passed证据复用。既有本机GET200/docs404/POST405、RSS68708KiB、监听0.0.0.0:8080/PID807431及原10运行PID不变证据保留；本次无重启/重复安装/账号生成/迁移/人工模型。
