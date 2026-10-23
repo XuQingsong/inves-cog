@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-017  已完成（公网HTTP200；页面部署验收收口）  2026-10-23 23:32 北京
+- 用户回传ufw status numbered已新增8080/tcp IPv4/IPv6 ALLOW IN规则，A未更改防火墙。实际外部探针2026-10-23 **15:31:51.221076UTC** GET http://43.166.2.31:8080/api/pages/?date=2026-10-23 返回 **HTTP200**，JSON对象且含counts。公网超时阻塞解除，不是仅用户报告/进程存活。外部回执a017-external-after-ufw-20261023.json只存元数据，无正文/持仓/凭据。
+- 生产完整SHA **7cbe4151c299eca7da318b80d27523f7aca69aef** 包含验收merge **4a86895a89a31b64bcd509e6cbac72087bad24ff**；[PR57](https://github.com/XuQingsong/inves-cog/pull/57)准确head **fa4441f7cbb0bf174b6b2efc302469e3cac45138** / [CI39972307325](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325)587passed证据复用。既有本机GET200/docs404/POST405、RSS68708KiB、监听0.0.0.0:8080/PID807431及原10运行PID不变证据保留；本次无重启/重复安装/账号生成/迁移/人工模型。
+- [需求方完成回报6368534622](https://github.com/XuQingsong/inves-cog/pull/57#issuecomment-6368534622)已同步。已自行决定无新增权限/接口/来源/依赖。A017部署要求已完成；M9截止分支degraded/versions0与M4/M9下个自然交易窗口验证继续独立OPS，不冒称自然业务已成功。下一步接新A开发单、到自然窗口核真实输出；持续接单授权有效。
+
 ## A-017  阻塞（用户回传UFW规则无8080；待用户root放行后外部复测）  2026-10-23 23:31 北京
 - 用户在本对话回传实际ufw status numbered：Status active，IPv4/IPv6规则仅15271 TCP/UDP、22 TCP、18789 TCP、2222 TCP，无8080/tcp允许规则。结合本次实际读到默认入站DROP，已定位主机UFW缺失页面端口放行这一阻断；云层是否还有限制须放行后外部复测，不能据此宣称整个公网链路已通。
 - 已直接给用户root命令 ufw allow 8080/tcp；依A017第4条由用户执行，A不改防火墙。尚未收到执行完成答复，未把给出命令当执行成功；页面服务/三个专用账号已完成部分不重复部署/配置。无新权限扩张或模型调用。
