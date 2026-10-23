@@ -1,5 +1,16 @@
 # A 线回报
 
+## A-017  阻塞（应用已安装且本机200；外部8080超时，待网络规则复核）  2026-10-23 23:08 北京
+- **已验收安装**：PR57 merge **4a86895a89a31b64bcd509e6cbac72087bad24ff** 已包含于生产 **7cbe4151c299eca7da318b80d27523f7aca69aef**；准确head **fa4441f7cbb0bf174b6b2efc302469e3cac45138** / [CI39972307325](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325)587项通过证据复用。23:02:47–23:02:57实际安装固定哈希页面三包，旧配置前缀保留，只新增/update m9/pages（807430/807431），原10RUNNING PID及已有marker不变，原embedding EXITED未动；迁移/手工业务/人工模型均0。未重做唯一M9迁移或历史账户/回放。
+- **账户阻塞已解除**：按UD-A42三既有role_overlay/role_shadow/role_web仅LOGIN+各随机独立密码，scoped URL仅服务器.env0600；三身份实际连接均验证成功，未新角色/GRANT/扩表权限，未以管理员业务运行。私有a042-login-result-20261023.json。今后不再重复等待这一答复。
+- **真实页面结果**：本机首页GET200、含counts，docs404、POST405，pages RSS **68708KiB**。23:05:11独立ss确认 **0.0.0.0:8080** 监听PID807431，首页再次200、全部预期PID/干净工作区通过。外部探针 http://43.166.2.31:8080/api/pages/?date=2026-10-23 于23:03:36返回 **TimeoutError**；不是外部HTTP200，不能宣称公网可用。第二外部工具无法获取，不拿它当独立成功证据。只读ufw状态当前账号无法非交互取得，无法确定主机/云安全组/来源限制具体哪层；A未改防火墙。
+- **所需用户行动已具体请求**：用户UD-A41报告TCP8080已放行有效，但仍须该实例绑定的安全组与主机两层入站规则/来源范围核对，或用户浏览器打开URL确认JSON可见。已在本对话说明用户影响（公网页面暂不可证可用）、证据、已完成准备，并发异步问题；不是重新索取LOGIN或持续部署授权。下一步得到网络状态后实际复测，不重复安装/重载或账号生成。
+- 私有证据a017-m9-pages-deployment-20261023.json、a017-listen-independent-verification-20261023.json、外部探针元数据；[需求方部署回报6368037536](https://github.com/XuQingsong/inves-cog/pull/57#issuecomment-6368037536)已同步。预检脚本曾漏算数字进程名valuation_v1而在变更前停止，已修；一次SSH连接超时后独立核无attempt/result/配置变更才重发，真实安装未重复。运行venv无pip，私有安装器venv只用于目标带哈希依赖安装，不改业务锁或其他包。
+
+## OPS-A016  进行中（M9已安装；首次截止分支已真实降级，下一自然窗口待验证）  2026-10-23 23:08 北京
+- M9专用账号实连通过、程序PID807430真实运行，生产与A017同为7cbe4151c299eca7da318b80d27523f7aca69aef；原唯一迁移/投递目录复用不重做。实际 **job10843 m9_overlay**，trade_date2026-10-23，started_at **15:03:02.475714UTC** / ended_at **15:03:02.504029UTC**，status **degraded** / processed_count0 / error_summary空；overlay.versions仍0。安装已过ET08:30，按真实截止分支无发布，不冒称按时成功或补造当时可见时间。尚无依赖就绪的shadow job，未用进程存活冒充影子结果。
+- 下一自然窗口10-26核overlay版本/m8_completeness/cooling_status统计及M4七源计划；影子依赖实际就绪后观察真实job，不手工补跑/模型调用。M4已22:14安装、daily_modules22:40补更新证据保留。M9登录阻塞已解除，不重新索取同一授权。[实际回报6368039065](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6368039065)已同步。接单持续开启，公网局部阻塞不停止自然任务。
+
 ## A-017 / OPS-A016  进行中（三专用账号实际登录已验证，准备只新增两个进程）  2026-10-23 23:00 北京
 - 按直接UD-A42，22:55:06三个已有角色role_overlay/role_shadow/role_web仅启用LOGIN及各独立随机密码，三个scoped URL仅服务器.env；表/GRANT未变。原角色均非superuser/CREATEROLE/CREATEDB；实际分别连接验证current_user等于对应角色、current_database=inves_cog，readonly探针通过；.env0600。私有a042-login-result-20261023.json及阶段attempt留存，不打印或外传密码/DSN。不是仅命令发出，已实连成功。
 - 二次fetch核origin/main **7cbe4151c299eca7da318b80d27523f7aca69aef** 确含PR57验收merge **4a86895a89a31b64bcd509e6cbac72087bad24ff**（最初fetch早于合并未包含，未提前安装）。准确head fa4441f7cbb0bf174b6b2efc302469e3cac45138/CI39972307325 587项通过有效。
