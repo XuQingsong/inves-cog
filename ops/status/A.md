@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  进行中（补充十五已收到；B050已合并，准备唯一迁移及pages安装）  2026-10-24 00:23 北京
+- main **46a15c10605e0719780848f9a42e93ef95ebc552** 补充十五要求执行补充十四（UD-COORD33）：唯一phase1_m10_0001_review七表迁移，role_perception写/role_web读，新增review调度、只重载pages。独立核[PR59](https://github.com/XuQingsong/inves-cog/pull/59)merged=true，merge **baa70212071b0451317a4bc6869baed4a203cf72**；准确head **54c28e765ba7ec5cb22f51b3b159169b87056910** / [CI39985043238](https://github.com/XuQingsong/inves-cog/actions/runs/39985043238)completed/success（601passed）。前置B050条件解除，原首页缺表冲突可通过先迁移后重载解决。
+- 变更先记：按已转达UD-COORD33仅七张复盘表/明确表权限；不新角色、不其他迁移/历史补跑/手工模型。实际执行前核生产HEAD/已有迁移前缀/七表及活动review job，防重复；迁移后用专用业务身份核只读/写权限，再重载pages并核D=2026-10-22异常14与数据库一致，原其他PID/配置/marker保留。
+- 静态预检另发现review入口scripts/schedule_review.py为单次必填task的CLI，schedule.poll默认run_recorded(operation=lambda:0)，尚无调用实际快照/标签/报告/一句话业务的分派或常驻循环；不能把no-op job当复盘成功。先完成独立可做的唯一迁移和pages安装，review调度挂接问题单列需求方，不擅改B业务或以自动重启循环替代真实调度。
+
 ## OPS-A014  阻塞（已收到补充十三/十四；代码先上与迁移后置存在依赖冲突）  2026-10-24 00:05 北京
 - 已收到B049部署交接；独立核[PR58](https://github.com/XuQingsong/inves-cog/pull/58) merged=true，merge **1eca1b695b230575d06bcf9e732d5464b5b41c5d**，准确head **a303f8da31615b484158181744480f5adfb62882** 的[CI39980804343](https://github.com/XuQingsong/inves-cog/actions/runs/39980804343)completed/success。main564a5db已含B049，B050尚未合并；补充十四记录UD-COORD33明确迁移/新增review调度须B050验收合并后执行，现不提前执行。
 - 实质冲突已核实：B049 page_home无条件_confirmed_misses读取perception.miss_samples及_stored_oneliner读取perception.reports_weekly，market同样依赖miss_samples；实际生产用role_web只读pg_catalog核七张复盘表全部不存在。生产仍 **7cbe4151c299eca7da318b80d27523f7aca69aef** 且干净。现在按补充十三仅快进代码/重载pages会令现有首页查询缺表返回错误，故尚未写生产或重载，保留已验外部200页面。
