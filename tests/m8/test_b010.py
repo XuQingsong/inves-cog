@@ -193,7 +193,7 @@ def test_six_payloads_use_the_recording_hash_and_the_run_cap(tmp_path):
         assert digest == row["payload_sha256"]
         assert recording_path("anomaly_candidates", row["payload"], tmp_path).name == f"{digest}.json"
         assert row["payload"]["output"] == candidate_output()
-        assert PROMPT_VERSION == "evidence-bridge-v4-links"
+        assert PROMPT_VERSION == "evidence-bridge-v4.1-links"
         seen[row["group"]] = row
         assert all(call["payload_sha256"] == digest for call in plan["calls"] if call["id"] == row["id"])
         assert sum(call["id"] == row["id"] for call in plan["calls"]) == 3

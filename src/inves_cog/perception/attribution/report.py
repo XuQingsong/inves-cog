@@ -55,11 +55,12 @@ def type_candidates(candidates, prelim=(), *, operating_impact_proven=False):
     return result
 
 
-def impact_scope(candidates, relations=(), *, direction=None):
+def impact_scope(candidates, relations=(), *, direction=None, neighbors=None):
     """Exposure is a relation label. A price member without one stays 纯共振."""
     by_ticker = {}
     for rel in relations:
         by_ticker.setdefault(rel.get("ticker"), []).append(rel)
+    use_path = neighbors is not None and not relations
     rows = []
     seen = set()
     for row in _scored(candidates):
@@ -70,8 +71,12 @@ def impact_scope(candidates, relations=(), *, direction=None):
             if not ticker or key in seen:
                 continue
             seen.add(key)
-            links = by_ticker.get(ticker) or []
-            exposure, reason = _exposure(mechanism, links)
+            if use_path:
+                exposure, reason, exit_reason = _path_exposure(mechanism, ticker, row, neighbors)
+            else:
+                links = by_ticker.get(ticker) or []
+                exposure, reason = _exposure(mechanism, links)
+                exit_reason = next((rel.get("exit_reason") for rel in links if rel.get("exit_reason")), None)
             rows.append(
                 {
                     "ticker": ticker,
@@ -79,7 +84,7 @@ def impact_scope(candidates, relations=(), *, direction=None):
                     "mechanism": mechanism,
                     "exposure": exposure,
                     "reason": reason,
-                    "exit_reason": next((rel.get("exit_reason") for rel in links if rel.get("exit_reason")), None),
+                    "exit_reason": exit_reason,
                 }
             )
     return rows
@@ -149,6 +154,7 @@ def explanation_report(
     narrative_shock=False,
     fundamental_unchanged=False,
     embeddings=None,
+    neighbors=None,
     magnitude=None,
     statements=(),
     as_of=None,
@@ -193,7 +199,12 @@ def explanation_report(
         "trading": None,
         "sources": sources,
         "unknowns": [],
-        "scope": impact_scope(candidates, relations, direction=anomaly.get("direction")),
+        "scope": impact_scope(
+            candidates,
+            relations,
+            direction=anomaly.get("direction"),
+            neighbors=neighbors,
+        ),
         "tracking": tracking,
         "constraint_conclusion": constraint_conclusion(tracking),
         "supplement": note,
@@ -314,6 +325,58 @@ def _usable_status(row):
 
 def _cited_conflict(row):
     return bool(row.get("conflict")) and _cited(row)
+
+
+def _path_exposure(mechanism, ticker, candidate, neighbors):
+    """The last hop into the ticker decides. A candidate neighbor is not operating exposure."""
+    if mechanism == "估值倍数":
+        return "概念关联", "估值倍数停在市场层", None
+    hop = _arriving(candidate, ticker)
+    if isinstance(hop, dict) and hop.get("kind") == "已有关系":
+        neighbor = _observed_neighbor(neighbors, hop, ticker)
+        if neighbor is not None and not neighbor.get("exit_reason"):
+            kind = neighbor.get("connection_type")
+            if kind == "业务关系":
+                return "直接", "状态至少观察到", None
+            if kind == "经营传导":
+                return "间接", "状态至少观察到", None
+    touched = _touches(neighbors, ticker)
+    if touched:
+        exit_reason = next((row.get("exit_reason") for row in touched if row.get("exit_reason")), None)
+        return "概念关联", "候选关系不是经营暴露", exit_reason
+    return "纯共振", "没有观察到的关系", None
+
+
+def _arriving(candidate, ticker):
+    arriving = [link for link in candidate.get("links") or [] if isinstance(link, dict) and link.get("to") == ticker]
+    relations = [link for link in arriving if link.get("kind") == "已有关系"]
+    if relations:
+        return relations[-1]
+    return arriving[-1] if arriving else None
+
+
+def _observed_neighbor(neighbors, link, ticker):
+    identifier = link.get("relation_id")
+    origin = link.get("from")
+    for row in neighbors or []:
+        if not isinstance(row, dict) or row.get("relation_id") != identifier:
+            continue
+        if row.get("status") not in _OBSERVED:
+            continue
+        ends = {row.get("from_entity"), row.get("to_entity")}
+        if ticker in ends and origin in ends:
+            return row
+    return None
+
+
+def _touches(neighbors, ticker):
+    found = []
+    for row in neighbors or []:
+        if not isinstance(row, dict):
+            continue
+        if ticker in {row.get("from_entity"), row.get("to_entity")}:
+            found.append(row)
+    return found
 
 
 def _exposure(mechanism, relations):

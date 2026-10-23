@@ -11,7 +11,7 @@ from inves_cog.perception.attribution.links import inspect_links
 from inves_cog.perception.attribution.material import material_fields
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
-PROMPT_VERSION = "evidence-bridge-v4-links"
+PROMPT_VERSION = "evidence-bridge-v4.1-links"
 _CONTRACT = Path(__file__).resolve().parents[4] / "docs/phase1/contracts/m8-candidate-prompt-v4"
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
 _LINK_KEYS = ("links", "竞争解释", "反证条件", "证伪预测")
@@ -176,6 +176,7 @@ def _research_rank(row):
 
 
 def propose_candidates(anomaly, items, neighbors, client, universe):
+    read_candidates.rejections = []
     if anomaly.get("universe") == "wide":
         return []
     if not items:
@@ -212,15 +213,59 @@ def _gate_row(row, items, neighbors):
 
 
 def read_candidates(result):
-    """Keep cited mechanisms. A malformed candidate is an explicit degrade, not an empty result."""
+    """Keep cited mechanisms. One bad candidate is dropped; every bad candidate still degrades."""
+    read_candidates.rejections = []
     if not isinstance(result, dict) or not isinstance(result.get("candidates"), list):
         raise ValueError("结构不合格")
     rows = []
+    structural = 0
     for row in result["candidates"]:
-        parsed = _candidate_row(row)
+        try:
+            parsed = _candidate_row(row)
+        except ValueError as exc:
+            if str(exc) != "结构不合格":
+                raise
+            structural += 1
+            read_candidates.rejections.append({"reason": "candidate_format_rejected", "field": _format_field(row)})
+            continue
         if parsed is not None:
             rows.append(parsed)
+    if structural and not rows:
+        raise ValueError("结构不合格")
     return rows[:5]
+
+
+def _format_field(row):
+    """Name the first field that makes this candidate structurally unusable."""
+    if not isinstance(row, dict):
+        return "candidates"
+    if not isinstance(row.get("mechanism"), str):
+        return "mechanism"
+    info_ids = row.get("info_ids")
+    if not isinstance(info_ids, list) or any(not isinstance(item, str) or not item for item in info_ids):
+        return "info_ids"
+    if "links" in row and not isinstance(row.get("links"), list):
+        return "links"
+    for key in ("chain", "affected", "control_baskets"):
+        if key in row and row[key] is not None and not isinstance(row[key], list):
+            return key
+    if isinstance(row.get("chain"), list):
+        for item in row["chain"]:
+            if not isinstance(item, dict) or not isinstance(item.get("entity_id"), str) or not item.get("entity_id"):
+                return "chain"
+            if "new" in item and item["new"] is not None and not isinstance(item["new"], bool):
+                return "chain"
+    if isinstance(row.get("affected"), list):
+        for item in row["affected"]:
+            if not isinstance(item, dict) or not isinstance(item.get("ticker"), str) or not item.get("ticker"):
+                return "affected"
+    baskets = row.get("control_baskets")
+    if isinstance(baskets, list) and any(not isinstance(item, str) or not item for item in baskets):
+        return "control_baskets"
+    direction = row.get("direction")
+    if direction is not None and direction not in {"up", "down"}:
+        return "direction"
+    return "candidates"
 
 
 def _candidate_row(row):

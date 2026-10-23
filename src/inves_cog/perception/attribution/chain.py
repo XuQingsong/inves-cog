@@ -38,7 +38,7 @@ from inves_cog.perception.attribution.magnitude import implied_magnitude
 from inves_cog.perception.attribution.material import material_fields
 from inves_cog.perception.attribution.move_card import NONE, classify, daily_text, move_card
 from inves_cog.perception.attribution.operating import operating_verdict
-from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates
+from inves_cog.perception.attribution.propose import candidate_payload, propose_candidates, read_candidates
 from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
@@ -579,6 +579,7 @@ def _one(anomaly, items, *, as_of, client, store, components, stage, valuation=N
 
 
 def _score_one(anomaly, items, *, as_of, client, store, components, stage, valuation=None, plan=None, page=None):
+    read_candidates.rejections = []
     if anomaly.get("started_at") is None or "universe" not in anomaly:
         raise ValueError("异常缺少起点或范围")
     previous, rejected = _stored_report(anomaly, store, as_of) if stage is not None else (None, False)
@@ -617,6 +618,7 @@ def _score_one(anomaly, items, *, as_of, client, store, components, stage, valua
     state, history, deadline = _lifecycle(candidates, when, prior, lifecycle_input, stage, as_of, due_on)
     impact = _impact(anomaly)
     channels = _channels(anomaly)
+    neighbors = None if anomaly.get("relations") else _graph_context(anomaly, as_of)["neighbors"]
     report = _report(
         anomaly,
         candidates,
@@ -626,7 +628,11 @@ def _score_one(anomaly, items, *, as_of, client, store, components, stage, valua
         channels,
         deadline,
         deadline_on=due_on.isoformat() if due_on is not None else None,
+        neighbors=neighbors,
     )
+    rejected = getattr(read_candidates, "rejections", None)
+    if rejected:
+        report["candidate_format_rejected"] = [dict(row) for row in rejected]
     report["lifecycle"] = state
     report["history"] = history
     report["market_confirmation_review"] = confirmation
@@ -1765,7 +1771,7 @@ def _track_rows(anomaly, state, stage=None, as_of=None):
     return [{"trade_date": trade_date, "emotion": emotion, "fundamental": "待验证"}]
 
 
-def _report(anomaly, candidates, items, status, impact, channels, deadline, *, deadline_on=None):
+def _report(anomaly, candidates, items, status, impact, channels, deadline, *, deadline_on=None, neighbors=None):
     current = {key: value for key, value in anomaly.items() if key != "status"}
     if status:
         current["status"] = status
@@ -1778,6 +1784,7 @@ def _report(anomaly, candidates, items, status, impact, channels, deadline, *, d
         deadline,
         relations=anomaly.get("relations") or (),
         deadline_on=deadline_on,
+        neighbors=neighbors,
         embeddings=anomaly.get("embeddings"),
         magnitude=channels,
         tracks_view=anomaly.get("tracks_view"),
