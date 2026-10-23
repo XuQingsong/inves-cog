@@ -5,9 +5,11 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from fastapi import FastAPI
+from starlette.responses import HTMLResponse
 
 from inves_cog.clock import SystemClock
 from inves_cog.web.db import open_reader
+from inves_cog.web.html_page import latest_visible_session, render_page
 from inves_cog.web.pages import (
     page_graph,
     page_health,
@@ -105,4 +107,68 @@ def create_app(dsn=None, clock=None):
     def review(date: date):
         return call(page_review, date)
 
+    _register_html(app, call, clock)
     return app
+
+
+def _register_html(app, call, clock):
+    def chosen(requested):
+        if requested is None:
+            return latest_visible_session(clock)
+        return requested
+
+    def show(builder, requested, **extra):
+        payload = call(builder, chosen(requested), **extra)
+        return HTMLResponse(render_page(payload))
+
+    @app.get("/")
+    def home_html(date: date | None = None):
+        return show(page_home, date)
+
+    @app.get("/market")
+    def market_html(date: date | None = None):
+        return show(page_market, date)
+
+    @app.get("/linkage/{event_id}")
+    def linkage_html(event_id: str, date: date | None = None):
+        return show(page_linkage, date, event_id=event_id)
+
+    @app.get("/stock/{symbol}")
+    def stock_html(symbol: str, date: date | None = None):
+        return show(page_stock, date, symbol=symbol)
+
+    @app.get("/graph")
+    def graph_html(date: date | None = None):
+        return show(page_graph, date)
+
+    @app.get("/settings/data")
+    def settings_html(date: date | None = None):
+        return show(page_settings, date)
+
+    @app.get("/paper/plan")
+    def plan_html(date: date | None = None):
+        return show(page_plan, date)
+
+    @app.get("/paper/portfolio")
+    def portfolio_html(date: date | None = None):
+        return show(page_portfolio, date)
+
+    @app.get("/paper/universe")
+    def universe_html(date: date | None = None):
+        return show(page_universe, date)
+
+    @app.get("/paper/stock/{symbol}")
+    def paper_stock_html(symbol: str, date: date | None = None):
+        return show(page_paper_stock, date, symbol=symbol)
+
+    @app.get("/paper/health")
+    def health_html(date: date | None = None):
+        return show(page_health, date)
+
+    @app.get("/paper/ledger")
+    def ledger_html(date: date | None = None):
+        return show(page_ledger, date)
+
+    @app.get("/review")
+    def review_html(date: date | None = None):
+        return show(page_review, date)

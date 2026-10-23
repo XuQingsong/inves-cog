@@ -37,7 +37,7 @@ class PageBoundary(BaseHTTPMiddleware):
         if request.method != "GET":
             return JSONResponse({"detail": "Method Not Allowed"}, status_code=405, headers={"Allow": "GET"})
         path = request.scope["path"]
-        if not path.startswith("/api/pages/"):
+        if not path.startswith("/api/pages/") and not _html_page(path):
             return JSONResponse({"detail": "Not Found"}, status_code=404)
         host = request.client.host if request.client else "unknown"
         allowed, retry = self.allow(host)
@@ -58,6 +58,27 @@ class PageBoundary(BaseHTTPMiddleware):
         return response
 
 
+def _html_page(path):
+    if path in {
+        "/",
+        "/market",
+        "/graph",
+        "/settings/data",
+        "/paper/plan",
+        "/paper/portfolio",
+        "/paper/universe",
+        "/paper/health",
+        "/paper/ledger",
+        "/review",
+    }:
+        return True
+    for prefix in ("/linkage/", "/stock/", "/paper/stock/"):
+        rest = path[len(prefix) :] if path.startswith(prefix) else ""
+        if rest and "/" not in rest:
+            return True
+    return False
+
+
 def protect(app, *, monotonic=time.monotonic):
     app.debug = False
     # Disable built-in documentation routes even if the underlying app keeps defaults.
@@ -70,5 +91,8 @@ def protect(app, *, monotonic=time.monotonic):
     return app
 
 
-def create_app(*, dsn=None, clock=None):
-    return protect(page_app(dsn=dsn, clock=clock))
+def create_app(*, dsn=None, clock=None, monotonic=None):
+    app = page_app(dsn=dsn, clock=clock)
+    if monotonic is None:
+        return protect(app)
+    return protect(app, monotonic=monotonic)
