@@ -79,3 +79,43 @@ def test_a017_rate_limit_is_separate_for_socket_ips():
         assert first.get('/api/pages/home').status_code == 429
     with TestClient(guarded, client=('203.0.113.2', 2)) as second:
         assert second.get('/api/pages/home').status_code == 200
+
+
+@pytest.fixture(scope='module')
+def public_pages():
+    from tests.m10.test_b048 import pages
+
+    yield from pages.__wrapped__()
+
+
+def test_a017_public_market_is_original_payload_without_trading_fields(public_pages):
+    from inves_cog.web.api import create_app as original
+    from inves_cog.web.public import create_app as public
+    from tests.m10.test_b048 import AFTER, DAY, FORBIDDEN_FIELDS, MARKET_PATHS, _keys
+
+    with TestClient(original(dsn=public_pages['dsn'], clock=AFTER)) as before:
+        with TestClient(public(dsn=public_pages['dsn'], clock=AFTER)) as after:
+            for path, _ in MARKET_PATHS:
+                expected = before.get(path, params={'date': DAY.isoformat()})
+                actual = after.get(path, params={'date': DAY.isoformat()})
+                assert actual.status_code == expected.status_code == 200
+                assert actual.json() == expected.json()
+                assert not (_keys(actual.json()) & FORBIDDEN_FIELDS)
+
+
+def test_a017_uvicorn_single_worker_direct_ip_and_no_access_logging(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+
+    from scripts.serve_pages import main
+
+    seen = {}
+    monkeypatch.setattr(
+        'inves_cog.ingest.settings.read_environment',
+        lambda *a, **kw: {'INVES_COG_WEB_DATABASE_URL': 'offline'},
+    )
+    monkeypatch.setattr('inves_cog.web.public.create_app', lambda **kw: 'app')
+    monkeypatch.setitem(sys.modules, 'uvicorn', SimpleNamespace(run=lambda app, **kw: seen.update(app=app, **kw)))
+    main()
+    assert seen == {'app': 'app', 'host': '0.0.0.0', 'port': 8080, 'workers': 1,
+                    'proxy_headers': False, 'server_header': False, 'access_log': False, 'log_level': 'critical'}
