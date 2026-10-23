@@ -1,5 +1,8 @@
 # A 线回报
 
+## OPS-A014  已收到（B-045入口与真实时间修复部署）  2026-10-23 14:00 北京
+- 已读取main436523ca6d658dee2f7b04d62501358b795c4686的A-014补充八：B045/PR52验收合并218b696b05e1652d1d48a47b84eb1155a7e56eff，按同一授权只重载morning_page/tracks/labels；非槽位手动CLI一次应not-due、不触发业务或模型。先核真实进程与今日marker，部署后独立核源文件/入口/时钟；不重复历史、今日任务和RSS日采样。周一10-26自然三阶段job/真实时间/实时快照仍须实测，前序晚完成导致tracks失败且不重跑的风险保持。
+
 ## OPS-A014  进行中（B-044安装已完成；自然三阶段仍有已报入口/时钟阻塞）  2026-10-23 13:11 北京
 - **实际安装完成**：按A-014续十四补充六/UD-COORD-29，服务器从04631bbf5e8c3aaadbf978427754188dcb101a72干净快进到 **e503bd24d2d1ee2f8a66a25d5e152916b7cf433a**，包含验收merge **f859bd34e2da0d57a1d615d38bdad0c17cd2cf1b**。PR51准确head **5de77c903a4d18a1b06ef02f2ac03df34c50fcf6** 的[CI39895457014](https://github.com/XuQingsong/inves-cog/actions/runs/39895457014)已独立查completed/success（任务验收记录481 passed）。13:09:36–13:09:45北京仅重载morning_page 103651→523846、tracks 103648→523884、labels 103647→523912；其他7个RUNNING worker PID一致，embedding原EXITED未动。
 - **独立核验**：13:10:41已安装6个关键文件哈希匹配准确版本，虚拟环境实际导入该src；请求构造anomaly_candidates含reasoning_effort=low，模型glm-5.3、timeout300秒、重试0。未发真实模型请求/未重跑业务任务；今日09:15/09:30/12:30三份marker哈希前后一致，未删除重置。私有证据b044-before-20261023.json、b044-deployment-20261023.json、b044-independent-verification-20261023.json，只有元数据。
