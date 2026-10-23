@@ -31,7 +31,7 @@
           {"from": "hdd_supply_up", "to": "AAA", "kind": "声明的假设", "hypothesis": "More HDD supply pressures AAA's drive prices and margins.", "hypothesis_type": "产业结构", "falsify": {"metric": "AAA HDD average selling price", "direction": "flat or up", "window": "next quarter"}},
           {"from": "hdd_supply_up", "to": "BBB", "kind": "声明的假设", "hypothesis": "More HDD supply pressures BBB's drive prices and margins.", "hypothesis_type": "产业结构", "falsify": {"metric": "BBB HDD average selling price", "direction": "flat or up", "window": "next quarter"}}
         ],
-        "竞争解释": ["sector-wide risk-off selling"],
+        "竞争解释": ["broad sector risk-off selling"],
         "反证条件": "AAA and BBB fall no more than unexposed semiconductor peers over the window.",
         "证伪预测": [
           {"ticker": "AAA", "control_basket": "semiconductor peers without HDD exposure", "direction": "down", "window": "next 5 sessions"},
