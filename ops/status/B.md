@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-048  已收到  2026-10-23 21:30 北京
+
+- 任务：M10 第一部分，页面 JSON 接口与每日看盘页面。新 PR，基于 main `2505db2`。复盘闭环留给 B-049。
+- 授权：新增 `src/inves_cog/web/` 与测试，`.env.example` 增加 `INVES_COG_WEB_DATABASE_URL`，从 `tests/harness/pending.txt` 移除本单实现的测试名。只读上游表。不新建表、迁移、GRANT，不改上游模块与合同，不部署。
+- 页面以 `date` 当日为准，不读该日之后的行。连接级只读。数值直接来自上游字段，页面层不重算。role_web 读不到的表先停下写清，不自行加权限。
+- 提交前按 `ops/answers/B-048.md` 的 P1–P10 交证据。做不到或冲突就停下写清。不标已完成。
+
 ## B-047  已完成  2026-10-23 21:09 北京
 
 - PR #55，head `09bb9e0`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39958364141 。`phase1-blocking` 552 passed、21 deselected，用时 117.30 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/55
