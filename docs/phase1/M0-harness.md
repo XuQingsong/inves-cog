@@ -76,7 +76,7 @@ migrations/phase1_m0_0001_schemas_roles.sql  # README §3.6 的 schema、角色�
 | FR-M0-09 | 导入防火墙（I01）：基于 AST 的导入图，按 README §3.7 的允许 / 禁止表判定；包括 `from x import y`、相对导入和 `importlib.import_module("字面量")`；任何位置导入 `stock_pm` 或 Muse 的模块名（`paper_trade_*`、`paper_tracker`、`factor_framework*`、`screen_asof_*`）即失败 |
 | FR-M0-10 | LLM：`config/llm_tasks.yaml` 与 README §3.8 的表完全一致（10 个任务）；`registry` 只能返回 `glm-5.3` 或 `deepseek-v4.1-flash`；按第 2 节的扫描范围做**白名单式**检查：用正则匹配形如模型名的字符串（前缀至少包括 `glm`、`gpt`、`claude`、`qwen`、`gemini`、`deepseek`、`llama`、`mistral`，不区分大小写），凡不在白名单 {`glm-5.3`, `deepseek-v4.1-flash`} 中的一律失败；这样项目里不需要出现任何禁止模型名的清单。负例在扫描范围之外的临时文件里构造，用同一个扫描器验证红灯；所有 LLM 调用都经 `registry` |
 | FR-M0-11 | 迁移骨架：建立 README §3.6 的 schema 和角色。权限策略为**默认拒绝**：每个角色对自己负责写入的 schema 有读写权；对"可读"列中的 schema 只授予 SELECT；其他一律没有权限，"不可读"列再显式 REVOKE 一次；`role_shadow` 对 `perception_shadow`、`factor_shadow` 可写，其余只读；`role_web` 全部只读。迁移由独立的管理员角色 `inves_cog_admin` 执行，并为每个 schema 写 `ALTER DEFAULT PRIVILEGES`，使以后各模块新建的表自动符合矩阵。`tools/permissions.py` 提供 `assert_no_select(role, schema)`、`assert_no_write(role, schema)`；`phase1_blocking` 里用迁移 SQL 的静态解析，不打开数据库连接 |
-| FR-M0-12 | CI：PR 必跑 `phase1_blocking`；每晚跑 `phase1_replay`、`phase1_cases`；`phase1_blocking` 总耗时超过 180 秒即失败 |
+| FR-M0-12 | CI：PR 必跑 `phase1_blocking`；每晚跑 `phase1_replay`、`phase1_cases`；`phase1_blocking` 总耗时超过 300 秒即失败（2026-10-23 用户 UD-COORD-32 由 180 秒调整：CI 共享运行器耗时在 84–182 秒间波动，已误报一次） |
 | FR-M0-13 | 工程基线：`make phase1-test` 在只装了 Docker 和 Python 的干净机器上一次跑通（建环境、迁移、测试）；`CODEOWNERS` 把 `docs/**` 指定给需求方 |
 
 ## 6. 异常与降级
@@ -98,7 +98,7 @@ migrations/phase1_m0_0001_schemas_roles.sql  # README §3.6 的 schema、角色�
 | `test_schema_roles_migration` | blocking | 迁移脚本含全部 schema、角色、REVOKE | FR-M0-11 |
 | `test_clean_env_bootstrap` | CI | 干净容器里 `make phase1-test` 通过 | FR-M0-13 |
 | `test_markers_registered` | blocking | 四个标记已注册 | FR-M0-02 |
-| `test_blocking_duration` | CI | 180 秒上限 | FR-M0-12 |
+| `test_blocking_duration` | CI | 300 秒上限 | FR-M0-12 |
 
 **破坏性自测**（自测报告里逐项附红灯输出，然后还原）：
 
@@ -116,7 +116,7 @@ migrations/phase1_m0_0001_schemas_roles.sql  # README §3.6 的 schema、角色�
 
 | AC | 判定标准 | 类型 | 对应 | 阻塞 |
 |---|---|---|---|---|
-| AC-M0-01 | 干净环境 `pytest -m phase1_blocking` 全绿，耗时 ≤ 180 秒 | H | FR-M0-02、12 | 是 |
+| AC-M0-01 | 干净环境 `pytest -m phase1_blocking` 全绿，耗时 ≤ 300 秒 | H | FR-M0-02、12 | 是 |
 | AC-M0-02 | 第 7 节 9 项破坏性自测都产生红灯，错误信息指明文件和规则 | E | FR-M0-03–10 | 是 |
 | AC-M0-03 | `pending.txt` 的条目与 README §5 和 M1–M10 第 7 节的测试清单逐一对应，模块字段正确 | E | FR-M0-06 | 是 |
 | AC-M0-04 | 需求方在本地改动 golden 的一个字节，测试变红；开发提供的临时副本破坏性自测为红灯；`.github/CODEOWNERS` 内容为 `docs/** @XuQingsong`。（GitHub 分支保护是否开启属于用户的前置条件 R1，不计入本条判定） | E | FR-M0-07、13 | 是 |

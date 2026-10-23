@@ -23,4 +23,4 @@ def test_blocking_duration():
     assert record["mark"] == "phase1_blocking"
     assert record["exit_code"] == 0
     assert record["collected"] >= 10
-    assert record["duration_seconds"] <= 180
+    assert record["duration_seconds"] <= 300
