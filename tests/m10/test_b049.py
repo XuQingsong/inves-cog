@@ -491,9 +491,9 @@ def test_review_page_blocks(admin, host):
         "/api/pages/review",
     )
     for path in paths:
-        body = client.get(path, params={"date": day.isoformat()}).json()
-        assert client.get(path, params={"date": day.isoformat()}).status_code == 200
-        assert not (_keys(body) & FORBIDDEN_FIELDS)
+        response = client.get(path, params={"date": day.isoformat()})
+        assert response.status_code == 200
+        assert not (_keys(response.json()) & FORBIDDEN_FIELDS)
 
 
 def test_review_grants(admin, host):
