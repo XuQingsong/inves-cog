@@ -1,5 +1,11 @@
 # A 线回报
 
+## OPS-A016  进行中（M4已实际安装，M9登录仍阻塞；自然业务待到点）  2026-10-23 22:16 北京
+- **代码已验收合并**：PR54独立merged=true，需求方merge **79f94ae0a2508e277f1b249181b94970761a6926** 明确Accepted E1–E8；完整head **af5ba67acaa322b9458586ecceaf848d85c6ef6f**、准确[CI39965598009](https://github.com/XuQingsong/inves-cog/actions/runs/39965598009)568passed证据保留，开发关闭，不再等待同一验收。
+- **M4安装实际完成**：22:14:44–22:14:53服务器从8bef57cb37ab5b9bcc0ef37e0e25b161ca9483d9干净快进上述验收merge，只重载paper_plan3980186→783294，其他9个RUNNING PID保持、原embedding EXITED不动，配置/全部已有json marker不变。6关键文件哈希与目标Git一致；人工模型0/手工业务0/迁移0，不执行B048或今日补跑、不重复RSS。证据a016-m4-deployment-20261023.json。
+- **独立核验**：22:15:34另一次SSH核HEAD/干净工作区/哈希/全部预期PID一致，实际import来自已安装src。真实SystemClock当前非窗口，生产scheduled(values={})连接前返回not_due，无数据库/计划业务启动；a016-m4-independent-verification-20261023.json。仅证明安装与guard，首个自然M4计划/七源input_completeness仍待下个交易窗口，不写成业务已验收。
+- **剩余M9权限**：唯一迁移/独立目录与既有表权限元数据准备复用不重做；现有role_overlay、role_shadow的LOGIN及私有scoped URL仍无新决定，M9program仍未新增启动，无自然覆盖层证据。UD-A40仅指定A014部署范围不扩大权限；已请求最小登录决定，收到有效答复后继续已授权实际安装/身份及自然输出验证。不影响本次已完成M4部分。
+
 ## OPS-A016  已收到（PR54已验收合并，继续M4实际安装）  2026-10-23 22:14 北京
 - 独立核PR54 merged=true；需求方merge **79f94ae0a2508e277f1b249181b94970761a6926** 明确Accepted against E1–E8，准确head af5ba67acaa322b9458586ecceaf848d85c6ef6f/CI39965598009的568项通过证据有效。main已包含该合并，A运行，无新A任务。依A016“验收合并后部署”原授权继续，不重新等待同一验收。
 - 计划仅快进服务器到已验收A016 merge79f94ae、重载paper_plan一个进程，核无活动paper job/新部署前缀、保存前后PID/marker/配置/6文件哈希。现已过ET09:05，不手工补跑/改钟，不重复M9迁移；M9现有两角色LOGIN无答复，暂不新增/启动M9 program。B048虽已合main，不在本次安装目标或运行范围。
