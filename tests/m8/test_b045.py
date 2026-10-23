@@ -120,10 +120,13 @@ def test_module_entry_reaches_main_and_writes_both_stage_rows():
         env["INVES_COG_PERCEPTION_DATABASE_URL"] = dsn
         for task_name, moment in (("attribution_tracks", tracks), ("attribution_labels", labels)):
             if task_name == "attribution_labels":
+                # The tracks subprocess records wall-clock times, which are after this
+                # historical slot. Readiness compares that end with the slot, and
+                # ended_at cannot precede started_at, so both move together.
                 admin.execute(
-                    "UPDATE ingest.job_runs SET ended_at = %s "
+                    "UPDATE ingest.job_runs SET started_at = %s, ended_at = %s "
                     "WHERE trade_date = %s AND task_name = 'attribution_tracks'",
-                    (moment - timedelta(minutes=15), DAY),
+                    (moment - timedelta(minutes=20), moment - timedelta(minutes=15), DAY),
                 )
             ran = subprocess.run(
                 [
@@ -141,7 +144,7 @@ def test_module_entry_reaches_main_and_writes_both_stage_rows():
                 check=False,
                 env=env,
             )
-            assert ran.returncode == 0, ran.stderr
+            assert ran.returncode == 0, (ran.returncode, ran.stdout, ran.stderr)
             row = admin.execute(
                 "SELECT status FROM ingest.job_runs WHERE trade_date = %s AND task_name = %s",
                 (DAY, task_name),
