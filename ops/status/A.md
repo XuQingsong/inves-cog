@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-017  阻塞（用户要求的主机防火墙只读核查已完成；具体放行规则需root核实）  2026-10-23 23:27 北京
+- 用户直接要求“你检查一下主机防火墙”，已实际SSH只读核查：/etc/ufw/ufw.conf 为 ENABLED=yes，/etc/default/ufw 的 DEFAULT_INPUT_POLICY="DROP"；ufw unit active/exited、Result=success，firewalld inactive。证明UFW已启用且默认入站丢弃，但不能仅凭默认策略断言8080被拦截。
+- /etc/ufw/user.rules、user6.rules读取PermissionError；sudo -n ufw status verbose、nft list ruleset、iptables -S均返回“a password is required”。当前claudeuser无可用非交互root查询权限，未绕过权限、未改任何防火墙或云规则。
+- 同批真实核验仍0.0.0.0:8080监听pages PID807431，本机首页HTTP200；未输出页面正文/凭据，未重载服务/重建账号。公网阻塞具体是主机放行缺失还是云/来源层仍未知。需要用户在root终端执行ufw status numbered核实8080/tcp入站规则；原用户报告云/端口放行保留，不冒称已核全部层。下一步有规则结果后判断并实际外部复测，不重复部署。
+
 ## A-017  阻塞（应用已安装且本机200；外部8080超时，待网络规则复核）  2026-10-23 23:08 北京
 - **已验收安装**：PR57 merge **4a86895a89a31b64bcd509e6cbac72087bad24ff** 已包含于生产 **7cbe4151c299eca7da318b80d27523f7aca69aef**；准确head **fa4441f7cbb0bf174b6b2efc302469e3cac45138** / [CI39972307325](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325)587项通过证据复用。23:02:47–23:02:57实际安装固定哈希页面三包，旧配置前缀保留，只新增/update m9/pages（807430/807431），原10RUNNING PID及已有marker不变，原embedding EXITED未动；迁移/手工业务/人工模型均0。未重做唯一M9迁移或历史账户/回放。
 - **账户阻塞已解除**：按UD-A42三既有role_overlay/role_shadow/role_web仅LOGIN+各随机独立密码，scoped URL仅服务器.env0600；三身份实际连接均验证成功，未新角色/GRANT/扩表权限，未以管理员业务运行。私有a042-login-result-20261023.json。今后不再重复等待这一答复。
