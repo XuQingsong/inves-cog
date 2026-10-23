@@ -1,5 +1,9 @@
 # A 线回报
 
+## OPS-A014  进行中（补充十六/十七已收到；准备B051只重载pages）  2026-10-24 00:43 北京
+- 需求方补充十六确认96含宽池，交接14写错；原“不修改数据”正确，计数差异不再阻塞。确认review空跑缺陷并派B052，验收合并后按原UD-COORD33上线，不重复请求授权；现不启空壳/不重复七表迁移。
+- 补充十七交接B051网页渲染，main **2ae28bc8e69a2310f5de7ba01ccf0189ea63c943** 含独立核merged的[PR60](https://github.com/XuQingsong/inves-cog/pull/60)，merge **ce76f35c89fff0880282bff10fd403dbe17df9e0**，准确head **67b52d98ee1a618a7d4b9cab35464f18af3affa8**/[CI39987482146](https://github.com/XuQingsong/inves-cog/actions/runs/39987482146)success。按同范围授权仅代码快进/重载pages，不新增依赖/角色/迁移/手工业务或模型。将核原PID/已提交前缀及外部根路径与market状态码/Content-Type，不输出页面正文。
+
 ## OPS-A014  阻塞（七表迁移/pages安装完成；review真实业务分派缺失）  2026-10-24 00:27 北京
 - **已实际完成**：按补充十四/十五UD-COORD33，生产从7cbe4151c299eca7da318b80d27523f7aca69aef快进 **46a15c10605e0719780848f9a42e93ef95ebc552**，含[PR59](https://github.com/XuQingsong/inves-cog/pull/59)验收merge **baa70212071b0451317a4bc6869baed4a203cf72**；准确head **54c28e765ba7ec5cb22f51b3b159169b87056910**/[CI39985043238](https://github.com/XuQingsong/inves-cog/actions/runs/39985043238)success已独立核（601passed）。唯一phase1_m10_0001_review实际执行1次，SHA256 **3dcef823aa4123821b10e09998f4d9d62a3431c5c582ccf7de08d48633ce4ead**，七表均存在且初始0行，role_perception写/role_web SELECT且无写权限全部核实，未新角色/其他授权。
 - **页面实际结果**：仅pages807431→847380，其他11RUNNING PID保持，原embedding EXITED不变，配置/已有marker不变；无人工模型/手工业务/历史补跑。独立SSH核HEAD/干净工作区/三关键文件hash一致。公网 **2026-10-23 16:25:54UTC GET /api/pages/?date=2026-10-22 HTTP200，anomaly_count=96**，本机同为96，与DB按ET D+1 01:00截点count96一致。交接“应为14”**不通过**，全量与截止内均96；未把96改成14或隐去不符。pages RSS117580KiB。
