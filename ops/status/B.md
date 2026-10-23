@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-050  已收到  2026-10-23 23:54 北京
+
+- 任务：M10 页面日期口径。`date` 是美股交易日 D。可见截点是 min(请求时刻, 美东 D+1 01:00)。未处置标红用同一个时刻（夏令北京 D+1 13:00，冬令 D+1 14:00）。非交易日返回「非交易日」，HTTP 200。
+- 新 PR，基于当前 main `7754650`。授权只改 `src/inves_cog/web/` 与 `tests/m10/`。不改上游、迁移、合同。不部署，不调用真实模型。
+- 提交前按 `ops/answers/B-050.md` 的 K1–K5 交证据。不标已完成。
+
+
 ## B-049  已完成  2026-10-23 23:49 北京
 
 - PR #58，head `a303f8d`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39980804343 ：`phase1-blocking` 成功，596 passed、21 deselected，`blocking.json` 为 exit_code 0、duration 181.451 秒（≤ 300 秒，UD-COORD-32）。`test_m0_ci.py` 2 passed。nightly 跳过。没有部署，没有在生产执行迁移，没有调用真实模型。
