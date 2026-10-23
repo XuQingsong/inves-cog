@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-050  已完成  2026-10-24 00:17 北京
+
+- PR #59，head `54c28e7`。https://github.com/XuQingsong/inves-cog/pull/59 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39985043238 ：`phase1-blocking` 成功，601 passed、21 deselected，`blocking.json` 为 exit_code 0、duration 97.786 秒（≤ 300）。`test_m0_ci.py` 2 passed。nightly 跳过。没有部署，没有调用真实模型。
+- 相对 main 的 diff：`src/inves_cog/web/pages.py`、`src/inves_cog/perception/review/` 的 calendar、cases、snapshots，以及 `tests/m10/test_b048.py`、`test_b049.py`、`test_b050.py`。没有迁移、上游算法、合同。`perception/review/` 来自 2026-10-24 00:05 的补充授权。
+- K1｜通过｜`test_trade_date_rows_are_visible_at_beijing_1305`｜junit 0.065 秒。北京 D+1 13:05 请求 `/api/pages/?date=D`，异常计数为 2，未处置为 `b050-a-m7` 与 `b050-a-m8` 且都标红。联动快照为北京 12:30 的 `m8-bj-1230`，幅度 8.57。计划标记为美东 08:35 的 `m4-et-0835`。
+- K2｜通过｜`test_cutoff_hides_rows_after_the_request_or_the_deadline`｜junit 0.035 秒。北京 D+1 09:00 只见 08:57 的 `b050-a-m7`，不标红，联动仍是美东 08:00 的 `m9-et-0800`。13:05 不见北京 13:30 生成的 `b050-a-after`。
+- K3｜通过｜`test_highlight_follows_daylight_and_standard_time`｜junit 0.000 秒。夏令北京 D+1 12:59 不标红、13:00 标红；冬令 13:59 不标红、14:00 标红。
+- K4｜通过｜`test_pages_share_one_cutoff_and_closed_days_say_so`｜junit 0.132 秒。现有 13 个页面端点（原 12 个加上 `/api/pages/review`）返回同一个截点。周六各端点 HTTP 200，正文为「非交易日」，且不调用截点。
+- K5｜通过｜`test_b048.py` 11 项（0.850 秒）、`test_a017.py` 8 项（0.492 秒）、`test_b049.py` 9 项（0.487 秒）｜本 head CI 601 passed。diff 含 `web/pages.py` 与 `tests/m10/`，另加补充授权的 `perception/review/`。没有上游算法、迁移、合同。
+- K6｜通过｜`test_review_cutoff_uses_the_session_close`｜junit 0.008 秒。T+5 在截点后 5 分钟打标，reason 为空，可见二次命中含北京 due+1 08:00 的收盘确认、不含 13:30 的行。先兆与页面共用 `calendar.cutoff`。B-049 九项在同一 CI 通过。不取 B-051。
+
+
 ## B-050  进行中  2026-10-24 00:15 北京
 
 - PR #59，head `54c28e7`。https://github.com/XuQingsong/inves-cog/pull/59 。没有合并。这一 head 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39985043238 还在跑。不标已完成。
