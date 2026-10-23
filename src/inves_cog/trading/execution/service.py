@@ -2,6 +2,7 @@
 
 from inves_cog.ingest.market import exchange
 from inves_cog.trading.engine import ExecutionEngine
+from inves_cog.trading.execution.completeness import describe_inputs
 from inves_cog.trading.execution.contracts import members_asof
 from inves_cog.trading.execution.repository import Repository
 
@@ -71,12 +72,24 @@ def daily_plan(*, clock, connection, universe, target, overlay=None, persist=Tru
     repository = Repository(connection)
     inputs = repository.inputs(signal_day, [r["ticker"] for r in universe])
     engine = ExecutionEngine(clock=clock)
+    old = None
     if persist:
         old = repository.restore(engine.portfolio_id, target)
         if old:
             engine.restore(old["state"])
     engine.insiders = repository.insider_events(signal_day)
     plan = prepare(engine, target, inputs, universe, overlay)
+    plan["input_completeness"] = describe_inputs(
+        plan,
+        inputs,
+        universe,
+        signal_day=signal_day,
+        cutoff=clock.now_utc(),
+        insiders=engine.insiders,
+        ledger=old,
+        ledger_checked=persist,
+        overlay=overlay,
+    )
     if persist:
         with connection.transaction():
             engine.persist_orders(connection, plan["orders"])

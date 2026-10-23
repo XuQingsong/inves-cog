@@ -1,0 +1,74 @@
+{
+  "a016-m9-preflight-20261023.json": {
+    "code_sha": "436523ca6d658dee2f7b04d62501358b795c4686",
+    "dirty": false,
+    "environment": {
+      "INVES_COG_SHADOW_DATABASE_URL": false,
+      "INVES_COG_OVERLAY_DATABASE_URL": false,
+      "INVES_COG_OVERLAY_DIR": false
+    },
+    "configured_roles": {},
+    "existing_roles": [
+      {
+        "rolname": "role_overlay",
+        "rolcanlogin": false
+      },
+      {
+        "rolname": "role_shadow",
+        "rolcanlogin": false
+      }
+    ],
+    "tables": {
+      "overlay.versions": false,
+      "perception_shadow.signals": false,
+      "factor_shadow.registry": false,
+      "factor_shadow.daily": false,
+      "factor_shadow.f02_state": false
+    },
+    "existing_m9_jobs": [],
+    "programs": [
+      "program:scheduler",
+      "program:daily_modules",
+      "program:anomaly_daily",
+      "program:valuation_v1",
+      "program:paper_plan",
+      "program:morning_page",
+      "program:financials",
+      "program:watchdog",
+      "program:embedding",
+      "program:attribution_tracks",
+      "program:attribution_labels"
+    ]
+  },
+  "a016-m9-migration-20261023.json": {
+    "at": "2026-10-23T12:00:43.911006+00:00",
+    "source_sha": "8a6705ede6e263dbcea6d31f71afe0520669103a",
+    "only_migration": "migrations/phase1_m9_0001_overlay_shadow.sql",
+    "migration_sha256": "2b5b1306953b1eaa28463cb507498849cb8db1198dd77d00ba9c66cf6701af94",
+    "tables_before": {
+      "overlay.versions": false,
+      "perception_shadow.signals": false,
+      "factor_shadow.registry": false,
+      "factor_shadow.daily": false,
+      "factor_shadow.f02_state": false
+    },
+    "rows_after": {
+      "overlay.versions": 0,
+      "perception_shadow.signals": 0,
+      "factor_shadow.registry": 0,
+      "factor_shadow.daily": 0,
+      "factor_shadow.f02_state": 0
+    },
+    "business_model_calls": 0,
+    "service_started": false,
+    "runtime_blocker": "existing overlay/shadow roles NOLOGIN; scoped URLs absent"
+  },
+  "a016-m9-directory-20261023.json": {
+    "at": "2026-10-23T12:10:32.801250+00:00",
+    "production_directory_prepared": true,
+    "separate_from_historical_migration_and_exports": true,
+    "scoped_logins_changed": false,
+    "service_started": false,
+    "model_calls": 0
+  }
+}

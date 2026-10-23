@@ -219,9 +219,15 @@ def test_plan_unpublished_low_coverage():
 def test_plan_json_contract():
     from inves_cog.trading.execution.cli import due
 
-    # The stated 20:00 Beijing slot stays fixed across US daylight-saving changes.
+    # A016 supersedes the fixed Beijing slot with ET08:35–09:05.
     for month, day in ((1, 12), (7, 13)):
-        for hour, minute, expected in ((11, 59, False), (12, 0, True), (12, 29, True), (12, 30, False)):
+        offset = 1 if month == 1 else 0
+        for hour, minute, expected in (
+            (12 + offset, 34, False),
+            (12 + offset, 35, True),
+            (13 + offset, 4, True),
+            (13 + offset, 5, False),
+        ):
             stamp = datetime(2026, month, day, hour, minute, tzinfo=timezone.utc)
             assert due(FrozenClock(stamp)) is expected
         stamp = datetime(2026, month, day, 12, tzinfo=timezone.utc)

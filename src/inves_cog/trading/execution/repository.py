@@ -125,7 +125,7 @@ class Repository:
 
     def restore(self, portfolio_id, through):
         return self.connection.execute(
-            "SELECT state FROM trading.ledger WHERE portfolio_id=%s AND trade_date<=%s "
+            "SELECT state,observed_at FROM trading.ledger WHERE portfolio_id=%s AND trade_date<=%s "
             "AND extractor='fixed' AND rule_set='A' AND params_version='p-2026.10' "
             "ORDER BY trade_date DESC,observed_at DESC LIMIT 1",
             (portfolio_id, through),

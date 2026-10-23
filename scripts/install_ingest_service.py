@@ -54,6 +54,7 @@ serverurl=unix://{state}/supervisor.sock
         ],
         "valuation_v1": [str(root / "scripts/schedule_daily_modules.py"), "--tasks", "valuation_v1"],
         "paper_plan": [str(root / "scripts/schedule_daily_modules.py"), "--tasks", "paper_plan"],
+        "m9": [str(root / "scripts/schedule_m9.py")],
         "morning_page": [str(root / "scripts/schedule_morning_page.py")],
         "attribution_tracks": [str(root / "scripts/schedule_attribution_stage.py"), "--task", "attribution_tracks"],
         "attribution_labels": [str(root / "scripts/schedule_attribution_stage.py"), "--task", "attribution_labels"],
