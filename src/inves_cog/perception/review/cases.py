@@ -2,6 +2,7 @@
 
 from psycopg.types.json import Jsonb
 
+from inves_cog.ingest.market import regular_bounds
 from inves_cog.perception.review.calendar import HORIZONS, add_sessions, cutoff
 
 MISSING_PRICE = "T+5 缺少行情"
@@ -127,7 +128,7 @@ def _label_body(connection, case, horizon, due, visible):
     }
     reason = None
     if horizon == "T+5":
-        reason = _price_gap(connection, case["anomaly_id"], due)
+        reason = _price_gap(connection, case["anomaly_id"], due, visible)
     return body, reason
 
 
@@ -146,7 +147,7 @@ def _visible_hits(connection, anomaly_id, visible):
     )
 
 
-def _price_gap(connection, anomaly_id, due):
+def _price_gap(connection, anomaly_id, due, visible):
     members = connection.execute(
         "SELECT members FROM perception.anomalies WHERE anomaly_id = %s",
         (anomaly_id,),
@@ -154,6 +155,9 @@ def _price_gap(connection, anomaly_id, due):
     names = member_tickers(members["members"] if members else None)
     if not names:
         return MISSING_PRICE + "：无成员"
+    bounds = regular_bounds(due)
+    if bounds is None or bounds[1] >= visible:
+        return MISSING_PRICE + " " + "、".join(names)
     found = {
         row["ticker"]
         for row in connection.execute(

@@ -28,9 +28,11 @@ DAY = date(2031, 4, 17)
 DAY2 = date(2031, 4, 18)
 SIGNAL = date(2031, 4, 16)
 SEEN = datetime(2031, 4, 17, 2, 0, tzinfo=timezone.utc)
-LATE = datetime(2031, 4, 17, 17, 0, tzinfo=timezone.utc)
+# 2031-04-18 01:00 America/New_York is 05:00 UTC. Rows stamped LATE stay after that cutoff.
+DEADLINE = datetime(2031, 4, 18, 5, 0, tzinfo=timezone.utc)
+LATE = datetime(2031, 4, 18, 6, 0, tzinfo=timezone.utc)
 BEFORE = FrozenClock(datetime(2031, 4, 17, 4, 0, tzinfo=timezone.utc))
-AFTER = FrozenClock(datetime(2031, 4, 17, 5, 0, tzinfo=timezone.utc))
+AFTER = FrozenClock(DEADLINE)
 PUBLISHED = SEEN + timedelta(hours=1)
 
 # Every numeric field the pages emit is one of these upstream columns or a SQL count of them.

@@ -1,13 +1,17 @@
 """Daily page JSON. Every number is copied from an upstream column or is a SQL count of those rows."""
 
 import json
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import yaml
 
+from inves_cog.ingest.market import trading_day
+from inves_cog.perception.review.calendar import cutoff as _deadline
+
 MISSING = "数据暂缺"
+CLOSED = "非交易日"
 PAPER_LABEL = "纸面跟踪，非投资建议"
 VALUATION_LABEL = "估值参考 v1，不参与仓位"
 UNCONNECTED = "未接通"
@@ -25,9 +29,18 @@ _UNIVERSE = Path(__file__).resolve().parents[3] / "config" / "universe.yaml"
 # No stored SPY/QQQ weight table exists, so that linkage clause is not applied.
 
 
-def _window(day):
-    start = datetime.combine(day, time.min, tzinfo=_SHANGHAI)
-    return start, start + timedelta(days=1)
+def _shanghai_midnight(day):
+    return datetime.combine(day, time.min, tzinfo=_SHANGHAI)
+
+
+def _cutoff(clock, day):
+    return min(clock.now_utc(), _deadline(day))
+
+
+def _open(clock, day):
+    if not trading_day(day):
+        return None, {"message": CLOSED}
+    return _cutoff(clock, day), None
 
 
 def _parse_ts(value):
@@ -290,8 +303,7 @@ def _stored_oneliner(connection, day, cutoff):
 
 
 def _highlighted(clock, day):
-    local = clock.now_utc().astimezone(_SHANGHAI)
-    return local >= datetime.combine(day, time(13, 0), tzinfo=_SHANGHAI)
+    return clock.now_utc() >= _deadline(day)
 
 
 def _status_counts(anomalies, events):
@@ -308,7 +320,9 @@ def _count(connection, sql, params):
 
 
 def page_home(connection, day, clock):
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     tickers, _, _ = _overlay(connection, day, cutoff)
@@ -331,7 +345,7 @@ def page_home(connection, day, clock):
         if state != "①":
             continue
         unhandled.append({"anomaly_id": anomaly["anomaly_id"], "disposition": state, "highlighted": red})
-    start, _ = _window(day)
+    start = _shanghai_midnight(day)
     counts = {
         "anomaly_count": len(anomalies),
         "status_counts": _status_counts(anomalies, events),
@@ -404,7 +418,7 @@ def _eligible(connection, day, pool, etfs):
 
 
 def _tags(connection, day, cutoff, ticker):
-    start, _ = _window(day)
+    start = _shanghai_midnight(day)
     tags = []
     earnings = _one(
         connection,
@@ -559,8 +573,9 @@ def _anomaly_public(anomaly, events, tickers, acted, missed):
 
 
 def page_market(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     tickers, _, _ = _overlay(connection, day, cutoff)
@@ -750,8 +765,9 @@ def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, compl
 
 
 def page_linkage(connection, day, clock, event_id):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     view = next((item for item in events.values() if item["event_id"] == event_id), None)
@@ -776,8 +792,9 @@ def _what_changed(report):
 
 
 def page_stock(connection, day, clock, symbol):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     tickers, by_event, completeness = _overlay(connection, day, cutoff)
@@ -833,8 +850,9 @@ def _status_basis(evidence):
 
 
 def page_graph(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     rows = _rows(
         connection,
         """
@@ -868,8 +886,9 @@ def page_graph(connection, day, clock):
 
 
 def page_settings(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     sources = []
     for row in _rows(
         connection,
@@ -996,8 +1015,9 @@ def _paper(page, day, extra):
 
 
 def page_plan(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     plan = _plan(connection, day, cutoff)
     payload = None if plan is None else plan["payload"]
     if isinstance(payload, dict) and "input_completeness" in payload:
@@ -1038,8 +1058,9 @@ def page_plan(connection, day, clock):
 
 
 def page_portfolio(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     ledger = _ledger(connection, day, cutoff)
     plan = _plan(connection, day, cutoff)
@@ -1112,7 +1133,7 @@ def _health_map(connection):
     return {row["ticker"]: row for row in rows}
 
 
-def _ranges(connection, day):
+def _ranges(connection, day, cutoff):
     rows = _rows(
         connection,
         """
@@ -1120,7 +1141,7 @@ def _ranges(connection, day):
         FROM valuation_v1.ranges
         WHERE trade_date = %s AND observed_at < %s
         """,
-        (day, _window(day)[1]),
+        (day, cutoff),
     )
     return {row["ticker"]: row for row in rows}
 
@@ -1169,14 +1190,15 @@ def _universe_row(ticker, health, score, ranges, factors, states):
 
 
 def page_universe(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     pool, _ = _universe()
     health = _health_map(connection)
     scores = _scores(connection, day)
-    ranges = _ranges(connection, day)
+    ranges = _ranges(connection, day, cutoff)
     factors = _factor_map(connection, day, cutoff)
     states = _event_states(anomalies, events)
     return _paper(
@@ -1191,8 +1213,9 @@ def page_universe(connection, day, clock):
 
 
 def page_paper_stock(connection, day, clock, symbol):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     anomalies = _anomalies(connection, day, cutoff)
     history = _rows(
         connection,
@@ -1209,7 +1232,7 @@ def page_paper_stock(connection, day, clock, symbol):
         "SELECT profile FROM fundamentals.profile WHERE as_of = %s AND ticker = %s",
         (day, symbol),
     )
-    ranges = _ranges(connection, day).get(symbol, MISSING)
+    ranges = _ranges(connection, day, cutoff).get(symbol, MISSING)
     factors = _factor_map(connection, day, cutoff).get(symbol, MISSING)
     lines = [row for row in _timeline_records(connection, day, cutoff, anomalies) if row["ticker"] == symbol]
     if not lines:
@@ -1230,7 +1253,9 @@ def page_paper_stock(connection, day, clock, symbol):
 
 
 def page_health(connection, day, clock):
-    del clock
+    _, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     rows = _rows(
         connection,
         """
@@ -1244,8 +1269,9 @@ def page_health(connection, day, clock):
 
 
 def page_ledger(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     fills = _rows(
         connection,
         """
@@ -1284,8 +1310,9 @@ def _object(value):
 
 
 def page_review(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     cases = _rows(
         connection,
         """
