@@ -212,6 +212,7 @@ def _run_live(connection, perception, client, folder):
             perception=perception,
             clock=FrozenClock(morning),
             client=client,
+            record_clock=FrozenClock(morning),
         )
         assert morning_result == 0
         for name in ("attribution_tracks", "attribution_labels"):
@@ -223,6 +224,7 @@ def _run_live(connection, perception, client, folder):
                     perception=perception,
                     clock=FrozenClock(moment),
                     client=client,
+                    record_clock=FrozenClock(moment),
                 )
                 == 0
             )

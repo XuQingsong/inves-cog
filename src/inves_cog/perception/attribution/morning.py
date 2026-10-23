@@ -74,22 +74,23 @@ ORDER BY signal_date DESC, generated_at DESC LIMIT 1
 """
 
 
-class _Frozen:
-    def __init__(self, moment):
-        self._moment = moment
+def _record_clock(clock):
+    """Job rows use a clock that keeps moving. Tests inject one; production uses the wall clock."""
+    if clock is not None:
+        return clock
+    from inves_cog.clock import SystemClock
 
-    def now_utc(self):
-        return self._moment
+    return SystemClock()
 
 
-def main(argv=None, *, connection=None, perception=None, clock=None, client=None):
+def main(argv=None, *, connection=None, perception=None, clock=None, client=None, record_clock=None):
     """Run only at the morning page's minute. Tests inject both connections, the clock, and the client."""
     moment = _moment(argv, clock)
     if not _is_morning(moment):
         return 0
     borrowed, writer, owned = _connections(connection, perception)
     try:
-        return _execute(borrowed, writer, moment, client)
+        return _execute(borrowed, writer, moment, client, _record_clock(record_clock))
     finally:
         for item in owned:
             item.close()
@@ -157,14 +158,14 @@ def _require_writer(connection):
             raise RuntimeError(f"没有写入权限：{table}")
 
 
-def _fail_job(connection, moment, task_name, day, reason):
+def _fail_job(connection, _moment, task_name, day, reason, clock=None):
     def refuse():
         raise RuntimeError(reason)
 
     try:
         run_recorded(
             connection,
-            clock=_Frozen(moment),
+            clock=_record_clock(clock),
             task_name=task_name,
             trade_date=day,
             params_version=PARAMS,
@@ -175,15 +176,22 @@ def _fail_job(connection, moment, task_name, day, reason):
     return 1
 
 
-def _execute(connection, writer, moment, client):
+def _execute(connection, writer, moment, client, record_clock):
     day = _closed_trade_date(moment)
     if writer is None:
-        return _fail_job(connection, moment, "attribution_candidates", day, "缺少 INVES_COG_PERCEPTION_DATABASE_URL")
+        return _fail_job(
+            connection,
+            moment,
+            "attribution_candidates",
+            day,
+            "缺少 INVES_COG_PERCEPTION_DATABASE_URL",
+            clock=record_clock,
+        )
     if writer is not connection:
         try:
             _require_writer(writer)
         except Exception as exc:
-            return _fail_job(connection, moment, "attribution_candidates", day, str(exc))
+            return _fail_job(connection, moment, "attribution_candidates", day, str(exc), clock=record_clock)
     if client is None:
         from inves_cog.llm.client import Client
 
@@ -242,7 +250,7 @@ def _execute(connection, writer, moment, client):
     try:
         run_recorded(
             connection,
-            clock=_Frozen(moment),
+            clock=record_clock,
             task_name="attribution_candidates",
             trade_date=day,
             params_version=PARAMS,
