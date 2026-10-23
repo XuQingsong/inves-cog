@@ -9,6 +9,13 @@ from inves_cog.ingest.cli import connect
 from inves_cog.ingest.market import NY, exchange, trading_day
 from inves_cog.ingest.repository import json_text
 from inves_cog.ingest.settings import read_environment
+from inves_cog.perception.attribution.morning import (
+    dispatch_decision,
+    record_skip,
+    skip_summary,
+    upstream_phrase,
+    upstream_ready,
+)
 
 TASKS = (
     "bars_full",
@@ -21,9 +28,11 @@ TASKS = (
 )
 
 
-def dependencies_met(name, records):
+def dependencies_met(name, records, *, now=None):
     def completed(row):
-        return bool(row and row["status"] in {"ok", "degraded"} and row.get("ended_at") is not None)
+        ended = row.get("ended_at") if row else None
+        fresh = now is None or (ended is not None and ended <= now)
+        return bool(row and row["status"] in {"ok", "degraded"} and ended is not None and fresh)
 
     required = {
         "market_structure": ("bars_full", "m6_market_inputs"),
@@ -41,7 +50,7 @@ def dependencies_met(name, records):
     raise ValueError("Unknown module task")
 
 
-def readiness(values):
+def readiness(values, *, now=None):
     records = {}
 
     def ready(name, day):
@@ -54,7 +63,8 @@ def readiness(values):
                     (day, list(TASKS)),
                 ).fetchall()
                 records[day] = {row["task_name"]: row for row in rows}
-        return dependencies_met(name, records[day])
+        moment = now() if callable(now) else now
+        return dependencies_met(name, records[day], now=moment if name == "anomaly_daily" else None)
 
     return ready
 
@@ -76,6 +86,45 @@ def _already_attempted(connection, name, day):
     )
 
 
+def _anomaly_decision(connection, day):
+    rows = connection.execute(
+        "SELECT task_name, status, ended_at, error_summary FROM ingest.job_runs WHERE task_name=%s AND trade_date=%s",
+        ("anomaly_daily", day),
+    ).fetchall()
+    return dispatch_decision("anomaly_daily", rows)
+
+
+def _after_close_deadline(moment):
+    local = moment.astimezone(NY)
+    return (local.hour, local.minute) > (21, 0)
+
+
+def _skip_anomaly(clock, values, day, dependency_rows, skip_job):
+    rows = list(dependency_rows(day) if dependency_rows else _upstream_rows(values, day))
+    missing = []
+    now = clock.now_utc()
+    for name in ("bars_full", "market_structure"):
+        group = [row for row in rows if row.get("task_name") in (None, name)]
+        if not upstream_ready(group, now, name):
+            missing.append(upstream_phrase(name, group))
+    summary = skip_summary(missing or ["bars_full 没有记录", "market_structure 没有记录"])
+    if skip_job is not None:
+        skip_job("anomaly_daily", day, summary)
+    else:
+        with _perception_connection(values) as connection:
+            record_skip(connection, "anomaly_daily", day, summary, clock)
+    return {"status": "failed", "error_summary": summary}
+
+
+def _upstream_rows(values, day):
+    with connect(values) as connection:
+        return connection.execute(
+            "SELECT task_name, status, ended_at, error_summary FROM ingest.job_runs "
+            "WHERE trade_date=%s AND task_name=ANY(%s)",
+            (day, ["bars_full", "market_structure"]),
+        ).fetchall()
+
+
 def run_anomalies(*, clock, values):
     from collections import Counter
 
@@ -85,7 +134,7 @@ def run_anomalies(*, clock, values):
 
     day = clock.today_trade_date()
     with _perception_connection(values) as connection:
-        if _already_attempted(connection, "anomaly_daily", day):
+        if _anomaly_decision(connection, day) != "run":
             return {"status": "already_attempted"}
         summary = {}
 
@@ -116,7 +165,16 @@ def run_anomalies(*, clock, values):
             params_version="p-2026.10",
             operation=operation,
         )
-        return {"status": "ok", "job_id": job, **summary}
+        late = _after_close_deadline(clock.now_utc())
+        if late:
+            connection.execute(
+                "UPDATE ingest.job_runs SET error_summary=%s WHERE id=%s AND status='ok'",
+                ("迟到", job),
+            )
+        body = {"status": "ok", "job_id": job, **summary}
+        if late:
+            body["late"] = True
+        return body
 
 
 def premarket_scope(connection, *, clock):
@@ -220,17 +278,19 @@ def run_once(
     paper_run=None,
     premarket_run=None,
     names=None,
+    dependency_rows=None,
+    skip_job=None,
 ):
     local = clock.now_utc().astimezone(NY)
     if not trading_day(local.date()):
         return {}
-    ready, result = ready or readiness(values), {}
+    ready, result = ready or readiness(values, now=clock.now_utc), {}
     tasks = []
     hm = (local.hour, local.minute)
     if (20, 45) <= hm:
         tasks.append(("market_structure", market_run, "day"))
-    # Leave five minutes for M7 after M6; do not claim a late run met the 21:00 deadline.
-    if (20, 55) <= hm < (21, 0):
+    # 20:55–21:00 is on time. 21:00–21:10 can still run and is marked late. 21:10 skips.
+    if (20, 55) <= hm <= (21, 10):
         tasks.append(("anomaly_daily", anomaly_run, None))
     if hm >= (22, 30):
         tasks.extend([("rule_a_scores", score_run, "signal_date"), ("valuation_v1", valuation_run, None)])
@@ -254,7 +314,10 @@ def run_once(
                 else local.date()
             )
             if name != "paper_plan" and not ready(name, dependency_day):
-                result[name] = {"status": "waiting_dependencies"}
+                if name == "anomaly_daily" and hm == (21, 10):
+                    result[name] = _skip_anomaly(clock, values, dependency_day, dependency_rows, skip_job)
+                else:
+                    result[name] = {"status": "waiting_dependencies"}
                 continue
             kwargs = {"clock": clock, "values": values}
             if day_key:
@@ -272,6 +335,8 @@ def run_once(
                     "entry_paths",
                     "data_quality",
                     "missing_count",
+                    "error_summary",
+                    "late",
                 )
                 if key in output
             }

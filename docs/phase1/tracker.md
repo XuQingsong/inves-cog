@@ -394,3 +394,4 @@ B-013 只撤回我此前多加的「正文必须出现公司名」检查，不�
 - 2026-10-23 14:00：B-045 交 PR #52 `6bd9a96`（CI 485，API 独立确认），Z1–Z5 复核通过并合并 `218b696`；通知 A 部署。已知残余风险：09:15 若晚于 09:30 结束，tracks/labels 当日失败（不重跑），GLM low 后预计 09:15 任务数分钟内完成，10-26 观察。
 - 2026-10-23 14:30：用户确认依赖方案 `docs/phase1/dependency-plan.md`（UD-COORD-30，早页不等估值）。派 B-046（M7/M8 截点+等待窗口+最晚期限、skipped_upstream、结果以 job_runs 为准）。A-016（M4 改 ET 08:35–09:05 + 输入完整度 + 评分未就绪不出计划）待 A-015 验收后派。
 - 2026-10-23 20:00：A-015/PR #45 验收合并（merge `3d0a4cf`）：head `5cfbccb` 与当前 main 合并后推临时分支跑 CI 39948620481 success，本地 tests/m9 53 passed；迁移只建 overlay/perception_shadow/factor_shadow 表并收回 role_trading 写权限。派 A-016：M9 上线（迁移+worker）、M4 改 ET 08:35–09:05 并以评分为强依赖、覆盖层为弱依赖、FR-M4-16 输入完整度。B-046 已收到。
+- 2026-10-23 20:30：B-046 交 PR #53 `69296ec`（CI 544，API 独立确认），D1–D8 复核通过并合并 `6fa657c`；通知 A 部署（anomaly_daily/morning_page/tracks/labels 四进程）。

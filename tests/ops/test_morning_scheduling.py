@@ -27,9 +27,7 @@ def poll(root, stamp, calls, *, code=0, values=None):
     )
 
 
-@pytest.mark.parametrize(
-    "stamp", ["2026-10-20T01:14:59Z", "2026-10-20T01:16:00Z", "2026-11-03T01:15:00Z", "2026-10-19T01:15:00Z"]
-)
+@pytest.mark.parametrize("stamp", ["2026-10-20T01:14:59Z", "2026-11-03T01:15:00Z", "2026-10-19T01:15:00Z"])
 def test_morning_poll_outside_slot_does_nothing(tmp_path, stamp):
     from scripts.schedule_morning_page import run_once
 
@@ -79,7 +77,7 @@ def test_morning_child_receives_private_environment_but_never_logs_page(tmp_path
 
     run_once(root=root, python=Path("/fixture/python"), clock=frozen("2026-10-20T01:15:00Z"), run=invoke)
     command, options = calls[0]
-    assert command == ["/fixture/python", "-m", "inves_cog.perception.attribution.morning"]
+    assert command == ["/fixture/python", "-m", "inves_cog.perception.attribution.morning", "--page-only"]
     assert "--at" not in command and options["cwd"] == root
     assert options["env"]["FIXTURE_PRIVATE_KEY"] == "private-value"
     folder = Path(options["env"]["INVES_COG_PAGE_DIR"])

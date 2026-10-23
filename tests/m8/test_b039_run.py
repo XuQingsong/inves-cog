@@ -286,9 +286,25 @@ def test_later_slots_are_polled_once_and_registered(tmp_path):
 
     moment = slot_moment(DAY, "attribution_tracks")
     calls = []
+    store = {"tracks": []}
+
+    def records(task, _day):
+        if task == "attribution_candidates":
+            return [
+                {
+                    "task_name": task,
+                    "status": "ok",
+                    "ended_at": moment - timedelta(minutes=1),
+                    "error_summary": None,
+                }
+            ]
+        return store["tracks"]
 
     def invoke(command, **kwargs):
         calls.append(command)
+        store["tracks"] = [
+            {"task_name": "attribution_tracks", "status": "ok", "ended_at": moment, "error_summary": None}
+        ]
         return type("Done", (), {"returncode": 0})()
 
     root = tmp_path / "repo"
@@ -299,9 +315,11 @@ def test_later_slots_are_polled_once_and_registered(tmp_path):
         python=Path("/fixture/python"),
         run=invoke,
         load_environment=lambda _path: {},
+        records=records,
     )
     assert first["status"] == "ok"
-    assert calls[0][-2:] == ["--task", "attribution_tracks"]
+    assert calls[0][calls[0].index("--task") + 1] == "attribution_tracks"
+    assert "--at" in calls[0]
     assert (
         run_once(
             root=root,
@@ -310,17 +328,26 @@ def test_later_slots_are_polled_once_and_registered(tmp_path):
             python=Path("/fixture/python"),
             run=invoke,
             load_environment=lambda _path: {},
+            records=records,
         )["status"]
         == "already_attempted"
     )
     assert len(calls) == 1
+    labels = slot_moment(DAY, "attribution_labels")
+
+    def label_records(task, _day):
+        if task == "attribution_tracks":
+            return [{"task_name": task, "status": "ok", "ended_at": labels - timedelta(minutes=1)}]
+        return []
+
     failed = run_once(
         root=tmp_path / "other",
         task_name="attribution_labels",
-        clock=FrozenClock(slot_moment(DAY, "attribution_labels")),
+        clock=FrozenClock(labels),
         python=Path("/fixture/python"),
         run=lambda command, **kwargs: type("Done", (), {"returncode": 1})(),
         load_environment=lambda _path: {},
+        records=label_records,
     )
     assert failed["status"] == "failed"
     config = ConfigParser(interpolation=None)
