@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-050  进行中  2026-10-24 00:03 北京
+
+- PR #59，head `90639d1`。https://github.com/XuQingsong/inves-cog/pull/59 。没有合并。基于 main `7754650`。CI https://github.com/XuQingsong/inves-cog/actions/runs/39983218679 未出。不标已完成。
+- 本地 `make phase1-test`：591 passed、21 deselected，用时 106.21 秒。`test_b050.py` 4 项、`test_b048.py` 11 项、`test_a017.py` 8 项通过。本分支没有 B-049 的复盘代码，所以没有跑 `test_b049.py`。
+- `date` 是美股交易日。可见截点是 min(请求时刻, 美东 D+1 01:00)。非交易日返回「非交易日」。没有部署，没有调用真实模型。
+
+
 ## B-050  已收到  2026-10-23 23:54 北京
 
 - 任务：M10 页面日期口径。`date` 是美股交易日 D。可见截点是 min(请求时刻, 美东 D+1 01:00)。未处置标红用同一个时刻（夏令北京 D+1 13:00，冬令 D+1 14:00）。非交易日返回「非交易日」，HTTP 200。
