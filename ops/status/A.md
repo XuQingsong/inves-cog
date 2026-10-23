@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-017 / OPS-A016  进行中（公网入口已交草稿PR57；等待准确CI与登录决定）  2026-10-23 22:40 北京
+- [PR57](https://github.com/XuQingsong/inves-cog/pull/57) draft/open，完整head **337df84f92bb0806667828977042a9cfff2ce463**，先失败提交d70a496保留6失败。新增独立public入口/serve_pages配置、7项离线防护通过（green.xml）/ruff通过；真实DB市场页包装前后payload逐字段相等及无交易字段测试待清洁CI。业务api/pages/db、主锁uv.lock与已有安装器均未改。
+- 变更：按任务指定uvicorn，使用requirements-pages.txt固定uvicorn0.38.0/click8.1.8/h11 0.16.0 wheel哈希为独立运维依赖，不升级业务包。公开包已下载，目标Python3.11经uv离线解析/哈希安装到临时target并实际uvicorn --version成功。原全项目锁因既有curl-cffi索引timeout失败后停止；10秒无重试核实仍timeout，不无限重试。最初自动审批因用量耗尽未执行，用户“继续”后同一命令重审通过，未绕过。完整过程/边界见handoff/A017/self-test.md。
+- 服务器只读预检：role_web/overlay/shadow均NOLOGIN，三个scoped URL缺失；uvicorn未安装，8080无监听。已直接向用户请求这三个既有角色LOGIN/随机独立密码仅私有env（不新角色、不扩表权限），并请用户root/云控制台放行TCP8080、告知情况；未把无回复当批准，不自行改防火墙。PR未验收合并前不安装防护/启pages，M9也未启。
+- A014补充十一剩余dispatcher安装已准备：从79f94ae快进 **fb41108b0e12eb9b34c126af6ce92888bf23fea5**（含A016/B048验收合并），仅补重载daily_modules；paper_plan已安装当前同一源码，不重复重载，其他PID/marker保持。只装既有授权代码，不启动M10/M9、不手工业务/模型/迁移。
+
 ## A-017  已收到（M10公网只读入口与最小防护；登录/端口等待直接决定）  2026-10-23 22:24 北京
 - 最新main **fb41108** 下发A017（UD-COORD31），B048已合并4040c7b。目标仅本项目uvicorn单worker/0.0.0.0:8080/claudeuser，只新增web进程；GET页面路径、其余方法405、文档404、每IP60次/分钟、错误不泄漏。现API尚无这些防护，按本任务明确例外新开A017 PR；在独立入口包装，不改B业务页数据算法或正在开发的B049。
 - 变更：新增HTTP入口中间件/启动配置；uvicorn是任务指定运行依赖，先核现有环境/锁定依赖，在status记录。先失败离线测试后实现，准确head CI通过后交需求方验收合并，不提前部署未合并防护。
