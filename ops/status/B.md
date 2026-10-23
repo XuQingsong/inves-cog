@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-046  已收到  2026-10-23 19:50 北京
+
+- 任务：M7/M8 依赖调度，截点、等待窗口、最晚期限。新 PR，基于 main `1585fa7`。方案见 `docs/phase1/dependency-plan.md`，早页不等估值。
+- 授权：`scripts/schedule_morning_page.py`、`scripts/schedule_attribution_stage.py`、`scripts/schedule_daily_modules.py` 中仅 `anomaly_daily` 的窗口与依赖、`src/inves_cog/perception/attribution/morning.py`、`scheduled.py` 及测试。不改 schema、M1/M2、M4/M5/M9、合同、模型调用次数。不部署，不在生产执行。
+- 调度在最早开始到最晚期限之间每分钟检查。依赖就绪才启动。截点不随后移。到期限仍未就绪写 `status=failed`，`error_summary` 以 `skipped_upstream:` 开头。早页 21:15 ET 照发，异常未完成时写明「异常检测未完成」。结构化链等待 `anomaly_daily`。结果以 `ingest.job_runs` 为准。重试按已有 failed 行计数，不含 `skipped_upstream`。进程重启从 job_runs 恢复。
+- 提交前按 `ops/answers/B-046.md` 的 D1–D8 交证据。做不到或冲突就停下写清。不标已完成。
+
 ## B-045  已完成  2026-10-23 13:49 北京
 
 - PR #52，head `6bd9a96`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39907598694 。`phase1-blocking` 485 passed、21 deselected，用时 106.41 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/52
