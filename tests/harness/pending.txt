@@ -1,17 +1,7 @@
 test_anomaly_live_smoke | M7 | 等待 R5
 test_case_attribution | M8 | 等待 v3 真实录音（需用户授权调用）
-test_page_json_contracts | M10 | 等待 M10 实现
-test_pages_no_recompute | M10 | 等待 M10 实现
-test_system_log_counts_match | M10 | 等待 M10 实现
-test_disposition_states | M10 | 等待 M10 实现
-test_timeline_records_no_action | M10 | 等待 M10 实现
 test_case_cadence | M10 | 等待 M10 实现
-test_valuation_position_panel | M10 | 等待 M10 实现
-test_paper_labels | M10 | 等待 M10 实现
-test_market_pages_no_trading_fields | M10 | 等待 M10 实现
 test_oneliner_grounded | M10 | 等待 M10 实现
 test_precursor_snapshot_daily | M10 | 等待 M10 实现
 test_miss_sample_frame | M10 | 等待 M10 实现
 test_reports_contents | M10 | 等待 M10 实现
-test_unconnected_shown | M10 | 等待 M10 实现
-test_paper_input_completeness_passthrough | M10 | 等待 M10 实现
