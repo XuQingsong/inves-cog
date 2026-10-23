@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-052  已收到  2026-10-24 00:40 北京
+
+- 任务：复盘调度改为常驻循环并调用真实函数；首页未处置和标红只含 `universe='pool'`，计数仍报全部并分列池内/宽池，宽池在 `/market` 列出且不标红。
+- 新 PR，基于当前 main `2ae28bc`（含 B-051 合并 `ce76f35`）。授权 `scripts/schedule_review.py`、`src/inves_cog/perception/review/`、`src/inves_cog/web/` 与 `tests/m10/`。不改迁移、上游、合同。不部署，不调用真实模型。
+- 提交前按 `ops/answers/B-052.md` 的 Q1–Q6 交证据。不标已完成。
+
+
 ## B-051  已完成  2026-10-24 00:35 北京
 
 - PR #60，head `67b52d9`。https://github.com/XuQingsong/inves-cog/pull/60 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39987482146 ：`phase1-blocking` 成功，612 passed，`blocking.json` 为 exit_code 0、duration 127.480 秒（≤ 300）。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 的另一次运行 https://github.com/XuQingsong/inves-cog/actions/runs/39987482266 也成功，duration 160.296 秒。没有部署，没有调用真实模型。
