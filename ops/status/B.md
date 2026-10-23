@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-051  进行中  2026-10-24 00:33 北京
+
+- PR #60，head `67b52d9`。https://github.com/XuQingsong/inves-cog/pull/60 。没有合并。这一 head 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39987482146 与 https://github.com/XuQingsong/inves-cog/actions/runs/39987482266 还在跑。不标已完成。
+- 上一 head `a292150` 的本地 `make phase1-test` 失败两处：ruff format，以及 `/market` 把字段名 `spy_5d_pct` 里的 5 印进正文。该 head 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39987097464 失败。当前 head 不再把带数字的字段名写入正文。
+- 本地 `make phase1-test`：612 passed、21 deselected，用时 110.23 秒。`test_b051.py` 11 项通过，含路径、数字来自 JSON、首页标红、转义、白名单、限流和 503 脱敏。`test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_a017.py` 8 项通过。没有部署，没有调用真实模型。
+
+
 ## B-051  已收到  2026-10-24 00:20 北京
 
 - 任务：M10 网页渲染。13 个 HTML 路径，支持 `?date=`，默认最近一个已到截点的美股交易日。HTML 只渲染同名页面 JSON。中文界面，动态文本用 `html.escape`，不加载外部脚本、字体或 CDN。
