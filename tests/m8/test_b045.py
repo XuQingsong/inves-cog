@@ -144,10 +144,6 @@ def test_module_entry_reaches_main_and_writes_both_stage_rows():
             assert row["status"] == "ok"
     finally:
         admin.execute(
-            "DELETE FROM perception.m9_input_snapshots WHERE trade_date = %s AND kind = 'stage_completion'",
-            (DAY,),
-        )
-        admin.execute(
             "DELETE FROM ingest.job_runs WHERE trade_date = %s AND task_name = ANY(%s)",
             (DAY, ["attribution_candidates", "attribution_tracks", "attribution_labels"]),
         )

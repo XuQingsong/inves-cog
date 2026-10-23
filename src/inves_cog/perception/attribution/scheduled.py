@@ -108,10 +108,6 @@ def _execute(connection, writer, moment, task_name, client, record_clock):
     return 0
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
-
-
 def _previous_ready(connection, trade_date, previous, moment):
     rows = connection.execute(
         "SELECT task_name, status, ended_at FROM ingest.job_runs WHERE trade_date = %s AND task_name = %s",
@@ -133,3 +129,7 @@ def _aware(value):
     if isinstance(value, datetime) and value.tzinfo is not None:
         return value
     return None
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
