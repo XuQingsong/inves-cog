@@ -2,6 +2,16 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-044  已收到  2026-10-23 10:55 北京
+
+- 任务：M8 候选分析 prompt v4、GLM 低强度思考、早页先发、快照方向取值。新 PR，基于 main `c44ab51`。
+- 授权：可改 `src/inves_cog/perception/attribution/`、`src/inves_cog/llm/transport.py` 中仅 `anomaly_candidates` 分支、`config/llm_tasks.yaml` 中仅 `anomaly_candidates` 一项。不改 links/grounding 门禁、M9/M4/规则 A、schema、角色、数据源、合同 JSON。不部署，不在生产执行。
+- `anomaly_candidates` 的 system 整段读取 `docs/phase1/contracts/m8-candidate-prompt-v4/instruction.txt`，payload 的 `output` 读取同目录 `output.json`。`PROMPT_VERSION` 改为 `evidence-bridge-v4-links`。items 含文档时，在 v4 的 anchor 结构里追加 `passage` 及 `passage_schema()`。代码读文件，不手抄文本。
+- `anomaly_candidates` 请求加 `reasoning_effort="low"`。该任务 `timeout_seconds` 改为 300。模型仍为 glm-5.3，重试次数不变。
+- 09:15 先完成所有 pool 异常的 move_card 并写出早页，再跑结构化链落库。结构化链失败或慢不得推迟或阻止早页写出。模型调用次数与 B-040 相同。job 成败语义不变。
+- 实时 `snapshot._direction_field` 与回放 `replay_window._direction` 取首选候选门禁后保留的 `affected[*].direction`。唯一则填；不一致写缺失原因“受影响标的方向不一致”；无保留标的写“没有保留的受影响标的”。不再用 claims 汇总方向，也不用异常价格方向。
+- 提交前按 `ops/answers/B-044.md` 的 Y1–Y8 交证据。做不到或和约束冲突就停下写清。不标已完成。
+
 ## B-043  已完成  2026-10-22 23:23 北京
 
 - 草稿 PR #50，head `a9c4366`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39803809585 。`phase1-blocking` 477 passed、21 deselected，用时 103.49 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/50
