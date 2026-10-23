@@ -162,6 +162,7 @@ def test_rendered_numbers_are_already_in_the_payload():
             "shadow_divergence_count": 4,
         },
         "unhandled": [{"anomaly_id": "b048-a1", "disposition": "①", "highlighted": True}],
+        "market": {"spy_5d_pct": 0.01, "L1": "风险"},
     }
     html = render_page(payload)
     found = set()
@@ -174,7 +175,7 @@ def test_dynamic_text_is_escaped():
     payload = {"page": "/market", "date": "2031-04-17", "note": '<script>alert("x")</script> &'}
     html = render_page(payload)
     assert "<script>" not in html
-    assert '&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;' in html
+    assert "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;" in html
     assert "&amp;" in html
     assert "http://" not in html and "https://" not in html
 

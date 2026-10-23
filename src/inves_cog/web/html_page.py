@@ -80,6 +80,13 @@ HIDDEN_ON_RESEARCH = {
     "portfolio",
 }
 _RESEARCH = {"/", "/market", "/linkage/{id}", "/stock/{symbol}", "/graph", "/settings/data", "/review"}
+_LABELS = {
+    "spy_5d_pct": "标普五日涨跌",
+    "L1": "第一层",
+    "L2": "第二层",
+    "L3": "第三层",
+    "L4": "第四层",
+}
 _STYLE = """
 body { margin: 0; color: black; background: white; font-family: sans-serif; }
 nav a { display: block; color: black; text-decoration: none; }
@@ -157,9 +164,17 @@ def _form(payload):
 
 def _document(title, body):
     return (
-        "<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\">"
+        '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
         f"<title>{_text(title)}</title><style>{_STYLE}</style></head><body>{body}</body></html>"
     )
+
+
+def _label(key):
+    if key in _LABELS:
+        return _LABELS[key]
+    if any(character.isdigit() for character in str(key)):
+        return "字段"
+    return str(key)
 
 
 def _text(value):
@@ -190,7 +205,7 @@ def _mapping(value, research):
         if research and key in HIDDEN_ON_RESEARCH:
             continue
         shown = _linked(key, item) if isinstance(item, str) else _value(item, research)
-        rows.append(f"<dt>{_text(key)}</dt><dd>{shown}</dd>")
+        rows.append(f"<dt>{_text(_label(key))}</dt><dd>{shown}</dd>")
     body = "<dl>" + "".join(rows) + "</dl>"
     if value.get("highlighted") is True:
         return f'<div class="mark">{body}<p>标红</p></div>'
