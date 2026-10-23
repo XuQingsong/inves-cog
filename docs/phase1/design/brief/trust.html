@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>复盘与数据 · 美股 10月22日（样稿 v3）</title><style>
+  body{margin:0;background:#f5f6f8;color:#1f2329;font:15px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:16px}
+  header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px}
+  h1{font-size:22px;margin:0} .meta{color:#646a73;font-size:13px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:#eef0f3;color:#646a73;margin-left:6px}
+  .card{background:#fff;border-radius:10px;padding:16px 18px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .card h2{font-size:17px;margin:0 0 8px} .lead{font-size:16px;font-weight:600;margin:4px 0 10px}
+  .hero{border-left:4px solid #3370ff} .hero .lead{font-size:17px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+  .kpi{background:#f7f8fa;border-radius:8px;padding:10px 12px} .kpi b{display:block;font-size:20px} .kpi span{color:#646a73;font-size:12px}
+  .up{color:#d83931} .down{color:#2ea121} .muted{color:#8f959e} .warn{color:#de7802}
+  table{width:100%;border-collapse:collapse;font-size:14px} th,td{padding:7px 6px;border-bottom:1px solid #eff0f1;text-align:left} th{color:#646a73;font-weight:500;font-size:13px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .bar{display:flex;align-items:center;gap:6px;margin:3px 0} .bar i{display:inline-block;height:10px;border-radius:2px}
+  .gap{border:1px dashed #de7802;background:#fff8ee;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:13px;color:#7a4a00}
+  .gap b{color:#de7802}
+  .note{border:1px dashed #8f959e;background:#f7f8fa;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:13px;color:#4e5969}
+  .event{border-top:1px solid #eff0f1;padding-top:10px;margin-top:10px} .event:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .pill{display:inline-block;padding:0 7px;border-radius:9px;font-size:12px;margin-right:4px}
+  .p-red{background:#fdecec;color:#d83931} .p-green{background:#e9f7ec;color:#2ea121} .p-grey{background:#eef0f3;color:#646a73} .p-orange{background:#fff3e5;color:#de7802}
+  .status td:first-child{width:28%} .ok{color:#2ea121} .bad{color:#d83931}
+  a{color:#3370ff;text-decoration:none} .more{font-size:13px}
+  footer{color:#8f959e;font-size:12px;text-align:center;margin:20px 0}
+
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px} nav a{padding:6px 14px;border-radius:16px;background:#fff;color:#4e5969;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,.05)} nav a.on{background:#3370ff;color:#fff}
+  nav a small{display:block;font-size:11px;opacity:.8}
+  details{margin:6px 0} summary{cursor:pointer;font-weight:600;padding:6px 0}
+  .theme{border-top:1px solid #eff0f1;padding-top:8px;margin-top:8px}
+  .risk{background:#fdecec;color:#d83931;border-radius:4px;padding:0 5px}
+  td small{color:#8f959e;display:block;font-size:12px}
+</style></head><body><div class="wrap">
+<header><h1>复盘与数据</h1><div class="meta">美股 10月22日（周四） · 北京 10月23日 13:00 更新 <span class="tag">纸面跟踪，非投资建议</span></div></header>
+<nav><a href="index.html" class="">市场总览<small>大环境怎么样</small></a><a href="stocks.html" class="">我的标的<small>59 只各自怎样</small></a><a href="account.html" class="">纸面账户<small>仓位怎么处理</small></a><a href="trust.html" class="on">复盘与数据<small>系统靠不靠谱</small></a></nav><div class="card hero"><div class="lead">今天的行情数据完整可信；事件原因、情绪、估值三块不可信或缺失，看结论时请留意。</div></div>
+<div class="card"><h2>数据状态</h2><table class="status">
+<tr><td>行情、板块、风格</td><td class="ok">✔ 完整（2,570 只股票、58 个篮子、66 个分组）</td></tr>
+<tr><td>新闻</td><td class="bad">✘ 10月15日起未采集（生产调度从未包含新闻任务）</td></tr>
+<tr><td>情绪（VIX/期权/空头）</td><td class="bad">✘ 未接入每日调度</td></tr>
+<tr><td>事件原因（M8）</td><td class="warn">⚠ 基于旧新闻</td></tr>
+<tr><td>冷静期（M9）</td><td class="bad">✘ 尚未上线</td></tr>
+<tr><td>估值（M5）</td><td class="warn">⚠ 成长/周期股失真；AVGO 结果为 0</td></tr>
+<tr><td>纸面撮合</td><td class="warn">⚠ 10-19 起 5 笔订单未成交</td></tr>
+<tr><td>纸面计划</td><td class="warn">⚠ 10-23 未生成；2 处理由矛盾</td></tr></table></div>
+<div class="card"><h2>系统之前说的对不对（复盘）</h2>
+<p>理想状态：列出前几天系统给出的判断（如“10-16 存储股下跌是供给担忧”），对照之后 1 / 5 / 20 个交易日的实际走势，标“说对 / 说错 / 待验证”，并统计每周命中率。</p>
+<div class="gap"><b>现在：</b>复盘打标程序已建表，但调度入口是空壳（B-052 修复中），尚无打标记录。</div></div>
+
+<footer>纸面跟踪，非投资建议 · 样稿 v3 · 数字取自 inves-cog 生产库（只读）；橙色虚线框为数据缺口</footer></div></body></html>
