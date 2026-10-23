@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-048  进行中  2026-10-23 21:58 北京
+
+- PR #56，head `2b4b81a`。https://github.com/XuQingsong/inves-cog/pull/56 。没有合并。本地 `make phase1-test` 563 passed、21 deselected，用时 105.16 秒。同一 head 的 `phase1-blocking` 还在等 CI：https://github.com/XuQingsong/inves-cog/actions/runs/39965309782 。不标已完成。
+- 十二个每日页面只读。数值来自上游列或这些行的 SQL 计数。处置卡合成 ①–④，无漏检数据不出现 ⑤。北京 13:00 后未处置标红。大幅波动榜分联动和单股事件，模型调用计数为 0。M8/M9 字段从 `overlay.versions` 透传，不读 `perception.m9_input_snapshots`。
+- 相对 main 的 diff：`src/inves_cog/web/`、`.env.example` 的 `INVES_COG_WEB_DATABASE_URL`、`tests/m10/test_b048.py`，以及 `tests/harness/pending.txt` 只删本单测试名。没有迁移、GRANT、上游模块、合同。没有部署，没有调用真实模型。
+- P1–P10 本地通过，CI 未出。不取新任务。
+
 ## B-048  已收到  2026-10-23 21:30 北京
 
 - 任务：M10 第一部分，页面 JSON 接口与每日看盘页面。新 PR，基于 main `2505db2`。复盘闭环留给 B-049。
