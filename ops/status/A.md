@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-017 / OPS-A016  进行中（三专用账号实际登录已验证，准备只新增两个进程）  2026-10-23 23:00 北京
+- 按直接UD-A42，22:55:06三个已有角色role_overlay/role_shadow/role_web仅启用LOGIN及各独立随机密码，三个scoped URL仅服务器.env；表/GRANT未变。原角色均非superuser/CREATEROLE/CREATEDB；实际分别连接验证current_user等于对应角色、current_database=inves_cog，readonly探针通过；.env0600。私有a042-login-result-20261023.json及阶段attempt留存，不打印或外传密码/DSN。不是仅命令发出，已实连成功。
+- 二次fetch核origin/main **7cbe4151c299eca7da318b80d27523f7aca69aef** 确含PR57验收merge **4a86895a89a31b64bcd509e6cbac72087bad24ff**（最初fetch早于合并未包含，未提前安装）。准确head fa4441f7cbb0bf174b6b2efc302469e3cac45138/CI39972307325 587项通过有效。
+- 本阶段只快进已验收main7cbe415，安装固定哈希页面依赖，追加m9/pages两个program并仅update这两组，原10个RUNNING PID及marker/配置原前缀保留。M9唯一迁移不重复；不手工业务/历史补跑或模型调用。已有生产投递目录复用，当前过自然窗口则如实记录M9截止/降级，不补钟。页面先loopback、再外部TCP8080状态/计数/RSS，页面正文/持仓不输出。
+
 ## A-017 / OPS-A016  进行中（UD-A-42：用户直接允许三现有角色LOGIN）  2026-10-23 23:00 北京
 - **用户直接决定UD-A-42**：针对“是否允许现有role_overlay、role_shadow、role_web启用LOGIN，独立密码仅存服务器私有配置”，用户明确答复 **“允许，继续吧”**。仅三个已有角色LOGIN、分别随机密码与scoped URL私有配置，不新建角色、不新增GRANT/表权限、不以管理员业务运行。先推送本决定，再复核实际角色/URL/现有作业与部署前缀，防重复配置。
 - 用户已报TCP8080放行UD-A41；仍需服务启动后外部实测。PR57已独立核merged=true，merge4a86895a89a31b64bcd509e6cbac72087bad24ff，准确headfa4441f7cbb0bf174b6b2efc302469e3cac45138/CI39972307325的587项成功证据有效；先核main包含验收合并再安装。只新增M9/pages指定进程，原M4/M8等其他进程与已有job/marker保留，不重复M9迁移/历史补跑/模型任务。
