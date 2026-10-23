@@ -1075,16 +1075,13 @@ def test_read_only_transaction_rejects_writes(pages):
         "test_market_pages_no_trading_fields",
         "test_unconnected_shown",
         "test_paper_input_completeness_passthrough",
-    ):
-        assert name not in pending
-    for name in (
         "test_case_cadence",
         "test_oneliner_grounded",
         "test_precursor_snapshot_daily",
         "test_miss_sample_frame",
         "test_reports_contents",
     ):
-        assert name in pending
+        assert name not in pending
     source = (
         (ROOT / "src/inves_cog/web").read_text()
         if False

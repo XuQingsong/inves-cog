@@ -1,5 +1,6 @@
 """Daily page JSON. Every number is copied from an upstream column or is a SQL count of those rows."""
 
+import json
 from datetime import datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -15,7 +16,7 @@ VALUATION_LABEL = "估值参考 v1，不参与仓位"
 UNCONNECTED = "未接通"
 STALE = "今日未更新"
 COMPLETENESS_MISSING = "输入完整性未报告"
-# This ticket never calls a model. The grounded one-line summary belongs to the next ticket.
+# The page copies a stored sentence when the review job saved one. It does not call a model.
 MODEL_CALLS = 0
 
 _SHANGHAI = ZoneInfo("Asia/Shanghai")
@@ -264,7 +265,9 @@ def _cooling_on(tickers, names):
     return False
 
 
-def _disposition(view, cooling_on, acted):
+def _disposition(view, cooling_on, acted, missed=False):
+    if missed:
+        return "⑤"
     if view is not None and view["deadline_visible"]:
         return "④"
     if cooling_on or acted:
@@ -272,6 +275,35 @@ def _disposition(view, cooling_on, acted):
     if view is None or view["lifecycle"] in (None, "已发现"):
         return "①"
     return "②"
+
+
+def _confirmed_misses(connection, cutoff):
+    rows = _rows(
+        connection,
+        """
+        SELECT anomaly_id FROM perception.miss_samples
+        WHERE judgment = '应发现' AND anomaly_id IS NOT NULL
+          AND judged_at IS NOT NULL AND judged_at < %s
+        """,
+        (cutoff,),
+    )
+    return {row["anomaly_id"] for row in rows}
+
+
+def _stored_oneliner(connection, day, cutoff):
+    row = _one(
+        connection,
+        """
+        SELECT payload->>'sentence' AS sentence
+        FROM perception.reports_weekly
+        WHERE report_id = %s AND generated_at < %s
+        """,
+        ("oneliner:" + day.isoformat(), cutoff),
+    )
+    if row is None:
+        return None
+    sentence = row["sentence"]
+    return sentence or None
 
 
 def _highlighted(clock, day):
@@ -302,12 +334,18 @@ def page_home(connection, day, clock):
     payload = plan["payload"] if plan and isinstance(plan["payload"], dict) else {}
     orders = _orders(connection, day)
     acted = _acted(orders, payload)
+    missed = _confirmed_misses(connection, cutoff)
     red = _highlighted(clock, day)
     unhandled = []
     for anomaly in anomalies:
         names = _tickers(anomaly["members"])
         view = events.get(anomaly["anomaly_id"])
-        state = _disposition(view, _cooling_on(tickers, names), bool(set(names) & acted))
+        state = _disposition(
+            view,
+            _cooling_on(tickers, names),
+            bool(set(names) & acted),
+            anomaly["anomaly_id"] in missed,
+        )
         if state != "①":
             continue
         unhandled.append({"anomaly_id": anomaly["anomaly_id"], "disposition": state, "highlighted": red})
@@ -346,7 +384,8 @@ def page_home(connection, day, clock):
     return {
         "page": "/",
         "date": day,
-        "summary_oneliner": f"今日异常 {counts['anomaly_count']} 个，详见下方",
+        "summary_oneliner": _stored_oneliner(connection, day, cutoff)
+        or f"今日异常 {counts['anomaly_count']} 个，详见下方",
         "counts": counts,
         "unhandled": unhandled,
         "sections": {
@@ -518,7 +557,7 @@ def _move_board(connection, day, cutoff, anomalies):
     return {"联动": linked, "单股事件": single}
 
 
-def _anomaly_public(anomaly, events, tickers, acted):
+def _anomaly_public(anomaly, events, tickers, acted, missed):
     names = _tickers(anomaly["members"])
     view = events.get(anomaly["anomaly_id"])
     return {
@@ -531,7 +570,9 @@ def _anomaly_public(anomaly, events, tickers, acted):
         "max_abs_z": anomaly["max_abs_z"],
         "universe": anomaly["universe"],
         "status": anomaly["status"],
-        "disposition": _disposition(view, _cooling_on(tickers, names), bool(set(names) & acted)),
+        "disposition": _disposition(
+            view, _cooling_on(tickers, names), bool(set(names) & acted), anomaly["anomaly_id"] in missed
+        ),
     }
 
 
@@ -545,6 +586,7 @@ def page_market(connection, day, clock):
     plan = _plan(connection, day, cutoff)
     payload = plan["payload"] if plan and isinstance(plan["payload"], dict) else {}
     acted = _acted(_orders(connection, day), payload)
+    missed = _confirmed_misses(connection, cutoff)
     market = _one(
         connection,
         "SELECT l1_state, spy_5d_pct, vix, shock_flag FROM marketstate.market WHERE trade_date = %s",
@@ -573,7 +615,7 @@ def page_market(connection, day, clock):
             "vix": market["vix"],
             "shock_flag": market["shock_flag"],
         },
-        "anomalies": [_anomaly_public(row, events, tickers, acted) for row in anomalies],
+        "anomalies": [_anomaly_public(row, events, tickers, acted, missed) for row in anomalies],
         "linkage_events": [
             {
                 "event_id": view["event_id"],
@@ -1263,3 +1305,105 @@ def page_ledger(connection, day, clock):
             "sections": {"ledger": _section(connection, day, cutoff, "paper_plan")},
         },
     )
+
+
+def _object(value):
+    if isinstance(value, str):
+        return json.loads(value)
+    return value if isinstance(value, dict) else {}
+
+
+def page_review(connection, day, clock):
+    del clock
+    _, cutoff = _window(day)
+    cases = _rows(
+        connection,
+        """
+        SELECT case_id, anomaly_id, trade_date, status, reason
+        FROM perception.cases
+        WHERE trade_date <= %s
+        ORDER BY case_id
+        """,
+        (day,),
+    )
+    labels = _rows(
+        connection,
+        """
+        SELECT case_id, horizon, as_of, drafted, reason, labels
+        FROM perception.case_labels
+        WHERE as_of <= %s AND written_at < %s
+        ORDER BY case_id, horizon
+        """,
+        (day, cutoff),
+    )
+    grouped = {}
+    for row in labels:
+        grouped.setdefault(row["case_id"], []).append(
+            {
+                "horizon": row["horizon"],
+                "as_of": row["as_of"],
+                "drafted": row["drafted"],
+                "reason": row["reason"],
+                "labels": _object(row["labels"]),
+            }
+        )
+    weekly = _one(
+        connection,
+        """
+        SELECT payload FROM perception.reports_weekly
+        WHERE report_id LIKE 'week:%%' AND period_end <= %s AND generated_at < %s
+        ORDER BY period_end DESC
+        LIMIT 1
+        """,
+        (day, cutoff),
+    )
+    monthly = _one(
+        connection,
+        """
+        SELECT payload FROM perception.reports_monthly
+        WHERE period_end <= %s AND generated_at < %s
+        ORDER BY period_end DESC
+        LIMIT 1
+        """,
+        (day, cutoff),
+    )
+    samples = _rows(
+        connection,
+        """
+        SELECT item_ref, discovered, judgment, gap_ring, anomaly_id
+        FROM perception.miss_samples
+        WHERE period_end <= %s AND (judged_at IS NULL OR judged_at < %s)
+        ORDER BY sample_id
+        """,
+        (day, cutoff),
+    )
+    patterns = _rows(
+        connection,
+        """
+        SELECT pattern_id, trigger_type, mechanism, capital_behavior, outcome,
+               example_count, retained_holds, status, examples, counterexamples
+        FROM perception.patterns
+        WHERE updated_at < %s
+        ORDER BY pattern_id
+        """,
+        (cutoff,),
+    )
+    return {
+        "page": "/review",
+        "date": day,
+        "案例库": [
+            {
+                "case_id": row["case_id"],
+                "anomaly_id": row["anomaly_id"],
+                "trade_date": row["trade_date"],
+                "status": row["status"],
+                "reason": row["reason"],
+                "labels": grouped.get(row["case_id"], []),
+            }
+            for row in cases
+        ],
+        "周报": _object(weekly["payload"]) if weekly else {},
+        "月报": _object(monthly["payload"]) if monthly else {},
+        "漏检报告": samples,
+        "模式库候选": patterns,
+    }

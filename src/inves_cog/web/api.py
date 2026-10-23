@@ -18,6 +18,7 @@ from inves_cog.web.pages import (
     page_paper_stock,
     page_plan,
     page_portfolio,
+    page_review,
     page_settings,
     page_stock,
     page_universe,
@@ -99,5 +100,9 @@ def create_app(dsn=None, clock=None):
     @app.get("/api/pages/paper/ledger")
     def ledger(date: date):
         return call(page_ledger, date)
+
+    @app.get("/api/pages/review")
+    def review(date: date):
+        return call(page_review, date)
 
     return app
