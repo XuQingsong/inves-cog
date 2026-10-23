@@ -890,7 +890,10 @@ def _ledger(connection, day, cutoff):
 def _position_tickers(state):
     if not isinstance(state, dict):
         return []
-    return _tickers(state.get("positions"))
+    positions = state.get("positions")
+    if isinstance(positions, dict):
+        return [key for key in positions if isinstance(key, str)]
+    return _tickers(positions)
 
 
 def _timeline_records(connection, day, cutoff, anomalies):
