@@ -2,6 +2,20 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-044  已完成  2026-10-23 11:35 北京
+
+- PR #51，head `5de77c9`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39895457014 。`phase1-blocking` 481 passed、21 deselected，用时 162.55 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/51
+- 已合入裁定 `92ea956`。示例用词是 `broad sector risk-off selling`。`assert "wide" not in asked` 未改。`registry.py` 只把 `anomaly_candidates` 的预期超时设为 300，其他困难任务仍是 900。没有部署，没有在生产执行，没有调用真实模型。
+- Y1｜通过｜`test_prompt_files_are_the_request_and_other_tasks_keep_their_bodies`｜system 与 instruction.txt 逐字节相等。无文档时 output 与 output.json 相等。有文档时只在 schema 的 anchor 上多 passage 字段，example 不变。
+- Y2｜通过｜`test_v4_example_passes_the_gate_and_a_v3_shaped_output_does_not`｜example 走 `propose_candidates` 后 AAA、BBB 保留，方向 down，research_gaps 为空。坏输出 affected 为空且 research_gaps 非空。links.py、grounding.py 未改。
+- Y3｜通过｜同一请求测试｜anomaly_candidates 请求含 reasoning_effort=low、model glm-5.3、无 max_tokens，timeout 300，retries 0。其他任务仍是通用前缀。graph/exposure 为 8192 加 low，segment 为 4096 加 low，其余没有这两项。
+- Y4｜通过｜`test_morning_page_is_written_before_a_blocking_candidate_call`｜注入超时前早页文件已写出。`page-already-written` 在第一次 anomaly_candidates 之前。两条异常的调用是 move_card、claim_extraction、anomaly_candidates 各 2 次。
+- Y5｜通过｜`test_snapshot_direction_uses_the_preferred_candidate_not_claims`｜保留标的都是 down 时方向为 down。方向不一致时缺失原因是「受影响标的方向不一致」。无保留标的时是「没有保留的受影响标的」。claims 方向混杂不影响。实时快照和回放快照各一组。
+- Y6｜通过｜`test_v2_and_v3_counts_match_and_later_slots_are_quiet` 及 B-041 其余、B-042、B-043｜子串 wide 不再出现。断言未改。东芝夹具只补了 direction down。
+- Y7｜通过｜相对 main 的 diff 未改 links.py、grounding.py、M9、M4、schema、迁移、GRANT、合同 JSON。transport.py 只改了 anomaly_candidates 分支。registry.py 那一行预期超时已按裁定接受。
+- Y8｜通过｜head `5de77c9` 本地 `make phase1-test` 481 passed、21 deselected，用时 94.87 秒。CI 同一 head 481 passed、21 deselected，用时 162.55 秒，nightly 跳过。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-044  进行中  2026-10-23 11:33 北京
 
 - PR #51，head `5de77c9`，已合入裁定 `92ea956`。https://github.com/XuQingsong/inves-cog/pull/51 。没有合并。phase1-blocking 正在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39895457014 。不标已完成。
