@@ -172,6 +172,8 @@ WHERE accession = ANY(%s) AND fetched_at <= %s
 
 def attach_graph(connection, anomalies, as_of):
     """Read visible graph rows onto each anomaly. An empty read leaves a caller's edges alone."""
+    if connection is None:
+        return anomalies
     for anomaly in anomalies or []:
         if not isinstance(anomaly, dict):
             continue

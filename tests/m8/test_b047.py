@@ -62,6 +62,17 @@ class _Reply:
         return {"candidates": self.candidates}
 
 
+def test_replay_without_a_database_keeps_edges_the_caller_supplied():
+    anomaly = {
+        "anomaly_id": "b047-none",
+        "trade_date": DAY,
+        "members": [{"ticker": "AAA"}],
+        "edges": [{"relation_id": "kept"}],
+    }
+    assert attach_graph(None, [anomaly], CUTOFF) == [anomaly]
+    assert anomaly["edges"] == [{"relation_id": "kept"}]
+
+
 def test_g1_live_and_replay_keep_one_normalized_neighbor():
     _with_admin(_seed_visibility, _assert_visibility)
 
