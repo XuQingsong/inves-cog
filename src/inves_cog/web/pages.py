@@ -1321,7 +1321,7 @@ def page_review(connection, day, clock):
         connection,
         """
         SELECT payload FROM perception.reports_weekly
-        WHERE report_id LIKE 'week:%' AND period_end <= %s AND generated_at < %s
+        WHERE report_id LIKE 'week:%%' AND period_end <= %s AND generated_at < %s
         ORDER BY period_end DESC
         LIMIT 1
         """,
