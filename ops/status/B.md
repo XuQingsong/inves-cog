@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-050  进行中  2026-10-24 00:15 北京
+
+- PR #59，head `54c28e7`。https://github.com/XuQingsong/inves-cog/pull/59 。没有合并。这一 head 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39985043238 还在跑。不标已完成。
+- `90639d1` 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39983218679 失败：合并 main 后复盘页仍调用已删除的 `_window`；`2032-06-18` 是 Juneteenth 休市，页面返回「非交易日」。`56c013f` 把截点收到 `perception/review/calendar.cutoff`，复盘打标和先兆用同一截点，样本日改为 `2032-06-17`。该 head 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39984375214 仍失败：生成时刻等于请求时刻，严格小于截点，行不可见。
+- 当前 head 把复盘页的读取时钟拨到写入后一分钟。本地 `make phase1-test`：601 passed、21 deselected，用时 106.89 秒。`test_b050.py` 5 项、`test_b049.py` 9 项、`test_b048.py` 11 项、`test_a017.py` 8 项通过。
+- 补充授权改了 `src/inves_cog/perception/review/`（calendar、cases、snapshots）和 `tests/m10/`。页面截点是 min(请求时刻, 美东 D+1 01:00)。没有部署，没有调用真实模型。
+
+
 ## B-050  进行中  2026-10-24 00:03 北京
 
 - PR #59，head `90639d1`。https://github.com/XuQingsong/inves-cog/pull/59 。没有合并。基于 main `7754650`。CI https://github.com/XuQingsong/inves-cog/actions/runs/39983218679 未出。不标已完成。
