@@ -2,6 +2,21 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-047  已完成  2026-10-23 21:09 北京
+
+- PR #55，head `09bb9e0`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39958364141 。`phase1-blocking` 552 passed、21 deselected，用时 117.30 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/55
+- 早报和回放用同一个 `attach_graph` 读 `graph.relations`。没有数据库连接时不动调用方已有的边。端点 `ticker:XXX` 读成 `XXX`。引文认定只改投影，不写回表。暴露进报告 scope、有 n_code 的 `ticker_status`，以及实时和回放快照。`PROMPT_VERSION` 是 `evidence-bridge-v4.1-links`。单个候选结构不合格只丢弃该条。
+- 相对 main 的 diff：`graph_context.py`、`morning.py`、`replay_window.py`、`propose.py`、`report.py`、`chain.py`，以及 `tests/m8/test_b047.py`、`tests/m8/test_b044.py`、`tests/m8/test_b010.py`。后两个只改了版本字符串。没有 schema、迁移、graph 写入、M6、M9、M4、合同 JSON。没有部署，没有在生产执行，没有调用真实模型。
+- G1｜通过｜`test_g1_live_and_replay_keep_one_normalized_neighbor`｜一次性库里三条 `ticker:AAA` 关系，早报 `_load` 和回放 `attach_graph` 的 neighbors 只剩截点前那条，端点是 `AAA`。读取语句都是 SELECT。
+- G2｜通过｜`test_g2_citation_status_is_derived_and_rows_stay_unchanged`｜业务关系、经营传导引文对上为观察到并带 `status_basis`；市场叙事、引文不存在、原文晚于截点保持候选。人工观察到不写 `status_basis`。表行前后逐字段相等。
+- G3｜通过｜`test_g3_exposure_agrees_across_scope_status_and_both_snapshots`｜已有关系指向第一条为直接、第二条为间接；只走假设且有候选邻居为概念关联；无邻居为纯共振；估值倍数为概念关联。scope、打上的 affected、实时快照和回放快照一致。估值倍数写入 N2 的 `ticker_status`。供给没有 n_code，不新造代码。
+- G4｜通过｜`test_g4_direct_exposure_turns_cooling_on_through_the_provider`｜直接结果经 `m8_provider` 交给 `generate_overlay`，AAA `cooling_status` 为 on，概念关联标的为 off。没有改 M9。
+- G5｜通过｜`test_g5_system_message_matches_the_updated_instruction`｜请求 system 与 `instruction.txt` 逐字节相等，`PROMPT_VERSION` 为 `evidence-bridge-v4.1-links`。B-044 Y1/Y2 在同一次 phase1 里通过。
+- G6｜通过｜`test_g6_one_bad_candidate_is_dropped_and_all_bad_still_degrades`｜两个合格候选进入门禁，`control_baskets` 为字符串的那条被丢弃并记下字段。三条都不合格时降级为「结构不合格」。
+- G7｜通过｜`test_g7_forged_mismatched_and_candidate_links_are_not_observed_exposure`｜伪造 relation_id、端点不符、候选状态的已有关系都不成为直接或间接。B-041 至 B-046 在同一次 phase1 里通过。
+- G8｜通过｜head `09bb9e0`｜本地 `make phase1-test` 552 passed、21 deselected，用时 107.00 秒。CI 同一 head 552 passed、21 deselected，用时 117.30 秒，nightly 跳过。diff 只含上述源文件和测试。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-047  进行中  2026-10-23 21:08 北京
 
 - PR #55，head `09bb9e0`。https://github.com/XuQingsong/inves-cog/pull/55 。没有合并。本地 `make phase1-test` 已过，同一 head 的 `phase1-blocking` 还在等 CI。不标已完成。
