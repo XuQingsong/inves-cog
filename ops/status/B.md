@@ -2,6 +2,22 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-044  阻塞  2026-10-23 11:18 北京
+
+- PR #51，head `14de3b7`。https://github.com/XuQingsong/inves-cog/pull/51 。没有合并。不标已完成。
+- 冲突：Y1 要求 payload 的 `output` 与 `docs/phase1/contracts/m8-candidate-prompt-v4/output.json` 相等。该文件 example 的竞争解释是 `sector-wide risk-off selling`。Y6 要求 `test_v2_and_v3_counts_match_and_later_slots_are_quiet` 通过，并且 `tests/m8/test_b041_contract.py` 只允许给 `_candidate` 的 affected 补 `"direction": "down"`，断言不改。该测试第 249 行 `assert "wide" not in asked` 命中示例里的子串 wide。宽池异常本身没有进入模型：同一测试里 09:15 的调用仍是 move_card、claim_extraction、anomaly_candidates 各 3 次，之后两段为 0，这两条断言已过。没有改这条断言，没有改合同 JSON。
+- 需要需求方决定：是否允许把该断言从子串 `wide` 收窄为「anomaly_id 或 universe 为 wide 的请求不出现」，或改示例用词。确认前不继续改。
+- 另有一处超出授权文件：`src/inves_cog/llm/registry.py` 的 I37 把困难任务超时写死为 900。不改这一处，yaml 里的 300 无法加载。已只把 `anomaly_candidates` 的预期超时改为 300，其他困难任务仍是 900。请确认是否接受这一行。
+- Y1｜通过｜`test_prompt_files_are_the_request_and_other_tasks_keep_their_bodies`｜system 与 instruction.txt 逐字节相等。无文档时 output 与 output.json 相等。有文档时只在 schema 的 anchor 上多 passage 字段，example 不变。
+- Y2｜通过｜`test_v4_example_passes_the_gate_and_a_v3_shaped_output_does_not`｜example 走 `propose_candidates` 后 AAA、BBB 保留，方向 down，research_gaps 为空。坏输出 affected 为空且 research_gaps 非空。links.py、grounding.py 未改。
+- Y3｜通过｜同一请求测试｜anomaly_candidates 请求含 reasoning_effort=low、model glm-5.3、无 max_tokens，timeout 300，retries 0。其他任务仍是通用前缀。graph/exposure 为 8192 加 low，segment 为 4096 加 low，其余没有这两项。
+- Y4｜通过｜`test_morning_page_is_written_before_a_blocking_candidate_call`｜注入超时前早页文件已写出。`page-already-written` 在第一次 anomaly_candidates 之前。两条异常的调用是 move_card、claim_extraction、anomaly_candidates 各 2 次。
+- Y5｜通过｜`test_snapshot_direction_uses_the_preferred_candidate_not_claims`｜保留标的都是 down 时方向为 down。方向不一致时缺失原因是「受影响标的方向不一致」。无保留标的时是「没有保留的受影响标的」。claims 方向混杂不影响。实时快照和回放快照各一组。
+- Y6｜不通过｜`test_v2_and_v3_counts_match_and_later_slots_are_quiet`｜只失败在子串 wide。B-041 其余测试、B-042、B-043 在这次 phase1-test 里通过。东芝夹具只补了 direction down。合同断言未改。
+- Y7｜需确认｜diff 未改 links.py、grounding.py、M9、M4、schema、迁移、GRANT、合同 JSON。transport.py 只改了 anomaly_candidates 分支。registry.py 多了上面那一行预期超时。
+- Y8｜不通过｜head `14de3b7` 本地 `make phase1-test`：480 passed、1 failed、21 deselected，用时 93.98 秒。唯一失败是 Y6 那一条。CI 会同样红。不标已完成。
+- 没有部署，没有在生产执行，没有调用真实模型。不取新任务。
+
 ## B-044  已收到  2026-10-23 10:55 北京
 
 - 任务：M8 候选分析 prompt v4、GLM 低强度思考、早页先发、快照方向取值。新 PR，基于 main `c44ab51`。
