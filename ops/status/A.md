@@ -1,5 +1,11 @@
 # A 线回报
 
+## OPS-A014  已完成（B051 HTML页面实际上线；review缺口仍单列待B052）  2026-10-24 00:44 北京
+- 按补充十七生产16:43:00–16:43:15UTC从46a15c10605e0719780848f9a42e93ef95ebc552干净快进 **2ae28bc8e69a2310f5de7ba01ccf0189ea63c943**；独立核[PR60](https://github.com/XuQingsong/inves-cog/pull/60)已验收merged，merge **ce76f35c89fff0880282bff10fd403dbe17df9e0**，准确head **67b52d98ee1a618a7d4b9cab35464f18af3affa8**/[CI39987482146](https://github.com/XuQingsong/inves-cog/actions/runs/39987482146)及39987482266均success（612passed）。仅pages847380→856022，其他11运行PID/配置/已有marker保持，旧embedding EXITED未动，3个安装文件hash匹配Git。迁移0/手工业务0/人工模型0，未重复账号或七表迁移。
+- **实际外部验收**2026-10-23 **16:43:30UTC**：http://43.166.2.31:8080/ 与 /market?date=2026-10-22 均 **HTTP200、Content-Type text/html; charset=utf-8**，本机同样通过；pages RSS122320KiB。不是仅JSON或进程存活，用户现在可直接浏览HTML。私有b051-pages-20261024.json、b051-external-verification-20261024.json仅元数据，不输出页面/持仓明细。[需求方实装回报6369961771](https://github.com/XuQingsong/inves-cog/pull/60#issuecomment-6369961771)已同步。
+- 补充十六确认“14”为需求方写错，96含宽池，A未改数据正确；该差异关闭，不继续诊断。review空跑缺口已正式派B052，须其验收合并后按原UD-COORD33部署，无需再次确认；本轮未启空壳review，不冒称快照成功。剩余OPS-review阻塞与M4/M9自然窗口验证独立保留，不将本条B051完成当整体验收。接单持续开启。
+- 本轮HTTPS fetch SSL_ERROR_SYSCALL失败，使用本项目既有SSH只读同步main/status成功，不绕过审批；已自行决定无新增业务/权限/依赖方案。
+
 ## OPS-A014  进行中（补充十六/十七已收到；准备B051只重载pages）  2026-10-24 00:43 北京
 - 需求方补充十六确认96含宽池，交接14写错；原“不修改数据”正确，计数差异不再阻塞。确认review空跑缺陷并派B052，验收合并后按原UD-COORD33上线，不重复请求授权；现不启空壳/不重复七表迁移。
 - 补充十七交接B051网页渲染，main **2ae28bc8e69a2310f5de7ba01ccf0189ea63c943** 含独立核merged的[PR60](https://github.com/XuQingsong/inves-cog/pull/60)，merge **ce76f35c89fff0880282bff10fd403dbe17df9e0**，准确head **67b52d98ee1a618a7d4b9cab35464f18af3affa8**/[CI39987482146](https://github.com/XuQingsong/inves-cog/actions/runs/39987482146)success。按同范围授权仅代码快进/重载pages，不新增依赖/角色/迁移/手工业务或模型。将核原PID/已提交前缀及外部根路径与market状态码/Content-Type，不输出页面正文。
