@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-047  已收到  2026-10-23 20:40 北京
+
+- 任务：M8 接入图谱关系。读入、引文自动认定、暴露分级、prompt v4.1。新 PR，基于 main `6810db6`。
+- 授权：`src/inves_cog/perception/attribution/` 下的读取（morning/scheduled/replay_window）、graph_context、propose、report/chain 中暴露计算相关部分及测试，以及 `PROMPT_VERSION`。不改 schema、迁移、`graph.*` 表内容、M6 图谱模块、M9/M4、合同 JSON。不部署，不在生产执行。
+- 实时与回放用同一函数读 `graph.relations`。端点 `ticker:XXX` 与成员 `XXX` 在读取层写成同一种。截点前可见。人工已观察到的保留；业务关系与经营传导在截点前原文能逐字对上引文时，读取时视为观察到并写 `status_basis`，不写回数据库。市场叙事与对不上的保持候选。暴露按门禁后路径末段计算。`PROMPT_VERSION` 改为 `evidence-bridge-v4.1-links`。单个候选结构不合格只丢弃该条。
+- 提交前按 `ops/answers/B-047.md` 的 G1–G8 交证据。做不到或冲突就停下写清。不标已完成。
+
 ## B-046  已完成  2026-10-23 20:14 北京
 
 - PR #53，head `69296ec`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39951383790 。`phase1-blocking` 544 passed、21 deselected，用时 91.81 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/53
