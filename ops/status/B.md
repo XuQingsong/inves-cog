@@ -2,6 +2,21 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-046  已完成  2026-10-23 20:14 北京
+
+- PR #53，head `69296ec`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39951383790 。`phase1-blocking` 544 passed、21 deselected，用时 91.81 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/53
+- 早页、归因候选、轨迹、标签和 `anomaly_daily` 在美东窗口内每分钟检查。硬依赖要同一交易日 `ok` 或 `degraded`，且真实 `ended_at` 不晚于当前时刻。可见性截点仍是窗口开始。到期未就绪写 `failed`，`error_summary` 以 `skipped_upstream:` 开头。早页 21:15 ET 照发，异常未完成时含「异常检测未完成」。成功以 `ingest.job_runs` 为准。候选不自动重试；轨迹、标签、异常检测失败后再试最多 2 次。
+- 相对 main 的 diff：`morning.py`、`scheduled.py`、三个调度脚本，以及 `tests/m8/test_b046.py`、`tests/m8/test_b039_run.py`、`tests/ops/test_morning_scheduling.py`、`tests/ops/test_runtime_scheduling.py`、`tests/m7/test_b032.py`。`test_b032` 只给作业游标补了 `fetchall`。没有改 `run_recorded`、`chain.py`、`move_card.py`、schema、迁移、M4/M5/M9、合同。没有部署，没有在生产执行，没有调用真实模型。
+- D1｜通过｜`test_d1_tracks_waits_for_the_real_end_and_keeps_the_cutoff`｜候选 21:45:30 ET 才结束时，轨迹从 21:30 到 21:45 每分钟等待，21:46 启动。`--at` 是这次检查时刻，新闻查询截点仍是 21:30。标签在 00:30 之后写出快照，`source_asof` 是三阶段真实最晚结束时间。
+- D2｜通过｜`test_d2_deadline_skip_names_the_upstream_and_does_not_call_the_model`｜候选一直失败时，轨迹在 00:00 ET 写 `skipped_upstream:` 并点名 `attribution_candidates 状态 failed`。标签在 07:30 ET 写明 `attribution_tracks 被跳过`。没有模型调用，没有快照。
+- D3｜通过｜`test_d3_anomaly_window_marks_late_and_skips_at_the_deadline`｜`market_structure` 20:58 ET 完成则异常检测照常跑。21:05 完成后作业 `error_summary` 为「迟到」，状态仍是 `ok`。21:10 仍未就绪则跳过且不再跑，21:12 不再进入该任务。
+- D4｜通过｜`test_d4_page_is_sent_while_the_chain_waits_for_anomalies`｜21:15 异常未完成时页面照写并含「异常检测未完成」，链继续等。异常 21:20 完成后链才跑。页面不等估值，并写出「估值 2026-10-14」。
+- D5｜通过｜`test_d5_retries_stop_after_the_cap_and_candidates_do_not_retry`｜轨迹先失败再成功，共 2 行（1 条 failed、1 条 ok）。连续 3 次失败后不再启动。候选 1 条失败后不再自动重试。
+- D6｜通过｜`test_d6_exit_without_a_job_row_is_not_ok_and_restart_keeps_the_count`｜退出码 0 但没有任务行，记为失败，原因 `no_job_row`。已有 `ok` 不再启动。换一个只带 3 条失败行的进程，重试次数仍按表计算，不再启动。
+- D7｜通过｜`test_d7_winter_shifts_beijing_and_keeps_the_et_window`｜2026-11-12 的美东窗口仍是 21:30 与 00:30。北京时间比夏令时晚 1 小时。早页北京 10:15，美东 21:15。
+- D8｜通过｜head `69296ec`｜本地 `make phase1-test` 491 passed、21 deselected，用时 97.24 秒，含 B-041 至 B-045。CI 同一 head 544 passed、21 deselected，用时 91.81 秒，nightly 跳过；多出的用例来自 CI 合并了 main 上后到的 M9 测试。diff 只含上述源文件和测试。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-046  进行中  2026-10-23 20:12 北京
 
 - PR #53，head `69296ec`。https://github.com/XuQingsong/inves-cog/pull/53 。没有合并。本地 `make phase1-test` 已过，同一 head 的 `phase1-blocking` 还在等 CI。不标已完成。
