@@ -1,0 +1,46 @@
+{
+  "schema": {
+    "candidates": [
+      {
+        "mechanism": "one of mechanisms",
+        "info_ids": ["info_id"],
+        "affected": [{"ticker": "member symbol", "basket_id": "basket name or empty string", "direction": "up|down"}],
+        "control_baskets": ["comparison group name"],
+        "direction": "up|down",
+        "links": [
+          {"from": "node", "to": "node or final ticker", "kind": "来源陈述", "anchors": [{"info_id": "info_id", "source_field": "headline|summary", "quote": "exact substring", "provides": "what it shows"}], "组合": false},
+          {"from": "node", "to": "TICKER", "kind": "声明的假设", "hypothesis": "one sentence", "hypothesis_type": "产业结构|需求弹性|暴露关系|其他", "falsify": {"metric": "string", "direction": "string", "window": "string"}}
+        ],
+        "竞争解释": ["string"],
+        "反证条件": "string",
+        "证伪预测": [{"ticker": "affected ticker", "control_basket": "comparison group", "direction": "up|down", "window": "string"}]
+      }
+    ]
+  },
+  "example": {
+    "_note": "Fictional. Anomaly members AAA, BBB down. News n1 headline: 'Zeta Corp doubles hard-drive output in Asia'.",
+    "candidates": [
+      {
+        "mechanism": "供给",
+        "info_ids": ["n1"],
+        "affected": [{"ticker": "AAA", "basket_id": "HDD", "direction": "down"}, {"ticker": "BBB", "basket_id": "HDD", "direction": "down"}],
+        "control_baskets": ["semiconductor peers without HDD exposure"],
+        "direction": "down",
+        "links": [
+          {"from": "zeta_news", "to": "hdd_supply_up", "kind": "来源陈述", "anchors": [{"info_id": "n1", "source_field": "headline", "quote": "Zeta Corp doubles hard-drive output", "provides": "a competitor adds HDD supply"}], "组合": false},
+          {"from": "hdd_supply_up", "to": "AAA", "kind": "声明的假设", "hypothesis": "More HDD supply pressures AAA's drive prices and margins.", "hypothesis_type": "产业结构", "falsify": {"metric": "AAA HDD average selling price", "direction": "flat or up", "window": "next quarter"}},
+          {"from": "hdd_supply_up", "to": "BBB", "kind": "声明的假设", "hypothesis": "More HDD supply pressures BBB's drive prices and margins.", "hypothesis_type": "产业结构", "falsify": {"metric": "BBB HDD average selling price", "direction": "flat or up", "window": "next quarter"}}
+        ],
+        "竞争解释": ["sector-wide risk-off selling"],
+        "反证条件": "AAA and BBB fall no more than unexposed semiconductor peers over the window.",
+        "证伪预测": [
+          {"ticker": "AAA", "control_basket": "semiconductor peers without HDD exposure", "direction": "down", "window": "next 5 sessions"},
+          {"ticker": "BBB", "control_basket": "semiconductor peers without HDD exposure", "direction": "down", "window": "next 5 sessions"}
+        ]
+      }
+    ]
+  },
+  "max": 5,
+  "mechanisms": ["供给", "需求", "竞争", "客户融资", "估值倍数"],
+  "forbidden": ["score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis", "已支持的市场关联", "已量化或验证的经营暴露"]
+}
