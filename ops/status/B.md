@@ -2,6 +2,24 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-048  已完成  2026-10-23 22:01 北京
+
+- PR #56，head `2b4b81a`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39965309782 。`phase1-blocking` 563 passed、21 deselected，用时 117.02 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/56
+- 十二个每日页面只读。数值来自上游列或这些行的 SQL 计数。处置卡合成 ①–④，无漏检数据不出现 ⑤。北京 13:00 后未处置标红。大幅波动榜分联动和单股事件，模型调用计数为 0。M8/M9 字段从 `overlay.versions` 透传，不读 `perception.m9_input_snapshots`。
+- 相对 main 的 diff：`src/inves_cog/web/`、`.env.example` 的 `INVES_COG_WEB_DATABASE_URL`、`tests/m10/test_b048.py`，以及 `tests/harness/pending.txt` 只删本单测试名。没有迁移、GRANT、上游模块、合同。没有部署，没有调用真实模型。
+- P1｜通过｜`test_page_json_contracts`｜12 个端点返回 200；第 4 节字段和类型齐全。当日之后生成的行（b048-late 异常、b048-rel-late、overlay「次日才生成」）不出现。缺失的联动 id 也返回 200。
+- P2｜通过｜`test_pages_no_recompute`｜数值字段等于 `COMPARED_FIELDS` 列出的上游列：`anomalies.max_abs_z`、各项计数、market `spy_5d_pct`/`vix`、daily `ret`/`resid_z`、`rotation.rank`、候选 score/evidence、检索 relevance、second_hits `expected_z`/`control_z`、冲击分解、报告 `magnitude_channels`、tracks.metrics、graph `strength`/`exposure_usd`、source_health latency/items、计划 payload、账本 cash/equity/peak/positions、`tier_usage`、daily_scores 四本账、ranges bear/neutral/bull、因子 value、订单 qty/fill_price/cost、overlay exposure/cooling/m8_gaps/m8_completeness。
+- P3｜通过｜`test_system_log_counts_match`｜六项计数与 SQL 一致：异常 5，状态计数「已发现·原因未明」1 /「市场确认」2 /「已验证·有影响」1 /「假设中」1，高优先级信息 3，交易动作 2，不动作 1，影子分歧 1。一句话「今日异常 5 个，详见下方」。未处置 b048-a1 在北京 12:00 不高亮，13:00 高亮。
+- P4｜通过｜`test_disposition_states`｜a1 ①，a2 ②，a3 ③（冷却开、无 MU 订单），a4 ④（到期结果「支持」），a6 ③（pending 订单）。首页和行情 JSON 没有 ⑤。
+- P5｜通过｜`test_timeline_records_no_action`｜NVDA/COST 持仓和 AMD/CRWD 候选各有一行。NVDA 不动 N6，下次检查 2031-04-24。AMD 不动 N1，下次检查 2031-04-22。COST 和 CRWD 只有 ticker 与「数据暂缺」，没有 n_code。
+- P6｜通过｜`test_valuation_position_panel`、`test_paper_labels`｜组合面板 payload 是存储的「估值参考 v1，不参与仓位」与「对照」。每个 `/paper/*` 含「纸面跟踪，非投资建议」。组合、标的池、纸面个股含估值句。
+- P7｜通过｜`test_market_pages_no_trading_fields`｜六个行情与研究页的键递归检查，没有 `FORBIDDEN_FIELDS`。
+- P8｜通过｜`test_unconnected_shown`｜b048-tavily 只有 source、status「未接通」、display「未接通」，没有数值；晚到的源不出现。首页异常区「今日未更新」，job_status failed，error_summary「skipped_upstream: bars_full 没有记录」；信息区 ok。行情分层区「今日未更新」，error「连接中断」；波动区 ok，联动榜仍在。
+- P9｜通过｜`test_paper_input_completeness_passthrough`｜计划的 `input_completeness` 与存储的 bars 对象逐字段相等；次日计划没有该键时显示「输入完整性未报告」。`/linkage/b048-e3` 与 `/stock/MU` 的 exposure 为直接，cooling_status 为 on，m8_gaps 与 m8_completeness 等于 overlay.versions payload。波动榜联动 LITE、MU、NVDA，单股事件 BIG、INTC、JPM、ORCL。NVDA 同伴 AMD，rank 3，has_anomaly false；MU rank 1，has_anomaly true；LITE 有异常、无同伴；INTC has_anomaly false（晚到异常被隐藏）。标签为财报、8-K、Form 4。MEME、TQQQ、SPY 不上榜。`MODEL_CALLS` 为 0。
+- P10｜通过｜`test_read_only_transaction_rejects_writes`｜`SHOW default_transaction_read_only` 为 on；INSERT 抛出 ReadOnlySqlTransaction。pending.txt 只移走本单测试名，保留 B-049 的名字。本地 `make phase1-test` 563 passed、21 deselected，用时 105.16 秒。CI 同一 head `2b4b81a` 563 passed、21 deselected，用时 117.02 秒，nightly 跳过。diff 没有迁移、GRANT、上游模块、合同。
+- 下一步：等需求方验收。不取新任务。
+
+
 ## B-048  进行中  2026-10-23 21:58 北京
 
 - PR #56，head `2b4b81a`。https://github.com/XuQingsong/inves-cog/pull/56 。没有合并。本地 `make phase1-test` 563 passed、21 deselected，用时 105.16 秒。同一 head 的 `phase1-blocking` 还在等 CI：https://github.com/XuQingsong/inves-cog/actions/runs/39965309782 。不标已完成。
