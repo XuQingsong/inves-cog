@@ -1,0 +1,97 @@
+FFFFFF                                                                   [100%]
+=================================== FAILURES ===================================
+__________________ test_a017_only_get_no_docs_or_other_paths ___________________
+
+    def test_a017_only_get_no_docs_or_other_paths():
+>       with client_for() as client:
+             ^^^^^^^^^^^^
+
+tests/m10/test_a017.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+timer = None, failing = False, host = '203.0.113.1'
+
+    def client_for(*, timer=None, failing=False, host='203.0.113.1'):
+>       from inves_cog.web.public import protect
+E       ModuleNotFoundError: No module named 'inves_cog.web.public'
+
+tests/m10/test_a017.py:10: ModuleNotFoundError
+_______________ test_a017_exact_home_alias_and_upstream_payload ________________
+
+    def test_a017_exact_home_alias_and_upstream_payload():
+>       with client_for() as client:
+             ^^^^^^^^^^^^
+
+tests/m10/test_a017.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+timer = None, failing = False, host = '203.0.113.1'
+
+    def client_for(*, timer=None, failing=False, host='203.0.113.1'):
+>       from inves_cog.web.public import protect
+E       ModuleNotFoundError: No module named 'inves_cog.web.public'
+
+tests/m10/test_a017.py:10: ModuleNotFoundError
+___________ test_a017_per_ip_60_per_minute_ignores_forwarded_headers ___________
+
+    def test_a017_per_ip_60_per_minute_ignores_forwarded_headers():
+        now = [0.0]
+>       with client_for(timer=lambda: now[0]) as client:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m10/test_a017.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+timer = <function test_a017_per_ip_60_per_minute_ignores_forwarded_headers.<locals>.<lambda> at 0x1083b05e0>
+failing = False, host = '203.0.113.1'
+
+    def client_for(*, timer=None, failing=False, host='203.0.113.1'):
+>       from inves_cog.web.public import protect
+E       ModuleNotFoundError: No module named 'inves_cog.web.public'
+
+tests/m10/test_a017.py:10: ModuleNotFoundError
+____________ test_a017_error_hides_exception_and_connection_string _____________
+
+    def test_a017_error_hides_exception_and_connection_string():
+>       with client_for(failing=True) as client:
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/m10/test_a017.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+timer = None, failing = True, host = '203.0.113.1'
+
+    def client_for(*, timer=None, failing=False, host='203.0.113.1'):
+>       from inves_cog.web.public import protect
+E       ModuleNotFoundError: No module named 'inves_cog.web.public'
+
+tests/m10/test_a017.py:10: ModuleNotFoundError
+____________ test_a017_service_only_web_single_worker_and_no_secret ____________
+
+    def test_a017_service_only_web_single_worker_and_no_secret():
+        from pathlib import Path
+>       from scripts.serve_pages import configuration
+E       ModuleNotFoundError: No module named 'scripts.serve_pages'
+
+tests/m10/test_a017.py:60: ModuleNotFoundError
+_______________ test_a017_rate_limit_is_separate_for_socket_ips ________________
+
+    def test_a017_rate_limit_is_separate_for_socket_ips():
+>       from inves_cog.web.public import protect
+E       ModuleNotFoundError: No module named 'inves_cog.web.public'
+
+tests/m10/test_a017.py:69: ModuleNotFoundError
+=============================== warnings summary ===============================
+../../../Users/xuqingsong/workspace/inves-cog/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /Users/xuqingsong/workspace/inves-cog/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/m10/test_a017.py::test_a017_only_get_no_docs_or_other_paths - Mo...
+FAILED tests/m10/test_a017.py::test_a017_exact_home_alias_and_upstream_payload
+FAILED tests/m10/test_a017.py::test_a017_per_ip_60_per_minute_ignores_forwarded_headers
+FAILED tests/m10/test_a017.py::test_a017_error_hides_exception_and_connection_string
+FAILED tests/m10/test_a017.py::test_a017_service_only_web_single_worker_and_no_secret
+FAILED tests/m10/test_a017.py::test_a017_rate_limit_is_separate_for_socket_ips
+6 failed, 1 warning in 0.34s
