@@ -34,35 +34,38 @@ class PageBoundary(BaseHTTPMiddleware):
             return True, 0
 
     async def dispatch(self, request, call_next):
-        if request.method != 'GET':
-            return JSONResponse({'detail': 'Method Not Allowed'}, status_code=405, headers={'Allow': 'GET'})
-        path = request.scope['path']
-        if not path.startswith('/api/pages/'):
-            return JSONResponse({'detail': 'Not Found'}, status_code=404)
-        host = request.client.host if request.client else 'unknown'
+        if request.method != "GET":
+            return JSONResponse({"detail": "Method Not Allowed"}, status_code=405, headers={"Allow": "GET"})
+        path = request.scope["path"]
+        if not path.startswith("/api/pages/"):
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+        host = request.client.host if request.client else "unknown"
         allowed, retry = self.allow(host)
         if not allowed:
-            return JSONResponse({'detail': '请求过于频繁'}, status_code=429, headers={'Retry-After': str(retry)})
-        if path == '/api/pages/':
-            request.scope['path'] = '/api/pages/home'
-            request.scope['raw_path'] = b'/api/pages/home'
+            return JSONResponse({"detail": "请求过于频繁"}, status_code=429, headers={"Retry-After": str(retry)})
+        if path == "/api/pages/":
+            request.scope["path"] = "/api/pages/home"
+            request.scope["raw_path"] = b"/api/pages/home"
         try:
             response = await call_next(request)
         except Exception:
             # No exception detail, DSN, SQL or private page content reaches HTTP/log output.
-            return JSONResponse({'detail': '页面暂不可用'}, status_code=503)
+            return JSONResponse({"detail": "页面暂不可用"}, status_code=503)
         if response.status_code >= 500:
-            return JSONResponse({'detail': '页面暂不可用'}, status_code=503)
-        response.headers['Cache-Control'] = 'no-store'
-        response.headers['X-Content-Type-Options'] = 'nosniff'
+            return JSONResponse({"detail": "页面暂不可用"}, status_code=503)
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
 
 def protect(app, *, monotonic=time.monotonic):
     app.debug = False
     # Disable built-in documentation routes even if the underlying app keeps defaults.
-    app.router.routes = [r for r in app.router.routes if getattr(r, 'path', '') not in
-                         {'/docs', '/docs/oauth2-redirect', '/redoc', '/openapi.json'}]
+    app.router.routes = [
+        r
+        for r in app.router.routes
+        if getattr(r, "path", "") not in {"/docs", "/docs/oauth2-redirect", "/redoc", "/openapi.json"}
+    ]
     app.add_middleware(PageBoundary, monotonic=monotonic)
     return app
 
