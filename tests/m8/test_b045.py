@@ -119,6 +119,12 @@ def test_module_entry_reaches_main_and_writes_both_stage_rows():
         env["INVES_COG_DATABASE_URL"] = dsn
         env["INVES_COG_PERCEPTION_DATABASE_URL"] = dsn
         for task_name, moment in (("attribution_tracks", tracks), ("attribution_labels", labels)):
+            if task_name == "attribution_labels":
+                admin.execute(
+                    "UPDATE ingest.job_runs SET ended_at = %s "
+                    "WHERE trade_date = %s AND task_name = 'attribution_tracks'",
+                    (moment - timedelta(minutes=15), DAY),
+                )
             ran = subprocess.run(
                 [
                     sys.executable,
