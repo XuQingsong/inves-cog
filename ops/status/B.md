@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-049  进行中  2026-10-23 22:57 北京
+
+- PR #58，head `d2a457e`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。上一 head `9335b14` 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39973042317 ：588 passed、21 deselected，业务断言没有失败，但 `FR-M0-12: blocking took 185.439s > 180s`。不放宽 180 秒门槛。新 head 的 CI 未出。不标已完成，不取新任务。
+- 七张复盘表。`role_perception` 可写，`role_web` 只读。案例按 T+1/T+5/T+20 打标，先兆快照缺维度写「数据暂缺」，漏检抽样不看是否发现，确认漏检后处置卡为 ⑤。模式库、周报月报和 `/review` 读已保存的行。一句话引用当日异常编号才留下，否则用模板。页面不调模型。
+- 调度写 `job_runs`。上游到期仍未就绪写 `skipped_upstream:`。没有部署，没有在生产执行迁移，没有调用真实模型。
+
+
 ## B-049  进行中  2026-10-23 22:52 北京
 
 - PR #58，head `9335b14`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。本地 `make phase1-test` 588 passed、21 deselected，用时 107.61 秒。同一 head 的 `phase1-blocking` CI 未出。不标已完成，不取新任务。
