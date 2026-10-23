@@ -1,0 +1,30 @@
+{
+  "kind": "offline_FrozenClock_contract_probe",
+  "business_calls": 0,
+  "source_m4_sha256": "2afee991f3b754b95be4ab9cdae4c0974f72bd64abc84d6dc9e4ca1ad238af53",
+  "rows": [
+    {
+      "instant_utc": "2026-10-20T12:05:00Z",
+      "m4_due": true,
+      "m9_due": [
+        "overlay",
+        "shadows"
+      ]
+    },
+    {
+      "instant_utc": "2026-11-03T12:05:00Z",
+      "m4_due": true,
+      "m9_due": []
+    },
+    {
+      "instant_utc": "2026-11-03T13:05:00Z",
+      "m4_due": false,
+      "m9_due": [
+        "overlay",
+        "shadows"
+      ]
+    }
+  ],
+  "production_writes": 0,
+  "model_calls": 0
+}

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="4" time="0.670" timestamp="2026-10-22T22:04:33.910627+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_provider" name="test_native_scheduled_default_reads_real_provider" time="0.144"><failure message="KeyError: 'm9_overlay'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10ed34b90&gt;
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-346/test_native_scheduled_default_0')
+
+    def test_native_scheduled_default_reads_real_provider(monkeypatch, tmp_path):
+        from inves_cog.shadow import cli
+    
+        data, source, operations = Database("data"), Database("source"), Database("operations")
+        shadow_connections = iter([data, source])
+        calls, jobs = [], []
+    
+        def connect(values):
+            selected = values["INVES_COG_DATABASE_URL"]
+            calls.append(selected)
+            if selected == "synthetic-shadow":
+                return next(shadow_connections)
+            return operations if selected == "synthetic-operations" else Database("overlay")
+    
+        class Repository:
+            def __init__(self, _):
+                pass
+    
+            def health_rows(self):
+                return {}
+    
+            def write_health(self, _):
+                pass
+    
+            def write_job(self, row):
+                jobs.append(dict(row))
+                return 1
+    
+        store = MemoryOutputs(tmp_path)
+        monkeypatch.setattr(cli, "connect", connect)
+        monkeypatch.setattr(cli, "Operations", Repository)
+        monkeypatch.setattr(cli, "DatabaseOutputs", lambda **_: store)
+        result = cli.scheduled(
+            clock=CLOCK,
+            values={
+                "INVES_COG_DATABASE_URL": "synthetic-operations",
+                "INVES_COG_SHADOW_DATABASE_URL": "synthetic-shadow",
+                "INVES_COG_OVERLAY_DATABASE_URL": "synthetic-overlay",
+                "INVES_COG_OVERLAY_DIR": str(tmp_path),
+            },
+        )
+&gt;       assert result["m9_overlay"]["status"] == "ok"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'm9_overlay'
+
+tests/m9/test_m9_provider.py:113: KeyError</failure></testcase><testcase classname="tests.m9.test_m9_provider" name="test_m8_reader_uses_closed_input_day_and_keeps_source_ids" time="0.001" /><testcase classname="tests.m9.test_m9_provider" name="test_incomplete_native_event_keeps_old_overlay_and_reports_fields" time="0.001"><failure message="AssertionError: assert ('mechanism' in {})">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10f037350&gt;
+tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-346/test_incomplete_native_event_k0')
+
+    def test_incomplete_native_event_keeps_old_overlay_and_reports_fields(monkeypatch, tmp_path):
+        from inves_cog.shadow import cli
+    
+        source = Database(
+            "source",
+            [
+                {
+                    "event_id": "synthetic-event",
+                    "anomaly_id": "synthetic-anomaly",
+                    "generated_at": ENDED,
+                    "history": [{"at": ENDED.isoformat(), "new": "市场确认", "evidence_ids": ["synthetic-info"]}],
+                }
+            ],
+        )
+        monkeypatch.setattr(cli, "_scoped", lambda *_: source)
+        snapshot = cli._read_m8({}, SOURCE_DAY, CLOCK.now_utc())
+        store = MemoryOutputs(tmp_path)
+        old = run_overlay(
+            clock=CLOCK,
+            target=TARGET,
+            source={"complete": True, "events": [], "source_events_asof": ENDED.isoformat()},
+            outputs=store,
+        )["overlay"]
+        result = run_overlay(clock=CLOCK, target=TARGET, source=snapshot, outputs=store)
+        assert result["status"] == "degraded" and result["overlay"] == old and len(store.overlays) == 1
+&gt;       assert "mechanism" in result["missing"]["fields"] and "affected" in result["missing"]["fields"]
+E       AssertionError: assert ('mechanism' in {})
+
+tests/m9/test_m9_provider.py:162: AssertionError</failure></testcase><testcase classname="tests.m9.test_m9_provider" name="test_reader_permission_failure_stays_unknown_without_role_fallback" time="0.000" /></testsuite></testsuites>

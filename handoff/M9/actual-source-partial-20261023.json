@@ -1,0 +1,63 @@
+{
+  "status": "partial_actual_source_consumed_offline_not_A5_complete",
+  "replay": true,
+  "source_sha": "04631bbf5e8c3aaadbf978427754188dcb101a72",
+  "m9_source_sha": "39291661d7c48d56e40bebceddf9bf963978b620",
+  "provider_export_sha256": "b38689b862cc503a94557d2cc9f41a389b776f6ad26e5bb78538471b76704d71",
+  "exported_at": "2026-10-22T16:24:59.641219+00:00",
+  "days": [
+    {
+      "trade_date": "2026-10-15",
+      "status": "ok",
+      "snapshot_id": 1,
+      "events": 2,
+      "tickers": 1,
+      "cooling_status_counts": {
+        "on": 0,
+        "off": 1,
+        "unknown": 0
+      },
+      "sha256": "8cc3f658ca9a63e4a8b14b318b415689ea20f533d36f6f966c743140a14cf98a"
+    },
+    {
+      "trade_date": "2026-10-16",
+      "status": "unavailable",
+      "snapshot_id": null,
+      "events": null,
+      "tickers": null,
+      "cooling_status_counts": null,
+      "sha256": "9ae854a9d907cd6d2f52c0250b476520d1c796c276ec1d34fb6d8b2fda0e3823"
+    },
+    {
+      "trade_date": "2026-10-19",
+      "status": "unavailable",
+      "snapshot_id": null,
+      "events": null,
+      "tickers": null,
+      "cooling_status_counts": null,
+      "sha256": "b09e4d2000b429526362698e1bd1ec1015937d31d1f35547e949c04cc0c74f82"
+    },
+    {
+      "trade_date": "2026-10-20",
+      "status": "unavailable",
+      "snapshot_id": null,
+      "events": null,
+      "tickers": null,
+      "cooling_status_counts": null,
+      "sha256": "a04d6c3de005e4133d61440ae3fcfe5c37b07c6842d2d4496cbccc2a27c71ebc"
+    },
+    {
+      "trade_date": "2026-10-21",
+      "status": "unavailable",
+      "snapshot_id": null,
+      "events": null,
+      "tickers": null,
+      "cooling_status_counts": null,
+      "sha256": "45fac7d322571d1e79ab4b225d1b5d2898f53f261dda351c10220256144862bc"
+    }
+  ],
+  "model_calls": 0,
+  "database_writes": 0,
+  "production_M9_service_deployed": false,
+  "live_delivery_untouched": true
+}

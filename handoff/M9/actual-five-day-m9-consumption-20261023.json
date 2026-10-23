@@ -1,0 +1,81 @@
+{
+  "status": "actual_source_consumed_offline",
+  "replay": true,
+  "source_sha": "04631bbf5e8c3aaadbf978427754188dcb101a72",
+  "provider_export_sha256": "368da2594fdc2d19cb57e41d434a6364f3bba68bb81667746915b60ceb771785",
+  "m9_source_sha": "c0ff0c242408896538ad76e3684a774385804f08",
+  "days": [
+    {
+      "trade_date": "2026-10-15",
+      "snapshot_id": 1,
+      "events": 2,
+      "tickers": 1,
+      "cooling_status_counts": {
+        "on": 0,
+        "off": 1,
+        "unknown": 0
+      },
+      "empty_reason": null,
+      "sha256": "c02aa0cda45aca59ec6448b406af6f871c8e942546d36c0aa7df32362ac911d5"
+    },
+    {
+      "trade_date": "2026-10-16",
+      "snapshot_id": 5,
+      "events": 4,
+      "tickers": 4,
+      "cooling_status_counts": {
+        "on": 0,
+        "off": 4,
+        "unknown": 0
+      },
+      "empty_reason": null,
+      "sha256": "13fe3298a9473e7eb4a2e64e7d306d056f2ee1239b4988b51ac0d1cf728eb3f3"
+    },
+    {
+      "trade_date": "2026-10-19",
+      "snapshot_id": 2,
+      "events": 0,
+      "tickers": 0,
+      "cooling_status_counts": {
+        "on": 0,
+        "off": 0,
+        "unknown": 0
+      },
+      "empty_reason": "实际回放源当日没有事件；M7实际异常为0",
+      "sha256": "230b1f30769385138b4ed8157e417c0e15a4fcc8c90b47cd55b0919c27e533f9"
+    },
+    {
+      "trade_date": "2026-10-20",
+      "snapshot_id": 3,
+      "events": 1,
+      "tickers": 2,
+      "cooling_status_counts": {
+        "on": 0,
+        "off": 2,
+        "unknown": 0
+      },
+      "empty_reason": null,
+      "sha256": "b14032541e21a802dedcc962f25ee316261630daf7f0b9c37d8cade7d9db2a89"
+    },
+    {
+      "trade_date": "2026-10-21",
+      "snapshot_id": 4,
+      "events": 1,
+      "tickers": 0,
+      "cooling_status_counts": {
+        "on": 0,
+        "off": 0,
+        "unknown": 0
+      },
+      "empty_reason": null,
+      "sha256": "db3acfbedeb89ef3c41b142a99b6e0f4e266f61928e64743996f366502f92905"
+    }
+  ],
+  "runtime_policy": {
+    "dates_16_19_20_21": "UD-A-34/35/36: DeepSeek non-thinking, two workers; 10-15 retained original"
+  },
+  "database_writes": 0,
+  "model_calls": 0,
+  "production_M9_service_deployed": false,
+  "live_delivery_untouched": true
+}

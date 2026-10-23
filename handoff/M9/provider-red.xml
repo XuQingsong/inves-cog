@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.639" timestamp="2026-10-21T18:56:24.867350+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_provider" name="test_native_scheduled_default_reads_real_provider" time="0.149"><failure message="KeyError: 'm9_overlay'">tests/m9/test_m9_provider.py:113: in test_native_scheduled_default_reads_real_provider
+    assert result["m9_overlay"]["status"] == "ok"
+           ^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'm9_overlay'</failure></testcase><testcase classname="tests.m9.test_m9_provider" name="test_m8_reader_uses_closed_input_day_and_keeps_source_ids" time="0.001"><failure message="assert [(datetime.da...imezone.utc))] == [(datetime.da...imezone.utc))]&#10;  &#10;  At index 0 diff: (datetime.date(2026, 10, 21), datetime.datetime(2026, 10, 21, 12, 15, tzinfo=datetime.timezone.utc)) != (datetime.date(2026, 10, 20), datetime.datetime(2026, 10, 21, 12, 15, tzinfo=datetime.timezone.utc))&#10;  Use -v to get more diff">tests/m9/test_m9_provider.py:132: in test_m8_reader_uses_closed_input_day_and_keeps_source_ids
+    assert calls == [(SOURCE_DAY, CLOCK.now_utc())]
+E   assert [(datetime.da...imezone.utc))] == [(datetime.da...imezone.utc))]
+E     
+E     At index 0 diff: (datetime.date(2026, 10, 21), datetime.datetime(2026, 10, 21, 12, 15, tzinfo=datetime.timezone.utc)) != (datetime.date(2026, 10, 20), datetime.datetime(2026, 10, 21, 12, 15, tzinfo=datetime.timezone.utc))
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.m9.test_m9_provider" name="test_incomplete_native_event_keeps_old_overlay_and_reports_fields" time="0.001"><failure message="AttributeError: module 'inves_cog.shadow.cli' has no attribute '_read_m8'">tests/m9/test_m9_provider.py:152: in test_incomplete_native_event_keeps_old_overlay_and_reports_fields
+    snapshot = cli._read_m8({}, SOURCE_DAY, CLOCK.now_utc())
+               ^^^^^^^^^^^^
+E   AttributeError: module 'inves_cog.shadow.cli' has no attribute '_read_m8'</failure></testcase><testcase classname="tests.m9.test_m9_provider" name="test_reader_permission_failure_stays_unknown_without_role_fallback" time="0.000"><failure message="AttributeError: module 'inves_cog.shadow.cli' has no attribute '_read_m8'">tests/m9/test_m9_provider.py:176: in test_reader_permission_failure_stays_unknown_without_role_fallback
+    result = cli._read_m8({}, SOURCE_DAY, CLOCK.now_utc())
+             ^^^^^^^^^^^^
+E   AttributeError: module 'inves_cog.shadow.cli' has no attribute '_read_m8'</failure></testcase></testsuite></testsuites>

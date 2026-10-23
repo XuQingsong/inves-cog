@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.400" timestamp="2026-10-21T15:11:15.953454+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_weights" name="test_m9_augmented_books_reweight_original_subitems" time="0.235"><failure message="assert 80.95 == 79.85714285714286 ± 8.0e-05&#10;  &#10;  comparison failed&#10;  Obtained: 80.95&#10;  Expected: 79.85714285714286 ± 8.0e-05">tests/m9/test_m9_weights.py:19: in test_m9_augmented_books_reweight_original_subitems
+    assert rows['F-03']['substituted_value'] == pytest.approx((34*82+15*75)/49)
+E   assert 80.95 == 79.85714285714286 ± 8.0e-05
+E     
+E     comparison failed
+E     Obtained: 80.95
+E     Expected: 79.85714285714286 ± 8.0e-05</failure></testcase></testsuite></testsuites>

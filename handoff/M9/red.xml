@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="12" time="0.418" timestamp="2026-10-21T13:39:47.731394+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_only_tightens" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.overlay.rules'">tests/m9/test_m9_contracts.py:15: in test_overlay_only_tightens
+    from inves_cog.overlay.rules import generate_overlay
+E   ModuleNotFoundError: No module named 'inves_cog.overlay.rules'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_cooling_rules" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.overlay.rules'">tests/m9/test_m9_contracts.py:37: in test_overlay_cooling_rules
+    from inves_cog.overlay.rules import generate_overlay
+E   ModuleNotFoundError: No module named 'inves_cog.overlay.rules'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_overlay_contract" time="0.187"><failure message="ModuleNotFoundError: No module named 'inves_cog.overlay.api'">tests/m9/test_m9_contracts.py:60: in test_overlay_contract
+    from inves_cog.overlay.api import create_app
+E   ModuleNotFoundError: No module named 'inves_cog.overlay.api'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_shadow_signals_no_orders" time="0.001"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.repository'">tests/m9/test_m9_contracts.py:84: in test_shadow_signals_no_orders
+    from inves_cog.shadow.repository import WriteRepository
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.repository'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_factor_shadow_no_orders" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.repository'">tests/m9/test_m9_contracts.py:98: in test_factor_shadow_no_orders
+    from inves_cog.shadow.repository import WriteRepository
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.repository'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_x1_once_per_event" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.signals'">tests/m9/test_m9_contracts.py:115: in test_x1_once_per_event
+    from inves_cog.shadow.signals import generate_signals
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.signals'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_f01_values" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.factors'">tests/m9/test_m9_contracts.py:136: in test_f01_values
+    from inves_cog.shadow.factors import f01
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.factors'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_f02_values" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.factors'">tests/m9/test_m9_contracts.py:147: in test_f02_values
+    from inves_cog.shadow.factors import f02
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.factors'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_f02_shadow_hysteresis" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.hysteresis'">tests/m9/test_m9_contracts.py:154: in test_f02_shadow_hysteresis
+    from inves_cog.shadow.hysteresis import step_hysteresis
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.hysteresis'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_single_factor_substitution" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.substitution'">tests/m9/test_m9_contracts.py:170: in test_single_factor_substitution
+    from inves_cog.shadow.substitution import substitute
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.substitution'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_factor_versioning" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.registry'">tests/m9/test_m9_contracts.py:184: in test_factor_versioning
+    from inves_cog.shadow.registry import Registry
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.registry'</failure></testcase><testcase classname="tests.m9.test_m9_contracts" name="test_s10_eligibility_shadow" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.factors'">tests/m9/test_m9_contracts.py:198: in test_s10_eligibility_shadow
+    from inves_cog.shadow.factors import s10
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.factors'</failure></testcase></testsuite></testsuites>

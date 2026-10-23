@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.208" timestamp="2026-10-21T14:05:40.549565+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_inputs" name="test_m9_event_eps_baseline_is_specific_to_each_event" time="0.020"><failure message="AssertionError: assert [] == ['synthetic-E1']&#10;  &#10;  Right contains one more item: 'synthetic-E1'&#10;  Use -v to get more diff">tests/m9/test_m9_inputs.py:18: in test_m9_event_eps_baseline_is_specific_to_each_event
+    assert [row['event_id'] for row in x1] == ['synthetic-E1']
+E   AssertionError: assert [] == ['synthetic-E1']
+E     
+E     Right contains one more item: 'synthetic-E1'
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.m9.test_m9_inputs" name="test_m9_segment_core_uses_four_visible_quarters_and_one_axis" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.normalization'">tests/m9/test_m9_inputs.py:22: in test_m9_segment_core_uses_four_visible_quarters_and_one_axis
+    from inves_cog.shadow.normalization import segment_inputs
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.normalization'</failure></testcase><testcase classname="tests.m9.test_m9_inputs" name="test_m9_event_consensus_rejects_late_or_different_fiscal_year" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.normalization'">tests/m9/test_m9_inputs.py:37: in test_m9_event_consensus_rejects_late_or_different_fiscal_year
+    from inves_cog.shadow.normalization import event_eps_change
+E   ModuleNotFoundError: No module named 'inves_cog.shadow.normalization'</failure></testcase></testsuite></testsuites>

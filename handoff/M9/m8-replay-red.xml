@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="0.230" timestamp="2026-10-22T22:11:35.539277+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_replay" name="test_five_day_m8_replay_is_explicit_and_never_publishes_live" time="0.002"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.replay'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-350/test_five_day_m8_replay_is_exp0')
+
+    def test_five_day_m8_replay_is_explicit_and_never_publishes_live(tmp_path):
+&gt;       from inves_cog.shadow.replay import replay_m8
+E       ModuleNotFoundError: No module named 'inves_cog.shadow.replay'
+
+tests/m9/test_m9_replay.py:46: ModuleNotFoundError</failure></testcase><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_paths_overlapping_live_before_reading[live]" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.replay'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-350/test_m8_replay_rejects_paths_o0')
+relative = 'live'
+
+    @pytest.mark.parametrize("relative", ["live", "live/replay", "."])
+    def test_m8_replay_rejects_paths_overlapping_live_before_reading(tmp_path, relative):
+&gt;       from inves_cog.shadow.replay import replay_m8
+E       ModuleNotFoundError: No module named 'inves_cog.shadow.replay'
+
+tests/m9/test_m9_replay.py:75: ModuleNotFoundError</failure></testcase><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_paths_overlapping_live_before_reading[live/replay]" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.replay'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-350/test_m8_replay_rejects_paths_o1')
+relative = 'live/replay'
+
+    @pytest.mark.parametrize("relative", ["live", "live/replay", "."])
+    def test_m8_replay_rejects_paths_overlapping_live_before_reading(tmp_path, relative):
+&gt;       from inves_cog.shadow.replay import replay_m8
+E       ModuleNotFoundError: No module named 'inves_cog.shadow.replay'
+
+tests/m9/test_m9_replay.py:75: ModuleNotFoundError</failure></testcase><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_rejects_paths_overlapping_live_before_reading[.]" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.replay'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-350/test_m8_replay_rejects_paths_o2')
+relative = '.'
+
+    @pytest.mark.parametrize("relative", ["live", "live/replay", "."])
+    def test_m8_replay_rejects_paths_overlapping_live_before_reading(tmp_path, relative):
+&gt;       from inves_cog.shadow.replay import replay_m8
+E       ModuleNotFoundError: No module named 'inves_cog.shadow.replay'
+
+tests/m9/test_m9_replay.py:75: ModuleNotFoundError</failure></testcase><testcase classname="tests.m9.test_m9_replay" name="test_m8_replay_missing_snapshot_is_unavailable_not_an_empty_success" time="0.000"><failure message="ModuleNotFoundError: No module named 'inves_cog.shadow.replay'">tmp_path = PosixPath('/private/var/folders/9m/q9r8d9sx1xd6l5fv95m4kt800000gn/T/pytest-of-xuqingsong/pytest-350/test_m8_replay_missing_snapsho0')
+
+    def test_m8_replay_missing_snapshot_is_unavailable_not_an_empty_success(tmp_path):
+&gt;       from inves_cog.shadow.replay import replay_m8
+E       ModuleNotFoundError: No module named 'inves_cog.shadow.replay'
+
+tests/m9/test_m9_replay.py:84: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

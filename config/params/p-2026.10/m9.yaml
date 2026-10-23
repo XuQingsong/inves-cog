@@ -1,0 +1,49 @@
+m9:
+  factor_version: v1
+  source: docs/system-spec.md §§10.3,10.4,11.1–11.4,13.7
+  publish_window_et: ["08:00", "08:30"]
+  f01:
+    growth_min: 70
+    revenue_min: 20
+    eps_growth_cap: 50
+    previous_margin_min: 3
+    effective_cap: 65
+    weights: [50, 30, 20]
+    psg_curve: [[0.1,95],[0.2,82],[0.3,70],[0.5,52],[0.7,38],[1,20],[1.5,5]]
+    eps_pe_curve: [[0.5,90],[1,70],[1.5,50],[2.5,25],[4,5]]
+  f02:
+    growth_entry: 80
+    revenue_q_min: 30
+    gross_margin_min: -1
+    effective_cap: 60
+    growth_exit: 70
+    quality_upgrade: 50
+    bad_filings: 2
+    weights: [40,40,20]
+    gm_curve: [[-2,20],[0,45],[2,65],[5,85]]
+    fcf_curve: [[-5,20],[0,45],[5,70],[10,90]]
+    positive_profit_score: 70
+    negative_profit_score: 30
+  f03:
+    mature_on: "2027-04-08"
+    weight: 15
+    curve: [[-10,10],[-3,35],[0,55],[3,75],[10,95]]
+  f04:
+    weight: 15
+    curve: [[-5,10],[-2,35],[0,55],[2,75],[5,95]]
+  f05:
+    weight: 20
+  f06:
+    target_volatility: {defense: 25, normal: 35, attack: 50}
+    minimum_multiplier: 0.5
+    maximum_multiplier: 1.0
+  s10:
+    residual_sigma_multiplier: 1.0
+    hard_loss_equity_pct: 1.5
+    maximum_sessions: 5
+    secondary_drop: {defense: 0.04, normal: 0.06, attack: 0.09}
+    earnings_sessions: 5
+    s1_acceleration_max: -10
+    s1_prior_year_ratio: 0.5
+  x1:
+    eps_revision_pct: -5

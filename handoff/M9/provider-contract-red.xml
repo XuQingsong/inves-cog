@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="12" time="0.810" timestamp="2026-10-22T15:11:43.601346+08:00" hostname="xuqingsongdeMacBook-Pro.local"><testcase classname="tests.m9.test_m9_provider_contract" name="test_a1_a3_a4_actual_contract_via_native_provider" time="0.162"><failure message="KeyError: 'cooling_status'">tests/m9/test_m9_provider_contract.py:90: in test_a1_a3_a4_actual_contract_via_native_provider
+    assert_expected(payload, contract["expected_m9"])
+tests/m9/test_m9_provider_contract.py:75: in assert_expected
+    assert item["cooling_status"] == wanted["cooling_status"]
+           ^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'cooling_status'</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_a2_incomplete_contract_retains_previous_generated_at" time="0.011" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_a2_first_incomplete_contract_has_no_overlay" time="0.006" /><testcase classname="tests.m9.test_m9_provider_contract" name="test_display_only_gaps_do_not_block_cooling" time="0.007"><failure message="KeyError: 'cooling_status'">tests/m9/test_m9_provider_contract.py:125: in test_display_only_gaps_do_not_block_cooling
+    assert_expected(store.overlays[0], contract["expected_m9"])
+tests/m9/test_m9_provider_contract.py:75: in assert_expected
+    assert item["cooling_status"] == wanted["cooling_status"]
+           ^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'cooling_status'</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[lifecycle]" time="0.007"><failure message="assert True is False">tests/m9/test_m9_provider_contract.py:146: in test_required_provider_gaps_produce_unknown
+    assert_expected(store.overlays[0], {"WDC": wanted})
+tests/m9/test_m9_provider_contract.py:74: in assert_expected
+    assert item["cooling_off"] is wanted["cooling_off"]
+E   assert True is False</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[mechanism]" time="0.006"><failure message="assert True is False">tests/m9/test_m9_provider_contract.py:146: in test_required_provider_gaps_produce_unknown
+    assert_expected(store.overlays[0], {"WDC": wanted})
+tests/m9/test_m9_provider_contract.py:74: in assert_expected
+    assert item["cooling_off"] is wanted["cooling_off"]
+E   assert True is False</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[exposure]" time="0.006"><failure message="assert True is False">tests/m9/test_m9_provider_contract.py:146: in test_required_provider_gaps_produce_unknown
+    assert_expected(store.overlays[0], {"WDC": wanted})
+tests/m9/test_m9_provider_contract.py:74: in assert_expected
+    assert item["cooling_off"] is wanted["cooling_off"]
+E   assert True is False</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[deadline_outcome]" time="0.006"><failure message="assert True is False">tests/m9/test_m9_provider_contract.py:146: in test_required_provider_gaps_produce_unknown
+    assert_expected(store.overlays[0], {"WDC": wanted})
+tests/m9/test_m9_provider_contract.py:74: in assert_expected
+    assert item["cooling_off"] is wanted["cooling_off"]
+E   assert True is False</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_required_provider_gaps_produce_unknown[direction]" time="0.006"><failure message="assert True is False">tests/m9/test_m9_provider_contract.py:146: in test_required_provider_gaps_produce_unknown
+    assert_expected(store.overlays[0], {"WDC": wanted})
+tests/m9/test_m9_provider_contract.py:74: in assert_expected
+    assert item["cooling_off"] is wanted["cooling_off"]
+E   assert True is False</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_normal_nulls_are_not_reclassified_as_missing" time="0.006"><failure message="KeyError: 'cooling_status'">tests/m9/test_m9_provider_contract.py:154: in test_normal_nulls_are_not_reclassified_as_missing
+    assert wdc["cooling_status"] == "on"
+           ^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'cooling_status'</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_known_cooling_survives_another_event_gap" time="0.006"><failure message="KeyError: 'cooling_status'">tests/m9/test_m9_provider_contract.py:167: in test_known_cooling_survives_another_event_gap
+    assert wdc["cooling_status"] == "on" and wdc["cooling_off"]
+           ^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'cooling_status'</failure></testcase><testcase classname="tests.m9.test_m9_provider_contract" name="test_empty_complete_input_publishes_empty_overlay" time="0.001"><failure message="KeyError: 'm8_completeness'">tests/m9/test_m9_provider_contract.py:181: in test_empty_complete_input_publishes_empty_overlay
+    assert out["overlay"]["m8_completeness"]["unknown_tickers"] == []
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'm8_completeness'</failure></testcase></testsuite></testsuites>
