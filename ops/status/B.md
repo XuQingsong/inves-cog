@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-049  进行中  2026-10-23 23:06 北京
+
+- PR #58，head `d2a457e`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39974136702 ：596 passed、21 deselected（含 main 上 A-017 的合并结果），业务断言没有失败，但 `FR-M0-12: blocking took 183.128s > 180s`。B-049 九个测试在这份 junit 里合计 1.23 秒。不放宽 180 秒门槛，不改上游算法。不标已完成，不取新任务。
+- 上一 head `9335b14` 同样是断言全过、耗时 185.439 秒越线。慢速 runner 上，合入本单之前的 579 项套件也曾到 185.758 秒。
+- 七张复盘表。`role_perception` 可写，`role_web` 只读。没有部署，没有在生产执行迁移，没有调用真实模型。
+
+
 ## B-049  进行中  2026-10-23 22:57 北京
 
 - PR #58，head `d2a457e`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。上一 head `9335b14` 的 CI https://github.com/XuQingsong/inves-cog/actions/runs/39973042317 ：588 passed、21 deselected，业务断言没有失败，但 `FR-M0-12: blocking took 185.439s > 180s`。不放宽 180 秒门槛。新 head 的 CI 未出。不标已完成，不取新任务。
