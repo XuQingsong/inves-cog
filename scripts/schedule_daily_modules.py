@@ -296,8 +296,8 @@ def run_once(
         tasks.extend([("rule_a_scores", score_run, "signal_date"), ("valuation_v1", valuation_run, None)])
     if (8, 0) <= hm < (8, 30):
         tasks.append(("premarket_review", premarket_run, None))
-    # Preserve the accepted M4 entry point's explicit Beijing publishing window.
-    from inves_cog.trading.execution.cli import due as paper_due
+    # M4 owns its score waiting/deadline decision, including the final 09:05 poll.
+    from inves_cog.trading.execution.cli import polling_due as paper_due
 
     if paper_due(clock):
         tasks.append(("paper_plan", paper_run, None))
@@ -313,7 +313,7 @@ def run_once(
                 if name == "paper_plan"
                 else local.date()
             )
-            if not ready(name, dependency_day):
+            if name != "paper_plan" and not ready(name, dependency_day):
                 if name == "anomaly_daily" and hm == (21, 10):
                     result[name] = _skip_anomaly(clock, values, dependency_day, dependency_rows, skip_job)
                 else:

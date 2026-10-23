@@ -1,0 +1,52 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_e1_et_window_and_restart[2026-07-13] ___________________
+
+day = '2026-07-13'
+
+    @pytest.mark.parametrize('day', ['2026-07-13', '2026-01-12'])
+    def test_e1_et_window_and_restart(day):
+        for hour, minute, expected in [(8, 34, False), (8, 35, True), (9, 4, True), (9, 5, False)]:
+            c = clock(day, hour, minute)
+>           assert cli.due(c) is expected
+E           AssertionError: assert False is True
+E            +  where False = <function due at 0x10abc4540>(FrozenClock(instant=datetime.datetime(2026, 7, 13, 8, 35, tzinfo=zoneinfo.ZoneInfo(key='America/New_York'))))
+E            +    where <function due at 0x10abc4540> = cli.due
+
+tests/m4/test_a016.py:21: AssertionError
+__________________ test_e1_et_window_and_restart[2026-01-12] ___________________
+
+day = '2026-01-12'
+
+    @pytest.mark.parametrize('day', ['2026-07-13', '2026-01-12'])
+    def test_e1_et_window_and_restart(day):
+        for hour, minute, expected in [(8, 34, False), (8, 35, True), (9, 4, True), (9, 5, False)]:
+            c = clock(day, hour, minute)
+>           assert cli.due(c) is expected
+E           AssertionError: assert False is True
+E            +  where False = <function due at 0x10abc4540>(FrozenClock(instant=datetime.datetime(2026, 1, 12, 8, 35, tzinfo=zoneinfo.ZoneInfo(key='America/New_York'))))
+E            +    where <function due at 0x10abc4540> = cli.due
+
+tests/m4/test_a016.py:21: AssertionError
+________________ test_e2_only_real_success_before_now_is_ready _________________
+
+    def test_e2_only_real_success_before_now_is_ready():
+        c = clock('2026-07-13', 8, 51)
+        ended = clock('2026-07-13', 8, 50).now_utc()
+>       from inves_cog.trading.execution.cli import scores_ready
+E       ImportError: cannot import name 'scores_ready' from 'inves_cog.trading.execution.cli' (/private/tmp/inves-cog-a016/src/inves_cog/trading/execution/cli.py)
+
+tests/m4/test_a016.py:29: ImportError
+_________________ test_e5_seven_sources_no_empty_insider_proof _________________
+
+    def test_e5_seven_sources_no_empty_insider_proof():
+>       from inves_cog.trading.execution.completeness import describe_inputs
+E       ModuleNotFoundError: No module named 'inves_cog.trading.execution.completeness'
+
+tests/m4/test_a016.py:37: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/m4/test_a016.py::test_e1_et_window_and_restart[2026-07-13] - Ass...
+FAILED tests/m4/test_a016.py::test_e1_et_window_and_restart[2026-01-12] - Ass...
+FAILED tests/m4/test_a016.py::test_e2_only_real_success_before_now_is_ready
+FAILED tests/m4/test_a016.py::test_e5_seven_sources_no_empty_insider_proof - ...
+4 failed in 0.72s

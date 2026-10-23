@@ -51,10 +51,16 @@ def probe(stamp, ready=lambda *args: True, failure=None):
         ("2026-11-03T01:55:00Z", ["market_structure", "anomaly_daily"]),
         ("2026-11-03T03:30:00Z", ["market_structure", "rule_a_scores", "valuation_v1"]),
         ("2026-10-20T11:59:59Z", []),
-        ("2026-10-20T12:00:00Z", ["premarket_review", "paper_plan"]),
+        ("2026-10-20T12:00:00Z", ["premarket_review"]),
         ("2026-10-20T12:30:00Z", []),
-        ("2026-11-03T12:00:00Z", ["paper_plan"]),
+        ("2026-10-20T12:35:00Z", ["paper_plan"]),
+        ("2026-10-20T13:05:00Z", ["paper_plan"]),  # final deadline accounting poll
+        ("2026-10-20T13:06:00Z", []),
+        ("2026-11-03T12:00:00Z", []),
         ("2026-11-03T13:00:00Z", ["premarket_review"]),
+        ("2026-11-03T13:35:00Z", ["paper_plan"]),
+        ("2026-11-03T14:05:00Z", ["paper_plan"]),
+        ("2026-11-03T14:06:00Z", []),
         ("2026-10-18T12:00:00Z", []),
     ],
 )
@@ -79,9 +85,15 @@ def test_a014_paper_uses_previous_session_scores_and_current_premarket_inputs():
         return False
 
     result, calls = probe("2026-10-19T12:00:00Z", ready=ready)
-    assert seen == [("premarket_review", date(2026, 10, 19)), ("paper_plan", date(2026, 10, 16))]
+    assert seen == [("premarket_review", date(2026, 10, 19))]
     assert calls == []
     assert all(row["status"] == "waiting_dependencies" for row in result.values())
+    # A016 moves the paper score gate into its CLI, which owns its deadline too.
+    # test_e2_e4_wait_then_plan_once_across_restart checks the actual prior-session query.
+    seen.clear()
+    result, calls = probe("2026-10-19T12:35:00Z", ready=ready)
+    assert not seen
+    assert [name for name, _ in calls] == ["paper_plan"]
 
 
 def test_a014_dependencies_both_reject_incomplete_and_allow_degraded_finished():
@@ -102,8 +114,10 @@ def test_a014_dependencies_both_reject_incomplete_and_allow_degraded_finished():
 def test_a014_valuation_failure_does_not_suppress_paper_or_anomaly_dispatch():
     result, calls = probe("2026-10-20T12:00:00Z", failure="premarket_review")
     assert result["premarket_review"] == {"status": "failed", "error_type": "ValueError"}
+    assert [name for name, _ in calls] == ["premarket_review"]
+    result, calls = probe("2026-10-20T12:35:00Z", failure="premarket_review")
     assert result["paper_plan"]["status"] == "ok"
-    assert [name for name, _ in calls] == ["premarket_review", "paper_plan"]
+    assert [name for name, _ in calls] == ["paper_plan"]
 
 
 def test_a014_m7_dispatch_uses_own_login_and_existing_recorded_guard(monkeypatch):
@@ -154,9 +168,11 @@ def test_a014_m7_missing_writer_fails_closed_without_borrowing_admin(monkeypatch
 def test_a014_preserves_accepted_m4_beijing_window_without_changing_business_guard():
     from inves_cog.trading.execution.cli import due
 
-    assert due(clock("2026-11-03T12:00:00Z"))
+    # A016 explicitly supersedes the original A014 fixed-Beijing contract.
+    assert not due(clock("2026-11-03T12:00:00Z"))
     assert not due(clock("2026-11-03T13:00:00Z"))
-    assert [name for name, _ in probe("2026-11-03T12:00:00Z")[1]] == ["paper_plan"]
+    assert due(clock("2026-11-03T13:35:00Z"))
+    assert [name for name, _ in probe("2026-11-03T13:35:00Z")[1]] == ["paper_plan"]
 
 
 def test_a014_valuation_failure_does_not_suppress_completed_scoring():
