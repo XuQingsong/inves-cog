@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-017  已完成（代码正式送验；生产页面尚未上线）  2026-10-23 22:50 北京
+- 原[PR57](https://github.com/XuQingsong/inves-cog/pull/57)已实际ready_for_review/draft=false、open/unmerged，完整head **fa4441f7cbb0bf174b6b2efc302469e3cac45138**。准确[CI39972307325/job120477879945](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325/job/120477879945)独立核completed/success，完整日志merge1eac85f包含本head与mainfb41108：清洁容器make phase1-test **587passed/21deselected/179.08秒**，M0另2passed、9项预期失败门禁均red=True。原先失败d70a496和首轮337df84的格式失败仍保留，未改门禁/B业务或跳过用例。
+- **GET/文档边界通过**：test_a017_only_get_no_docs_or_other_paths，非GET（含HEAD/OPTIONS）405、Allow=GET，docs/redoc/openapi/其他路径404；底层文档路由移除。**限流通过**：test_a017_per_ip_60_per_minute_ignores_forwarded_headers / test_a017_rate_limit_is_separate_for_socket_ips，60滚动秒、到期恢复、不同socket IP独立，不信任XFF，客户端容量有界。
+- **错误脱敏通过**：test_a017_error_hides_exception_and_connection_string，仅通用503无假DSN/账号/栈。**首页与数据透传通过**：test_a017_exact_home_alias_and_upstream_payload / test_a017_public_market_is_original_payload_without_trading_fields，一次性真实DB市场页与原JSON逐字段相等、递归无交易字段，无模型。**运行配置通过**：test_a017_service_only_web_single_worker_and_no_secret / test_a017_uvicorn_single_worker_direct_ip_and_no_access_logging，独立pages配置仅新增一个程序，单worker/0.0.0.0:8080/无连接串/不记录访问日志。
+- **依赖真实准备**：requirements-pages.txt固定三包wheel哈希，Python3.11用uv离线解析/哈希安装到临时target及实际uvicorn版本命令成功，业务uv.lock不变。全项目锁curl-cffi索引超时、旧3.9工具不适配和格式漏检事实均写handoff/A017，不抹除失败。最终lint与format检查均通过、原失败test_import_firewall本地也通过。
+- **交付/下一步**：PR描述与[正式送验6367688828](https://github.com/XuQingsong/inves-cog/pull/57#issuecomment-6367688828)已按准确结果更新。需求方验收合并后A才安装本入口；当前生产仅fb41108、pages/M9未启动，公网状态码/首页计数/RSS尚未验。用户报告TCP8080已放行UD-A41保留；三个既有角色LOGIN用户只问“为什么需要？”尚未批准，已解释原专用权限需要数据库认证、网页仍免登录，30表既有SELECT/schema USAGE核齐，不扩权。待明确决定后继续已授权账号/进程准备，不自动合并，不重复接单/部署授权。
+
 ## A-017  进行中（首轮功能8项通过；格式失败已修，新head CI待实回）  2026-10-23 22:46 北京
 - 原PR57完整新head **fa4441f7cbb0bf174b6b2efc302469e3cac45138** 已推，准确[CI39972307325](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325)运行中。首轮337df84的[CI39971495151/job120475066604](https://github.com/XuQingsong/inves-cog/actions/runs/39971495151/job/120475066604)独立完整日志：586passed/1failed/21deselected/179.99秒，8项A017功能（含真实DB市场页包装前后逐字段相同/无交易字段）全通过；唯一失败ruff format三个新文件。已承认此前只跑lint漏format，实际formatter/check/format --check均通过，本地7项再过。未改门禁/B代码或跳过测试，ci-history保留失败。
 - 用户“为什么需要？”已在本对话解释，未批准LOGIN。另同一只读账号用pg_catalog OID核role_web所需30张表均存在且已有SELECT/schema USAGE，证明无需新增表权限；catalog-only不当专用账号登录证明。最初名称解析受当前账号schema限制而失败，未换账号/借管理员业务运行，后仅合法读catalog元数据。三角色仍未改LOGIN、未配密码/URL；M9/pages未启。TCP8080用户报告已放行UD-A41保留，待服务上线再验证外部连通。
