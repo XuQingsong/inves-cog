@@ -2,6 +2,21 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-049  已完成  2026-10-23 23:49 北京
+
+- PR #58，head `a303f8d`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39980804343 ：`phase1-blocking` 成功，596 passed、21 deselected，`blocking.json` 为 exit_code 0、duration 181.451 秒（≤ 300 秒，UD-COORD-32）。`test_m0_ci.py` 2 passed。nightly 跳过。没有部署，没有在生产执行迁移，没有调用真实模型。
+- 相对 main 的 diff：`migrations/phase1_m10_0001_review.sql`、`src/inves_cog/perception/review/`、`src/inves_cog/web/api.py`、`src/inves_cog/web/pages.py`、`scripts/schedule_review.py`、`tests/m10/test_b049.py`、`tests/m10/test_b048.py` 的 pending 断言、`tests/harness/pending.txt`，以及 `config/params/p-2026.10/m0.yaml` 的 `blocking_max_seconds` 180→300。没有上游算法与合同改动。
+- R1｜通过｜`test_case_cadence`｜junit 0.569 秒。3 个 pool 案例在 T+1/T+5/T+20 各一条打标；T+5 缺行情时案例为「未完成」且原因以「T+5 缺少行情」开头；晚于该日上海零点的行不参与。
+- R2｜通过｜`test_precursor_snapshot_daily`｜junit 0.155 秒。连续 3 个交易日，每日 59 只股票加全部篮子各一行；缺维度写「数据暂缺」；非交易日写入 0 行。
+- R3｜通过｜`test_miss_sample_frame`｜junit 0.116 秒。固定种子下翻转「系统是否发现」后抽样集合不变；检出率分母含未发现项；未知与数据不覆盖单列；确认漏检后处置卡为 ⑤。
+- R4｜通过｜`test_pattern_thresholds`｜junit 0.051 秒。9 例不出现，10 例「观察」，30 例且保留样本成立为「有效」，30 例但保留样本不成立仍「观察」；每组有反例。
+- R5｜通过｜`test_reports_contents`｜junit 0.030 秒。周报、月报包含测试里列出的全部区块；影子 5/21/63 日与上游价格逐值相等。
+- R6｜通过｜`test_oneliner_grounded`｜junit 0.005 秒。引用当日异常 id 才采用原文；不引用也不是「无异常」，或模型抛错，都用模板；每日 `client.call` 一次；输入只有当日事实。
+- R7｜通过｜`test_review_page_blocks` 及 B-048 P1–P10｜`/review` 返回案例库、周报、月报、漏检报告、模式库候选。B-048 十一个测试在本 head 全部 passed，含 `test_market_pages_no_trading_fields`。`test_review_page_blocks` 对每个页面只读一次，键里没有交易字段。
+- R8｜通过｜`test_review_grants`｜junit 0.029 秒。迁移只建七张表。登录账号继承 `role_perception` 可写、`role_web` 只读。没有新角色，没有 `ALTER DEFAULT PRIVILEGES`。
+- R9｜通过｜`test_review_schedule_waits_then_skips`｜junit 0.020 秒。上游未就绪等到期限后 `error_summary` 以 `skipped_upstream:` 开头；成功看 `ingest.job_runs`。本 head CI 如上。不取 B-050。
+
+
 ## B-049  进行中  2026-10-23 23:44 北京
 
 - PR #58，head `a303f8d`。https://github.com/XuQingsong/inves-cog/pull/58 。没有合并。已并入 UD-COORD-32 之后的 main（`7754650`）。插件读取的 `config/params/p-2026.10/m0.yaml` 里 `harness.blocking_max_seconds` 从 180 改为 300，与文档和 `test_blocking_duration` 一致。这一 head 的 `phase1-blocking` CI 未出。不标已完成，不取 B-050。
