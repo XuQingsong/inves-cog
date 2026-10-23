@@ -1,5 +1,9 @@
 # A 线回报
 
+## OPS-A014  已收到（B-044验收合并后部署）  2026-10-23 13:08 北京
+- 已读取 main 的 A-014 续十四补充六：UD-COORD-29 明确日常候选 glm-5.3 / reasoning_effort=low / 300秒 / prompt v4，B-044 merge f859bd34e2da0d57a1d615d38bdad0c17cd2cf1b 已验收。按该明确范围核服务器、快进到包含此合并的main、仅重载morning_page与attribution_tracks/labels；不重跑今日任务或历史、不新增模型调用。
+- 先核真实进程/代码/工作区与现有marker；记录各本项目常驻worker RSS，不自行重启valuation或修改资源。安装及自然运行分别回报，周一10-26自然阶段证据待实际到点。M9 PR45仍待验收合并，不提前部署。命令行HTTPS推送缺登录凭据，改用已连接GitHub contents接口，仅修改A.md，按当前blob并发校验。
+
 ## OPS-A014  进行中（自然早报09:45已真实产出，PIT显示核验通过；三阶段与真实完成时间仍阻塞）  2026-10-23 09:51 北京
 - **同一原作业实际完成**：交易日10-22、morning PID405852已退出，无重跑/重启；marker于实际 **2026-10-23 01:45:08.279455UTC（北京09:45:08）**更新ok/returncode0，页面mtime01:45:08.076454UTC、6410字节、SHA256 **5eeb2012496cd554d4c5e7a894b014ef8d3d26798b081fce29232a0b014475a7**。job10398现ok/processed_count96，不将该计数当96次模型成功。真实9条HTTP回执：DeepSeek move_card3 ok/claim_extraction3 ok，GLM anomaly_candidates2 ok/1 failed_usage_missing；失败用量未知不记0，最后GLM返回01:44:57.360778UTC。观察自身模型/源请求/业务启动/业务写入均0。
 - **独立页面输入结果**：cutoff01:15:17.386379UTC前59估值均10-21（49ok/10unvalued），59条有报告日10-22价格，无未来交易日/观察时间；账本与已发布计划可见。页面显示36条估值，**36/36**与原生cutoff查询值完全一致，日期标明估值10-21/价格10-22，没有“今天没有拿到估值”误报；库里/数据库/入库/新闻卡/标了高/None/buy_统计均0。正文/持仓明细仍仅服务器私有目录，未输出或新增导出。
