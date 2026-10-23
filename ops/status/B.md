@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-052  已完成  2026-10-24 01:02 北京
+
+- PR #61，head `a0a46b0`。https://github.com/XuQingsong/inves-cog/pull/61 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39991192724 ：`phase1-blocking` 成功，619 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 98.712 秒（≤ 300）、status passed。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
+- 相对 main 的 diff：`scripts/schedule_review.py`，`src/inves_cog/perception/review/schedule.py`、`reports.py`，`src/inves_cog/web/pages.py`、`html_page.py`，以及 `tests/m10/test_b052.py`。没有新迁移、上游、合同。原来的 `poll()` 窗口没有改。
+- Q1｜通过｜`test_q1_real_execution`｜CI junit 0.063 秒。截点后先兆快照行数等于 59 只加全部篮子。到期案例写入 T+1。一句话已入库，计数客户端调用 1 次。各任务 `job_runs` 为 ok，`processed_count` 等于实际写入行数。同日再跑为 already_attempted。
+- Q2｜通过｜`test_q2_week_and_month`｜CI junit 0.068 秒。周末与月末各跑一轮。漏检样本、周报、月报都有行，再跑一轮不增加。
+- Q3｜通过｜`test_q3_wait_then_skip`｜CI junit 0.018 秒。`attribution_labels` 未就绪时 ET 02:00 为 waiting_dependencies。ET D+1 07:30 写 `skipped_upstream:`，没有复盘行，模型调用 0。
+- Q4｜通过｜`test_q4_perception_writer`｜CI junit 0.041 秒。ingest 账号不能写 `precursor_snapshots`，任务仍由 perception 账号写完。缺 `INVES_COG_PERCEPTION_DATABASE_URL` 时失败，调用计数 0。
+- Q5｜通过｜`test_q5_run_once`｜CI junit 0.036 秒。同一天第二次不重复。换客户端再跑不调用模型，一句话仍是 1 行。
+- Q6｜通过｜`test_q6_pool_unhandled`｜CI junit 0.033 秒。96 个异常计数 96，池内 2、宽池 94。未处置和标红只有池内。`/market` 列出宽池且不标红。同一次 CI 中 `test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_b051.py` 11 项通过。
+
+
 ## B-052  进行中  2026-10-24 01:00 北京
 
 - PR #61，head `a0a46b0`。https://github.com/XuQingsong/inves-cog/pull/61 。没有合并。本地 `make phase1-test`：619 passed、21 deselected，用时 111.17 秒。这一 head 的 CI 还没出结果，不标已完成。
