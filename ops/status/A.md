@@ -1,5 +1,21 @@
 # A 线回报
 
+## A-016  已完成（代码提交验收；上线与自然验证另列OPS，不冒称整体完成）  2026-10-23 20:29 北京
+- [PR54](https://github.com/XuQingsong/inves-cog/pull/54)已实际ready_for_review/draft=false、open/unmerged。完整head **a23b1d7e867d4b12045e4be91c5f7552891f16e5**，包含已验收B046/main384244aa3e24b717c0e21a49d85abd499fe0a955；先失败提交e312d529bd2007014437d08df2e48a908cd76ae1保留。准确[CI39952903801/job120411508966](https://github.com/XuQingsong/inves-cog/actions/runs/39952903801/job/120411508966) completed/success，独立完整日志确认merge58fb6dab1ca4a18c40008b90eeaa4fb922a8a9f1将本head合入384244a；清洁容器make phase1-test **560 passed/21 deselected/175.84秒**，M0另2passed，9项预期失败自检均red=True。原87f0060 CI39951689859的543passed/5旧时段断言失败仍保留ci-history；修正后没有跳过/删除测试或改门禁。
+- **E1｜通过｜test_e1_et_window_and_restart**：注入冬夏时钟，ET08:34不出、08:35出，09:05仅截止记账；旧固定北京窗口不触发。**E2｜通过｜test_e2_only_real_success_before_now_is_ready / test_e2_e4_wait_then_plan_once_across_restart / test_e2_deadline_failure_no_plan_or_duplicate / test_e2_outer_worker_does_not_hide_deadline**：上一交易日评分ok/degraded且真实ended_at可见才就绪，晚到等待、到期failed/skipped_upstream且无计划，外层不吞截止。
+- **E3｜通过｜test_e3_e6_actual_plan_unchanged_except_completeness / test_e3_late_overlay_not_consumed**：真实非空引擎计划，overlay缺失照常生成、标冷静期未生效；存在记录版本/M8缺口，不读窗口开始后才生成的层。**E4｜通过｜test_e2_e4_wait_then_plan_once_across_restart**：持久job+advisory lock，重复轮询及重启不重复尝试。
+- **E5｜通过｜test_e5_seven_sources_no_empty_insider_proof / test_plan_unpublished_low_coverage**：FR-M4-16七源sources列表、status/as_of/覆盖/缺项/fallback/影响齐备；无证据unknown/NULL、内部人无行不当采集完整，VIX缺失按非恐慌；bars<95%原不发布保留。**E6｜通过｜test_e3_e6_actual_plan_unchanged_except_completeness**：同一非空夹具真实订单/计划除新增完整度外逐项相同，规则A未改。
+- **E7｜配置/迁移/目录项通过，生产运行尚未通过｜test_e7_add_only_m9_program_separate_migration / handoff/A016/m9-deployment.json**：只执行phase1_m9_0001一次、仅新增M9 program配置、目录独立；role_overlay/role_shadow仍NOLOGIN且无scoped URL，新权限待需求方决定，未启动M9，不把该项写成自然发布通过。**E8｜通过｜准确CI39952903801**：完整make通过，对main差异无M7/M8/M5源码及合同；仅继承B046。相关离线86项、B046相邻19项和ruff通过。
+- **已自行决定**：无新增业务/接口/权限决定；共用脚本合并冲突保留两边已授权逻辑，M4等待/期限归CLI、M7截止保留B046。PR描述/送验[评论6364873305](https://github.com/XuQingsong/inves-cog/pull/54#issuecomment-6364873305)已写完整事实。下一步需求方按同一E1–E8验收、获准后合并；A不自动合并、不提前部署本PR M4代码。A016上线剩余见OPS-A016。
+
+## OPS-A016  阻塞（仅M9专用角色登录决定；迁移/目录/权限元数据已核）  2026-10-23 20:29 北京
+- 生产唯一迁移20:00已成功（不重做），独立投递目录20:10已配置；管理员catalog元数据只读核role_shadow对11输入表SELECT与自身4输出INSERT/UPDATE均具备，role_overlay对versions SELECT/INSERT/UPDATE具备；role_trading对overlay只读、写删均false。它仅证明目录权限，不冒称角色登录测试。
+- 两现有角色NOLOGIN、两个scoped URL缺失；最后核PR45仍无新答复。已[实际请求6364375871](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6364375871)需求方取得最小决定（仅现有两个角色LOGIN和随机独立密码私有env，或既有获准专用登录位置），不扩大M0权限、不借管理员业务运行。首次已在本对话说明影响/证据/准备/需决定；本阻塞不影响A016代码验收。今晚ET08:00–08:30尚无M9 worker/自然输出，不补钟或历史补跑冒充。权限到位后直接继续已授权安装并核真实身份/自然输出；接单持续开启。
+
+## OPS-A014  进行中（UD-A-39本次B046安装已完成；10-26/27自然验证待到点）  2026-10-23 20:29 北京
+- 按用户直接允许该次部署，服务器20:26:52–20:27:11实际从436523ca6d658dee2f7b04d62501358b795c4686干净快进 **384244aa3e24b717c0e21a49d85abd499fe0a955**（包含验收merge6fa657ca10ed0396e81a60ad1943b511186dc376、PR53准确head69296ecf6db540369095052e96685c947df25f67，[CI39951383790](https://github.com/XuQingsong/inves-cog/actions/runs/39951383790)独立查success）。只重载anomaly_daily3981531→731229、labels546492→731258、tracks546462→731294、morning546445→731322；其余6个RUNNING PID一致，embedding原EXITED不动。
+- 实际部署脚本校验5安装文件哈希与目标Git一致、服务配置/全部已有json marker不变、工作区干净；20:27另一次独立SSH只读复核HEAD/哈希/全部预期PID一致、M9 program不存在。私有证据b046-deployment-20261023.json（含before/after、哈希、明确UD-A39）；人工模型调用0/手工业务启动0/迁移0。不重复今日RSS、不手动补跑；10-26/27四任务启动/job/真实时间/早页与快照仍待自然到点，不冒称业务通过。此前自动审批拒绝后未执行，取得用户直接新授权并先写状态才重审通过，未绕过。
+
 ## OPS-A014  进行中（UD-A-39：用户直接允许本次B046生产部署）  2026-10-23 20:26 北京
 - 用户决策 **UD-A-39**：针对“是否允许按A014补充九，在inves-cog生产服务器部署需求方已验收合并B046，仅重载anomaly_daily、morning_page、attribution_tracks、attribution_labels四个进程，不手动触发任务”，用户直接答复 **“允许该次部署”**。仅本次生产快进/四进程重载，不扩大B线开发/权限/预算/业务补跑范围；持续接单UD37/38不变。
 - 原部署命令被自动审批以B线部署超出现有可信范围拒绝，命令未执行（连本地部署脚本都未创建），未绕过；已在本对话说明原因并取得上述直接确认。先写本决定，再重新按同一有限方案执行。准确B046 head69296ecf6db540369095052e96685c947df25f67的CI39951383790已独立查completed/success。
