@@ -244,7 +244,14 @@ def _run_morning(connection, perception, moment, client, folder):
 
     os.environ["INVES_COG_PAGE_DIR"] = str(folder)
     try:
-        return morning_main([], connection=connection, perception=perception, clock=FrozenClock(moment), client=client)
+        return morning_main(
+            [],
+            connection=connection,
+            perception=perception,
+            clock=FrozenClock(moment),
+            client=client,
+            record_clock=FrozenClock(moment),
+        )
     finally:
         os.environ.pop("INVES_COG_PAGE_DIR", None)
 
@@ -256,6 +263,7 @@ def _run_stage(task_name, connection, perception, moment, client):
         perception=perception,
         clock=FrozenClock(moment),
         client=client,
+        record_clock=FrozenClock(moment),
     )
 
 
