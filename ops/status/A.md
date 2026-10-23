@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-017  进行中（UD-A-41：用户告知TCP8080已放行；角色LOGIN尚未批准）  2026-10-23 22:44 北京
+- **用户直接输入UD-A-41**：针对服务器/云安全组TCP8080放行情况，用户答复 **“已放行 TCP 8080”**。此为用户报告的配置状态，服务尚未启动，不能当外网连通验证。后续获准上线后再实测GET状态码/首页计数/RSS，不由A修改防火墙。
+- 针对三个既有角色LOGIN请求，用户答复 **“为什么需要？”**，这是提问而非批准。已在本对话解释：现有角色具备职责权限但NOLOGIN无法认证，M9覆盖层写入/影子读写分别用原role_overlay/role_shadow，M10只读用原role_web；密码仅私有env，表权限与网页免登录方案不变。未执行ALTER ROLE/密码生成/URL配置，不把继续、端口放行或提问扩大为数据库登录许可。
+- PR57准确head337df84f92bb0806667828977042a9cfff2ce463的CI39971495151仍运行，不冒称通过。补充十一实际22:40:27–22:40:36快进生产到fb41108b0e12eb9b34c126af6ce92888bf23fea5，仅daily_modules3981530→796120；paper_plan783294和其余8运行PID保持、原embedding EXITED，配置/已有marker不变，人工模型/手工业务/迁移均0。22:41:19独立SSH核HEAD/干净工作区/6文件哈希/全部预期PID一致、未启M9/pages；私有a016-daily-dispatch-deployment-20261023.json和独立verification回执。
+
 ## A-017 / OPS-A016  进行中（公网入口已交草稿PR57；等待准确CI与登录决定）  2026-10-23 22:40 北京
 - [PR57](https://github.com/XuQingsong/inves-cog/pull/57) draft/open，完整head **337df84f92bb0806667828977042a9cfff2ce463**，先失败提交d70a496保留6失败。新增独立public入口/serve_pages配置、7项离线防护通过（green.xml）/ruff通过；真实DB市场页包装前后payload逐字段相等及无交易字段测试待清洁CI。业务api/pages/db、主锁uv.lock与已有安装器均未改。
 - 变更：按任务指定uvicorn，使用requirements-pages.txt固定uvicorn0.38.0/click8.1.8/h11 0.16.0 wheel哈希为独立运维依赖，不升级业务包。公开包已下载，目标Python3.11经uv离线解析/哈希安装到临时target并实际uvicorn --version成功。原全项目锁因既有curl-cffi索引timeout失败后停止；10秒无重试核实仍timeout，不无限重试。最初自动审批因用量耗尽未执行，用户“继续”后同一命令重审通过，未绕过。完整过程/边界见handoff/A017/self-test.md。
