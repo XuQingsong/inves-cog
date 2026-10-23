@@ -181,6 +181,9 @@ class Runs:
     def fetchone(self):
         return self.job
 
+    def fetchall(self):
+        return [self.job] if self.job else []
+
 
 @pytest.mark.phase1_blocking
 def test_detection_run_stamps_the_clock_not_the_old_trade_date(monkeypatch):
