@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-051  已收到  2026-10-24 00:20 北京
+
+- 任务：M10 网页渲染。13 个 HTML 路径，支持 `?date=`，默认最近一个已到截点的美股交易日。HTML 只渲染同名页面 JSON。中文界面，动态文本用 `html.escape`，不加载外部脚本、字体或 CDN。
+- 新 PR，基于当前 main `46a15c1`（含 B-050 合并 `baa7021`）。授权只改 `src/inves_cog/web/`（含 `public.py` 路径白名单，仅新增本单 GET 页面路径）与 `tests/m10/`。不新增依赖，不改上游、迁移、合同。不部署，不调用真实模型。
+- 提交前按 `ops/answers/B-051.md` 的 H1–H7 交证据。不标已完成。
+
+
 ## B-050  已完成  2026-10-24 00:17 北京
 
 - PR #59，head `54c28e7`。https://github.com/XuQingsong/inves-cog/pull/59 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39985043238 ：`phase1-blocking` 成功，601 passed、21 deselected，`blocking.json` 为 exit_code 0、duration 97.786 秒（≤ 300）。`test_m0_ci.py` 2 passed。nightly 跳过。没有部署，没有调用真实模型。
