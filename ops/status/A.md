@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-016  已完成（最新main集成准确CI通过，重新交需求方验收）  2026-10-23 22:01 北京
+- 原PR54 ready/open/unmerged，完整head **af5ba67acaa322b9458586ecceaf848d85c6ef6f** 已合main **dbea515b504b6d7b06ca3b7835a97c4e7ecbc4ce**。[准确CI39965598009/job120454521342](https://github.com/XuQingsong/inves-cog/actions/runs/39965598009/job/120454521342)已独立查completed/success，完整日志确认merge44d3da2包含本准确head与最新main：清洁容器make phase1-test **568passed/21deselected/84.53秒**，M0另2passed，9项预期失败门禁均red=True。对main差异无B源码/合同，本地相关139项通过/ruff通过。PR描述与[重新送验6366675531](https://github.com/XuQingsong/inves-cog/pull/54#issuecomment-6366675531)已更新，A不自动合并或提前部署M4。
+- **验收反馈失败原因与处理**：需求方临时集成CI39962796598完整日志是568项全通过，但FR-M0-12耗时181.607s超过180s导致失败；证据保留不改写。按要求合入当前main并跑本准确head完整CI，本次84.53s通过；没有放宽耗时门槛、修改B代码/测试/CI或用无限重试掩盖失败，未声称已确定底层耗时波动根因。E1–E7行为/迁移配置证据延用，E8由本准确CI替代旧head结果；M9实际自然发布仍未通过，不混同代码验收。
+- **下一步**：需求方按本head复核合并，A收到已验收合并后继续M4安装/自然验证；M9两专用角色LOGIN仍无明确决定，迁移/目录/既有表权限准备复用不重做。用户UD-A40持续部署授权已落地且B04721:55实际完成（前条证据/PR55评论6366615341），后续同范围A014已验收版本不再逐次确认；不扩大数据库权限/迁移/模型/手工补跑。已自行决定无新增业务/权限方案。
+
 ## OPS-A014  进行中（UD-A40下B047安装已完成，独立复核通过）  2026-10-23 21:58 北京
 - 21:55:29–21:55:48实际干净快进服务器到 **8bef57cb37ab5b9bcc0ef37e0e25b161ca9483d9**，含已验收PR55 merge8a5fffa7b9f046c675396dd6498485e9d89878dc。准确head **09bb9e03570298a006c40792a7d6a075d1311c4e** 的CI39958364141成功证据复用。只重载anomaly_daily731229→774142、labels731258→774152、tracks731294→774200、morning731322→774241，其他6个RUNNING PID保持、原embedding EXITED不动。
 - 部署脚本核目标job无活动/新前缀不存在后执行，配置/全部已有marker不变，8安装文件哈希与目标Git一致。随后独立SSH核HEAD/干净工作区/哈希/全部预期PID一致，M9program仍不存在；私有b047-deployment-20261023.json。人工模型调用0/手工业务启动0/迁移0，不重复RSS。10-26自然exposure分布/早页/实时快照仍待到点，不能称业务验收通过。原审批拒绝后获新直接UD-A40才重审执行，不绕过。
