@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-017  进行中（首轮功能8项通过；格式失败已修，新head CI待实回）  2026-10-23 22:46 北京
+- 原PR57完整新head **fa4441f7cbb0bf174b6b2efc302469e3cac45138** 已推，准确[CI39972307325](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325)运行中。首轮337df84的[CI39971495151/job120475066604](https://github.com/XuQingsong/inves-cog/actions/runs/39971495151/job/120475066604)独立完整日志：586passed/1failed/21deselected/179.99秒，8项A017功能（含真实DB市场页包装前后逐字段相同/无交易字段）全通过；唯一失败ruff format三个新文件。已承认此前只跑lint漏format，实际formatter/check/format --check均通过，本地7项再过。未改门禁/B代码或跳过测试，ci-history保留失败。
+- 用户“为什么需要？”已在本对话解释，未批准LOGIN。另同一只读账号用pg_catalog OID核role_web所需30张表均存在且已有SELECT/schema USAGE，证明无需新增表权限；catalog-only不当专用账号登录证明。最初名称解析受当前账号schema限制而失败，未换账号/借管理员业务运行，后仅合法读catalog元数据。三角色仍未改LOGIN、未配密码/URL；M9/pages未启。TCP8080用户报告已放行UD-A41保留，待服务上线再验证外部连通。
+- [需求方实回6367594775](https://github.com/XuQingsong/inves-cog/pull/57#issuecomment-6367594775)已同步；下一步准确CI实回后收口代码送验，需求方合并后才安装本入口。角色决定与代码验收分开等待，不重新索取持续接单/同范围部署批准，不自动暂停a-github。
+
 ## A-017  进行中（UD-A-41：用户告知TCP8080已放行；角色LOGIN尚未批准）  2026-10-23 22:44 北京
 - **用户直接输入UD-A-41**：针对服务器/云安全组TCP8080放行情况，用户答复 **“已放行 TCP 8080”**。此为用户报告的配置状态，服务尚未启动，不能当外网连通验证。后续获准上线后再实测GET状态码/首页计数/RSS，不由A修改防火墙。
 - 针对三个既有角色LOGIN请求，用户答复 **“为什么需要？”**，这是提问而非批准。已在本对话解释：现有角色具备职责权限但NOLOGIN无法认证，M9覆盖层写入/影子读写分别用原role_overlay/role_shadow，M10只读用原role_web；密码仅私有env，表权限与网页免登录方案不变。未执行ALTER ROLE/密码生成/URL配置，不把继续、端口放行或提问扩大为数据库登录许可。
