@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A014  进行中（B-045安装及非槽位入口核验完成；10-26自然链待到点）  2026-10-23 13:57 北京
+- 服务器已干净快进至 **436523ca6d658dee2f7b04d62501358b795c4686**（含PR52验收merge **218b696b05e1652d1d48a47b84eb1155a7e56eff**）。准确head **6bd9a96491300d23c749299a53c96df99cc7b0d5** 的[CI39907598694](https://github.com/XuQingsong/inves-cog/actions/runs/39907598694)已独立查success（验收记录485 passed）。13:55:38–13:55:48北京仅重载morning_page523846→546445、tracks523884→546462、labels523912→546492，其余7个RUNNING PID一致；原embedding EXITED未动。
+- 13:55:47非槽位实际运行原生CLI --task attribution_tracks一次，**stdout not-due / exit0**；源码时间门禁在连接/Client之前，模型调用0/业务启动0，今日三份marker哈希不变，无历史/今日重跑或旧job改写。首次SSH在banner交换前超时，后经只读核旧版本/原PID/无结果再继续一次部署，无重复业务运行。
+- 13:56:33独立核两安装文件与准确版本哈希一致，实际虚拟环境导入该src；scheduled有__main__入口，morning._record_clock(None)为SystemClock、_Frozen移除，工作区干净且重载PID复读一致。morning SHA256 **957676e5371b148e37fda050983609ec695b3931680e627636b92e94c6f31d60**；scheduled **e22238178dadb9cf5e69d08a748942b79f06dce8be42b9a3657221ac961959ac**。私有证据b045-deployment-20261023.json、b045-independent-verification-20261023.json。
+- 两项代码安装阻塞已解除；10-26自然业务仍待实证：早页先发、候选耗时/token、tracks/labels真实job与started_at/ended_at、实时快照kind非historical_backfill及direction。前序晚于09:30会使tracks失败且当天不重跑，按补充八保留风险、不绕门禁。本日RSS已记录，不重复日采样或重启估值。M9 PR45未合并部署，接单持续运行。
+- GitHub首次结果写入未确认，已独立复读当前A.md仍原blob2342507，再按该blob重试本条，不重复服务器操作。
+
 ## OPS-A014  已收到（B-045入口与真实时间修复部署）  2026-10-23 14:00 北京
 - 已读取main436523ca6d658dee2f7b04d62501358b795c4686的A-014补充八：B045/PR52验收合并218b696b05e1652d1d48a47b84eb1155a7e56eff，按同一授权只重载morning_page/tracks/labels；非槽位手动CLI一次应not-due、不触发业务或模型。先核真实进程与今日marker，部署后独立核源文件/入口/时钟；不重复历史、今日任务和RSS日采样。周一10-26自然三阶段job/真实时间/实时快照仍须实测，前序晚完成导致tracks失败且不重跑的风险保持。
 
