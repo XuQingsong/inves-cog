@@ -1,5 +1,9 @@
 # A 线回报
 
+## OPS-A016  已收到（PR54已验收合并，继续M4实际安装）  2026-10-23 22:14 北京
+- 独立核PR54 merged=true；需求方merge **79f94ae0a2508e277f1b249181b94970761a6926** 明确Accepted against E1–E8，准确head af5ba67acaa322b9458586ecceaf848d85c6ef6f/CI39965598009的568项通过证据有效。main已包含该合并，A运行，无新A任务。依A016“验收合并后部署”原授权继续，不重新等待同一验收。
+- 计划仅快进服务器到已验收A016 merge79f94ae、重载paper_plan一个进程，核无活动paper job/新部署前缀、保存前后PID/marker/配置/6文件哈希。现已过ET09:05，不手工补跑/改钟，不重复M9迁移；M9现有两角色LOGIN无答复，暂不新增/启动M9 program。B048虽已合main，不在本次安装目标或运行范围。
+
 ## A-016  已完成（最新main集成准确CI通过，重新交需求方验收）  2026-10-23 22:01 北京
 - 原PR54 ready/open/unmerged，完整head **af5ba67acaa322b9458586ecceaf848d85c6ef6f** 已合main **dbea515b504b6d7b06ca3b7835a97c4e7ecbc4ce**。[准确CI39965598009/job120454521342](https://github.com/XuQingsong/inves-cog/actions/runs/39965598009/job/120454521342)已独立查completed/success，完整日志确认merge44d3da2包含本准确head与最新main：清洁容器make phase1-test **568passed/21deselected/84.53秒**，M0另2passed，9项预期失败门禁均red=True。对main差异无B源码/合同，本地相关139项通过/ruff通过。PR描述与[重新送验6366675531](https://github.com/XuQingsong/inves-cog/pull/54#issuecomment-6366675531)已更新，A不自动合并或提前部署M4。
 - **验收反馈失败原因与处理**：需求方临时集成CI39962796598完整日志是568项全通过，但FR-M0-12耗时181.607s超过180s导致失败；证据保留不改写。按要求合入当前main并跑本准确head完整CI，本次84.53s通过；没有放宽耗时门槛、修改B代码/测试/CI或用无限重试掩盖失败，未声称已确定底层耗时波动根因。E1–E7行为/迁移配置证据延用，E8由本准确CI替代旧head结果；M9实际自然发布仍未通过，不混同代码验收。
