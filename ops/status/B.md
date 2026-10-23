@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-049  已收到  2026-10-23 22:20 北京
+
+- 任务：M10 第二部分，复盘闭环与一句话摘要。新 PR，基于当前 main `fb41108`（含 B-048 合并 `4040c7b`）。需求以 `docs/phase1/M10-pages-review.md` v5 为准，本单完成 B-048 之外的全部 M10 内容。
+- 授权：新增迁移 `migrations/phase1_m10_0001_review.sql`，只建七张表（`perception.cases`、`case_labels`、`precursor_snapshots`、`miss_samples`、`patterns`、`reports_weekly`、`reports_monthly`）。写入只授予现有 `role_perception`，读取只授予现有 `role_web`（及需要时的 `role_shadow`）。不新建角色，不改其他表权限。代码在 `src/inves_cog/web/` 与新增 `src/inves_cog/perception/review/`（或等价目录），另加调度入口脚本和测试。从 `tests/harness/pending.txt` 移除本单测试名。不改上游模块算法与合同。不部署，不在生产执行迁移或模型调用。
+- 范围：案例与 T+1/T+5/T+20 打标、先兆快照、独立漏检样本框、模式库候选、周报月报、一句话摘要、`/review` 页面，以及处置卡 ⑤ 接入首页与市场页。调度写 `job_runs`，上游未就绪等到期限，到期写 `skipped_upstream:`。
+- 提交前按 `ops/answers/B-049.md` 的 R1–R9 交证据。做不到或冲突就停下写清。不标已完成。
+
+
 ## B-048  已完成  2026-10-23 22:01 北京
 
 - PR #56，head `2b4b81a`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39965309782 。`phase1-blocking` 563 passed、21 deselected，用时 117.02 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/56
