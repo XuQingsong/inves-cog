@@ -1,7 +1,9 @@
 """Project supplied relationship versions; this does not reconstruct graph history."""
 
+import re
+import unicodedata
 from datetime import datetime, timezone
-from json import dumps
+from json import dumps, loads
 
 _TEXT = ("relation_id", "from_entity", "to_entity", "mechanism", "connection_type", "direction", "status")
 _TIMES = (
@@ -100,6 +102,8 @@ def project_graph(members, baskets, edges, as_of):
         if not valid:
             continue
         row = {key: edge[key] for key in _TEXT if isinstance(edge.get(key), str) and edge[key]}
+        if edge.get("status_basis") == "SEC原文引文核对":
+            row["status_basis"] = edge["status_basis"]
         row.update(times)
         revision = edge.get("revision")
         if isinstance(revision, (str, int)) and not isinstance(revision, bool):
@@ -143,3 +147,147 @@ def project_graph(members, baskets, edges, as_of):
             "historical_version_reconstructed": False,
         },
     }
+
+
+_OBSERVED = {"观察到", "有支持", "已确立"}
+_CITED = {"业务关系", "经营传导"}
+_BASIS = "SEC原文引文核对"
+_TICKER = "ticker:"
+_RELATIONS = """
+SELECT relation_id, from_entity, to_entity, connection_type, mechanism, direction, status,
+       first_discovered_at, reviewed_at, last_evidence_at, source_info_ids, evidence
+FROM graph.relations
+WHERE status <> '驳回'
+  AND (from_entity = ANY(%s) OR to_entity = ANY(%s))
+  AND first_discovered_at <= %s
+  AND (reviewed_at IS NULL OR reviewed_at <= %s)
+ORDER BY relation_id
+"""
+_TEXTS = """
+SELECT accession, text
+FROM graph.source_texts
+WHERE accession = ANY(%s) AND fetched_at <= %s
+"""
+
+
+def attach_graph(connection, anomalies, as_of):
+    """Read visible graph rows onto each anomaly. An empty read leaves a caller's edges alone."""
+    for anomaly in anomalies or []:
+        if not isinstance(anomaly, dict):
+            continue
+        edges = read_graph_edges(connection, anomaly.get("members") or [], as_of)
+        if edges:
+            anomaly["edges"] = edges
+    return anomalies
+
+
+def read_graph_edges(connection, members, as_of):
+    """One cutoff for live and replay. Citation checks are derived and are not written back."""
+    names = []
+    for member in members or []:
+        name = member.get("ticker") if isinstance(member, dict) else member
+        if isinstance(name, str) and name and name not in names:
+            names.append(name)
+    if not names or as_of is None:
+        return []
+    keys = []
+    for name in names:
+        keys.append(name)
+        prefixed = _TICKER + name
+        if prefixed not in keys:
+            keys.append(prefixed)
+    found = [_mapping(row) for row in connection.execute(_RELATIONS, (keys, keys, as_of, as_of)).fetchall()]
+    texts = _source_texts(connection, found, as_of)
+    edges = []
+    for row in found:
+        edge = _prepared_edge(row, texts)
+        if edge is not None:
+            edges.append(edge)
+    return edges
+
+
+def _source_texts(connection, rows, as_of):
+    accessions = []
+    for row in rows:
+        citation = _citation(row.get("evidence"))
+        accession = citation.get("accession") if isinstance(citation, dict) else None
+        if isinstance(accession, str) and accession and accession not in accessions:
+            accessions.append(accession)
+    grouped = {accession: [] for accession in accessions}
+    if not accessions:
+        return grouped
+    for row in connection.execute(_TEXTS, (accessions, as_of)).fetchall():
+        mapped = _mapping(row)
+        accession = mapped.get("accession")
+        text = mapped.get("text")
+        if accession in grouped and isinstance(text, str):
+            grouped[accession].append(text)
+    return grouped
+
+
+def _prepared_edge(row, texts):
+    edge = {
+        "relation_id": row.get("relation_id"),
+        "from_entity": _ticker_name(row.get("from_entity")),
+        "to_entity": _ticker_name(row.get("to_entity")),
+        "connection_type": row.get("connection_type"),
+        "mechanism": row.get("mechanism"),
+        "direction": row.get("direction"),
+        "status": row.get("status"),
+        "first_discovered_at": row.get("first_discovered_at"),
+        "reviewed_at": row.get("reviewed_at"),
+        "last_evidence_at": row.get("last_evidence_at"),
+        "source_info_ids": list(row.get("source_info_ids") or []),
+    }
+    if edge["status"] in _OBSERVED:
+        return edge
+    if edge["connection_type"] in _CITED and _quote_matches(row.get("evidence"), texts):
+        edge["status"] = "观察到"
+        edge["status_basis"] = _BASIS
+    return edge
+
+
+def _quote_matches(evidence, texts):
+    citation = _citation(evidence)
+    if not isinstance(citation, dict):
+        return False
+    quote = citation.get("quote")
+    accession = citation.get("accession")
+    if not isinstance(quote, str) or not isinstance(accession, str) or accession not in texts:
+        return False
+    wanted = _normalize(quote)
+    if not wanted:
+        return False
+    return any(wanted in _normalize(text) for text in texts[accession])
+
+
+def _citation(evidence):
+    if isinstance(evidence, str):
+        try:
+            evidence = loads(evidence)
+        except ValueError:
+            return None
+    if hasattr(evidence, "obj"):
+        evidence = evidence.obj
+    if not isinstance(evidence, dict):
+        return None
+    return evidence.get("citation")
+
+
+def _ticker_name(entity):
+    if isinstance(entity, str) and entity.startswith(_TICKER):
+        rest = entity[len(_TICKER) :]
+        if rest:
+            return rest
+    return entity
+
+
+def _normalize(text):
+    folded = unicodedata.normalize("NFKC", text)
+    return re.sub(r"\s+", " ", folded).strip()
+
+
+def _mapping(row):
+    if isinstance(row, dict):
+        return row
+    return dict(row)

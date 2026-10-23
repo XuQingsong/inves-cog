@@ -176,6 +176,9 @@ def _day(connection, clock, store, recorder, trade_date, anomalies, items, *, dr
     stages = []
     for name in STAGES:
         moment = slot_moment(trade_date, name)
+        from inves_cog.perception.attribution.graph_context import attach_graph
+
+        attach_graph(connection, due, moment)
         seen = _stage_news(items, trade_date, moment)
         info_ids = [item.get("info_id") for item in seen]
         before = _call_count(actor)

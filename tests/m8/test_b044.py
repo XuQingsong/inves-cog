@@ -57,7 +57,7 @@ def test_prompt_files_are_the_request_and_other_tasks_keep_their_bodies():
     output = json.loads((_CONTRACT / "output.json").read_text(encoding="utf-8"))
     assert candidate_instruction() == instruction
     assert candidate_output() == output
-    assert PROMPT_VERSION == "evidence-bridge-v4-links"
+    assert PROMPT_VERSION == "evidence-bridge-v4.1-links"
     plain = candidate_payload({"anomaly_id": "a"}, [{"info_id": "n1", "headline": "h"}], [])
     assert plain["output"] == output
 

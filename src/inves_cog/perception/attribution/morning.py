@@ -16,6 +16,7 @@ from inves_cog.perception.attribution.chain import (
     prepare_move_pages,
     run_scheduled,
 )
+from inves_cog.perception.attribution.graph_context import attach_graph
 from inves_cog.perception.attribution.store import Store
 
 PORTFOLIO = "paper-fixed"
@@ -272,6 +273,7 @@ def _execute(connection, writer, moment, client, record_clock):
 
 def _load(connection, moment, day):
     anomalies = [_anomaly(row) for row in _all(connection, _ANOMALIES, (day, moment))]
+    attach_graph(connection, anomalies, moment)
     items = [_item(row) for row in _all(connection, _NEWS, (moment, _news_start(day), moment))]
     valuation = _valuation(connection, moment, day)
     holdings, plan = _book(connection, moment, day)
