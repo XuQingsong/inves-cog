@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-017  阻塞（用户回传UFW规则无8080；待用户root放行后外部复测）  2026-10-23 23:31 北京
+- 用户在本对话回传实际ufw status numbered：Status active，IPv4/IPv6规则仅15271 TCP/UDP、22 TCP、18789 TCP、2222 TCP，无8080/tcp允许规则。结合本次实际读到默认入站DROP，已定位主机UFW缺失页面端口放行这一阻断；云层是否还有限制须放行后外部复测，不能据此宣称整个公网链路已通。
+- 已直接给用户root命令 ufw allow 8080/tcp；依A017第4条由用户执行，A不改防火墙。尚未收到执行完成答复，未把给出命令当执行成功；页面服务/三个专用账号已完成部分不重复部署/配置。无新权限扩张或模型调用。
+- main仍7cbe4151c299eca7da318b80d27523f7aca69aef、A运行、无新A开发单；准确head/CI与本机200/RSS等既有证据复用。下一步收到放行结果后一次有界外部HTTP验证，不重启服务，M9/M4自然验证继续独立保留。
+
 ## A-017  阻塞（用户要求的主机防火墙只读核查已完成；具体放行规则需root核实）  2026-10-23 23:27 北京
 - 用户直接要求“你检查一下主机防火墙”，已实际SSH只读核查：/etc/ufw/ufw.conf 为 ENABLED=yes，/etc/default/ufw 的 DEFAULT_INPUT_POLICY="DROP"；ufw unit active/exited、Result=success，firewalld inactive。证明UFW已启用且默认入站丢弃，但不能仅凭默认策略断言8080被拦截。
 - /etc/ufw/user.rules、user6.rules读取PermissionError；sudo -n ufw status verbose、nft list ruleset、iptables -S均返回“a password is required”。当前claudeuser无可用非交互root查询权限，未绕过权限、未改任何防火墙或云规则。
