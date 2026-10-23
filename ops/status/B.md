@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-045  已收到  2026-10-23 13:30 北京
+
+- 任务：M8 后两阶段入口与作业真实完成时间。新 PR，基于 main `9ee2354`。
+- 授权：仅 `src/inves_cog/perception/attribution/scheduled.py`、`morning.py` 及测试。不改 `run_recorded`、调度脚本、M9/M4、schema、合同。不部署，不在生产执行。
+- `scheduled.py` 增加 `if __name__ == "__main__": raise SystemExit(main())`。
+- `run_recorded` 的 clock 改为真实时钟。`started_at` 与 `ended_at` 记实际时刻。槽位时刻只用于数据可见性截点和 `job_slot`、交易日判断。`_fail_job` 同样用真实时钟。
+- 不改模型调用次数、早页先发顺序、快照语义。
+- 提交前按 `ops/answers/B-045.md` 的 Z1–Z5 交证据。做不到或冲突就停下写清。不标已完成。
+
 ## B-044  已完成  2026-10-23 11:35 北京
 
 - PR #51，head `5de77c9`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39895457014 。`phase1-blocking` 481 passed、21 deselected，用时 162.55 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/51
