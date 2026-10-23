@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A014  进行中（B-044安装已完成；自然三阶段仍有已报入口/时钟阻塞）  2026-10-23 13:11 北京
+- **实际安装完成**：按A-014续十四补充六/UD-COORD-29，服务器从04631bbf5e8c3aaadbf978427754188dcb101a72干净快进到 **e503bd24d2d1ee2f8a66a25d5e152916b7cf433a**，包含验收merge **f859bd34e2da0d57a1d615d38bdad0c17cd2cf1b**。PR51准确head **5de77c903a4d18a1b06ef02f2ac03df34c50fcf6** 的[CI39895457014](https://github.com/XuQingsong/inves-cog/actions/runs/39895457014)已独立查completed/success（任务验收记录481 passed）。13:09:36–13:09:45北京仅重载morning_page 103651→523846、tracks 103648→523884、labels 103647→523912；其他7个RUNNING worker PID一致，embedding原EXITED未动。
+- **独立核验**：13:10:41已安装6个关键文件哈希匹配准确版本，虚拟环境实际导入该src；请求构造anomaly_candidates含reasoning_effort=low，模型glm-5.3、timeout300秒、重试0。未发真实模型请求/未重跑业务任务；今日09:15/09:30/12:30三份marker哈希前后一致，未删除重置。私有证据b044-before-20261023.json、b044-deployment-20261023.json、b044-independent-verification-20261023.json，只有元数据。
+- **本日RSS（KiB，重载前）**：anomaly_daily178664、labels73328、tracks41564、daily_modules307160、financials309300、morning_page19248、paper_plan390504、scheduler222000、valuation_v1 **571680（558.3MiB）**、watchdog93004。仅记录；未重启估值、未改资源，用户root已做slice调整不由A重复操作。后续每日一次，不每轮重复。
+- **未解决的已报缺陷仍如实保留**：本次B044未改scheduled.py；安装后的AST仍无__main__入口，morning仍传clock=_Frozen(moment)。因此不能宣称09:30/12:30阶段或真实完成时间恢复，不能用B044安装完成代替自然归因链通过。请需求方给出上述范围的修复并验收合并，A继续既有部署授权、不越线改B源码、不手工补跑/补快照。周一10-26观察早页先发、实际候选耗时/token、三阶段job及direction（是否可完成须先解决入口）。
+- M9 PR45完整head **5cfbccb693a974ab6f9cbe6a0f8bd801273268ca** / [CI39824753091](https://github.com/XuQingsong/inves-cog/actions/runs/39824753091)仍待验收合并，未提前部署；五日旧回放/迁移不重复。接单按UD37/38持续运行。
+
 ## OPS-A014  已收到（B-044验收合并后部署）  2026-10-23 13:08 北京
 - 已读取 main 的 A-014 续十四补充六：UD-COORD-29 明确日常候选 glm-5.3 / reasoning_effort=low / 300秒 / prompt v4，B-044 merge f859bd34e2da0d57a1d615d38bdad0c17cd2cf1b 已验收。按该明确范围核服务器、快进到包含此合并的main、仅重载morning_page与attribution_tracks/labels；不重跑今日任务或历史、不新增模型调用。
 - 先核真实进程/代码/工作区与现有marker；记录各本项目常驻worker RSS，不自行重启valuation或修改资源。安装及自然运行分别回报，周一10-26自然阶段证据待实际到点。M9 PR45仍待验收合并，不提前部署。命令行HTTPS推送缺登录凭据，改用已连接GitHub contents接口，仅修改A.md，按当前blob并发校验。
