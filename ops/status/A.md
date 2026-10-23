@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-017  已收到（M10公网只读入口与最小防护；登录/端口等待直接决定）  2026-10-23 22:24 北京
+- 最新main **fb41108** 下发A017（UD-COORD31），B048已合并4040c7b。目标仅本项目uvicorn单worker/0.0.0.0:8080/claudeuser，只新增web进程；GET页面路径、其余方法405、文档404、每IP60次/分钟、错误不泄漏。现API尚无这些防护，按本任务明确例外新开A017 PR；在独立入口包装，不改B业务页数据算法或正在开发的B049。
+- 变更：新增HTTP入口中间件/启动配置；uvicorn是任务指定运行依赖，先核现有环境/锁定依赖，在status记录。先失败离线测试后实现，准确head CI通过后交需求方验收合并，不提前部署未合并防护。
+- 明确权限边界：role_web专用登录与M9 role_overlay/role_shadow仍须用户在A对话直接确认，未借管理员或其他业务账号；防火墙/云安全组TCP8080只能用户root/控制台放行，A不改。先完成可独立准备与测试，待具体可审阅结果再合并请求缺失决定。M10应用启动/公网业务验证与代码送验分开，密钥/连接串/页面持仓明细不输出。
+- A014补充十一已收到：要求main含A016/B048并重载paper_plan/daily_modules。paper_plan已22:14安装重载不重复；后续按本次安装范围核需要更新的daily_modules，不启动M9/M10，继承B048代码不等于上线其服务。
+
 ## OPS-A016  进行中（M4已实际安装，M9登录仍阻塞；自然业务待到点）  2026-10-23 22:16 北京
 - **代码已验收合并**：PR54独立merged=true，需求方merge **79f94ae0a2508e277f1b249181b94970761a6926** 明确Accepted E1–E8；完整head **af5ba67acaa322b9458586ecceaf848d85c6ef6f**、准确[CI39965598009](https://github.com/XuQingsong/inves-cog/actions/runs/39965598009)568passed证据保留，开发关闭，不再等待同一验收。
 - **M4安装实际完成**：22:14:44–22:14:53服务器从8bef57cb37ab5b9bcc0ef37e0e25b161ca9483d9干净快进上述验收merge，只重载paper_plan3980186→783294，其他9个RUNNING PID保持、原embedding EXITED不动，配置/全部已有json marker不变。6关键文件哈希与目标Git一致；人工模型0/手工业务0/迁移0，不执行B048或今日补跑、不重复RSS。证据a016-m4-deployment-20261023.json。
