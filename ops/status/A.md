@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  已收到（补充十：B047验收合并后部署）  2026-10-23 21:28 北京
+- main **8bef57cb37ab5b9bcc0ef37e0e25b161ca9483d9** 的A014补充十交A部署B047；PR55已独立核merged=true，merge **8a5fffa7b9f046c675396dd6498485e9d89878dc**，准确head **09bb9e03570298a006c40792a7d6a075d1311c4e** 的[CI39958364141](https://github.com/XuQingsong/inves-cog/actions/runs/39958364141)已独立核completed/success（需求方验收552passed）。不执行B047开发、不手工模型实测或B048任务。
+- 服务器只读预检仍 **384244aa3e24b717c0e21a49d85abd499fe0a955**、工作区干净，B046四PID731229/731258/731294/731322均在；其他6个运行PID及原embedding EXITED保持。新部署脚本已准备：只快进上述已合并目标、核无活动目标job、只重载四指定进程、保存前后版本/哈希/marker/PID证据，远端期限150秒，禁止重复前缀；不改数据库/角色/配置、不手动触发任务。
+- UD-A39只明确本次B046，未扩大到B047或M9登录；按新补充十原范围提交实际操作审批，若拒绝不绕过。A016 PR54仍未合并/无新登录答复，未部署M4或启M9。
+
 ## OPS-A016  阻塞（21:02复核，M9登录无新决定；按30分钟规则提醒）  2026-10-23 21:02 北京
 - 最新main6810db66016d5b800010e64b2a078517f8707287、A运行，无新A任务/角色登录答复，PR54仍ready/open/unmerged、head a23b1d7e867d4b12045e4be91c5f7552891f16e5；准确CI39952903801的560项通过证据复用，不重复CI或授权作业。B047新分支不属A任务，不执行。
 - M9唯一迁移/独立目录/既有表权限核验均已准备；当前缺已有role_overlay/role_shadow的LOGIN及私有scoped URL明确决定。已[同步提醒6365506804](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6365506804)需求方取得最小授权或既有获准专用登录位置，并在本对话简洁提醒。此为两个不同角色的新权限，不是重复索取role_perception或持续接单批准；UD-A39仅本次B046部署不扩大到登录。
