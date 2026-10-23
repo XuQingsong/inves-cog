@@ -1,5 +1,15 @@
 # A 线回报
 
+## A-016  进行中（代码已交草稿PR54；唯一迁移完成，M9登录待明确授权）  2026-10-23 20:14 北京
+- **代码真实交付**：[PR54](https://github.com/XuQingsong/inves-cog/pull/54) draft/open，完整head **87f006048f4a2d642acf69a256aac860732b30c1**，先失败提交 **e312d529bd2007014437d08df2e48a908cd76ae1** 保留。M4 ET08:35–09:05、上一交易日评分ok/degraded且真实ended_at可见才生成，窗口等待/截止skipped_upstream；持久job与advisory lock防重启/并发重复；七源完整度按FR-M4-16 sources列表，overlay弱依赖并传版本/缺口，无证据unknown/NULL、无行不推断无事件，不改规则A与95%门槛。外层worker只对M4把等待/截止交回CLI，未改M7/M8/M5源码或合同。
+- **E1–E6相关验证已通过**：M4/调度 **39 passed、3 deselected**，ruff通过；红灯4项与green.xml及逐项清单在handoff/A016。非空真实引擎计划与原prepare基线除input_completeness外完全一致，冬夏/08:34/08:35/09:05、延迟评分、截止失败/无计划/重启防重、overlay存在/缺失/晚于窗口开始、七源结构均覆盖。make phase1-test实际因本机无Docker启动前退出，未宣称全量绿；准确[CI39951689859](https://github.com/XuQingsong/inves-cog/actions/runs/39951689859)当前in_progress，等待实回，不引用旧CI代替。
+- **M9独立部署已做完能做部分**：20:00:43只执行已合并 **phase1_m9_0001_overlay_shadow.sql**，SHA256 **2b5b1306953b1eaa28463cb507498849cb8db1198dd77d00ba9c66cf6701af94**；原五表不存在，事务完成后五表各0行，无模型/业务启动。20:10独立生产投递目录已准备、只设置INVES_COG_OVERLAY_DIR，与历史迁移/导出目录无祖先重叠；未重复迁移、未改旧业务数据。脱敏回执已取回handoff/A016/m9-deployment.json。E7配置测试确认supervisor原集合仅新增M9，生产worker尚未启动。
+- **新权限阻塞有界核实并直接请求需求方**：role_overlay、role_shadow均已存在但NOLOGIN；两个scoped URL均不存在，无M9运行记录。UD-A-13只授权role_perception，不能重复套用到另两个角色。按A016现有权限边界，未擅自ALTER ROLE/新建角色/借管理员业务运行。已[实际评论6364375871](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6364375871)请求需求方取得最小决定：仅已有两角色LOGIN、各随机密码私有写env，或提供既有获准专用登录私有位置，复用M0权限。不需要用户重给已批准迁移或旧回放授权。本对话已直接说明影响、证据、完成准备与所需决定；M4独立代码继续。
+- 下一步：准确CI实回/修复后收口PR代码；登录答复后核真实业务身份/权限、只新增M9进程并核自然输出。M4本PR未验收合并前不部署；今晚窗口能否完成以真实时间/依赖为准，不补钟冒充自然，不重复本日RSS。接单持续开启。
+
+## A-015  已完成（需求方验收合并；后续上线进入A016）  2026-10-23 20:00 北京
+- PR45完整head **5cfbccb693a974ab6f9cbe6a0f8bd801273268ca**，原准确[CI39824753091](https://github.com/XuQingsong/inves-cog/actions/runs/39824753091)成功、五日实际回放证据保留。需求方已按A016开头确认验收合并 **3d0a4cf224f074088968b7c3772e34dc5ac079f9**（集成CI39948620481为需求方验收记录）；GitHub独立实查merged=true。仅关闭开发任务，不把它当生产已上线或完整自然字段五日通过；后续明确交由A016，不重做历史模型任务。
+
 ## A-016  已收到（M9上线、M4时序与七源输入完整度）  2026-10-23 20:00 北京
 - 已读取main **8a6705ede6e263dbcea6d31f71afe0520669103a** 的A-016/E1–E8及UD-COORD-30依赖方案；A015 PR45完整head5cfbccb693a974ab6f9cbe6a0f8bd801273268ca已验收合并（merge3d0a4cf，集成CI39948620481任务记录通过），不再等待同一验收。A014/B045已部署证据保留，M9此前未安装。
 - 本单先失败测试、后实现：M4 ET08:35–09:05、上一交易日评分强依赖/期限skipped_upstream、M9弱依赖及七项input_completeness只报告；规则A与bars95%门槛保持。代码新PR不自动合并，合并后部署其改动。
