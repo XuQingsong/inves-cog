@@ -323,7 +323,7 @@ def test_llm_models_allowed(tmp_path):
     assert registry.resolve("move_card").failure_status == "抽取失败"
     assert registry.resolve("anomaly_candidates").model == "glm-5.3"
     assert registry.resolve("entity_tagging").model == "deepseek-v4.1-flash"
-    assert registry.resolve("anomaly_candidates").timeout_seconds == 900
+    assert registry.resolve("anomaly_candidates").timeout_seconds == 300
     assert registry.resolve("entity_tagging").retries == 2
     with pytest.raises(ValueError):
         registry.resolve("unknown")

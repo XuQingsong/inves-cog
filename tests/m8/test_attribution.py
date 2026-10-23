@@ -3252,10 +3252,10 @@ def test_model_output_contract_rejects_a_bad_structure():
     forbidden = {"score", "confidence", "fundamental", "evidence", "operating_impact_proven", "enters_hypothesis"}
     candidate_schema = candidate_output()
     claim_schema = claim_output()
-    assert isinstance(candidate_schema["candidates"], list)
-    assert candidate_schema["candidates"][0]["affected"][0]["basket_id"] == "string"
+    assert isinstance(candidate_schema["schema"]["candidates"], list)
+    assert candidate_schema["schema"]["candidates"][0]["affected"][0]["basket_id"] == "basket name or empty string"
     assert isinstance(claim_schema["items"][0]["claims"], list)
-    assert set(candidate_schema["mechanism"]) == {"供给", "需求", "竞争", "客户融资", "估值倍数"}
+    assert set(candidate_schema["mechanisms"]) == {"供给", "需求", "竞争", "客户融资", "估值倍数"}
     assert forbidden <= set(candidate_schema["forbidden"])
     assert forbidden <= set(claim_schema["forbidden"])
     assert candidate_payload({"anomaly_id": "a"}, [], [])["output"] == candidate_output()
@@ -7607,7 +7607,7 @@ def test_case_inputs_are_the_payload_bytes(tmp_path, capsys):
         candidate_body = json.loads(candidate.read_text())
         claim_body = json.loads(claim.read_text())
         assert "result" not in candidate_body and "result" not in claim_body
-        assert isinstance(candidate_body["output"]["candidates"], list)
+        assert isinstance(candidate_body["output"]["schema"]["candidates"], list)
         assert candidate_body["output"]["forbidden"]
         assert isinstance(claim_body["output"]["items"][0]["claims"], list)
         assert claim_body["output"]["forbidden"]

@@ -9,7 +9,13 @@ from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import trading_day
 from inves_cog.perception.anomaly.service import run_recorded
-from inves_cog.perception.attribution.chain import _closed_trade_date, job_slot, run_scheduled
+from inves_cog.perception.attribution.chain import (
+    _closed_trade_date,
+    _daily_pages,
+    job_slot,
+    prepare_move_pages,
+    run_scheduled,
+)
 from inves_cog.perception.attribution.store import Store
 
 PORTFOLIO = "paper-fixed"
@@ -185,6 +191,32 @@ def _execute(connection, writer, moment, client):
 
     def operation():
         loaded = _load(connection, moment, day)
+        prepared = prepare_move_pages(
+            loaded["anomalies"],
+            loaded["items"],
+            as_of=moment,
+            client=client,
+            valuation=loaded["valuation"],
+            plan=loaded["plan"],
+        )
+        synthetic = []
+        for anomaly in loaded["anomalies"]:
+            ready = prepared.get(anomaly.get("anomaly_id"))
+            if isinstance(ready, dict):
+                synthetic.append({"anomaly_id": anomaly.get("anomaly_id"), "move_card": ready.get("move_card")})
+            elif isinstance(ready, Exception):
+                synthetic.append({"anomaly_id": anomaly.get("anomaly_id"), "degraded": str(ready)})
+        material = [item for item in loaded["items"] if item.get("published_at") is not None]
+        early = _daily_pages(
+            loaded["anomalies"],
+            material,
+            synthetic,
+            loaded["valuation"],
+            loaded["plan"],
+            moment,
+            holdings=loaded["holdings"],
+        )
+        _emit(day, _soften(early[0]["text"] if early else "", _failed(loaded["anomalies"], synthetic, day)))
         result = run_scheduled(
             moment,
             anomalies=loaded["anomalies"],
@@ -194,12 +226,9 @@ def _execute(connection, writer, moment, client):
             valuation=loaded["valuation"],
             plan=loaded["plan"],
             holdings=loaded["holdings"],
+            prepared_pages=prepared,
         )
         rows = (result or {}).get("rows") or []
-        pages = (result or {}).get("daily_pages") or []
-        flags = _failed(loaded["anomalies"], rows, day)
-        text = _soften(pages[0]["text"] if pages else "", flags)
-        _emit(day, text)
         reasons = _reasons(loaded["anomalies"], rows, day)
         saved = [row for row in rows if row.get("saved")]
         if rows and not saved:

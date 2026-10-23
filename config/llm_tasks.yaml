@@ -2,7 +2,7 @@ tasks:
   anomaly_candidates:
     tier: difficult
     model: glm-5.3
-    timeout_seconds: 900
+    timeout_seconds: 300
     retries: 0
     failure_status: 待分析
   graph_seed_draft:

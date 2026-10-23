@@ -60,7 +60,9 @@ LEFT JOIN LATERAL (
     WHERE anomaly_id = e.anomaly_id
 ) AS tickers ON true
 LEFT JOIN LATERAL (
-    SELECT jsonb_agg(jsonb_build_object('mechanism', mechanism, 'affected', affected)) AS rows
+    SELECT jsonb_agg(jsonb_build_object(
+        'mechanism', mechanism, 'affected', affected, 'score', score, 'scored', scored
+    )) AS rows
     FROM perception.candidates
     WHERE anomaly_id = e.anomaly_id
 ) AS candidates ON true
@@ -306,13 +308,48 @@ def _mechanism(row):
     return None
 
 
-def _direction_field(row, now):
-    found = _distinct(item.get("direction") for item in _dicts(row, "claims", 9))
-    if len(found) == 1:
-        return _observed(found[0], now, _DB_REASONS["direction"])
+def retained_direction(candidates, mechanism):
+    """Direction of the preferred scored candidate after the gate has kept its tickers."""
+    chosen = _preferred_candidate(candidates, mechanism)
+    affected = [
+        item
+        for item in (chosen.get("affected") if isinstance(chosen, dict) else []) or []
+        if isinstance(item, dict) and item.get("ticker")
+    ]
+    if not affected:
+        return None, "没有保留的受影响标的"
+    found = []
+    for item in affected:
+        direction = item.get("direction")
+        if direction in (None, "") or direction in found:
+            continue
+        found.append(direction)
+    if len(found) == 1 and all(item.get("direction") == found[0] for item in affected):
+        return found[0], None
     if len(found) > 1:
-        return {"value": None, "at": None, "missing_reason": "多条说法的方向不一致"}
-    return _empty("direction")
+        return None, "受影响标的方向不一致"
+    return None, "没有保留的受影响标的"
+
+
+def _preferred_candidate(candidates, mechanism):
+    matched = [
+        row
+        for row in candidates or []
+        if isinstance(row, dict)
+        and row.get("scored")
+        and row.get("score") is not None
+        and row.get("mechanism") == mechanism
+    ]
+    if not matched:
+        return None
+    return max(matched, key=lambda row: row["score"])
+
+
+def _direction_field(row, now):
+    value, reason = retained_direction(_dicts(row, "candidates", 7), _cell(row, "mechanism", 4))
+    if reason:
+        return {"value": None, "at": None, "missing_reason": reason}
+    return _observed(value, now, _DB_REASONS["direction"])
 
 
 def _members(row, divergence, filing):
