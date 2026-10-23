@@ -1,5 +1,9 @@
 # A 线回报
 
+## OPS-A014  已收到（B046已验收，按补充九部署）  2026-10-23 20:24 北京
+- main已到384244a（包含验收merge6fa657ca10ed0396e81a60ad1943b511186dc376，PR53/head69296ec）；已读A014补充九，核服务器仍436523ca6d658dee2f7b04d62501358b795c4686且工作区干净。只重载anomaly_daily/morning_page/tracks/labels四个进程，不手工触发任务；其余PID与今日marker保留比较，10-26/27自然验证另回报。
+- A016草稿PR54已合入本次main，共用脚本保留B046的M7截止逻辑与M4自有等待/截止，相关86项及B046相邻19项通过、ruff通过。新完整head a23b1d7e867d4b12045e4be91c5f7552891f16e5。首轮87f0060准确CI39951689859失败（543 passed/5旧时段断言失败），原记录保留，已修正旧测试；d2fcd4d因main共用脚本冲突没有PR run，新merge已解决后推送，等待准确新head CI，不冒称全量通过。M9既有权限目录已核齐，角色LOGIN仍待需求方明确新决定，未重复迁移/新启业务。
+
 ## A-016  进行中（代码已交草稿PR54；唯一迁移完成，M9登录待明确授权）  2026-10-23 20:14 北京
 - **代码真实交付**：[PR54](https://github.com/XuQingsong/inves-cog/pull/54) draft/open，完整head **87f006048f4a2d642acf69a256aac860732b30c1**，先失败提交 **e312d529bd2007014437d08df2e48a908cd76ae1** 保留。M4 ET08:35–09:05、上一交易日评分ok/degraded且真实ended_at可见才生成，窗口等待/截止skipped_upstream；持久job与advisory lock防重启/并发重复；七源完整度按FR-M4-16 sources列表，overlay弱依赖并传版本/缺口，无证据unknown/NULL、无行不推断无事件，不改规则A与95%门槛。外层worker只对M4把等待/截止交回CLI，未改M7/M8/M5源码或合同。
 - **E1–E6相关验证已通过**：M4/调度 **39 passed、3 deselected**，ruff通过；红灯4项与green.xml及逐项清单在handoff/A016。非空真实引擎计划与原prepare基线除input_completeness外完全一致，冬夏/08:34/08:35/09:05、延迟评分、截止失败/无计划/重启防重、overlay存在/缺失/晚于窗口开始、七源结构均覆盖。make phase1-test实际因本机无Docker启动前退出，未宣称全量绿；准确[CI39951689859](https://github.com/XuQingsong/inves-cog/actions/runs/39951689859)当前in_progress，等待实回，不引用旧CI代替。
