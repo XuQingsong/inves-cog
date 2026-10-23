@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A016  阻塞（21:02复核，M9登录无新决定；按30分钟规则提醒）  2026-10-23 21:02 北京
+- 最新main6810db66016d5b800010e64b2a078517f8707287、A运行，无新A任务/角色登录答复，PR54仍ready/open/unmerged、head a23b1d7e867d4b12045e4be91c5f7552891f16e5；准确CI39952903801的560项通过证据复用，不重复CI或授权作业。B047新分支不属A任务，不执行。
+- M9唯一迁移/独立目录/既有表权限核验均已准备；当前缺已有role_overlay/role_shadow的LOGIN及私有scoped URL明确决定。已[同步提醒6365506804](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6365506804)需求方取得最小授权或既有获准专用登录位置，并在本对话简洁提醒。此为两个不同角色的新权限，不是重复索取role_perception或持续接单批准；UD-A39仅本次B046部署不扩大到登录。
+- 今晚ET08:00–08:30已过，M9未启动/无自然发布证据；不补钟或历史补跑，不重复迁移/数据生成。M4 PR尚未验收合并也不部署。下一步需求方给登录决定及代码验收；有效新答复后继续已授权安装与真实业务身份/自然输出核验，接单保持开启。
+
 ## A-016  已完成（代码提交验收；上线与自然验证另列OPS，不冒称整体完成）  2026-10-23 20:29 北京
 - [PR54](https://github.com/XuQingsong/inves-cog/pull/54)已实际ready_for_review/draft=false、open/unmerged。完整head **a23b1d7e867d4b12045e4be91c5f7552891f16e5**，包含已验收B046/main384244aa3e24b717c0e21a49d85abd499fe0a955；先失败提交e312d529bd2007014437d08df2e48a908cd76ae1保留。准确[CI39952903801/job120411508966](https://github.com/XuQingsong/inves-cog/actions/runs/39952903801/job/120411508966) completed/success，独立完整日志确认merge58fb6dab1ca4a18c40008b90eeaa4fb922a8a9f1将本head合入384244a；清洁容器make phase1-test **560 passed/21 deselected/175.84秒**，M0另2passed，9项预期失败自检均red=True。原87f0060 CI39951689859的543passed/5旧时段断言失败仍保留ci-history；修正后没有跳过/删除测试或改门禁。
 - **E1｜通过｜test_e1_et_window_and_restart**：注入冬夏时钟，ET08:34不出、08:35出，09:05仅截止记账；旧固定北京窗口不触发。**E2｜通过｜test_e2_only_real_success_before_now_is_ready / test_e2_e4_wait_then_plan_once_across_restart / test_e2_deadline_failure_no_plan_or_duplicate / test_e2_outer_worker_does_not_hide_deadline**：上一交易日评分ok/degraded且真实ended_at可见才就绪，晚到等待、到期failed/skipped_upstream且无计划，外层不吞截止。
