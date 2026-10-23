@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-015 / OPS-A014  已收到（UD-A-37：用户直接恢复A线，审批同步已恢复）  2026-10-23 09:26 北京
+- **用户直接决定 UD-A-37**：本对话针对“是否恢复A线接单、允许同步GitHub，并在需求方验收合并后继续已授权部署”的确认问题，用户直接答复 **“确认恢复 A 线，继续已授权工作”**。覆盖镜像AGENTS旧停止段落；沿用原A线范围、已批准预算和验收/合并边界，不重新索取已给模型、导出、账户或迁移授权。原a-github保持ACTIVE/每10分钟/原线程，不创建替代自动化。
+- **审批停点已解除**：此前2026-10-23约02:02北京起，同一git fetch两次被自动审批依据镜像停止段落拒绝；未换通道绕过，也未执行新作业/部署。用户本次直接答复后，同一fetch已重审通过、实际完成。当前main **1c9a802366e9b23d54eab2110459a766c029979d**，A运行，README/A014/A015答复未变、无A016；原PR45完整head **5cfbccb693a974ab6f9cbe6a0f8bd801273268ca**仍ready/open/unmerged，最新讨论无新需求方答复。先记录本直接决定，再继续已到窗口的本项目自然运行只读核验；不重复回放、迁移、M7补算、既有CI或模型请求。
+- **既有交付继续有效**：[PR45](https://github.com/XuQingsong/inves-cog/pull/45) A1–A6及真实五日回放证据已交；该准确head [CI39824753091](https://github.com/XuQingsong/inves-cog/actions/runs/39824753091) 530 passed/21 deselected、M0另2通过复用。M9尚未验收合并，不在本轮提前部署；将通过GitHub跟进需求方复核。其他已授权部分继续查实，真实自然任务是否完成以job/快照/输出证据为准。
+
 ## A-015  进行中（A1–A6交付齐备，PR45正式提交验收，准确CI530项通过）  2026-10-23 01:49 北京
 - **最终交付**：原[PR45](https://github.com/XuQingsong/inves-cog/pull/45)已实际转 **ready_for_review/draft=false、open/unmerged**，标题“[M9] 提交验收：逐标的M8覆盖层、独立影子因子与五日实际回放”；准确完整head **5cfbccb693a974ab6f9cbe6a0f8bd801273268ca**。PR描述与[实际送验评论6347415903](https://github.com/XuQingsong/inves-cog/pull/45#issuecomment-6347415903)已按最终代码/结果更新，请需求方按同一A1–A6复核；A未合并/部署M9，不把送验当需求方已验收。
 - **A1通过**：test_a1_a3_a4_actual_contract_via_native_provider直接读取唯一JSON完整output经生产scheduled/provider，WDC/STX on、MU off、NVDA/AMD unknown；test_a1_pure_resonance_contract_is_off验证独立纯共振NVDA off。唯一合同SHA256 **72c05c6ed1fd793673ee4dd5ce572bb4f2d2e6eec49791cc59a07badd86a8fd3**不变，只继承main、不手改docs。证据provider-contract-checklist.md及provider-scope-green.xml；默认真实形态不可变provider非空/空/缺字段/缺阶段和权限失败不换账号均在本head回归覆盖。
