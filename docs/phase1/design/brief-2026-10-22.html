@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>今日简报 · 美股 2026-10-22（样稿）</title>
+<style>
+  body{margin:0;background:#f5f6f8;color:#1f2329;font:15px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:16px}
+  header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px}
+  h1{font-size:22px;margin:0} .meta{color:#646a73;font-size:13px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:#eef0f3;color:#646a73;margin-left:6px}
+  .card{background:#fff;border-radius:10px;padding:16px 18px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .card h2{font-size:17px;margin:0 0 8px} .lead{font-size:16px;font-weight:600;margin:4px 0 10px}
+  .hero{border-left:4px solid #3370ff} .hero .lead{font-size:17px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+  .kpi{background:#f7f8fa;border-radius:8px;padding:10px 12px} .kpi b{display:block;font-size:20px} .kpi span{color:#646a73;font-size:12px}
+  .up{color:#d83931} .down{color:#2ea121} .muted{color:#8f959e} .warn{color:#de7802}
+  table{width:100%;border-collapse:collapse;font-size:14px} th,td{padding:7px 6px;border-bottom:1px solid #eff0f1;text-align:left} th{color:#646a73;font-weight:500;font-size:13px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .bar{display:flex;align-items:center;gap:6px;margin:3px 0} .bar i{display:inline-block;height:10px;border-radius:2px}
+  .gap{border:1px dashed #de7802;background:#fff8ee;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:13px;color:#7a4a00}
+  .gap b{color:#de7802}
+  .note{border:1px dashed #8f959e;background:#f7f8fa;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:13px;color:#4e5969}
+  .event{border-top:1px solid #eff0f1;padding-top:10px;margin-top:10px} .event:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .pill{display:inline-block;padding:0 7px;border-radius:9px;font-size:12px;margin-right:4px}
+  .p-red{background:#fdecec;color:#d83931} .p-green{background:#e9f7ec;color:#2ea121} .p-grey{background:#eef0f3;color:#646a73} .p-orange{background:#fff3e5;color:#de7802}
+  .status td:first-child{width:28%} .ok{color:#2ea121} .bad{color:#d83931}
+  a{color:#3370ff;text-decoration:none} .more{font-size:13px}
+  footer{color:#8f959e;font-size:12px;text-align:center;margin:20px 0}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="note"><b>样稿说明：</b>这是“今日简报”首页的设计样稿，数字全部取自生产库 2026-10-22（美股周四）的真实数据。<span style="color:#de7802">橙色虚线框</span>标的是“理想状态应显示什么、现在为什么没有”。确认方向后，这份样稿就是开发的验收标准。</div>
+
+<header>
+  <h1>今日简报 · 美股 10月22日（周四）</h1>
+  <div class="meta">北京时间 10月23日 13:00 更新 <span class="tag">纸面跟踪，非投资建议</span></div>
+</header>
+
+<!-- 0. 一句话结论 -->
+<div class="card hero">
+  <div class="lead">AI 产业链遭集中抛售，资金转向防御板块；大盘小跌、小盘持平，是一次<b>板块轮动</b>而非全面恐慌。纸面组合 −0.40%，AI 持仓（占 26%）拖累约 2.5 万美元，防御持仓对冲了大部分。</div>
+  <div class="grid">
+    <div class="kpi"><span>标普 500 (SPY)</span><b class="down">−1.18%</b></div>
+    <div class="kpi"><span>纳指 100 (QQQ)</span><b class="down">−2.86%</b></div>
+    <div class="kpi"><span>罗素小盘 (IWM)</span><b>+0.07%</b></div>
+    <div class="kpi"><span>纸面组合当日</span><b class="down">−0.40%</b></div>
+  </div>
+</div>
+
+<!-- 1. 市场 -->
+<div class="card">
+  <h2>一、市场：AI 链领跌，防御与价值领涨</h2>
+  <div class="lead">板块分化达到 5.4 倍标准差（极端），涨的股票比跌的多：765 涨 / 512 跌。</div>
+  <table>
+    <tr><th>领跌</th><th class="num">涨跌</th><th>领涨</th><th class="num">涨跌</th></tr>
+    <tr><td>AI 网络与光通信</td><td class="num down">−9.16%</td><td>必需消费 XLP</td><td class="num up">+3.31%</td></tr>
+    <tr><td>半导体设备</td><td class="num down">−9.10%</td><td>区域银行 KRE</td><td class="num up">+2.53%</td></tr>
+    <tr><td>数据中心电力</td><td class="num down">−7.84%</td><td>公用事业 XLU</td><td class="num up">+2.07%</td></tr>
+    <tr><td>存储（内存/硬盘）</td><td class="num down">−7.61%</td><td>医疗 XLV</td><td class="num up">+1.32%</td></tr>
+    <tr><td>半导体 SMH</td><td class="num down">−5.99%</td><td>地产 XLRE</td><td class="num up">+1.09%</td></tr>
+  </table>
+  <p style="margin:10px 0 4px"><b>资金风格：</b>动量股相对价值股 <span class="down">−3.32%</span>，等权标普相对市值加权 <span class="up">+1.91%</span>，小盘相对纳指 <span class="up">+2.93%</span> —— 资金从拥挤的大型科技/AI 动量股撤出，流向价值、小盘和防御。</p>
+  <div class="gap"><b>理想状态：</b>这里还应有真实的资金流数据（ETF 申赎、主力资金净流入流出）。<b>现在：</b>系统只有“板块相对强弱”，用它近似资金流向；真实资金流数据尚未接入。</div>
+
+  <h2 style="margin-top:14px">情绪</h2>
+  <div class="grid">
+    <div class="kpi"><span>VIX 恐慌指数</span><b class="muted">暂缺</b></div>
+    <div class="kpi"><span>3 个月 VIX</span><b>20.12</b><span>前一日 18.72，↑</span></div>
+    <div class="kpi"><span>近 5 日下跌股票占比</span><b>37.9%</b></div>
+    <div class="kpi"><span>标普距一年高点</span><b>−1.9%</b></div>
+  </div>
+  <div class="lead" style="font-size:15px">情绪偏谨慎但未恐慌：中期波动率在升，大盘离高点很近，没有触发系统性冲击。</div>
+  <div class="gap"><b>理想状态：</b>VIX、期权看跌/看涨比、空头仓位、新闻情绪。<b>现在：</b>这些数据源（FRED、CBOE、FINRA）从上线起就没有加入每日调度，VIX 自 10-15 起为空。</div>
+  <a class="more" href="#">市场详情 →</a>
+</div>
+
+<!-- 2. 重大事件 -->
+<div class="card">
+  <h2>二、重大事件</h2>
+  <div class="gap"><b>⚠ 今天的原因解释不可信：</b>系统自 <b>10月15日</b>起没有采集新闻（只收 SEC 公告），下面系统给出的“可能原因”引用的是一周前的旧新闻。下列内容按“理想状态”写法示意，并标出现在系统实际给出的内容。</div>
+
+  <div class="event">
+    <span class="pill p-red">强度 4.7σ</span><span class="pill p-grey">23 只</span><span class="pill p-orange">系统：原因未明</span>
+    <div class="lead">AI 产业链 23 只股票同日下跌（NVDA、AMD、AVGO、MU、MRVL、TSM、DELL、VRT、CEG……）</div>
+    <p style="margin:4px 0"><b>理想状态应写：</b>发生了什么 → 最可能的原因（引用当日新闻原文与时间）→ 是情绪/资金还是基本面 → 系统把握多大 → 接下来盯什么（如：下周财报、资本开支指引）。</p>
+    <p style="margin:4px 0" class="muted"><b>系统实际：</b>状态“原因未明”；早页卡片列出“AI 融资担忧”“国债收益率上行”“CoreWeave 债务问题”，引用的都是 10月16日的新闻。</p>
+    <p style="margin:4px 0"><b>与你的关系：</b>纸面持仓 NVDA、MU、MRVL、AMD、AVGO 都在其中。</p>
+  </div>
+
+  <div class="event">
+    <span class="pill p-red">−9.1%</span><span class="pill p-grey">4 只</span><span class="pill p-grey">系统：假设中</span>
+    <div class="lead">半导体设备（AMAT、ASML、KLAC、LRCX）集体下跌</div>
+    <p style="margin:4px 0" class="muted"><b>系统实际：</b>“芯片股近 7 日表现最差”“LRCX 创最长连跌”“摩根大通下调 ASML 目标价”——同样是 10月15–16日的旧新闻。</p>
+  </div>
+
+  <div class="event">
+    <span class="pill p-green">+3.3%</span><span class="pill p-grey">系统：假设中</span>
+    <div class="lead">必需消费 XLP 领涨：资金转向防御</div>
+    <p style="margin:4px 0"><b>系统判断：</b>防御板块领涨、科技落后，资金从 AI 股转向沃尔玛等必需消费。<span class="ok">与当日板块数据一致。</span></p>
+  </div>
+  <a class="more" href="#">全部 96 个异常（池内 2、宽池 94）→</a>
+</div>
+
+<!-- 3. 我的持仓 -->
+<div class="card">
+  <h2>三、我的持仓（纸面）</h2>
+  <div class="grid">
+    <div class="kpi"><span>总资产</span><b>$1,462,351</b></div>
+    <div class="kpi"><span>当日盈亏</span><b class="down">−$5,837</b><span>−0.40%</span></div>
+    <div class="kpi"><span>距历史高点</span><b class="down">−3.3%</b></div>
+    <div class="kpi"><span>现金</span><b>$125,598</b><span>8.6%</span></div>
+  </div>
+  <div class="lead">风险提示：AI 相关持仓占总资产 26%，今天集中下跌 4–9%；冷静期机制（M9）尚未上线，系统不会自动暂停对这些股票的加仓。</div>
+  <table>
+    <tr><th>股票</th><th class="num">市值</th><th class="num">当日</th><th class="num">持仓盈亏</th><th>今日计划</th><th>关联事件</th></tr>
+    <tr><td><b>MRVL</b></td><td class="num">$82,907</td><td class="num down">−8.70%</td><td class="num up">+62%</td><td>持有</td><td><span class="pill p-red">AI 链下跌</span></td></tr>
+    <tr><td><b>AMD</b></td><td class="num">$28,952</td><td class="num down">−8.10%</td><td class="num up">+153%</td><td>分批止盈 $7.7k</td><td><span class="pill p-red">AI 链下跌</span></td></tr>
+    <tr><td><b>MU</b></td><td class="num">$86,505</td><td class="num down">−6.26%</td><td class="num up">+45%</td><td>波段买入 $23.1k <span class="warn">⚠</span></td><td><span class="pill p-red">AI 链下跌</span></td></tr>
+    <tr><td><b>NVDA</b></td><td class="num">$155,126</td><td class="num down">−4.40%</td><td class="num up">+6%</td><td>持有</td><td><span class="pill p-red">AI 链下跌</span></td></tr>
+    <tr><td><b>AVGO</b></td><td class="num">$26,506</td><td class="num down">−4.31%</td><td class="num down">−11%</td><td>持有</td><td><span class="pill p-red">AI 链下跌</span></td></tr>
+    <tr><td>GOOGL</td><td class="num">$139,739</td><td class="num down">−3.15%</td><td class="num down">−3%</td><td>确认加仓 $4.9k <span class="warn">⚠</span></td><td class="muted">—</td></tr>
+    <tr><td>ADBE</td><td class="num">$64,391</td><td class="num up">+6.07%</td><td class="num up">+11%</td><td>持有</td><td class="muted">—</td></tr>
+    <tr><td>HD</td><td class="num">$120,932</td><td class="num up">+4.33%</td><td class="num up">+6%</td><td>持有</td><td><span class="pill p-green">防御轮动</span></td></tr>
+    <tr><td>JNJ</td><td class="num">$128,720</td><td class="num up">+3.81%</td><td class="num up">+19%</td><td>警戒减仓 $30.9k</td><td><span class="pill p-green">防御轮动</span></td></tr>
+    <tr><td>NFLX</td><td class="num">$33,994</td><td class="num up">+3.09%</td><td class="num down">−6%</td><td>持有</td><td class="muted">—</td></tr>
+    <tr><td>LLY</td><td class="num">$165,950</td><td class="num up">+2.83%</td><td class="num up">+26%</td><td>持有</td><td><span class="pill p-green">防御轮动</span></td></tr>
+    <tr><td>V</td><td class="num">$184,381</td><td class="num up">+1.59%</td><td class="num up">+13%</td><td>持有</td><td class="muted">—</td></tr>
+    <tr><td>AAPL</td><td class="num">$112,823</td><td class="num up">+1.23%</td><td class="num up">+34%</td><td>持有</td><td class="muted">—</td></tr>
+  </table>
+  <a class="more" href="#">持仓详情与决策时间线 →</a>
+</div>
+
+<!-- 4. 今日计划 -->
+<div class="card">
+  <h2>四、纸面交易计划</h2>
+  <div class="gap"><b>⚠ 10月23日（周五）的计划没有生成。</b>下面是 10月22日开盘前生成的计划（制定时 AI 链还没下跌）。</div>
+  <div class="lead">买 3 笔（约 $8.6 万），卖 2 笔（约 $3.9 万）。</div>
+  <table>
+    <tr><th>动作</th><th>股票</th><th class="num">金额</th><th>为什么（人话）</th></tr>
+    <tr><td class="down">卖</td><td>JNJ</td><td class="num">$30,934</td><td>触发警戒线，先减一部分仓位</td></tr>
+    <tr><td class="down">卖</td><td>AMD</td><td class="num">$7,738</td><td>涨幅已很大（+153%），按规则分批锁定利润</td></tr>
+    <tr><td class="up">买</td><td>GE</td><td class="num">$57,731</td><td>观察名单里出现短线买点</td></tr>
+    <tr><td class="up">买</td><td>MU</td><td class="num">$23,092</td><td>短线回调买点 <span class="warn">（同一计划又写“卖出后冷却期，暂不加仓”，自相矛盾）</span></td></tr>
+    <tr><td class="up">买</td><td>GOOGL</td><td class="num">$4,878</td><td>趋势确认后加仓 <span class="warn">（同一计划又写“该档买入额度已满”，自相矛盾）</span></td></tr>
+  </table>
+  <p style="margin:10px 0 4px"><b>没有买的：</b>14 只符合条件的股票没有开新仓，原因是“开仓名额上限 12 只，当前计数 14”（实际持仓 13 只，系统没有说明 14 是怎么算的，待查）。</p>
+  <div class="gap"><b>理想状态：</b>每条理由都是一句人话，买卖与“不做”的理由不能互相矛盾；超过上限时直接说明“持仓数已超上限，暂停新开仓”。<b>现在：</b>页面显示的是规则代码（如 M-40、M-34），且有上述两处矛盾。</div>
+  <a class="more" href="#">完整计划与输入完整度 →</a>
+</div>
+
+<!-- 5. 估值 -->
+<div class="card">
+  <h2>五、贵还是便宜</h2>
+  <div class="gap"><b>⚠ 估值模型对高增长股和周期股严重失真，暂不展示“合理价”。</b>例：NVDA 现价 $212，模型中性价 $538；AMD 现价 $508，模型 $91；MU 现价 $856，模型 $219；AVGO 结果为 0。原因是模型直接把“本股十年中位市盈率”套用到当前利润上，对利润高速变化的公司不成立。</div>
+  <p style="margin:6px 0">在模型修好之前，先展示客观事实：</p>
+  <table>
+    <tr><th>股票</th><th class="num">当前市盈率</th><th class="num">本股十年 25% / 50% / 75% 分位</th><th>位置</th></tr>
+    <tr><td>NVDA</td><td class="num">26.8</td><td class="num">43.7 / 54.6 / 75.0</td><td>低于历史 25% 分位</td></tr>
+  </table>
+  <p class="muted" style="font-size:13px">（样稿只列 NVDA 作示例；正式版覆盖全部 59 只。）</p>
+</div>
+
+<!-- 6. 数据可信度 -->
+<div class="card">
+  <h2>今天的数据可信吗</h2>
+  <table class="status">
+    <tr><td>行情与板块轮动</td><td class="ok">✔ 完整（2,570 只股票、58 个篮子、66 个分组）</td></tr>
+    <tr><td>新闻</td><td class="bad">✘ 10月15日起未采集（生产调度从未包含新闻任务）</td></tr>
+    <tr><td>情绪数据（VIX/期权/空头）</td><td class="bad">✘ 未接入每日调度</td></tr>
+    <tr><td>事件原因解释（M8）</td><td class="warn">⚠ 基于旧新闻，仅供参考</td></tr>
+    <tr><td>冷静期（M9）</td><td class="bad">✘ 尚未上线</td></tr>
+    <tr><td>估值</td><td class="warn">⚠ 高增长/周期股失真</td></tr>
+    <tr><td>纸面计划</td><td class="warn">⚠ 10月23日未生成；理由有矛盾</td></tr>
+  </table>
+</div>
+
+<footer>纸面跟踪，非投资建议 · 样稿 v1 · 数据来源：inves-cog 生产库（只读）</footer>
+</div></body></html>
