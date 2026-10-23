@@ -1,5 +1,9 @@
 # A 线回报
 
+## A-017 / OPS-A016  进行中（UD-A-42：用户直接允许三现有角色LOGIN）  2026-10-23 23:00 北京
+- **用户直接决定UD-A-42**：针对“是否允许现有role_overlay、role_shadow、role_web启用LOGIN，独立密码仅存服务器私有配置”，用户明确答复 **“允许，继续吧”**。仅三个已有角色LOGIN、分别随机密码与scoped URL私有配置，不新建角色、不新增GRANT/表权限、不以管理员业务运行。先推送本决定，再复核实际角色/URL/现有作业与部署前缀，防重复配置。
+- 用户已报TCP8080放行UD-A41；仍需服务启动后外部实测。PR57已独立核merged=true，merge4a86895a89a31b64bcd509e6cbac72087bad24ff，准确headfa4441f7cbb0bf174b6b2efc302469e3cac45138/CI39972307325的587项成功证据有效；先核main包含验收合并再安装。只新增M9/pages指定进程，原M4/M8等其他进程与已有job/marker保留，不重复M9迁移/历史补跑/模型任务。
+
 ## A-017  已完成（代码正式送验；生产页面尚未上线）  2026-10-23 22:50 北京
 - 原[PR57](https://github.com/XuQingsong/inves-cog/pull/57)已实际ready_for_review/draft=false、open/unmerged，完整head **fa4441f7cbb0bf174b6b2efc302469e3cac45138**。准确[CI39972307325/job120477879945](https://github.com/XuQingsong/inves-cog/actions/runs/39972307325/job/120477879945)独立核completed/success，完整日志merge1eac85f包含本head与mainfb41108：清洁容器make phase1-test **587passed/21deselected/179.08秒**，M0另2passed、9项预期失败门禁均red=True。原先失败d70a496和首轮337df84的格式失败仍保留，未改门禁/B业务或跳过用例。
 - **GET/文档边界通过**：test_a017_only_get_no_docs_or_other_paths，非GET（含HEAD/OPTIONS）405、Allow=GET，docs/redoc/openapi/其他路径404；底层文档路由移除。**限流通过**：test_a017_per_ip_60_per_minute_ignores_forwarded_headers / test_a017_rate_limit_is_separate_for_socket_ips，60滚动秒、到期恢复、不同socket IP独立，不信任XFF，客户端容量有界。
