@@ -1,11 +1,9 @@
-"""Trading-day shifts and the Shanghai visibility cutoff. The clock is injected by callers."""
+"""Trading-day shifts and the shared visibility cutoff. Callers inject the clock."""
 
 from datetime import datetime, time, timedelta
-from zoneinfo import ZoneInfo
 
-from inves_cog.ingest.market import next_trading_day, trading_day
+from inves_cog.ingest.market import NY, next_trading_day, trading_day
 
-SHANGHAI = ZoneInfo("Asia/Shanghai")
 HORIZONS = (("T+1", 1), ("T+5", 5), ("T+20", 20))
 
 
@@ -21,5 +19,5 @@ def add_sessions(day, count):
 
 
 def cutoff(day):
-    start = datetime.combine(day, time.min, tzinfo=SHANGHAI)
-    return start + timedelta(days=1)
+    """ET calendar D+1 01:00. Daylight time is Beijing D+1 13:00; standard time is 14:00."""
+    return datetime.combine(day + timedelta(days=1), time(1, 0), tzinfo=NY)

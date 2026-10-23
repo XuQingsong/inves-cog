@@ -181,7 +181,7 @@ def test_precursor_snapshot_daily(admin):
 
 
 def test_miss_sample_frame(admin, host):
-    period = date(2032, 6, 18)
+    period = date(2032, 6, 17)
     seen = datetime.combine(period, time(2, 0), tzinfo=UTC)
     for index in range(25):
         _info(admin, f"b049-info-{index:02d}", seen, attention=False, found=index < 12)

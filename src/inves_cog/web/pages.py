@@ -1,13 +1,14 @@
 """Daily page JSON. Every number is copied from an upstream column or is a SQL count of those rows."""
 
 import json
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import yaml
 
-from inves_cog.ingest.market import NY, trading_day
+from inves_cog.ingest.market import trading_day
+from inves_cog.perception.review.calendar import cutoff as _deadline
 
 MISSING = "数据暂缺"
 CLOSED = "非交易日"
@@ -30,11 +31,6 @@ _UNIVERSE = Path(__file__).resolve().parents[3] / "config" / "universe.yaml"
 
 def _shanghai_midnight(day):
     return datetime.combine(day, time.min, tzinfo=_SHANGHAI)
-
-
-def _deadline(day):
-    # Calendar D+1 01:00 in America/New_York. Daylight time is Beijing D+1 13:00; standard time is 14:00.
-    return datetime.combine(day + timedelta(days=1), time(1, 0), tzinfo=NY)
 
 
 def _cutoff(clock, day):
@@ -1314,8 +1310,9 @@ def _object(value):
 
 
 def page_review(connection, day, clock):
-    del clock
-    _, cutoff = _window(day)
+    cutoff, closed = _open(clock, day)
+    if closed is not None:
+        return closed
     cases = _rows(
         connection,
         """

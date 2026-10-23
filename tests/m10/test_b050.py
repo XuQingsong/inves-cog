@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from psycopg.types.json import Jsonb
 
 from inves_cog.clock import FrozenClock
+from inves_cog.perception.review.calendar import add_sessions, cutoff
+from inves_cog.perception.review.cases import run_labels
 from inves_cog.web import pages as page_module
 from inves_cog.web.api import create_app
 from inves_cog.web.pages import CLOSED, _highlighted
@@ -33,6 +35,7 @@ PATHS = (
     "/api/pages/paper/stock/NVDA",
     "/api/pages/paper/health",
     "/api/pages/paper/ledger",
+    "/api/pages/review",
 )
 
 
@@ -53,9 +56,13 @@ def _dsn(host):
 
 
 def _clear(admin):
+    admin.execute("DELETE FROM perception.case_labels WHERE case_id LIKE 'b050-%'")
+    admin.execute("DELETE FROM perception.cases WHERE case_id LIKE 'b050-%'")
+    admin.execute("DELETE FROM perception.second_hits WHERE info_id LIKE 'b050-%'")
     admin.execute("DELETE FROM perception.reports WHERE anomaly_id LIKE 'b050-%'")
     admin.execute("DELETE FROM perception.linkage_events WHERE event_id LIKE 'b050-%'")
     admin.execute("DELETE FROM perception.anomalies WHERE anomaly_id LIKE 'b050-%'")
+    admin.execute("DELETE FROM ingest.bars_daily WHERE source = 'b050'")
     admin.execute("DELETE FROM overlay.versions WHERE params_version = 'b050'")
     admin.execute("DELETE FROM trading.plan WHERE portfolio_id = 'b050-paper'")
 
@@ -231,3 +238,36 @@ def test_pages_share_one_cutoff_and_closed_days_say_so(pages, monkeypatch):
             assert response.status_code == 200, path
             assert response.json() == {"message": CLOSED}
         assert seen == []
+
+
+def test_review_cutoff_uses_the_session_close(pages):
+    admin = pages["admin"]
+    due = add_sessions(SUMMER, 5)
+    admin.execute("DELETE FROM perception.case_labels WHERE case_id = 'b050-a-m7'")
+    admin.execute("DELETE FROM perception.cases WHERE case_id = 'b050-a-m7'")
+    admin.execute("DELETE FROM perception.second_hits WHERE info_id LIKE 'b050-k6-%'")
+    admin.execute("DELETE FROM ingest.bars_daily WHERE source = 'b050'")
+    early = _shanghai(due + timedelta(days=1), 8, 0)
+    late = _shanghai(due + timedelta(days=1), 13, 30)
+    admin.execute(
+        "INSERT INTO ingest.bars_daily (ticker, trade_date, close, source) VALUES ('NVDA', %s, 101.5, 'b050')",
+        (due,),
+    )
+    admin.execute(
+        """
+        INSERT INTO perception.second_hits (event_id, info_id, outcome, source_root, published_at)
+        VALUES ('b050-e1', 'b050-k6-close', '确认', 'b050', %s),
+               ('b050-e1', 'b050-k6-late', '确认', 'b050', %s)
+        """,
+        (early, late),
+    )
+    run_labels(admin, due, _clock(cutoff(due) + timedelta(minutes=5)))
+    row = admin.execute(
+        """
+        SELECT reason, labels FROM perception.case_labels
+        WHERE case_id = 'b050-a-m7' AND horizon = 'T+5'
+        """
+    ).fetchone()
+    seen_hits = row["labels"]["可见二次命中"]
+    assert row["reason"] is None
+    assert "b050-k6-close" in seen_hits and "b050-k6-late" not in seen_hits

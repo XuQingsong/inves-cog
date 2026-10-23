@@ -5,7 +5,8 @@ from pathlib import Path
 import yaml
 from psycopg.types.json import Jsonb
 
-from inves_cog.perception.review.calendar import is_session
+from inves_cog.ingest.market import regular_bounds
+from inves_cog.perception.review.calendar import cutoff, is_session
 
 MISSING = "数据暂缺"
 _UNIVERSE = Path(__file__).resolve().parents[4] / "config" / "universe.yaml"
@@ -59,6 +60,9 @@ def _features(beta, short):
 
 
 def _beta(connection, day, tickers):
+    bounds = regular_bounds(day)
+    if bounds is None or bounds[1] >= cutoff(day):
+        return {}
     rows = connection.execute(
         """
         SELECT ticker, beta_share_5d
