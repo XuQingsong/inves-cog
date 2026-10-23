@@ -1,7 +1,2 @@
 test_anomaly_live_smoke | M7 | 等待 R5
 test_case_attribution | M8 | 等待 v3 真实录音（需用户授权调用）
-test_case_cadence | M10 | 等待 M10 实现
-test_oneliner_grounded | M10 | 等待 M10 实现
-test_precursor_snapshot_daily | M10 | 等待 M10 实现
-test_miss_sample_frame | M10 | 等待 M10 实现
-test_reports_contents | M10 | 等待 M10 实现
