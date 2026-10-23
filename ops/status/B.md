@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-045  已完成  2026-10-23 13:49 北京
+
+- PR #52，head `6bd9a96`，CI 绿：https://github.com/XuQingsong/inves-cog/actions/runs/39907598694 。`phase1-blocking` 485 passed、21 deselected，用时 106.41 秒，nightly 跳过。没有合并。https://github.com/XuQingsong/inves-cog/pull/52
+- `scheduled.py` 的 `__main__` 在文件末尾。未到槽位打印 `not-due` 并返回 0。`morning.py` 与 `scheduled.py` 的作业记录用真实时钟，槽位时刻只做可见性、上一阶段就绪、`job_slot` 和交易日判断。模型调用次数、早页先发、快照语义未改。
+- 相对 main 的 diff 只有 `scheduled.py`、`morning.py`、`tests/m8/test_b042.py`、`tests/m8/test_b043.py`、`tests/m8/test_b045.py`。没有改 `run_recorded`、调度脚本、M9/M4、schema、合同。没有部署，没有在生产执行，没有调用真实模型。
+- Z1｜通过｜`test_module_entry_reaches_main_and_writes_both_stage_rows`｜非槽位 `2026-10-16T08:00:00+08:00` 标准输出是 `not-due`，返回码 0。一次性库上 tracks、labels 各有一条 `ok`。labels 前把 tracks 的 `started_at` 与 `ended_at` 一起改到槽位前，因为子进程墙钟晚于历史槽位，且 `ended_at` 不能早于 `started_at`。
+- Z2｜通过｜`test_job_rows_use_the_moving_clock_including_failures`｜早页、tracks、labels 的 `started_at` 是真实开始，`ended_at` 晚 30 分钟，都不等于槽位。tracks 缺少上一阶段、早页没有写入权限，两条失败行同样是这 30 分钟。
+- Z3｜通过｜`test_slot_still_filters_visibility_and_previous_stage_readiness`｜晚于槽位的新闻和异常不进 payload。上一阶段 `ended_at` 晚于本槽位则失败，早于本槽位则 tracks 为 `ok`。同一次 `make phase1-test` 里 B-041 V5 与 B-043 X4 通过。
+- Z4｜通过｜`test_live_snapshot_uses_the_latest_real_end`｜labels 成功后实时快照 `source_asof` 等于三阶段真实最晚 `ended_at`，不是槽位时刻。同一次 phase1-test 里 B-041、B-042、B-043、B-044 全部通过。
+- Z5｜通过｜head `6bd9a96`｜本地 `make phase1-test` 485 passed、21 deselected，用时 96.42 秒。CI 同一 head 485 passed、21 deselected，用时 106.41 秒，nightly 跳过。diff 只含上述两个源文件和测试。
+- 下一步：等需求方验收。不取新任务。
+
 ## B-045  进行中  2026-10-23 13:48 北京
 
 - PR #52，head `6bd9a96`。https://github.com/XuQingsong/inves-cog/pull/52 。没有合并。phase1-blocking 正在跑：https://github.com/XuQingsong/inves-cog/actions/runs/39907598694 。不标已完成。
