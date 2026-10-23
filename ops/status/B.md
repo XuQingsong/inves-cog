@@ -2,6 +2,18 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-052  进行中  2026-10-24 01:00 北京
+
+- PR #61，head `a0a46b0`。https://github.com/XuQingsong/inves-cog/pull/61 。没有合并。本地 `make phase1-test`：619 passed、21 deselected，用时 111.17 秒。这一 head 的 CI 还没出结果，不标已完成。
+- Q1｜本地通过｜`test_q1_real_execution`｜junit 0.083 秒。截点后先兆快照行数等于 59 只加全部篮子。到期案例写入 T+1。一句话已入库，计数客户端调用 1 次。各任务 `job_runs` 为 ok，`processed_count` 等于实际写入行数。同日再跑为 already_attempted。
+- Q2｜本地通过｜`test_q2_week_and_month`｜junit 0.072 秒。周末与月末各跑一轮。漏检样本、周报、月报都有行，再跑一轮不增加。
+- Q3｜本地通过｜`test_q3_wait_then_skip`｜junit 0.015 秒。`attribution_labels` 未就绪时 ET 02:00 为 waiting_dependencies。ET D+1 07:30 写 `skipped_upstream:`，没有复盘行，模型调用 0。
+- Q4｜本地通过｜`test_q4_perception_writer`｜junit 0.037 秒。ingest 账号不能写 `precursor_snapshots`，任务仍由 perception 账号写完。缺 `INVES_COG_PERCEPTION_DATABASE_URL` 时失败，调用计数 0。
+- Q5｜本地通过｜`test_q5_run_once`｜junit 0.036 秒。同一天第二次不重复。换客户端再跑不调用模型，一句话仍是 1 行。
+- Q6｜本地通过｜`test_q6_pool_unhandled`｜junit 0.032 秒。96 个异常计数 96，池内 2、宽池 94。未处置和标红只有池内。`/market` 列出宽池且不标红。同一次 phase1 里 `test_b048.py` 至 `test_b051.py` 通过。
+- 没有部署，没有调用真实模型。原来的 `poll()` 窗口没有改。
+
+
 ## B-052  已收到  2026-10-24 00:40 北京
 
 - 任务：复盘调度改为常驻循环并调用真实函数；首页未处置和标红只含 `universe='pool'`，计数仍报全部并分列池内/宽池，宽池在 `/market` 列出且不标红。
