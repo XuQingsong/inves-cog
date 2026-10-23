@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A014  阻塞（七表迁移/pages安装完成；review真实业务分派缺失）  2026-10-24 00:27 北京
+- **已实际完成**：按补充十四/十五UD-COORD33，生产从7cbe4151c299eca7da318b80d27523f7aca69aef快进 **46a15c10605e0719780848f9a42e93ef95ebc552**，含[PR59](https://github.com/XuQingsong/inves-cog/pull/59)验收merge **baa70212071b0451317a4bc6869baed4a203cf72**；准确head **54c28e765ba7ec5cb22f51b3b159169b87056910**/[CI39985043238](https://github.com/XuQingsong/inves-cog/actions/runs/39985043238)success已独立核（601passed）。唯一phase1_m10_0001_review实际执行1次，SHA256 **3dcef823aa4123821b10e09998f4d9d62a3431c5c582ccf7de08d48633ce4ead**，七表均存在且初始0行，role_perception写/role_web SELECT且无写权限全部核实，未新角色/其他授权。
+- **页面实际结果**：仅pages807431→847380，其他11RUNNING PID保持，原embedding EXITED不变，配置/已有marker不变；无人工模型/手工业务/历史补跑。独立SSH核HEAD/干净工作区/三关键文件hash一致。公网 **2026-10-23 16:25:54UTC GET /api/pages/?date=2026-10-22 HTTP200，anomaly_count=96**，本机同为96，与DB按ET D+1 01:00截点count96一致。交接“应为14”**不通过**，全量与截止内均96；未把96改成14或隐去不符。pages RSS117580KiB。
+- **失败与恢复证据**：首脚本在迁移committed后因预期14断言停止；独立只读确认7表/权限成功和真实96，随后只恢复代码/pages阶段，未重跑迁移/生成账号。私有b050-review-schema-pages-20261024-attempt.json与result、外部b050-external-verification-20261024.json留存；远端180/90秒期限有界，不重置诊断预算。
+- **复盘实质阻塞**：scripts/schedule_review.py为必填task的单次CLI，无常驻循环/多任务分派；schedule.poll默认run_recorded(operation=lambda:0)，未调用run_labels/快照/报表/ground/store_oneliner，且入口默认主URL未选择perception专用写身份。启动该程序不会交付复盘业务，可能空记job成功；故未新增review进程，不冒称上线。**首日先兆快照真实0行**。七表权限/schema已准备，不以报告代替已可完成的页面工作。
+- [PR58缺口反馈6369604501](https://github.com/XuQingsong/inves-cog/pull/58#issuecomment-6369604501)、[PR59实装回报6369623306](https://github.com/XuQingsong/inves-cog/pull/59#issuecomment-6369623306)已同步。已直接告诉用户功能影响/证据/已完成准备；需要需求方派B明确修复真实业务/专用身份/调度及每日次数防重并验收合并后再交A，不需用户重复批准既有范围。A不改B代码、不人工触发、接单持续开启。M4/M9自然验证仍独立保留。
+
 ## OPS-A014  进行中（补充十五已收到；B050已合并，准备唯一迁移及pages安装）  2026-10-24 00:23 北京
 - main **46a15c10605e0719780848f9a42e93ef95ebc552** 补充十五要求执行补充十四（UD-COORD33）：唯一phase1_m10_0001_review七表迁移，role_perception写/role_web读，新增review调度、只重载pages。独立核[PR59](https://github.com/XuQingsong/inves-cog/pull/59)merged=true，merge **baa70212071b0451317a4bc6869baed4a203cf72**；准确head **54c28e765ba7ec5cb22f51b3b159169b87056910** / [CI39985043238](https://github.com/XuQingsong/inves-cog/actions/runs/39985043238)completed/success（601passed）。前置B050条件解除，原首页缺表冲突可通过先迁移后重载解决。
 - 变更先记：按已转达UD-COORD33仅七张复盘表/明确表权限；不新角色、不其他迁移/历史补跑/手工模型。实际执行前核生产HEAD/已有迁移前缀/七表及活动review job，防重复；迁移后用专用业务身份核只读/写权限，再重载pages并核D=2026-10-22异常14与数据库一致，原其他PID/配置/marker保留。
