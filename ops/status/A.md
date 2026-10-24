@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-018 / UD-COORD-36  进行中（已验收，部署受控恢复）  2026-10-24 23:59 北京
+- 最新main39ddebe0c53eb4e806fcc868ab0b5f881d73a4f4含PR73验收merge7bf8995bca490e26fc9a3a11e6fd06b627687933；head02f05d7f611104d70e57e18404aa993283d5731d/准确CI40108363441/job120914687276 success723passed已核。费用答复已到：本次补采单独30元，不含先前14元；input2/output8元每百万，缺usage按同批平均。今日补采上限6000、稳态2500保持。
+- 变更先记：生产干净快进该已合并main，无迁移/权限变更；恢复news两采集任务。共享旧enrich保持冻结直至受控业务进程接管，避免无预算约束并发消费；调用既有Pipeline.enrich_pending(limit=1)+JobRunner逐条处理并按真实账本每条后核费用/当天调用，单个受控窗口最多30分钟、远端2400秒硬期限、私有进度/receipt和排他锁。累计成本从本次恢复baseline算，不重置预算；未知无同批样本则保守停，不按0费用。
+- 到30元或当天调用边界、窗口期限或异常：仅新闻pending加费用暂停/原retry保留的来源标记并延期，停news两采集任务；恢复原共享enrich处理SEC等，其他运行服务保持。不删除/倒填数据，不新增业务算法/部署未合并代码；受控入口只调用已合并标准函数和原身份，防并发/重复。下一轮先核真实unit/回执/账本再继续，不无限重置窗口预算。无用户新审批。
+
 ## A-018 / UD-COORD-36  进行中（代码完成，PR73正式送验）  2026-10-24 23:50 北京
 - [PR73](https://github.com/XuQingsong/inves-cog/pull/73)ready/open，完整head**02f05d7f611104d70e57e18404aa993283d5731d**；准确[CI40108363441/job120914687276](https://github.com/XuQingsong/inves-cog/actions/runs/40108363441/job/120914687276)实际success **723passed/21deselected/190.99秒**，独立完整日志checkoutf513109合本head与main5ff39fe6be5578f2e539d663df81eefb480f4702；新增隔离DB三项全过，M0另2passed0.57秒/九红门禁保持。先红335fd81f1e00c805398d6b562504ff68bd678d94，准确CI40107941637/job120913424439实际3failed720passed199.75秒；后实现local87b0b60/远端02f05d7。本地原info_item_contract 1passed0.35秒、ruff/format/diff通过，未称本地DB实跑。送验comment6386249276。
 - 仅M1 repository enrichment队列选择+测试：news published_at>=10-21 00:00ET，旧可见pending新闻保留原内容/时间/状态/既有来源，仅extraction_source添加幂等backfill_skip（补采未提取/UD-COORD36/真实as_of）。未知日期不送模型，SEC等不受日期范围影响，已ok历史保持。轮询复用同一选择使old-only也标记但不派发，不伪称ok；原retry_at/排序/limit保持。测试覆盖精确ET边界、null日期、非news、所有原字段相等、标记不重复、old-only、已提取不改及实际Pipeline计数客户端派发。
