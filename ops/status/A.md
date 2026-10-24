@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-019  进行中（M5三项自验通过，PR68正式送验；M4已部署）  2026-10-24 17:20 北京
+- [PR68](https://github.com/XuQingsong/inves-cog/pull/68)已ready/open，完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3；准确[CI40081103007/job120834666831](https://github.com/XuQingsong/inves-cog/actions/runs/40081103007/job/120834666831)completed/success。已独立完整日志checkout72d9b0f合本head与989850890041ebcc29ec6fb0e7d96bc97a16de4a，**702passed/21deselected/114.77秒**，M0另2passed0.32秒、9项red=True；本地16passed/1deselected、ruff/format/diff通过。正式comment6382464599。
+- **(a)真实同输入59只等价通过**：服务器原地冻结10-22输入，旧未改service与新候选完整结果逐字段a==b，ranges/shadows/panel/summary全相等，差异0，共同hash367ee7ba405a80590cc231f03a2906356ef7d58e04e9837dc0f85087e0e41886。原始数据未外传。**(b)资源通过**：旧算法100.269372秒/1457092KiB；候选10.854771秒/279516KiB（273MiB），500MiB/禁swap/1800秒门禁不变。**(c)准确CI通过**。私有equivalence-metrics.json、before/after-metrics.json，验证service SHA256 28d5b19bd8b5250acd3fcf1a16158497dfeeb1b69be1de3af0ba6d048821ac90、repository 6c4c748b96f483b819443c9b5ad6408781825d344225a55a35c01c33ec274891与送验内容一致。
+- 额外真实SQL读取47条历史/完整证据相等已通过；为排除数据库驱动缓冲造成的未覆盖峰值，另单次只读全59数据库路径unit inves-cog-a019-m5-database-20261024（同500MiB/禁swap/1800秒、REPEATABLE READ READ ONLY/persist=False），将与冻结结果比较，尚待真实结果；不写业务/不跑模型/不部署候选，不把该检查冒充10-23补算。
+- M4已实际部署9898508/迁移完成，8expired、剩余pending1、账本静态hash保持；paper_plan1331874、B056 review1331915已实际恢复，原结果证据复用。**剩余**需求方验收合并PR68后安装M5并完成获准10-23正常调度补算一次；当前10-23估值仍缺失，整单未完成。A020未开始，不自动合并或重复补跑。
+
 ## A-019  进行中（候选2真实59只验证273MiB/10.85秒；草稿PR68及CI运行中）  2026-10-24 17:16 北京
 - [PR68](https://github.com/XuQingsong/inves-cog/pull/68)draft，远端完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3；准确[CI40081103007/job120834666831](https://github.com/XuQingsong/inves-cog/actions/runs/40081103007/job/120834666831)in_progress，容器build已成功，未称全CI通过。远端先红d9c8556后实现97c7241/57b63c0；本地额外先红621340a及实现46fc8ca，同三文件内容（Git凭据不可用，内容API顺序提交保留红后绿历史）。本地M5离线16passed/1deselected0.80s，ruff/format/diff通过。
 - 候选2冻结输入unit inves-cog-a019-m5-after2-20261024 invocation3fb9bb31c45a4279b7ef777e8a66f598实际completed/exit0：**59只、10.854771秒、peak279516KiB（约273MiB）**，MemoryMax500MiB/SwapMax0/RuntimeMax1800不变；完整输出hash367ee7ba405a80590cc231f03a2906356ef7d58e04e9837dc0f85087e0e41886，私有after-metrics.json。首失败候选保留不冒称通过。
