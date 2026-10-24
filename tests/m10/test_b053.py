@@ -491,8 +491,8 @@ def test_v1_structure_and_detail_links(pages):
     hrefs = re.findall(r'href="([^"?#]+)', blob)
     for path in DETAIL_PATHS:
         assert path in hrefs
-    assert any(item.startswith("/stock/") for item in hrefs)
-    assert any(item.startswith("/paper/stock/") for item in hrefs)
+    assert any(item.startswith("/s/") for item in hrefs)
+    assert not any(item.startswith("/stock/") or item.startswith("/paper/stock/") for item in hrefs)
     assert "/linkage/b053-e1" in hrefs
     events = _json(pages, "/api/pages/brief/market")["events"]
     assert [row["anomaly_id"] for row in events] == ["b053-a1", "b053-a2", "b053-a3"]

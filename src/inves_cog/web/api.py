@@ -27,6 +27,7 @@ from inves_cog.web.pages import (
     page_stock,
     page_universe,
 )
+from inves_cog.web.stock_brief import page_brief_stock
 
 
 def _jsonable(value):
@@ -125,6 +126,10 @@ def create_app(dsn=None, clock=None):
     def brief_trust(date: date):
         return call(page_brief_trust, date)
 
+    @app.get("/api/pages/brief/stock/{symbol}")
+    def brief_stock(symbol: str, date: date):
+        return call(page_brief_stock, date, symbol=symbol)
+
     _register_html(app, call, clock)
     return app
 
@@ -139,8 +144,8 @@ def _register_html(app, call, clock):
         payload = call(builder, chosen(requested), **extra)
         return HTMLResponse(render_page(payload))
 
-    def show_brief(builder, requested):
-        payload = call(builder, chosen(requested))
+    def show_brief(builder, requested, **extra):
+        payload = call(builder, chosen(requested), **extra)
         return HTMLResponse(render_brief(payload))
 
     @app.get("/")
@@ -170,6 +175,10 @@ def _register_html(app, call, clock):
     @app.get("/linkage/{event_id}")
     def linkage_html(event_id: str, date: date | None = None):
         return show(page_linkage, date, event_id=event_id)
+
+    @app.get("/s/{symbol}")
+    def investor_stock_html(symbol: str, date: date | None = None):
+        return show_brief(page_brief_stock, date, symbol=symbol)
 
     @app.get("/stock/{symbol}")
     def stock_html(symbol: str, date: date | None = None):
