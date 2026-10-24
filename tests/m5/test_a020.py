@@ -120,3 +120,32 @@ def test_a020_failed_transport_consumes_attempt_and_is_not_retried():
     result = collect(clock=FrozenClock(NOW), repository=repo, tickers=["A"], fetch=fetch, pause=lambda: None)
     assert calls == ["A"] and result["request_count"] == 1 and result["processed_count"] == 0
     assert "sensitive" not in str(result) and "sensitive" not in str(repo.saved)
+
+
+@pytest.mark.phase1_blocking
+def test_a020_http_client_has_no_retry_redirect_or_unbounded_body(monkeypatch):
+    from contextlib import contextmanager
+
+    import httpx
+
+    from inves_cog.valuation_v1.consensus import Client
+
+    calls = []
+    monkeypatch.setattr(httpx, "get", lambda *a, **kw: pytest.fail("unbounded get must not be used"))
+
+    @contextmanager
+    def stream(*a, **kw):
+        calls.append(kw)
+
+        class Response:
+            status_code = 200
+
+            def iter_bytes(self):
+                yield b'{"Information":"quota"}'
+
+        yield Response()
+
+    monkeypatch.setattr(httpx, "stream", stream)
+    response = Client("test-only-placeholder").fetch("NVDA")
+    assert response.raw == {"Information": "quota"} and len(calls) == 1
+    assert calls[0]["follow_redirects"] is False
