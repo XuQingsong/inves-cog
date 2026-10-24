@@ -62,7 +62,7 @@ def number(value, *, count=False):
 
 
 def parse_estimates(ticker, raw, fetched_at):
-    """Strict provisional flat response contract; never infer a missing estimate."""
+    """Provider flat response verified against the coordinator fixture; no inferred estimates."""
     if raw.get("symbol") != ticker or not isinstance(raw.get("estimates"), list):
         raise ValueError("unrecognized earnings estimates response")
     annual, quarterly = [], []
