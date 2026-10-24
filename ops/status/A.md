@@ -1,5 +1,12 @@
 # A 线回报
 
+## OPS-A018  进行中（新闻费用止损已执行，其他12服务保持）  2026-10-24 22:05 北京
+- 按A018 N5超2500即暂停要求，生产scheduler1212613→1485374，任务仅移除news_prefill/news_full、原8项及fred/cboe/finra/fed_news保留；唯一enrich1485380已SIGSTOP/stat Tl。独立核其他12运行PID全部保持，新闻已有入库不删除/不倒填，无新权限/迁移/模型手工调用。初脚本在scheduler重启过渡态探针KeyError，随后只读核真实进程并冻结新子进程，未盲目重复重载。
+- 核验计数ET10-24 **info_enrichment3212物理调用**（layer2 3211/layer1 1）、已知input2994263/output1001585，usage_missing4，news_card0；3142是止损前首次探针，非最终值。共享enrich同时处理SEC等，暂停期间信息提取暂缓，原采集/行情继续。只移除news任务不能阻止消费已入库队列，所以冻结该唯一子进程；不擅自恢复。私有a018-cost-stop-20261024.json，PR62 comment6385141037已向需求方交接恢复安排，不再向用户逐项审批。
+- N3首自然新闻窗口job11388 ok/processed15580，独立新增news14576/不同info_id14576，first_seen12:00:39.554958–12:03:56.728041UTC真实当前时间；N4宏观窗口未到不称完成。N5护栏有实质触发且止损，超额事实保留，不宣称预算内成功。
+
+# A 线回报
+
 ## OPS-A018  进行中（首日2500护栏触发，执行限定止损）  2026-10-24 22:01 北京
 - 真实只读计数ET10-24 info_enrichment物理3142次（layer2 3141/layer1 1），已知input2932017/output978961、usage_missing4；news_card0。已超过A018明确2500即暂停news任务门槛，不把usage缺失当0费用。
 - 变更先记：按A018费用护栏暂停news_prefill/news_full，并冻结本项目唯一enrich子进程避免持久待处理新闻继续消耗；仅必要重载scheduler，其他program保持。共享enrich也处理SEC，故暂停期间其他信息提取暂缓，但行情/原采集任务保留；不改ingest代码或数据库/权限，不重跑数据/模型，不擅自恢复当天调用。先核真实PID再执行、私有receipt与前后聚合验证。
