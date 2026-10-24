@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-019  进行中（M5已验收合并，部署及唯一补算）  2026-10-24 19:47 北京
+- 最新main0ff3db38e30cdfb875c0c509c3b96fac1b0202ed已含PR68验收merge86f015856ac57e2612ca5cc6c05627b89ff182f0；A019答复19:45明确按UD-A47部署并完成10-23估值一次。完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3/准确CI40081103007 job120834666831 success702passed，59只等价/实际DB310MiB20.96秒证据复用。
+- 变更先记：生产干净快进该已合并main，仅重载valuation_v1加载新M5；无schema/权限/源/预算变更、不重做M4迁移或8单清理。先核10-23已有59行/活动job/唯一receipt，已有成功则只核验不补跑。需要执行时使用原valuation_v1 run+JobRunner、真实SystemClock与target10-23，不伪造可见时间/不调模型，原角色分离业务写与job记账。
+- 唯一补算由独立unit硬500MiB/禁swap/CPU100%/RuntimeMax1800约束、私有receipt和明确PID，失败不自动重试。结果以真实job及59行/观察时间/耗时独立核对；命令发出或worker存活不算完成。完成后本轮结束，A020下轮按最小编号接单，不跨线。
+
 ## A-019  进行中（真实数据库全59只亦通过，等待需求方验收合并M5）  2026-10-24 17:25 北京
 - 额外全59只真实数据库路径已实际完成：unit inves-cog-a019-m5-database-20261024、同候选/同10-22截点，REPEATABLE READ READ ONLY/persist=False，**317536KiB（约310MiB）/20.962353秒**，完整结果与同输入旧基线相等。0模型/0业务写，500MiB/禁swap/1800秒门禁未改。私有database-metrics.json，已同步PR68 comment。
 - 首状态探针25秒SSH超时未判业务失败/重跑，后低内存探针真实取得complete=true/tickers59/equal_to_frozen_baseline=true及上述指标；主机memory PSI0、IO近0，paper_plan1331874/review1331915均在。与273MiB/10.85秒冻结文件路径明确区分，不能拿SSH偶发超时代替运行失败。
