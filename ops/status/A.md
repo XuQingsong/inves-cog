@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-review  进行中（首次真实产出88快照；周报读身份错误，准备仅停失败循环）  2026-10-24 13:07 北京
+- 自然session10-23于05:00UTC实际执行：job11331 review_snapshots ok/88、11332 labels ok/35、11333 oneliner ok/1、11334 weekly_sample ok/20；实表快照88、case_labels21、reports_weekly1（含一句话）。窗口后llm_calls0，不将一句话job1冒称模型成功。尚未追加模型调用或正文输出。
+- weekly_report job11335至11342（05:00:19–05:03:49UTC）每30秒failed8次，准确错误permission denied for table miss_samples。只读核reader=inves_cog_ingest无SELECT、writer=role_perception有SELECT；已装head9233f76895f398ca6beda589ed0fa6a8e302a8a7中schedule._operation把store_weekly(reader,...writer=writer)分派，build_weekly._samples用reader读perception表，身份路径错误（monthly亦潜在）。_pending非oneliner失败不断重试。不是七表缺失或perception登录缺失，不重做迁移/账号/加GRANT。
+- 变更先记：先确认无活动review job、当日3项daily及weekly_sample已成功，仅stop review失败循环作有界运维止损，保留真实产出且其余服务不动；不改B代码/数据库/模型。已同步PR61请需求方派B修复读身份分派及重试边界，验收合并后按UD-A47恢复，不重复问用户同范围部署许可。A019方案/A018自然采集独立继续。
+
 ## OPS-A018  进行中（UD-A46/47实际安装完成；N3–N5待自然运行证据）  2026-10-24 12:54 北京
 - 实际04:51:12–04:51:19UTC生产从511f51b749e4849143bf6e9d8b267445a2de4b26干净快进 **9233f76895f398ca6beda589ed0fa6a8e302a8a7**，含[PR62](https://github.com/XuQingsong/inves-cog/pull/62)已验收merge **73e69a42d2b5262c1a599a5be7125e96633c551b**；准确head **eb986bbb99f994012cdb60883182ffdc616d7116**/[CI40056099429](https://github.com/XuQingsong/inves-cog/actions/runs/40056099429)success645passed复用。仅scheduler配置command原8+news_prefill/news_full/fred/cboe/finra/fed_news，reread/update PID3307289→1212613，ps实际14项顺序已核；其他12运行PID（pages1204915/review1153175等）/原配置其余部分/marker保持，迁移0、手工采集0、人工模型0。私有a018-scheduler-20261024.json与attempt实际落盘，禁止重复安装。
 - **04:52:22UTC独立基线**：HEAD/干净工作区、scheduler/pages/review RUNNING；新增六任务安装后job0，news cursor仍2026-10-16T00:54:01.581701UTC，ET10-16起新闻0。VIX最近五日10-12 15.21、10-09 14.84、10-08 15.41、10-07 15.08、10-06 15.01，M6恢复尚未证明。N3补采first_seen/每日条数、N4历史及次日M6、N5首日成本仍待自然执行，不将安装冒充业务补齐。回执a018-postinstall-baseline-20261024.json。
