@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  阻塞（新增review生产进程被自动审批拒绝；已直接请求具体授权）  2026-10-24 10:58 北京
+- 已验收B052准确head a0a46b0250a2f2a5b98047499013fec6cf340bcc、merge6b9d900e04bf69bc3871461430606cdf47645bd3/CI39991192724 success证据有效；补充十八要求复用七表及perception身份上线review，脚本已准备150秒期限、guard旧HEAD/干净工作区/无活动review job或前缀、只新增review并重载pages/其他PID保持，不迁移或手工模型/补跑。
+- **实际生产命令未执行**：自动审批拒绝，明确理由“现有可信授权仅覆盖已验收版本服务器快进及指定四个进程，未明确授权新增review进程这一生产副作用”。未通过工作绕过/间接执行。仓库转达UD-COORD33未被审批认可为新增进程直接授权，已在本对话说明影响（自动复盘仍未上线）、既有证据/已完成准备，并异步请求仅新增已验收review及pages重载的明确同意；不是重新确认接单/重复迁移。待用户直接有效答复再记UD-A-NN并重审原动作。
+- 已同步PR61。A018新head eb986bbb99f994012cdb60883182ffdc616d7116 / PR62 / CI40056099429仍运行，继续独立完成代码送验，不把局部阻塞扩成停止全部。生产实际状态仍上次B051，不冒称新部署完成；原唯一迁移、账号、页面成功证据保留，不重复执行。
+
 ## OPS-A014 / A-018  进行中（B052验收交接已收到；A018合最新main重新CI）  2026-10-24 10:55 北京
 - A018首准确head a01d6abb0f9a081f344346b6879d029cf7287b1c/[CI40055526851](https://github.com/XuQingsong/inves-cog/actions/runs/40055526851)独立完整日志证明merge d7f661d含本head+447919f，make phase1-test **638passed/21deselected/181.09秒**，M0另2passed，9项red=True。但期间main合B052，已继承最新main f32f2ea912df2f98b35a3de4ea9933a0df3502cd，不改B代码；新head **eb986bbb99f994012cdb60883182ffdc616d7116**已推原PR62（draft），N1/N2再26passed；需本新head准确CI后正式送验，旧638不冒充当前通过。
 - 补充十八明确B052已验收合并可独立部署（UD-COORD33）：[PR61](https://github.com/XuQingsong/inves-cog/pull/61)独立merged=true，merge **6b9d900e04bf69bc3871461430606cdf47645bd3**，准确head **a0a46b0250a2f2a5b98047499013fec6cf340bcc**/[CI39991192724](https://github.com/XuQingsong/inves-cog/actions/runs/39991192724)success。真实run_cycle已调用快照/标签/周月报/一句话且常驻30秒轮询、perception专用writer；不再把旧no-op分支当现有运行入口。
