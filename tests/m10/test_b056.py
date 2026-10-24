@@ -101,10 +101,10 @@ def test_r1_reports_select_review_tables_on_the_perception_connection(admin, hos
         review_sql = [(name, sql) for name, sql in log if _review_tables(sql)]
         assert review_sql
         assert {name for name, _sql in review_sql} == {"perception"}
-        selects = [sql for name, sql in review_sql if sql.lstrip().lower().startswith("select")]
+        selects = [sql for _name, sql in review_sql if sql.lstrip().lower().startswith("select")]
         assert any("perception.miss_samples" in sql for sql in selects)
         assert any("perception.case_labels" in sql for sql in selects)
-        assert any("perception.patterns" in sql for sql in selects)
+        assert any("perception.patterns" in sql for _name, sql in review_sql)
     finally:
         ingest.close()
         perception.close()
@@ -308,11 +308,11 @@ def _clean(admin):
     admin.execute(
         """
         DELETE FROM perception.reports_weekly
-        WHERE report_id LIKE 'oneliner:2035%' OR report_id LIKE 'week:2035%'
+        WHERE report_id LIKE 'oneliner:2035%%' OR report_id LIKE 'week:2035%%'
            OR (period_end >= DATE '2035-01-01' AND period_end < DATE '2036-01-01')
         """
     )
-    admin.execute("DELETE FROM perception.reports_monthly WHERE report_id LIKE 'month:2035%'")
+    admin.execute("DELETE FROM perception.reports_monthly WHERE report_id LIKE 'month:2035%%'")
     admin.execute(
         """
         DELETE FROM perception.miss_samples
@@ -326,12 +326,12 @@ def _clean(admin):
         """
     )
     admin.execute("DELETE FROM marketstate.daily WHERE ticker = 'B056M'")
-    admin.execute("DELETE FROM ingest.info_items WHERE info_id LIKE 'b056-%'")
+    admin.execute("DELETE FROM ingest.info_items WHERE info_id LIKE 'b056-%%'")
     admin.execute(
         """
         DELETE FROM ingest.job_runs
         WHERE trade_date >= DATE '2035-01-01' AND trade_date < DATE '2036-01-01'
-          AND (task_name LIKE 'review_%' OR task_name = ANY(%s) OR params_version = 'b056')
+          AND (task_name LIKE 'review_%%' OR task_name = ANY(%s) OR params_version = 'b056')
         """,
         (list(UPSTREAM),),
     )
