@@ -698,17 +698,30 @@ def test_v8_market_pages_hide_the_book(pages):
 
 def test_review_gap_when_labels_are_absent(pages):
     admin = pages["admin"]
-    admin.execute("DELETE FROM perception.case_labels WHERE case_id = 'b053-case'")
+    admin.execute(
+        """
+        INSERT INTO perception.case_labels (
+            case_id, horizon, as_of, drafted, labels, reason, visible_until, written_at
+        ) VALUES ('b053-case', 'T+5', %s, false, %s, '旧日', %s, %s)
+        """,
+        (PREV, Jsonb({"result": "旧日"}), cutoff(DAY) + timedelta(days=3), SEEN),
+    )
     try:
+        present = _json(pages, "/api/pages/brief/trust")
+        assert [row["horizon"] for row in present["labels"]] == ["T+1"]
+        assert present["review_gap"] is None
+        admin.execute("DELETE FROM perception.case_labels WHERE case_id = 'b053-case' AND horizon = 'T+1'")
         trust = _json(pages, "/api/pages/brief/trust")
         assert trust["labels"] == []
         assert "尚无 T+1/T+5/T+20 打标记录" in _get(pages, "/trust").text
     finally:
+        admin.execute("DELETE FROM perception.case_labels WHERE case_id = 'b053-case' AND horizon = 'T+5'")
         admin.execute(
             """
             INSERT INTO perception.case_labels (
                 case_id, horizon, as_of, drafted, labels, reason, visible_until, written_at
             ) VALUES ('b053-case', 'T+1', %s, false, %s, '方向对', %s, %s)
+            ON CONFLICT (case_id, horizon) DO NOTHING
             """,
             (DAY, Jsonb({"result": "方向对"}), cutoff(DAY) + timedelta(days=3), SEEN),
         )

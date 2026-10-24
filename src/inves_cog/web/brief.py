@@ -399,7 +399,7 @@ def _labels(connection, day, cutoff):
         """
         SELECT case_id, horizon, as_of, reason, labels
         FROM perception.case_labels
-        WHERE as_of <= %s AND written_at < %s
+        WHERE as_of = %s AND written_at < %s
         ORDER BY case_id, horizon
         """,
         (day, cutoff),
