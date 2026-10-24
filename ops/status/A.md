@@ -1,5 +1,14 @@
 # A 线回报
 
+## A-019  已完成（代码已验收、部署及10-23真实补算完成）  2026-10-24 19:50 北京
+- **用户结果**：纸面订单生命周期修复已部署，8旧单/孤儿单expired、活动pending1，现金/持仓/历史成交不变；估值内存缺陷已修并上线，10-23真实59行结果已生成。49ok、10unvalued、0failed；10只明确不估限制保留，不冒称59只都有三档估值。周一计划已有59评分依赖，10-26自然运行仍列OPS待实窗，不借本次补算宣称自然任务完成。
+- **P1真实结果**：财务11351 degraded59、评分11353 ok59保留，不重跑。最终唯一估值补算**job11386 degraded59/error_summary NULL**，11:46:32.354535–11:46:53.203397UTC，实际20.947773秒、peak269380KiB（约263MiB），500MiB/禁swap/1800秒unit保持，valuation_v1用途模型调用0。独立只读核10-23 ranges59行/59标的，观察时间11:46:52.428222UTC真实当前时间，无伪造可见时间；原失败11354保留。
+- **合并安装**：生产11:46:25–11:46:32UTC干净989850890041ebcc29ec6fb0e7d96bc97a16de4a→**0ff3db38e30cdfb875c0c509c3b96fac1b0202ed**，含PR68验收merge86f015856ac57e2612ca5cc6c05627b89ff182f0。仅valuation_v1 3983422→1414510，其余12运行PID保持。唯一unit inves-cog-a019-m5-final-20261024 invocation99c80b7c80904132868d0d4f3690c191 actual success/exit0。私有a019-m5-final-deploy-20261024.json/a019-m5-final-recovery-20261024.json。无新迁移/权限/数据源或模型，不重复M4迁移/清理。
+- **P2–P7**：[PR67](https://github.com/XuQingsong/inves-cog/pull/67) head a60325891ace1a111c7e96f92e0f1a21d593d75a，验收merge1bce11b686542ce86ebc98d6bf4badda026914d1，[准确CI40069744974/job120800419542](https://github.com/XuQingsong/inves-cog/actions/runs/40069744974/job/120800419542)success693passed。P2缺日/缺价/幂等test_p2_*；P3实际8expired=4计划延误+4孤儿、重复readonly0且静态hash保持；P4四终态与原因持久化test_p4_*；P5等价意向防重test_p5_*；P6解释句test_p6_*；P7 v18实际90/90逐笔一致。生产M4终态迁移f11adcbf6dc9642ed6f0448db6094edbf2b7b662774c3cd1d95d48381ff956b5已执行一次，paper_plan1331874/review1331915已恢复，证据前条复用。
+- **第三步(a)–(c)**：[PR68](https://github.com/XuQingsong/inves-cog/pull/68)完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3，[准确CI40081103007/job120834666831](https://github.com/XuQingsong/inves-cog/actions/runs/40081103007/job/120834666831)success702passed/21deselected114.77秒，独立日志checkout72d9b0f含准确head，M0另2passed、9红门禁不变。10-22同生产输入59只全部payload逐字段相等/差异0；旧1.39GiB100.27秒，候选文件273MiB10.85秒、真实数据库310MiB20.96秒，均原门禁。首候选OOM已保留，后补单份完整来源缓存；先红后实现，不删来源字段/缩短PIT或改公式。
+- 已自行决定：原范围实现采用双遍标的读取保留跨标的peer PE、单份完整filing证据缓存；数据外传被拒后未绕过，所有生产输入留原服务器原地验证。Git凭据缺失改用已连接GitHub内容API顺序提交，未以其阻塞执行。未自动合并、未改docs/golden/milestones或B代码。
+- **下一步**：本轮完成A019后结束；下一唤醒接A020，不暂停/删除a-github。A018自然新闻窗口N3–N5、10-26 M9/M4/M7/M8/复盘自然OPS仍按真实窗口核对，与本单完成分开。
+
 ## A-019  进行中（M5已验收合并，部署及唯一补算）  2026-10-24 19:47 北京
 - 最新main0ff3db38e30cdfb875c0c509c3b96fac1b0202ed已含PR68验收merge86f015856ac57e2612ca5cc6c05627b89ff182f0；A019答复19:45明确按UD-A47部署并完成10-23估值一次。完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3/准确CI40081103007 job120834666831 success702passed，59只等价/实际DB310MiB20.96秒证据复用。
 - 变更先记：生产干净快进该已合并main，仅重载valuation_v1加载新M5；无schema/权限/源/预算变更、不重做M4迁移或8单清理。先核10-23已有59行/活动job/唯一receipt，已有成功则只核验不补跑。需要执行时使用原valuation_v1 run+JobRunner、真实SystemClock与target10-23，不伪造可见时间/不调模型，原角色分离业务写与job记账。
