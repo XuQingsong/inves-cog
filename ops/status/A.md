@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-019  进行中（候选2真实59只验证273MiB/10.85秒；草稿PR68及CI运行中）  2026-10-24 17:16 北京
+- [PR68](https://github.com/XuQingsong/inves-cog/pull/68)draft，远端完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3；准确[CI40081103007/job120834666831](https://github.com/XuQingsong/inves-cog/actions/runs/40081103007/job/120834666831)in_progress，容器build已成功，未称全CI通过。远端先红d9c8556后实现97c7241/57b63c0；本地额外先红621340a及实现46fc8ca，同三文件内容（Git凭据不可用，内容API顺序提交保留红后绿历史）。本地M5离线16passed/1deselected0.80s，ruff/format/diff通过。
+- 候选2冻结输入unit inves-cog-a019-m5-after2-20261024 invocation3fb9bb31c45a4279b7ef777e8a66f598实际completed/exit0：**59只、10.854771秒、peak279516KiB（约273MiB）**，MemoryMax500MiB/SwapMax0/RuntimeMax1800不变；完整输出hash367ee7ba405a80590cc231f03a2906356ef7d58e04e9837dc0f85087e0e41886，私有after-metrics.json。首失败候选保留不冒称通过。
+- 同一冻结10-22输入重排为按filing证据的只读等值布局，3566filings/59只，原数据不外传。候选按原主键惰性读取完整原field_sources单缓存；当前审计hash仍覆盖所有字段。额外真实只读数据库验证候选SQL成功、首标的47历史状态、完整证据与原JSON相等，0业务写/模型。
+- 旧算法基线独立unit inves-cog-a019-m5-before-20261024 invocationb46d484d12cb4e84a6721a58652f4cf4，使用未改生产旧service与同一冻结输入，原地离线输出，1800MiB/禁swap/CPU100%/1800秒保护共享机；与候选顺序运行，尚待真实结果和59只全payload逐字段比较，不能仅hash新输出就称等价。若基线失败不自动第二批。
+- M4生产迁移、8expired/剩余pending1、paper_plan1331874及B056 review1331915已实际完成；M5尚未部署/10-23未补算，待等价/CI及需求方验收合并后继续。整单未完成。
+
 ## A-019  进行中（500MiB实测失败，继续修来源证据读取峰值）  2026-10-24 17:12 北京
 - 首候选原地冻结输入验证unit inves-cog-a019-m5-after-20261024实际Result=oom-kill、ExecMainStatus9，无metrics，不算通过。500MiB/禁swap硬限制保护了生产；不提高验收门槛、不重复同一候选。按标的分批本身不足，单标的快照最大87MB序列化载荷也需控制解码/对象峰值。
 - 变更先记（原M5分批读取批准范围内，无schema/源/权限变化）：M5 Repository.inputs保留所有财务状态行及数值，历史来源field_sources改为按原主键惰性读取完整原JSON、单份来源缓存，切换filing释放前份；当前来源审计hash仍对完整字典计算，不删字段/缩短历史/PIT或改公式。新增非空缓存语义红灯621340a实际1failed ImportError，先红后实现。冻结输入比较将在服务器本地完成，不外传生产快照。M4生产清理和review恢复已完成证据保持。
