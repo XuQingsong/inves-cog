@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-060  已收到  2026-10-25 03:40 北京
+
+- 任务：修复 B-059 的破位提示和数字格式。B-059 验收不通过，已关单。基于 main 新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-060.md` 的 F1–F5。只读上游，不调模型，不部署。
+- 必改：连续天数改用账本评分里的 `consec_below200`，不再从日线自算。已执行破位减仓为橙。达到门槛、持有满 10 天且非恐慌为红，并写下次减仓比例。持有不足或恐慌写明原因，为橙。未达门槛时写第 M 天触发，N 达到 M 减 1 为红。距离、占比、现金比例去掉正号，保留 1 位小数。涨跌幅仍带符号。
+- 下一步：按账本阶段和评分天数改文案，用生产形态夹具自验 F1–F5。
+
 ## B-059  已完成  2026-10-25 03:17 北京
 
 - PR #74，head `2398834`。https://github.com/XuQingsong/inves-cog/pull/74 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40124230068 ：`phase1-blocking` 成功，743 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 225.127 秒（≤ 300）、status passed、collected 743、pending 0。日志 `743 passed, 21 deselected, 5 warnings in 225.17s`。suite xml time 225.123。`m0-ci.xml` 2 passed、0 failures、xml 0.516 秒（日志 `2 passed in 0.55s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。工件 `m0-clean-environment-evidence` id 12571884036。运行创建于 2026-10-25 03:12 北京，`phase1-blocking` 完成于 03:17 北京。B 线没有合并，没有部署，没有调用真实模型。
