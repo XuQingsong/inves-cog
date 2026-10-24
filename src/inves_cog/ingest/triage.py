@@ -30,6 +30,10 @@ KEYWORDS = {
     "policy": r"export control|tariff|regulation|sanction",
     "risk": r"recall|lawsuit|litigation",
 }
+MACRO_PATTERN = re.compile(
+    r"(?<!\w)(fed|fomc|cpi|pce|payrolls?|employment|jobs?|tariffs?|export controls?|sanctions?)(?!\w)",
+    re.I,
+)
 REUSED_FIELDS = ["entities", "is_guidance", "guidance_direction", "is_rating_change"]
 
 
@@ -51,11 +55,15 @@ class NewsTriage:
         usage_today=None,
         cached_root=None,
         workers=1,
+        full_daily_limit=1_500,
+        screen_daily_limit=120,
     ):
         self.llm, self.embed, self.entities, self.clock = llm, embed, entities, clock
         self.workers = workers
         self.monitored_ids, self.pool = set(monitored_ids), set(pool_tickers)
         self.daily_budget = daily_budget
+        self.full_daily_limit = full_daily_limit
+        self.screen_daily_limit = screen_daily_limit
         self.usage_today = usage_today or (lambda: {"tokens": 0, "missing": 0})
         self.cached_root = cached_root or (lambda root: None)
         self.entity_map = {e["entity_id"]: e for e in entities}
@@ -98,12 +106,19 @@ class NewsTriage:
             )
         )
 
+    @staticmethod
+    def holding(item):
+        return bool(item.get("extraction_source", {}).get("news_queue", {}).get("holding_related"))
+
     def primary(self, item):
         return (
-            self.tracked(item)
+            self.holding(item)
+            or self.tracked(item)
             or bool(set(item["entities"]) & self.monitored_ids)
             or item["kind"] == "sec_8k"
             or item["source_level"] == 1
+            or item["source"].casefold() == "benzinga"
+            and bool(MACRO_PATTERN.search(item["headline"] + " " + extraction_body(item["body"])))
         )
 
     def over_budget(self):
@@ -112,7 +127,7 @@ class NewsTriage:
 
     def defer(self, item, reason):
         now = self.clock.now_utc()
-        if reason == "daily_budget":
+        if reason in {"daily_budget", "full_daily_limit", "screen_daily_limit"}:
             zone = ZoneInfo("America/New_York")
             retry = datetime.combine(now.astimezone(zone).date() + timedelta(days=1), time(), zone)
         else:
@@ -128,7 +143,17 @@ class NewsTriage:
             return [future.result() for future in futures]
 
     def screen(self, items):
-        self.map_work(self.screen_batch, [items[start : start + 25] for start in range(0, len(items), 25)])
+        batches = [items[start : start + 25] for start in range(0, len(items), 25)]
+        stats = self.usage_today()
+        if bool(stats.get("missing")) or stats.get("tokens", 0) >= self.daily_budget:
+            for item in items:
+                self.defer(item, "daily_budget")
+            return
+        remaining = max(0, self.screen_daily_limit - stats.get("screen_calls", 0))
+        self.map_work(self.screen_batch, batches[:remaining])
+        for batch in batches[remaining:]:
+            for item in batch:
+                self.defer(item, "screen_daily_limit")
 
     def screen_batch(self, batch):
         if self.over_budget():
@@ -175,15 +200,14 @@ class NewsTriage:
                     screened=True,
                     material=entry["material"],
                     layer=2 if entry["material"] or self.primary(item) else 3,
+                    tier="A" if entry["material"] or self.primary(item) else "B",
+                    reason="screening_material" if entry["material"] else "screening_not_material",
                 )
             except Exception as exc:
                 record_extraction_error(item, "news_screening", exc)
                 self.defer(item, "screening_failed")
 
     def full(self, item):
-        if self.over_budget() and not self.tracked(item):
-            self.defer(item, "daily_budget")
-            return item
         item["flags"] = [f for f in item["flags"] if f != "entity_tagging_failed"]
         with usage_context(purpose="M1:layer2", info_ids=[item["info_id"]]):
             result = enrich(item, llm=self.llm, embed=None, entities=self.entities, clock=self.clock, close_read=True)
@@ -191,6 +215,8 @@ class NewsTriage:
         return result
 
     def embed_item(self, item):
+        if self.meta(item).get("tier") == "C" or self.meta(item).get("retry_at"):
+            return item
         self.meta(item)["embedding_attempted"] = True
         if item["embedding"] is not None:
             item["flags"] = [f for f in item["flags"] if f != "embedding_failed"]
@@ -259,36 +285,51 @@ class NewsTriage:
             )
             if previous is None and item["source_root"]:
                 previous = self.cached_root(root)
-            previous_meta = previous.get("extraction_source", {}).get("news_triage", {}) if previous else {}
-            reusable = previous_meta.get("llm_full") or (
-                previous_meta.get("screened")
-                and previous_meta.get("layer") == 3
-                and not on_demand
-                and not self.primary(item)
-            )
-            if previous and reusable and previous["extraction_status"] == "ok":
+            if previous and previous["extraction_status"] == "ok":
                 representatives[root] = self.reuse(item, previous)
+                self.meta(representatives[root]).update(tier="C", layer=3, reason="rules_only_low_value")
                 continue
             representatives[root] = item
             meta = self.meta(item)
             stamp = item["published_at"] or item["first_seen_at"]
             if not on_demand and stamp < self.clock.now_utc() - timedelta(days=30):
-                meta.update(layer=3, reason="historical_rules_only")
+                meta.update(tier="C", layer=3, reason="historical_rules_only")
             elif on_demand or self.primary(item):
-                meta.update(layer=2, reason="on_demand" if on_demand else "rule_hit")
+                meta.update(tier="A", layer=2, reason="on_demand" if on_demand else "rule_hit")
             elif original.get("extraction_source", {}).get("news_triage", {}).get("screened"):
                 screen = original["extraction_source"]["news_triage"]
                 meta.update(
                     screened=True,
                     material=screen["material"],
                     layer=2 if screen["material"] else 3,
+                    tier="A" if screen["material"] else "B",
                     reason="screening_cached",
                 )
+            elif item["source"].casefold() == "fiscal.ai":
+                meta.update(tier="C", layer=3, reason="rules_only_low_value")
             else:
-                meta.update(layer=1, reason="screening")
+                meta.update(tier="B", layer=1, reason="screening")
                 screening.append(item)
         self.screen(screening)
-        ordered = sorted(representatives.items(), key=lambda pair: self.tracked(pair[1]))
+        ordered = sorted(
+            representatives.items(),
+            key=lambda pair: (
+                self.meta(pair[1]).get("tier") != "A",
+                not self.holding(pair[1]),
+                not self.tracked(pair[1]),
+            ),
+        )
+        stats = self.usage_today()
+        full = [
+            item for _, item in ordered if self.meta(item).get("layer") == 2 and not self.meta(item).get("retry_at")
+        ]
+        if bool(stats.get("missing")) or stats.get("tokens", 0) >= self.daily_budget:
+            for item in full:
+                self.defer(item, "daily_budget")
+        else:
+            remaining = max(0, self.full_daily_limit - stats.get("full_items", 0))
+            for item in full[remaining:]:
+                self.defer(item, "full_daily_limit")
         with ThreadPoolExecutor(max_workers=self.workers) as executor:
             futures = {executor.submit(copy_context().run, self.finish, item): root for root, item in ordered}
             for future in as_completed(futures):
@@ -302,6 +343,7 @@ class NewsTriage:
             root = item["source_root"] or item["info_id"]
             result = self.reuse(item, representatives[root]) if item["info_id"] in copies else representatives[root]
             if item["info_id"] in copies:
+                self.meta(result).update(tier="C", layer=3, reason="rules_only_low_value")
                 result = self.embed_item(result)
                 if persist is not None:
                     persist(result)

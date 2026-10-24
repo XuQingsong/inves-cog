@@ -84,18 +84,20 @@ def test_a022_tiers_route_real_source_shapes_and_c_uses_no_model():
     benzinga_other = item("bz-other", "benzinga", "Local retail opening")
     sec = item("sec", "SEC", "Issuer files material 8-K", kind="sec_8k")
     monitored = item("monitored", "fiscal.ai", "OpenAI releases a product")
+    held = item("held", "fiscal.ai", "Held company update", tickers=["XYZ"])
+    held["extraction_source"] = {"news_queue": {"holding_related": True}}
     models = CountingModels(material={benzinga_other["info_id"]})
 
     rows = engine(models).process(
-        [fiscal_low, fiscal_pool, benzinga_pool, benzinga_macro, benzinga_other, sec, monitored]
+        [fiscal_low, fiscal_pool, benzinga_pool, benzinga_macro, benzinga_other, sec, monitored, held]
     )
 
-    assert [meta(row)["tier"] for row in rows] == ["C", "A", "A", "A", "A", "A", "A"]
+    assert [meta(row)["tier"] for row in rows] == ["C", "A", "A", "A", "A", "A", "A", "A"]
     assert meta(rows[0])["reason"] == "rules_only_low_value"
     assert rows[0]["extraction_status"] == "ok" and rows[0]["embedding"] is None
     assert models.calls.count("entity_tagging") == 1
-    assert models.calls.count("news_card") == 6
-    assert models.calls.count("info_fields_extraction") == 6
+    assert models.calls.count("news_card") == 7
+    assert models.calls.count("info_fields_extraction") == 7
     assert meta(rows[4])["screened"] and meta(rows[4])["material"]
 
 
@@ -113,9 +115,7 @@ def test_a022_duplicate_root_reuses_evidence_without_model_calls():
     previous = item("previous", "benzinga", "NVIDIA duplicate", tickers=["NVDA"])
     previous["extraction_status"] = "ok"
     previous["source_root"] = "provider:shared"
-    previous["extraction_source"] = {
-        "news_triage": {"tier": "A", "layer": 2, "llm_full": True, "rule_entities": ["nvidia"]}
-    }
+    previous["extraction_source"] = {"news_triage": {"tier": "C", "layer": 3, "rule_entities": ["nvidia"]}}
     duplicate = item("duplicate", "fiscal.ai", "Reposted NVIDIA duplicate", tickers=["NVDA"])
     duplicate["source_root"] = "provider:shared"
     models = CountingModels()
@@ -155,6 +155,21 @@ def test_a022_independent_count_caps_and_token_fallback_defer_to_next_et_day(sta
     assert models.calls == []
 
 
+def test_a022_last_full_slot_goes_to_holding_before_pool():
+    pool = item("last-pool", "fiscal.ai", "Apple pool update", tickers=["AAPL"])
+    held = item("last-held", "fiscal.ai", "Outside-pool holding update", tickers=["XYZ"])
+    held["extraction_source"] = {"news_queue": {"holding_related": True}}
+    models = CountingModels()
+    rows = engine(
+        models,
+        stats={"tokens": 0, "missing": 0, "full_items": 1499, "screen_calls": 0},
+    ).process([pool, held])
+    assert rows[0]["extraction_status"] == "pending"
+    assert meta(rows[0])["reason"] == "full_daily_limit"
+    assert rows[1]["extraction_status"] == "ok"
+    assert models.calls == ["news_card", "info_fields_extraction"]
+
+
 def test_a022_usage_query_counts_full_articles_once_and_screen_calls():
     from inves_cog.ingest.repository import Repository
 
@@ -184,16 +199,16 @@ def test_a022_queue_orders_a_then_holdings_then_newest_and_leaves_ud36_boundary(
     host = _disposable_database()
     with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as db:
         db.execute("TRUNCATE ingest.info_items CASCADE")
-        db.execute("DELETE FROM trading.ledger WHERE portfolio_id=%s", ("a022-paper",))
+        db.execute("DELETE FROM trading.ledger WHERE portfolio_id=%s", ("paper-fixed",))
         db.execute(
             """INSERT INTO trading.ledger
             (portfolio_id,trade_date,phase,extractor,rule_set,params_version,cash,equity,peak_equity,state,observed_at)
             VALUES (%s,%s,'close','fixed','A','p-2026.10',100,100,100,%s::jsonb,%s)""",
-            ("a022-paper", NOW.date(), json_text({"positions": {"NVDA": {"qty": 1}}}), NOW),
+            ("paper-fixed", NOW.date(), json_text({"positions": {"XYZ": {"qty": 1}}}), NOW),
         )
         repo = Repository(db)
         rows = [
-            item("held", "benzinga", "Held update", tickers=["NVDA"], minutes=30),
+            item("held", "fiscal.ai", "Held update", tickers=["XYZ"], minutes=30),
             item("pool", "fiscal.ai", "Pool update", tickers=["AAPL"], minutes=5),
             item("macro", "benzinga", "FOMC tariff policy", minutes=1),
             item("screen", "benzinga", "Unclassified local update", minutes=0),

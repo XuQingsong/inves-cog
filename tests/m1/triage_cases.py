@@ -75,7 +75,7 @@ def assert_news_triage(root, clock):
     results = engine().process(rows)
     assert [r["extraction_source"]["news_triage"]["layer"] for r in results] == [2, 2, 2, 2, 2, 3]
     assert len(usage) == 10 and all(r["extraction_status"] == "ok" for r in results)
-    assert results[-1]["embedding"] and not results[-1]["extraction_source"]["news_triage"]["llm_full"]
+    assert results[-1]["embedding"] is None and not results[-1]["extraction_source"]["news_triage"]["llm_full"]
     assert all(r["purpose"] == "M1:layer2" for r in usage)
 
     # 26 unknown articles use 25+1 title batches, never 26 full requests.
@@ -115,7 +115,7 @@ def assert_news_triage(root, clock):
     assert all(r["embedding"] is not None for r in results)
     assert [len(r["info_ids"]) for r in usage[before:] if r["purpose"] == "M1:layer1"] == [25, 1]
 
-    # Same-root articles retain identity and get independent vectors, but share dialogue.
+    # Same-root articles retain identity and share dialogue; the duplicate is tier C and uses no model.
     one = item("root-one", "Apple launch")
     two = dict(one, info_id="news:Fixture:root-two", headline="A reposted Apple launch")
     full(one)
@@ -123,22 +123,24 @@ def assert_news_triage(root, clock):
     results = engine().process([one, two])
     assert len(usage) - before == 2 and results[1]["info_id"] == two["info_id"]
     assert results[1]["extraction_source"]["news_triage"]["reused_from"] == one["info_id"]
+    assert results[1]["extraction_source"]["news_triage"]["tier"] == "C"
+    assert results[1]["embedding"] is None
 
-    # Budget holds untracked official/material work, while tracked pool work continues.
+    # The token fallback is a hard daily threshold for every tier.
     before = len(usage)
     budget = engine(daily_budget=10, usage_today=lambda: {"tokens": 11, "missing": 0})
     results = budget.process([rows[0], rows[1], unknown[1]])
-    assert results[0]["extraction_status"] == "ok" and len(usage) - before == 2
-    assert all(r["extraction_status"] == "pending" for r in results[1:])
-    assert all(r["extraction_source"]["news_triage"]["retry_at"] > clock.now_utc().isoformat() for r in results[1:])
-    assert all(r["embedding"] is not None for r in results)
+    assert len(usage) == before
+    assert all(r["extraction_status"] == "pending" for r in results)
+    assert all(r["extraction_source"]["news_triage"]["retry_at"] > clock.now_utc().isoformat() for r in results)
+    assert all(r["embedding"] is None for r in results)
 
     # Bad or absent screening replies cannot silently make an article unimportant.
     bad = item("malformed", "Unclassified story")
     results = engine().process([bad])
     assert results[0]["extraction_status"] == "pending"
     assert results[0]["extraction_source"]["news_triage"]["reason"] == "screening_failed"
-    assert results[0]["embedding"] is not None
+    assert results[0]["embedding"] is None
     # An old article is still eligible through the same on-demand interface.
     full(rows[-1])
     before = len(usage)
