@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-018  进行中（草稿PR62；N1/N2实现与离线回归通过，准确CI运行中）  2026-10-24 10:49 北京
+- [PR62](https://github.com/XuQingsong/inves-cog/pull/62)draft/open，完整head **a01d6abb0f9a081f344346b6879d029cf7287b1c**，基于main447919f5f648e27399c5c34046ec0fe96f87839f；准确[CI40055526851/job120757548563](https://github.com/XuQingsong/inves-cog/actions/runs/40055526851/job/120757548563)仍in_progress，容器build已过/full make运行中，不冒称成功。只改scripts/install_ingest_service.py和tests/ops/test_a018_source_scheduling.py。
+- **N1｜离线通过**｜test_n1_scheduler_exact_tasks_and_other_programs_unchanged（Linux/Darwin），精确原8+新增6顺序，其他11program命令/重启策略与awake平台行为保持。**N2｜离线通过**｜test_n2_existing_et_windows_dst_and_non_session，24组冬夏/周末08:00–08:10、20:20、20:45与持久开始时间防重；news/宏观周末采集复用原规则，不改runtime或时段。
+- **N6｜相关回归通过，全量待CI**：先失败提交 **f8dc3828084574ae8daf5a6742e2ca63583b9f4a** 实际2failed/24passed（缺六项），实现后tests/ops+m1/test_market_info+m4/A016+m8/B039 **115passed/1.32秒**，ruff check/format与diff --check通过。首red提交import排序lint也在实现修正。本地make phase1-test实际因无Docker退出2，未以本地相关通过替代全量，待清洁CI实回。不新增handoff文件以遵守N6 diff边界。
+- **N3/N4/N5｜生产尚未恢复**：部署前只读基线2026-10-24 02:46:40UTC，news cursor through2026-10-16T00:54:01.581701UTC（updated当时，ET10-15），published>=10-16新闻0；VIX最近观测10-12/15.21，历史10-15起缺。现有当日enrichment目的下news_card物理调用3、token4388/632；其他任务存在NULL token，不当零费用/逻辑调用。账本call_id为每次attempt随机UUID，不能把UUID前缀去重称逻辑调用数，后续成本护栏须保守统计物理attempt并单列缺用量。仅元数据回执a018-predeployment-baseline-20261024.json，未输出新闻正文/密钥。
+- 当前生产scheduler/采集/模型均未改或手工触发。下一步准确CI实回后正式送验，需求方合并后才安装scheduler/真实cursor续采，核first_seen实际时间/每日条数/VIX及首日调用token，超过2500或源401/403/限流按任务暂停news并报，不扩大M1代码权限。A019尚未开始；B052未合并仍不提前上线review。
+
 ## A-018  已收到（恢复新闻/VIX等六项既有采集；先测试后实现）  2026-10-24 10:45 北京
 - 最新main447919f下发A018/答案N1–N6，明确UD-COORD34恢复新闻并补采10-16起缺口，日费用5–8元/一次补采40–60元、逻辑调用2500次护栏。只按最小新单A018执行；A019纸面账户只读排查在本单交付后开始，未提前改交易规则。
 - 变更先记：仅scripts/install_ingest_service.py scheduler追加news_prefill/news_full/fred/cboe/finra/fed_news，保留原8顺序、其他program原样；只测试runtime既有窗口/冬夏/非交易日，不改M1业务/权限/来源或时段。保留先失败测试提交后实现，准确CI通过交需求方验收；合并前不改生产scheduler。
