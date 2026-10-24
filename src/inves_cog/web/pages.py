@@ -342,12 +342,14 @@ def page_home(connection, day, clock):
             bool(set(names) & acted),
             anomaly["anomaly_id"] in missed,
         )
-        if state != "①":
+        if anomaly["universe"] != "pool" or state != "①":
             continue
         unhandled.append({"anomaly_id": anomaly["anomaly_id"], "disposition": state, "highlighted": red})
     start = _shanghai_midnight(day)
     counts = {
         "anomaly_count": len(anomalies),
+        "pool_anomaly_count": sum(row["universe"] == "pool" for row in anomalies),
+        "wide_anomaly_count": sum(row["universe"] == "wide" for row in anomalies),
         "status_counts": _status_counts(anomalies, events),
         "high_priority_info_count": _count(
             connection,
@@ -553,9 +555,12 @@ def _move_board(connection, day, cutoff, anomalies):
     return {"联动": linked, "单股事件": single}
 
 
-def _anomaly_public(anomaly, events, tickers, acted, missed):
+def _anomaly_public(anomaly, events, tickers, acted, missed, highlighted):
     names = _tickers(anomaly["members"])
     view = events.get(anomaly["anomaly_id"])
+    disposition = _disposition(
+        view, _cooling_on(tickers, names), bool(set(names) & acted), anomaly["anomaly_id"] in missed
+    )
     return {
         "anomaly_id": anomaly["anomaly_id"],
         "layer": anomaly["layer"],
@@ -566,9 +571,8 @@ def _anomaly_public(anomaly, events, tickers, acted, missed):
         "max_abs_z": anomaly["max_abs_z"],
         "universe": anomaly["universe"],
         "status": anomaly["status"],
-        "disposition": _disposition(
-            view, _cooling_on(tickers, names), bool(set(names) & acted), anomaly["anomaly_id"] in missed
-        ),
+        "disposition": disposition,
+        "highlighted": bool(highlighted and anomaly["universe"] == "pool" and disposition == "①"),
     }
 
 
@@ -611,7 +615,9 @@ def page_market(connection, day, clock):
             "vix": market["vix"],
             "shock_flag": market["shock_flag"],
         },
-        "anomalies": [_anomaly_public(row, events, tickers, acted, missed) for row in anomalies],
+        "anomalies": [
+            _anomaly_public(row, events, tickers, acted, missed, _highlighted(clock, day)) for row in anomalies
+        ],
         "linkage_events": [
             {
                 "event_id": view["event_id"],

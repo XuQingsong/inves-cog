@@ -25,15 +25,29 @@ MONTHLY_BLOCKS = (
 HORIZONS = (5, 21, 63)
 
 
-def store_weekly(connection, week_ending, clock):
+def store_weekly(connection, week_ending, clock, writer=None):
     payload = build_weekly(connection, week_ending, cutoff(week_ending))
-    _store(connection, "perception.reports_weekly", "week:" + week_ending.isoformat(), week_ending, clock, payload)
+    _store(
+        writer or connection,
+        "perception.reports_weekly",
+        "week:" + week_ending.isoformat(),
+        week_ending,
+        clock,
+        payload,
+    )
     return payload
 
 
-def store_monthly(connection, month_end, clock):
+def store_monthly(connection, month_end, clock, writer=None):
     payload = build_monthly(connection, month_end, cutoff(month_end))
-    _store(connection, "perception.reports_monthly", "month:" + month_end.isoformat(), month_end, clock, payload)
+    _store(
+        writer or connection,
+        "perception.reports_monthly",
+        "month:" + month_end.isoformat(),
+        month_end,
+        clock,
+        payload,
+    )
     return payload
 
 
