@@ -2,12 +2,21 @@
 
 from html import escape
 
-from inves_cog.web.brief import MISSING, PAPER_LABEL, UNTRUSTED
+from inves_cog.web.brief import (
+    MISSING,
+    PAPER_LABEL,
+    UNTRUSTED,
+    format_fraction,
+    format_points,
+    half_up,
+    human_reason,
+    short_unvalued_text,
+)
 from inves_cog.web.pages import CLOSED
 
 NAV = (
     ("/", "市场总览", "大环境怎么样"),
-    ("/stocks", "我的标的", "只各自怎样"),
+    ("/stocks", "我的标的", "59 只各自怎样"),
     ("/account", "纸面账户", "仓位怎么处理"),
     ("/trust", "复盘与数据", "系统靠不靠谱"),
 )
@@ -65,7 +74,7 @@ def _market(payload):
     indexes = "".join(
         (
             f'<div class="kpi"><span>{_text(row["name"])}</span>'
-            f'<b class="{_tone(row.get("ret"))}">{_pct(row.get("ret"))}</b></div>'
+            f'<b class="{_tone(row.get("ret"))}">{_pct(row.get("ret"))}</b>{_post(row.get("post"))}</div>'
         )
         for row in payload.get("indexes") or []
     )
@@ -126,7 +135,7 @@ def _stocks(payload):
             "<tr>"
             f"<td>{_text(theme['sector'])}</td>"
             f'<td class="num {_tone(theme.get("average"))}">{_pct(theme.get("average"))}</td>'
-            f'<td class="num">{_plain(theme.get("volume_multiple"))}</td>'
+            f'<td class="num">{_multiple(theme.get("volume_multiple"))}</td>'
             f'<td class="num">{_count(theme.get("held_count"))}</td>'
             f'<td class="num">{_count(theme.get("buyable_count"))}</td>'
             f"<td>{_text(theme.get('line'))}</td></tr>"
@@ -166,17 +175,17 @@ def _account(payload):
         valuation = _valuation(row.get("valuation"))
         holdings.append(
             f'<tr{mark}><td><a href="/paper/stock/{_text(row["ticker"])}">{_text(row["ticker"])}</a></td>'
-            f"<td>{_plain(row.get('avg_cost'))} → {_plain(row.get('price'))}</td>"
+            f"<td>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
             f'<td class="{_tone(row.get("pnl"))}">{_pct(row.get("pnl"))}</td>'
-            f"<td>{_plain(row.get('take_profit'))}</td><td>{_plain(row.get('ma200'))}</td>"
-            f"<td>{_plain(row.get('disaster'))}</td><td>{_count(row.get('below_days'))}</td>"
+            f"<td>{_price(row.get('take_profit'))}</td><td>{_price(row.get('ma200'))}</td>"
+            f"<td>{_price(row.get('disaster'))}</td><td>{_count(row.get('below_days'))}</td>"
             f"<td>{_text(row.get('next_step'))}{_text(near)}</td><td>{valuation}</td></tr>"
         )
     closed = []
     for row in payload.get("closed_records") or []:
         closed.append(
             f"<tr><td>{_text(row.get('ticker'))}</td><td>{_text(row.get('trade_date'))}</td>"
-            f"<td>{_text(row.get('kind'))}</td><td>{_text(row.get('reason_zh') or MISSING)}</td>"
+            f"<td>{_text(row.get('kind'))}</td><td>{_reason(row.get('reason_zh'))}</td>"
             f"<td>{_text(row.get('source'))}</td></tr>"
         )
     candidates = []
@@ -184,16 +193,16 @@ def _account(payload):
         books = row.get("books") or {}
         candidates.append(
             f'<tr><td><a href="/stock/{_text(row["ticker"])}">{_text(row["ticker"])}</a></td>'
-            f"<td>{_book(books)}</td><td>{_plain(row.get('ma50'))}</td><td>{_plain(row.get('year_high'))}</td>"
+            f"<td>{_book(books)}</td><td>{_price(row.get('ma50'))}</td><td>{_price(row.get('year_high'))}</td>"
             f"<td>{_text(row.get('view'))}</td><td>{_valuation(row.get('valuation'))}</td></tr>"
         )
     return (
         f"<h1>{_text(headings[0])}</h1><p>{_text(payload.get('label') or PAPER_LABEL)}</p>"
         f'<div class="card hero"><p class="lead">{_text(payload.get("oneliner"))}</p>'
-        f'<div class="grid"><div class="kpi"><span>总资产</span><b>{_plain(payload.get("equity"))}</b></div>'
+        f'<div class="grid"><div class="kpi"><span>总资产</span><b>{_money(payload.get("equity"))}</b></div>'
         f'<div class="kpi"><span>当日</span><b>{_pct(payload.get("day_change"))}</b></div>'
         f'<div class="kpi"><span>距高点</span><b>{_pct(payload.get("drawdown"))}</b></div>'
-        f'<div class="kpi"><span>现金</span><b>{_plain(payload.get("cash"))}</b></div></div></div>'
+        f'<div class="kpi"><span>现金</span><b>{_money(payload.get("cash"))}</b></div></div></div>'
         f'<div class="card"><h2>{_text(headings[1])}</h2><table><tr><th>代码</th><th>成本→现价</th><th>盈亏</th>'
         f"<th>止盈线</th><th>200日线</th><th>灾难止损线</th><th>破位天数</th><th>下一步</th><th>估值</th></tr>"
         f"{''.join(holdings) or '<tr><td>暂缺</td></tr>'}</table></div>"
@@ -233,7 +242,9 @@ def _trust(payload):
 def _member_row(row):
     events = "、".join(row.get("events") or []) or "无"
     held = "持有" if row.get("held") else "未持有"
-    if row.get("entry_pass") is True:
+    if row.get("held"):
+        buyable = ""
+    elif row.get("entry_pass") is True:
         buyable = "可买"
     elif row.get("entry_pass") is False:
         buyable = "不可买"
@@ -242,7 +253,7 @@ def _member_row(row):
     return (
         f'<tr><td><a href="/stock/{_text(row["ticker"])}">{_text(row["ticker"])}</a></td>'
         f'<td class="{_tone(row.get("ret"))}">{_pct(row.get("ret"))}</td>'
-        f"<td>{_plain(row.get('volume_multiple'))}</td><td>{_plain(row.get('rsi'))}</td>"
+        f"<td>{_multiple(row.get('volume_multiple'), '×')}</td><td>{_whole(row.get('rsi'))}</td>"
         f"<td>{_points(row.get('price_vs_ma200'))}</td><td>{_points(row.get('drawdown252'))}</td>"
         f"<td>{_text(held)}</td><td>{_text(buyable)}</td><td>{_text(events)}</td>"
         f"<td>{_valuation(row.get('valuation'))}</td></tr>"
@@ -271,12 +282,12 @@ def _valuation(view):
     if not isinstance(view, dict):
         return _text(MISSING)
     if view.get("state") == "未估值":
-        return _text(view.get("text") or "未估值")
+        return _text(short_unvalued_text(view.get("text") or "未估值"))
     bits = [
-        f"PE {_plain(view.get('pe'))}",
-        f"p25 {_plain(view.get('pe_p25'))}",
-        f"p50 {_plain(view.get('pe_p50'))}",
-        f"p75 {_plain(view.get('pe_p75'))}",
+        f"市盈率 {_pe(view.get('pe'))}",
+        f"25分位 {_whole(view.get('pe_p25'))}",
+        f"50分位 {_whole(view.get('pe_p50'))}",
+        f"75分位 {_whole(view.get('pe_p75'))}",
         f"隐含 {_points(view.get('implied_growth'))}",
         f"营收 {_points(view.get('rev_cagr_3y'))}",
         f"EPS {_points(view.get('eps_growth'))}",
@@ -301,17 +312,12 @@ def _book(books):
 
 def _nav(payload):
     page = "/" if not isinstance(payload, dict) else payload.get("page") or "/"
-    count = payload.get("pool_count") if isinstance(payload, dict) else None
     links = []
     chosen = payload.get("date") if isinstance(payload, dict) and isinstance(payload.get("date"), str) else ""
     query = f"?date={_text(chosen)}" if chosen else ""
     for href, label, small in NAV:
         mark = ' class="on"' if href == page else ""
-        if href == "/stocks":
-            hint = f"{_count(count)} {small}"
-        else:
-            hint = small
-        links.append(f'<a href="{href}{query}"{mark}>{_text(label)}<small>{_text(hint)}</small></a>')
+        links.append(f'<a href="{href}{query}"{mark}>{_text(label)}<small>{_text(small)}</small></a>')
     return "<nav>" + "".join(links) + "</nav>"
 
 
@@ -342,15 +348,59 @@ def _text(value):
 
 
 def _pct(value):
-    if value is None:
-        return _text(MISSING)
-    return _text(f"{value * 100:.2f}%")
+    return _text(format_fraction(value))
 
 
 def _points(value):
+    return _text(format_points(value))
+
+
+def _post(value):
+    if value is None:
+        return ""
+    return f"<small>盘后 {_pct(value)}</small>"
+
+
+def _money(value):
     if value is None:
         return _text(MISSING)
-    return _text(f"{value:.2f}%")
+    amount = int(half_up(value, 0))
+    return _text(f"${amount:,}")
+
+
+def _price(value):
+    if value is None:
+        return _text(MISSING)
+    number = float(value)
+    if abs(number) >= 100:
+        shown = f"{int(half_up(number, 0)):,}"
+    else:
+        shown = f"{half_up(number, 2):,}"
+    return _text(f"${shown}")
+
+
+def _multiple(value, suffix="倍"):
+    if value is None:
+        return _text(MISSING)
+    return _text(f"{half_up(value, 1)}{suffix}")
+
+
+def _whole(value):
+    if value is None:
+        return _text(MISSING)
+    return _text(str(int(half_up(value, 0))))
+
+
+def _pe(value):
+    if value is None:
+        return _text(MISSING)
+    return _text(str(half_up(value, 1)))
+
+
+def _reason(value):
+    if not value:
+        return _text(MISSING)
+    return _text(human_reason(value) or MISSING)
 
 
 def _plain(value):
@@ -361,7 +411,9 @@ def _plain(value):
     if isinstance(value, int) and not isinstance(value, bool):
         return _text(value)
     if isinstance(value, float):
-        return _text(f"{value:.4f}".rstrip("0").rstrip("."))
+        if value.is_integer():
+            return _text(str(int(value)))
+        return _text(f"{value:.2f}".rstrip("0").rstrip("."))
     return _text(value)
 
 
