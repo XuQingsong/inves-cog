@@ -17,6 +17,8 @@ MEANINGS = {
 }
 COUNT_LABELS = (
     ("anomaly_count", "异常数"),
+    ("pool_anomaly_count", "池内异常数"),
+    ("wide_anomaly_count", "宽池异常数"),
     ("high_priority_info_count", "高优先级信息数"),
     ("trade_action_count", "交易动作数"),
     ("no_action_count", "决定不动数"),
