@@ -661,6 +661,9 @@ def test_v10_valuation_display_copies_payload_and_hides_price(pages):
             (DAY,),
         )
         admin.execute("DELETE FROM valuation_v1.ranges WHERE trade_date = %s AND ticker = 'AVGO'", (DAY,))
+
+
+def test_v5_status_follows_queries(pages):
     admin = pages["admin"]
     trust = _json(pages, "/api/pages/brief/trust")
     states = {row["item"]: row["state"] for row in trust["statuses"]}
