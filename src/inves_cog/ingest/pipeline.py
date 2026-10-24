@@ -38,6 +38,14 @@ from inves_cog.ingest.triage import NewsTriage
 from inves_cog.ingest.universe import build_universe, daily_liquidity
 
 ROOT = Path(__file__).resolve().parents[3]
+# The free Alpaca subscription rejects SIP data newer than 15 minutes (HTTP 403).
+SIP_DELAY = timedelta(minutes=16)
+
+
+def prefill_end(clock, day):
+    """Premarket cutoff: 08:00 ET, or the newest SIP minute the subscription may query."""
+    first = local_at(day, 4)
+    return max(first, min(local_at(day, 8), clock.now_utc() - SIP_DELAY))
 
 
 def bar_run_mode(clock, day):
@@ -191,7 +199,8 @@ class Pipeline:
             return {"processed_count": 0, "note": "XNYS closed"}
         alpaca = self.require(self.alpaca, "Alpaca")
         collector = MarketCollector(alpaca.http, clock=self.clock, headers=alpaca.headers)
-        result = collector.minute_bars(self.codes, self.day, end=local_at(self.day, 8) if prefill else None)
+        end = prefill_end(self.clock, self.day) if prefill else None
+        result = collector.minute_bars(self.codes, self.day, end=end)
         for row in result.rows:
             self.repo.write("bars_minute", row, update=("open", "high", "low", "close", "volume", "session"))
         if prefill:
@@ -200,6 +209,7 @@ class Pipeline:
                 "missing_codes": result.missing_codes,
                 "exhausted": result.exhausted,
                 "status": result.status,
+                "data_through": end.isoformat(),
             }
         first = self.repo.first_bar_date() or self.day - timedelta(days=60)
         daily = alpaca.daily_bars(self.codes, first, self.day)
