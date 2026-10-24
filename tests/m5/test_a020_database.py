@@ -85,3 +85,39 @@ def test_a020_abandoned_http_reservation_fails_closed(database):
     assert repo.reserve("A", NOW)
     assert Repository(db).reserve("B", NOW) is None
     assert not Repository(db).available(NOW)
+
+
+def test_a020_migration_narrows_preexisting_default_table_grants():
+    from pathlib import Path
+
+    host = _disposable_database()
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", autocommit=True) as db:
+        schema = "a020_acl_fixture"
+        db.execute("CREATE SCHEMA " + schema)
+        try:
+            # Production has these defaults; a fresh harness schema otherwise hides the risk.
+            db.execute(
+                "ALTER DEFAULT PRIVILEGES IN SCHEMA "
+                + schema
+                + " GRANT SELECT,INSERT,UPDATE,DELETE ON TABLES TO role_valuation"
+            )
+            db.execute("ALTER DEFAULT PRIVILEGES IN SCHEMA " + schema + " GRANT SELECT ON TABLES TO role_shadow")
+            sql = Path("migrations/phase1_m5_0002_consensus_snapshots.sql").read_text()
+            db.execute(sql.replace("valuation_v1", schema), prepare=False)
+            table = schema + ".consensus_snapshots"
+            for role, expected in [
+                ("role_valuation", (True, True, False, False)),
+                ("role_web", (True, False, False, False)),
+                ("role_trading", (True, False, False, False)),
+                ("role_shadow", (False, False, False, False)),
+            ]:
+                actual = tuple(
+                    db.execute(
+                        "SELECT has_table_privilege(%s,%s,'SELECT'),has_table_privilege(%s,%s,'INSERT'),"
+                        "has_table_privilege(%s,%s,'UPDATE'),has_table_privilege(%s,%s,'DELETE')",
+                        (role, table) * 4,
+                    ).fetchone()
+                )
+                assert actual == expected, (role, actual)
+        finally:
+            db.execute("DROP SCHEMA " + schema + " CASCADE")
