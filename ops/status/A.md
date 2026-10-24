@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-018  已收到（恢复新闻/VIX等六项既有采集；先测试后实现）  2026-10-24 10:45 北京
+- 最新main447919f下发A018/答案N1–N6，明确UD-COORD34恢复新闻并补采10-16起缺口，日费用5–8元/一次补采40–60元、逻辑调用2500次护栏。只按最小新单A018执行；A019纸面账户只读排查在本单交付后开始，未提前改交易规则。
+- 变更先记：仅scripts/install_ingest_service.py scheduler追加news_prefill/news_full/fred/cboe/finra/fed_news，保留原8顺序、其他program原样；只测试runtime既有窗口/冬夏/非交易日，不改M1业务/权限/来源或时段。保留先失败测试提交后实现，准确CI通过交需求方验收；合并前不改生产scheduler。
+- N3补采first_seen实际采集时间、N4历史VIX/次日M6、N5首日真实调用/token均属合并部署后证据，不能用离线配置测试冒充恢复。部署后依实际cursor续采并核预算/401/403/限流，不回填可见时间，不新增模型种类/历史分析补跑。先读任务/现有配置与未提交修改，主检出用户docs未动；将复用干净/tmp工作树。
+
 ## OPS-A014  已完成（B051 HTML页面实际上线；review缺口仍单列待B052）  2026-10-24 00:44 北京
 - 按补充十七生产16:43:00–16:43:15UTC从46a15c10605e0719780848f9a42e93ef95ebc552干净快进 **2ae28bc8e69a2310f5de7ba01ccf0189ea63c943**；独立核[PR60](https://github.com/XuQingsong/inves-cog/pull/60)已验收merged，merge **ce76f35c89fff0880282bff10fd403dbe17df9e0**，准确head **67b52d98ee1a618a7d4b9cab35464f18af3affa8**/[CI39987482146](https://github.com/XuQingsong/inves-cog/actions/runs/39987482146)及39987482266均success（612passed）。仅pages847380→856022，其他11运行PID/配置/已有marker保持，旧embedding EXITED未动，3个安装文件hash匹配Git。迁移0/手工业务0/人工模型0，未重复账号或七表迁移。
 - **实际外部验收**2026-10-23 **16:43:30UTC**：http://43.166.2.31:8080/ 与 /market?date=2026-10-22 均 **HTTP200、Content-Type text/html; charset=utf-8**，本机同样通过；pages RSS122320KiB。不是仅JSON或进程存活，用户现在可直接浏览HTML。私有b051-pages-20261024.json、b051-external-verification-20261024.json仅元数据，不输出页面/持仓明细。[需求方实装回报6369961771](https://github.com/XuQingsong/inves-cog/pull/60#issuecomment-6369961771)已同步。
