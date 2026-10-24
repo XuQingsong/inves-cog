@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-020 / OPS-A018  进行中（草稿PR70准确CI运行；首自然新闻窗口已有真实入库）  2026-10-24 20:14 北京
+- [PR70](https://github.com/XuQingsong/inves-cog/pull/70)draft，完整head1d180d260f86e0b236f822a624a4b913b8f6cee9；准确[CI40092829130/job120868853018](https://github.com/XuQingsong/inves-cog/actions/runs/40092829130/job/120868853018)in_progress，build成功、全量及隔离DB测试待实回。先红本地5cedf1f实际5failed、HTTP边界e22b095实际1failed后实现72a8fa0；远端先红c657463/dc7283、888e044后对应实现。相关18passed0.65s，ruff/format/diff通过，不把未运行DB测试说已通过。
+- 单表request/response/estimate只追加；HTTP前持久占额、UTC日及滚动24小时24次、跨重启计数，未完成请求保守停采；Note/Information当日止损，失败不重试/无重定向、流式20秒/2MiB界限、15秒间隔；最久成功更新优先，PIT最新完整可见response，错误响应不静默复用旧预期；现有三角色授权、独立轮询program。当前未生产迁移/真实采集，不改估值公式或页面。
+- **待真实字段样例（需求方提供，非用户审批）**：官方文档只确认端点及年度/季度，demo实际返回Information；parser夹具明确标synthetic，当前flat estimates/date/horizon合同待已实测NVDA响应验证，不能以推测宣布兼容。已在PR68 comment6383916054请求需求方提供已有脱敏样例/私有存档位置，不要求新调用。其余额度/存储/权限/PIT继续实做，不用该缺口停整个任务。
+- **OPS-A018 N3真实推进**：自然news_prefill **job11388 ok/processed15580**，12:00:26.699996–12:03:56.743076UTC；独立核实际新news行**14576/不同info_id14576**，first_seen12:00:39.554958–12:03:56.728041UTC真实当前时间，处理量不冒称新增量。按美东published_day现有10-16至24分别703/31/87/2330/2676/2886/3265/2425/162，历史缺口已有真实恢复，不伪造当时可见时间。
+- **N5仍监测**：ET10-24 info_enrichment实际物理调用294，已知input_tokens合302101/output94598、usage_missing1（已知部分之和，不是完整总用量/0费用），news_card0，尚未触2500。VIX自然宏观窗口/N4及后续N5独立待实窗，不重复手工采集/模型。A018仅OPS不占第二开发任务位。
+
 ## A-020  已收到（免费额度一致预期快照接入）  2026-10-24 19:56 北京
 - A019已完成，最新main0ff3db38e30cdfb875c0c509c3b96fac1b0202ed/control A运行，按最小编号接A020。依据任务UD-COORD-35与设计阶段B：现有Alpha Vantage key免费25次/日，任务最多24次、59只最久未更新优先，遇Note/Information当日停且degraded，不重试。
 - 变更先记：仅M5新增只追加consensus_snapshots及相应迁移，原role_valuation写、role_web/role_trading读、不新角色；新增独立调度任务并持久防重/额度。raw原样存档、fetched_at实时时钟、PIT只取截点前最近快照，年度FY1/FY2及季度解析。当前不改M5算法/页面、不运行生产迁移或真实请求；验收合并后再部署取首日请求/入库数及轮次预期。
