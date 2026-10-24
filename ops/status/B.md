@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-054  已收到  2026-10-24 11:50 北京
+
+- 任务：投资者页面呈现修正，对齐样稿。基于 main（含 B-053）。新 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-054.md` 的 F1–F9。不改上游、迁移、合同，不调模型，不部署。
+- 必改：涨跌用 close 不用 post；篮子与主题显示中文名；事件按成员覆盖命名；金额、涨跌、价格、倍数、RSI、PE 按样稿格式；主题一句话按四档规则；下一步用人话且不显示 M-xx；未估值原因映射短中文；待成交计数与表内行数一致，导航不出现“暂缺”，持有时不标可买；VIX 有值就显示，“对我意味着什么”含持仓受影响一句。
+- 下一步：改 `brief.py` 与页面渲染，用同时含 close 与 post 的 10-22 形态夹具自验 F1–F9。
+
 ## B-053  已完成  2026-10-24 11:22 北京
 
 - PR #63，head `8108183`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40057856464 ：`phase1-blocking` 成功，630 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 123.141 秒（≤ 300）、status passed、collected 630、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
