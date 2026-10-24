@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-055  已收到  2026-10-24 12:50 北京
+
+- 任务：投资者页面接入新闻与事件解释，并修正线上走查遗留。基于 main（含 B-054）新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-055.md` 的 W1–W7。只读上游，不调模型，不部署。
+- 必改：逐只明细加“今日新闻”（截点内条数，展开最多 3 条：中文摘要或英文标题、来源、北京时间）；主题一览加今日新闻合计。新闻新鲜时，今天的大事显示 M8 早页“可能原因”（最多 2 条）和引用时间；引用早于交易日 3 天以上标“引用的是 N 天前的新闻”；新闻缺失仍写“原因暂不可信”。复盘页显示最近入库时间与最近 1 个交易日新闻条数。今天的大事只列股票事件，排除成员全为 ETF 或风格/指数的异常（生产形态含 XLP、iwm_qqq）。账户当日盈亏改按当日收盘估算：总资产 = Σ持股×close + 现金，当日盈亏 = Σ持股×(close−前收)，旁标“按 X月X日 收盘估算”，账本原值留在详情页。25/50/75 分位相同时显示“历史样本不足”。
+- 下一步：改 `brief.py` 与页面渲染，用生产 10-22 形态夹具（close/post、23 只股票异常、XLP、iwm_qqq，新闻新鲜与缺失两组）自验 W1–W7。
+
 ## B-054  已完成  2026-10-24 12:13 北京
 
 - PR #64，head `df12c55`。https://github.com/XuQingsong/inves-cog/pull/64 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40061084475 ：`phase1-blocking` 成功，640 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 171.061 秒（≤ 300）、status passed、collected 640、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
