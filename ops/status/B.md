@@ -2,6 +2,26 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-053  已完成  2026-10-24 11:07 北京
+
+- PR #63，head `1c60eed`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40056585917 ：`phase1-blocking` 成功，629 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 99.166 秒（≤ 300）、status passed、collected 629、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
+- 相对 main 的 diff：`src/inves_cog/web/api.py`、`brief.py`、`brief_html.py`、`html_page.py`、`public.py`，以及 `tests/m10/test_b051.py`、`test_b053.py`。旧系统日志 HTML 改到 `/log`，`/api/pages/home` 未改。没有新迁移、上游、合同。
+- V1｜通过｜`test_v1_structure_and_detail_links`｜CI junit 0.289 秒。四个路径 200 HTML。标题顺序是市场总览（资金、情绪、今天的大事）、我的标的（主题一览、逐只明细）、纸面账户（持仓与关键价位、已止盈/止损/清仓、待选）、复盘与数据（数据状态、系统之前说的对不对）。导航四项为市场总览/我的标的/纸面账户/复盘与数据。旧详情页可从页脚到达。
+- V2｜通过｜`test_v2_judgment_boundaries`｜CI junit 0.000 秒。IWM−QQQ 大于 0.02 且上涨家数多于下跌家数是“板块轮动而非全面恐慌”；差距刚好 0.02 不是。SPY 小于等于 −0.02 且涨跌家数比小于 0.5 是“普跌”；比刚好 0.5 不是。其余是“分化”。
+- V3｜通过｜`test_v3_formulas_follow_the_parameter_file`、`test_v3_page_values_match_the_formulas`｜CI junit 0.009 秒、0.139 秒。主题平均、成交量倍数、止盈线、灾难线、200/50 日线、一年高点按公式相等。临时 m4.yaml 把 double_price 改成 3、disaster_peak_fraction 改成 0.50、normal 破位天数改成 9 后，NVDA 止盈线 150、灾难线 50、破位天数 9。仓库里的 m4.yaml 仍是 double_price 2。
+- V4｜通过｜`test_v4_scores_and_valuation_are_copied`｜CI junit 0.174 秒。四本账、RSI、entry_pass 与上游逐值相等。AAPL 估值 0、AMD 估值远离现价，页面不出现合理价并写“模型不适用”。NVDA 中性价 90 仍显示。
+- V5｜通过｜`test_v5_status_follows_queries`｜CI junit 0.108 秒。夹具初始是新闻缺失、VIX 暂缺、M9 已上线、订单警示、计划已有。写入新闻、VIX=31、删掉 overlay、把 pending 改到当日、删掉当日计划后，状态变成新闻新鲜、VIX 已有、M9 未上线/缺失、订单正常、计划警示，情绪标题变成“情绪：恐慌”。
+- V6｜通过｜`test_v6_reason_line_follows_news`｜CI junit 0.064 秒。无新闻时首页有“原因暂不可信”，没有“存储供给增加”。写入新闻后出现该解释和引用时间 `2034-11-15T14:00:00+00:00`，不再出现“原因暂不可信”。
+- V7｜通过｜`test_v7_account_table`｜CI junit 0.076 秒。持仓表有止盈线、200 日线、灾难线、下一步。NVDA 距灾难线过近，一行 `class="warn"`。已平记录含 INTC 止盈（计划历史卖出）和 NOK 止损（exits）。待选 12 只都是 entry_pass 且未持有。
+- V8｜通过｜`test_v8_market_pages_hide_the_book`｜CI junit 0.197 秒。市场与标的 JSON 没有订单、现金、权益、持仓数量字段；HTML 不含 `b053-p0` 和 `400000`。账户页与复盘页有“纸面跟踪，非投资建议”。待成交原因里的脚本被转义。同一次 CI 里 `test_a017.py` 8 项通过。
+- 复盘按交易日：`test_review_gap_when_labels_are_absent`｜CI junit 0.101 秒。同日 T+1 列出，前一交易日的 T+5 不出现在当日页。删掉当日 T+1 后显示“尚无 T+1/T+5/T+20 打标记录”。
+- V9｜通过｜`make phase1-test` 与这次 CI｜629 passed、21 deselected、99.166 秒。同一次 CI 里 `test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_b051.py` 11 项、`test_b052.py` 7 项通过。`test_b052.py` 在当前 main，本 diff 不改它。
+- 夹具页文本（交易日 2034-11-15，10-22 形态：AI 链领跌、防御领涨、13 只持仓、12 只待选、5 笔 pending）：
+  - 市场总览：光通信-9.00%、半导体设备-8.00%领跌，XLP3.30%、KRE2.50%领涨，判断：板块轮动而非全面恐慌。标普 500 -1.20%、纳指 100 -4.00%、罗素小盘 -1.00%，涨/跌 9/5。资金：光通信、半导体设备领跌，XLP、KRE领涨。风格：动量相对价值 -3.30%、等权相对市值加权 1.90%、小盘相对纳指 2.90%，板块分化 5.4σ。情绪：谨慎，未恐慌。VIX 暂缺，3 个月 VIX 20.12（前日 18.72），近 5 日下跌股占比 37.90%，标普距一年高点 -1.90%。大事只列池内前三：光通信 4只 5.5σ、半导体设备 2只 4.4σ、存储 2只 3.3σ；新闻缺失，事件区是“原因暂不可信”。对我意味着什么：标的池59只里5只下跌、5只波动超过7%。
+  - 我的标的：跌幅最大的主题是AI 网络与光通信，平均-9.00%，该主题默认展开。LITE 成交量倍数 2。
+  - 纸面账户：持仓13只，距灾难线过近1只，待成交5笔。总资产 1000000，当日 -1.96%，距高点 -9.09%，现金 400000。NVDA 成本 50、现价 70、盈亏 40.00%、止盈线 100、200日线 73.6842、灾难线 60、破位天数 3，该行标红。已平：INTC 止盈、NOK 止损。待选 12 只；AMD 四本账 80/70/60/55，50日线 38.4615，一年高点 43.4783，估值“模型不适用”。
+  - 复盘与数据：数据状态有缺口，下面逐项是查询结果。新闻 缺失，VIX 暂缺，M9 已上线，估值 模型不适用，订单 警示，计划 已有。当日列出 b053-case 的 T+1，原因“方向对”。
+
 ## B-053  进行中  2026-10-24 11:04 北京
 
 - PR #63，head `1c60eed`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。本地 `make phase1-test`：622 passed、21 deselected，用时 109.232 秒。这一 head 的 CI 还没出结果，不标已完成。
