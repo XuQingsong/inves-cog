@@ -1,7 +1,7 @@
+import shlex
 from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
-import shlex
 from zoneinfo import ZoneInfo
 
 import pytest
