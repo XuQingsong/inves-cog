@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  已完成（UD-A47 B055实际部署及四路径公网核验）  2026-10-24 13:52 北京
+- 实际05:50:24–05:50:36UTC生产9233f76895f398ca6beda589ed0fa6a8e302a8a7干净快进 **feedabf2b58db0dda07814e2d7f4339848275035**，含[PR65](https://github.com/XuQingsong/inves-cog/pull/65)验收merge **a3232b93781f3293d0881e4cc02c414d32efca05**；准确head **884d46aa8fa7905b522c5c22a7853eaf9d9e9776**/[CI40064580146](https://github.com/XuQingsong/inves-cog/actions/runs/40064580146)completed/success676passed复用。按UD-A47直接执行，未重复索取逐PR审批。
+- 仅pages1204915→1241625，其他11运行PID/配置/marker保持（financials1241037、scheduler1212613），review仍STOPPED待B056验收。迁移0、手工业务0、人工模型0。私有b055-pages-20261024.json实际落盘，防重复。**05:50:50UTC独立公网** /、/stocks、/account、/trust均200及text/html; charset=utf-8，本机亦通过。新闻展示代码上线不代表A018采集已到自然窗口/缺口补齐。
+- P1紧急恢复真实业务PID1241057、外层timeout1241056；05:50:59UTC阶段m2_financials运行中、RSS360256KiB，当前无完成结果；总硬截止07:21:14UTC（北京15:21），每项1800秒。不得重启/并发/以进程存在冒称三依赖ready。证据a019-p1-once-20261024.json逐阶段可查；A019工程修改在紧急项收口后继续。已同步PR65需求方。
+
 ## A-019 / OPS-A014  进行中（P1一次性作业实际启动；B055准备仅pages部署）  2026-10-24 13:50 北京
 - P1实际05:49:34UTC financials2695856→1241037刷新成功，其余11运行PID保持/review维持STOPPED；一次性外层timeout PID1241056已启动，总硬期限5500秒，私有a019-p1-launch-20261024.json、a019-p1-once-20261024.json逐阶段记录。并非宣称三任务完成，不重复触发；后续以真实job/回执核结果，失败不自动第二次。
 - B055变更先记：按补充二十三/UD-A47从已装9233f76895f398ca6beda589ed0fa6a8e302a8a7快进 **feedabf2b58db0dda07814e2d7f4339848275035**，含PR65验收merge **a3232b93781f3293d0881e4cc02c414d32efca05**；准确head **884d46aa8fa7905b522c5c22a7853eaf9d9e9776**/[CI40064580146](https://github.com/XuQingsong/inves-cog/actions/runs/40064580146)success676passed。仅pages重载，其他11运行PID含新financials、scheduler保持，review仍STOPPED，不触碰P1作业/预算/数据库，不迁移/新账号/人工模型，120秒期限与已执行receipt防重，四公网路径元数据核验。
