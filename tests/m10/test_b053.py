@@ -645,7 +645,8 @@ def test_v10_valuation_display_copies_payload_and_hides_price(pages):
         assert "未估值（金融股不适用）" in account_html
         avgo_cell = next(part for part in account_html.split("<tr") if "AVGO" in part).rsplit("<td>", 1)[-1]
         assert avgo_cell.startswith("未估值（金融股不适用）") and "0" not in avgo_cell
-        stock_cell = next(part for part in stocks_html.split("<tr") if "AVGO" in part).rsplit("<td>", 1)[-1]
+        stock_row = next(part for part in stocks_html.split("<tr") if "AVGO" in part)
+        stock_cell = next(part for part in stock_row.split("<td>") if "未估值" in part)
         assert stock_cell.startswith("未估值（金融股不适用）") and "0" not in stock_cell
         nvda_stock = next(row for theme in stocks["themes"] for row in theme["members"] if row["ticker"] == "NVDA")
         assert nvda_stock["valuation"]["implied_growth"] == 27.7
