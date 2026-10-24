@@ -2,6 +2,20 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-060  已完成  2026-10-25 03:51 北京
+
+- PR #76，head `582e283`。https://github.com/XuQingsong/inves-cog/pull/76 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40126757476 ：`phase1-blocking` 成功，750 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 234.286 秒（≤ 300）、status passed、collected 750、pending 0。日志 `750 passed, 21 deselected, 5 warnings in 234.33s`。suite xml time 234.281。`m0-ci.xml` 2 passed、0 failures、xml 0.546 秒（日志 `2 passed in 0.58s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。工件 `m0-clean-environment-evidence` id 12573633174。运行创建于 2026-10-25 03:45 北京，`phase1-blocking` 完成于 03:50 北京。B 线没有合并，没有部署，没有调用真实模型。
+- 相对当时 main 的 diff 是 `src/inves_cog/web/brief_html.py`、`risk_brief.py`，以及 `tests/m10/test_b059.py`、`test_b060.py`。没有新迁移、授权、上游。CI 记录的改动文件与此相同。
+- F1｜通过｜`test_f1_source_does_not_count_bars`、`test_f1_page_uses_the_ledger_score_not_the_bars`｜CI junit 0.001 秒、0.118 秒。页面天数等于账本评分的 `consec_below200`。NFLX 写 130 天，不写日线自算，也不写生产走查里的 235。风险模块源码不再计算日线连续天数。
+- F2｜通过｜`test_f2_four_copies_and_plain_percents`、`test_f2_panic_follows_the_ledger_flag`｜CI junit 0.010 秒、0.076 秒。阶段 2 为橙，写已执行破位减仓、不再重复减仓。达到门槛且持有满 10 天、非恐慌为红，下次减仓 33.3%（进攻层比例来自卖出参数）。持有 5 天写持有不足 10 个交易日。账本恐慌打开后，同一只改为恐慌模式下暂停破位减仓，级别变橙。未达门槛写在第 M 天触发减仓，N 达到 M 减 1 为红。
+- F3｜通过｜`test_f3_visible_copy_is_not_self_contradictory`｜CI junit 0.075 秒。可见文本里「已连续 N 天……第 M 天」的句子都满足 N 小于 M。NFLX 的 130 天不再接「第 3 天减仓」。
+- F4｜通过｜`test_f4_signs_and_one_decimal`｜CI junit 0.252 秒。距离 10.6%、占比 20.2% 不带正号，1 位小数。现金比例 95.2% 不带正号。涨跌幅仍是今日 −6.30%。没有 4 位以上小数。
+- F5｜通过｜`test_f5_three_pages` 与整次 phase1｜CI junit 0.380 秒。同一次 CI 750 passed、21 deselected、234.286 秒。B-048 至 B-059 与 A-017 都在这次通过的集合里。diff 只含上面的授权路径。
+- 夹具页文本（交易日 2040-02-16）：
+  - 市场总览：红色 2 项，橙色 3 项。第一条红色：AVGO 已连续 10 天低于 200 日线，达到规则 A 破位减仓条件，下一次计划将减仓 33.3%。
+  - 纸面账户：AVGO 已连续 10 天低于 200 日线，达到规则 A 破位减仓条件，下一次计划将减仓 33.3%。GOOGL 已连续 2 天低于 200 日线，规则 A 在第 3 天触发减仓。HD 已连续 50 天低于 200 日线；规则 A 已执行破位减仓，不再重复减仓。INTC 已连续 3 天低于 200 日线，持有不足 10 个交易日，暂不减仓。NFLX 今日 −6.30%，已连续 130 天低于 200 日线；规则 A 已执行破位减仓，不再重复减仓。
+  - `/s/NFLX`：我的仓位顶部为 NFLX 今日 −6.30%，已连续 130 天低于 200 日线；规则 A 已执行破位减仓，不再重复减仓。
+
 ## B-060  进行中  2026-10-25 03:48 北京
 
 - PR #76，head `582e283`。https://github.com/XuQingsong/inves-cog/pull/76 。没有合并。
