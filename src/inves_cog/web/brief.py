@@ -52,6 +52,7 @@ FORMULAS = (
     "200日线 = 现价 / (1 + price_vs_ma200/100)。",
     "50日线 = 现价 / (1 + dev50/100)。",
     "一年高点 = 现价 / (1 + drawdown252/100)。",
+    "估值展示复制打分 derived.pe 与估值 payload，不重算，不展示中性价。",
     "轮动：IWM减QQQ大于2个百分点，且上涨家数大于下跌家数。",
     "普跌：SPY小于等于-2%，且上涨家数/下跌家数小于0.5。",
     "其余为分化。",
@@ -125,6 +126,36 @@ def valuation_view(price, neutral):
     if neutral == 0 or price == 0 or neutral / price > VALUE_FAR or price / neutral > VALUE_FAR:
         return {"status": "模型不适用", "neutral": None}
     return {"status": "可用", "neutral": neutral}
+
+
+def valuation_card(range_row, pe, price):
+    """Copy payload fields for display. The fair price is never included."""
+    payload = {} if range_row is None else _object(range_row.get("payload"))
+    inputs = payload.get("inputs") if isinstance(payload.get("inputs"), dict) else {}
+    neutral = None if range_row is None else _number(range_row.get("neutral"))
+    card = {
+        "state": valuation_view(price, neutral)["status"],
+        "pe": pe,
+        "pe_p25": _number(inputs.get("pe_p25")),
+        "pe_p50": _number(inputs.get("pe_p50")),
+        "pe_p75": _number(inputs.get("pe_p75")),
+        "implied_growth": _number(payload.get("implied_growth")),
+        "rev_cagr_3y": _number(inputs.get("rev_cagr_3y")),
+        "eps_growth": _number(inputs.get("eps_growth")),
+        "implied_reason": None,
+        "text": None,
+    }
+    if card["implied_growth"] is None and payload.get("implied_reason"):
+        card["implied_reason"] = str(payload["implied_reason"])
+    if range_row is not None and range_row.get("status") == "unvalued":
+        reason = payload.get("reason")
+        cause = str(reason) if isinstance(reason, str) and reason else MISSING
+        card["state"] = "未估值"
+        card["text"] = f"未估值（{cause}）"
+        for key in ("pe", "pe_p25", "pe_p50", "pe_p75", "implied_growth", "rev_cagr_3y", "eps_growth"):
+            card[key] = None
+        card["implied_reason"] = None
+    return card
 
 
 def session_gap(start, end):
@@ -263,7 +294,7 @@ def _scores(connection, day):
     rows = _rows(
         connection,
         """
-        SELECT ticker, tech, quality, growth, valuation, timing, entry_pass, tier
+        SELECT ticker, tech, derived, quality, growth, valuation, timing, entry_pass, tier
         FROM trading.daily_scores
         WHERE signal_date = %s
         """,
@@ -276,7 +307,7 @@ def _ranges(connection, day, cutoff):
     rows = _rows(
         connection,
         """
-        SELECT ticker, neutral, status
+        SELECT ticker, neutral, status, payload
         FROM valuation_v1.ranges
         WHERE trade_date = %s AND observed_at < %s
         """,
@@ -426,6 +457,16 @@ def _price(tech, bars):
     if bars and bars[-1]["close"] is not None:
         return float(bars[-1]["close"])
     return None
+
+
+def _derived_pe(score):
+    if score is None:
+        return None
+    return _number(_object(score.get("derived")).get("pe"))
+
+
+def _card_for(context, ticker, score, price):
+    return valuation_card(context["ranges"].get(ticker), _derived_pe(score), price)
 
 
 def _books(score):
@@ -702,9 +743,12 @@ def _themes(context, day):
     for sector in context["order"]:
         members = []
         for ticker in context["grouped"][sector]:
-            members.append(
-                _member(ticker, day, bars, scores.get(ticker), daily, ticker in positions, membership.get(ticker, []))
+            score = scores.get(ticker)
+            member = _member(
+                ticker, day, bars, score, daily, ticker in positions, membership.get(ticker, [])
             )
+            member["valuation"] = _card_for(context, ticker, score, member["price"])
+            members.append(member)
         average = theme_average([row["ret"] for row in members])
         themes.append(
             {
@@ -887,22 +931,22 @@ def page_brief_account(connection, day, clock):
         stock = themes.get(ticker) or _member(
             ticker, day, context["bars"], context["scores"].get(ticker), context["daily"], True, []
         )
-        view = valuation_view(
-            stock["price"],
-            None if ticker not in context["ranges"] else context["ranges"][ticker]["neutral"],
+        if "valuation" not in stock:
+            stock["valuation"] = _card_for(context, ticker, context["scores"].get(ticker), stock["price"])
+        holdings.append(
+            _holding_row(
+                ticker, position, stock, context["sell"], context["pending"], plan_payload, stock["valuation"]
+            )
         )
-        holdings.append(_holding_row(ticker, position, stock, context["sell"], context["pending"], plan_payload, view))
     held = set(context["positions"])
     candidates = []
     for ticker, score in sorted(context["scores"].items()):
         if ticker in held or not score["entry_pass"] or ticker not in set(context["pool"]):
             continue
         stock = themes.get(ticker) or _member(ticker, day, context["bars"], score, context["daily"], False, [])
-        view = valuation_view(
-            stock["price"],
-            None if ticker not in context["ranges"] else context["ranges"][ticker]["neutral"],
-        )
-        candidates.append(_candidate_row(stock, view))
+        if "valuation" not in stock:
+            stock["valuation"] = _card_for(context, ticker, score, stock["price"])
+        candidates.append(_candidate_row(stock, stock["valuation"]))
     ledger = context["ledger"]
     equity = None if ledger is None else ledger["equity"]
     cash = None if ledger is None else ledger["cash"]

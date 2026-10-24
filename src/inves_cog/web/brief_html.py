@@ -136,7 +136,8 @@ def _stocks(payload):
         details.append(
             f'<details class="theme"{opened}><summary>{_text(theme["sector"])} {_pct(theme.get("average"))}</summary>'
             "<table><tr><th>代码</th><th>当日涨跌</th><th>成交量倍数</th><th>RSI</th>"
-            f"<th>距200日线</th><th>距一年高点</th><th>持有</th><th>可买</th><th>事件</th></tr>{body}</table></details>"
+            "<th>距200日线</th><th>距一年高点</th><th>持有</th><th>可买</th><th>事件</th><th>估值</th></tr>"
+            f"{body}</table></details>"
         )
     table = (
         "<table><tr><th>主题</th><th>平均涨跌</th><th>成交量相对20日</th><th>持有数</th><th>可买数</th><th>一句话</th></tr>"
@@ -243,7 +244,8 @@ def _member_row(row):
         f'<td class="{_tone(row.get("ret"))}">{_pct(row.get("ret"))}</td>'
         f"<td>{_plain(row.get('volume_multiple'))}</td><td>{_plain(row.get('rsi'))}</td>"
         f"<td>{_points(row.get('price_vs_ma200'))}</td><td>{_points(row.get('drawdown252'))}</td>"
-        f"<td>{_text(held)}</td><td>{_text(buyable)}</td><td>{_text(events)}</td></tr>"
+        f"<td>{_text(held)}</td><td>{_text(buyable)}</td><td>{_text(events)}</td>"
+        f"<td>{_valuation(row.get('valuation'))}</td></tr>"
     )
 
 
@@ -268,9 +270,23 @@ def _side(row):
 def _valuation(view):
     if not isinstance(view, dict):
         return _text(MISSING)
-    if view.get("neutral") is None:
-        return _text(view.get("status") or MISSING)
-    return _text(view.get("neutral"))
+    if view.get("state") == "未估值":
+        return _text(view.get("text") or "未估值")
+    bits = [
+        f"PE {_plain(view.get('pe'))}",
+        f"p25 {_plain(view.get('pe_p25'))}",
+        f"p50 {_plain(view.get('pe_p50'))}",
+        f"p75 {_plain(view.get('pe_p75'))}",
+        f"隐含 {_points(view.get('implied_growth'))}",
+        f"营收 {_points(view.get('rev_cagr_3y'))}",
+        f"EPS {_points(view.get('eps_growth'))}",
+    ]
+    text = " ".join(bits)
+    if view.get("state") == "模型不适用":
+        text = f"模型不适用 {text}"
+    if view.get("implied_reason"):
+        text = f"{text} {_text(view['implied_reason'])}"
+    return text
 
 
 def _book(books):

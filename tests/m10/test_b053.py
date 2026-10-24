@@ -558,15 +558,109 @@ def test_v4_scores_and_valuation_are_copied(pages):
     stocks = _json(pages, "/api/pages/brief/stocks")
     copied = [row for theme in stocks["themes"] for row in theme["members"] if row["ticker"] == "AMD"][0]
     assert copied["rsi"] == 12.5
-    assert amd["valuation"]["status"] == "模型不适用" and amd["valuation"]["neutral"] is None
+    assert amd["valuation"]["state"] == "模型不适用"
+    assert "neutral" not in amd["valuation"] and "bear" not in amd["valuation"]
     html = _get(pages, "/account").text
     assert "模型不适用" in html and "4321" not in html
     nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
-    assert nvda["valuation"]["neutral"] == 90
-    assert "90" in html
+    assert "neutral" not in nvda["valuation"] and "90" not in html
+    assert nvda["valuation"]["state"] == "可用"
 
 
-def test_v5_status_follows_queries(pages):
+def test_v10_valuation_display_copies_payload_and_hides_price(pages):
+    admin = pages["admin"]
+    label = "估值参考 v1，不参与仓位"
+    nvda_payload = {
+        "label": label,
+        "implied_growth": 27.7,
+        "inputs": {"pe_p25": 20, "pe_p50": 30, "pe_p75": 45, "rev_cagr_3y": 110, "eps_growth": 23.6},
+    }
+    amd_payload = {
+        "label": label,
+        "implied_growth": None,
+        "implied_reason": "无法反解：价格不在区间",
+        "inputs": {"pe_p25": 12, "pe_p50": 18, "pe_p75": 24, "rev_cagr_3y": 23.6, "eps_growth": 23.6},
+    }
+    avgo_payload = {
+        "label": label,
+        "reason": "金融",
+        "implied_growth": 0,
+        "inputs": {"pe_p25": 0, "pe_p50": 0, "pe_p75": 0, "rev_cagr_3y": 0, "eps_growth": 0},
+    }
+    admin.execute(
+        "UPDATE valuation_v1.ranges SET payload = %s WHERE trade_date = %s AND ticker = 'NVDA'",
+        (Jsonb(nvda_payload), DAY),
+    )
+    admin.execute(
+        "UPDATE trading.daily_scores SET derived = %s WHERE signal_date = %s AND ticker = 'NVDA'",
+        (Jsonb({"pe": 22.8}), DAY),
+    )
+    admin.execute(
+        "UPDATE valuation_v1.ranges SET payload = %s WHERE trade_date = %s AND ticker = 'AMD'",
+        (Jsonb(amd_payload), DAY),
+    )
+    admin.execute(
+        """
+        INSERT INTO valuation_v1.ranges (
+            trade_date, ticker, params_version, method_version, version, type, status,
+            bear, neutral, bull, pending_review, payload, observed_at
+        ) VALUES (
+            %s, 'AVGO', 'p-2026.10', 'v1', 'v1', 'base', 'unvalued',
+            0, 0, 0, false, %s, %s
+        )
+        """,
+        (DAY, Jsonb(avgo_payload), SEEN),
+    )
+    try:
+        account = _json(pages, "/api/pages/brief/account")
+        stocks = _json(pages, "/api/pages/brief/stocks")
+        nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
+        card = nvda["valuation"]
+        assert card["pe"] == 22.8
+        assert card["pe_p25"] == nvda_payload["inputs"]["pe_p25"]
+        assert card["pe_p50"] == nvda_payload["inputs"]["pe_p50"]
+        assert card["pe_p75"] == nvda_payload["inputs"]["pe_p75"]
+        assert card["implied_growth"] == nvda_payload["implied_growth"]
+        assert card["rev_cagr_3y"] == nvda_payload["inputs"]["rev_cagr_3y"]
+        assert card["eps_growth"] == nvda_payload["inputs"]["eps_growth"]
+        assert "neutral" not in card and "bear" not in card and "bull" not in card
+        amd = next(row for row in account["candidates"] if row["ticker"] == "AMD")
+        assert amd["valuation"]["implied_growth"] is None
+        assert amd["valuation"]["implied_reason"] == amd_payload["implied_reason"]
+        assert amd["valuation"]["pe_p25"] == 12
+        assert amd["valuation"]["state"] == "模型不适用"
+        avgo = next(row for row in account["holdings"] if row["ticker"] == "AVGO")
+        assert avgo["valuation"]["state"] == "未估值"
+        assert avgo["valuation"]["text"] == "未估值（金融）"
+        assert all(
+            avgo["valuation"][key] is None
+            for key in ("pe", "pe_p25", "pe_p50", "pe_p75", "implied_growth", "rev_cagr_3y", "eps_growth")
+        )
+        account_html = _get(pages, "/account").text
+        stocks_html = _get(pages, "/stocks").text
+        assert "90" not in account_html and "4321" not in account_html
+        assert "90" not in stocks_html and "4321" not in stocks_html
+        assert "22.8" in account_html and "27.70%" in account_html and "110.00%" in account_html
+        assert "无法反解：价格不在区间" in account_html
+        assert "未估值（金融）" in account_html
+        avgo_cell = next(part for part in account_html.split("<tr") if "AVGO" in part).rsplit("<td>", 1)[-1]
+        assert avgo_cell.startswith("未估值（金融）") and "0" not in avgo_cell
+        stock_cell = next(part for part in stocks_html.split("<tr") if "AVGO" in part).rsplit("<td>", 1)[-1]
+        assert stock_cell.startswith("未估值（金融）") and "0" not in stock_cell
+        nvda_stock = next(row for theme in stocks["themes"] for row in theme["members"] if row["ticker"] == "NVDA")
+        assert nvda_stock["valuation"]["implied_growth"] == 27.7
+        assert "22.8" in stocks_html and "未估值（金融）" in stocks_html
+    finally:
+        empty = Jsonb({"label": label})
+        admin.execute(
+            "UPDATE valuation_v1.ranges SET payload = %s WHERE trade_date = %s AND ticker IN ('NVDA', 'AMD')",
+            (empty, DAY),
+        )
+        admin.execute(
+            "UPDATE trading.daily_scores SET derived = '{}' WHERE signal_date = %s AND ticker = 'NVDA'",
+            (DAY,),
+        )
+        admin.execute("DELETE FROM valuation_v1.ranges WHERE trade_date = %s AND ticker = 'AVGO'", (DAY,))
     admin = pages["admin"]
     trust = _json(pages, "/api/pages/brief/trust")
     states = {row["item"]: row["state"] for row in trust["statuses"]}
