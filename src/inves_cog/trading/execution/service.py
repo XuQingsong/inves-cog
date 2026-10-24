@@ -1,5 +1,7 @@
 """Plan from a closed signal session; never use the target session's unseen prices."""
 
+from datetime import timedelta
+
 from inves_cog.ingest.market import exchange
 from inves_cog.trading.engine import ExecutionEngine
 from inves_cog.trading.execution.completeness import describe_inputs
@@ -37,8 +39,29 @@ def decide_day(engine, day, inputs):
     return result
 
 
+def settle_through(engine, signal_day, inputs):
+    """Advance real session opens in order; an absent quote never loses its pending day."""
+    if engine.mode != "paper":
+        return True
+    previous = max(engine.settled_dates, default=engine.signal_date)
+    start = previous + timedelta(days=1) if previous is not None else signal_day
+    if start > signal_day:
+        return True
+    calendar = exchange(signal_day.year)
+    for stamp in calendar.sessions_in_range(str(start), str(signal_day)):
+        day = stamp.date()
+        opening = {ticker: rows[day]["open"] for ticker, rows in inputs["bars"].items() if day in rows}
+        engine.fill(day, opening, delayed=day < signal_day)
+        if day not in engine.settled_dates:
+            # Preserve the missing day for the next invocation, even if there are later quotes.
+            return False
+    return True
+
+
 def prepare(engine, target, inputs, universe, overlay=None):
     signal_day = exchange(target.year).previous_session(str(target)).date()
+    if not settle_through(engine, signal_day, inputs):
+        raise ValueError("补撮合缺少实际开盘价，保留待成交单且暂停推进计划")
     if engine.signal_date != signal_day:
         decide_day(engine, signal_day, inputs)
     known_members = [
@@ -96,6 +119,7 @@ def daily_plan(*, clock, connection, universe, target, overlay=None, persist=Tru
             engine.persist_orders(connection, engine.trades)
             for canceled in plan["cancels"]:
                 engine.persist_orders(connection, [{**canceled["original_order"], "status": "canceled"}])
+            engine.persist_orders(connection, engine.terminal_orders)
             repository.save(engine, plan)
     return plan
 

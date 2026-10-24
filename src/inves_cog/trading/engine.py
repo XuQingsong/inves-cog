@@ -12,7 +12,7 @@ from inves_cog.trading.execution import buys, settlement
 from inves_cog.trading.execution.contracts import coverage, overlay_state, validate_order
 from inves_cog.trading.execution.risk import update_risk, vix_panic
 from inves_cog.trading.execution.sells import sell_signal
-from inves_cog.trading.execution.state import PARAMS, TIERS
+from inves_cog.trading.execution.state import PARAMS, RULE_A, TIERS
 
 
 class ExecutionEngine:
@@ -31,6 +31,7 @@ class ExecutionEngine:
         self.last_equity, self.last_prices = self.cash, {}
         self.settled_dates = set()
         self.cancels = []
+        self.terminal_orders, self.order_lifecycle = [], []
 
     @property
     def health_codes(self):
@@ -67,16 +68,41 @@ class ExecutionEngine:
             **values,
         }
         raw = f"{self.portfolio_id}:{self.signal_date}:{len(self.pending)}:{ticker}:{action}"
+        if self.mode == "paper":
+            previous = [o for o in self.pending if o["ticker"] == ticker and o["action"] == action]
+            if previous:
+                raw += ":" + ":".join(o["order_id"] for o in previous)
+                for old in previous:
+                    self.record_terminal(old, "superseded", "同标的同动作的新意向替代旧单")
         order["order_id"] = hashlib.sha256(raw.encode()).hexdigest()
         validate_order(order)
         order["kind"] = self.order_kind(order)
         self.pending.append(order)
 
-    def fill(self, day, opening, execution_scores=None):
+    def record_terminal(self, order, status, reason):
+        if status not in {"filled", "canceled", "expired", "superseded"}:
+            raise ValueError("Unknown terminal order status")
+        terminal = copy.deepcopy(order)
+        identity = (
+            terminal.get("order_id")
+            or hashlib.sha256(json.dumps(order, default=str, sort_keys=True).encode()).hexdigest()
+        )
+        terminal.update(order_id=identity, status=status, terminal_reason=reason)
+        terminal["reason_zh"] = order["reason_zh"] + "；" + reason
+        self.pending = [o for o in self.pending if o is not order and o.get("order_id") != identity]
+        self.terminal_orders = [o for o in self.terminal_orders if o["order_id"] != identity] + [terminal]
+        self.order_lifecycle.append(
+            {"order_id": identity, "status": status, "reason": reason, "observed_at": self.clock.now_utc().isoformat()}
+        )
+        return terminal
+
+    def fill(self, day, opening, execution_scores=None, *, delayed=False):
         if day in self.settled_dates:
             return []
         available = [o for o in self.pending if o["trade_date"] == day and o["signal_date"] < day]
         if not available:
+            if self.mode == "paper":
+                self.settled_dates.add(day)
             return []
         equity = self.equity(opening)
         if equity is None:
@@ -106,6 +132,12 @@ class ExecutionEngine:
                         "status": "filled",
                     }
                 )
+                if self.mode == "paper":
+                    if delayed:
+                        fills[-1]["execution_note"] = "补撮合（计划延误）"
+                    self.record_terminal(fills[-1], "filled", fills[-1].get("execution_note", "按计划开盘成交"))
+            elif self.mode == "paper":
+                self.record_terminal(order, "expired", "未满足成交约束，未成交")
         self.pending = [o for o in self.pending if o not in available] + deferred
         self.trades.extend(fills)
         if not deferred:
@@ -183,6 +215,11 @@ class ExecutionEngine:
                     }
                 )
                 self.skip(intent["ticker"], "M-34", "N5", "事件冷静期，暂停买入")
+                if self.mode == "paper":
+                    self.record_terminal(intent, "canceled", "事件冷静期，撤销买单")
+                continue
+            if not published:
+                keep.append(intent)
                 continue
             if published:
                 estimated = self.estimated_notional(intent)
@@ -193,6 +230,8 @@ class ExecutionEngine:
                         else "当前持仓按计划股数计算的金额为0"
                     )
                     self.skip(intent["ticker"], intent["rule_ids"][0], "N7", text)
+                    if self.mode == "paper":
+                        self.record_terminal(intent, "expired", text)
                     continue
                 multiplier = item.get("first_lot_multiplier", 1)
                 if not selling and isinstance(multiplier, (int, float)) and 0 <= multiplier <= 1:
@@ -210,7 +249,7 @@ class ExecutionEngine:
                 )
         self.pending = keep
         self.cancels = canceled
-        return {
+        result = {
             "trade_date": day,
             "signal_date": self.signal_date,
             "rule_set": "A",
@@ -237,6 +276,35 @@ class ExecutionEngine:
                 },
             },
         }
+
+        if self.mode == "paper":
+            self.explain_plan(result)
+        return result
+
+    def explain_plan(self, plan):
+        explanations = {}
+        for skip in plan["skips"]:
+            matching = [o for o in plan["orders"] if o["ticker"] == skip["ticker"]]
+            old = [o for o in matching if o["signal_date"] < self.signal_date]
+            if old:
+                labels = sorted({f"{o['trade_date'].month} 月 {o['trade_date'].day} 日" for o in old})
+                skip["reason_zh"] += "；另有 " + "、".join(labels) + "待成交单"
+            core_blocked = "M-58" in skip["rule_ids"] or ("M-40" in skip["rule_ids"] and "额度" in skip["reason_zh"])
+            if core_blocked and any(o["action"] in {"buy_swing", "buy_watch"} for o in matching):
+                reason = "冷却期" if "M-58" in skip["rule_ids"] else "额度满"
+                explanations[skip["ticker"]] = f"核心加仓暂停（{reason}），波段仓按独立规则买入"
+        pending = [o for o in self.pending if o["action"] == "buy_to"]
+        count = len(self.positions) + len(pending)
+        # Frozen source aacea04 L649–667 includes additions to already-held names.
+        plan["portfolio"]["slot_count"] = {
+            "holdings": len(self.positions),
+            "buy_to_pending": len(pending),
+            "total": count,
+            "held_additions": sum(o["ticker"] in self.positions for o in pending),
+            "limit": RULE_A["max_positions"],
+        }
+        plan["portfolio"]["slot_count_note"] = f"持仓 {len(self.positions)} + 加仓挂单 {len(pending)} = {count}"
+        plan["explanations"] = explanations
 
     def order_kind(self, order):
         if order["action"] == "buy_to":
@@ -328,7 +396,8 @@ class ExecutionEngine:
                 "cost,rule_ids,reason_zh,tier,rule_set,params_version,overlay_version,status,intent) "
                 "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'A','p-2026.10',%s,%s,%s) "
                 "ON CONFLICT (portfolio_id,order_id) DO UPDATE SET status=EXCLUDED.status,qty=EXCLUDED.qty,"
-                "fill_price=EXCLUDED.fill_price,cost=EXCLUDED.cost,intent=EXCLUDED.intent",
+                "fill_price=EXCLUDED.fill_price,cost=EXCLUDED.cost,reason_zh=EXCLUDED.reason_zh,"
+                "intent=EXCLUDED.intent",
                 (
                     self.portfolio_id,
                     order["order_id"],
@@ -368,6 +437,7 @@ class ExecutionEngine:
             "scores",
             "skips",
             "cancels",
+            "order_lifecycle",
             "vix_detail",
             "panic",
         )
