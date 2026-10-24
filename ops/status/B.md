@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-053  已收到  2026-10-24 11:12 北京
+
+- 需求方复核 PR #63 head `1c60eed`：V1–V9 通过，V10 未交付。同一 PR 补估值展示：任何情况下不展示合理价或中性价；改为当前 PE、`payload.inputs` 的 pe_p25/p50/p75、`implied_growth` 与 `rev_cagr_3y`/`eps_growth`；反解失败显示 `implied_reason`；`unvalued` 显示“未估值（原因）”，不显示 0。其余不动。授权仍是 `src/inves_cog/web/` 与 `tests/m10/`。不改上游、迁移、合同，不调模型，不部署。
+- 下一步：改 `brief.py` 的估值展示并补 V10 测试，再跑 phase1 和 CI。
+
 ## B-053  已完成  2026-10-24 11:07 北京
 
 - PR #63，head `1c60eed`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40056585917 ：`phase1-blocking` 成功，629 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 99.166 秒（≤ 300）、status passed、collected 629、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
