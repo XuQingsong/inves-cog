@@ -26,9 +26,10 @@ HORIZONS = (5, 21, 63)
 
 
 def store_weekly(connection, week_ending, clock, writer=None):
-    payload = build_weekly(connection, week_ending, cutoff(week_ending))
+    review = writer or connection
+    payload = build_weekly(connection, week_ending, cutoff(week_ending), review=review)
     _store(
-        writer or connection,
+        review,
         "perception.reports_weekly",
         "week:" + week_ending.isoformat(),
         week_ending,
@@ -39,9 +40,10 @@ def store_weekly(connection, week_ending, clock, writer=None):
 
 
 def store_monthly(connection, month_end, clock, writer=None):
-    payload = build_monthly(connection, month_end, cutoff(month_end))
+    review = writer or connection
+    payload = build_monthly(connection, month_end, cutoff(month_end), review=review)
     _store(
-        writer or connection,
+        review,
         "perception.reports_monthly",
         "month:" + month_end.isoformat(),
         month_end,
@@ -51,23 +53,26 @@ def store_monthly(connection, month_end, clock, writer=None):
     return payload
 
 
-def build_weekly(connection, week_ending, visible):
+def build_weekly(connection, week_ending, visible, *, review=None):
+    """Upstream reads stay on connection. Review-table reads use review, or connection when omitted."""
+    review = review or connection
     start = week_ending - timedelta(days=6)
-    samples = _samples(connection, start, week_ending)
+    samples = _samples(review, start, week_ending)
     forward = _shadow_rows(connection, start, week_ending, visible)
     return {
         "漏检报告": miss_report(samples),
         "估值区间变化最大的10只": _range_changes(connection, start, week_ending, visible),
-        "待确认打标": _pending(connection, week_ending, visible),
+        "待确认打标": _pending(review, week_ending, visible),
         "冷静期挡掉的买入此后表现": _cooling(connection, start, week_ending, visible),
         "估值仓位对照标黄持仓此后表现": _yellow(connection, start, week_ending, visible),
         "后续收益": forward,
     }
 
 
-def build_monthly(connection, month_end, visible):
+def build_monthly(connection, month_end, visible, *, review=None):
+    review = review or connection
     start = month_end.replace(day=1)
-    samples = _samples(connection, start, month_end)
+    samples = _samples(review, start, month_end)
     signals, factors = _split_shadow(connection, start, month_end, visible)
     return {
         "归因校准": _calibration(connection, start, month_end, visible),

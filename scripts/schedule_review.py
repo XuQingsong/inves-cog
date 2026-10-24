@@ -10,12 +10,19 @@ _QUIET = {"not_due", "already_attempted", "waiting_dependencies"}
 
 
 class _EnvironmentClient:
-    """Build the model client on the first call, not at import or when the writer is missing."""
+    """Call through Client.from_environment so the default recorder writes ingest.llm_calls."""
+
+    def __init__(self, values, send=None, clock=None):
+        self.values = values
+        self.send = send
+        self.clock = clock
 
     def call(self, task, payload):
         from inves_cog.llm.client import Client
 
-        return Client.from_environment().call(task, payload)
+        if not self.values.get("INVES_COG_DATABASE_URL"):
+            raise RuntimeError("缺少 INVES_COG_DATABASE_URL")
+        return Client.from_environment(self.values, send=self.send, clock=self.clock).call(task, payload)
 
 
 def run_once(*, clock, connection, writer, client=None):
@@ -53,7 +60,7 @@ def main():
             connection = connect(values)
             writer_url = values.get("INVES_COG_PERCEPTION_DATABASE_URL")
             writer = connect({"INVES_COG_DATABASE_URL": writer_url}) if writer_url else None
-            result = run_once(clock=clock, connection=connection, writer=writer, client=_EnvironmentClient())
+            result = run_once(clock=clock, connection=connection, writer=writer, client=_EnvironmentClient(values))
             if result["status"] not in _QUIET:
                 print(json_text(result), flush=True)
         except Exception as exc:

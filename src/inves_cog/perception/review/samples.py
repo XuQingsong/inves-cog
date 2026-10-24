@@ -13,7 +13,8 @@ MOVE_LINE = 0.07
 JUDGMENTS = ("应发现", "不应发现", "未知", "数据不覆盖")
 
 
-def sample_weekly(connection, period_end):
+def sample_weekly(connection, period_end, writer=None):
+    """Read upstream items on connection. Write miss_samples on writer, or connection when omitted."""
     visible = cutoff(period_end)
     start = visible - timedelta(days=7)
     rows = connection.execute(
@@ -28,10 +29,11 @@ def sample_weekly(connection, period_end):
         """,
         (start, visible),
     ).fetchall()
-    return _store(connection, "weekly_info", period_end, rows, "info_id", WEEKLY_DRAW)
+    return _store(writer or connection, "weekly_info", period_end, rows, "info_id", WEEKLY_DRAW)
 
 
-def sample_monthly(connection, month_end):
+def sample_monthly(connection, month_end, writer=None):
+    review = writer or connection
     start = month_end.replace(day=1)
     moves = connection.execute(
         """
@@ -55,8 +57,8 @@ def sample_monthly(connection, month_end):
         )
     companies = _company_rows(connection, month_end)
     return {
-        "moves": _store(connection, "monthly_move", month_end, move_rows, "info_id", MONTHLY_DRAW),
-        "companies": _store(connection, "monthly_company", month_end, companies, "info_id", MONTHLY_DRAW),
+        "moves": _store(review, "monthly_move", month_end, move_rows, "info_id", MONTHLY_DRAW),
+        "companies": _store(review, "monthly_company", month_end, companies, "info_id", MONTHLY_DRAW),
     }
 
 

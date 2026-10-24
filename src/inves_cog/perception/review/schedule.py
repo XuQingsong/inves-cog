@@ -9,6 +9,8 @@ from inves_cog.perception.review.calendar import add_sessions, cutoff, is_sessio
 NY = ZoneInfo("America/New_York")
 PARAMS = "m10-review-v1"
 FINISHED = {"ok", "degraded"}
+# The first attempt plus two retries. A restarted process counts the same job_runs rows.
+_ATTEMPTS = 3
 # (start hour, start minute), (deadline hour, deadline minute), upstream task names.
 WINDOWS = {
     "review_labels": ((7, 31), (7, 40), ("anomaly_daily",)),
@@ -69,7 +71,20 @@ def _classify(rows):
         return "done"
     if any(str(row.get("error_summary") or "").startswith("skipped_upstream:") for row in rows):
         return "skipped"
+    if _consecutive_failures(rows) >= _ATTEMPTS:
+        return "exhausted"
     return "run"
+
+
+def _consecutive_failures(rows):
+    count = 0
+    for row in reversed(rows):
+        if row.get("status") in FINISHED:
+            break
+        if str(row.get("error_summary") or "").startswith("skipped_upstream:"):
+            break
+        count += 1
+    return count
 
 
 def _ready(rows, moment):
@@ -128,6 +143,7 @@ _MONTHLY = ("review_monthly_sample", "review_monthly_report")
 _OPEN = (1, 0)
 _DEADLINE = (7, 30)
 _MISSING_WRITER = "缺少 INVES_COG_PERCEPTION_DATABASE_URL"
+_MISSING_DATABASE = "缺少 INVES_COG_DATABASE_URL"
 
 
 def review_day(moment):
@@ -173,22 +189,26 @@ def run_cycle(moment, *, records, connection, writer, clock, client=None):
         _write_skip(connection, pending[0], day, _MISSING_WRITER, clock)
         return {"status": "failed", "trade_date": day.isoformat(), "error_summary": _MISSING_WRITER}
     for task in pending:
-        run_recorded(
+        operation = _operation(task, day, connection, writer, clock, client)
+        row_id = run_recorded(
             connection,
             clock=clock,
             task_name=task,
             trade_date=day,
             params_version=PARAMS,
-            operation=_operation(task, day, connection, writer, clock, client),
+            operation=operation,
         )
+        note = operation.box.get("note")
+        if note:
+            connection.execute(
+                "UPDATE ingest.job_runs SET error_summary = %s WHERE id = %s",
+                (note, row_id),
+            )
     return {"status": "ok", "trade_date": day.isoformat(), "tasks": pending}
 
 
 def _pending(task, records):
-    rows = list(records(task) or [])
-    if task == "review_oneliner" and rows:
-        return False
-    return _classify(rows) == "run"
+    return _classify(list(records(task) or [])) == "run"
 
 
 def _upstream_missing(records, moment):
@@ -205,6 +225,8 @@ def _upstream_missing(records, moment):
 
 
 def _operation(task, day, reader, writer, clock, client):
+    box = {}
+
     def run():
         if task == "review_snapshots":
             from inves_cog.perception.review.snapshots import write_snapshots
@@ -215,34 +237,42 @@ def _operation(task, day, reader, writer, clock, client):
 
             return run_labels(writer, day, clock)
         if task == "review_oneliner":
-            return _write_oneliner(writer, day, clock, client)
+            box["note"] = _write_oneliner(writer, day, clock, client)
+            return 1
         if task == "review_weekly_sample":
             from inves_cog.perception.review.samples import sample_weekly
 
-            return len(sample_weekly(writer, day))
+            return len(sample_weekly(reader, day, writer=writer))
         if task == "review_weekly_report":
+            from inves_cog.perception.review.patterns import rebuild_patterns
             from inves_cog.perception.review.reports import store_weekly
 
             store_weekly(reader, day, clock, writer=writer)
+            rebuild_patterns(writer, clock)
             return 1
         if task == "review_monthly_sample":
             from inves_cog.perception.review.samples import sample_monthly
 
-            drawn = sample_monthly(writer, day)
+            drawn = sample_monthly(reader, day, writer=writer)
             return len(drawn["moves"]) + len(drawn["companies"])
         if task == "review_monthly_report":
+            from inves_cog.perception.review.patterns import rebuild_patterns
             from inves_cog.perception.review.reports import store_monthly
 
             store_monthly(reader, day, clock, writer=writer)
+            rebuild_patterns(writer, clock)
             return 1
         raise ValueError("未知任务")
 
+    run.box = box
     return run
 
 
 def _write_oneliner(writer, day, clock, client):
-    from inves_cog.perception.review.oneliner import ground, store_oneliner, template_sentence
+    from inves_cog.perception.review.oneliner import ground_outcome, store_oneliner, template_sentence
 
+    if client is not None:
+        _require_database(client)
     visible = cutoff(day)
     rows = writer.execute(
         """
@@ -258,6 +288,17 @@ def _write_oneliner(writer, day, clock, client):
         "counts": {"anomaly_count": len(rows)},
         "anomalies": [{"anomaly_id": row["anomaly_id"]} for row in rows],
     }
-    sentence = template_sentence(len(rows)) if client is None else ground(client, page)
+    if client is None:
+        sentence, note = template_sentence(len(rows)), "模板（未配置模型客户端）"
+    else:
+        sentence, note = ground_outcome(client, page)
     store_oneliner(writer, day, clock, sentence)
-    return 1
+    return note
+
+
+def _require_database(client):
+    values = getattr(client, "values", None)
+    if not isinstance(values, dict):
+        return
+    if not values.get("INVES_COG_DATABASE_URL"):
+        raise RuntimeError(_MISSING_DATABASE)
