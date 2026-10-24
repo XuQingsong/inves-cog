@@ -475,6 +475,8 @@ def test_v1_structure_and_detail_links(pages):
     assert [text for _level, text in found["/stocks"]] == ["我的标的", "主题一览（按今日表现排序）", "逐只明细"]
     assert [text for _level, text in found["/account"]] == [
         "纸面账户",
+        "风险提示",
+        "组合风险",
         "持仓与关键价位",
         "已止盈 / 止损 / 清仓",
         "待选：符合买入条件但还没买的",

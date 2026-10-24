@@ -1658,7 +1658,7 @@ def page_brief_market(connection, day, clock):
         "pool_count": len(context["pool"]),
         "formulas": list(FORMULAS),
         "label": PAPER_LABEL,
-    }
+    } | _risk_fields(connection, day, context)
 
 
 def page_brief_stocks(connection, day, clock):
@@ -1743,6 +1743,22 @@ def page_brief_account(connection, day, clock):
         },
         "formulas": list(FORMULAS),
         "label": PAPER_LABEL,
+    } | _risk_fields(connection, day, context, holdings)
+
+
+def _risk_fields(connection, day, context, holdings=None):
+    from inves_cog.web.risk_brief import RISK_FORMULAS, portfolio_view
+
+    view = portfolio_view(connection, day, context)
+    if holdings is not None:
+        for row in holdings:
+            found = view["by_ticker"].get(row["ticker"])
+            row["risk_level"] = None if found is None else found["level"]
+    return {
+        "risk_lines": view["lines"],
+        "risk_note": view["note"],
+        "risk_card": view["card"],
+        "formulas": [*FORMULAS, *RISK_FORMULAS],
     }
 
 

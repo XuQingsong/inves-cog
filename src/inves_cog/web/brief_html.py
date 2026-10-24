@@ -45,6 +45,10 @@ h1, h2 { font-weight: 650; }
 .up { color: #0a7a32; }
 .muted, .missing { color: #777; }
 .warn { color: #b00020; font-weight: bold; }
+tr.risk-red, td.risk-red { background: #fde8e8; }
+tr.risk-orange, td.risk-orange { background: #fff1dc; }
+.bar { background: #efeae0; height: 8px; border-radius: 4px; }
+.bar span { display: block; height: 8px; background: #9a6b2f; border-radius: 4px; }
 table { width: 100%; border-collapse: collapse; }
 td, th { text-align: left; padding: 4px 6px; vertical-align: top; }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -112,7 +116,8 @@ def _market(payload):
         f"<h1>{_text(headings[0])}</h1>"
         f'<div class="card hero"><p class="lead">{_text(payload.get("oneliner"))}</p>'
         f'<div class="grid">{indexes}<div class="kpi"><span>涨 / 跌家数</span><b>{breadth}</b></div></div>'
-        f"<p><b>对我意味着什么：</b>{_text(payload.get('implication'))}</p></div>"
+        f"<p><b>对我意味着什么：</b>{_text(payload.get('implication'))}</p>"
+        f"<p>{_text(payload.get('risk_note') or MISSING)}</p></div>"
         f'<div class="card"><h2>{_text(headings[1])}</h2>{funds}'
         f"<p>风格：{styles} · 板块分化 {_text(spread_text)}</p>"
         '<div class="gap"><b>缺口：</b>没有真实资金流，目前用板块相对强弱近似。</div></div>'
@@ -165,6 +170,40 @@ def _stocks(payload):
     )
 
 
+def _risk_block(payload):
+    from inves_cog.web.risk_brief import EMPTY
+
+    lines = payload.get("risk_lines") or []
+    if not lines:
+        body = f"<p>{_text(EMPTY)}</p>"
+    else:
+        rows = []
+        for row in lines:
+            level = row.get("level") if row.get("level") in {"red", "orange"} else "orange"
+            rows.append(f'<p class="risk-{level}">{_text(row.get("text"))}</p>')
+        body = "".join(rows)
+    return f'<div class="card"><h2>风险提示</h2>{body}</div>'
+
+
+def _risk_card(card):
+    themes = []
+    for row in card.get("themes") or []:
+        share = row.get("share")
+        width = MISSING if share is None else f"{half_up(float(share) * 100, 2):.2f}"
+        themes.append(
+            f"<p>{_text(row.get('sector'))} {_pct(share)}</p>"
+            f'<div class="bar"><span style="width:{width}%"></span></div>'
+        )
+    body = "".join(themes) or f"<p>{_text(MISSING)}</p>"
+    return (
+        '<div class="card"><h2>组合风险</h2>'
+        f"{body}"
+        f"<p>距回撤刹车 {_text(card.get('dd8_gap'))}，距更深闸门 {_text(card.get('dd12_gap'))}</p>"
+        f"<p>持仓 {_count(card.get('holdings'))} 只，名额 {_count(card.get('slots'))} 只</p>"
+        f"<p>现金比例 {_pct(card.get('cash_ratio'))}</p></div>"
+    )
+
+
 def _account(payload):
     headings = payload.get("headings") or [
         "纸面账户",
@@ -174,16 +213,28 @@ def _account(payload):
     ]
     holdings = []
     for row in payload.get("holdings") or []:
-        mark = ' class="warn"' if row.get("near_disaster") else ""
+        level = row.get("risk_level") if row.get("risk_level") in {"red", "orange"} else None
+        if row.get("near_disaster"):
+            mark = ' class="warn"'
+            paint = f' class="risk-{level}"' if level else ""
+        elif level:
+            mark = f' class="risk-{level}"'
+            paint = ""
+        else:
+            mark = ""
+            paint = ""
         near = " 距灾难线过近" if row.get("near_disaster") else ""
         valuation = _valuation(row.get("valuation"))
+        tone = _tone(row.get("pnl"))
+        pnl_classes = [item for item in ((f"risk-{level}" if paint else None), tone) if item]
+        pnl_mark = f' class="{" ".join(pnl_classes)}"'
         holdings.append(
-            f'<tr{mark}><td><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
-            f"<td>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
-            f'<td class="{_tone(row.get("pnl"))}">{_pct(row.get("pnl"))}</td>'
-            f"<td>{_price(row.get('take_profit'))}</td><td>{_price(row.get('ma200'))}</td>"
-            f"<td>{_price(row.get('disaster'))}</td><td>{_count(row.get('below_days'))}</td>"
-            f"<td>{_text(row.get('next_step'))}{_text(near)}</td><td>{valuation}</td></tr>"
+            f'<tr{mark}><td{paint}><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
+            f"<td{paint}>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
+            f"<td{pnl_mark}>{_pct(row.get('pnl'))}</td>"
+            f"<td{paint}>{_price(row.get('take_profit'))}</td><td{paint}>{_price(row.get('ma200'))}</td>"
+            f"<td{paint}>{_price(row.get('disaster'))}</td><td{paint}>{_count(row.get('below_days'))}</td>"
+            f"<td{paint}>{_text(row.get('next_step'))}{_text(near)}</td><td{paint}>{valuation}</td></tr>"
         )
     closed = []
     for row in payload.get("closed_records") or []:
@@ -215,6 +266,7 @@ def _account(payload):
         f'<div class="kpi"><span>当日</span><b>{day_cell}</b></div>'
         f'<div class="kpi"><span>距高点</span><b>{_pct(payload.get("drawdown"))}</b></div>'
         f'<div class="kpi"><span>现金</span><b>{_money(payload.get("cash"))}</b></div></div></div>'
+        f"{_risk_block(payload)}{_risk_card(payload.get('risk_card') or {})}"
         f'<div class="card"><h2>{_text(headings[1])}</h2><table><tr><th>代码</th><th>成本→现价</th><th>盈亏</th>'
         f"<th>止盈线</th><th>200日线</th><th>灾难止损线</th><th>破位天数</th><th>下一步</th><th>估值</th></tr>"
         f"{''.join(holdings) or '<tr><td>暂缺</td></tr>'}</table></div>"
@@ -341,7 +393,8 @@ def _position_block(position):
     kind = position.get("kind")
     if kind == "held":
         pending = "、".join(position.get("pending") or []) or MISSING
-        return (
+        risk = f"<p>{_text(position.get('risk_text') or MISSING)}</p>"
+        return risk + (
             f"<p>股数 {_count(position.get('shares'))} 成本 {_price(position.get('avg_cost'))}"
             f" → 现价 {_price(position.get('price'))} 盈亏 {_pct(position.get('pnl'))}</p>"
             f"<p>止盈线 {_price(position.get('take_profit'))} 距离 {_pct(position.get('take_profit_gap'))}</p>"
