@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-020  进行中（迁移已提交，生产默认ACL差异已定位）  2026-10-24 23:20 北京
+- 生产已干净快进12ae132、唯一迁移SHA256 80805903eb60554f1d6aeaefd39c7cbe4712ce7f68d0e777bbee999cc97254e5已提交一次，表0行/未启动collector。私有a020-consensus-20261024-attempt.json phase=migration_committed，未重复执行DDL。
+- 实际权限断言发现role_valuation有UPDATE/DELETE；只读核pg_class确认owner=inves_cog_admin，ACL来自既有ALTER DEFAULT PRIVILEGES（role_valuation=arwd、role_shadow=r），非新建角色或候选代码扩权；append-only触发器O已启用。web/trading只读正确。
+- 变更先记：按A020明确批准的新表最小授权，仅对这张新空表REVOKE ALL FROM role_valuation,role_shadow，再GRANT SELECT,INSERT role_valuation；web/trading保留SELECT，默认ACL本身及其他表/角色不动。这是收窄到已验收目标，不增加业务权限。管理员仅DDL，业务仍role_valuation。收窄后独立核权限再续加唯一进程；将补迁移默认ACL回归PR，避免把隔离库无默认授权测试当生产完整覆盖。原13运行PID/新闻止损保持。
+
 ## A-020  进行中（验收合并已核，执行迁移与首日采集）  2026-10-24 23:17 北京
 - main12ae132abce0110d415f829dc355c80501b2b4fa含PR70验收merge87f2e8eb25f185f8d689e8f822e948100a65aa71，A020答复23:10明确部署。完整head1fbafb0e5a83726ba901074eb1fd6cc93b1197a1/准确CI40102826830/job120898302805 success719passed证据复用。
 - 变更先记：生产从已装2b2c6ee干净快进上述main，执行唯一phase1_m5_0002_consensus_snapshots.sql，只新增consensus_snapshots program；既有role_valuation写/role_web、role_trading读，不新增身份权限范围。管理员仅执行批准DDL，业务仍原role_valuation；其他13运行PID及冻结enrich保持。先核无table/receipt/同名进程和活动job，避免重复迁移/请求。
