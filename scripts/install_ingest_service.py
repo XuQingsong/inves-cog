@@ -39,6 +39,12 @@ serverurl=unix://{state}/supervisor.sock
             "sec_atom",
             "m6_market_inputs",
             "issuer_profiles",
+            "news_prefill",
+            "news_full",
+            "fred",
+            "cboe",
+            "finra",
+            "fed_news",
         ],
         "daily_modules": [
             str(root / "scripts/schedule_daily_modules.py"),
