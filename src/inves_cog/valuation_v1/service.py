@@ -94,7 +94,7 @@ def candidate_sources(state, rows, as_of, cutoff):
                 else None,
             },
             "field_sources_sha256": hashlib.sha256(
-                json.dumps(state.field_sources, default=str, sort_keys=True, ensure_ascii=False).encode()
+                json.dumps(dict(state.field_sources), default=str, sort_keys=True, ensure_ascii=False).encode()
             ).hexdigest()
             if state
             else None,
@@ -115,18 +115,29 @@ def candidate_sources(state, rows, as_of, cutoff):
 
 def build(*, clock, repository, universe, as_of, persist=True, book=None, source=None):
     tickers = [e["ticker"] for e in universe]
-    source = source or repository.inputs(as_of, tickers)
+    supplied_source = source
+
+    def load(ticker):
+        # Preserve the explicit replay input path. Live reads retain complete
+        # PIT history for one issuer, never all issuers' evidence dictionaries.
+        return supplied_source if supplied_source is not None else repository.inputs(as_of, [ticker])
+
     book = book or repository.restore(as_of)
     seen, bear_past = repository.shadow_history(as_of)
     cutoff = min(clock.now_utc(), datetime.combine(as_of, time(22, 30), NY).astimezone(timezone.utc))
-    membership, peers = memberships(source["baskets"], as_of)
+    context = load(tickers[0]) if tickers else {"baskets": []}
+    membership, peers = memberships(context["baskets"], as_of)
+    context = None
     pe, peer_pe = {}, {}
     for ticker in tickers:
+        source = load(ticker)
         pe[ticker], peer_pe[ticker] = historical_multiples(source, ticker, as_of)
+        source = None
     ranges = []
     shadows = []
     for entity in universe:
         ticker = entity["ticker"]
+        source = load(ticker)
         entity = {**entity, "sic": source.get("sic", {}).get(ticker, entity.get("sic"))}
         state = source["store"].state_asof(ticker, as_of, "fixed")
         bars = [r for r in source["bars"].get(ticker, []) if r["trade_date"] == as_of]
@@ -217,6 +228,9 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
             )
         ranges.append(row)
         shadows.append(shadow(row, bear_30d=bear_past.get(ticker), seen_versions=seen.get(ticker, set())))
+        # A loop variable must not keep the previous issuer's financial history
+        # alive while the next batch is decoded by the database driver.
+        source = state = None
     holdings = repository.holdings(as_of, cutoff=cutoff)
     by_ticker = {r["ticker"]: r for r in ranges}
     describe_actual(shadows, holdings)
