@@ -57,9 +57,23 @@ def test_ud36_exact_et_boundary_unknown_date_and_non_news_queue(queue):
     assert old["info_id"] not in ids and unknown["info_id"] not in ids
     assert {at["info_id"], recent["info_id"], sec["info_id"]} <= ids
     assert len(rows) == 4
-    # A counting consumer receives precisely the rows dispatched for extraction.
-    model_calls = [r["info_id"] for r in rows]
-    assert len(model_calls) == 4 and old["info_id"] not in model_calls
+    # Exercise the actual pipeline dispatch with a counting extraction client.
+    from inves_cog.ingest.pipeline import Pipeline
+
+    class CountingExtractor:
+        def __init__(self):
+            self.calls = []
+
+        def process(self, items):
+            for item in items:
+                self.calls.append(item["info_id"])
+                yield item
+
+    pipeline = Pipeline.__new__(Pipeline)
+    pipeline.repo, pipeline.clock, pipeline.triage = repo, FrozenClock(NOW), CountingExtractor()
+    result = pipeline.enrich_pending()
+    assert result["processed_count"] == 4
+    assert len(pipeline.triage.calls) == 4 and old["info_id"] not in pipeline.triage.calls
 
 
 def test_ud36_marks_old_without_mutating_original_content_or_claiming_extracted(queue):
