@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-019  进行中（第二步方案已收到，先做P1紧急依赖排查）  2026-10-24 13:45 北京
+- 最新main **feedabf2b58db0dda07814e2d7f4339848275035** 下发A019第二步/P1–P7，按原用户UD-A47直接执行。先第0项核10-23 m2_financials为何未触发、真实活动进程/job/已有补触发前缀；必要时只允许这三项既有任务各一次、实时时钟、不改预算/代码、周一前评分与估值就绪；无条件重跑/循环试错不授权。
+- 工程修复待紧急项推进后做先失败测试：缺日逐日撮合、现存4笔10-19旧单不回补历史而expired、4笔DB-only孤儿expired、终态expired/superseded与等价意向防重、独立波段/核心暂停说明、名额保持v18标准90笔。涉及终态schema须明确任务内迁移经合并后再安装，不提前写生产订单。只读参考v18合同/已有标准答案，不导入运行Muse或其他项目。
+- OPS-A014补充二十三同时交接已验收B055 PR65，仅pages重载；将独立核准确SHA/CI后按UD-A47直接部署。B056尚未合并，review保持止损STOPPED，不提前启动。
+
 ## OPS-review  阻塞（周报读身份缺陷已止损；日快照等真实产出保留，待B修复交接）  2026-10-24 13:07 北京
 - **实际05:06:08UTC仅stop review**：先核当日daily3项/weekly_sample成功、无活动review job，周报11335–11346共12次均permission denied for table miss_samples；review现STOPPED，其他12运行PID保持，数据库写0/模型0。私有review-weekly-failure-stop-20261024.json已落盘，未加GRANT/改B代码/重做迁移或重调一句话。
 - 真实成果：job11331快照88、11332标签处理35（case_labels实表21）、11333一句话存储1、11334周抽样20；窗口后llm_calls实际0，不能宣称模型成功。未完成周报，月报相同reader分派潜在受影响；具体根因及现有reader无SELECT/writer有SELECT证据见上一条。stop是局部有界止损，不暂停A线/定时器/scheduler或其他服务。
