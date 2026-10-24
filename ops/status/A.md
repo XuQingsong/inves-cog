@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-019  进行中（P1根因定位，准备三任务一次性有界补触发）  2026-10-24 13:49 北京
+- 05:45UTC真实job仅10-22财务10399 degraded/59，10-22评分10409及估值10405均30分钟超时failed；10-23三项job均0、active0。财务PID2695856已驻留近4天，窗口日志至10-24 01:44:58UTC每30秒ValueError且未创建job；独立新进程只读build成功、继承.env解析也成功。版本证据registry在10-23合并4d2ba37允许anomaly_candidates timeout300；常驻旧Registry仍只接受900，读新config即routing mismatch。已离线用旧Registry+当前config重现ValueError，不涉及模型/源调用。这解释财务在runner之前失败并连锁阻塞评分/估值，不把单纯进程存活当正常。
+- 变更先记：按第0项/UD-A47仅刷新financials既有进程加载已合并注册表（不改配置/源码/预算），在无活动同项目job/一次性receipt前缀且持项目锁后，顺序对目标10-23的m2_financials、rule_a_scores、valuation_v1各执行至多1次；使用真实SystemClock/observed_at，不冻结历史可见时间。M2采集按现在真实可见资料入库，目标日23评分/估值仍各自PIT筛选，不把现在抓取伪装当时可见。
+- 每任务既有1800秒预算并远端硬截止，外层总界限5500秒；进程限额2GiB防再次挤压共享机，不增并发。阶段回执记录PID/start/deadline/完整结果/job，任一前置失败即停止后续，不自动新批次；不运行consensus/其他任务或手工模型。所有运行状态以真实回执/job核验，未启动或完成前不冒称ready。
+- B055独立准确head884d46aa8fa7905b522c5c22a7853eaf9d9e9776/[CI40064580146](https://github.com/XuQingsong/inves-cog/actions/runs/40064580146)success、PR65 merged/mergea3232b93781f3293d0881e4cc02c414d32efca05已核；P1启动后仅pages部署该验收版本，review仍STOPPED，B056未合并不提前恢复。
+
 ## A-019  进行中（第二步方案已收到，先做P1紧急依赖排查）  2026-10-24 13:45 北京
 - 最新main **feedabf2b58db0dda07814e2d7f4339848275035** 下发A019第二步/P1–P7，按原用户UD-A47直接执行。先第0项核10-23 m2_financials为何未触发、真实活动进程/job/已有补触发前缀；必要时只允许这三项既有任务各一次、实时时钟、不改预算/代码、周一前评分与估值就绪；无条件重跑/循环试错不授权。
 - 工程修复待紧急项推进后做先失败测试：缺日逐日撮合、现存4笔10-19旧单不回补历史而expired、4笔DB-only孤儿expired、终态expired/superseded与等价意向防重、独立波段/核心暂停说明、名额保持v18标准90笔。涉及终态schema须明确任务内迁移经合并后再安装，不提前写生产订单。只读参考v18合同/已有标准答案，不导入运行Muse或其他项目。
