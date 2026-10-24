@@ -1,5 +1,11 @@
 # A 线回报
 
+## OPS-A018  进行中（UD-A46/47实际安装完成；N3–N5待自然运行证据）  2026-10-24 12:54 北京
+- 实际04:51:12–04:51:19UTC生产从511f51b749e4849143bf6e9d8b267445a2de4b26干净快进 **9233f76895f398ca6beda589ed0fa6a8e302a8a7**，含[PR62](https://github.com/XuQingsong/inves-cog/pull/62)已验收merge **73e69a42d2b5262c1a599a5be7125e96633c551b**；准确head **eb986bbb99f994012cdb60883182ffdc616d7116**/[CI40056099429](https://github.com/XuQingsong/inves-cog/actions/runs/40056099429)success645passed复用。仅scheduler配置command原8+news_prefill/news_full/fred/cboe/finra/fed_news，reread/update PID3307289→1212613，ps实际14项顺序已核；其他12运行PID（pages1204915/review1153175等）/原配置其余部分/marker保持，迁移0、手工采集0、人工模型0。私有a018-scheduler-20261024.json与attempt实际落盘，禁止重复安装。
+- **04:52:22UTC独立基线**：HEAD/干净工作区、scheduler/pages/review RUNNING；新增六任务安装后job0，news cursor仍2026-10-16T00:54:01.581701UTC，ET10-16起新闻0。VIX最近五日10-12 15.21、10-09 14.84、10-08 15.41、10-07 15.08、10-06 15.01，M6恢复尚未证明。N3补采first_seen/每日条数、N4历史及次日M6、N5首日成本仍待自然执行，不将安装冒充业务补齐。回执a018-postinstall-baseline-20261024.json。
+- 既有runtime周末**news_prefill同样ET08:00–08:10（北京10-24 20:00）**，news_full ET20:20/宏观ET20:45（北京10-25 08:20/08:45），不只等晚间news_full；不改窗口/手工补采。到点按真实cursor/first_seen取证；401/403/限流停源回报。
+- N5费用监测：当前ET10-24相关enrichment物理attempt1（M1:layer1、token NULL），安装后0；不是1次news_card逻辑调用或零费用。随机UUID不能逻辑去重，后续每轮按相关物理attempt保守上界监测2500护栏，超阈按任务暂停news并回报，缺用量单列，不扩预算/权限/M1业务。A019第一步只读结果已交需求方待修复方案；UD-A47持续按需求方原范围任务直接执行，不再逐单向用户索取同类批准。
+
 ## OPS-A018  进行中（UD-A-46部署同意；UD-A-47按需求方任务持续直接执行）  2026-10-24 北京
 - **用户直接决定UD-A-46**：对A018已验收PR62代码快进、仅scheduler六项自然采集/真实cursor与first_seen/既批新闻预算及每日2500调用监测、无新增权限迁移的具体问题，用户答复 **“允许部署 A018 并重载 scheduler”**。先记决定再执行已合并部署；N3–N5真实数据仍须后续取证。
 - **用户最新直接决定UD-A-47**：用户明确要求 **“不要再让我审批了，你直接听需求方给你发的任务”**。这是对本项目既有范围内由需求方通过GitHub协作信箱下发的任务及已验收部署的持续直接执行授权，不再逐PR/每轮重复索取同类审批。覆盖需求方后续同范围代码快进、指定进程安装/重载及已明确任务授权的执行；持续直到用户明确撤回/暂停或最新control暂停。不扩大既有预算、权限/新来源、跨线开发或自动合并边界，不绕过真正的自动审批拒绝。先准备可核验动作再执行，有新增边界按原规则处理；不得再把此前某个PR授权的特定编号当作用户要求逐单审批。
