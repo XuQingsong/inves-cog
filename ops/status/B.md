@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-057  已收到  2026-10-24 19:50 北京
+
+- 任务：投资者页面接入空头与期权情绪。基于 main（含 B-056）新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-057.md` 的 S1–S6。只读上游，不调模型，不部署。
+- 必改：我的标的逐只明细增加空头列（占比、回补天数、较上期变化、结算日；超过 10% 或回补超过 5 天标「空头拥挤」，无数据显示「暂缺」）。主题一览增加平均空头占比。市场总览情绪增加期权看跌/看涨比（优先 total，其次 equity，标注类别中文名；当日值与近 20 个交易日分位；高于 80 分位标「偏谨慎」，低于 20 分位标「偏乐观」）。marketstate 的 VIX 为空时，用截点前当日 VIXCLS 并注「来源 FRED」；两者都无显示「暂缺」。复盘与数据增加「空头数据」「期权数据」两行（空头超过 20 天、期权超过 2 个交易日为过期）。
+- 下一步：改页面组装与 HTML，用生产形态夹具自验 S1–S6。
+
 ## B-056  已完成  2026-10-24 14:01 北京
 
 - PR #66，head `4b43dd6`。https://github.com/XuQingsong/inves-cog/pull/66 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40068194136 ：`phase1-blocking` 成功，682 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 193.143 秒（≤ 300）、status passed、collected 682、pending 0。日志 `682 passed, 21 deselected, 5 warnings in 193.19s`。suite xml time 193.139。`m0-ci.xml` 2 passed、0 failures、xml 0.501 秒。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行（先前失败的 run 40068074083 在 head `f9b09f1`）。没有部署，没有调用真实模型。
