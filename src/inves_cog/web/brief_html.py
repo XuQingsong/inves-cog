@@ -87,8 +87,11 @@ def _market(payload):
     spread = payload.get("sector_spread_z")
     spread_text = MISSING if spread is None else f"{spread:.1f}σ"
     vix_gap = ""
+    vix_note = ""
     if payload.get("vix") is None:
         vix_gap = '<div class="gap"><b>缺口：</b>VIX 暂缺。</div>'
+    elif payload.get("vix_source") == "FRED":
+        vix_note = "<span>来源 FRED</span>"
     events = []
     notes = []
     for row in payload.get("events") or []:
@@ -112,7 +115,8 @@ def _market(payload):
         f"<p>风格：{styles} · 板块分化 {_text(spread_text)}</p>"
         '<div class="gap"><b>缺口：</b>没有真实资金流，目前用板块相对强弱近似。</div></div>'
         f'<div class="card"><h2>{_text(headings[2])}</h2>'
-        f'<div class="grid"><div class="kpi"><span>VIX</span><b>{_plain(payload.get("vix"))}</b></div>'
+        f'<div class="grid"><div class="kpi"><span>VIX</span><b>{_plain(payload.get("vix"))}</b>{vix_note}</div>'
+        f'<div class="kpi"><span>期权看跌/看涨比</span><b>{_text(payload.get("put_call_text") or MISSING)}</b></div>'
         f'<div class="kpi"><span>3 个月 VIX</span><b>{_plain(payload.get("vix3m"))}</b>'
         f"<span>前日 {_plain(payload.get('vix3m_prev'))}</span></div>"
         f'<div class="kpi"><span>近 5 日下跌股占比</span><b>{_points(payload.get("down_share_5d_pct"))}</b></div>'
@@ -135,7 +139,8 @@ def _stocks(payload):
             f'<td class="num">{_count(theme.get("held_count"))}</td>'
             f'<td class="num">{_count(theme.get("buyable_count"))}</td>'
             f"<td>{_text(theme.get('line'))}</td>"
-            f'<td class="num">{_count(theme.get("news_count"))}</td></tr>'
+            f'<td class="num">{_count(theme.get("news_count"))}</td>'
+            f"<td>{_text(theme.get('short_text') or MISSING)}</td></tr>"
         )
         body = "".join(_member_row(row) for row in theme.get("members") or [])
         opened = " open" if theme.get("open") else ""
@@ -143,12 +148,12 @@ def _stocks(payload):
             f'<details class="theme"{opened}><summary>{_text(theme["sector"])} {_pct(theme.get("average"))}</summary>'
             "<table><tr><th>代码</th><th>当日涨跌</th><th>成交量倍数</th><th>RSI</th>"
             "<th>距200日线</th><th>距一年高点</th><th>持有</th><th>可买</th><th>事件</th><th>估值</th>"
-            "<th>今日新闻</th></tr>"
+            "<th>今日新闻</th><th>空头</th></tr>"
             f"{body}</table></details>"
         )
     table = (
         "<table><tr><th>主题</th><th>平均涨跌</th><th>成交量相对20日</th><th>持有数</th><th>可买数</th>"
-        "<th>一句话</th><th>今日新闻</th></tr>" + "".join(rows) + "</table>"
+        "<th>一句话</th><th>今日新闻</th><th>平均空头占比</th></tr>" + "".join(rows) + "</table>"
     )
     return (
         f"<h1>{_text(headings[0])}</h1>"
@@ -224,7 +229,7 @@ def _trust(payload):
     rows = []
     for item in payload.get("statuses") or []:
         state = item.get("state")
-        kind = "bad" if state in {"缺失", "警示", "未上线/缺失", "模型不适用"} else "ok"
+        kind = "bad" if state in {"缺失", "警示", "过期", "未上线/缺失", "模型不适用"} else "ok"
         if state == MISSING:
             kind = "warn"
         extra = ""
@@ -233,6 +238,8 @@ def _trust(payload):
                 f" 最近入库 {_text(payload.get('news_seen_beijing') or MISSING)}"
                 f" 最近 1 个交易日 {_count(payload.get('news_day_count'))} 条"
             )
+        elif item.get("detail"):
+            extra = f" {_text(item.get('detail'))}"
         rows.append(f'<p class="status {kind}"><b>{_text(item.get("item"))}</b> {_text(state)}{extra}</p>')
     if payload.get("labels"):
         review = "".join(
@@ -267,7 +274,8 @@ def _member_row(row):
         f"<td>{_multiple(row.get('volume_multiple'), '×')}</td><td>{_whole(row.get('rsi'))}</td>"
         f"<td>{_points(row.get('price_vs_ma200'))}</td><td>{_points(row.get('drawdown252'))}</td>"
         f"<td>{_text(held)}</td><td>{_text(buyable)}</td><td>{_text(events)}</td>"
-        f"<td>{_valuation(row.get('valuation'))}</td><td>{_news_cell(row)}</td></tr>"
+        f"<td>{_valuation(row.get('valuation'))}</td><td>{_news_cell(row)}</td>"
+        f"<td>{_text(row.get('short_text') or MISSING)}</td></tr>"
     )
 
 
