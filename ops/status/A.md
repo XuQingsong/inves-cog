@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-review  阻塞（周报读身份缺陷已止损；日快照等真实产出保留，待B修复交接）  2026-10-24 13:07 北京
+- **实际05:06:08UTC仅stop review**：先核当日daily3项/weekly_sample成功、无活动review job，周报11335–11346共12次均permission denied for table miss_samples；review现STOPPED，其他12运行PID保持，数据库写0/模型0。私有review-weekly-failure-stop-20261024.json已落盘，未加GRANT/改B代码/重做迁移或重调一句话。
+- 真实成果：job11331快照88、11332标签处理35（case_labels实表21）、11333一句话存储1、11334周抽样20；窗口后llm_calls实际0，不能宣称模型成功。未完成周报，月报相同reader分派潜在受影响；具体根因及现有reader无SELECT/writer有SELECT证据见上一条。stop是局部有界止损，不暂停A线/定时器/scheduler或其他服务。
+- PR61已回报需求方：需B明确修复周/月报读取身份及失败重试边界并验收合并，A随后按UD-A47直接部署恢复；不需要用户重复批准同范围部署，不用扩权绕过错误。A019修复方案及A018自然采集不受该局部阻塞影响。
+
 ## OPS-review  进行中（首次真实产出88快照；周报读身份错误，准备仅停失败循环）  2026-10-24 13:07 北京
 - 自然session10-23于05:00UTC实际执行：job11331 review_snapshots ok/88、11332 labels ok/35、11333 oneliner ok/1、11334 weekly_sample ok/20；实表快照88、case_labels21、reports_weekly1（含一句话）。窗口后llm_calls0，不将一句话job1冒称模型成功。尚未追加模型调用或正文输出。
 - weekly_report job11335至11342（05:00:19–05:03:49UTC）每30秒failed8次，准确错误permission denied for table miss_samples。只读核reader=inves_cog_ingest无SELECT、writer=role_perception有SELECT；已装head9233f76895f398ca6beda589ed0fa6a8e302a8a7中schedule._operation把store_weekly(reader,...writer=writer)分派，build_weekly._samples用reader读perception表，身份路径错误（monthly亦潜在）。_pending非oneliner失败不断重试。不是七表缺失或perception登录缺失，不重做迁移/账号/加GRANT。
