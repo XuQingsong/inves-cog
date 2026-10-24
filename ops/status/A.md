@@ -1,11 +1,15 @@
 # A 线回报
 
+## A-020  阻塞（草稿实现与准确CI通过；缺真实成功响应合同）  2026-10-24 22:06 北京
+- [PR70](https://github.com/XuQingsong/inves-cog/pull/70)仍draft，完整head **b3251f34010ef02254b35cd3ffe85167ee4ae0a0**；[准确CI40100514553/job120891540791](https://github.com/XuQingsong/inves-cog/actions/runs/40100514553/job/120891540791)实际success。独立日志checkout f671277合该head与main0ff3db38e30cdfb875c0c509c3b96fac1b0202ed，**711passed/21deselected/216.07秒**；A020六离线及三隔离DB全过，M0另2passed0.55秒、9红门禁保持。首次CI三失败均旧installer精确program集合，已仅增加授权consensus_snapshots名称与command精确断言，保留所有原task/其他program断言，非弱化测试。本地42passed0.72秒、ruff/diff通过，local commit53c72af历史保留。
+- 已实做：单表只追加request/response/estimate及迁移、既有角色最小授权；请求前持久占额，滚动24h最多24/UTC同ticker防重、跨进程锁/重启计数、未知请求保守停采、Note/Information当日停止、不重试/无重定向、流式时间/大小边界；最久成功更新优先轮询、raw存档及PIT截点、独立调度program。准确DB测试覆盖额度跨连接持久、当日限流、未完成请求、防删改、读写权限与错误最新快照不静默复用旧值。
+- **实际剩余/责任**：需求方任务称已实测NVDA EPS9.31/51、15.91/52，但尚缺该成功JSON字段形态/既有私有存档路径。官方demo只返回Information，不能用synthetic flat estimates/date/horizon夹具称生产兼容。已在PR70/PR68请求需求方已有脱敏样例（不含key/URL，不新增请求）；我负责拿到后立即离线核对修正并送验。阻断的是一致预期真实入库的最终交付与部署，不阻断既有M5估值或已部署A019；不向用户重索审批。无生产迁移/真实Alpha请求/模型调用，不开始A021，不自动合并。
+- OPS-A018：新闻首自然入库14576真实完成；首日费用超护栏已暂停news两调度并冻结共享enrich。**第二次独立核计数稳定3212、last_call14:02:41.135354UTC、进程1485380 stat Tl**，其他12运行PID保持；已向需求方PR62交接恢复安排。SEC等提取暂缓、原采集仍在，N4未来自然窗口未验证，不把局部止损写成整体验收通过。
+
 ## OPS-A018  进行中（新闻费用止损已执行，其他12服务保持）  2026-10-24 22:05 北京
 - 按A018 N5超2500即暂停要求，生产scheduler1212613→1485374，任务仅移除news_prefill/news_full、原8项及fred/cboe/finra/fed_news保留；唯一enrich1485380已SIGSTOP/stat Tl。独立核其他12运行PID全部保持，新闻已有入库不删除/不倒填，无新权限/迁移/模型手工调用。初脚本在scheduler重启过渡态探针KeyError，随后只读核真实进程并冻结新子进程，未盲目重复重载。
 - 核验计数ET10-24 **info_enrichment3212物理调用**（layer2 3211/layer1 1）、已知input2994263/output1001585，usage_missing4，news_card0；3142是止损前首次探针，非最终值。共享enrich同时处理SEC等，暂停期间信息提取暂缓，原采集/行情继续。只移除news任务不能阻止消费已入库队列，所以冻结该唯一子进程；不擅自恢复。私有a018-cost-stop-20261024.json，PR62 comment6385141037已向需求方交接恢复安排，不再向用户逐项审批。
 - N3首自然新闻窗口job11388 ok/processed15580，独立新增news14576/不同info_id14576，first_seen12:00:39.554958–12:03:56.728041UTC真实当前时间；N4宏观窗口未到不称完成。N5护栏有实质触发且止损，超额事实保留，不宣称预算内成功。
-
-# A 线回报
 
 ## OPS-A018  进行中（首日2500护栏触发，执行限定止损）  2026-10-24 22:01 北京
 - 真实只读计数ET10-24 info_enrichment物理3142次（layer2 3141/layer1 1），已知input2932017/output978961、usage_missing4；news_card0。已超过A018明确2500即暂停news任务门槛，不把usage缺失当0费用。
