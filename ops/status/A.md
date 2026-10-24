@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-019  进行中（真实DB测试抓到原因未更新并修正；最终head重新CI）  2026-10-24 14:20 北京
+- 首head80c5ebd0afc4f151ef09a3d86a2c6b9dcf88bc8e/[CI40069260308](https://github.com/XuQingsong/inves-cog/actions/runs/40069260308)实际**1failed/691passed/21deselected/170.66秒**：真实一次性DB中8单状态已expired，但既有订单upsert未UPDATE顶层reason_zh，原因仍旧值。修复为同时更新reason_zh（未改断言）；f1f556287c05895321ed0e82aba66157857a09b3/CI40069603489随后运行，不冒称首head通过。
+- 自验另发现未发布计划会清空pending造成孤儿，同属本任务终态缺陷；已先提交真实失败测试b1f9567（1failed/14deselected），再修未发布时保留活动pending。**最终head a60325891ace1a111c7e96f92e0f1a21d593d75a** 已推原PR67（仍draft），准确新CI待实回；相关**37passed/3deselected/7.93秒**，ruff/format/diffcheck通过。90笔精确回归仍在该套测试，源规则/上限未改。
+- 不修改失败测试或CI门槛、不重复生产依赖补跑；生产订单/schema仍未写。P1估值PID1241057在06:15只读核RSS1519780KiB、CPU9.3%、Dl（I/O等待），原30分钟预算/05:53:01起止边界未重置；财政11351/评分11353真实完成证据保留。待其最终回执，不把进程存活或SSH探针超时当业务成功/退出。
+
 ## A-019  进行中（P2–P7草稿PR67，准确CI/数据库测试运行中）  2026-10-24 14:14 北京
 - [PR67](https://github.com/XuQingsong/inves-cog/pull/67)draft/open，完整head **80c5ebd0afc4f151ef09a3d86a2c6b9dcf88bc8e**，base feedabf2b58db0dda07814e2d7f4339848275035；准确[CI40069260308/job120798950462](https://github.com/XuQingsong/inves-cog/actions/runs/40069260308/job/120798950462)仍in_progress，容器build已成功、full make运行中。不冒称CI或一次性DB测试已过。P1原一次性估值仍运行，不新批次；不依赖它的离线工程独立推进，未扩大生产写范围。
 - **先失败历史**5530794（测试修正无关helper参数名后实际10failed/2passed），追加数据库/完整90笔测试ea15d87，后实现80c5ebd。相关离线**36passed/3deselected/7.68秒**，原phase1_replay另2passed/7.58秒；ruff/format/diff check通过。DB夹具用一次性Harness PostgreSQL，本机无Docker，不假装本地已跑DB测试，待准确CI真实执行。
