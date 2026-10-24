@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-059  已收到  2026-10-25 02:59 北京
+
+- 任务：持仓风险高亮。B-058 已关单。基于 main 新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-059.md` 的 K1–K7。只读上游，不调模型，不部署。
+- 必改：纸面账户顶部增加风险提示（红在前、橙在后）和组合风险卡，持仓行按最高级别着色。市场总览在「对我意味着什么」后追加红色项、橙色项数量和第一条红色项。持有的个股页在「我的仓位」顶部显示该股风险。阈值来自参数文件或常量，不改规则 A 的订单。
+- 下一步：接风险派生和三页呈现，用 13 只持仓夹具自验 K1–K7。
+
 ## B-058  已完成  2026-10-25 02:51 北京
 
 - PR #72，head `689fe8e`。https://github.com/XuQingsong/inves-cog/pull/72 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40107879809 ：`phase1-blocking` 成功，729 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 197.982 秒（≤ 300）、status passed、collected 729、pending 0。日志 `729 passed, 21 deselected, 5 warnings in 198.02s`。suite xml time 197.978。`m0-ci.xml` 2 passed、0 failures、xml 0.508 秒（日志 `2 passed in 0.54s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。工件 `m0-clean-environment-evidence` id 12565044355。运行创建于 2026-10-24 23:38 北京，`phase1-blocking` 完成于 23:42 北京。之后 main 以 `de49f8f` 合并该 PR（2026-10-25 00:57 北京），`27bd091` 把部署交给 A。B 线没有自行合并，没有部署，没有调用真实模型。
