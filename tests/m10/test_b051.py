@@ -29,7 +29,7 @@ pytestmark = pytest.mark.phase1_blocking
 
 CLOSED_DAY = date(2031, 4, 19)
 PAIRS = (
-    ("/", "/api/pages/home"),
+    ("/log", "/api/pages/home"),
     ("/market", "/api/pages/market"),
     ("/linkage/b048-e2", "/api/pages/linkage/b048-e2"),
     ("/stock/NVDA", "/api/pages/stock/NVDA"),
@@ -43,7 +43,7 @@ PAIRS = (
     ("/paper/ledger", "/api/pages/paper/ledger"),
     ("/review", "/api/pages/review"),
 )
-RESEARCH = ("/", "/market", "/linkage/b048-e2", "/stock/NVDA", "/graph", "/settings/data", "/review")
+RESEARCH = ("/log", "/market", "/linkage/b048-e2", "/stock/NVDA", "/graph", "/settings/data", "/review")
 PAPER = tuple(path for path, _ in PAIRS if path.startswith("/paper"))
 COUNT_LABELS = ("异常数", "各状态数", "高优先级信息数", "交易动作数", "决定不动数", "影子分歧数")
 MEANINGS = ("原因未明", "已归因·不需要行动", "已行动", "截止日已结", "事后确认漏检")
@@ -202,16 +202,16 @@ def test_html_paths_render_the_same_numbers(pages):
 
 def test_default_and_closed_dates(pages):
     with TestClient(_app(pages)) as client:
-        opened = client.get("/")
+        opened = client.get("/log")
         assert opened.status_code == 200
         assert "b048-a1" in opened.text
         assert "非交易日" not in _visible(opened.text)
     with TestClient(_app(pages, clock=FrozenClock(DEADLINE - timedelta(minutes=1)))) as client:
-        earlier = client.get("/")
+        earlier = client.get("/log")
         assert earlier.status_code == 200
         assert "b048-a1" not in earlier.text
     with TestClient(_app(pages)) as client:
-        closed = client.get("/", params={"date": CLOSED_DAY.isoformat()})
+        closed = client.get("/log", params={"date": CLOSED_DAY.isoformat()})
         assert closed.status_code == 200
         assert "非交易日" in closed.text
         assert "b048-a1" not in closed.text
@@ -219,9 +219,9 @@ def test_default_and_closed_dates(pages):
 
 def test_home_is_readable_and_highlights_unhandled(pages):
     with TestClient(_app(pages, clock=BEFORE)) as client:
-        early = client.get("/", params={"date": DAY.isoformat()})
+        early = client.get("/log", params={"date": DAY.isoformat()})
     with TestClient(_app(pages)) as client:
-        late = client.get("/", params={"date": DAY.isoformat()})
+        late = client.get("/log", params={"date": DAY.isoformat()})
     early_text = _visible(early.text)
     late_text = _visible(late.text)
     assert "b048-a1" in early_text and "标红" not in early_text
