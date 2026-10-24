@@ -393,7 +393,8 @@ class ExecutionEngine:
                 "cost,rule_ids,reason_zh,tier,rule_set,params_version,overlay_version,status,intent) "
                 "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'A','p-2026.10',%s,%s,%s) "
                 "ON CONFLICT (portfolio_id,order_id) DO UPDATE SET status=EXCLUDED.status,qty=EXCLUDED.qty,"
-                "fill_price=EXCLUDED.fill_price,cost=EXCLUDED.cost,intent=EXCLUDED.intent",
+                "fill_price=EXCLUDED.fill_price,cost=EXCLUDED.cost,reason_zh=EXCLUDED.reason_zh,"
+                "intent=EXCLUDED.intent",
                 (
                     self.portfolio_id,
                     order["order_id"],
