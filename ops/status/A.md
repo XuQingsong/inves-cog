@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  已完成（UD-A44 B053投资者四页实际部署；公网四路径通过）  2026-10-24 11:39 北京
+- 用户直接“允许部署 B053 并重载 pages”已先记UD-A44后重审原脚本通过，原审批阻塞解除。实际03:37:38–03:37:52UTC生产干净快进 **b3e35b3d07b3e8f5dbe8cc3b661899d6fb2d2261**，包含[PR63](https://github.com/XuQingsong/inves-cog/pull/63)验收merge **5c1318357e385aae628309d44c53cd78e39236c5**；准确head **8108183b222031462822cb7d9c396905e6bb9c46**/[CI40057856464](https://github.com/XuQingsong/inves-cog/actions/runs/40057856464)success证据复用。
+- 仅pages1153179→1172673；review1153175及其余11运行PID保持，配置/已有marker保持。迁移0、手工业务0、人工模型0，不重做review/账户/唯一迁移；未安装尚未合并A018。远端120秒期限内收口，私有b053-pages-20261024.json与attempt实际落盘，禁止重复部署。
+- **独立公网03:38:10UTC**：/、/stocks、/account、/trust均HTTP200及text/html; charset=utf-8，本机四路径亦通过。另SSH独立核完整HEAD、工作区干净、pages/review RUNNING，非仅部署命令发出。页面正文/持仓未输出。已同步PR63；已自行决定无新增权限/来源/依赖/业务方案。剩余review自然业务待窗口、A018待验收合并分别保留，不将四页可访问冒充整体验收。
+
 ## OPS-A014  进行中（UD-A-44：用户直接允许B053部署及pages重载）  2026-10-24 北京
 - **用户直接决定UD-A-44**：对已验收合并B053服务器快进到b3e35b3、仅重载pages、其他进程保持、不新增权限/迁移/手工模型的明确问题，用户答复 **“允许部署 B053 并重载 pages”**。此为审批拒绝后的直接有效授权，先记状态再重审原脚本；不绕过拒绝。
 - 目标 **b3e35b3d07b3e8f5dbe8cc3b661899d6fb2d2261** 含已验收PR63 merge **5c1318357e385aae628309d44c53cd78e39236c5**；准确head **8108183b222031462822cb7d9c396905e6bb9c46** / CI40057856464 success已核。复用原120秒脚本及防重/真实HEAD/PID/config guards，部署后独立核四路径公网200及HTML；不重新安装review/迁移/账号。
