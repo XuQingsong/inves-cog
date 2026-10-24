@@ -36,6 +36,7 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
         "daily_modules": ["scripts/schedule_daily_modules.py", "--tasks", "market_structure", "rule_a_scores"],
         "anomaly_daily": ["scripts/schedule_daily_modules.py", "--tasks", "anomaly_daily", "premarket_review"],
         "valuation_v1": ["scripts/schedule_daily_modules.py", "--tasks", "valuation_v1"],
+        "consensus_snapshots": ["scripts/schedule_consensus.py"],
         "paper_plan": ["scripts/schedule_daily_modules.py", "--tasks", "paper_plan"],
         "m9": ["scripts/schedule_m9.py"],
         "morning_page": ["scripts/schedule_morning_page.py"],

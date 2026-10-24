@@ -252,6 +252,7 @@ def test_e7_add_only_m9_program_separate_migration():
         "daily_modules",
         "anomaly_daily",
         "valuation_v1",
+        "consensus_snapshots",
         "paper_plan",
         "morning_page",
         "attribution_tracks",
