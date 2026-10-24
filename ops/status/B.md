@@ -2,6 +2,23 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-058  已完成  2026-10-25 02:51 北京
+
+- PR #72，head `689fe8e`。https://github.com/XuQingsong/inves-cog/pull/72 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40107879809 ：`phase1-blocking` 成功，729 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 197.982 秒（≤ 300）、status passed、collected 729、pending 0。日志 `729 passed, 21 deselected, 5 warnings in 198.02s`。suite xml time 197.978。`m0-ci.xml` 2 passed、0 failures、xml 0.508 秒（日志 `2 passed in 0.54s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。工件 `m0-clean-environment-evidence` id 12565044355。运行创建于 2026-10-24 23:38 北京，`phase1-blocking` 完成于 23:42 北京。之后 main 以 `de49f8f` 合并该 PR（2026-10-25 00:57 北京），`27bd091` 把部署交给 A。B 线没有自行合并，没有部署，没有调用真实模型。
+- 相对当时 main 的 diff 是 `src/inves_cog/web/api.py`、`brief_html.py`、`public.py`、`stock_brief.py`，以及 `tests/m10/test_b058.py`、`test_b053.py`。没有新迁移、授权、上游。
+- D1｜通过｜`test_d1_path_links_and_old_detail`｜CI junit 0.392 秒。`/s/NVDA`、`/s/LITE`、`/s/COHR` 返回页面并含「纸面跟踪，非投资建议」。我的标的和纸面账户的代码链到 `/s/{symbol}?date=`。两页没有 `/stock/` 或 `/paper/stock/` 链接。未知路径 404，多一段路径 404，POST 405。旧 `/stock/NVDA?date=` 仍是 200。
+- D2｜通过｜`test_d2_oneliners_match_the_template`｜CI junit 0.336 秒。三句一句话与模板一致。NVDA 含接近超卖和纸面持有 731 股。LITE 为尚未持有，可买。COHR 为不可买，质量分低于门槛。
+- D3｜通过｜`test_d3_window_returns_and_sparkline`｜CI junit 0.446 秒。近 5/20/60 日涨跌等于收盘比。折线点数等于可用收盘、最多 60，没有脚本和外链。NVDA 当日 −4.40%、盘后 +1.20%、成交量倍数 1.3。
+- D4｜通过｜`test_d4_short_residual_and_theme`｜CI junit 0.311 秒。NVDA 空头句与 B-057 口径一致，残差为弱于板块 1.2σ，主题均收益与我的标的页相同。LITE 强于板块 0.4σ。COHR 相对板块暂缺。LITE 空头暂缺。
+- D5｜通过｜`test_d5_news_and_events`｜CI junit 0.358 秒。NVDA 正好 10 条，截点后和最旧一条不出现。中文「说了什么」优先。事件状态市场确认、暴露高，原因只留两条，过期引用带「天前的新闻」。COHR 无新闻。
+- D6｜通过｜`test_d6_valuation_and_consensus`｜CI junit 0.484 秒。市盈率、分位、隐含增速和三年营收直接取上游。不出现中性价、101.01、99.99、合理价。NVDA 用截点内 FY1 5.50 / 40 家、FY2 6.25 / 38 家。LITE 与 COHR 写暂无一致预期（轮询中）。
+- D7｜通过｜`test_d7_position_blocks`、`test_d7_gate_map_covers_production_reasons`｜CI junit 0.381 秒、0.001 秒。NVDA 持仓、灾难线、待成交和下一步与卖出参数一致。LITE 为什么没买保留名额已满原文。COHR 卡点是质量分低于门槛。可见文本没有 `M-` 编号和 N1。规则 A 的缺失、红线、四本账和现金流约束都有人话，未映射的英文原因显示暂缺。
+- D8｜通过｜`test_d8_visible_text_stays_plain`｜CI junit 0.305 秒。去掉那条没有中文的英文标题后，可见文本没有小写英文代号，也没有 4 位以上小数。同一次 CI 729 passed、21 deselected、197.982 秒。diff 只含上面的授权路径。
+- 夹具页文本（交易日 2038-04-15）：
+  - NVDA：NVDA 今日 −4.40%，随 AI 产业链集体下跌；放量 1.3 倍、RSI 29 接近超卖；纸面持有 731 股，距灾难止损线 +25.00%。收盘 −4.40%，盘后 +1.20%；近 5 日 +3.23%，近 20 日 +14.29%，近 60 日 +60.00%。空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，4/5 结算；弱于板块 1.2σ；AI 算力芯片当日 −3.20%。最近 10 条，最新是没有中文时保留的英文标题。事件为 AI 产业链 3 只集体下跌，状态市场确认。市盈率 32.4，隐含增速 +18.40%，过去三年营收 +22.50%。FY1 每股收益 5.50，机构 40 家；FY2 每股收益 6.25，机构 38 家；前瞻市盈率 29.1 与 25.6；快照 2038-04-16。纸面持有 731 股，盈亏 +100.00%，下一步为待成交：试仓买入（2038-04-14 起）。
+  - LITE：LITE 今日 −1.20%，未见联动事件；放量 2.0 倍、RSI 55；尚未持有，可买。近 60 日暂缺。空头暂缺；强于板块 0.4σ；AI 网络与光通信当日 −1.00%。截点内没有该股新闻。暂无一致预期（轮询中）。尚未持有，可买；为什么没买：规则A开仓名额已满12只（当前计数12）。
+  - COHR：COHR 今日 −0.80%，未见联动事件；放量暂缺、RSI 72；不可买，质量分低于门槛。近 20 日和近 60 日暂缺。空头暂缺；相对板块暂缺；主题当日 −1.00%。截点内没有该股新闻。暂无一致预期（轮询中）。不可买，质量分低于门槛。
+
 ## B-058  进行中  2026-10-24 23:42 北京
 
 - PR #72，head `689fe8e`。https://github.com/XuQingsong/inves-cog/pull/72 。没有合并。
