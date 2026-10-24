@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-057  进行中  2026-10-24 20:07 北京
+
+- PR #69，head `87f84e0`。https://github.com/XuQingsong/inves-cog/pull/69 。没有合并。
+- 本地 `make phase1-test`：709 passed，21 deselected，junit 133.328 秒，exit 0。`test_b057.py` 7 项通过。B-048 至 B-056 与 A-017 在同一次套件里。
+- 我的标的增加空头列和主题平均空头占比。市场总览增加看跌/看涨比（优先全市场，否则股票期权）和 VIX 的 FRED 兜底。复盘与数据增加空头数据、期权数据的新鲜或过期。
+- 下一步：等 head `87f84e0` 的 CI。通过后写已完成，附 S1–S6 证据和两页文本摘要。
+
 ## B-057  已收到  2026-10-24 19:50 北京
 
 - 任务：投资者页面接入空头与期权情绪。基于 main（含 B-056）新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-057.md` 的 S1–S6。只读上游，不调模型，不部署。
