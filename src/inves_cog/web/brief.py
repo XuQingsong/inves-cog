@@ -744,9 +744,7 @@ def _themes(context, day):
         members = []
         for ticker in context["grouped"][sector]:
             score = scores.get(ticker)
-            member = _member(
-                ticker, day, bars, score, daily, ticker in positions, membership.get(ticker, [])
-            )
+            member = _member(ticker, day, bars, score, daily, ticker in positions, membership.get(ticker, []))
             member["valuation"] = _card_for(context, ticker, score, member["price"])
             members.append(member)
         average = theme_average([row["ret"] for row in members])
@@ -934,9 +932,7 @@ def page_brief_account(connection, day, clock):
         if "valuation" not in stock:
             stock["valuation"] = _card_for(context, ticker, context["scores"].get(ticker), stock["price"])
         holdings.append(
-            _holding_row(
-                ticker, position, stock, context["sell"], context["pending"], plan_payload, stock["valuation"]
-            )
+            _holding_row(ticker, position, stock, context["sell"], context["pending"], plan_payload, stock["valuation"])
         )
     held = set(context["positions"])
     candidates = []
