@@ -140,3 +140,22 @@ def test_replay_mode_keeps_both_frozen_rule_intents():
     queue(e, "sell_frac", fraction=0.25)
     queue(e, "sell_frac", fraction=0.3)
     assert len(e.pending) == 2  # Frozen v18 can issue two distinct same-day sell signals.
+
+
+def test_p2_prepare_does_not_jump_over_an_unsettled_missing_open():
+    from inves_cog.trading.execution.service import prepare
+
+    e = engine()
+    e.settled_dates = {FRIDAY}
+    queue(e)
+    with pytest.raises(ValueError, match="补撮合缺少实际开盘价"):
+        prepare(e, date(2026, 1, 14), {"bars": {"AAA": {TUESDAY: {"open": 99}}}}, [])
+    assert not e.trades and e.signal_date == FRIDAY
+
+
+def test_p7_frozen_90_trades_still_match_without_importing_muse():
+    from inves_cog.trading.execution.replay import run_frozen
+
+    comparison = run_frozen()["comparison"]
+    assert comparison["expected_count"] == comparison["actual_count"] == 90
+    assert comparison["differences"] == [] and comparison["match_rate"] == 1
