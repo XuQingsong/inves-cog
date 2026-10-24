@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-054  进行中  2026-10-24 12:09 北京
+
+- PR #64，head `df12c55`。https://github.com/XuQingsong/inves-cog/pull/64 。没有合并。
+- 本地 `make phase1-test`：640 passed，21 deselected，junit 115.275 秒，exit 0。`test_b054.py` 10 项、`test_b053.py` 11 项通过。
+- 呈现：涨跌取 close，盘后单列；中文名与事件覆盖命名；数字、主题一句话、下一步、未估值短中文；待成交按持仓行计；导航无“暂缺”；持有时可买列为空；VIX 有值即显示；持仓影响按股数与价格计算。
+- 下一步：等 head `df12c55` 的 CI。通过后写已完成，附 F1–F9 证据和四页文本摘要。
+
 ## B-054  已收到  2026-10-24 11:50 北京
 
 - 任务：投资者页面呈现修正，对齐样稿。基于 main（含 B-053）。新 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-054.md` 的 F1–F9。不改上游、迁移、合同，不调模型，不部署。
