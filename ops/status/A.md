@@ -1,5 +1,9 @@
 # A 线回报
 
+## OPS-A014  进行中（UD-A-45：用户直接允许B054部署及pages重载）  2026-10-24 北京
+- **用户直接决定UD-A-45**：对已验收B054收盘口径/中文名称/数字格式修正、服务器快进511f51b、仅重载pages、其他进程保持、不新增权限/迁移/手工模型的明确问题，用户答复 **“允许部署 B054 并重载 pages”**。先同步本决定再重审原部署脚本，不绕过此前审批拒绝。
+- 目标 **511f51b749e4849143bf6e9d8b267445a2de4b26** 含已验收PR64 merge **87a2fa6dc0f949c5cb94c8a8ab64be4ecf3d643a**；准确head **df12c555cdb1283b1399b5af5be5fa882e8643b6**/[CI40061084475](https://github.com/XuQingsong/inves-cog/actions/runs/40061084475)success已核。原120秒脚本核真实生产HEAD/PID/干净工作区及回执防重，只重载pages并核四公网路径；不重做review/账号/迁移或未合并A018。
+
 ## OPS-A014  阻塞（B054生产部署被自动审批拒绝，命令未执行）  2026-10-24 12:27 北京
 - 已核PR64 merged，准确head **df12c555cdb1283b1399b5af5be5fa882e8643b6**/[CI40061084475](https://github.com/XuQingsong/inves-cog/actions/runs/40061084475)success，merge **87a2fa6dc0f949c5cb94c8a8ab64be4ecf3d643a**在目标main **511f51b749e4849143bf6e9d8b267445a2de4b26**。原120秒脚本与真实HEAD/PID/receipt防重、配置保持和四公网路径核验已准备。
 - **生产命令实际未执行**：自动审批拒绝原操作，理由“生产快进代码并重启pages属于服务变更，现有协作文件/助手转述未直接覆盖B054具体副作用”。未绕过/重试拒绝。已直接告知用户线上仍B053、收盘口径等修正未生效、已有证据与准备，并异步请求允许B054部署及仅pages重载；收到直接答复后先记UD-A-NN再重审。UD-A44 B053已完成不重复执行/请求。
