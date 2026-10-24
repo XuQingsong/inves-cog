@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-019  进行中（真实数据库全59只亦通过，等待需求方验收合并M5）  2026-10-24 17:25 北京
+- 额外全59只真实数据库路径已实际完成：unit inves-cog-a019-m5-database-20261024、同候选/同10-22截点，REPEATABLE READ READ ONLY/persist=False，**317536KiB（约310MiB）/20.962353秒**，完整结果与同输入旧基线相等。0模型/0业务写，500MiB/禁swap/1800秒门禁未改。私有database-metrics.json，已同步PR68 comment。
+- 首状态探针25秒SSH超时未判业务失败/重跑，后低内存探针真实取得complete=true/tickers59/equal_to_frozen_baseline=true及上述指标；主机memory PSI0、IO近0，paper_plan1331874/review1331915均在。与273MiB/10.85秒冻结文件路径明确区分，不能拿SSH偶发超时代替运行失败。
+- PR68正式head57b63c036d61efb8cdf4cca69991532dd0aa78c3、准确CI40081103007/job120834666831 success702passed证据复用，全部59逐字段等价/资源/CI均通过。现等待需求方验收合并后安装M5并做获准10-23唯一一次补算，不自动合并；尚未产出10-23估值，不宣称整单完成。M4已部署、8expired/1pending及B056恢复结果保持。用户无须再次审批。
+
 ## A-019  进行中（M5三项自验通过，PR68正式送验；M4已部署）  2026-10-24 17:20 北京
 - [PR68](https://github.com/XuQingsong/inves-cog/pull/68)已ready/open，完整head57b63c036d61efb8cdf4cca69991532dd0aa78c3；准确[CI40081103007/job120834666831](https://github.com/XuQingsong/inves-cog/actions/runs/40081103007/job/120834666831)completed/success。已独立完整日志checkout72d9b0f合本head与989850890041ebcc29ec6fb0e7d96bc97a16de4a，**702passed/21deselected/114.77秒**，M0另2passed0.32秒、9项red=True；本地16passed/1deselected、ruff/format/diff通过。正式comment6382464599。
 - **(a)真实同输入59只等价通过**：服务器原地冻结10-22输入，旧未改service与新候选完整结果逐字段a==b，ranges/shadows/panel/summary全相等，差异0，共同hash367ee7ba405a80590cc231f03a2906356ef7d58e04e9837dc0f85087e0e41886。原始数据未外传。**(b)资源通过**：旧算法100.269372秒/1457092KiB；候选10.854771秒/279516KiB（273MiB），500MiB/禁swap/1800秒门禁不变。**(c)准确CI通过**。私有equivalence-metrics.json、before/after-metrics.json，验证service SHA256 28d5b19bd8b5250acd3fcf1a16158497dfeeb1b69be1de3af0ba6d048821ac90、repository 6c4c748b96f483b819443c9b5ad6408781825d344225a55a35c01c33ec274891与送验内容一致。
