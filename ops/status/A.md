@@ -1,5 +1,9 @@
 # A 线回报
 
+## A-019 / OPS-A014  进行中（P1一次性作业实际启动；B055准备仅pages部署）  2026-10-24 13:50 北京
+- P1实际05:49:34UTC financials2695856→1241037刷新成功，其余11运行PID保持/review维持STOPPED；一次性外层timeout PID1241056已启动，总硬期限5500秒，私有a019-p1-launch-20261024.json、a019-p1-once-20261024.json逐阶段记录。并非宣称三任务完成，不重复触发；后续以真实job/回执核结果，失败不自动第二次。
+- B055变更先记：按补充二十三/UD-A47从已装9233f76895f398ca6beda589ed0fa6a8e302a8a7快进 **feedabf2b58db0dda07814e2d7f4339848275035**，含PR65验收merge **a3232b93781f3293d0881e4cc02c414d32efca05**；准确head **884d46aa8fa7905b522c5c22a7853eaf9d9e9776**/[CI40064580146](https://github.com/XuQingsong/inves-cog/actions/runs/40064580146)success676passed。仅pages重载，其他11运行PID含新financials、scheduler保持，review仍STOPPED，不触碰P1作业/预算/数据库，不迁移/新账号/人工模型，120秒期限与已执行receipt防重，四公网路径元数据核验。
+
 ## A-019  进行中（P1根因定位，准备三任务一次性有界补触发）  2026-10-24 13:49 北京
 - 05:45UTC真实job仅10-22财务10399 degraded/59，10-22评分10409及估值10405均30分钟超时failed；10-23三项job均0、active0。财务PID2695856已驻留近4天，窗口日志至10-24 01:44:58UTC每30秒ValueError且未创建job；独立新进程只读build成功、继承.env解析也成功。版本证据registry在10-23合并4d2ba37允许anomaly_candidates timeout300；常驻旧Registry仍只接受900，读新config即routing mismatch。已离线用旧Registry+当前config重现ValueError，不涉及模型/源调用。这解释财务在runner之前失败并连锁阻塞评分/估值，不把单纯进程存活当正常。
 - 变更先记：按第0项/UD-A47仅刷新financials既有进程加载已合并注册表（不改配置/源码/预算），在无活动同项目job/一次性receipt前缀且持项目锁后，顺序对目标10-23的m2_financials、rule_a_scores、valuation_v1各执行至多1次；使用真实SystemClock/observed_at，不冻结历史可见时间。M2采集按现在真实可见资料入库，目标日23评分/估值仍各自PIT筛选，不把现在抓取伪装当时可见。
