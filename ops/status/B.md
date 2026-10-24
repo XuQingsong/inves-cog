@@ -2,6 +2,21 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-053  进行中  2026-10-24 11:04 北京
+
+- PR #63，head `1c60eed`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。本地 `make phase1-test`：622 passed、21 deselected，用时 109.232 秒。这一 head 的 CI 还没出结果，不标已完成。
+- 相对 main `cdd144d` 的 diff：`src/inves_cog/web/api.py`、`brief.py`、`brief_html.py`、`html_page.py`、`public.py`，以及 `tests/m10/test_b051.py`、`test_b053.py`。旧系统日志 HTML 改到 `/log`，`/api/pages/home` 未改。没有新迁移、上游、合同。没有部署，没有调用真实模型。
+- V1｜本地通过｜`test_v1_structure_and_detail_links`｜junit 0.345 秒。四个路径 200 HTML。标题顺序是市场总览（资金、情绪、今天的大事）、我的标的（主题一览、逐只明细）、纸面账户（持仓与关键价位、已止盈/止损/清仓、待选）、复盘与数据（数据状态、系统之前说的对不对）。导航四项为市场总览/我的标的/纸面账户/复盘与数据。旧详情页可从页脚到达。
+- V2｜本地通过｜`test_v2_judgment_boundaries`｜junit 0.000 秒。IWM−QQQ 大于 0.02 且上涨家数多于下跌家数是“板块轮动而非全面恐慌”；差距刚好 0.02 不是。SPY 小于等于 −0.02 且涨跌家数比小于 0.5 是“普跌”；比刚好 0.5 不是。其余是“分化”。
+- V3｜本地通过｜`test_v3_formulas_follow_the_parameter_file`、`test_v3_page_values_match_the_formulas`｜junit 0.010 秒、0.170 秒。主题平均、成交量倍数、止盈线、灾难线、200/50 日线、一年高点按公式相等。临时 m4.yaml 把 double_price 改成 3、disaster_peak_fraction 改成 0.50、normal 破位天数改成 9 后，NVDA 止盈线 150、灾难线 50、破位天数 9。仓库里的 m4.yaml 仍是 double_price 2。
+- V4｜本地通过｜`test_v4_scores_and_valuation_are_copied`｜junit 0.184 秒。四本账、RSI、entry_pass 与上游逐值相等。AAPL 估值 0、AMD 估值远离现价，页面不出现合理价并写“模型不适用”。NVDA 中性价 90 仍显示。
+- V5｜本地通过｜`test_v5_status_follows_queries`｜junit 0.136 秒。夹具初始是新闻缺失、VIX 暂缺、M9 已上线、订单警示、计划已有。写入新闻、VIX=31、删掉 overlay、把 pending 改到当日、删掉当日计划后，状态变成新闻新鲜、VIX 已有、M9 未上线/缺失、订单正常、计划警示，情绪标题变成“情绪：恐慌”。
+- V6｜本地通过｜`test_v6_reason_line_follows_news`｜junit 0.083 秒。无新闻时首页有“原因暂不可信”，没有“存储供给增加”。写入新闻后出现该解释和引用时间 `2034-11-15T14:00:00+00:00`，不再出现“原因暂不可信”。
+- V7｜本地通过｜`test_v7_account_table`｜junit 0.083 秒。持仓表有止盈线、200 日线、灾难线、下一步。NVDA 距灾难线过近，一行 `class="warn"`。已平记录含 INTC 止盈（计划历史卖出）和 NOK 止损（exits）。待选 12 只都是 entry_pass 且未持有。
+- V8｜本地通过｜`test_v8_market_pages_hide_the_book`｜junit 0.250 秒。市场与标的 JSON 没有订单、现金、权益、持仓数量字段；HTML 不含 `b053-p0` 和 `400000`。账户页与复盘页有“纸面跟踪，非投资建议”。待成交原因里的脚本被转义。同一次 phase1 里 `test_a017.py` 8 项通过。
+- 复盘按交易日：`test_review_gap_when_labels_are_absent`｜junit 0.125 秒。同日 T+1 列出，前一交易日的 T+5 不出现在当日页。删掉当日 T+1 后显示“尚无 T+1/T+5/T+20 打标记录”。
+- V9｜本地通过｜`make phase1-test`｜622 passed、21 deselected、109.232 秒。同一次里 `test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_b051.py` 11 项通过。当前 main 没有 `tests/m10/test_b052.py`（该文件在 B-052 分支）；本 diff 不改 `page_home` 的未处置查询。CI 待本 head。
+
 ## B-053  已收到  2026-10-24 10:40 北京
 
 - 任务：按投资者样稿重做 `/`、`/stocks`、`/account`、`/trust`。验收标准是 `docs/phase1/design/brief/{index,stocks,account,trust}.html`。提交前逐项完成 `ops/answers/B-053.md` 的 V1–V9。授权 `src/inves_cog/web/` 与 `tests/m10/`。不改上游、迁移、合同，不调模型，不部署。
