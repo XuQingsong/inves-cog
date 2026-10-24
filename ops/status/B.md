@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-058  已收到  2026-10-24 23:20 北京
+
+- 任务：投资者个股详情页。基于 main（含 B-057）新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-058.md` 的 D1–D8。只读上游，不调模型，不部署。
+- 必改：新路径 `/s/{symbol}`，白名单同 A-017，支持 `?date=`。我的标的和纸面账户的代码链到此页，旧 `/stock/{symbol}` 保留。页面按一句话、走势与位置、资金与情绪、新闻与事件、基本面与估值、我的仓位、数据时点页脚组织。派生值放在 `brief.py` 或新的 `stock_brief.py`，不重算分数、状态、估值，不展示合理价。夹具覆盖 NVDA 持仓、LITE 待选、COHR 未持有不可买。
+- 下一步：接路径和页面组装，用生产形态夹具自验 D1–D8。
+
 ## B-057  已完成  2026-10-24 20:10 北京
 
 - PR #69，head `87f84e0`。https://github.com/XuQingsong/inves-cog/pull/69 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40092447955 ：`phase1-blocking` 成功，709 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 215.511 秒（≤ 300）、status passed、collected 709、pending 0。日志 `709 passed, 21 deselected, 5 warnings in 215.56s`。suite xml time 215.507。`m0-ci.xml` 2 passed、0 failures、xml 0.504 秒（日志 `2 passed in 0.54s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行（先前失败的 run 40092246621 在 head `ebe2015`）。工件 `m0-clean-environment-evidence` id 12560005769。没有部署，没有调用真实模型。
