@@ -2,16 +2,47 @@
 
 import json
 from collections import defaultdict
+from collections.abc import Mapping
 from datetime import timedelta
 
 from psycopg.types.json import Jsonb
 
 from inves_cog.ingest.fundamentals.repository import state_from_row
-from inves_cog.ingest.fundamentals.state import StateStore
+from inves_cog.ingest.fundamentals.state import FIELDS, StateStore
 from inves_cog.valuation_v1.calculations import settings
 from inves_cog.valuation_v1.lifecycle import TypeHistory, ValuationBook
 
 WRITE_TABLES = {"ranges", "position_panel", "shadow_rules"}
+
+
+class EvidenceCache:
+    """Keep one complete, unmodified filing proof instead of all decoded JSON."""
+
+    def __init__(self, read):
+        self.read = read
+        self.key = None
+        self.value = None
+
+    def get(self, key):
+        if key != self.key:
+            self.value = None
+            self.value = self.read(key)
+            self.key = key
+        return self.value
+
+
+class EvidenceView(Mapping):
+    def __init__(self, cache, key):
+        self.cache, self.key = cache, key
+
+    def __getitem__(self, key):
+        return self.cache.get(self.key)[key]
+
+    def __iter__(self):
+        return iter(self.cache.get(self.key))
+
+    def __len__(self):
+        return len(self.cache.get(self.key))
 
 
 def jsonb(row):
@@ -28,10 +59,21 @@ class Repository:
         ).fetchone()["exists"]
 
     def inputs(self, through, tickers):
+        def evidence(key):
+            return self.connection.execute(
+                "SELECT field_sources FROM fundamentals.fin_state WHERE ticker=%s AND extractor=%s AND filed=%s",
+                key,
+            ).fetchone()["field_sources"]
+
+        cache = EvidenceCache(evidence)
+        columns = (
+            "ticker,extractor,filed,period_end,accession,form,fiscal_period,values_extra,health_codes,"
+            + ",".join(FIELDS)
+        )
         states = [
-            state_from_row(r)
+            state_from_row({**r, "field_sources": EvidenceView(cache, (r["ticker"], r["extractor"], r["filed"]))})
             for r in self.connection.execute(
-                "SELECT * FROM fundamentals.fin_state WHERE extractor='fixed' "
+                "SELECT " + columns + " FROM fundamentals.fin_state WHERE extractor='fixed' "
                 "AND ticker=ANY(%s) AND filed<=%s ORDER BY ticker,filed",
                 (tickers, through),
             ).fetchall()
