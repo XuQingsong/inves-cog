@@ -8,6 +8,8 @@ from fastapi import FastAPI
 from starlette.responses import HTMLResponse
 
 from inves_cog.clock import SystemClock
+from inves_cog.web.brief import page_brief_account, page_brief_market, page_brief_stocks, page_brief_trust
+from inves_cog.web.brief_html import render_brief
 from inves_cog.web.db import open_reader
 from inves_cog.web.html_page import latest_visible_session, render_page
 from inves_cog.web.pages import (
@@ -107,6 +109,22 @@ def create_app(dsn=None, clock=None):
     def review(date: date):
         return call(page_review, date)
 
+    @app.get("/api/pages/brief/market")
+    def brief_market(date: date):
+        return call(page_brief_market, date)
+
+    @app.get("/api/pages/brief/stocks")
+    def brief_stocks(date: date):
+        return call(page_brief_stocks, date)
+
+    @app.get("/api/pages/brief/account")
+    def brief_account(date: date):
+        return call(page_brief_account, date)
+
+    @app.get("/api/pages/brief/trust")
+    def brief_trust(date: date):
+        return call(page_brief_trust, date)
+
     _register_html(app, call, clock)
     return app
 
@@ -121,8 +139,28 @@ def _register_html(app, call, clock):
         payload = call(builder, chosen(requested), **extra)
         return HTMLResponse(render_page(payload))
 
+    def show_brief(builder, requested):
+        payload = call(builder, chosen(requested))
+        return HTMLResponse(render_brief(payload))
+
     @app.get("/")
     def home_html(date: date | None = None):
+        return show_brief(page_brief_market, date)
+
+    @app.get("/stocks")
+    def stocks_html(date: date | None = None):
+        return show_brief(page_brief_stocks, date)
+
+    @app.get("/account")
+    def account_html(date: date | None = None):
+        return show_brief(page_brief_account, date)
+
+    @app.get("/trust")
+    def trust_html(date: date | None = None):
+        return show_brief(page_brief_trust, date)
+
+    @app.get("/log")
+    def log_html(date: date | None = None):
         return show(page_home, date)
 
     @app.get("/market")

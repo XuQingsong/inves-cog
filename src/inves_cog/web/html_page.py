@@ -23,7 +23,11 @@ COUNT_LABELS = (
     ("shadow_divergence_count", "影子分歧数"),
 )
 NAV = (
-    ("/", "系统日志"),
+    ("/", "市场总览"),
+    ("/stocks", "我的标的"),
+    ("/account", "纸面账户"),
+    ("/trust", "复盘与数据"),
+    ("/log", "系统日志"),
     ("/market", "市场"),
     ("/graph", "图谱"),
     ("/settings/data", "数据健康"),

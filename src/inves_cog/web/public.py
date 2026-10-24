@@ -61,6 +61,10 @@ class PageBoundary(BaseHTTPMiddleware):
 def _html_page(path):
     if path in {
         "/",
+        "/log",
+        "/stocks",
+        "/account",
+        "/trust",
         "/market",
         "/graph",
         "/settings/data",
