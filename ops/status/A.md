@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A018  进行中（首日2500护栏触发，执行限定止损）  2026-10-24 22:01 北京
+- 真实只读计数ET10-24 info_enrichment物理3142次（layer2 3141/layer1 1），已知input2932017/output978961、usage_missing4；news_card0。已超过A018明确2500即暂停news任务门槛，不把usage缺失当0费用。
+- 变更先记：按A018费用护栏暂停news_prefill/news_full，并冻结本项目唯一enrich子进程避免持久待处理新闻继续消耗；仅必要重载scheduler，其他program保持。共享enrich也处理SEC，故暂停期间其他信息提取暂缓，但行情/原采集任务保留；不改ingest代码或数据库/权限，不重跑数据/模型，不擅自恢复当天调用。先核真实PID再执行、私有receipt与前后聚合验证。
+- A020仍当前唯一开发任务，PR70新head b3251f34010ef02254b35cd3ffe85167ee4ae0a0，准确CI40100514553/job120891540791运行中；此前CI3failed708passed，A020九测试含隔离数据库全过，失败为三处旧program集合未含授权新增项，已仅增加精确新增进程断言。相关42passed0.72秒。
+
 ## A-020 / OPS-A018  进行中（草稿PR70准确CI运行；首自然新闻窗口已有真实入库）  2026-10-24 20:14 北京
 - [PR70](https://github.com/XuQingsong/inves-cog/pull/70)draft，完整head1d180d260f86e0b236f822a624a4b913b8f6cee9；准确[CI40092829130/job120868853018](https://github.com/XuQingsong/inves-cog/actions/runs/40092829130/job/120868853018)in_progress，build成功、全量及隔离DB测试待实回。先红本地5cedf1f实际5failed、HTTP边界e22b095实际1failed后实现72a8fa0；远端先红c657463/dc7283、888e044后对应实现。相关18passed0.65s，ruff/format/diff通过，不把未运行DB测试说已通过。
 - 单表request/response/estimate只追加；HTTP前持久占额、UTC日及滚动24小时24次、跨重启计数，未完成请求保守停采；Note/Information当日止损，失败不重试/无重定向、流式20秒/2MiB界限、15秒间隔；最久成功更新优先，PIT最新完整可见response，错误响应不静默复用旧预期；现有三角色授权、独立轮询program。当前未生产迁移/真实采集，不改估值公式或页面。
