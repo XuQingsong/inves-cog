@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-056  进行中  2026-10-24 13:58 北京
+
+- PR #66，head `4b43dd6`。https://github.com/XuQingsong/inves-cog/pull/66 。没有合并。
+- 本地 `make phase1-test`：682 passed，21 deselected，junit 114.317 秒，exit 0。`test_b056.py` 6 项通过，同一次里 B-049、B-052 也通过。
+- 读身份：ingest 账号不能读复盘七表时，周报和月报仍写出；这些表上的语句走 perception 连接。连续失败 3 次后不再启动，重启后按 job_runs 计数，已成功的任务不重跑。一句话摘要经 `Client.from_environment()` 写入 1 行 `ingest.llm_calls`；缺少 `INVES_COG_DATABASE_URL` 时调用前失败；job 结果区分“模型原文采用 / 模板（原因）”。
+- 下一步：等 head `4b43dd6` 的 CI。通过后写已完成，附 R1–R4 证据。
+
 ## B-056  已收到  2026-10-24 13:40 北京
 
 - 任务：复盘调度修正读身份、失败重试上限、一句话摘要记账。基于 main（含 B-055）新开 PR。授权 `src/inves_cog/perception/review/`、`scripts/schedule_review.py`、`tests/m10/`。提交前完成 `ops/answers/B-056.md` 的 R1–R4。不改迁移、授权、上游，不调真实模型，不部署。
