@@ -2,6 +2,14 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-053  已完成  2026-10-24 11:22 北京
+
+- PR #63，head `8108183`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40057856464 ：`phase1-blocking` 成功，630 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 123.141 秒（≤ 300）、status passed、collected 630、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
+- 相对 main 的 diff 仍是 `src/inves_cog/web/api.py`、`brief.py`、`brief_html.py`、`html_page.py`、`public.py`，以及 `tests/m10/test_b051.py`、`test_b053.py`。没有新迁移、上游、合同。
+- V10｜通过｜`test_v10_valuation_display_copies_payload_and_hides_price`｜CI junit 0.167 秒。NVDA 当前 PE 22.8 复制 `derived.pe`；p25/p50/p75 为 20/30/45，隐含增速 27.7，营收三年 110，EPS 三年 23.6，与 payload 逐值相等。账户页和标的页有这些数，没有中性价 90，也没有 4321。AMD 反解失败显示“无法反解：价格不在区间”。AVGO `unvalued` 且库里的数字是 0，页面只写“未估值（金融）”，估值格没有 0。
+- V4｜通过｜`test_v4_scores_and_valuation_are_copied`｜CI junit 0.185 秒。偏离超过 2 倍仍标“模型不适用”，估值对象里没有 neutral。V5｜通过｜`test_v5_status_follows_queries`｜CI junit 0.132 秒。同一次 CI 里 `test_b053.py` 11 项、`test_a017.py` 8 项、`test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_b051.py` 11 项、`test_b052.py` 7 项通过。
+- 夹具页估值格：基础夹具不再出现中性价 90。补上 payload 后，NVDA 为 PE 22.8、p25 20、p50 30、p75 45、隐含 27.70%、营收 110.00%、EPS 23.60%。AVGO 为“未估值（金融）”。
+
 ## B-053  进行中  2026-10-24 11:21 北京
 
 - PR #63，head `8108183`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。本地 `make phase1-test`：623 passed、21 deselected，用时 109.512 秒。这一 head 的 CI 还在跑，不标已完成。没有部署，没有调用真实模型。
