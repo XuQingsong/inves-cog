@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-020  进行中（开发/真实合同核验完成，PR70正式送验）  2026-10-24 22:36 北京
+- [PR70](https://github.com/XuQingsong/inves-cog/pull/70)已ready/open，完整head **1fbafb0e5a83726ba901074eb1fd6cc93b1197a1**；[准确CI40102826830/job120898302805](https://github.com/XuQingsong/inves-cog/actions/runs/40102826830/job/120898302805)completed/success，**719passed/21deselected/212.51秒**。独立完整日志checkout7c6c1c1合该head与最新main2b2c6ee21fd4a5bd109861cc1c78bcbd303f66f7；A020七离线+三隔离DB全过，M0另2passed0.52秒/九红门禁保持。本地43passed1.82秒、ruff/format/diff通过。送验comment6385475301。
+- 要求1通过：原地实际核需求方已有40920字节/41条成功NVDA样例，sha256 f68049c50b9d8293376ea527e1bf94b0557f2ab3baef6adf77b09ca1d00c004f，未来2FY2Q、FY1 EPS9.3124/51、FY2 15.9146/52，raw不变；test_a020_verified_provider_shape_keeps_precision_nulls_and_past_raw及原排序/null/负值测试。原文未外传/未新增请求。PIT与只追加/权限由test_a020_pit_uses_latest_visible_whole_response_and_table_is_append_only实跑。
+- 要求2通过：Note/Information计数客户端只调用一次即停degraded；24次占额跨真实隔离连接重启保持、异常不重试、未知在途保守停，相关rate_limit/durable_quota/abandoned/HTTP边界测试全部通过。轮询由rotation_prioritizes_never_then_oldest_with_stable_ties覆盖。要求3/4通过：无估值公式/页面改动，仅快照/独立调度，既有角色无扩权。
+- **下一步需求方验收合并，随后我直接完成已授权迁移/部署并回报首日请求/成功标的/轮次，不再索批，不自动合并。** 当前未生产迁移/Alpha采集，不称已真实每日入库或整单部署完成。已有key共享M1日历兜底的限制保留，任务自身上限24+provider限流停止。
+- B057已实际上线，四外页200/新增栏目可见，详前条。A018 UD-COORD-36范围/费用决定已接收，排在当前任务验收后落实对应PR，部署前新闻/共享enrich继续止损；不同时启动A021。未修改docs/golden/milestones或B代码，主仓库用户未提交docs保留。
+
 ## OPS-B057  已完成（合并安装与外部页面核验）  2026-10-24 22:33 北京
 - 生产14:31:52–14:32:06UTC干净0ff3db38e30cdfb875c0c509c3b96fac1b0202ed→2b2c6ee21fd4a5bd109861cc1c78bcbd303f66f7，含验收merge9c56e6690197b8c01b62fd1fa0b802d094148594；PR69完整head87f84e085a78a19d2fe9e69dce3cb8b1ab42185f，准确[CI40092447955/job120867740790](https://github.com/XuQingsong/inves-cog/actions/runs/40092447955/job/120867740790)success709passed。
 - 仅pages1241625→1499883，其余12运行PID、配置/markers保持；enrich1485380仍Tl、新闻任务仍暂停。内外部四页/、/stocks、/account、/trust均200/text/html；新增看跌/看涨、空头/回补、空头数据/期权数据均外部布尔核见。未输出私有页面/持仓；私有b057-pages-20261024.json，0迁移/模型/业务补跑，PR69 comment6385446941已回报。
