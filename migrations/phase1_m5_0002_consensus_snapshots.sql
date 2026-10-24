@@ -19,7 +19,9 @@ BEGIN RAISE EXCEPTION 'consensus snapshots are append-only'; END;
 $$;
 CREATE TRIGGER consensus_snapshots_append_only BEFORE UPDATE OR DELETE ON valuation_v1.consensus_snapshots
  FOR EACH ROW EXECUTE FUNCTION valuation_v1.consensus_append_only();
-REVOKE ALL ON valuation_v1.consensus_snapshots FROM PUBLIC;
+-- Existing deployment defaults may grant broader rights on new tables.
+-- Rebuild only this table's business ACL; leave schema defaults and other tables alone.
+REVOKE ALL ON valuation_v1.consensus_snapshots FROM PUBLIC,role_valuation,role_shadow,role_web,role_trading;
 GRANT SELECT,INSERT ON valuation_v1.consensus_snapshots TO role_valuation;
 GRANT USAGE ON SCHEMA valuation_v1 TO role_web,role_trading;
 GRANT SELECT ON valuation_v1.consensus_snapshots TO role_web,role_trading;
