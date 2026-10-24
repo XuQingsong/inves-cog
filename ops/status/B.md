@@ -2,6 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-053  已收到  2026-10-24 10:40 北京
+
+- 任务：按投资者样稿重做 `/`、`/stocks`、`/account`、`/trust`。验收标准是 `docs/phase1/design/brief/{index,stocks,account,trust}.html`。提交前逐项完成 `ops/answers/B-053.md` 的 V1–V9。授权 `src/inves_cog/web/` 与 `tests/m10/`。不改上游、迁移、合同，不调模型，不部署。
+- 下一步：实现 `brief.py` 与页面，再按 V1–V9 自验。
+
 ## B-052  已完成  2026-10-24 01:02 北京
 
 - PR #61，head `a0a46b0`。https://github.com/XuQingsong/inves-cog/pull/61 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/39991192724 ：`phase1-blocking` 成功，619 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 98.712 秒（≤ 300）、status passed。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
