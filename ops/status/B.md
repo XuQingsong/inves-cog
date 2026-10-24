@@ -2,6 +2,15 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-056  已完成  2026-10-24 14:01 北京
+
+- PR #66，head `4b43dd6`。https://github.com/XuQingsong/inves-cog/pull/66 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40068194136 ：`phase1-blocking` 成功，682 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 193.143 秒（≤ 300）、status passed、collected 682、pending 0。日志 `682 passed, 21 deselected, 5 warnings in 193.19s`。suite xml time 193.139。`m0-ci.xml` 2 passed、0 failures、xml 0.501 秒。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行（先前失败的 run 40068074083 在 head `f9b09f1`）。没有部署，没有调用真实模型。
+- 相对 main 的 diff 是 `src/inves_cog/perception/review/schedule.py`、`reports.py`、`samples.py`、`oneliner.py`，`scripts/schedule_review.py`，以及 `tests/m10/test_b056.py`。没有新迁移、授权、上游。
+- R1｜通过｜`test_r1_reports_select_review_tables_on_the_perception_connection`｜CI junit 0.162 秒。ingest 账号对七张复盘表的 SELECT 被拒。周报、月报仍写出。这些表上的语句全部走 perception 连接，其中包括 `miss_samples` 与 `case_labels` 的 SELECT，以及模式库对 `patterns` 的写入。
+- R2｜通过｜`test_r2_three_failures_stop_and_a_success_is_left_alone`｜CI junit 0.026 秒。`review_snapshots` 已有 3 次失败后不再启动，重启后仍是 3 条。`review_labels` 已成功，保持 1 条 ok。`review_oneliner` 两次失败后再跑一次并记「模型原文采用」，成功后不再启动。
+- R3｜通过｜`test_r3_adopted_sentence_writes_one_llm_call`、`test_r3_ungrounded_text_is_a_template_result`、`test_r3_missing_database_url_fails_before_the_call`、`test_r3_without_a_client_records_the_template_reason`｜CI junit 0.067、0.066、0.055、0.061 秒。计数客户端经 `Client.from_environment()` 的 recorder 写入 `ingest.llm_calls` 1 行，job 结果为「模型原文采用」。原文未引用当日编号时结果为「模板（原文未引用当日编号）」。缺少 `INVES_COG_DATABASE_URL` 时调用前失败，发送次数为 0，不新增 llm_calls，error_summary 为「缺少 INVES_COG_DATABASE_URL」。未配置客户端时结果为「模板（未配置模型客户端）」。
+- R4｜通过｜B-049 九项、B-052 七项、`make phase1-test`、本次 CI｜九项与七项在这次 CI 里都通过。682 passed、21 deselected、193.143 秒。diff 只含上面的授权路径。
+
 ## B-056  进行中  2026-10-24 13:58 北京
 
 - PR #66，head `4b43dd6`。https://github.com/XuQingsong/inves-cog/pull/66 。没有合并。
