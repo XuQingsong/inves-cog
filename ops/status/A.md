@@ -1,5 +1,14 @@
 # A 线回报
 
+## A-019  进行中（原估值超预算进程已实际终止，服务器响应恢复；估值结果仍缺失）  2026-10-24 14:50 北京
+- 用户纠正 UD-A-48：用户再次要求“有问题，你要尝试去解决，不要把问题往外一丢就啥也不管了”。继续承担诊断和解决，不把SSH/状态报告当交付，不追加已限定一次的业务补跑。
+- 只读轻量命令实际确认原PID1241057仍活、RSS1519856KiB，外层1241056仍活；原回执running，先前termination回执不存在。主机load20.58，内存PSI some avg10=66.04/full59.10，IO some99.45/full56.66。此前“服务器不可达”表述过宽：认证与轻命令可以成功，重命令在资源压力下超时。
+- 已核/proc/1241057/cmdline仅匹配a019_p1_once_20261024.py，TERM后短等、必要KILL；实际ps无该业务/外层PID且/proc/1241057不存在，远端返回A019_ORIGINAL_PID_EXIT_CONFIRMED/exit0。仅停止这次超预算一次性估值，未重跑/重启其他服务。终止后独立核可用内存4176MiB，最近10秒memory PSI0.16/full0.14、IO0.40/full0.29，SSH Python/DB读取恢复。
+- 独立DB确认job11351财务degraded59、11353评分ok59完成；原唯一估值job11354 started05:53:01.036153UTC，现failed0、ended06:46:25.699890UTC，原因明确超1800秒预算、实际确认进程退出、未重试。目标10-23 valuation_v1.ranges真实0行，故估值未交付，不能说三依赖全部完成。私有原once及termination回执已原子更新/落盘，不输出持仓或页面正文。
+- supervisor实际12RUNNING；pages1241625、scheduler1212613、financials1241037、paper_plan783294、既有valuation3983422保持；review STOPPED等待B056验收，embedding既有EXITED不冒称正常。watchdog实际PID1269073有变化，只记录当前事实，未宣称全部PID保持。
+- Git HTTPS推送仍无凭据，本机helper=osxkeychain且gh未装；已停止无意义重推，改用已连接GitHub内容API按最新A.md blob替换，仅A.md，保留B。原未推本地cdd2cbf的连接失败事实在本条补齐；不需要用户为状态同步重新登录。
+- 代码完整head a60325891ace1a111c7e96f92e0f1a21d593d75a/[PR67](https://github.com/XuQingsong/inves-cog/pull/67)仍ready/open未合并，准确[CI40069744974/job120800419542](https://github.com/XuQingsong/inves-cog/actions/runs/40069744974/job/120800419542)success693passed复用。P2–P7代码不受SSH阻塞；P3生产迁移/8单清理仍须验收合并后执行。估值资源耗尽的具体代码热点未证明，不用猜测冒充根因；将真实失败与有界后续修复需求交需求方，A保留推进责任，不自动第二批/扩预算。A020尚未开始。
+
 ## A-019  进行中（P2–P7代码已完成正式送验；P1估值终止最终状态尚待核实）  2026-10-24 14:28 北京
 - **代码交付**：[PR67](https://github.com/XuQingsong/inves-cog/pull/67)已ready/open未合并，完整head **a60325891ace1a111c7e96f92e0f1a21d593d75a**；准确[CI40069744974/job120800419542](https://github.com/XuQingsong/inves-cog/actions/runs/40069744974/job/120800419542)completed/success，独立完整日志checkout9a47a75合本head与main feedabf2b58db0dda07814e2d7f4339848275035。make phase1-test **693passed/21deselected/196.11秒**，M0另2passed，9项red=True。15项A019行为测试+2项真实一次性DB测试实际通过，非空生产形态4旧单/4孤儿/1活动单；本地37passed/3deselected，ruff/format/diff通过。未自动合并，未执行生产CHECK迁移或8笔订单清理。
 - **P1｜部分完成，估值未证明完成**：财务11351 degraded59/评分11353 ok59实际完成，评分已满足M4 ready条件。估值05:53:01UTC开始，06:23:01原预算截止仍无正常结果；已发仅核原PID1241057/cmdline/回执的TERM→短等→必要KILL限定操作，且只有确认退出才允许把该次未结束job真实标failed。**终止核验38秒超时，随后只读核验15秒亦超时，尚不能确认远端命令具体执行到哪一步/进程是否退出/失败记账是否完成。**不能将本地SSH结束当远端退出，不重发补跑/盲目终止，不重置诊断预算；本轮停止追加探针，下一唤醒只核原receipt/PID/job。local ssh配置无ControlMaster，不能将问题归咎复用连接。
