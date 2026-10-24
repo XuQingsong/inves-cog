@@ -2,6 +2,23 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-055  已完成  2026-10-24 13:06 北京
+
+- PR #65，head `884d46a`。https://github.com/XuQingsong/inves-cog/pull/65 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40064580146 ：`phase1-blocking` 成功，676 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 191.733 秒（≤ 300）、status passed、collected 676、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
+- 相对 main 的 diff 是 `src/inves_cog/web/brief.py`、`brief_html.py`，以及 `tests/m10/test_b053.py`、`test_b055.py`。没有新迁移、上游、合同。
+- W1｜通过｜`test_w1_stock_news_count_and_preview`、`test_w1_missing_news_shows_zero_and_untrusted`｜CI junit 0.407 秒、0.373 秒。新鲜组 NVDA 今日新闻 2，展开是「NVDA beats · Wire · 2036-10-23 02:30」和「英伟达获得大单 · 路透 · 2036-10-22 22:00」。截点后入库和下一交易日的新闻不出现。主题「AI 算力芯片」今日新闻合计 2。删掉当日新闻后条数为 0，页面不报错。
+- W2｜通过｜`test_w2_event_reasons_then_morning_page`｜CI junit 0.183 秒。新鲜组事件显示「供给增加」「需求放缓」，第三条不出现。引用 2036-10-10 标「引用的是 12 天前的新闻」。去掉 move card 后改显示早页「可能的原因」前两条。缺失组保留「原因暂不可信」，不再出现「供给增加」。
+- W3｜通过｜`test_w3_news_status_follows_the_fixture`｜CI junit 0.140 秒。复盘页新鲜组最近 1 个交易日 2 条，并显示最近入库的北京时间。缺失组为 0 条，最近入库 2036-10-15 23:00。
+- W4｜通过｜`test_w4_only_stock_events_and_both_sessions`｜CI junit 0.190 秒。今天的大事只有「AI 产业链 23 只同日下跌」，不含 XLP、iwm_qqq。标普 close −1.18%、盘后 +0.02%。广域普通股 ACME 的异常会留下。XLP 在广域表里标成 non_common 也不进大事。
+- W5｜通过｜`test_w5_close_estimate_replaces_the_ledger_day`｜CI junit 0.141 秒。总资产 $2,140、当日 $80，旁标「按 10月22日 收盘估算」两次。计算是 1000+10×100+2×70 与 10×(100−90)+2×(70−80)。账本权益 500000 不出现在账户页。详情页 `/api/pages/paper/portfolio` 的 equity 仍是 500000、现金 1000。
+- W6｜通过｜`test_w6_equal_percentiles_say_the_sample_is_thin`｜CI junit 0.126 秒。MRVL JSON 的 25/50/75 分位仍是 53。HTML 写「历史样本不足」，格子里没有 53。
+- W7｜通过｜`test_w7_three_page_digest` 与这次 CI｜CI junit 0.179 秒。676 passed、21 deselected、191.733 秒。同一次 CI 里 `test_b055.py` 10 项、`test_b054.py` 10 项、`test_b053.py` 11 项、`test_a017.py` 8 项、`test_b048.py` 11 项、`test_b049.py` 9 项、`test_b050.py` 5 项、`test_b051.py` 11 项、`test_b052.py` 7 项通过。V10 CI junit 0.261 秒。单元 `test_stock_event_and_stale_citation_rules` 0.001 秒，`test_close_estimate_uses_every_holding` 0.000 秒。刚好 3 天前的引用不标过期，4 天前标「引用的是 4 天前的新闻」。
+- 夹具页文本（交易日 2036-10-22，close/post 分开，形态对齐生产 10-22）：
+  - 市场总览：标普 500 −1.18% 盘后 +0.02%，纳指 100 −2.86% 盘后 −0.19%，罗素小盘 +0.07% 盘后 −0.04%，判断：分化。今天的大事只有 4.7σ AI 产业链 23 只同日下跌。原因：供给增加，引用 2036-10-22T14:00:00+00:00；需求放缓，引用 2036-10-10T14:00:00+00:00，引用的是 12 天前的新闻。没有 XLP，没有 iwm_qqq。VIX 18.72。
+  - 我的标的：跌幅最大的主题是 AI 算力芯片，平均−4.40%，今日新闻 2。NVDA −4.40%，持有，事件「AI 产业链 23 只同日下跌」，今日新闻 2：NVDA beats · Wire · 2036-10-23 02:30；英伟达获得大单 · 路透 · 2036-10-22 22:00。MRVL 估值写「历史样本不足」。
+  - 纸面账户：持仓2只，距灾难线过近0只，待成交0笔。总资产 $2,140 按 10月22日 收盘估算，当日 $80 按 10月22日 收盘估算，现金 $1,000，距高点 −37.50%。AAPL $50.00 → $70.00，NVDA $50.00 → $100。
+  - 复盘与数据：新鲜组新闻最近 1 个交易日 2 条；缺失组 0 条，最近入库 2036-10-15 23:00，并保留原因暂不可信。
+
 ## B-055  进行中  2026-10-24 13:02 北京
 
 - PR #65，head `884d46a`。https://github.com/XuQingsong/inves-cog/pull/65 。没有合并。
