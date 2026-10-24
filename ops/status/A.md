@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-020  进行中（已安装，首批实际5成功；默认ACL回归单独补齐）  2026-10-24 23:23 北京
+- 生产main12ae132abce0110d415f829dc355c80501b2b4fa、唯一迁移已执行，实际权限已收窄核验role_valuation=[SELECT,INSERT]，web/trading仅SELECT，默认继承的role_shadow此新表权限已撤；不改全局默认ACL/其他表。append-only触发器O。新增唯一consensus_snapshots PID1523534，15:21:15UTC安装完成，原13运行PID及冻结enrich保持；私有a020-consensus-20261024.json/attempt.json。
+- **真实首批**job11742 running（15:21:11.334808UTC起），只读核request5/response ok5/estimate16共5标的，fetched_at真实15:21:12–15:22:15UTC。当前不把running或5条阶段结果称首日24完成，不手工重启/重复调用。
+- 生产默认ACL差异已实际修复，并单独[PR71](https://github.com/XuQingsong/inves-cog/pull/71)draft补未来迁移回归：先红测试head d7740641808065b96d9a91c76f42243aac8d4ae7，准确CI40106654455/job120909628197运行中。测试在隔离schema模拟role_valuation arwd/role_shadow r再执行原迁移，精确断言既批角色权限；不以生产额外schema测试。暂不启动第二开发任务，A018范围修正在本单收口后落实。
+
 ## A-020  进行中（迁移已提交，生产默认ACL差异已定位）  2026-10-24 23:20 北京
 - 生产已干净快进12ae132、唯一迁移SHA256 80805903eb60554f1d6aeaefd39c7cbe4712ce7f68d0e777bbee999cc97254e5已提交一次，表0行/未启动collector。私有a020-consensus-20261024-attempt.json phase=migration_committed，未重复执行DDL。
 - 实际权限断言发现role_valuation有UPDATE/DELETE；只读核pg_class确认owner=inves_cog_admin，ACL来自既有ALTER DEFAULT PRIVILEGES（role_valuation=arwd、role_shadow=r），非新建角色或候选代码扩权；append-only触发器O已启用。web/trading只读正确。
