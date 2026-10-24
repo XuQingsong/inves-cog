@@ -2,7 +2,11 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
-## B-055  已完成  2026-10-24 13:06 北京
+## B-056  已收到  2026-10-24 13:40 北京
+
+- 任务：复盘调度修正读身份、失败重试上限、一句话摘要记账。基于 main（含 B-055）新开 PR。授权 `src/inves_cog/perception/review/`、`scripts/schedule_review.py`、`tests/m10/`。提交前完成 `ops/answers/B-056.md` 的 R1–R4。不改迁移、授权、上游，不调真实模型，不部署。
+- 必改：复盘七表的读和写都用 perception 连接，ingest 连接只读上游。周报、月报、漏检统计、模式库按此分派。任一复盘任务连续失败 3 次后当日不再启动，重启后按 job_runs 计数，成功任务不受影响。一句话摘要的模型调用必须经 `Client.from_environment()` 的默认 recorder 写入 `ingest.llm_calls`；缺少 `INVES_COG_DATABASE_URL` 时调用前失败并记原因；job 结果写明“模型原文采用”或“模板（原因）”。
+- 下一步：改调度分派和摘要记账，用 ingest 账号无复盘表权限的两账号夹具自验 R1–R4。
 
 - PR #65，head `884d46a`。https://github.com/XuQingsong/inves-cog/pull/65 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40064580146 ：`phase1-blocking` 成功，676 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 191.733 秒（≤ 300）、status passed、collected 676、pending 0。`test_m0_ci.py` 2 passed。nightly 跳过。同一 head 只有这一次运行。没有部署，没有调用真实模型。
 - 相对 main 的 diff 是 `src/inves_cog/web/brief.py`、`brief_html.py`，以及 `tests/m10/test_b053.py`、`test_b055.py`。没有新迁移、上游、合同。
