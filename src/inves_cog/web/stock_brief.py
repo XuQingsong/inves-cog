@@ -1,0 +1,717 @@
+"""Investor stock page. Derived display only; scores, states and valuation stay upstream."""
+
+import re
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
+from inves_cog.ingest.fundamentals.health import BLOCKING
+from inves_cog.ingest.market import NY
+from inves_cog.trading.scoring.rules import BOOK_KEYS, ENTRY, EXCLUDED
+from inves_cog.web.brief import (
+    MISSING,
+    PAPER_LABEL,
+    THEME_VOLUME,
+    _beijing_text,
+    _books,
+    _card_for,
+    _context,
+    _event_title,
+    _holding_row,
+    _member,
+    _news_summary,
+    _object,
+    _one,
+    _parse_ts,
+    _reports,
+    _rows,
+    _short_view,
+    _themes,
+    _visible_anomalies,
+    _visible_cap,
+    event_reasons,
+    format_fraction,
+    format_points,
+    half_up,
+    human_reason,
+    level,
+    short_sentence,
+    volume_multiple,
+)
+from inves_cog.web.pages import _tickers
+
+# Frozen rule-A entry book minima live in ENTRY. The page translates a miss; it does not rescore.
+_BOOK_BELOW = {
+    "quality": "质量分低于门槛",
+    "growth": "增长分低于门槛",
+    "valuation": "估值分低于门槛",
+    "timing": "时机分低于门槛",
+}
+_BOOK_MISSING = {"quality": "质量分缺失", "growth": "增长分缺失", "valuation": "估值分缺失"}
+_HEALTH_REASON = {
+    "no_bar": "缺少行情",
+    "stale_fundamentals": "财报过期",
+    "revenue_tag_gap": "营收口径有缺口",
+    "q4_missing": "四季报缺失",
+    "companyfacts_lag": "公司事实滞后",
+    "core_field_missing": "核心字段缺失",
+    "implausible_value": "数值不可信",
+    "split_suspect": "疑似拆股，估值未启用",
+    "insufficient_history": "历史不足，无法对照均线",
+}
+_TIER_WORD = (("attack", "进攻"), ("defense", "防守"), ("normal", "普通"))
+_EVENT_TITLE = re.compile(r"^(?P<name>.*?) \d+ 只(?P<verb>集体下跌|集体上涨|同日下跌|同日上涨)$")
+_LOWER = re.compile(r"[a-z_]")
+_SHANGHAI = ZoneInfo("Asia/Shanghai")
+_OVERSOLD = 30
+_SPARK_LIMIT = 60
+_NEWS_LIMIT = 10
+_RETURN_LAGS = (5, 20, 60)
+STOCK_FORMULAS = (
+    "近 N 日涨跌 = 当日收盘 / N 个交易日前的收盘 − 1；交易日不足则暂缺。",
+    "折线使用最近不超过 60 个交易日的收盘价，点数等于这些交易日的个数。",
+    "成交量倍数 = 当日成交量 / 前 20 日均量；达到 1.3 倍称为放量。",
+    "RSI 低于 30 标注接近超卖。RSI、距 50 日线、距 200 日线和距一年高点直接取上游。",
+    "参考价 = 现价 / (1 + 上游百分比 / 100)。",
+    "相对板块强弱直接取当日残差，正数为强于板块，负数为弱于板块。",
+    "空头占比、回补天数与变化沿用最近一期不晚于截点的记录。",
+    "主题当日表现 = 该主题有收益的成员当日收益算术平均。",
+    "前瞻市盈率 = 现价 / 截点内最新一致预期每股收益。",
+    "距灾难止损线 = (现价 − 灾难线) / 现价；灾难线与止盈线沿用卖出参数，不重算。",
+    "不可买卡点把规则 A 的缺失原因、排除红线、现金流约束和四本账门槛译成人话，不重算分数。",
+    "页面只引用已有估值输入，不给出目标价。",
+)
+
+
+def session_return(closes, lag):
+    """Close-to-close return across `lag` trading sessions. A short history stays missing."""
+    if lag < 1 or len(closes) <= lag:
+        return None
+    base = closes[-1 - lag]
+    if not base:
+        return None
+    return closes[-1] / base - 1
+
+
+def spark_closes(closes):
+    """The last 60 available closes. The count is however many sessions exist, at most 60."""
+    return list(closes[-_SPARK_LIMIT:])
+
+
+def pace_clause(multiple, rsi):
+    if multiple is None:
+        volume = f"放量{MISSING}"
+    else:
+        shown = f"{half_up(multiple, 1):.1f}"
+        volume = f"放量 {shown} 倍" if multiple >= THEME_VOLUME else f"成交量 {shown} 倍"
+    if rsi is None:
+        oscillator = f"RSI {MISSING}"
+    else:
+        note = " 接近超卖" if rsi < _OVERSOLD else ""
+        oscillator = f"RSI {int(half_up(rsi, 0))}{note}"
+    return f"{volume}、{oscillator}"
+
+
+def follow_clause(title):
+    if not title:
+        return "未见联动事件"
+    match = _EVENT_TITLE.match(str(title))
+    if match:
+        return f"随 {match.group('name')}{match.group('verb')}"
+    return f"随 {title}"
+
+
+def position_clause(held, shares, distance, buyable, blocker):
+    if held:
+        count = MISSING if shares is None else str(int(half_up(shares, 0)))
+        return f"纸面持有 {count} 股，距灾难止损线 {format_fraction(distance)}"
+    if buyable is True:
+        return "尚未持有，可买"
+    if buyable is False:
+        return f"不可买，{blocker or MISSING}"
+    return f"买入资格{MISSING}"
+
+
+def stock_oneliner(ticker, ret, follow, multiple, rsi, *, held, shares, distance, buyable, blocker):
+    pace = pace_clause(multiple, rsi)
+    position = position_clause(held, shares, distance, buyable, blocker)
+    return f"{ticker} 今日 {format_fraction(ret)}，{follow}；{pace}；{position}。"
+
+
+def resid_sentence(value):
+    if value is None:
+        return f"相对板块{MISSING}"
+    if value == 0:
+        return "与板块持平"
+    shown = f"{half_up(abs(value), 1):.1f}"
+    side = "强于板块" if value > 0 else "弱于板块"
+    return f"{side} {shown}σ"
+
+
+def forward_pe(price, eps):
+    if price is None or eps in (None, 0):
+        return None
+    return float(price) / float(eps)
+
+
+def plain_text(text):
+    """Drop English tier codes from a sentence that is already meant for the page."""
+    cleaned = "" if text is None else str(text)
+    for word, label in _TIER_WORD:
+        cleaned = cleaned.replace(word, label)
+    if not cleaned or _LOWER.search(cleaned):
+        return MISSING
+    return cleaned
+
+
+def plain_skip(text):
+    """Human sentence for a stored skip. Rule ids and English tier names do not remain."""
+    cleaned = human_reason(text)
+    if not cleaned:
+        return MISSING
+    return plain_text(cleaned)
+
+
+def _reason_text(reason):
+    if not reason:
+        return None
+    if str(reason).startswith("missing_book:"):
+        keys = [part for part in str(reason).split(":", 1)[1].split(",") if part]
+        labels = [_BOOK_MISSING.get(key) for key in keys]
+        if not keys or any(item is None for item in labels):
+            return None
+        return "、".join(labels)
+    labels = [_HEALTH_REASON.get(part) for part in str(reason).split(";")]
+    if not labels or any(item is None for item in labels):
+        return None
+    return "、".join(labels)
+
+
+def buy_blocker(score):
+    """One Chinese blocker for a name rule A will not buy. Passing names have none."""
+    if not score or score.get("entry_pass"):
+        return None
+    if score.get("null_reason"):
+        return _reason_text(score.get("null_reason")) or MISSING
+    for line in score.get("red_lines") or []:
+        if line in EXCLUDED:
+            return line
+    tier = score.get("tier")
+    bounds = None if tier is None else ENTRY.get(tier)
+    if bounds is not None:
+        books = score.get("books") or {}
+        for key, bound in zip(BOOK_KEYS, bounds, strict=True):
+            value = books.get(key)
+            if value is None or value < bound:
+                return _BOOK_BELOW[key]
+    if score.get("m32_ok") is False:
+        return "进攻仓现金与增长不足"
+    if tier is None:
+        return "未分档"
+    return MISSING
+
+
+def _num(value):
+    if value is None or isinstance(value, bool):
+        return None
+    return float(value)
+
+
+def _bars(connection, symbol, day):
+    return _rows(
+        connection,
+        """
+        SELECT trade_date, close, volume
+        FROM ingest.bars_daily
+        WHERE ticker = %s AND trade_date <= %s
+        ORDER BY trade_date
+        """,
+        (symbol, day),
+    )
+
+
+def _score_row(connection, day, symbol):
+    return _one(
+        connection,
+        """
+        SELECT tech, derived, quality, growth, valuation, timing, red_lines, tier,
+               m32_ok, gate_pass, entry_pass, null_reason
+        FROM trading.daily_scores
+        WHERE signal_date = %s AND ticker = %s
+        ORDER BY (extractor = 'fixed') DESC, params_version DESC
+        LIMIT 1
+        """,
+        (day, symbol),
+    )
+
+
+def _gate_score(row):
+    if row is None:
+        return None
+    return {
+        "books": _books(row) or {},
+        "red_lines": list(row["red_lines"] or []),
+        "tier": row["tier"],
+        "m32_ok": row["m32_ok"],
+        "gate_pass": row["gate_pass"],
+        "entry_pass": bool(row["entry_pass"]),
+        "null_reason": row["null_reason"],
+        "tech": row["tech"],
+        "derived": row["derived"],
+    }
+
+
+def _sessions(connection, day, symbol):
+    rows = _rows(
+        connection,
+        """
+        SELECT session, ret, resid_z
+        FROM marketstate.daily
+        WHERE trade_date = %s AND ticker = %s
+        """,
+        (day, symbol),
+    )
+    found = {row["session"]: row for row in rows}
+    return found.get("close"), found.get("post")
+
+
+def _short_for(connection, symbol, cap, cached):
+    view = cached.get(symbol)
+    if view is not None:
+        return view
+    row = _one(
+        connection,
+        """
+        SELECT settlement_date, days_to_cover, si_pct_shares_outstanding, raw
+        FROM ingest.short_interest
+        WHERE ticker = %s AND settlement_date <= %s
+        ORDER BY settlement_date DESC, observation_id DESC
+        LIMIT 1
+        """,
+        (symbol, cap),
+    )
+    return None if row is None else _short_view(row)
+
+
+def _news(connection, symbol, cutoff):
+    rows = _rows(
+        connection,
+        """
+        SELECT published_at, first_seen_at, source, headline, extraction_source
+        FROM ingest.info_items
+        WHERE kind = 'news' AND first_seen_at <= %s AND %s = ANY(tickers)
+          AND (published_at IS NULL OR published_at <= %s)
+        ORDER BY published_at DESC NULLS LAST, info_id DESC
+        LIMIT %s
+        """,
+        (cutoff, symbol, cutoff, _NEWS_LIMIT),
+    )
+    items = []
+    for row in rows:
+        published = _parse_ts(row["published_at"])
+        items.append(
+            {
+                "summary": _news_summary(_object(row["extraction_source"]), row["headline"]),
+                "source": row["source"] or MISSING,
+                "published_beijing": _beijing_text(published),
+            }
+        )
+    return items
+
+
+def _consensus(connection, symbol, cutoff):
+    snapshot = _one(
+        connection,
+        """
+        SELECT request_id, fetched_at, status
+        FROM valuation_v1.consensus_snapshots
+        WHERE ticker = %s AND kind = 'response' AND fetched_at <= %s
+        ORDER BY fetched_at DESC, id DESC
+        LIMIT 1
+        """,
+        (symbol, cutoff),
+    )
+    if snapshot is None or snapshot["status"] != "ok":
+        return None
+    rows = _rows(
+        connection,
+        """
+        SELECT horizon, eps_avg, eps_count
+        FROM valuation_v1.consensus_snapshots
+        WHERE request_id = %s AND kind = 'estimate' AND horizon = ANY(%s)
+        """,
+        (snapshot["request_id"], ["FY1", "FY2"]),
+    )
+    found = {row["horizon"]: row for row in rows}
+    if not found:
+        return None
+    return {"fetched_at": snapshot["fetched_at"], "rows": found}
+
+
+def _exposures(connection, ids, symbol):
+    if not ids:
+        return {}
+    rows = _rows(
+        connection,
+        """
+        SELECT anomaly_id, exposure
+        FROM perception.ticker_status
+        WHERE anomaly_id = ANY(%s) AND ticker = %s
+        """,
+        (ids, symbol),
+    )
+    return {row["anomaly_id"]: row["exposure"] for row in rows}
+
+
+def _events_for(connection, context, day, symbol):
+    chosen = []
+    for row in _visible_anomalies(context["anomalies"], context["stocks"]):
+        names = _tickers(row["members"])
+        if symbol not in names:
+            continue
+        chosen.append(row)
+    chosen.sort(key=lambda row: (-(row["max_abs_z"] or -1), row["anomaly_id"]))
+    reports = _reports(connection, [row["anomaly_id"] for row in chosen])
+    exposure = _exposures(connection, [row["anomaly_id"] for row in chosen], symbol)
+    events = []
+    for row in chosen:
+        view = context["events"].get(row["anomaly_id"])
+        reasons = event_reasons(reports.get(row["anomaly_id"]), day)
+        title = _event_title(list(row["baskets"] or []), _tickers(row["members"]), row["direction"], context["catalog"])
+        status = row["status"] if view is None else view["lifecycle"]
+        shown = exposure.get(row["anomaly_id"]) or MISSING
+        if _LOWER.search(str(shown)):
+            shown = MISSING
+        events.append(
+            {
+                "title": title,
+                "status": status,
+                "exposure": shown,
+                "reasons": reasons,
+            }
+        )
+    return events
+
+
+def _trend_block(bars, day, close_row, post_row, member):
+    closes = [float(row["close"]) for row in bars if row["close"] is not None]
+    today = [row for row in bars if row["trade_date"] == day]
+    prior = [row["volume"] for row in bars if row["trade_date"] < day and row["volume"] is not None]
+    today_volume = None if not today else today[-1]["volume"]
+    multiple = volume_multiple(today_volume, prior)
+    returns = {lag: session_return(closes, lag) for lag in _RETURN_LAGS}
+    price = member["price"]
+    return {
+        "ret": None if close_row is None else _num(close_row["ret"]),
+        "post": None if post_row is None else _num(post_row["ret"]),
+        "ret_5": returns[5],
+        "ret_20": returns[20],
+        "ret_60": returns[60],
+        "dev50": member["dev50"],
+        "ma50": level(price, member["dev50"]),
+        "price_vs_ma200": member["price_vs_ma200"],
+        "ma200": level(price, member["price_vs_ma200"]),
+        "drawdown252": member["drawdown252"],
+        "year_high": level(price, member["drawdown252"]),
+        "rsi": member["rsi"],
+        "volume_multiple": multiple,
+        "closes": spark_closes(closes),
+        "price": price,
+    }
+
+
+def _quote_date(value):
+    if value is None:
+        return MISSING
+    if isinstance(value, datetime):
+        return value.astimezone(NY).date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    parsed = _parse_ts(value)
+    if parsed is None:
+        return MISSING
+    return parsed.astimezone(NY).date().isoformat()
+
+
+def _beijing_day(value):
+    parsed = value if isinstance(value, datetime) else _parse_ts(value)
+    if parsed is None:
+        return MISSING
+    return parsed.astimezone(_SHANGHAI).date().isoformat()
+
+
+def _estimate_view(row, price):
+    if row is None:
+        return {"eps": None, "count": None, "forward_pe": None}
+    eps = _num(row["eps_avg"])
+    return {
+        "eps": eps,
+        "count": None if row["eps_count"] is None else int(row["eps_count"]),
+        "forward_pe": forward_pe(price, eps),
+    }
+
+
+def _why_not(plan_payload, symbol):
+    payload = plan_payload if isinstance(plan_payload, dict) else {}
+    for skip in payload.get("skips") or []:
+        if isinstance(skip, dict) and skip.get("ticker") == symbol and skip.get("reason_zh"):
+            return plain_skip(skip.get("reason_zh"))
+    return "符合买入条件，当日没有买入记录"
+
+
+def _position_block(symbol, held, member, gate, context, valuation):
+    plan_payload = _object(context["plan"]["payload"]) if context["plan"] else {}
+    pending = [row for row in context["pending"] if row["ticker"] == symbol]
+    if held:
+        position = context["positions"][symbol]
+        row = _holding_row(symbol, position, member, context["sell"], context["pending"], plan_payload, valuation)
+        price = row["price"]
+        distance = None if price in (None, 0) or row["disaster"] is None else (price - row["disaster"]) / price
+        return {
+            "kind": "held",
+            "shares": _num(row["shares"]),
+            "avg_cost": row["avg_cost"],
+            "price": price,
+            "pnl": row["pnl"],
+            "take_profit": row["take_profit"],
+            "take_profit_gap": _gap(price, row["take_profit"]),
+            "ma200": row["ma200"],
+            "ma200_gap": _gap(price, row["ma200"]),
+            "disaster": row["disaster"],
+            "disaster_gap": distance,
+            "below_days": row["below_days"],
+            "pending": [plain_skip(item.get("reason_zh")) for item in pending],
+            "next_step": plain_text(row["next_step"]),
+            "blocker": None,
+            "why_not": None,
+        }
+    buyable = None if gate is None else bool(gate["entry_pass"])
+    if buyable is True:
+        kind, blocker, why_not = "buyable", None, _why_not(plan_payload, symbol)
+    elif buyable is False:
+        kind, blocker, why_not = "blocked", buy_blocker(gate), None
+    else:
+        kind, blocker, why_not = "unknown", None, None
+    return {
+        "kind": kind,
+        "shares": None,
+        "price": member["price"],
+        "ma50": level(member["price"], member["dev50"]),
+        "year_high": level(member["price"], member["drawdown252"]),
+        "blocker": blocker,
+        "why_not": why_not,
+        "next_step": None,
+        "pending": [],
+    }
+
+
+def _gap(price, line):
+    if price in (None, 0) or line is None:
+        return None
+    return (price - line) / price
+
+
+def _theme_view(context, day, symbol):
+    sector = context["catalog"]["sector_of"].get(symbol)
+    if sector is None:
+        return None, None
+    for theme in _themes(context, day):
+        if theme["sector"] == sector:
+            return sector, theme["average"]
+    return sector, None
+
+
+def _lead_event(events):
+    if not events:
+        return "未见联动事件"
+    return follow_clause(events[0]["title"])
+
+
+def _sentences(symbol, trend, short_text, resid_text, sector, theme_ret, news, events, valuation, consensus, position):
+    trend_sentence = (
+        f"收盘 {format_fraction(trend['ret'])}，盘后 {format_fraction(trend['post'])}；"
+        f"近 5 日 {format_fraction(trend['ret_5'])}，近 20 日 {format_fraction(trend['ret_20'])}，"
+        f"近 60 日 {format_fraction(trend['ret_60'])}。"
+    )
+    theme_name = sector or MISSING
+    funds_sentence = f"{short_text}；{resid_text}；{theme_name}当日 {format_fraction(theme_ret)}。"
+    if news:
+        news_sentence = f"最近 {len(news)} 条，最新：{news[0]['summary']}。"
+    else:
+        news_sentence = "截点内没有该股新闻。"
+    if events:
+        event_sentence = f"{events[0]['title']}，状态 {events[0]['status']}。"
+    else:
+        event_sentence = "没有涉及该股的联动事件。"
+    if not isinstance(valuation, dict):
+        valuation_sentence = f"估值{MISSING}。"
+    elif valuation.get("state") == "未估值":
+        valuation_sentence = f"{valuation.get('text') or '未估值'}。"
+    else:
+        pe = MISSING if valuation.get("pe") is None else f"{half_up(valuation['pe'], 1):.1f}"
+        implied = format_points(valuation.get("implied_growth"))
+        growth = format_points(valuation.get("rev_cagr_3y"))
+        valuation_sentence = f"市盈率 {pe}，隐含增速 {implied}，过去三年营收 {growth}。"
+    if consensus is None:
+        consensus_sentence = "暂无一致预期（轮询中）。"
+    else:
+        consensus_sentence = (
+            f"FY1 每股收益 {_eps(consensus['fy1']['eps'])}，机构 {_count(consensus['fy1']['count'])} 家；"
+            f"FY2 每股收益 {_eps(consensus['fy2']['eps'])}，机构 {_count(consensus['fy2']['count'])} 家；"
+            f"前瞻市盈率 {_pe(consensus['fy1']['forward_pe'])} 与 {_pe(consensus['fy2']['forward_pe'])}；"
+            f"快照 {consensus['as_of']}。"
+        )
+    if position["kind"] == "held":
+        position_sentence = (
+            f"纸面持有 {_count(position['shares'])} 股，盈亏 {format_fraction(position['pnl'])}，"
+            f"下一步 {position['next_step']}。"
+        )
+    elif position["kind"] == "buyable":
+        position_sentence = f"尚未持有，可买；为什么没买：{position['why_not']}。"
+    elif position["kind"] == "blocked":
+        position_sentence = f"不可买，{position['blocker'] or MISSING}。"
+    else:
+        position_sentence = f"买入资格{MISSING}。"
+    return {
+        "trend": trend_sentence,
+        "funds": funds_sentence,
+        "news": news_sentence,
+        "events": event_sentence,
+        "valuation": valuation_sentence,
+        "consensus": consensus_sentence,
+        "position": position_sentence,
+    }
+
+
+def _eps(value):
+    if value is None:
+        return MISSING
+    return f"{half_up(value, 2):.2f}"
+
+
+def _pe(value):
+    if value is None:
+        return MISSING
+    return f"{half_up(value, 1):.1f}"
+
+
+def _count(value):
+    if value is None:
+        return MISSING
+    return str(int(half_up(value, 0)))
+
+
+def page_brief_stock(connection, day, clock, symbol):
+    """One ticker, cut off at the same clock as the other brief pages."""
+    symbol = str(symbol or "").strip().upper()
+    context, closed = _context(connection, day, clock)
+    if closed is not None:
+        return closed
+    cap = _visible_cap(day, context["cutoff"])
+    bars = _bars(connection, symbol, day)
+    gate = _gate_score(_score_row(connection, day, symbol))
+    score_row = (
+        None
+        if gate is None
+        else {
+            "tech": gate["tech"],
+            "derived": gate["derived"],
+            "quality": gate["books"].get("quality"),
+            "growth": gate["books"].get("growth"),
+            "valuation": gate["books"].get("valuation"),
+            "timing": gate["books"].get("timing"),
+            "entry_pass": gate["entry_pass"],
+            "tier": gate["tier"],
+        }
+    )
+    close_row, post_row = _sessions(connection, day, symbol)
+    daily = {} if close_row is None else {symbol: {"ret": _num(close_row["ret"])}}
+    held = symbol in context["positions"]
+    member = _member(symbol, day, {symbol: bars}, score_row, daily, held, [])
+    trend = _trend_block(bars, day, close_row, post_row, member)
+    valuation = _card_for(context, symbol, score_row, member["price"])
+    # Fair and neutral prices stay off this payload.
+    valuation.pop("neutral", None)
+    short = _short_for(connection, symbol, cap, context["shorts"])
+    short_text = MISSING if short is None else short_sentence(short)
+    resid = None if close_row is None else _num(close_row["resid_z"])
+    sector, theme_ret = _theme_view(context, day, symbol)
+    news = _news(connection, symbol, context["cutoff"])
+    events = _events_for(connection, context, day, symbol)
+    consensus_raw = _consensus(connection, symbol, context["cutoff"])
+    if consensus_raw is None:
+        consensus = None
+    else:
+        consensus = {
+            "as_of": _beijing_day(consensus_raw["fetched_at"]),
+            "fy1": _estimate_view(consensus_raw["rows"].get("FY1"), member["price"]),
+            "fy2": _estimate_view(consensus_raw["rows"].get("FY2"), member["price"]),
+        }
+    position = _position_block(symbol, held, member, gate, context, valuation)
+    distance = position.get("disaster_gap")
+    buyable = None if gate is None else gate["entry_pass"]
+    if held:
+        buyable = False
+    oneliner = stock_oneliner(
+        symbol,
+        trend["ret"],
+        _lead_event(events),
+        trend["volume_multiple"],
+        trend["rsi"],
+        held=held,
+        shares=position.get("shares"),
+        distance=distance,
+        buyable=False if held else buyable,
+        blocker=position.get("blocker"),
+    )
+    sentences = _sentences(
+        symbol,
+        trend,
+        short_text,
+        resid_sentence(resid),
+        sector,
+        theme_ret,
+        news,
+        events,
+        valuation,
+        consensus,
+        position,
+    )
+    news_stamp = news[0]["published_beijing"] if news else MISSING
+    short_stamp = MISSING if short is None else _quote_date(short.get("settlement"))
+    range_row = context["ranges"].get(symbol)
+    value_stamp = MISSING if range_row is None else day.isoformat()
+    consensus_stamp = "暂无" if consensus is None else consensus["as_of"]
+    return {
+        "page": f"/s/{symbol}",
+        "date": day,
+        "symbol": symbol,
+        "title": symbol,
+        "oneliner": oneliner,
+        "headings": ["走势与位置", "资金与情绪", "新闻与事件", "基本面与估值", "我的仓位"],
+        "trend": trend,
+        "short_text": short_text,
+        "resid_text": resid_sentence(resid),
+        "sector": sector,
+        "theme_ret": theme_ret,
+        "news": news,
+        "events": events,
+        "books": None if gate is None else gate["books"],
+        "valuation": valuation,
+        "consensus": consensus,
+        "position": position,
+        "sentences": sentences,
+        "stamps": [
+            {"label": "行情", "value": day.isoformat()},
+            {"label": "新闻", "value": news_stamp},
+            {"label": "空头", "value": short_stamp},
+            {"label": "估值", "value": value_stamp},
+            {"label": "一致预期", "value": consensus_stamp},
+        ],
+        "formulas": list(STOCK_FORMULAS),
+        "label": PAPER_LABEL,
+    }
+
+
+def covered_gate_reasons():
+    """Production gate codes this page knows how to say. Tests fail if a new one appears."""
+    return set(_HEALTH_REASON) | set(BLOCKING) | set(EXCLUDED) | set(_BOOK_BELOW) | set(_BOOK_MISSING)

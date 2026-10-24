@@ -76,7 +76,7 @@ def _html_page(path):
         "/review",
     }:
         return True
-    for prefix in ("/linkage/", "/stock/", "/paper/stock/"):
+    for prefix in ("/linkage/", "/s/", "/stock/", "/paper/stock/"):
         rest = path[len(prefix) :] if path.startswith(prefix) else ""
         if rest and "/" not in rest:
             return True

@@ -63,6 +63,8 @@ def render_brief(payload):
         main = _account(payload)
     elif page == "/trust":
         main = _trust(payload)
+    elif isinstance(page, str) and page.startswith("/s/"):
+        main = _stock(payload)
     else:
         main = _market(payload)
     title = payload.get("title") or "每日页面"
@@ -142,7 +144,7 @@ def _stocks(payload):
             f'<td class="num">{_count(theme.get("news_count"))}</td>'
             f"<td>{_text(theme.get('short_text') or MISSING)}</td></tr>"
         )
-        body = "".join(_member_row(row) for row in theme.get("members") or [])
+        body = "".join(_member_row(row, payload.get("date")) for row in theme.get("members") or [])
         opened = " open" if theme.get("open") else ""
         details.append(
             f'<details class="theme"{opened}><summary>{_text(theme["sector"])} {_pct(theme.get("average"))}</summary>'
@@ -176,7 +178,7 @@ def _account(payload):
         near = " 距灾难线过近" if row.get("near_disaster") else ""
         valuation = _valuation(row.get("valuation"))
         holdings.append(
-            f'<tr{mark}><td><a href="/paper/stock/{_text(row["ticker"])}">{_text(row["ticker"])}</a></td>'
+            f'<tr{mark}><td><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
             f"<td>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
             f'<td class="{_tone(row.get("pnl"))}">{_pct(row.get("pnl"))}</td>'
             f"<td>{_price(row.get('take_profit'))}</td><td>{_price(row.get('ma200'))}</td>"
@@ -194,7 +196,7 @@ def _account(payload):
     for row in payload.get("candidates") or []:
         books = row.get("books") or {}
         candidates.append(
-            f'<tr><td><a href="/stock/{_text(row["ticker"])}">{_text(row["ticker"])}</a></td>'
+            f'<tr><td><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
             f"<td>{_book(books)}</td><td>{_price(row.get('ma50'))}</td><td>{_price(row.get('year_high'))}</td>"
             f"<td>{_text(row.get('view'))}</td><td>{_valuation(row.get('valuation'))}</td></tr>"
         )
@@ -257,7 +259,133 @@ def _trust(payload):
     )
 
 
-def _member_row(row):
+def _stock(payload):
+    headings = payload.get("headings") or ["走势与位置", "资金与情绪", "新闻与事件", "基本面与估值", "我的仓位"]
+    sentences = payload.get("sentences") or {}
+    trend = payload.get("trend") or {}
+    symbol = payload.get("symbol") or ""
+    news = (
+        "".join(
+            f"<p>{_text(item.get('summary'))} · {_text(item.get('source'))} · "
+            f"{_text(item.get('published_beijing'))}</p>"
+            for item in payload.get("news") or []
+        )
+        or f"<p>{_text(MISSING)}</p>"
+    )
+    events = []
+    for row in payload.get("events") or []:
+        events.append(
+            f"<p><b>{_text(row.get('title'))}</b> 状态 {_text(row.get('status'))} 暴露 {_text(row.get('exposure'))}</p>"
+        )
+        events.extend(_reason_lines(row))
+    event_html = "".join(events) or f"<p>{_text(MISSING)}</p>"
+    consensus = _consensus_block(payload.get("consensus"))
+    stamps = " ".join(f"{_text(item.get('label'))} {_text(item.get('value'))}" for item in payload.get("stamps") or [])
+    return (
+        f"<h1>{_text(symbol)}</h1>"
+        f'<p><a href="/stocks">返回我的标的</a></p>'
+        f'<div class="card hero"><p class="lead">{_text(payload.get("oneliner"))}</p></div>'
+        f'<div class="card"><h2>{_text(headings[0])}</h2><p>{_text(sentences.get("trend"))}</p>'
+        f"<p>当日 {_pct(trend.get('ret'))} 盘后 {_pct(trend.get('post'))}</p>"
+        f"<p>近 5 日 {_pct(trend.get('ret_5'))} 近 20 日 {_pct(trend.get('ret_20'))} "
+        f"近 60 日 {_pct(trend.get('ret_60'))}</p>"
+        f"<p>距 50 日线 {_points(trend.get('dev50'))}（{_price(trend.get('ma50'))}）"
+        f" 距 200 日线 {_points(trend.get('price_vs_ma200'))}（{_price(trend.get('ma200'))}）"
+        f" 距一年高点 {_points(trend.get('drawdown252'))}（{_price(trend.get('year_high'))}）</p>"
+        f"<p>RSI {_whole(trend.get('rsi'))} 成交量倍数 {_multiple(trend.get('volume_multiple'), '倍')}</p>"
+        f"{_sparkline(trend.get('closes') or [])}</div>"
+        f'<div class="card"><h2>{_text(headings[1])}</h2><p>{_text(sentences.get("funds"))}</p>'
+        f"<p>成交量倍数 {_multiple(trend.get('volume_multiple'), '倍')}</p>"
+        f"<p>{_text(payload.get('short_text') or MISSING)}</p>"
+        f"<p>{_text(payload.get('resid_text') or MISSING)}</p>"
+        f"<p>{_text(payload.get('sector') or MISSING)} {_pct(payload.get('theme_ret'))}</p></div>"
+        f'<div class="card"><h2>{_text(headings[2])}</h2><p>{_text(sentences.get("news"))}</p>{news}'
+        f"<p>{_text(sentences.get('events'))}</p>{event_html}</div>"
+        f'<div class="card"><h2>{_text(headings[3])}</h2><p>{_text(sentences.get("valuation"))}</p>'
+        f"<p>{_book(payload.get('books'))}</p>"
+        f"<p>{_valuation(payload.get('valuation'))}</p>"
+        f"<p>{_text(sentences.get('consensus'))}</p>{consensus}</div>"
+        f'<div class="card"><h2>{_text(headings[4])}</h2><p>{_text(sentences.get("position"))}</p>'
+        f"{_position_block(payload.get('position') or {})}</div>"
+        f"<p>{stamps}</p>"
+    )
+
+
+def _consensus_block(consensus):
+    if not isinstance(consensus, dict):
+        return f"<p>{_text('暂无一致预期（轮询中）')}</p>"
+    lines = []
+    for key, label in (("fy1", "FY1"), ("fy2", "FY2")):
+        row = consensus.get(key) or {}
+        lines.append(
+            f"<p>{label} 每股收益 {_eps(row.get('eps'))} 机构 {_count(row.get('count'))} 家 "
+            f"前瞻市盈率 {_eps_pe(row.get('forward_pe'))}</p>"
+        )
+    lines.append(f"<p>快照 {_text(consensus.get('as_of') or MISSING)}</p>")
+    return "".join(lines)
+
+
+def _eps(value):
+    if value is None:
+        return _text(MISSING)
+    return _text(f"{half_up(value, 2):.2f}")
+
+
+def _eps_pe(value):
+    if value is None:
+        return _text(MISSING)
+    return _text(f"{half_up(value, 1):.1f}")
+
+
+def _position_block(position):
+    kind = position.get("kind")
+    if kind == "held":
+        pending = "、".join(position.get("pending") or []) or MISSING
+        return (
+            f"<p>股数 {_count(position.get('shares'))} 成本 {_price(position.get('avg_cost'))}"
+            f" → 现价 {_price(position.get('price'))} 盈亏 {_pct(position.get('pnl'))}</p>"
+            f"<p>止盈线 {_price(position.get('take_profit'))} 距离 {_pct(position.get('take_profit_gap'))}</p>"
+            f"<p>200 日线 {_price(position.get('ma200'))} 距离 {_pct(position.get('ma200_gap'))}</p>"
+            f"<p>灾难线 {_price(position.get('disaster'))} 距离 {_pct(position.get('disaster_gap'))}"
+            f" 破位天数 {_count(position.get('below_days'))}</p>"
+            f"<p>待成交 {_text(pending)} 下一步 {_text(position.get('next_step') or MISSING)}</p>"
+        )
+    if kind == "buyable":
+        return (
+            f"<p>回调参考 {_price(position.get('ma50'))} 上方参考 {_price(position.get('year_high'))}</p>"
+            f"<p>为什么没买 {_text(position.get('why_not') or MISSING)}</p>"
+        )
+    if kind == "blocked":
+        return f"<p>主要卡点 {_text(position.get('blocker') or MISSING)}</p>"
+    return f"<p>{_text(MISSING)}</p>"
+
+
+def _sparkline(closes):
+    if not closes:
+        return f"<p>{_text(MISSING)}</p>"
+    width, height = 240, 48
+    low, high = min(closes), max(closes)
+    span = high - low or 1
+    last = len(closes) - 1
+    coords = []
+    for index, value in enumerate(closes):
+        x = 0 if last == 0 else index * width / last
+        y = height - 4 - (float(value) - low) / span * (height - 8)
+        coords.append(f"{x:.1f},{y:.1f}")
+    points = " ".join(coords)
+    return (
+        f'<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img">'
+        f'<polyline fill="none" stroke="#1a1a1a" stroke-width="1.5" points="{points}"/></svg>'
+    )
+
+
+def _symbol_href(payload, ticker):
+    chosen = payload.get("date") if isinstance(payload, dict) and isinstance(payload.get("date"), str) else ""
+    query = f"?date={_text(chosen)}" if chosen else ""
+    return f"/s/{_text(ticker)}{query}"
+
+
+def _member_row(row, day=None):
     events = "、".join(row.get("events") or []) or "无"
     held = "持有" if row.get("held") else "未持有"
     if row.get("held"):
@@ -269,7 +397,7 @@ def _member_row(row):
     else:
         buyable = MISSING
     return (
-        f'<tr><td><a href="/stock/{_text(row["ticker"])}">{_text(row["ticker"])}</a></td>'
+        f'<tr><td><a href="{_symbol_href({"date": day}, row["ticker"])}">{_text(row["ticker"])}</a></td>'
         f'<td class="{_tone(row.get("ret"))}">{_pct(row.get("ret"))}</td>'
         f"<td>{_multiple(row.get('volume_multiple'), '×')}</td><td>{_whole(row.get('rsi'))}</td>"
         f"<td>{_points(row.get('price_vs_ma200'))}</td><td>{_points(row.get('drawdown252'))}</td>"
