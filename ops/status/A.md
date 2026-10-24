@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014  已完成（UD-A45 B054已实装，四公网路径通过）  2026-10-24 12:37 北京
+- 用户直接“允许部署 B054 并重载 pages”已先记UD-A45后重审原操作通过，原审批阻塞解除。实际04:36:03–04:36:17UTC生产从b3e35b3d07b3e8f5dbe8cc3b661899d6fb2d2261干净快进 **511f51b749e4849143bf6e9d8b267445a2de4b26**，含[PR64](https://github.com/XuQingsong/inves-cog/pull/64)验收merge **87a2fa6dc0f949c5cb94c8a8ab64be4ecf3d643a**；准确head **df12c555cdb1283b1399b5af5be5fa882e8643b6**/[CI40061084475](https://github.com/XuQingsong/inves-cog/actions/runs/40061084475)success证据复用。
+- 仅pages1172673→1204915，review1153175及其余11运行PID/配置/已有marker全部保持。迁移0/手工业务0/人工模型0，未重复review/账号/迁移，未部署尚未合并A018。120秒远端边界内完成，私有b054-pages-20261024.json与attempt已落盘，禁止重复执行。
+- **独立公网04:36:33UTC**：/、/stocks、/account、/trust全HTTP200及text/html; charset=utf-8，本机四路径同样通过。另SSH独立完整HEAD、工作区干净、pages/review RUNNING已核；无页面/持仓正文输出。已同步PR64；无新增接口/权限/依赖/来源决定。收盘口径等已验收修正代码已安装，四路径可访问不替代需求方逐句走查或review自然产出验证。下一步A018待验收合并，review按既定窗口核实际业务，不手工补跑。
+
 ## OPS-A014  进行中（UD-A-45：用户直接允许B054部署及pages重载）  2026-10-24 北京
 - **用户直接决定UD-A-45**：对已验收B054收盘口径/中文名称/数字格式修正、服务器快进511f51b、仅重载pages、其他进程保持、不新增权限/迁移/手工模型的明确问题，用户答复 **“允许部署 B054 并重载 pages”**。先同步本决定再重审原部署脚本，不绕过此前审批拒绝。
 - 目标 **511f51b749e4849143bf6e9d8b267445a2de4b26** 含已验收PR64 merge **87a2fa6dc0f949c5cb94c8a8ab64be4ecf3d643a**；准确head **df12c555cdb1283b1399b5af5be5fa882e8643b6**/[CI40061084475](https://github.com/XuQingsong/inves-cog/actions/runs/40061084475)success已核。原120秒脚本核真实生产HEAD/PID/干净工作区及回执防重，只重载pages并核四公网路径；不重做review/账号/迁移或未合并A018。
