@@ -1,5 +1,18 @@
 # A 线回报
 
+## A-019  已完成（第一步只读根因排查；修复待需求方确认方案）  2026-10-24 12:48 北京
+- 本步未改代码/订单/账本/交易规则、未补跑或调用模型，无新PR/CI；核验生产完整HEAD **511f51b749e4849143bf6e9d8b267445a2de4b26**（最新main继承同一trading代码）。真实元数据04:45:29及04:46:22UTC，私有a019-readonly-20261024.json、a019-followup-20261024.json，只有汇总/规则原因无持仓正文。首次运维默认账号读daily_scores被拒，切现有专用TRADING只读身份完成，未加权限/用管理员。
+- **1｜pending并非全部没有撮合服务，而是缺少跨日补推进**：实际paper_plan PID783294/daily_modules796120运行；service.py:40–43只调用目标前一交易日decide_day，:10–14仅fill该日，engine.py:78只选择trade_date==day，不遍历上次ledger至signal_day缺失日期。10-19计划直到10-20 10:48UTC才生成，ledger signal10-16；下一实际计划10-21直接fill10-20，故错过10-19。4笔target10-19至10-22仍pending，且4只当日均有有效open，不能归咎缺开盘数据。ledger最新已settled10-21、DB另3笔target10-21为filled，证明该链路在恰好遇到目标日时可撮合；缺日期不会自行追回。当前没有独立收盘/开盘成交worker补这个缺口。
+- **重复订单须分两类**：10-21的7项含10-19原4个相同order_id+新3；10-22的5项含原4相同ID+新1，原4是携带旧意向，不是每天重新插4单。engine.py:172–211 plan遍历全部pending无目标日过滤，故旧单每天展示；新signal确实还会queue相同ticker/action（queue:69按signal_date/len生成新ID，sell/core分支不对等价未决意向防重），DB当前1个重复pending组多2单。另DB pending9对ledger pending5，有4笔DB-only orphan；plan/settlement移出pending但非filled/canceled分支没有持久终态（engine.py:195–197/:109，service.py:95–98只写当前orders/trades/cancels），页面若读orders全pending会包含已不在活动ledger的行。不能把重绘同一ID与新重复意向混称。
+- **2｜10-23缺计划直接原因与下次风险**：DB没有10-23 paper_plan job/plan，最新paper job10179/10-22 ok、前次9469/10-21 ok。A016 paper窗口ET08:35–09:05代码直到10-23 **14:14:44UTC（ET10:14）** 才安装，daily_modules14:40再更新，均已过窗口；代码仅窗口内poll，不在窗口外补写skip。因此“无paper job”由窗口错过直接解释。另必需的signal10-22评分job **10409** 于10-23 02:38:16–04:52:07UTC **failed** / SourceError: Task exceeded its 30-minute budget，虽processed59且daily_scores存在59行，scores_ready只认ok/degraded完成job，不能用有行数冒称依赖ready。当前10-23 score job/rows都缺。10-26新窗口代码/进程已在，但是否正常出计划**不能保证**：必须10-23 scores真实ok/degraded到位；否则09:05按cli.py:115–137写failed skipped_upstream。不能靠paper进程存活承诺成功。
+- **3｜orders/skips矛盾**：10-22两类冲突订单均源于signal10-16/target10-19旧pending，skips来自当前signal10-21重新评估（M40额度满、M58核心冷却）。core_adds buys.py:80–88只skip不撤销旧意向；core_swings:113–137另独立M60波段分支也没有核心冷却同门。engine.plan只对overlay冷静期取消，并不因最新core skip撤旧单，故最新skip不具有全局撤单效力；实际fill会执行符合其目标日/价格/settlement条件的pending，不由skips列表自动阻止。现过期单由于目标日精确匹配暂不成交，不能因此称冲突无影响。
+- **4｜14构成已核**：10-22 ledger真实positions13，pending buy_to=1且该标的已持有；buys.py:265 slots=len(positions)+sum(pending.action==buy_to)，所以13+1=14，持仓加仓重复占开仓名额，不是第14只持仓。且原持仓13已大于规则max12，不能擅改上限或删持仓。
+- **下一步需需求方方案（本任务明确只读后等待）**：确认缺日成交/过期意向处置和DB-only pending终态、等价未决意向防重、core与swing冲突口径/撤单效力、名额按新增标的去重方式，以及10-23评分失败/计划缺失的修复范围；任何历史写回/补撮合须明确范围，不自行修改历史或买卖条件。评分失败的具体性能原因本步未做新批次诊断，不把timeout消息当完整性能根因。A020排在A019修复后。
+
+## OPS-A018  进行中（验收合并已到位，scheduler部署待直接允许）  2026-10-24 12:48 北京
+- main补充二十一/二十二明确PR62 merge73e69a4已验收，沿用准确head **eb986bbb99f994012cdb60883182ffdc616d7116**/[CI40056099429](https://github.com/XuQingsong/inves-cog/actions/runs/40056099429)645passed证据。需求方明确要求用户在A对话直接允许scheduler部署，已发自包含确认（仅快进含PR62的main，scheduler六任务自然窗口、真实cursor/first_seen及已批准新闻预算/2500护栏、无新权限/迁移），尚未收到答复，未部署或重试被拒操作。
+- N3–N5仍是安装后真实证据，不能把已合并当新闻/VIX恢复。A019只读排查已独立完成并等待需求方修复方案；review自然窗口仍独立核验，无暂停接单/定时器。
+
 ## A-019  已收到（按补充二十二先只读排查纸面账户）  2026-10-24 12:45 北京
 - 最新main9233f76明确A018已验收合并，部署需用户对scheduler重载直接允许；同时明确A019现在开始，不必等部署。只读查pending不成交/重复下单、10-23计划缺失、orders/skips矛盾及13持仓/计数14构成；证据限本项目job元数据、代码位置和汇总计数，不输出持仓明细。不先改代码/数据库/交易规则，不补跑或调用模型，回报根因后等需求方方案。
 - A018 merge73e69a4已继承原准确head/CI645证据；N3–N5仍未生产恢复，不冒称已完成。准备已合并版本scheduler仅重载的可审阅部署方案，按补充二十一直接确认后执行；B054已实装成功不重复安装。
