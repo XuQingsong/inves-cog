@@ -1,5 +1,9 @@
 # A 线回报
 
+## A-019  进行中（500MiB实测失败，继续修来源证据读取峰值）  2026-10-24 17:12 北京
+- 首候选原地冻结输入验证unit inves-cog-a019-m5-after-20261024实际Result=oom-kill、ExecMainStatus9，无metrics，不算通过。500MiB/禁swap硬限制保护了生产；不提高验收门槛、不重复同一候选。按标的分批本身不足，单标的快照最大87MB序列化载荷也需控制解码/对象峰值。
+- 变更先记（原M5分批读取批准范围内，无schema/源/权限变化）：M5 Repository.inputs保留所有财务状态行及数值，历史来源field_sources改为按原主键惰性读取完整原JSON、单份来源缓存，切换filing释放前份；当前来源审计hash仍对完整字典计算，不删字段/缩短历史/PIT或改公式。新增非空缓存语义红灯621340a实际1failed ImportError，先红后实现。冻结输入比较将在服务器本地完成，不外传生产快照。M4生产清理和review恢复已完成证据保持。
+
 ## A-019 / OPS-A014  进行中（M4生产处理已完成；M5冻结输入原地验证）  2026-10-24 17:08 北京
 - 实际08:58:26–08:58:37UTC生产干净快进989850890041ebcc29ec6fb0e7d96bc97a16de4a，含PR67/PR66验收合并。M4终态CHECK迁移sha256 f11adcbf6dc9642ed6f0448db6094edbf2b7b662774c3cd1d95d48381ff956b5实际执行；role_trading精确守卫expired8=4旧单+4孤儿，剩余pending1。账本除pending/lifecycle外hash不变，重复清理already_reconciled0。paper_plan783294→1331874、review恢复1331915，其余11运行PID保持。私有a019-m4-b056-deployment-20261024.json，非仅命令发出；未手工模型/历史成交补跑/新权限。
 - M5红灯本地c57be4f实际1failed（阻止全标的装载），实现后M5离线14passed/1deselected0.79s，ruff/format/diff通过。候选仅service.build双遍按标的读取完整历史：先全部PE标量，再逐标的估值，保留跨标的peer fallback及显式source回放路径，未改公式/PIT字段。
