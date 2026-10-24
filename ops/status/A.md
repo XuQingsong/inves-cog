@@ -57,3 +57,7 @@
 已收到 03:45 复核：T1/T3–T7 通过，T2 按需求方修订把 token 兜底改为每 ET 日 550 万，补 450 万 token 下第 1500 条放行、第 1501 条按条数延期的测试。现有 Pipeline 仍显式传入旧配置 150 万，将在 triage 内兼容映射为新常量，保留小额度测试注入，不改配置或其他逻辑；先失败测试后实现，同 PR75 送验。该修订来自 main 需求方复核，不扩大累计补采预算或调用上限。
 
 复核修订已推送同 PR75，head `c637d015477ea18d02b6f9bf8643174846ef3207`。新增两例先失败，修复后目标/兼容回归 11 passed，静态检查通过。550 万 token 常量已兼容默认与现有 Pipeline 旧参数路径；完整提取第 1500 条在 450 万 token 下放行，第 1501 条按条数延期。准确 head CI 待完成，不沿用上一 head 的通过结论。
+
+## A-022 复核修订 已完成，待验收合并
+
+[PR75](https://github.com/XuQingsong/inves-cog/pull/75)，head `c637d015477ea18d02b6f9bf8643174846ef3207`，[准确 CI](https://github.com/XuQingsong/inves-cog/actions/runs/40126687106/job/120969540260) 通过：754 passed、21 deselected。T1/T3–T7 沿用需求方已接受行为并通过本次全量回归；T2 新增 `test_a022_4500000_tokens_allows_item_1500_then_defers_1501_by_count` 两条路径均通过，550 万 token 触线延期用例通过。已自行决定：仅按已记录方案兼容旧参数，无其他。下一步：需求方验收合并后安装，再核验真实运行和预算；当前未部署。
