@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-019  进行中（P2–P7草稿PR67，准确CI/数据库测试运行中）  2026-10-24 14:14 北京
+- [PR67](https://github.com/XuQingsong/inves-cog/pull/67)draft/open，完整head **80c5ebd0afc4f151ef09a3d86a2c6b9dcf88bc8e**，base feedabf2b58db0dda07814e2d7f4339848275035；准确[CI40069260308/job120798950462](https://github.com/XuQingsong/inves-cog/actions/runs/40069260308/job/120798950462)仍in_progress，容器build已成功、full make运行中。不冒称CI或一次性DB测试已过。P1原一次性估值仍运行，不新批次；不依赖它的离线工程独立推进，未扩大生产写范围。
+- **先失败历史**5530794（测试修正无关helper参数名后实际10failed/2passed），追加数据库/完整90笔测试ea15d87，后实现80c5ebd。相关离线**36passed/3deselected/7.68秒**，原phase1_replay另2passed/7.58秒；ruff/format/diff check通过。DB夹具用一次性Harness PostgreSQL，本机无Docker，不假装本地已跑DB测试，待准确CI真实执行。
+- P2：settle_through逐交易日推进，用该日open并标补撮合；缺open保留未结算日并阻止跳过推进计划，重跑不重复fill。P4/P5：移出pending产生filled/canceled/expired/superseded可持久终态/原因与观察时间；纸面同标的同动作新意向替代旧单，唯一ID避免三次连续替代碰撞，replay_v18冻结路径保留。P6：旧单日期旁注、核心冷却/额度与独立波段说明句。
+- **P7源码核对**：只读GitHub固定Muse aacea04e4562f70854d69330fe724aa2799f2858/code/paper_trade_v18_full30.py L649–667确为len(positions)+pending buy_to条数>=12，含已持仓加仓；保留算法，仅计划JSON增加slot_count及“持仓13+加仓挂单1=14”说明。仅本项目run_frozen+load_golden回归实际**expected=actual=90，differences=[]，match_rate=1**；未导入/运行Muse代码、未改golden。
+- **变更（任务内）**：仅新增M4 migration phase1_m4_0002_order_terminal_states.sql扩展expired/superseded CHECK，无新角色/GRANT。P3独立expire_legacy_orders函数仅在合并/迁移后按明确4旧单+4孤儿精确计数守卫、项目锁/事务执行，修改终态及最新账本pending/生命周期，保留cash/positions/既有成交/历史计划/账本观察时间；重复清理只读，计数变更拒绝。**生产迁移/旧单清理均未执行**，不能把函数交付冒充P3生产完成。DB测试覆盖8终态、保留字段、幂等和计数变化回滚。
+- 下一步准确CI实回与P1估值最终结果后正式送验；若失败仅修已证缺陷再跑新head，不改门槛。主检出用户docs未动，worktree无其他人未提交修改；A020仍排在本修复之后，review待B056已验收恢复。
+
 ## A-019  进行中（P1财务/评分已真实完成，估值仍运行）  2026-10-24 13:57 北京
 - 同一一次性恢复回执a019-p1-once-20261024.json（业务PID1241057、外层1241056）实际：**m2_financials job11351 degraded/59**，05:49:36–05:52:55UTC；**rule_a_scores job11353 ok/59**，05:52:56–05:53:00UTC；两者目标trade_date=2026-10-23，真实当前时间执行，无冻结/倒填。M4 scores_ready要求ok/degraded完成job，现已满足这项依赖；不等于已生成10-26计划/整体验收。
 - valuation_v1同一脚本于05:53:01UTC开始，回执仍running，未称完成；每项1800秒及总07:21:14UTC硬截止保持，不重启/重触发前两项。财务degraded具体缺项仅按既有task结果后续汇总，不改为ok。
