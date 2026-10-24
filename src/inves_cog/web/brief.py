@@ -1,9 +1,10 @@
 """Investor brief pages. Simple derived values live only in this module."""
 
 import re
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import yaml
 
@@ -32,8 +33,11 @@ MOVE_BAND = 0.07
 DISASTER_NEAR = 0.20
 VALUE_FAR = 2.0
 NEWS_GAP = 1
+STALE_NEWS_DAYS = 3
 PENDING_GAP = 2
 PRIOR_DAYS = 20
+_SHANGHAI = ZoneInfo("Asia/Shanghai")
+_ISO_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})")
 LEADER_COUNT = (4, 5)
 MISSING = "暂缺"
 UNTRUSTED = "原因暂不可信"
@@ -506,6 +510,166 @@ def _news_fresh(seen, day):
     return session_gap(seen.astimezone(NY).date(), day) <= NEWS_GAP
 
 
+def _beijing_text(value):
+    moment = value if isinstance(value, datetime) else _parse_ts(value)
+    if moment is None:
+        return MISSING
+    return moment.astimezone(_SHANGHAI).strftime("%Y-%m-%d %H:%M")
+
+
+def _day_window(day):
+    start = datetime.combine(day, time(4, 0), tzinfo=NY)
+    return start, start + timedelta(days=1)
+
+
+def citation_stale_note(cited, trade_date):
+    """More than three calendar days before the trade date, in New York."""
+    moment = _parse_ts(cited)
+    if moment is None or trade_date is None:
+        return None
+    gap = (trade_date - moment.astimezone(NY).date()).days
+    if gap > STALE_NEWS_DAYS:
+        return f"引用的是 {gap} 天前的新闻"
+    return None
+
+
+def _news_summary(source, headline):
+    card = source.get("news_card") if isinstance(source, dict) else None
+    said = card.get("说了什么") if isinstance(card, dict) else None
+    if isinstance(said, str) and said.strip():
+        return said.strip()
+    if isinstance(headline, str) and headline.strip():
+        return headline.strip()
+    return MISSING
+
+
+def _day_news(connection, day, cutoff):
+    """News published in the ET session and already stored at the cutoff."""
+    start, end = _day_window(day)
+    rows = _rows(
+        connection,
+        """
+        SELECT info_id, published_at, source, headline, tickers, extraction_source
+        FROM ingest.info_items
+        WHERE kind = 'news' AND first_seen_at <= %s AND published_at >= %s AND published_at < %s
+        ORDER BY published_at DESC, info_id
+        """,
+        (cutoff, start, end),
+    )
+    items = []
+    for row in rows:
+        published = _parse_ts(row["published_at"])
+        items.append(
+            {
+                "info_id": row["info_id"],
+                "summary": _news_summary(_object(row["extraction_source"]), row["headline"]),
+                "source": row["source"] or MISSING,
+                "published_at": None if published is None else published.isoformat(),
+                "published_beijing": _beijing_text(published),
+                "tickers": [name for name in (row["tickers"] or []) if isinstance(name, str)],
+            }
+        )
+    return items
+
+
+def _wide_stocks(connection, day):
+    """Ordinary names in the latest M1 wide set on or before this trade date."""
+    rows = _rows(
+        connection,
+        """
+        SELECT ticker
+        FROM ingest.wide_universe
+        WHERE trade_date = (SELECT max(trade_date) FROM ingest.wide_universe WHERE trade_date <= %s)
+          AND included
+          AND exclude_reason IS DISTINCT FROM 'non_common'
+        """,
+        (day,),
+    )
+    return {row["ticker"] for row in rows}
+
+
+def _stock_names(pool, wide):
+    return set(pool) | set(wide)
+
+
+def event_has_stock(names, pool, wide):
+    """A stock event has a universe name or an M1 ordinary share. ETFs and style ids do not."""
+    stocks = _stock_names(pool, wide)
+    return any(name in stocks for name in names)
+
+
+def _move_reasons(report):
+    card = report.get("move_card") if isinstance(report, dict) else None
+    if not isinstance(card, dict):
+        return []
+    found = []
+    for item in card.get("解释") or []:
+        if not isinstance(item, dict):
+            continue
+        text = item.get("怎么影响") or item.get("一句话")
+        if not text:
+            continue
+        cited = item.get("发布时间")
+        found.append({"text": str(text), "cited_at": None if cited is None else str(cited)})
+    return found
+
+
+def _daily_reasons(report):
+    text = report.get("daily_text") if isinstance(report, dict) else None
+    if not isinstance(text, str):
+        return []
+    found = []
+    for line in text.splitlines():
+        if "可能的原因" not in line and "可能原因" not in line:
+            continue
+        if "没找到" in line:
+            continue
+        match = _ISO_TS.search(line)
+        cited = None if match is None else match.group(0)
+        body = line.split("：", 1)[-1].strip() if "：" in line else line.strip()
+        if cited:
+            body = body.replace(cited, "").strip()
+        if body:
+            found.append({"text": body, "cited_at": cited})
+    return found
+
+
+def event_reasons(report, trade_date):
+    """At most two causes, from the move card when it has any, otherwise the morning page."""
+    chosen = _move_reasons(report) or _daily_reasons(report)
+    reasons = []
+    for item in chosen[:2]:
+        reasons.append({**item, "stale_note": citation_stale_note(item.get("cited_at"), trade_date)})
+    return reasons
+
+
+def _session_closes(history, day):
+    today = [row["close"] for row in history if row["trade_date"] == day and row["close"] is not None]
+    prior = [row["close"] for row in history if row["trade_date"] < day and row["close"] is not None]
+    if not today or not prior:
+        return None, None
+    return float(today[-1]), float(prior[-1])
+
+
+def close_estimate(context, day):
+    """Mark the book to that day's close. Incomplete prices stay on the ledger."""
+    ledger = context["ledger"]
+    cash = None if ledger is None else _number(ledger.get("cash"))
+    positions = context["positions"]
+    if cash is None or not positions:
+        return None
+    equity = cash
+    pnl = 0.0
+    for ticker, position in positions.items():
+        shares = _number(position.get("shares"))
+        close, previous = _session_closes(context["bars"].get(ticker) or [], day)
+        if shares is None or close is None or previous is None:
+            return None
+        equity += shares * close
+        pnl += shares * (close - previous)
+    return {"equity": equity, "day_pnl": pnl, "label": f"按 {day.month}月{day.day}日 收盘估算"}
+
+
 def _book(connection, day, cutoff):
     return _one(
         connection,
@@ -649,23 +813,12 @@ def _books(score):
     }
 
 
-def _explanation(report):
-    card = report.get("move_card") if isinstance(report, dict) else None
-    if not isinstance(card, dict):
-        return None, None
-    lines = []
-    cited = None
-    for item in card.get("解释") or []:
-        if not isinstance(item, dict):
-            continue
-        text = item.get("怎么影响")
-        if text:
-            lines.append(str(text))
-        if cited is None and item.get("发布时间"):
-            cited = str(item["发布时间"])
-    if not lines and cited is None:
-        return None, None
-    return "；".join(lines) or None, cited
+def _explanation(report, trade_date):
+    reasons = event_reasons(report, trade_date)
+    if not reasons:
+        return None, None, []
+    cited = next((item["cited_at"] for item in reasons if item.get("cited_at")), None)
+    return "；".join(item["text"] for item in reasons) or None, cited, reasons
 
 
 def _sell_history(plans, state):
@@ -722,12 +875,15 @@ def _style_only(baskets):
     return bool(names) and all(item in STYLE_LABELS for item in names)
 
 
-def _visible_anomalies(anomalies):
+def _visible_anomalies(anomalies, stocks):
     chosen = []
     for row in anomalies:
         if row["universe"] != "pool":
             continue
         if _style_only(row["baskets"] or []):
+            continue
+        names = _tickers(row["members"])
+        if not event_has_stock(names, stocks, ()):
             continue
         chosen.append(row)
     return chosen
@@ -767,13 +923,13 @@ def _covering_theme(tickers, catalog):
     return best[1]
 
 
-def _event_rows(anomalies, events, reports, fresh, catalog):
-    pool = _visible_anomalies(anomalies)
+def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day):
+    pool = _visible_anomalies(anomalies, stocks)
     pool.sort(key=lambda row: (-(row["max_abs_z"] or -1), row["anomaly_id"]))
     chosen = []
     for row in pool[:3]:
         view = events.get(row["anomaly_id"])
-        explanation, cited = _explanation(reports.get(row["anomaly_id"]))
+        explanation, cited, reasons = _explanation(reports.get(row["anomaly_id"]), day)
         names = _tickers(row["members"])
         baskets = list(row["baskets"] or [])
         chosen.append(
@@ -786,15 +942,16 @@ def _event_rows(anomalies, events, reports, fresh, catalog):
                 "members": names,
                 "explanation": explanation,
                 "cited_at": cited,
+                "reasons": reasons,
                 "untrusted": not fresh,
             }
         )
     return chosen
 
 
-def _member_events(anomalies, catalog):
+def _member_events(anomalies, catalog, stocks):
     membership = {}
-    for row in _visible_anomalies(anomalies):
+    for row in _visible_anomalies(anomalies, stocks):
         names = _tickers(row["members"])
         title = _event_title(list(row["baskets"] or []), names, row["direction"], catalog)
         for name in names:
@@ -864,12 +1021,12 @@ def _context(connection, day, clock):
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     scores = _scores(connection, day)
-    bars = _bars(connection, day, pool)
     ranges = _ranges(connection, day, cutoff)
     ledger = _book(connection, day, cutoff)
     portfolio = None if ledger is None else ledger["portfolio_id"]
     state = _state(ledger)
     positions = _positions(state)
+    bars = _bars(connection, day, list(dict.fromkeys([*pool, *positions])))
     plan = _plan(connection, day, cutoff)
     if portfolio is None and plan is not None:
         owner = _one(
@@ -888,6 +1045,7 @@ def _context(connection, day, clock):
     context_portfolio = portfolio
     seen = _news_seen(connection, cutoff)
     fresh = _news_fresh(seen, day)
+    news_items = _day_news(connection, day, cutoff)
     version = params_version(plan)
     sell = sell_params(version)
     return {
@@ -905,6 +1063,10 @@ def _context(connection, day, clock):
         "scores": scores,
         "bars": bars,
         "ranges": ranges,
+        "stocks": _stock_names(pool, _wide_stocks(connection, day)),
+        "news_items": news_items,
+        "news_seen": seen,
+        "news_day_count": len(news_items),
         "ledger": ledger,
         "state": state,
         "positions": positions,
@@ -1023,13 +1185,17 @@ def _themes(context, day):
     scores = context["scores"]
     bars = context["bars"]
     positions = context["positions"]
-    membership = _member_events(context["anomalies"], context["catalog"])
+    membership = _member_events(context["anomalies"], context["catalog"], context["stocks"])
+    news_items = context["news_items"]
     themes = []
     for sector in context["order"]:
         members = []
         for ticker in context["grouped"][sector]:
             score = scores.get(ticker)
             member = _member(ticker, day, bars, score, daily, ticker in positions, membership.get(ticker, []))
+            matched = [item for item in news_items if ticker in item["tickers"]]
+            member["news_count"] = len(matched)
+            member["news"] = matched[:3]
             member["valuation"] = _card_for(context, ticker, score, member["price"])
             members.append(member)
         average = theme_average([row["ret"] for row in members])
@@ -1040,6 +1206,7 @@ def _themes(context, day):
                 "volume_multiple": theme_average([row["volume_multiple"] for row in members]),
                 "held_count": sum(1 for row in members if row["held"]),
                 "buyable_count": sum(1 for row in members if row["entry_pass"] is True and not row["held"]),
+                "news_count": sum(row["news_count"] for row in members),
                 "members": members,
                 "line": _theme_line(sector, average, members),
             }
@@ -1125,7 +1292,9 @@ def page_brief_market(connection, day, clock):
     market = context["market"]
     vix = None if market is None else market["vix"]
     reports = _reports(connection, [row["anomaly_id"] for row in context["anomalies"]])
-    events = _event_rows(context["anomalies"], context["events"], reports, context["fresh"], catalog)
+    events = _event_rows(
+        context["anomalies"], context["events"], reports, context["fresh"], catalog, context["stocks"], day
+    )
     pool_returns = [context["daily"][ticker]["ret"] for ticker in context["pool"] if ticker in context["daily"]]
     down_count = sum(1 for value in pool_returns if value is not None and value < 0)
     wide_count = sum(1 for value in pool_returns if value is not None and abs(value) >= MOVE_BAND)
@@ -1231,6 +1400,7 @@ def page_brief_account(connection, day, clock):
     previous = _previous_equity(connection, day, context["cutoff"], context["portfolio"])
     day_change = None if equity is None or previous in (None, 0) else equity / previous - 1
     drawdown = None if equity is None or peak in (None, 0) else equity / peak - 1
+    estimate = close_estimate(context, day)
     near = sum(1 for row in holdings if row["near_disaster"])
     pending_rows = sum(1 for row in holdings if str(row["next_step"]).startswith("待成交"))
     sentence = f"持仓{len(holdings)}只，距灾难线过近{near}只，待成交{pending_rows}笔。"
@@ -1245,6 +1415,7 @@ def page_brief_account(connection, day, clock):
         "peak_equity": peak,
         "day_change": day_change,
         "drawdown": drawdown,
+        "close_estimate": estimate,
         "holdings": holdings,
         "closed_records": _sell_history(context["plans"], context["state"]),
         "candidates": candidates,
@@ -1297,6 +1468,8 @@ def page_brief_trust(connection, day, clock):
         "oneliner": sentence,
         "headings": ["复盘与数据", "数据状态", "系统之前说的对不对（复盘）"],
         "statuses": statuses,
+        "news_seen_beijing": _beijing_text(context["news_seen"]),
+        "news_day_count": context["news_day_count"],
         "labels": labels,
         "review_gap": None if labels else "尚无 T+1/T+5/T+20 打标记录",
         "formulas": list(FORMULAS),
