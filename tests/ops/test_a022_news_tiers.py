@@ -55,7 +55,7 @@ def item(identifier, source, headline, *, tickers=(), kind="news", minutes=0, bo
     )
 
 
-def engine(models, *, stats=None, cached_root=None):
+def engine(models, *, stats=None, cached_root=None, **kwargs):
     entities = [
         {"entity_id": "openai", "name": "OpenAI", "aliases": ["ChatGPT"], "tickers": []},
         {"entity_id": "nvidia", "name": "NVIDIA", "aliases": [], "tickers": ["NVDA"]},
@@ -69,6 +69,7 @@ def engine(models, *, stats=None, cached_root=None):
         clock=FrozenClock(NOW),
         usage_today=lambda: stats or {"tokens": 0, "missing": 0, "full_items": 0, "screen_calls": 0},
         cached_root=cached_root,
+        **kwargs,
     )
 
 
@@ -140,7 +141,7 @@ def test_a022_duplicate_root_reuses_evidence_without_model_calls():
             "screen_daily_limit",
         ),
         (
-            {"tokens": 1_500_000, "missing": 0, "full_items": 0, "screen_calls": 0},
+            {"tokens": 5_500_000, "missing": 0, "full_items": 0, "screen_calls": 0},
             item("token-cap", "benzinga", "NVIDIA update", tickers=["NVDA"]),
             "daily_budget",
         ),
@@ -168,6 +169,22 @@ def test_a022_last_full_slot_goes_to_holding_before_pool():
     assert meta(rows[0])["reason"] == "full_daily_limit"
     assert rows[1]["extraction_status"] == "ok"
     assert models.calls == ["news_card", "info_fields_extraction"]
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"daily_budget": 1_500_000}])
+def test_a022_4500000_tokens_allows_item_1500_then_defers_1501_by_count(kwargs):
+    models = CountingModels()
+    stats = {"tokens": 4_500_000, "missing": 0, "full_items": 1499, "screen_calls": 0}
+    triage = engine(models, stats=stats, **kwargs)
+    first = triage.process([item("item-1500", "benzinga", "Apple first", tickers=["AAPL"])])[0]
+    assert triage.daily_budget == 5_500_000
+    assert first["extraction_status"] == "ok"
+    assert len(models.calls) == 2
+    stats["full_items"] = 1500
+    second = triage.process([item("item-1501", "benzinga", "Apple second", tickers=["AAPL"])])[0]
+    assert second["extraction_status"] == "pending"
+    assert meta(second)["reason"] == "full_daily_limit"
+    assert len(models.calls) == 2
 
 
 def test_a022_usage_query_counts_full_articles_once_and_screen_calls():
