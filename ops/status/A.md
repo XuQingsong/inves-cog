@@ -1,5 +1,9 @@
 # A 线回报
 
+## OPS-A014  已收到（补充二十：B054页面呈现修正部署）  2026-10-24 12:25 北京
+- 最新main **511f51b749e4849143bf6e9d8b267445a2de4b26** 补充二十按UD-A40交接仅快进/重载pages；独立核[PR64](https://github.com/XuQingsong/inves-cog/pull/64) merged=true，merge **87a2fa6dc0f949c5cb94c8a8ab64be4ecf3d643a**，准确head **df12c555cdb1283b1399b5af5be5fa882e8643b6**/[CI40061084475](https://github.com/XuQingsong/inves-cog/actions/runs/40061084475)completed/success。修正收盘口径、中文名与数字呈现，继承已验收代码不自行改B业务。
+- 变更先记：仅生产从已装B053快进上述main并重载pages，review和其余PID/配置/marker保持，无迁移/权限/账号/模型/手工业务。120秒有界脚本，先核干净HEAD/真实PID/回执防重，再核四公网路径状态及HTML，页面/持仓正文不输出；A018未合并不安装其scheduler。
+
 ## OPS-A014  已完成（UD-A44 B053投资者四页实际部署；公网四路径通过）  2026-10-24 11:39 北京
 - 用户直接“允许部署 B053 并重载 pages”已先记UD-A44后重审原脚本通过，原审批阻塞解除。实际03:37:38–03:37:52UTC生产干净快进 **b3e35b3d07b3e8f5dbe8cc3b661899d6fb2d2261**，包含[PR63](https://github.com/XuQingsong/inves-cog/pull/63)验收merge **5c1318357e385aae628309d44c53cd78e39236c5**；准确head **8108183b222031462822cb7d9c396905e6bb9c46**/[CI40057856464](https://github.com/XuQingsong/inves-cog/actions/runs/40057856464)success证据复用。
 - 仅pages1153179→1172673；review1153175及其余11运行PID保持，配置/已有marker保持。迁移0、手工业务0、人工模型0，不重做review/账户/唯一迁移；未安装尚未合并A018。远端120秒期限内收口，私有b053-pages-20261024.json与attempt实际落盘，禁止重复部署。
