@@ -2,6 +2,22 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-059  已完成  2026-10-25 03:17 北京
+
+- PR #74，head `2398834`。https://github.com/XuQingsong/inves-cog/pull/74 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40124230068 ：`phase1-blocking` 成功，743 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 225.127 秒（≤ 300）、status passed、collected 743、pending 0。日志 `743 passed, 21 deselected, 5 warnings in 225.17s`。suite xml time 225.123。`m0-ci.xml` 2 passed、0 failures、xml 0.516 秒（日志 `2 passed in 0.55s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。工件 `m0-clean-environment-evidence` id 12571884036。运行创建于 2026-10-25 03:12 北京，`phase1-blocking` 完成于 03:17 北京。B 线没有合并，没有部署，没有调用真实模型。
+- 相对当时 main 的 diff 是 `src/inves_cog/web/brief.py`、`brief_html.py`、`risk_brief.py`、`stock_brief.py`，以及 `tests/m10/test_b053.py`、`test_b059.py`。没有新迁移、授权、上游。CI 记录的改动文件与此相同。
+- K1｜通过｜`test_k1_disaster_edges`｜CI junit 0.001 秒。小于 10% 为红，正好 10% 为橙，小于 20% 为橙，正好 20% 不提示，负缺口为红。
+- K2｜通过｜`test_k2_streak_and_k5_drawdown_edges`、`test_k2_rule_days_follow_the_parameter_file`｜CI junit 0.009 秒、0.076 秒。连续天数按含当日的 200 日均线从今天往回数。GOOGL 连续 2 天、标准层 3 天，为红。HD 连续 1 天、防守层 10 天，为橙。把标准层减仓天数改成 10 后，GOOGL 变为橙，并写第 10 天。
+- K3｜通过｜含在 `test_k6_pages_sort_color_and_plain_text`｜CI junit 0.607 秒。AMD 只因池内异常为橙，写卷入 AI 产业链下跌。MU 直接暴露为红。INTC 写冷静期内不加仓。截点后的覆盖层不把 COST 标成冷静期。
+- K4｜通过｜`test_k4_theme_and_drop_edges` 与 K6｜CI junit 0.000 秒。正好 25% 不提示，超过 25% 为橙；正好 35% 仍为橙，超过 35% 为红。夹具 AI 算力芯片占 +26.00%，条形 `width:26.00%`。前三主题里第二名是零售。持仓 13 只，名额 12 只。
+- K5｜通过｜`test_k5_drawdown_follows_the_parameter_file`｜CI junit 0.230 秒。−3.3% 没有组合回撤句。−7% 为橙，写接近回撤刹车，不写已触发。−8.5% 为红，写已触发回撤刹车、进攻层减仓 +33.33%，以及到了更深闸门就暂停非防守层新开仓。把回撤刹车改成 −10.00% 后，同一 −8.5% 变为橙。
+- K6｜通过｜`test_k6_pages_sort_color_and_plain_text`｜CI junit 0.607 秒。账户页先红后橙。市场总览在「对我意味着什么」之后是红色 2 项，橙色 5 项，第一条红色是 GOOGL。`/s/MU` 在「我的仓位」含 MU 那句。距灾难线过近的行仍是 `class="warn"`，其余红、橙行使用 `risk-red`、`risk-orange`。可见文本没有 `M-` 编号、小写英文代号、N1、N2，也没有 4 位以上小数。
+- K7｜通过｜`test_k7_formulas_stay_plain` 与整次 phase1｜CI junit 0.002 秒。页脚公式是中文，含「不改规则 A 的订单」和「2 个百分点」。同一次 CI 743 passed、21 deselected、225.127 秒。B-048 至 B-058 与 A-017 都在这次通过的集合里。diff 只含上面的授权路径。
+- 夹具页文本（交易日 2039-08-16，组合距峰值 −3.3%，因此没有回撤句）：
+  - 市场总览：红色 2 项，橙色 5 项。第一条红色：GOOGL 已连续 2 天低于 200 日线，规则 A 第 3 天减仓。
+  - 纸面账户：GOOGL 已连续 2 天低于 200 日线，规则 A 第 3 天减仓。MU 距灾难止损线 +9.80%（$90.20），今日 −6.30%，卷入 AI 产业链下跌。AMD 卷入 AI 产业链下跌。HD 已连续 1 天低于 200 日线，规则 A 第 10 天减仓。INTC 冷静期内不加仓。MRVL 距灾难止损线 +18.00%（$82.00）。AI 算力芯片占 +26.00%，单一主题集中。
+  - `/s/MU`：我的仓位顶部为 MU 距灾难止损线 +9.80%（$90.20），今日 −6.30%，卷入 AI 产业链下跌。
+
 ## B-059  进行中  2026-10-25 03:15 北京
 
 - PR #74，head `2398834`。https://github.com/XuQingsong/inves-cog/pull/74 。没有合并。
