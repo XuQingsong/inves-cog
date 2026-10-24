@@ -203,12 +203,16 @@ def _member(pages, ticker):
 
 
 def test_s1_short_column_matches_the_latest_visible_print(pages):
-    stored = pages["admin"].execute(
-        """
+    stored = (
+        pages["admin"]
+        .execute(
+            """
         SELECT si_pct_shares_outstanding, days_to_cover, raw, settlement_date
         FROM ingest.short_interest WHERE observation_id = 'b057-nvda'
         """
-    ).fetchone()
+        )
+        .fetchone()
+    )
     nvda = _member(pages, "NVDA")
     assert nvda["short"]["pct"] == stored["si_pct_shares_outstanding"]
     assert nvda["short"]["days"] == stored["days_to_cover"]

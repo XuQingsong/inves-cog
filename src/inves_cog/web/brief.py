@@ -327,9 +327,7 @@ def short_status(latest, day):
 def option_status(rows, day):
     """Session age. More than 2 trading days since the latest print is stale."""
     dates = [
-        row["trade_date"]
-        for row in rows
-        if row["trade_date"] <= day and _metric(row.get("put_call_ratio")) is not None
+        row["trade_date"] for row in rows if row["trade_date"] <= day and _metric(row.get("put_call_ratio")) is not None
     ]
     if not dates:
         return MISSING, None
