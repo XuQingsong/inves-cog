@@ -1,5 +1,12 @@
 # A 线回报
 
+## A-018 / UD-COORD-36  进行中（代码完成，PR73正式送验）  2026-10-24 23:50 北京
+- [PR73](https://github.com/XuQingsong/inves-cog/pull/73)ready/open，完整head**02f05d7f611104d70e57e18404aa993283d5731d**；准确[CI40108363441/job120914687276](https://github.com/XuQingsong/inves-cog/actions/runs/40108363441/job/120914687276)实际success **723passed/21deselected/190.99秒**，独立完整日志checkoutf513109合本head与main5ff39fe6be5578f2e539d663df81eefb480f4702；新增隔离DB三项全过，M0另2passed0.57秒/九红门禁保持。先红335fd81f1e00c805398d6b562504ff68bd678d94，准确CI40107941637/job120913424439实际3failed720passed199.75秒；后实现local87b0b60/远端02f05d7。本地原info_item_contract 1passed0.35秒、ruff/format/diff通过，未称本地DB实跑。送验comment6386249276。
+- 仅M1 repository enrichment队列选择+测试：news published_at>=10-21 00:00ET，旧可见pending新闻保留原内容/时间/状态/既有来源，仅extraction_source添加幂等backfill_skip（补采未提取/UD-COORD36/真实as_of）。未知日期不送模型，SEC等不受日期范围影响，已ok历史保持。轮询复用同一选择使old-only也标记但不派发，不伪称ok；原retry_at/排序/limit保持。测试覆盖精确ET边界、null日期、非news、所有原字段相等、标记不重复、old-only、已提取不改及实际Pipeline计数客户端派发。
+- **生产未部署/调用未恢复**。真实只读基线：旧pending10765、窗口pending8002/ok736、未知pending1，旧ok57488/failed11不改。实际8002高于交接估计5000，仍按原补采6000/总30元及稳态2500，不扩预算；已同步PR73 comment6386162052。尚需需求方确认计价单价与30元是否含已发生14元，已PR62 comment6386110680/PR73跟进，属运营口径而非向用户新索批；不妨碍当前代码交付。
+- 下一步需求方验收合并后我按明确费用口径部署、恢复并回报旧跳过数/补采提取/调用/token/估算费用；当前止损保持。A020已完成首批24/23/78、PR71已验收合并main5ff39fe，不重做迁移或采集；A021下一顺位未启动。未改docs/golden/milestones，用户docs保留。
+- 中间阶段状态写入长时间未回，本轮终止等待后重读blob确认未写成，再以最新blob同步本真实最终结果；未以状态写入代替实际实现或CI。
+
 ## A-018 / UD-COORD-36  已收到（新闻提取范围修正，当前唯一开发任务）  2026-10-24 23:38 北京
 - 最新A020答复已明确独立核验23成功/78条并完成，PR71 CI通过送验即可，不阻塞下一项；据此开始A018范围PR，不开始A021。PR71已ready/headbab95f8/准确CI40106973971 success720passed保持，未自行合并。
 - 变更先记：仅M1 repository enrichment队列选择处统一过滤news published_at>=2026-10-21 00:00 America/New_York（UTC04:00），旧pending新闻保留原始数据/状态，只在extraction_source添加“补采未提取（UD-COORD-36）”标记；不伪称提取ok，不删新闻或倒填时间。未知发布时间news保守不送模型，非news含SEC不受该时间边界影响；轮询有无队列与实际取批复用同一选择，避免空转/漏标。
