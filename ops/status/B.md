@@ -2,6 +2,20 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-057  已完成  2026-10-24 20:10 北京
+
+- PR #69，head `87f84e0`。https://github.com/XuQingsong/inves-cog/pull/69 。没有合并。CI https://github.com/XuQingsong/inves-cog/actions/runs/40092447955 ：`phase1-blocking` 成功，709 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 215.511 秒（≤ 300）、status passed、collected 709、pending 0。日志 `709 passed, 21 deselected, 5 warnings in 215.56s`。suite xml time 215.507。`m0-ci.xml` 2 passed、0 failures、xml 0.504 秒（日志 `2 passed in 0.54s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行（先前失败的 run 40092246621 在 head `ebe2015`）。工件 `m0-clean-environment-evidence` id 12560005769。没有部署，没有调用真实模型。
+- 相对 main 的 diff 是 `src/inves_cog/web/brief.py`、`brief_html.py`，以及 `tests/m10/test_b057.py`、`test_b053.py`。没有新迁移、授权、上游。
+- S1｜通过｜`test_s1_short_column_matches_the_latest_visible_print`、`test_s1_threshold_edges_and_s3_rank_edges`｜CI junit 0.532 秒、0.001 秒。NVDA 可见最新一期与上游格式化后一致：占比 12.3%、回补 3.2 天、较上期 −4.8%、6/5 结算，并标空头拥挤。截点后的 40.0% 和上一期 8.0% 不出现。正好 10%（AMD）和正好 5.0 天（AVGO）不标拥挤；5.1 天（AMAT）标空头拥挤。MRVL 无数据显示暂缺。
+- S2｜通过｜`test_s2_theme_average_skips_missing_members`｜CI junit 0.125 秒。AI 算力芯片平均空头占比是 (12.34+10.0+3.0)/3，页面写 8.4%（覆盖 3/4）。MRVL 不计入分母。
+- S3｜通过｜`test_s3_put_call_uses_total_then_equity`｜CI junit 0.330 秒。当日有全市场时页面写「1.50（全市场），近 20 个交易日 100 分位，偏谨慎」。分位是最近 20 个交易日里小于等于当日值的个数 / 20 × 100，窗口外的 9.99 不计入。去掉当日全市场后改写「0.11（股票期权），近 20 个交易日 5 分位，偏乐观」。页面不出现 total、equity。正好 80 和正好 20 不加这两句文案。
+- S4｜通过｜`test_s4_vix_fallback_four_ways`｜CI junit 0.471 秒。市场状态为空且截点前当日 VIXCLS 为 19.03 时显示 19.03 并注来源 FRED；前一日 11.11 和截点后 99.99 不出现。市场状态为 18.72 时，无论 FRED 有无，都显示 18.72 且不注来源。两者都无时显示 VIX 暂缺。
+- S5｜通过｜`test_s5_short_and_option_freshness`｜CI junit 0.309 秒。默认空头数据新鲜、结算 6/5；期权数据新鲜、最近 6/15。结算日提前到 21 天为过期，20 天仍新鲜。期权最近日期早于 2 个交易日为过期。
+- S6｜通过｜`test_s6_two_pages_stay_in_plain_language`、B-048 至 B-056、A-017、`make phase1-test`、本次 CI｜CI junit 0.450 秒。可见文本没有英文代号，也没有 4 位以上小数。同一次 CI 里 B-048 十一项、B-049 九项、B-050 五项、B-051 十一项、B-052 七项、B-053 十一项、B-054 十项、B-055 十项、B-056 六项、A-017 八项通过。709 passed、21 deselected、215.511 秒。diff 只含上面的授权路径。
+- 夹具页文本（交易日 2037-06-15）：
+  - 市场总览：期权看跌/看涨比 1.50（全市场），近 20 个交易日 100 分位，偏谨慎。VIX 19.03，来源 FRED。
+  - 我的标的：NVDA 空头拥挤，占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算。AMD 占比 10.0%，回补 1.0 天，较上期 0.0%，6/5 结算。AVGO 回补 5.0 天，不标拥挤。AMAT 回补 5.1 天，空头拥挤。MRVL 暂缺。AI 算力芯片平均空头占比 8.4%（覆盖 3/4）。
+
 ## B-057  进行中  2026-10-24 20:07 北京
 
 - PR #69，head `87f84e0`。https://github.com/XuQingsong/inves-cog/pull/69 。没有合并。
