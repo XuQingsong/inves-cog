@@ -1,6 +1,8 @@
 """Append-only Alpha Vantage snapshots. These are not valuation formula inputs."""
 
+import json
 import math
+import time as timer
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from uuid import uuid4
@@ -26,17 +28,26 @@ class Client:
         import httpx
 
         # No automatic retries or redirects: one reservation is one HTTP call.
-        response = httpx.get(
+        chunks, size, started = [], 0, timer.monotonic()
+        with httpx.stream(
+            "GET",
             "https://www.alphavantage.co/query",
             params={"function": "EARNINGS_ESTIMATES", "symbol": ticker, "apikey": self.key},
             timeout=20,
             follow_redirects=False,
-        )
+        ) as response:
+            for chunk in response.iter_bytes():
+                size += len(chunk)
+                if size > 2 * 1024 * 1024 or timer.monotonic() - started > 20:
+                    raise TimeoutError("consensus response exceeded bounded read")
+                chunks.append(chunk)
+            status = response.status_code
+        body = b"".join(chunks).decode("utf-8")
         try:
-            raw = response.json()
+            raw = json.loads(body)
         except ValueError:
-            raw = response.text
-        return Response(raw, response.status_code)
+            raw = body
+        return Response(raw, status)
 
 
 def number(value, *, count=False):
