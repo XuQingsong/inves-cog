@@ -1,5 +1,11 @@
 # A 线回报
 
+## A-019 / OPS-A014  进行中（M4生产处理已完成；M5冻结输入原地验证）  2026-10-24 17:08 北京
+- 实际08:58:26–08:58:37UTC生产干净快进989850890041ebcc29ec6fb0e7d96bc97a16de4a，含PR67/PR66验收合并。M4终态CHECK迁移sha256 f11adcbf6dc9642ed6f0448db6094edbf2b7b662774c3cd1d95d48381ff956b5实际执行；role_trading精确守卫expired8=4旧单+4孤儿，剩余pending1。账本除pending/lifecycle外hash不变，重复清理already_reconciled0。paper_plan783294→1331874、review恢复1331915，其余11运行PID保持。私有a019-m4-b056-deployment-20261024.json，非仅命令发出；未手工模型/历史成交补跑/新权限。
+- M5红灯本地c57be4f实际1failed（阻止全标的装载），实现后M5离线14passed/1deselected0.79s，ruff/format/diff通过。候选仅service.build双遍按标的读取完整历史：先全部PE标量，再逐标的估值，保留跨标的peer fallback及显式source回放路径，未改公式/PIT字段。
+- 59只10-22生产输入在同一REPEATABLE READ READ ONLY快照冻结，私有60pickle合235121857字节、最大87293608；导出过程峰值981060KiB，**这是快照导出开销，不是修复后内存通过证据**。无业务运行或DB写入/模型调用。
+- 将该生产衍生快照传Mac被自动审批明确拒绝，原因未明确覆盖生产数据外传；未绕过。改服务器私有目录原地验证，仅输出指标/哈希。候选验证独立unit inves-cog-a019-m5-after-20261024，硬500MiB/MemorySwapMax0/CPU100%/RuntimeMaxSec1800，不访问DB/网络/模型，不改生产服务代码。此时尚待真实结果；旧基线后续同输入独立受限运行，不与候选并行挤压生产。整单未完成。
+
 ## A-019 / OPS-A014  已收到（已验收版本部署；随后M5分批读取）  2026-10-24 17:00 北京
 - 最新main989850890041ebcc29ec6fb0e7d96bc97a16de4a已含PR67验收merge1bce11b686542ce86ebc98d6bf4badda026914d1及PR66验收merge2902e8125e795f60df8a18c9ea24d32bef06113d；control A运行。需求方“运行时长上限暂停”是历史说明，不覆盖UD-A37/38持续开启及当前运行控制，不重复问恢复。按A014答复补充二十四顺序执行。
 - 变更先记：生产快进上述已验收main，仅运行M4 phase1_m4_0002_order_terminal_states.sql扩CHECK，无新权限/账号；以role_trading执行4旧单+4孤儿精确守卫清理，保留现金/持仓/成交/历史计划，重载paper_plan。PR67完整head a60325891ace1a111c7e96f92e0f1a21d593d75a/CI40069744974 success693passed复用。先核无活动纸面job及既有receipt防重，限定120秒，实际完成后再报结果。
