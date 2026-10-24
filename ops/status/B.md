@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-053  进行中  2026-10-24 11:21 北京
+
+- PR #63，head `8108183`。https://github.com/XuQingsong/inves-cog/pull/63 。没有合并。本地 `make phase1-test`：623 passed、21 deselected，用时 109.512 秒。这一 head 的 CI 还在跑，不标已完成。没有部署，没有调用真实模型。
+- V10｜本地通过｜`test_v10_valuation_display_copies_payload_and_hides_price`｜junit 0.224 秒。NVDA 当前 PE 22.8 复制 `derived.pe`；p25/p50/p75 为 20/30/45，隐含增速 27.7，营收三年 110，EPS 三年 23.6，与 payload 逐值相等。账户页和标的页 HTML 有这些数，没有中性价 90，也没有 4321。AMD 反解失败显示“无法反解：价格不在区间”，状态仍是“模型不适用”。AVGO `unvalued` 且 payload 里的数字是 0，页面只写“未估值（金融）”，估值格没有 0。
+- V4｜本地通过｜`test_v4_scores_and_valuation_are_copied`｜junit 0.127 秒。偏离超过 2 倍仍标“模型不适用”，估值对象里没有 neutral。V5｜本地通过｜`test_v5_status_follows_queries`｜junit 0.130 秒。新闻、VIX、M9、订单、计划的状态切换与上一头相同。同一次 phase1 里 V1–V3、V6–V9 的测试也通过。
+
 ## B-053  已收到  2026-10-24 11:12 北京
 
 - 需求方复核 PR #63 head `1c60eed`：V1–V9 通过，V10 未交付。同一 PR 补估值展示：任何情况下不展示合理价或中性价；改为当前 PE、`payload.inputs` 的 pe_p25/p50/p75、`implied_growth` 与 `rev_cagr_3y`/`eps_growth`；反解失败显示 `implied_reason`；`unvalued` 显示“未估值（原因）”，不显示 0。其余不动。授权仍是 `src/inves_cog/web/` 与 `tests/m10/`。不改上游、迁移、合同，不调模型，不部署。
