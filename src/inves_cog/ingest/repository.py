@@ -419,7 +419,7 @@ class Repository:
                 CASE WHEN holding_related THEN 0 ELSE 1 END,
                 published_at DESC NULLS LAST,first_seen_at DESC,info_id
             LIMIT %s""",
-                (cutoff, as_of, cutoff, as_of, POOL_TICKERS, cutoff, as_of, limit),
+                (cutoff, as_of, cutoff, as_of, list(POOL_TICKERS), cutoff, as_of, limit),
             ).fetchall()
         ]
 
