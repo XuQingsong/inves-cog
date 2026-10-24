@@ -647,6 +647,12 @@ def page_brief_stock(connection, day, clock, symbol):
             "fy2": _estimate_view(consensus_raw["rows"].get("FY2"), member["price"]),
         }
     position = _position_block(symbol, held, member, gate, context, valuation)
+    from inves_cog.web.risk_brief import EMPTY, RISK_FORMULAS, portfolio_view
+
+    if held:
+        found = portfolio_view(connection, day, context)["by_ticker"].get(symbol)
+        position["risk_text"] = EMPTY if found is None else found["text"]
+        position["risk_level"] = None if found is None else found["level"]
     distance = position.get("disaster_gap")
     buyable = None if gate is None else gate["entry_pass"]
     if held:
@@ -707,7 +713,7 @@ def page_brief_stock(connection, day, clock, symbol):
             {"label": "估值", "value": value_stamp},
             {"label": "一致预期", "value": consensus_stamp},
         ],
-        "formulas": list(STOCK_FORMULAS),
+        "formulas": [*STOCK_FORMULAS, *RISK_FORMULAS],
         "label": PAPER_LABEL,
     }
 
