@@ -218,6 +218,9 @@ class ExecutionEngine:
                 if self.mode == "paper":
                     self.record_terminal(intent, "canceled", "事件冷静期，撤销买单")
                 continue
+            if not published:
+                keep.append(intent)
+                continue
             if published:
                 estimated = self.estimated_notional(intent)
                 if estimated is not None and estimated <= 0:
