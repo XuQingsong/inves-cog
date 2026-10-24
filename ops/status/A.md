@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-019  进行中（P1估值已到30分钟截止，准备限定终止，不重试）  2026-10-24 14:24 北京
+- 估值05:53:01UTC起，原1800秒截止06:23:01UTC；06:23:08仅读回执仍running，先前进程为Dl/I/O等待，内部SIGALRM尚未形成最终回执，不能把设定截止说成已退出。
+- 变更先记：仅针对私有一次性脚本真实PID1241057及外层1241056核cmdline/receipt，先TERM并短暂等待、必要时KILL，确认进程退出后才把该次未结束valuation_v1 job标真实failed/结束时间和预算终止原因，并更新回执；若内核I/O阻塞无法退出就如实记“终止请求已发、进程仍在”，不假报结束。财务11351/评分11353不动，不再触发三任务，也不扩大30分钟预算/进入新批次。
+- A019最终代码head a60325891ace1a111c7e96f92e0f1a21d593d75a/CI40069744974仍运行，代码验证与P1估值失败/终止分开；生产订单迁移与清理仍未执行。
+
 ## A-019  进行中（真实DB测试抓到原因未更新并修正；最终head重新CI）  2026-10-24 14:20 北京
 - 首head80c5ebd0afc4f151ef09a3d86a2c6b9dcf88bc8e/[CI40069260308](https://github.com/XuQingsong/inves-cog/actions/runs/40069260308)实际**1failed/691passed/21deselected/170.66秒**：真实一次性DB中8单状态已expired，但既有订单upsert未UPDATE顶层reason_zh，原因仍旧值。修复为同时更新reason_zh（未改断言）；f1f556287c05895321ed0e82aba66157857a09b3/CI40069603489随后运行，不冒称首head通过。
 - 自验另发现未发布计划会清空pending造成孤儿，同属本任务终态缺陷；已先提交真实失败测试b1f9567（1failed/14deselected），再修未发布时保留活动pending。**最终head a60325891ace1a111c7e96f92e0f1a21d593d75a** 已推原PR67（仍draft），准确新CI待实回；相关**37passed/3deselected/7.93秒**，ruff/format/diffcheck通过。90笔精确回归仍在该套测试，源规则/上限未改。
