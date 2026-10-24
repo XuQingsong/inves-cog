@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-059  进行中  2026-10-25 03:15 北京
+
+- PR #74，head `2398834`。https://github.com/XuQingsong/inves-cog/pull/74 。没有合并。
+- 本地 `make phase1-test`：743 passed、21 deselected、134.12 秒。含 `tests/m10/test_b059.py` 7 项。
+- 纸面账户有风险提示和组合风险。市场总览在「对我意味着什么」后追加红色、橙色计数和第一条红色项。持有的个股页在「我的仓位」顶部显示该股风险。阈值来自参数文件或常量，不改规则 A 的订单。
+- 下一步：等该 head 的 CI。通过后再写已完成，并附三页文本摘要。
+
 ## B-059  已收到  2026-10-25 02:59 北京
 
 - 任务：持仓风险高亮。B-058 已关单。基于 main 新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-059.md` 的 K1–K7。只读上游，不调模型，不部署。
