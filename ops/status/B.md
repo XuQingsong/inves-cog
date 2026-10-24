@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-058  进行中  2026-10-24 23:42 北京
+
+- PR #72，head `689fe8e`。https://github.com/XuQingsong/inves-cog/pull/72 。没有合并。
+- 本地 `make phase1-test`：728 passed，21 deselected，132.72 秒，exit 0。`test_b058.py` 9 项通过，D1–D8 在同一次套件里。
+- 新路径 `/s/{symbol}`，我的标的和纸面账户的代码链到此页。旧 `/stock/{symbol}` 保留。派生值在 `stock_brief.py`，不重算分数、状态、估值，不展示合理价。
+- 下一步：等 head `689fe8e` 的 CI。通过后写已完成，附 D1–D8 证据和 NVDA、LITE、COHR 三页文本摘要。
+
 ## B-058  已收到  2026-10-24 23:20 北京
 
 - 任务：投资者个股详情页。基于 main（含 B-057）新开 PR。授权 `src/inves_cog/web/` 与 `tests/m10/`。提交前完成 `ops/answers/B-058.md` 的 D1–D8。只读上游，不调模型，不部署。
