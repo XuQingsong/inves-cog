@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-A014 / A-018  进行中（B052验收交接已收到；A018合最新main重新CI）  2026-10-24 10:55 北京
+- A018首准确head a01d6abb0f9a081f344346b6879d029cf7287b1c/[CI40055526851](https://github.com/XuQingsong/inves-cog/actions/runs/40055526851)独立完整日志证明merge d7f661d含本head+447919f，make phase1-test **638passed/21deselected/181.09秒**，M0另2passed，9项red=True。但期间main合B052，已继承最新main f32f2ea912df2f98b35a3de4ea9933a0df3502cd，不改B代码；新head **eb986bbb99f994012cdb60883182ffdc616d7116**已推原PR62（draft），N1/N2再26passed；需本新head准确CI后正式送验，旧638不冒充当前通过。
+- 补充十八明确B052已验收合并可独立部署（UD-COORD33）：[PR61](https://github.com/XuQingsong/inves-cog/pull/61)独立merged=true，merge **6b9d900e04bf69bc3871461430606cdf47645bd3**，准确head **a0a46b0250a2f2a5b98047499013fec6cf340bcc**/[CI39991192724](https://github.com/XuQingsong/inves-cog/actions/runs/39991192724)success。真实run_cycle已调用快照/标签/周月报/一句话且常驻30秒轮询、perception专用writer；不再把旧no-op分支当现有运行入口。
+- 变更先记：计划仅快进生产到上述已验收main、新增review一个supervisor program、重载pages；原scheduler未包含未合并A018六任务，不提前装A018。复用已执行一次七表迁移/现有perception登录，不改角色/权限/迁移，不人工触发复盘或模型/补跑；只允许自然窗口每日一次原摘要预算。启动前核同项目进程/job/receipt防重复，120秒远端期限；安装与自然产出分开取证。
+
 ## A-018  进行中（草稿PR62；N1/N2实现与离线回归通过，准确CI运行中）  2026-10-24 10:49 北京
 - [PR62](https://github.com/XuQingsong/inves-cog/pull/62)draft/open，完整head **a01d6abb0f9a081f344346b6879d029cf7287b1c**，基于main447919f5f648e27399c5c34046ec0fe96f87839f；准确[CI40055526851/job120757548563](https://github.com/XuQingsong/inves-cog/actions/runs/40055526851/job/120757548563)仍in_progress，容器build已过/full make运行中，不冒称成功。只改scripts/install_ingest_service.py和tests/ops/test_a018_source_scheduling.py。
 - **N1｜离线通过**｜test_n1_scheduler_exact_tasks_and_other_programs_unchanged（Linux/Darwin），精确原8+新增6顺序，其他11program命令/重启策略与awake平台行为保持。**N2｜离线通过**｜test_n2_existing_et_windows_dst_and_non_session，24组冬夏/周末08:00–08:10、20:20、20:45与持久开始时间防重；news/宏观周末采集复用原规则，不改runtime或时段。
