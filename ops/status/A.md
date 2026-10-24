@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-018 / UD-COORD-36  已收到（新闻提取范围修正，当前唯一开发任务）  2026-10-24 23:38 北京
+- 最新A020答复已明确独立核验23成功/78条并完成，PR71 CI通过送验即可，不阻塞下一项；据此开始A018范围PR，不开始A021。PR71已ready/headbab95f8/准确CI40106973971 success720passed保持，未自行合并。
+- 变更先记：仅M1 repository enrichment队列选择处统一过滤news published_at>=2026-10-21 00:00 America/New_York（UTC04:00），旧pending新闻保留原始数据/状态，只在extraction_source添加“补采未提取（UD-COORD-36）”标记；不伪称提取ok，不删新闻或倒填时间。未知发布时间news保守不送模型，非news含SEC不受该时间边界影响；轮询有无队列与实际取批复用同一选择，避免空转/漏标。
+- 先提交隔离DB边界/标记幂等/留存/非news与计数客户端测试，再实现，验收合并前不恢复enrich/news。已向需求方PR62 comment6386110680核费用单价及30元是否含已发生14元，以便部署时准确硬止损；这不是用户再审批、不阻碍当前离线实现，未澄清前不恢复真实调用。稳态2500/补采6000及总30元边界保持，不新增源/权限/迁移。
+
 ## A-020 部署回归  进行中（PR71正式送验，线上首批已完成）  2026-10-24 23:31 北京
 - [PR71](https://github.com/XuQingsong/inves-cog/pull/71)ready/open，完整head**bab95f8876c2c37c520b905a388a353ad9638b41**，准确[CI40106973971/job120910573917](https://github.com/XuQingsong/inves-cog/actions/runs/40106973971/job/120910573917)实际success **720passed/21deselected/148.80秒**；独立日志checkoutdcd0b24合本head与main12ae132abce0110d415f829dc355c80501b2b4fa，DB四项全过，M0另2passed0.44秒/九红门禁保持。先红d774064/CI40106654455真实1failed719passed，后实现只新增新表业务ACL重建，未改默认授权/其他表。
 - 生产权限在启动前已正确收窄、A020首批实际24请求/23成功/78条/限流停止已完成并独立核计数稳定，详下条；PR71合并后不重跑CREATE TABLE、不重启采集或模型。等待需求方验收本部署回归，随后落实已下达A018范围PR，再A021；不自动合并，不开展第二开发任务。下一轮按最新仓库与实际进度继续，a-github保持开启。
