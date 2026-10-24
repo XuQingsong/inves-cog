@@ -159,3 +159,11 @@ def test_p7_frozen_90_trades_still_match_without_importing_muse():
     comparison = run_frozen()["comparison"]
     assert comparison["expected_count"] == comparison["actual_count"] == 90
     assert comparison["differences"] == [] and comparison["match_rate"] == 1
+
+
+def test_p4_unpublished_plan_preserves_active_pending_instead_of_orphaning_it():
+    e = engine()
+    order = queue(e)
+    plan = e.plan(MONDAY, tradable=10, with_bars=0)
+    assert not plan["published"] and plan["orders"] == []
+    assert e.pending == [order] and e.terminal_orders == []
