@@ -1,6 +1,8 @@
 """Investor brief pages. Simple derived values live only in this module."""
 
+import re
 from datetime import timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 import yaml
@@ -44,17 +46,46 @@ STYLE_LABELS = {
     "rsp_spy": "等权相对市值加权",
     "iwm_qqq": "小盘相对纳指",
 }
+ETF_LABELS = {
+    "XLP": "必需消费",
+    "KRE": "区域银行",
+    "XLU": "公用事业",
+    "XLV": "医疗",
+    "XLE": "能源",
+    "XLF": "金融",
+    "XLI": "工业",
+    "XLK": "科技",
+    "XLY": "可选消费",
+    "XLC": "通信",
+    "SMH": "半导体",
+    "SOXX": "半导体",
+    "IGV": "软件",
+}
+AI_SECTORS = {
+    "AI 算力芯片",
+    "AI 网络与光通信",
+    "AI 服务器与算力云",
+    "存储",
+    "半导体设备",
+    "数据中心电力与散热",
+}
+THEME_SOLD = -0.05
+THEME_DOWN = -0.01
+THEME_UP = 0.01
+THEME_VOLUME = 1.3
+THEME_RSI = 35
+_RULE_ID = re.compile(r"M-\d+")
 FORMULAS = (
     "主题平均涨跌 = 该主题有收益的成员当日收益算术平均。",
     "成交量倍数 = 当日成交量 / 前20日均量。",
-    "止盈线 = 成本 × m4.sell.double_price。",
-    "灾难止损线 = max(峰值, 现价) × m4.sell.disaster_peak_fraction。",
-    "200日线 = 现价 / (1 + price_vs_ma200/100)。",
-    "50日线 = 现价 / (1 + dev50/100)。",
-    "一年高点 = 现价 / (1 + drawdown252/100)。",
-    "估值展示复制打分 derived.pe 与估值 payload，不重算，不展示中性价。",
-    "轮动：IWM减QQQ大于2个百分点，且上涨家数大于下跌家数。",
-    "普跌：SPY小于等于-2%，且上涨家数/下跌家数小于0.5。",
+    "止盈线 = 成本 × 卖出参数中的翻倍倍数。",
+    "灾难止损线 = 峰值与现价的较大者 × 卖出参数中的灾难比例。",
+    "200日线 = 现价 / (1 + 距200日线百分比/100)。",
+    "50日线 = 现价 / (1 + 距50日线百分比/100)。",
+    "一年高点 = 现价 / (1 + 距一年高点百分比/100)。",
+    "估值展示复制打分里的市盈率与估值输入，不重算，不展示中性价。",
+    "轮动：罗素小盘减纳指100大于2个百分点，且上涨家数大于下跌家数。",
+    "普跌：标普500小于等于-2%，且上涨家数/下跌家数小于0.5。",
     "其余为分化。",
     "距200日线、距一年高点、RSI、四本账直接取上游，页面不重算。",
 )
@@ -200,14 +231,152 @@ def _sectors():
     return ordered, grouped
 
 
-def _prefer(rows, key):
-    chosen = {}
+def _catalog(connection, grouped):
+    rows = _rows(connection, "SELECT basket_id, level, name, members FROM graph.baskets", ())
+    items = []
+    by_id = {}
+    for row in rows:
+        members = set(_tickers(row["members"]))
+        items.append({"id": row["basket_id"], "level": row["level"], "name": row["name"], "members": members})
+        by_id[row["basket_id"]] = row["name"]
+    sector_of = {ticker: sector for sector, tickers in grouped.items() for ticker in tickers}
+    return {"rows": items, "by_id": by_id, "sectors": grouped, "sector_of": sector_of}
+
+
+def _by_session(rows, key):
+    """Keep close and post apart. Page returns use close only."""
+    close, post = {}, {}
     for row in rows:
         name = key(row)
-        current = chosen.get(name)
-        if current is None or (row.get("session") == "post" and current.get("session") != "post"):
-            chosen[name] = row
-    return chosen
+        session = row.get("session")
+        if session == "close":
+            close[name] = row
+        elif session == "post":
+            post[name] = row
+    return close, post
+
+
+def half_up(value, digits):
+    quant = Decimal("1").scaleb(-digits)
+    return Decimal(str(value)).quantize(quant, rounding=ROUND_HALF_UP)
+
+
+def signed_percent(value, *, digits=2):
+    """Percent points already scaled. Negative uses the mockup minus sign."""
+    if value is None:
+        return MISSING
+    number = float(value)
+    if number < 0:
+        body = f"−{abs(number):.{digits}f}"
+    elif number > 0:
+        body = f"+{number:.{digits}f}"
+    else:
+        body = f"{number:.{digits}f}"
+    return body + "%"
+
+
+def format_fraction(value):
+    if value is None:
+        return MISSING
+    return signed_percent(value * 100)
+
+
+def format_points(value):
+    if value is None:
+        return MISSING
+    return signed_percent(value)
+
+
+def theme_sentence(average, volume, rsi_values):
+    """One line for a theme. Thresholds are fractions, same units as market returns."""
+    if average is None:
+        return f"当日收益{MISSING}。"
+    if average <= THEME_SOLD:
+        text = "被集中抛售"
+        if volume is not None and volume > THEME_VOLUME:
+            text += "，放量"
+        usable = [value for value in rsi_values if value is not None]
+        if usable:
+            mean = sum(usable) / len(usable)
+            text += f"；RSI 均值 {int(half_up(mean, 0))}"
+            if mean < THEME_RSI:
+                text += "，已超卖"
+        return text
+    if average <= THEME_DOWN:
+        return "跟随下跌"
+    if average > THEME_UP:
+        return "资金流入，走强"
+    return "平稳"
+
+
+def human_reason(text):
+    """Drop rule ids. Quota and cooldown use the mockup sentences."""
+    raw = "" if text is None else str(text)
+    if "额度已满" in raw:
+        return "该档买入额度已满，暂不加仓"
+    if "冷却" in raw:
+        return "卖出后冷却期，暂不加仓"
+    cleaned = _RULE_ID.sub("", raw)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" ：;；")
+    if cleaned.startswith("待成交"):
+        cleaned = cleaned[len("待成交") :].strip(" ：")
+    return cleaned
+
+
+def short_unvalued_text(text):
+    """Brief pages show a short Chinese cause. The raw reason stays on the card payload."""
+    raw = "" if text is None else str(text)
+    prefix = "未估值（"
+    if raw.startswith(prefix) and raw.endswith("）"):
+        return f"未估值（{_short_reason(raw[len(prefix) : -1])}）"
+    if not raw:
+        return "未估值"
+    return f"未估值（{_short_reason(raw)}）"
+
+
+def _short_reason(text):
+    body = text.strip()
+    if not body:
+        return "原因待补充"
+    folded = body.lower()
+    if "周期" in body and ("pe" in folded or "参数" in body):
+        return "周期股行业参数缺失"
+    if "亏损" in body and "增长" in body:
+        return "亏损且无增长"
+    if "金融" in body:
+        return "金融股不适用"
+    if "方法异常" in body or "三档" in body:
+        return "估值方法异常"
+    if "上市单位" in body:
+        return "上市单位未核实"
+    if "每股收益" in body or "eps" in folded or "缺少输入" in body:
+        return "缺少每股收益数据"
+    if ";" in body or "；" in body:
+        head = re.split(r"[;；]", body, maxsplit=1)[0].strip()
+        if head and head != body:
+            return _short_reason(head)
+    if re.search(r"[A-Za-z]", body):
+        return "原因待补充"
+    return body
+
+
+def _cjk(text):
+    return any("\u4e00" <= char <= "\u9fff" for char in text)
+
+
+def display_name(group_id, catalog):
+    if group_id in INDEX_LABELS:
+        return INDEX_LABELS[group_id]
+    if group_id in STYLE_LABELS:
+        return STYLE_LABELS[group_id]
+    if group_id in ETF_LABELS:
+        return f"{ETF_LABELS[group_id]} {group_id}"
+    named = catalog["by_id"].get(group_id)
+    if named:
+        return named
+    if _cjk(group_id) or group_id in catalog["sectors"]:
+        return group_id
+    return group_id
 
 
 def _number(value):
@@ -252,11 +421,11 @@ def _leaders(groups):
     return usable[:count], list(reversed(usable[-count:])) if count else []
 
 
-def _named(row):
+def _named(row, catalog):
     return {
         "id": row["group_id"],
         "kind": row["group_kind"],
-        "name": INDEX_LABELS.get(row["group_id"], STYLE_LABELS.get(row["group_id"], row["group_id"])),
+        "name": display_name(row["group_id"], catalog),
         "ret": row["ret"],
     }
 
@@ -265,7 +434,7 @@ def _oneliner(down, up, judgment):
     def side(rows, verb):
         if not rows:
             return f"领{verb}{MISSING}"
-        shown = "、".join(f"{row['name']}{row['ret'] * 100:.2f}%" for row in rows[:2])
+        shown = "、".join(f"{row['name']}{format_fraction(row['ret'])}" for row in rows[:2])
         return f"{shown}领{verb}"
 
     return f"{side(down, '跌')}，{side(up, '涨')}，判断：{judgment}。"
@@ -528,22 +697,78 @@ def _sell_history(plans, state):
     return found
 
 
+def _pending_line(order):
+    label = human_reason(order.get("reason_zh")) or "订单"
+    start = order.get("signal_date") or order.get("trade_date") or MISSING
+    return f"待成交：{label}（{start} 起）"
+
+
 def _next_step(ticker, pending, plan_payload):
     for order in pending:
-        if order["ticker"] == ticker and order.get("reason_zh"):
-            return order["reason_zh"]
+        if order["ticker"] == ticker:
+            return _pending_line(order)
     payload = plan_payload if isinstance(plan_payload, dict) else {}
     for order in payload.get("orders") or []:
         if isinstance(order, dict) and order.get("ticker") == ticker and order.get("reason_zh"):
-            return order["reason_zh"]
+            return human_reason(order.get("reason_zh")) or "继续持有"
     for skip in payload.get("skips") or []:
         if isinstance(skip, dict) and skip.get("ticker") == ticker and skip.get("reason_zh"):
-            return skip["reason_zh"]
+            return human_reason(skip.get("reason_zh")) or "继续持有"
     return "继续持有"
 
 
-def _event_rows(anomalies, events, reports, fresh):
-    pool = [row for row in anomalies if row["universe"] == "pool"]
+def _style_only(baskets):
+    names = [str(item) for item in baskets if item]
+    return bool(names) and all(item in STYLE_LABELS for item in names)
+
+
+def _visible_anomalies(anomalies):
+    chosen = []
+    for row in anomalies:
+        if row["universe"] != "pool":
+            continue
+        if _style_only(row["baskets"] or []):
+            continue
+        chosen.append(row)
+    return chosen
+
+
+def _event_title(baskets, tickers, direction, catalog):
+    real = [str(item) for item in baskets if item and str(item) not in STYLE_LABELS]
+    count = len(tickers)
+    down = direction not in {"up", "上涨"}
+    if len(real) <= 1:
+        name = display_name(real[0], catalog) if real else "、".join(tickers[:4])
+        verb = "集体下跌" if down else "集体上涨"
+        return f"{name} {count} 只{verb}"
+    name = _covering_theme(tickers, catalog) or (display_name(real[0], catalog) if real else "、".join(tickers[:4]))
+    verb = "同日下跌" if down else "同日上涨"
+    return f"{name} {count} 只{verb}"
+
+
+def _covering_theme(tickers, catalog):
+    wanted = set(tickers)
+    best = None
+    for item in catalog["rows"]:
+        covered = len(item["members"] & wanted)
+        if not covered:
+            continue
+        level = 1 if item["level"] == "L2" else 0
+        rank = (covered, level)
+        if best is None or rank > best[0]:
+            best = (rank, item["name"])
+    for sector, members in catalog["sectors"].items():
+        covered = len(set(members) & wanted)
+        rank = (covered, 1)
+        if covered and (best is None or rank > best[0]):
+            best = (rank, sector)
+    if best is None:
+        return None
+    return best[1]
+
+
+def _event_rows(anomalies, events, reports, fresh, catalog):
+    pool = _visible_anomalies(anomalies)
     pool.sort(key=lambda row: (-(row["max_abs_z"] or -1), row["anomaly_id"]))
     chosen = []
     for row in pool[:3]:
@@ -551,14 +776,13 @@ def _event_rows(anomalies, events, reports, fresh):
         explanation, cited = _explanation(reports.get(row["anomaly_id"]))
         names = _tickers(row["members"])
         baskets = list(row["baskets"] or [])
-        title = (baskets[0] if baskets else "、".join(names[:4])) + f" {len(names)}只"
         chosen.append(
             {
                 "anomaly_id": row["anomaly_id"],
                 "event_id": None if view is None else view["event_id"],
                 "max_abs_z": row["max_abs_z"],
                 "direction": row["direction"],
-                "title": title,
+                "title": _event_title(baskets, names, row["direction"], catalog),
                 "members": names,
                 "explanation": explanation,
                 "cited_at": cited,
@@ -566,6 +790,16 @@ def _event_rows(anomalies, events, reports, fresh):
             }
         )
     return chosen
+
+
+def _member_events(anomalies, catalog):
+    membership = {}
+    for row in _visible_anomalies(anomalies):
+        names = _tickers(row["members"])
+        title = _event_title(list(row["baskets"] or []), names, row["direction"], catalog)
+        for name in names:
+            membership.setdefault(name, []).append(title)
+    return membership
 
 
 def _statuses(fresh, vix, overlay, pending_late, plan, valuation_status):
@@ -601,7 +835,7 @@ def _context(connection, day, clock):
         return None, closed
     pool, _etfs = _universe()
     order, grouped = _sectors()
-    daily = _prefer(
+    daily, _daily_post = _by_session(
         _rows(
             connection,
             """
@@ -613,20 +847,19 @@ def _context(connection, day, clock):
         ),
         lambda row: row["ticker"],
     )
-    rotation = list(
-        _prefer(
-            _rows(
-                connection,
-                """
-                SELECT group_kind, group_id, session, ret
-                FROM marketstate.rotation
-                WHERE trade_date = %s AND group_kind = ANY(%s)
-                """,
-                (day, ["index", "style", "sector", "l3"]),
-            ),
-            lambda row: (row["group_kind"], row["group_id"]),
-        ).values()
+    rotation_close, rotation_post = _by_session(
+        _rows(
+            connection,
+            """
+            SELECT group_kind, group_id, session, ret
+            FROM marketstate.rotation
+            WHERE trade_date = %s AND group_kind = ANY(%s)
+            """,
+            (day, ["index", "style", "sector", "l3"]),
+        ),
+        lambda row: (row["group_kind"], row["group_id"]),
     )
+    rotation = list(rotation_close.values())
     market = _one(connection, "SELECT * FROM marketstate.market WHERE trade_date = %s", (day,))
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
@@ -664,6 +897,8 @@ def _context(connection, day, clock):
         "grouped": grouped,
         "daily": daily,
         "rotation": rotation,
+        "rotation_post": rotation_post,
+        "catalog": _catalog(connection, grouped),
         "market": market,
         "anomalies": anomalies,
         "events": events,
@@ -688,6 +923,62 @@ def _index_ret(rotation, name):
         if row["group_kind"] == "index" and row["group_id"] == name:
             return row["ret"]
     return None
+
+
+def _post_ret(context, name):
+    row = context["rotation_post"].get(("index", name))
+    return None if row is None else row["ret"]
+
+
+def _implication(context, down_count, wide_count):
+    pool = context["pool"]
+    sector_of = context["catalog"]["sector_of"]
+    ai_names = [ticker for ticker in pool if sector_of.get(ticker) in AI_SECTORS]
+    heavy = bool(pool) and len(ai_names) >= len(pool) / 3
+    lead = "我的标的池偏重 AI 链，" if heavy else ""
+    base = f"{lead}今天 {len(pool)} 只里 {down_count} 只下跌、{wide_count} 只波动超过 7%"
+    return f"{base}；{_holdings_clause(context, sector_of)}详见「我的标的」「纸面账户」。"
+
+
+def _holdings_clause(context, sector_of):
+    positions = context["positions"]
+    equity = None if context["ledger"] is None else _number(context["ledger"].get("equity"))
+    ai_held = [ticker for ticker in positions if sector_of.get(ticker) in AI_SECTORS]
+    valued = equity not in (None, 0) and bool(ai_held)
+    ai_value = 0.0
+    for ticker in ai_held:
+        price = _ticker_price(context, ticker)
+        shares = _number(positions[ticker].get("shares"))
+        if price is None or shares is None:
+            valued = False
+            break
+        ai_value += price * shares
+    if valued:
+        shown = int(half_up(ai_value / equity * 100, 0))
+        return f"纸面账户 AI 持仓占 {shown}%，"
+    if ai_held:
+        fallen = 0
+        for ticker in ai_held:
+            row = context["daily"].get(ticker)
+            ret = None if row is None else row["ret"]
+            if ret is not None and ret < 0:
+                fallen += 1
+        return f"纸面账户 AI 持仓有 {len(ai_held)} 只、当日下跌 {fallen} 只，"
+    fallen = 0
+    for ticker in positions:
+        row = context["daily"].get(ticker)
+        ret = None if row is None else row["ret"]
+        if ret is not None and ret < 0:
+            fallen += 1
+    if positions:
+        return f"纸面账户持仓里当日下跌 {fallen} 只，"
+    return "纸面账户当日没有持仓，"
+
+
+def _ticker_price(context, ticker):
+    score = context["scores"].get(ticker)
+    history = context["bars"].get(ticker) or []
+    return _price(_tech(score), history)
 
 
 def _breadth(daily):
@@ -732,13 +1023,7 @@ def _themes(context, day):
     scores = context["scores"]
     bars = context["bars"]
     positions = context["positions"]
-    anomalies = context["anomalies"]
-    membership = {}
-    for anomaly in anomalies:
-        if anomaly["universe"] != "pool":
-            continue
-        for name in _tickers(anomaly["members"]):
-            membership.setdefault(name, []).append(anomaly["anomaly_id"])
+    membership = _member_events(context["anomalies"], context["catalog"])
     themes = []
     for sector in context["order"]:
         members = []
@@ -754,7 +1039,7 @@ def _themes(context, day):
                 "average": average,
                 "volume_multiple": theme_average([row["volume_multiple"] for row in members]),
                 "held_count": sum(1 for row in members if row["held"]),
-                "buyable_count": sum(1 for row in members if row["entry_pass"] is True),
+                "buyable_count": sum(1 for row in members if row["entry_pass"] is True and not row["held"]),
                 "members": members,
                 "line": _theme_line(sector, average, members),
             }
@@ -772,12 +1057,9 @@ def _themes(context, day):
     return ordered
 
 
-def _theme_line(sector, average, members):
-    if average is None:
-        return f"{sector}当日收益{MISSING}。"
-    held = sum(1 for row in members if row["held"])
-    buyable = sum(1 for row in members if row["entry_pass"] is True)
-    return f"{sector}平均{average * 100:.2f}%，持有{held}，可买{buyable}。"
+def _theme_line(_sector, average, members):
+    volume = theme_average([row["volume_multiple"] for row in members])
+    return theme_sentence(average, volume, [row["rsi"] for row in members])
 
 
 def _holding_row(ticker, position, stock, sell, pending, plan_payload, valuation):
@@ -828,12 +1110,13 @@ def page_brief_market(connection, day, clock):
     if closed is not None:
         return closed
     rotation = context["rotation"]
+    catalog = context["catalog"]
     spy, qqq, iwm = (_index_ret(rotation, name) for name in ("SPY", "QQQ", "IWM"))
     advancers, decliners = _breadth(context["daily"])
     judgment = judge(spy, qqq, iwm, advancers, decliners)
     groups = [row for row in rotation if row["group_kind"] in {"l3", "sector"}]
     down, up = _leaders(groups)
-    down, up = [_named(row) for row in down], [_named(row) for row in up]
+    down, up = [_named(row, catalog) for row in down], [_named(row, catalog) for row in up]
     styles = []
     by_style = {row["group_id"]: row for row in rotation if row["group_kind"] == "style"}
     for key, label in STYLE_LABELS.items():
@@ -842,13 +1125,11 @@ def page_brief_market(connection, day, clock):
     market = context["market"]
     vix = None if market is None else market["vix"]
     reports = _reports(connection, [row["anomaly_id"] for row in context["anomalies"]])
-    events = _event_rows(context["anomalies"], context["events"], reports, context["fresh"])
+    events = _event_rows(context["anomalies"], context["events"], reports, context["fresh"], catalog)
     pool_returns = [context["daily"][ticker]["ret"] for ticker in context["pool"] if ticker in context["daily"]]
     down_count = sum(1 for value in pool_returns if value is not None and value < 0)
     wide_count = sum(1 for value in pool_returns if value is not None and abs(value) >= MOVE_BAND)
-    implication = (
-        f"标的池{len(context['pool'])}只里{down_count}只下跌、{wide_count}只波动超过7%。详见我的标的与纸面账户。"
-    )
+    implication = _implication(context, down_count, wide_count)
     shock = False if market is None else bool(market["shock_flag"])
     if shock:
         mood = "情绪：冲击"
@@ -871,9 +1152,9 @@ def page_brief_market(connection, day, clock):
         "judgment": judgment,
         "headings": ["市场总览", funds, mood, "今天的大事"],
         "indexes": [
-            {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy},
-            {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq},
-            {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm},
+            {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy, "post": _post_ret(context, "SPY")},
+            {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq, "post": _post_ret(context, "QQQ")},
+            {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm, "post": _post_ret(context, "IWM")},
         ],
         "advancers": advancers,
         "decliners": decliners,
@@ -904,7 +1185,7 @@ def page_brief_stocks(connection, day, clock):
     if worst is None:
         sentence = f"主题收益{MISSING}。"
     else:
-        sentence = f"跌幅最大的主题是{worst['sector']}，平均{worst['average'] * 100:.2f}%。"
+        sentence = f"跌幅最大的主题是{worst['sector']}，平均{format_fraction(worst['average'])}。"
     return {
         "page": "/stocks",
         "date": day,
@@ -951,7 +1232,8 @@ def page_brief_account(connection, day, clock):
     day_change = None if equity is None or previous in (None, 0) else equity / previous - 1
     drawdown = None if equity is None or peak in (None, 0) else equity / peak - 1
     near = sum(1 for row in holdings if row["near_disaster"])
-    sentence = f"持仓{len(holdings)}只，距灾难线过近{near}只，待成交{len(context['pending'])}笔。"
+    pending_rows = sum(1 for row in holdings if str(row["next_step"]).startswith("待成交"))
+    sentence = f"持仓{len(holdings)}只，距灾难线过近{near}只，待成交{pending_rows}笔。"
     return {
         "page": "/account",
         "date": day,
