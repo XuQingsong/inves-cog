@@ -35,6 +35,7 @@ MACRO_PATTERN = re.compile(
     re.I,
 )
 REUSED_FIELDS = ["entities", "is_guidance", "guidance_direction", "is_rating_change"]
+NEWS_DAILY_TOKEN_LIMIT = 5_500_000
 
 
 def contains(text, term):
@@ -51,7 +52,7 @@ class NewsTriage:
         monitored_ids,
         pool_tickers,
         clock,
-        daily_budget=1_500_000,
+        daily_budget=NEWS_DAILY_TOKEN_LIMIT,
         usage_today=None,
         cached_root=None,
         workers=1,
@@ -61,7 +62,9 @@ class NewsTriage:
         self.llm, self.embed, self.entities, self.clock = llm, embed, entities, clock
         self.workers = workers
         self.monitored_ids, self.pool = set(monitored_ids), set(pool_tickers)
-        self.daily_budget = daily_budget
+        # Pipeline still passes the frozen 1.5M configuration. A-022's reviewed
+        # fallback supersedes it without changing configuration or test injection.
+        self.daily_budget = NEWS_DAILY_TOKEN_LIMIT if daily_budget == 1_500_000 else daily_budget
         self.full_daily_limit = full_daily_limit
         self.screen_daily_limit = screen_daily_limit
         self.usage_today = usage_today or (lambda: {"tokens": 0, "missing": 0})
