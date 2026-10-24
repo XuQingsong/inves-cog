@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-020  进行中（22:40答复样例已实核，阻塞解除）  2026-10-24 22:48 北京
+- 已收到main2b2c6ee的ops/answers/A-020.md，在服务器原地核既有NVDA样例40920字节/41条，完整sha256 f68049c50b9d8293376ea527e1bf94b0557f2ab3baef6adf77b09ca1d00c004f；候选parser真实运行解析未来4条（2FY/2Q），FY1 9.3124/51、FY2 15.9146/52，raw前后相等。无接口/模型请求、无业务写、原文未外传。已补真实字段形态脱敏夹具（精度、历史期保留、额外字段/null、季度排序），本地43passed1.82秒、ruff/diff通过，待新准确CI后送验。
+- 变更依据UD-COORD-36已收：A018仅M1队列选择处允许范围条件/旧新闻标记并配测试；仅10-21 ET起提取，补采6000次/总30元、稳态2500，验收合并后恢复。排在A020送验后，现止损继续，不提前恢复。B057 PR69验收merge9c56e66、按A014仅重载pages部署，独立运维不改B代码。
+- 首次本次状态提交自动权限审查超时（非拒绝/未假定成功），本次重取最新blob后仅重试一次；不以此停离线核验。
+
 ## A-020  阻塞（草稿实现与准确CI通过；缺真实成功响应合同）  2026-10-24 22:06 北京
 - [PR70](https://github.com/XuQingsong/inves-cog/pull/70)仍draft，完整head **b3251f34010ef02254b35cd3ffe85167ee4ae0a0**；[准确CI40100514553/job120891540791](https://github.com/XuQingsong/inves-cog/actions/runs/40100514553/job/120891540791)实际success。独立日志checkout f671277合该head与main0ff3db38e30cdfb875c0c509c3b96fac1b0202ed，**711passed/21deselected/216.07秒**；A020六离线及三隔离DB全过，M0另2passed0.55秒、9红门禁保持。首次CI三失败均旧installer精确program集合，已仅增加授权consensus_snapshots名称与command精确断言，保留所有原task/其他program断言，非弱化测试。本地42passed0.72秒、ruff/diff通过，local commit53c72af历史保留。
 - 已实做：单表只追加request/response/estimate及迁移、既有角色最小授权；请求前持久占额，滚动24h最多24/UTC同ticker防重、跨进程锁/重启计数、未知请求保守停采、Note/Information当日停止、不重试/无重定向、流式时间/大小边界；最久成功更新优先轮询、raw存档及PIT截点、独立调度program。准确DB测试覆盖额度跨连接持久、当日限流、未完成请求、防删改、读写权限与错误最新快照不静默复用旧值。
