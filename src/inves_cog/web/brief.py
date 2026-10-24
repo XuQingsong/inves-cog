@@ -36,6 +36,18 @@ NEWS_GAP = 1
 STALE_NEWS_DAYS = 3
 PENDING_GAP = 2
 PRIOR_DAYS = 20
+# Short interest is crowded only when the share is above 10% or cover days are above 5.
+SHORT_CROWD_PCT = 10
+SHORT_CROWD_DAYS = 5
+SHORT_STALE_DAYS = 20
+OPTION_STALE_SESSIONS = 2
+OPTION_WINDOW = 20
+# Ingest stores CBOE headings as category codes (adapters.cboe_statistics).
+# total is "SUM OF ALL PRODUCTS"; equity is "EQUITY OPTIONS". The page says the Chinese name.
+OPTION_CATEGORIES = (
+    ("total", "全市场"),
+    ("equity", "股票期权"),
+)
 _SHANGHAI = ZoneInfo("Asia/Shanghai")
 _ISO_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})")
 LEADER_COUNT = (4, 5)
@@ -92,6 +104,14 @@ FORMULAS = (
     "普跌：标普500小于等于-2%，且上涨家数/下跌家数小于0.5。",
     "其余为分化。",
     "距200日线、距一年高点、RSI、四本账直接取上游，页面不重算。",
+    "空头占比取最近一期不晚于截点的占流通股百分比，保留 1 位小数；超过 10% 或回补天数超过 5 天标空头拥挤。",
+    "主题平均空头占比 = 有占比的成员算术平均，缺数据的成员不计入分母，并标覆盖数。",
+    (
+        "看跌/看涨比分位 = 最近 20 个交易日（含当日）里小于等于当日值的个数 / 20 × 100；"
+        "高于 80 标偏谨慎，低于 20 标偏乐观。优先全市场，否则股票期权。"
+    ),
+    "VIX 优先用市场状态；为空时用截点前当日宏观数值，并注明来源。",
+    "空头数据超过 20 个自然日为过期，期权数据超过 2 个交易日为过期。",
 )
 
 
@@ -208,6 +228,233 @@ def session_gap(start, end):
     return gap
 
 
+def _metric(value):
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return _number(value)
+
+
+def _visible_cap(day, moment):
+    """A page for this session cannot show a later date, nor a date after the cutoff."""
+    return min(day, moment.astimezone(NY).date())
+
+
+def short_crowded(pct, days):
+    """Strictly above either threshold. 10% and 5 days stay uncrowded."""
+    return (pct is not None and pct > SHORT_CROWD_PCT) or (days is not None and days > SHORT_CROWD_DAYS)
+
+
+def settlement_label(day):
+    if day is None:
+        return f"结算日{MISSING}"
+    return f"{day.month}/{day.day} 结算"
+
+
+def short_sentence(view):
+    """Conclusion first when the name is crowded, then the four upstream figures."""
+    head = "空头拥挤 " if view["crowded"] else ""
+    return (
+        f"{head}占比 {format_points_plain(view['pct'], 1)}，"
+        f"回补 {format_days(view['days'])} 天，"
+        f"较上期 {format_points_signed(view['change'], 1)}，"
+        f"{settlement_label(view['settlement'])}"
+    )
+
+
+def theme_short_summary(members):
+    """Arithmetic mean of members that have a share. Missing members stay out of the denominator."""
+    values = []
+    for row in members:
+        short = row.get("short")
+        if short is not None and short.get("pct") is not None:
+            values.append(short["pct"])
+    covered = len(values)
+    total = len(members)
+    average = None if covered == 0 else sum(values) / covered
+    text = f"{format_points_plain(average, 1)}（覆盖 {covered}/{total}）"
+    return average, covered, total, text
+
+
+def _recent_sessions(day, count):
+    found = []
+    cursor = day
+    guard = 0
+    while len(found) < count and guard < 800:
+        if trading_day(cursor):
+            found.append(cursor)
+        cursor -= timedelta(days=1)
+        guard += 1
+    found.reverse()
+    return found
+
+
+def option_percentile(today, samples):
+    """Inclusive rank inside the 20-session window, as a percent. A short window stays blank."""
+    if today is None or len(samples) != OPTION_WINDOW or any(value is None for value in samples):
+        return None
+    return sum(1 for value in samples if value <= today) / OPTION_WINDOW * 100
+
+
+def option_tone(percentile):
+    if percentile is None:
+        return None
+    if percentile > 80:
+        return "偏谨慎"
+    if percentile < 20:
+        return "偏乐观"
+    return None
+
+
+def option_sentence(view):
+    rank = MISSING if view["percentile"] is None else f"{int(half_up(view['percentile'], 0))} 分位"
+    tone = f"，{view['tone']}" if view.get("tone") else ""
+    return f"{format_ratio(view['value'])}（{view['label']}），近 20 个交易日 {rank}{tone}"
+
+
+def short_status(latest, day):
+    """Calendar age. More than 20 days since the latest settlement is stale."""
+    if latest is None:
+        return MISSING, None
+    state = "过期" if (day - latest).days > SHORT_STALE_DAYS else "新鲜"
+    return state, f"结算 {latest.month}/{latest.day}"
+
+
+def option_status(rows, day):
+    """Session age. More than 2 trading days since the latest print is stale."""
+    dates = [
+        row["trade_date"] for row in rows if row["trade_date"] <= day and _metric(row.get("put_call_ratio")) is not None
+    ]
+    if not dates:
+        return MISSING, None
+    latest = max(dates)
+    state = "过期" if session_gap(latest, day) > OPTION_STALE_SESSIONS else "新鲜"
+    return state, f"最近 {latest.month}/{latest.day}"
+
+
+def resolve_vix(market_vix, fred_vix):
+    """Market state wins. FRED is only the same-day fallback, and the page names that source."""
+    if market_vix is not None:
+        return market_vix, None
+    if fred_vix is not None:
+        return fred_vix, "FRED"
+    return None, None
+
+
+def _change_percent(raw):
+    if not isinstance(raw, dict):
+        return None
+    return _metric(raw.get("changePercent"))
+
+
+def _short_view(row):
+    pct = _metric(row.get("si_pct_shares_outstanding"))
+    days = _metric(row.get("days_to_cover"))
+    if pct is None and days is None:
+        return None
+    return {
+        "pct": pct,
+        "days": days,
+        "change": _change_percent(row.get("raw")),
+        "settlement": row.get("settlement_date"),
+        "crowded": short_crowded(pct, days),
+    }
+
+
+def _load_shorts(connection, tickers, cap):
+    if not tickers:
+        return {}, None
+    rows = _rows(
+        connection,
+        """
+        SELECT ticker, settlement_date, days_to_cover, si_pct_shares_outstanding, raw
+        FROM ingest.short_interest
+        WHERE ticker = ANY(%s) AND settlement_date <= %s
+        ORDER BY ticker, settlement_date, observation_id
+        """,
+        (list(tickers), cap),
+    )
+    grouped = {}
+    latest = None
+    for row in rows:
+        grouped.setdefault(row["ticker"], []).append(row)
+        settlement = row["settlement_date"]
+        if latest is None or settlement > latest:
+            latest = settlement
+    views = {}
+    for ticker, items in grouped.items():
+        view = _short_view(items[-1])
+        if view is not None:
+            views[ticker] = view
+    return views, latest
+
+
+def _load_option_rows(connection, cap):
+    codes = [code for code, _label in OPTION_CATEGORIES]
+    return _rows(
+        connection,
+        """
+        SELECT trade_date, category, put_call_ratio
+        FROM ingest.options_stats
+        WHERE trade_date <= %s AND category = ANY(%s)
+        """,
+        (cap, codes),
+    )
+
+
+def _option_view(rows, day):
+    by_category = {}
+    for row in rows:
+        if row["trade_date"] > day:
+            continue
+        ratio = _metric(row.get("put_call_ratio"))
+        if ratio is None:
+            continue
+        by_category.setdefault(row["category"], {})[row["trade_date"]] = ratio
+    chosen = label = None
+    for code, name in OPTION_CATEGORIES:
+        if day in (by_category.get(code) or {}):
+            chosen, label = code, name
+            break
+    if chosen is None:
+        return None
+    series = by_category[chosen]
+    samples = [series.get(session) for session in _recent_sessions(day, OPTION_WINDOW)]
+    today = series[day]
+    percentile = option_percentile(today, samples)
+    view = {
+        "category": chosen,
+        "label": label,
+        "value": today,
+        "percentile": percentile,
+        "tone": option_tone(percentile),
+    }
+    view["text"] = option_sentence(view)
+    return view
+
+
+def _fred_vix(connection, day, cap):
+    """Same-day VIXCLS only, and only a vintage whose realtime_start is already visible."""
+    if day > cap:
+        return None
+    row = _one(
+        connection,
+        """
+        SELECT value
+        FROM ingest.macro_observations
+        WHERE series_id = 'VIXCLS' AND observation_date = %s AND realtime_start <= %s
+        ORDER BY realtime_start DESC
+        LIMIT 1
+        """,
+        (day, cap),
+    )
+    return None if row is None else _metric(row["value"])
+
+
 def sell_params(version):
     path = PARAMS_ROOT / version / "m4.yaml"
     loaded = yaml.safe_load(path.read_text())
@@ -289,6 +536,39 @@ def format_points(value):
     if value is None:
         return MISSING
     return signed_percent(value)
+
+
+def format_points_plain(value, digits):
+    """Percent points already scaled, without a sign. One place for the short column."""
+    if value is None:
+        return MISSING
+    number = half_up(value, digits)
+    return f"{number:.{digits}f}%"
+
+
+def format_points_signed(value, digits):
+    """Percent points already scaled. Positive keeps a plus; negative uses the mockup minus."""
+    if value is None:
+        return MISSING
+    number = half_up(value, digits)
+    body = f"{abs(number):.{digits}f}%"
+    if number < 0:
+        return f"−{body}"
+    if number > 0:
+        return f"+{body}"
+    return body
+
+
+def format_days(value):
+    if value is None:
+        return MISSING
+    return f"{half_up(value, 1):.1f}"
+
+
+def format_ratio(value):
+    if value is None:
+        return MISSING
+    return f"{half_up(value, 2):.2f}"
 
 
 def theme_sentence(average, volume, rsi_values):
@@ -1048,6 +1328,13 @@ def _context(connection, day, clock):
     news_items = _day_news(connection, day, cutoff)
     version = params_version(plan)
     sell = sell_params(version)
+    cap = _visible_cap(day, cutoff)
+    shorts, latest_short = _load_shorts(connection, pool, cap)
+    option_rows = _load_option_rows(connection, cap)
+    short_state, short_detail = short_status(latest_short, day)
+    option_state, option_detail = option_status(option_rows, day)
+    market_vix = None if market is None else _metric(market["vix"])
+    resolved_vix, vix_source = resolve_vix(market_vix, _fred_vix(connection, day, cap))
     return {
         "cutoff": cutoff,
         "pool": pool,
@@ -1077,6 +1364,15 @@ def _context(connection, day, clock):
         "fresh": fresh,
         "version": version,
         "sell": sell,
+        "shorts": shorts,
+        "short_state": short_state,
+        "short_detail": short_detail,
+        "option_rows": option_rows,
+        "option": _option_view(option_rows, day),
+        "option_state": option_state,
+        "option_detail": option_detail,
+        "vix": resolved_vix,
+        "vix_source": vix_source,
     }, None
 
 
@@ -1197,8 +1493,10 @@ def _themes(context, day):
             member["news_count"] = len(matched)
             member["news"] = matched[:3]
             member["valuation"] = _card_for(context, ticker, score, member["price"])
+            _attach_short(member, context["shorts"].get(ticker))
             members.append(member)
         average = theme_average([row["ret"] for row in members])
+        short_average, short_covered, short_members, short_text = theme_short_summary(members)
         themes.append(
             {
                 "sector": sector,
@@ -1207,6 +1505,10 @@ def _themes(context, day):
                 "held_count": sum(1 for row in members if row["held"]),
                 "buyable_count": sum(1 for row in members if row["entry_pass"] is True and not row["held"]),
                 "news_count": sum(row["news_count"] for row in members),
+                "short_average": short_average,
+                "short_covered": short_covered,
+                "short_members": short_members,
+                "short_text": short_text,
                 "members": members,
                 "line": _theme_line(sector, average, members),
             }
@@ -1222,6 +1524,17 @@ def _themes(context, day):
     if ordered and ordered[0]["average"] is None:
         ordered[0]["open"] = False
     return ordered
+
+
+def _attach_short(member, view):
+    if view is None:
+        member["short"] = None
+        member["short_text"] = MISSING
+        return
+    stored = dict(view)
+    stored["text"] = short_sentence(stored)
+    member["short"] = stored
+    member["short_text"] = stored["text"]
 
 
 def _theme_line(_sector, average, members):
@@ -1290,7 +1603,7 @@ def page_brief_market(connection, day, clock):
         row = by_style.get(key)
         styles.append({"id": key, "name": label, "ret": None if row is None else row["ret"]})
     market = context["market"]
-    vix = None if market is None else market["vix"]
+    vix = context["vix"]
     reports = _reports(connection, [row["anomaly_id"] for row in context["anomalies"]])
     events = _event_rows(
         context["anomalies"], context["events"], reports, context["fresh"], catalog, context["stocks"], day
@@ -1332,6 +1645,9 @@ def page_brief_market(connection, day, clock):
         "styles": styles,
         "sector_spread_z": None if market is None else market["sector_spread_z"],
         "vix": vix,
+        "vix_source": context["vix_source"],
+        "put_call": context["option"],
+        "put_call_text": MISSING if context["option"] is None else context["option"]["text"],
         "vix3m": None if market is None else market["vix3m"],
         "vix3m_prev": _previous_vix3m(connection, day),
         "down_share_5d_pct": None if market is None else market["down_share_5d_pct"],
@@ -1434,8 +1750,7 @@ def page_brief_trust(connection, day, clock):
     context, closed = _context(connection, day, clock)
     if closed is not None:
         return closed
-    market = context["market"]
-    vix = None if market is None else market["vix"]
+    vix = context["vix"]
     late = any(session_gap(row["trade_date"], day) > PENDING_GAP for row in context["pending"])
     valuation_state = _valuation_status(context["scores"], context["ranges"], context["bars"])
     statuses = _statuses(
@@ -1445,6 +1760,12 @@ def page_brief_trust(connection, day, clock):
         late,
         context["plan"],
         valuation_state,
+    )
+    statuses.extend(
+        [
+            {"item": "空头数据", "state": context["short_state"], "detail": context["short_detail"]},
+            {"item": "期权数据", "state": context["option_state"], "detail": context["option_detail"]},
+        ]
     )
     labels = []
     for row in _labels(connection, day, context["cutoff"]):
@@ -1457,7 +1778,8 @@ def page_brief_trust(connection, day, clock):
                 "labels": _object(row["labels"]),
             }
         )
-    if any(item["state"] in {"缺失", "警示", MISSING, "未上线/缺失", "模型不适用"} for item in statuses):
+    gap_states = {"缺失", "警示", "过期", MISSING, "未上线/缺失", "模型不适用"}
+    if any(item["state"] in gap_states for item in statuses):
         sentence = "数据状态有缺口，下面逐项是查询结果。"
     else:
         sentence = "列出的数据状态均已接通。"

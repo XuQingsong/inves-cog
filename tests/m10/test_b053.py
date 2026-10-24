@@ -675,6 +675,8 @@ def test_v5_status_follows_queries(pages):
         "估值": "模型不适用",
         "订单": "警示",
         "计划": "已有",
+        "空头数据": "暂缺",
+        "期权数据": "暂缺",
     }
     try:
         admin.execute(
