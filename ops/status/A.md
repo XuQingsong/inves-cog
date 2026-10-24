@@ -1,5 +1,9 @@
 # A 线回报
 
+## A-020 部署回归  进行中（PR71正式送验，线上首批已完成）  2026-10-24 23:31 北京
+- [PR71](https://github.com/XuQingsong/inves-cog/pull/71)ready/open，完整head**bab95f8876c2c37c520b905a388a353ad9638b41**，准确[CI40106973971/job120910573917](https://github.com/XuQingsong/inves-cog/actions/runs/40106973971/job/120910573917)实际success **720passed/21deselected/148.80秒**；独立日志checkoutdcd0b24合本head与main12ae132abce0110d415f829dc355c80501b2b4fa，DB四项全过，M0另2passed0.44秒/九红门禁保持。先红d774064/CI40106654455真实1failed719passed，后实现只新增新表业务ACL重建，未改默认授权/其他表。
+- 生产权限在启动前已正确收窄、A020首批实际24请求/23成功/78条/限流停止已完成并独立核计数稳定，详下条；PR71合并后不重跑CREATE TABLE、不重启采集或模型。等待需求方验收本部署回归，随后落实已下达A018范围PR，再A021；不自动合并，不开展第二开发任务。下一轮按最新仓库与实际进度继续，a-github保持开启。
+
 ## A-020  已完成（已验收、迁移安装、首日24次/23成功实证）  2026-10-24 23:30 北京
 - **用户结果**：一致预期独立日采集已上线，首日24个真实请求、23标的成功、78条未来年度/季度预期入库；第24个响应为实际quota Information/Note，按要求立即停，未重试。原raw与真实fetched_at保存、PIT/权限只追加规则已核；本单不改估值计算或页面，因此新预期尚未用于估值。
 - **真实首批**job11742 degraded/processed23/error_summary NULL，15:21:11.334808–15:27:15.613640UTC；独立表request24、response ok23/throttled1、estimate78/23ticker；第二次独立核仍24，quota_message=true。degraded是供应商额度提示，不冒称全成功。最早下次滚动额度10-25 15:21:12UTC释放，59只剩36，按24/日预计北京时间**10-26约23:25**完成首轮（取决后续供应商额度可用，不称已覆盖59）。未把需求方样例倒填/无模型调用。
