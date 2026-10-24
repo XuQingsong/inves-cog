@@ -186,12 +186,14 @@ def _risk_block(payload):
 
 
 def _risk_card(card):
+    from inves_cog.web.risk_brief import format_plain_percent
+
     themes = []
     for row in card.get("themes") or []:
         share = row.get("share")
-        width = MISSING if share is None else f"{half_up(float(share) * 100, 2):.2f}"
+        width = MISSING if share is None else f"{half_up(float(share) * 100, 1):.1f}"
         themes.append(
-            f"<p>{_text(row.get('sector'))} {_pct(share)}</p>"
+            f"<p>{_text(row.get('sector'))} {_text(format_plain_percent(share))}</p>"
             f'<div class="bar"><span style="width:{width}%"></span></div>'
         )
     body = "".join(themes) or f"<p>{_text(MISSING)}</p>"
@@ -200,7 +202,7 @@ def _risk_card(card):
         f"{body}"
         f"<p>距回撤刹车 {_text(card.get('dd8_gap'))}，距更深闸门 {_text(card.get('dd12_gap'))}</p>"
         f"<p>持仓 {_count(card.get('holdings'))} 只，名额 {_count(card.get('slots'))} 只</p>"
-        f"<p>现金比例 {_pct(card.get('cash_ratio'))}</p></div>"
+        f"<p>现金比例 {_text(format_plain_percent(card.get('cash_ratio')))}</p></div>"
     )
 
 

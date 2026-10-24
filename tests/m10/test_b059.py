@@ -20,10 +20,10 @@ from inves_cog.web.risk_brief import (
     DISASTER_RED,
     THEME_ORANGE,
     THEME_RED,
-    consecutive_below_ma200,
     day_level,
     disaster_level,
     drawdown_level,
+    format_plain_percent,
     gate_gaps,
     ma_level,
     price_text,
@@ -99,10 +99,6 @@ def test_k4_theme_and_drop_edges():
 
 
 def test_k2_streak_and_k5_drawdown_edges():
-    quiet = [100.0] * 199
-    assert consecutive_below_ma200(quiet + [99.0]) == 1
-    assert consecutive_below_ma200([100.0] * 199 + [99.0, 99.0]) == 2
-    assert consecutive_below_ma200([100.0] * 10) == 0
     assert ma_level(2, 3) == "red"
     assert ma_level(1, 10) == "orange"
     assert ma_level(0, 3) is None
@@ -149,12 +145,7 @@ def _seed(admin):
     positions = {}
     for ticker, spec in HOLDINGS.items():
         close = spec.get("close", 100)
-        if spec.get("streak") == 2:
-            closes = [100.0] * 199 + [close, close]
-        elif spec.get("streak") == 1:
-            closes = [100.0] * 199 + [close]
-        else:
-            closes = [close, close]
+        closes = [close, close]
         _bars(admin, ticker, closes)
         price = closes[-1]
         gap = spec.get("gap")
@@ -164,6 +155,8 @@ def _seed(admin):
             "avg_cost": 80,
             "peak_price": peak,
             "tier_now": spec["tier"],
+            "stage": 0,
+            "entry_index": 0,
         }
         admin.execute(
             """
@@ -180,7 +173,25 @@ def _seed(admin):
             cash, equity, peak_equity, state, observed_at
         ) VALUES (%s, %s, 'close', 'fixed', 'A', 'p-2026.10', 100000, %s, %s, %s, %s)
         """,
-        (PORTFOLIO, DAY, equity, equity / 0.967, Jsonb({"positions": positions}), SEEN),
+        (
+            PORTFOLIO,
+            DAY,
+            equity,
+            equity / 0.967,
+            Jsonb(
+                {
+                    "positions": positions,
+                    "index": 40,
+                    "panic": False,
+                    "scores": {
+                        ticker: {"consec_below200": spec["streak"]}
+                        for ticker, spec in HOLDINGS.items()
+                        if spec.get("streak")
+                    },
+                }
+            ),
+            SEEN,
+        ),
     )
     admin.execute(
         """
@@ -279,12 +290,12 @@ def test_k6_pages_sort_color_and_plain_text(pages):
     line = disaster_line(_peak(price, 0.098), price, sell_params("p-2026.10"))
     gap = (price - line) / price
     assert mu["level"] == "red"
-    assert f"距灾难止损线 {format_fraction(gap)}（{price_text(line)}）" in mu["text"]
+    assert f"距灾难止损线 {format_plain_percent(gap)}（{price_text(line)}）" in mu["text"]
     assert f"今日 {format_fraction(-0.063)}" in mu["text"]
     assert "卷入 AI 产业链下跌" in mu["text"]
     mrvl = _line(account, "MRVL")
     assert mrvl["level"] == "orange" and "距灾难止损线" in mrvl["text"]
-    assert _line(account, "GOOGL")["text"].startswith("GOOGL 已连续 2 天低于 200 日线，规则 A 第 3 天减仓")
+    assert _line(account, "GOOGL")["text"].startswith("GOOGL 已连续 2 天低于 200 日线，规则 A 在第 3 天触发减仓")
     assert _line(account, "HD")["level"] == "orange"
     assert "第 10 天" in _line(account, "HD")["text"]
     assert _line(account, "AMD")["level"] == "orange" and "卷入 AI 产业链下跌" in _line(account, "AMD")["text"]
@@ -292,7 +303,7 @@ def test_k6_pages_sort_color_and_plain_text(pages):
     assert all(row.get("ticker") != "COST" for row in account["risk_lines"])
     assert all(row.get("ticker") != "MSFT" for row in account["risk_lines"])
     theme = next(row for row in account["risk_lines"] if row["text"].startswith("AI 算力芯片"))
-    assert theme["level"] == "orange" and format_fraction(0.26) in theme["text"]
+    assert theme["level"] == "orange" and "26.0%" in theme["text"]
     assert not any(row["text"].startswith("组合距峰值") for row in account["risk_lines"])
     card = account["risk_card"]
     assert card["themes"][0]["sector"] == "AI 算力芯片"
@@ -306,7 +317,7 @@ def test_k6_pages_sort_color_and_plain_text(pages):
     raw = _get(pages, "/account").text
     assert 'class="warn"' in raw
     assert 'class="risk-red"' in raw and 'class="risk-orange"' in raw
-    assert 'style="width:26.00%"' in raw
+    assert 'style="width:26.0%"' in raw
     market = _get(pages, "/").text
     assert "对我意味着什么" in market and "红色 2 项，橙色 5 项" in market
     assert market.index("对我意味着什么") < market.index("红色 2 项")
@@ -355,7 +366,7 @@ def test_k5_drawdown_follows_the_parameter_file(pages, monkeypatch):
         red = next(row for row in _account(pages)["risk_lines"] if row["text"].startswith("组合距峰值"))
         assert red["level"] == "red"
         assert "已触发回撤刹车" in red["text"] and "暂停非防守层新开仓" in red["text"]
-        fraction = format_fraction(risk_params("p-2026.10")["dd8_sell_fraction"])
+        fraction = format_plain_percent(risk_params("p-2026.10")["dd8_sell_fraction"])
         assert fraction in red["text"]
 
         def shifted(version):
