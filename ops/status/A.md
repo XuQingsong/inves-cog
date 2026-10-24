@@ -1,5 +1,15 @@
 # A 线回报
 
+## OPS-A014  已完成（UD-A-43 review实际安装及pages重载；自然产出待窗口）  2026-10-24 11:02 北京
+- 用户直接UD-A-43已先记状态后重审原部署成功，原自动审批拒绝已解除。生产02:58:06–02:58:18UTC从2ae28bc8e69a2310f5de7ba01ccf0189ea63c943干净快进 **f32f2ea912df2f98b35a3de4ea9933a0df3502cd**，含已验收[PR61](https://github.com/XuQingsong/inves-cog/pull/61) merge **6b9d900e04bf69bc3871461430606cdf47645bd3**；准确head **a0a46b0250a2f2a5b98047499013fec6cf340bcc**/[CI39991192724](https://github.com/XuQingsong/inves-cog/actions/runs/39991192724)success619passed证据复用。仅新增review PID1153175、pages856022→1153179，其他11运行PID、配置原前缀/marker保持（watchdog在本次之前已为1111601，以实际基线为准），旧embedding EXITED未动。
+- **独立实际核验03:01:09UTC**：HEAD/干净工作区、review/pages PID仍保持、现有role_perception实连本项目数据库成功；本机首页200 text/html。**公网03:01:27UTC** 首页与/market?date=2026-10-22均HTTP200、text/html; charset=utf-8。复用七表/原角色，迁移0、手工业务0、人工模型0；未重复账号/唯一迁移。私有回执b052-review-deployment-20261024.json和attempt已落盘，禁止重复安装。
+- **业务产出未验**：当前review job0、七表均0；实际尚未到ET D+1 01:00–07:30自然窗口，不把进程存活当快照或复盘成功。后续核真实job、先兆快照及每日一句话最多1次，不手工触发/回填。安装已完成，自然运行继续独立OPS。[需求方实装回报6379055734](https://github.com/XuQingsong/inves-cog/pull/61#issuecomment-6379055734)已同步；无新增业务决定。
+
+## A-018  进行中（代码已完成并正式送验；合并部署及数据恢复尚未完成）  2026-10-24 11:02 北京
+- [PR62](https://github.com/XuQingsong/inves-cog/pull/62)已ready/open，完整head **eb986bbb99f994012cdb60883182ffdc616d7116**；准确[CI40056099429/job120759309074](https://github.com/XuQingsong/inves-cog/actions/runs/40056099429/job/120759309074)success。独立完整日志checkout f7468ac合本head与main f32f2ea912df2f98b35a3de4ea9933a0df3502cd，make phase1-test **645passed/21deselected/184.23秒**，M0另2passed、9项red=True。未自动合并，生产未装本PR。
+- **已完成N1｜通过**｜test_n1_scheduler_exact_tasks_and_other_programs_unchanged，精确原8+新增6顺序，其他program保持；**已完成N2｜通过**｜test_n2_existing_et_windows_dst_and_non_session，冬夏/周末与既有时段防重，合main后26passed。**已完成N6｜CI通过**｜全量如上，diff仅scripts/install_ingest_service.py与tests/ops/test_a018_source_scheduling.py；本地无Docker全量退出2如实保留，相关115passed及ruff/format/diff检查通过。先失败f8dc3828084574ae8daf5a6742e2ca63583b9f4a（实际2failed24passed）后实现历史保留。
+- **N3/N4/N5｜待合并部署后实际验证**：news cursor仍ET10-15、10-16起新闻0、VIX最新10-12基线有效。不能用配置测试冒称恢复。部署须合并后只重载scheduler，真实cursor/实际first_seen续采，日条数/VIX历史与次日M6、首日真实调用/token/2500护栏另实证；attempt随机UUID不冒充逻辑调用去重。现未手工触发采集/模型或新权限。下一步需求方验收合并后执行授权部署；A019/A020未开始。[正式送验6379056327](https://github.com/XuQingsong/inves-cog/pull/62#issuecomment-6379056327)已同步。
+
 ## OPS-A014  进行中（UD-A-43：用户直接允许新增review及重载pages）  2026-10-24 11:00 北京
 - **用户直接决定UD-A-43**：针对“新增已验收B052 review常驻进程、仅重载pages；现有role_perception/已建七表、自然窗口每日一句话最多1次、不手工补跑/新权限/迁移”的明确问题，用户答复 **“允许新增 review 并重载 pages”**。此为自动审批拒绝后的新增直接授权，先同步状态再重审同一操作，不绕过原拒绝。
 - 延用已验收PR61 merge6b9d900e04bf69bc3871461430606cdf47645bd3、准确heada0a46b0250a2f2a5b98047499013fec6cf340bcc/CI39991192724 success证据，目标已合并main f32f2ea912df2f98b35a3de4ea9933a0df3502cd。原脚本先核生产HEAD/干净工作区、无review进程/job/前缀、perception身份及七表权限，再仅追加program和重载pages；远端150秒期限，其他PID/已有marker保持，不重复迁移/账号/业务补跑。
