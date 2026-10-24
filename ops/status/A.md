@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-020  进行中（验收合并已核，执行迁移与首日采集）  2026-10-24 23:17 北京
+- main12ae132abce0110d415f829dc355c80501b2b4fa含PR70验收merge87f2e8eb25f185f8d689e8f822e948100a65aa71，A020答复23:10明确部署。完整head1fbafb0e5a83726ba901074eb1fd6cc93b1197a1/准确CI40102826830/job120898302805 success719passed证据复用。
+- 变更先记：生产从已装2b2c6ee干净快进上述main，执行唯一phase1_m5_0002_consensus_snapshots.sql，只新增consensus_snapshots program；既有role_valuation写/role_web、role_trading读，不新增身份权限范围。管理员仅执行批准DDL，业务仍原role_valuation；其他13运行PID及冻结enrich保持。先核无table/receipt/同名进程和活动job，避免重复迁移/请求。
+- 首日由新常驻进程自然启动，24次/滚动24h与限流即停、未知请求停采已入代码；不手工重复调用、不将需求方既有样例倒填为历史快照。以DB request/response/estimate及真实job结果核成功股票数，模型0。完成后按明确优先级落实A018 UD-COORD36范围PR，再A021。
+
 ## A-020  进行中（开发/真实合同核验完成，PR70正式送验）  2026-10-24 22:36 北京
 - [PR70](https://github.com/XuQingsong/inves-cog/pull/70)已ready/open，完整head **1fbafb0e5a83726ba901074eb1fd6cc93b1197a1**；[准确CI40102826830/job120898302805](https://github.com/XuQingsong/inves-cog/actions/runs/40102826830/job/120898302805)completed/success，**719passed/21deselected/212.51秒**。独立完整日志checkout7c6c1c1合该head与最新main2b2c6ee21fd4a5bd109861cc1c78bcbd303f66f7；A020七离线+三隔离DB全过，M0另2passed0.52秒/九红门禁保持。本地43passed1.82秒、ruff/format/diff通过。送验comment6385475301。
 - 要求1通过：原地实际核需求方已有40920字节/41条成功NVDA样例，sha256 f68049c50b9d8293376ea527e1bf94b0557f2ab3baef6adf77b09ca1d00c004f，未来2FY2Q、FY1 EPS9.3124/51、FY2 15.9146/52，raw不变；test_a020_verified_provider_shape_keeps_precision_nulls_and_past_raw及原排序/null/负值测试。原文未外传/未新增请求。PIT与只追加/权限由test_a020_pit_uses_latest_visible_whole_response_and_table_is_append_only实跑。
