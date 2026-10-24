@@ -357,24 +357,34 @@ class Repository:
         return row["body"] if row else None
 
     def pending_info(self, limit=32, *, as_of):
+        # UD-COORD-36: a fixed publication boundary for news only. Keep original
+        # pending status and contents; a skip is not a successful extraction.
+        cutoff = "2026-10-21 00:00 America/New_York"
         return [
             dict(row)
             for row in self.connection.execute(
-                """SELECT * FROM ingest.info_items
+                """WITH marked AS (
+                UPDATE ingest.info_items
+                SET extraction_source=extraction_source || jsonb_build_object(
+                    'backfill_skip',jsonb_build_object(
+                        'decision','UD-COORD-36','reason','补采未提取（UD-COORD-36）',
+                        'cutoff',%s::timestamptz,'marked_at',%s::timestamptz))
+                WHERE kind='news' AND extraction_status='pending'
+                AND published_at<%s::timestamptz AND first_seen_at<=%s
+                AND NOT (extraction_source ? 'backfill_skip')
+                RETURNING info_id
+            ) SELECT * FROM ingest.info_items
             WHERE extraction_status='pending'
+            AND (kind<>'news' OR published_at>=%s::timestamptz)
             AND coalesce((extraction_source->'news_triage'->>'retry_at')::timestamptz,first_seen_at)<=%s
             ORDER BY first_seen_at,info_id LIMIT %s""",
-                (as_of, limit),
+                (cutoff, as_of, cutoff, as_of, cutoff, as_of, limit),
             ).fetchall()
         ]
 
     def has_pending_info(self, *, as_of):
-        return self.connection.execute(
-            """SELECT EXISTS(SELECT 1 FROM ingest.info_items
-            WHERE extraction_status='pending'
-            AND coalesce((extraction_source->'news_triage'->>'retry_at')::timestamptz,first_seen_at)<=%s) AS pending""",
-            (as_of,),
-        ).fetchone()["pending"]
+        # Polling must apply the identical policy, including an old-only queue.
+        return bool(self.pending_info(1, as_of=as_of))
 
     def llm_usage(self, as_of):
         return dict(
