@@ -1,5 +1,10 @@
 # A 线回报
 
+## A-019  进行中（P1财务/评分已真实完成，估值仍运行）  2026-10-24 13:57 北京
+- 同一一次性恢复回执a019-p1-once-20261024.json（业务PID1241057、外层1241056）实际：**m2_financials job11351 degraded/59**，05:49:36–05:52:55UTC；**rule_a_scores job11353 ok/59**，05:52:56–05:53:00UTC；两者目标trade_date=2026-10-23，真实当前时间执行，无冻结/倒填。M4 scores_ready要求ok/degraded完成job，现已满足这项依赖；不等于已生成10-26计划/整体验收。
+- valuation_v1同一脚本于05:53:01UTC开始，回执仍running，未称完成；每项1800秒及总07:21:14UTC硬截止保持，不重启/重触发前两项。财务degraded具体缺项仅按既有task结果后续汇总，不改为ok。
+- 首只读DB组合探针SSH挂起，已仅结束其本地SSH PID6371，未停止远端业务；随后18秒本地硬限时/保活仅一次cat回执成功获得上述真实阶段。网络/读探针失败不等于P1业务退出。A019工程修复在紧急项收口后继续，B056仍待验收交接。
+
 ## OPS-A014  已完成（UD-A47 B055实际部署及四路径公网核验）  2026-10-24 13:52 北京
 - 实际05:50:24–05:50:36UTC生产9233f76895f398ca6beda589ed0fa6a8e302a8a7干净快进 **feedabf2b58db0dda07814e2d7f4339848275035**，含[PR65](https://github.com/XuQingsong/inves-cog/pull/65)验收merge **a3232b93781f3293d0881e4cc02c414d32efca05**；准确head **884d46aa8fa7905b522c5c22a7853eaf9d9e9776**/[CI40064580146](https://github.com/XuQingsong/inves-cog/actions/runs/40064580146)completed/success676passed复用。按UD-A47直接执行，未重复索取逐PR审批。
 - 仅pages1204915→1241625，其他11运行PID/配置/marker保持（financials1241037、scheduler1212613），review仍STOPPED待B056验收。迁移0、手工业务0、人工模型0。私有b055-pages-20261024.json实际落盘，防重复。**05:50:50UTC独立公网** /、/stocks、/account、/trust均200及text/html; charset=utf-8，本机亦通过。新闻展示代码上线不代表A018采集已到自然窗口/缺口补齐。
