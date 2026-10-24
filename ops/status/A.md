@@ -1,5 +1,13 @@
 # A 线回报
 
+## A-020  已完成（已验收、迁移安装、首日24次/23成功实证）  2026-10-24 23:30 北京
+- **用户结果**：一致预期独立日采集已上线，首日24个真实请求、23标的成功、78条未来年度/季度预期入库；第24个响应为实际quota Information/Note，按要求立即停，未重试。原raw与真实fetched_at保存、PIT/权限只追加规则已核；本单不改估值计算或页面，因此新预期尚未用于估值。
+- **真实首批**job11742 degraded/processed23/error_summary NULL，15:21:11.334808–15:27:15.613640UTC；独立表request24、response ok23/throttled1、estimate78/23ticker；第二次独立核仍24，quota_message=true。degraded是供应商额度提示，不冒称全成功。最早下次滚动额度10-25 15:21:12UTC释放，59只剩36，按24/日预计北京时间**10-26约23:25**完成首轮（取决后续供应商额度可用，不称已覆盖59）。未把需求方样例倒填/无模型调用。
+- **合并安装**：PR70完整head1fbafb0e5a83726ba901074eb1fd6cc93b1197a1、准确CI40102826830/job120898302805 success719passed，验收merge87f2e8eb25f185f8d689e8f822e948100a65aa71；生产干净2b2c6ee→12ae132abce0110d415f829dc355c80501b2b4fa。唯一原迁移hash80805903eb60554f1d6aeaefd39c7cbe4712ce7f68d0e777bbee999cc97254e5已执行一次；新增consensus_snapshots1523534，原13运行PID保持。私有a020-consensus-20261024.json已更新phase=first_batch_complete，PR70 comment6386022025已回报。
+- **已自行解决**：生产既有默认ACL在新空表继承valuation改删/shadow读，启动前已仅此表收窄并核valuation SELECT/INSERT、web/trading仅SELECT、shadow无权，防删改trigger O。默认策略/其他表/角色不动，未重复迁移。未来新库同问题补PR71：测试先红head d7740641808065b96d9a91c76f42243aac8d4ae7，准确CI40106654455/job120909628197实际1failed719passed；后修headbab95f8876c2c37c520b905a388a353ad9638b41、CI40106973971/job120910573917尚运行，不报绿。现有生产已符合批准权限，PR71不要求重复CREATE TABLE。
+- 原要求1–4与真实形态/限额/防重/PIT/权限/轮询自验证据前条复用。新闻费用3212、last_call14:02:41UTC再次只读核未增长，UD-COORD36修正合并前继续止损。
+- **下一步顺序**：PR71准确CI实回后送验收口迁移回归，再按需求方23:10指令落实A018 UD-COORD36新闻队列范围PR，再A021；不同时开发/不自动合并，不恢复未获准代码，不暂停a-github。
+
 ## A-020  进行中（已安装，首批实际5成功；默认ACL回归单独补齐）  2026-10-24 23:23 北京
 - 生产main12ae132abce0110d415f829dc355c80501b2b4fa、唯一迁移已执行，实际权限已收窄核验role_valuation=[SELECT,INSERT]，web/trading仅SELECT，默认继承的role_shadow此新表权限已撤；不改全局默认ACL/其他表。append-only触发器O。新增唯一consensus_snapshots PID1523534，15:21:15UTC安装完成，原13运行PID及冻结enrich保持；私有a020-consensus-20261024.json/attempt.json。
 - **真实首批**job11742 running（15:21:11.334808UTC起），只读核request5/response ok5/estimate16共5标的，fetched_at真实15:21:12–15:22:15UTC。当前不把running或5条阶段结果称首日24完成，不手工重启/重复调用。
