@@ -1,5 +1,10 @@
 # A 线回报
 
+## OPS-B057  已完成（合并安装与外部页面核验）  2026-10-24 22:33 北京
+- 生产14:31:52–14:32:06UTC干净0ff3db38e30cdfb875c0c509c3b96fac1b0202ed→2b2c6ee21fd4a5bd109861cc1c78bcbd303f66f7，含验收merge9c56e6690197b8c01b62fd1fa0b802d094148594；PR69完整head87f84e085a78a19d2fe9e69dce3cb8b1ab42185f，准确[CI40092447955/job120867740790](https://github.com/XuQingsong/inves-cog/actions/runs/40092447955/job/120867740790)success709passed。
+- 仅pages1241625→1499883，其余12运行PID、配置/markers保持；enrich1485380仍Tl、新闻任务仍暂停。内外部四页/、/stocks、/account、/trust均200/text/html；新增看跌/看涨、空头/回补、空头数据/期权数据均外部布尔核见。未输出私有页面/持仓；私有b057-pages-20261024.json，0迁移/模型/业务补跑，PR69 comment6385446941已回报。
+- 时间更正：前两条22:48/22:50标题误沿用需求方22:40交接标记而非实际执行时间；真实执行以本条UTC回执14:31:52–14:32:06为准。A020服务器样例核验已实做、新head1fbafb0e5a83726ba901074eb1fd6cc93b1197a1/CI40102826830仍运行，不称通过或完成。下一步CI实回后正式送验；A018授权修正须验收合并再恢复，当前不扩大开发并发。
+
 ## A-020 / OPS-B057  进行中（真实合同新CI，已验收页面部署）  2026-10-24 22:50 北京
 - A020真实样例核验与脱敏形态测试已提交PR70完整head1fbafb0e5a83726ba901074eb1fd6cc93b1197a1；准确CI40102826830运行中。存档hash/未来2FY2Q/原文不变证据见前条，本地43passed；不把待回CI写通过。
 - 按A014补充二十五/UD-A47仅部署已验收B057：head87f84e085a78a19d2fe9e69dce3cb8b1ab42185f、准确CI40092447955/job120867740790 success、merge9c56e6690197b8c01b62fd1fa0b802d094148594已在main2b2c6ee21fd4a5bd109861cc1c78bcbd303f66f7。生产拟从已装0ff3db38e30cdfb875c0c509c3b96fac1b0202ed干净快进该main，只重载pages；不改配置/权限/schema、不恢复止损enrich/news、不启动A020未合并代码。真实PID/receipt先核，外部四页仅状态码/类型及页面新增栏目布尔验证，不输出私有页面或持仓。
