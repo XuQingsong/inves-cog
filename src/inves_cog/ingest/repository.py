@@ -406,6 +406,7 @@ class Repository:
                         coalesce(i.headline,'') || ' ' || coalesce(i.body,'') ~*
                         ('(^|[^[:alnum:]_])(fed|fomc|cpi|pce|payrolls?|employment|jobs?'
                          || '|tariffs?|export controls?|sanctions?)($|[^[:alnum:]_])'))
+                    )
                     AS important
                 FROM ingest.info_items AS i CROSS JOIN holdings CROSS JOIN monitored
                 WHERE i.extraction_status='pending'
