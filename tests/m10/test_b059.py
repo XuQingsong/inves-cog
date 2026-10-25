@@ -11,7 +11,7 @@ from psycopg.types.json import Jsonb
 from inves_cog.clock import FrozenClock
 from inves_cog.ingest.market import trading_day
 from inves_cog.perception.review.calendar import cutoff
-from inves_cog.web.brief import disaster_line, format_fraction, sell_params
+from inves_cog.web.brief import format_fraction, sell_params
 from inves_cog.web.public import create_app
 from inves_cog.web.risk_brief import (
     DAY_DROP,
@@ -26,7 +26,6 @@ from inves_cog.web.risk_brief import (
     format_plain_percent,
     gate_gaps,
     ma_level,
-    price_text,
     risk_params,
     theme_level,
 )
@@ -286,15 +285,11 @@ def test_k6_pages_sort_color_and_plain_text(pages):
     assert ("red", "MU") in levels
     assert [row["level"] for row in account["risk_lines"]].index("orange") > levels.index(("red", "MU"))
     mu = _line(account, "MU")
-    price = 100
-    line = disaster_line(_peak(price, 0.098), price, sell_params("p-2026.10"))
-    gap = (price - line) / price
     assert mu["level"] == "red"
-    assert f"距灾难止损线 {format_plain_percent(gap)}（{price_text(line)}）" in mu["text"]
+    assert "灾难止损" not in mu["text"] and "距灾难" not in mu["text"]
     assert f"今日 {format_fraction(-0.063)}" in mu["text"]
     assert "卷入 AI 产业链下跌" in mu["text"]
-    mrvl = _line(account, "MRVL")
-    assert mrvl["level"] == "orange" and "距灾难止损线" in mrvl["text"]
+    assert all(row.get("ticker") != "MRVL" for row in account["risk_lines"])
     assert _line(account, "GOOGL")["text"].startswith("GOOGL 已连续 2 天低于 200 日线，规则 A 在第 3 天触发减仓")
     assert _line(account, "HD")["level"] == "orange"
     assert "第 10 天" in _line(account, "HD")["text"]
@@ -319,7 +314,7 @@ def test_k6_pages_sort_color_and_plain_text(pages):
     assert 'class="risk-red"' in raw and 'class="risk-orange"' in raw
     assert 'style="width:26.0%"' in raw
     market = _get(pages, "/").text
-    assert "对我意味着什么" in market and "红色 2 项，橙色 5 项" in market
+    assert "对我意味着什么" in market and "红色 2 项，橙色 4 项" in market
     assert market.index("对我意味着什么") < market.index("红色 2 项")
     assert "第一条红色：" in market and "GOOGL 已连续 2 天" in market
     stock = _visible(_get(pages, "/s/MU").text)

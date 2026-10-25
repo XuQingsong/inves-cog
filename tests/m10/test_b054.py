@@ -481,7 +481,7 @@ def test_f4_visible_numbers_follow_the_mockup(pages):
     assert "22.8" in account
     assert "22.84" not in visible
     assert "73.6842" not in visible
-    assert "$73.68" in account
+    assert "$80.55" in account
     assert "$367" in account
     assert _LONG_DECIMAL.search(visible) is None
     card = next(row for row in _json(pages, "/api/pages/brief/account")["holdings"] if row["ticker"] == "NVDA")

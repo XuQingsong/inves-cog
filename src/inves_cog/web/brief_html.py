@@ -216,27 +216,26 @@ def _account(payload):
     holdings = []
     for row in payload.get("holdings") or []:
         level = row.get("risk_level") if row.get("risk_level") in {"red", "orange"} else None
-        if row.get("near_disaster"):
+        if level == "red":
             mark = ' class="warn"'
-            paint = f' class="risk-{level}"' if level else ""
-        elif level:
-            mark = f' class="risk-{level}"'
+            paint = ' class="risk-red"'
+        elif level == "orange":
+            mark = ' class="risk-orange"'
             paint = ""
         else:
             mark = ""
             paint = ""
-        near = " 距灾难线过近" if row.get("near_disaster") else ""
         valuation = _valuation(row.get("valuation"))
         tone = _tone(row.get("pnl"))
-        pnl_classes = [item for item in ((f"risk-{level}" if paint else None), tone) if item]
-        pnl_mark = f' class="{" ".join(pnl_classes)}"'
+        pnl_mark = f' class="{tone}"' if tone else ""
+        details = "<br>".join(_text(item.get("text") or MISSING) for item in row.get("levels") or [])
         holdings.append(
             f'<tr{mark}><td{paint}><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
+            f"<td{paint}>{_text(row.get('kind_label') or MISSING)}</td>"
             f"<td{paint}>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
             f"<td{pnl_mark}>{_pct(row.get('pnl'))}</td>"
-            f"<td{paint}>{_price(row.get('take_profit'))}</td><td{paint}>{_price(row.get('ma200'))}</td>"
-            f"<td{paint}>{_price(row.get('disaster'))}</td><td{paint}>{_count(row.get('below_days'))}</td>"
-            f"<td{paint}>{_text(row.get('next_step'))}{_text(near)}</td><td{paint}>{valuation}</td></tr>"
+            f"<td{paint}>{details or _text(MISSING)}</td>"
+            f"<td{paint}>{_text(row.get('next_step'))}</td><td{paint}>{valuation}</td></tr>"
         )
     closed = []
     for row in payload.get("closed_records") or []:
@@ -269,8 +268,8 @@ def _account(payload):
         f'<div class="kpi"><span>距高点</span><b>{_pct(payload.get("drawdown"))}</b></div>'
         f'<div class="kpi"><span>现金</span><b>{_money(payload.get("cash"))}</b></div></div></div>'
         f"{_risk_block(payload)}{_risk_card(payload.get('risk_card') or {})}"
-        f'<div class="card"><h2>{_text(headings[1])}</h2><table><tr><th>代码</th><th>成本→现价</th><th>盈亏</th>'
-        f"<th>止盈线</th><th>200日线</th><th>灾难止损线</th><th>破位天数</th><th>下一步</th><th>估值</th></tr>"
+        f'<div class="card"><h2>{_text(headings[1])}</h2><table><tr><th>代码</th><th>类型</th><th>成本→现价</th>'
+        f"<th>盈亏</th><th>适用条件</th><th>下一步</th><th>估值</th></tr>"
         f"{''.join(holdings) or '<tr><td>暂缺</td></tr>'}</table></div>"
         f'<div class="card"><h2>{_text(headings[2])}</h2><table><tr><th>代码</th><th>日期</th><th>类型</th>'
         f"<th>原因</th><th>来源</th></tr>{''.join(closed) or '<tr><td>暂缺</td></tr>'}</table></div>"
@@ -396,13 +395,12 @@ def _position_block(position):
     if kind == "held":
         pending = "、".join(position.get("pending") or []) or MISSING
         risk = f"<p>{_text(position.get('risk_text') or MISSING)}</p>"
+        lines = "".join(f"<p>{_text(item.get('text') or MISSING)}</p>" for item in position.get("levels") or [])
         return risk + (
+            f"<p>类型 {_text(position.get('holding_kind') or MISSING)}</p>"
             f"<p>股数 {_count(position.get('shares'))} 成本 {_price(position.get('avg_cost'))}"
             f" → 现价 {_price(position.get('price'))} 盈亏 {_pct(position.get('pnl'))}</p>"
-            f"<p>止盈线 {_price(position.get('take_profit'))} 距离 {_pct(position.get('take_profit_gap'))}</p>"
-            f"<p>200 日线 {_price(position.get('ma200'))} 距离 {_pct(position.get('ma200_gap'))}</p>"
-            f"<p>灾难线 {_price(position.get('disaster'))} 距离 {_pct(position.get('disaster_gap'))}"
-            f" 破位天数 {_count(position.get('below_days'))}</p>"
+            f"{lines or f'<p>{_text(MISSING)}</p>'}"
             f"<p>待成交 {_text(pending)} 下一步 {_text(position.get('next_step') or MISSING)}</p>"
         )
     if kind == "buyable":

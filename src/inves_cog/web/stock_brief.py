@@ -76,7 +76,7 @@ STOCK_FORMULAS = (
     "空头占比、回补天数与变化沿用最近一期不晚于截点的记录。",
     "主题当日表现 = 该主题有收益的成员当日收益算术平均。",
     "前瞻市盈率 = 现价 / 截点内最新一致预期每股收益。",
-    "距灾难止损线 = (现价 − 灾难线) / 现价；灾难线与止盈线沿用卖出参数，不重算。",
+    "我的仓位只列出该持仓类型会执行的卖出价位，距离写成还需上涨或还需下跌。",
     "不可买卡点把规则 A 的缺失原因、排除红线、现金流约束和四本账门槛译成人话，不重算分数。",
     "页面只引用已有估值输入，不给出目标价。",
 )
@@ -120,10 +120,10 @@ def follow_clause(title):
     return f"随 {title}"
 
 
-def position_clause(held, shares, distance, buyable, blocker):
+def position_clause(held, shares, buyable, blocker, kind=None):
     if held:
         count = MISSING if shares is None else str(int(half_up(shares, 0)))
-        return f"纸面持有 {count} 股，距灾难止损线 {format_fraction(distance)}"
+        return f"纸面持有 {count} 股，{kind or MISSING}"
     if buyable is True:
         return "尚未持有，可买"
     if buyable is False:
@@ -131,9 +131,9 @@ def position_clause(held, shares, distance, buyable, blocker):
     return f"买入资格{MISSING}"
 
 
-def stock_oneliner(ticker, ret, follow, multiple, rsi, *, held, shares, distance, buyable, blocker):
+def stock_oneliner(ticker, ret, follow, multiple, rsi, *, held, shares, buyable, blocker, kind=None):
     pace = pace_clause(multiple, rsi)
-    position = position_clause(held, shares, distance, buyable, blocker)
+    position = position_clause(held, shares, buyable, blocker, kind)
     return f"{ticker} 今日 {format_fraction(ret)}，{follow}；{pace}；{position}。"
 
 
@@ -463,22 +463,17 @@ def _position_block(symbol, held, member, gate, context, valuation):
     pending = [row for row in context["pending"] if row["ticker"] == symbol]
     if held:
         position = context["positions"][symbol]
-        row = _holding_row(symbol, position, member, context["sell"], context["pending"], plan_payload, valuation)
-        price = row["price"]
-        distance = None if price in (None, 0) or row["disaster"] is None else (price - row["disaster"]) / price
+        row = _holding_row(
+            symbol, position, member, context["sell"], context["pending"], plan_payload, valuation, context
+        )
         return {
             "kind": "held",
+            "holding_kind": row["kind_label"],
             "shares": _num(row["shares"]),
             "avg_cost": row["avg_cost"],
-            "price": price,
+            "price": row["price"],
             "pnl": row["pnl"],
-            "take_profit": row["take_profit"],
-            "take_profit_gap": _gap(price, row["take_profit"]),
-            "ma200": row["ma200"],
-            "ma200_gap": _gap(price, row["ma200"]),
-            "disaster": row["disaster"],
-            "disaster_gap": distance,
-            "below_days": row["below_days"],
+            "levels": row["levels"],
             "pending": [plain_skip(item.get("reason_zh")) for item in pending],
             "next_step": plain_text(row["next_step"]),
             "blocker": None,
@@ -502,12 +497,6 @@ def _position_block(symbol, held, member, gate, context, valuation):
         "next_step": None,
         "pending": [],
     }
-
-
-def _gap(price, line):
-    if price in (None, 0) or line is None:
-        return None
-    return (price - line) / price
 
 
 def _theme_view(context, day, symbol):
@@ -653,7 +642,6 @@ def page_brief_stock(connection, day, clock, symbol):
         found = portfolio_view(connection, day, context)["by_ticker"].get(symbol)
         position["risk_text"] = EMPTY if found is None else found["text"]
         position["risk_level"] = None if found is None else found["level"]
-    distance = position.get("disaster_gap")
     buyable = None if gate is None else gate["entry_pass"]
     if held:
         buyable = False
@@ -665,9 +653,9 @@ def page_brief_stock(connection, day, clock, symbol):
         trend["rsi"],
         held=held,
         shares=position.get("shares"),
-        distance=distance,
         buyable=False if held else buyable,
         blocker=position.get("blocker"),
+        kind=position.get("holding_kind"),
     )
     sentences = _sentences(
         symbol,
