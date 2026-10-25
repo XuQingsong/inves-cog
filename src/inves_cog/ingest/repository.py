@@ -4,6 +4,9 @@ import hashlib
 import json
 from contextlib import nullcontext
 from datetime import date, datetime
+from pathlib import Path
+
+import yaml
 
 
 def json_text(value):
@@ -70,6 +73,8 @@ INFO_FIELDS = (
     "ction_source"
 ).split()
 JSON_COLUMNS = {"raw", "payload", "extraction_source"}
+ROOT = Path(__file__).resolve().parents[3]
+POOL_TICKERS = tuple(row["ticker"] for row in yaml.safe_load((ROOT / "config/universe.yaml").read_text())["stocks"])
 
 
 def identity(value):
@@ -360,10 +365,17 @@ class Repository:
         # UD-COORD-36: a fixed publication boundary for news only. Keep original
         # pending status and contents; a skip is not a successful extraction.
         cutoff = "2026-10-21 00:00 America/New_York"
+        columns = ",".join(
+            "extraction_source || jsonb_build_object("
+            "'news_queue',jsonb_build_object('holding_related',holding_related)) AS extraction_source"
+            if field == "extraction_source"
+            else field
+            for field in INFO_FIELDS
+        )
         return [
             dict(row)
             for row in self.connection.execute(
-                """WITH marked AS (
+                f"""WITH marked AS (
                 UPDATE ingest.info_items
                 SET extraction_source=extraction_source || jsonb_build_object(
                     'backfill_skip',jsonb_build_object(
@@ -373,12 +385,41 @@ class Repository:
                 AND published_at<%s::timestamptz AND first_seen_at<=%s
                 AND NOT (extraction_source ? 'backfill_skip')
                 RETURNING info_id
-            ) SELECT * FROM ingest.info_items
-            WHERE extraction_status='pending'
-            AND (kind<>'news' OR published_at>=%s::timestamptz)
-            AND coalesce((extraction_source->'news_triage'->>'retry_at')::timestamptz,first_seen_at)<=%s
-            ORDER BY first_seen_at,info_id LIMIT %s""",
-                (cutoff, as_of, cutoff, as_of, cutoff, as_of, limit),
+            ), latest_ledger AS (
+                SELECT state FROM trading.ledger WHERE portfolio_id='paper-fixed'
+                ORDER BY observed_at DESC LIMIT 1
+            ), holdings AS (
+                SELECT coalesce(array_agg(ticker),ARRAY[]::text[]) AS tickers
+                FROM latest_ledger CROSS JOIN LATERAL
+                jsonb_object_keys(coalesce(state->'positions','{{}}'::jsonb)) AS ticker
+            ), monitored AS (
+                SELECT coalesce(array_agg(entity_id),ARRAY[]::text[]) AS ids
+                FROM graph.monitored_entities
+            ), ranked AS (
+                SELECT i.*,
+                (i.tickers && holdings.tickers) AS holding_related,
+                (i.tickers && holdings.tickers
+                    OR i.kind='sec_8k'
+                    OR i.tickers && %s::text[]
+                    OR i.entities && monitored.ids
+                    OR (lower(i.source)='benzinga' AND
+                        coalesce(i.headline,'') || ' ' || coalesce(i.body,'') ~*
+                        ('(^|[^[:alnum:]_])(fed|fomc|cpi|pce|payrolls?|employment|jobs?'
+                         || '|tariffs?|export controls?|sanctions?)($|[^[:alnum:]_])'))
+                    )
+                    AS important
+                FROM ingest.info_items AS i CROSS JOIN holdings CROSS JOIN monitored
+                WHERE i.extraction_status='pending'
+                AND (i.kind<>'news' OR i.published_at>=%s::timestamptz)
+                AND coalesce((i.extraction_source->'news_triage'->>'retry_at')::timestamptz,i.first_seen_at)<=%s
+            ) SELECT {columns} FROM ranked
+            ORDER BY
+                CASE WHEN important THEN 0 WHEN lower(source)='benzinga' THEN 1
+                     WHEN lower(source)='fiscal.ai' THEN 2 ELSE 1 END,
+                CASE WHEN holding_related THEN 0 ELSE 1 END,
+                published_at DESC NULLS LAST,first_seen_at DESC,info_id
+            LIMIT %s""",
+                (cutoff, as_of, cutoff, as_of, list(POOL_TICKERS), cutoff, as_of, limit),
             ).fetchall()
         ]
 
@@ -389,11 +430,22 @@ class Repository:
     def llm_usage(self, as_of):
         return dict(
             self.connection.execute(
-                """SELECT
-            coalesce(sum(input_tokens+output_tokens),0) AS tokens,
-            count(*) FILTER (WHERE input_tokens IS NULL OR output_tokens IS NULL) AS missing
-            FROM ingest.llm_calls WHERE model='deepseek-v4.1-flash'
-            AND (created_at AT TIME ZONE 'America/New_York')::date=(%s AT TIME ZONE 'America/New_York')::date""",
+                """WITH daily AS (
+                SELECT * FROM ingest.llm_calls WHERE model='deepseek-v4.1-flash'
+                AND (created_at AT TIME ZONE 'America/New_York')::date=
+                    (%s AT TIME ZONE 'America/New_York')::date
+            ), full_items AS (
+                SELECT count(DISTINCT info_id) AS count FROM daily
+                CROSS JOIN LATERAL unnest(info_ids) AS info_id
+                WHERE right(purpose,length('M1:layer2'))='M1:layer2'
+                AND task IN ('info_fields_extraction','news_card')
+            ) SELECT
+                coalesce(sum(input_tokens+output_tokens),0) AS tokens,
+                count(*) FILTER (WHERE input_tokens IS NULL OR output_tokens IS NULL) AS missing,
+                (SELECT count FROM full_items) AS full_items,
+                count(*) FILTER (WHERE right(purpose,length('M1:layer1'))='M1:layer1'
+                    AND task='entity_tagging') AS screen_calls
+            FROM daily""",
                 (as_of,),
             ).fetchone()
         )
