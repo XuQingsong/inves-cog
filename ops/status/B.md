@@ -2,6 +2,12 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-061  已收到  2026-10-25 11:00 北京
+
+- 依据 main `b26318d`：B-060 已关单（2026-10-25 11:10），收件箱新编号 B-061。
+- 范围：持仓关键价位按规则 A 真实卖出逻辑重做。授权 `src/inves_cog/web/` 与 `tests/m10/`。只读上游参数，不改 M4 订单或规则，不调模型，不部署。
+- 下一步：新开分支，按 E1–E7 实现后先推 PR。
+
 ## B-060  已完成  2026-10-25 03:51 北京
 
 - PR #76，head `582e283`。https://github.com/XuQingsong/inves-cog/pull/76 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40126757476 ：`phase1-blocking` 成功，750 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 234.286 秒（≤ 300）、status passed、collected 750、pending 0。日志 `750 passed, 21 deselected, 5 warnings in 234.33s`。suite xml time 234.281。`m0-ci.xml` 2 passed、0 failures、xml 0.546 秒（日志 `2 passed in 0.58s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。工件 `m0-clean-environment-evidence` id 12573633174。运行创建于 2026-10-25 03:45 北京，`phase1-blocking` 完成于 03:50 北京。B 线没有合并，没有部署，没有调用真实模型。
