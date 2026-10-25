@@ -167,7 +167,7 @@ details.method div{font-size:12px;color:var(--ink2);columns:2;column-gap:32px;ma
   .nav a{min-width:auto;padding:6px 10px} .nav a small{display:none}
   main{padding:14px}
   .g4{grid-template-columns:1fr 1fr} .g3,.g2,.g-main{grid-template-columns:1fr}
-  .kpi .v{font-size:22px}
+  .g4>*{min-width:0} .kpi{padding:14px} .kpi .v{font-size:17px;overflow-wrap:anywhere}
   .hhead{display:none}
   .hrow{grid-template-columns:1fr auto;gap:6px 10px}
   .hrow .c-ruler{grid-column:1 / -1} .hrow .c-next{grid-column:1 / -1} .hrow .caret{display:none}
