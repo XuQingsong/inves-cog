@@ -103,3 +103,11 @@ A-022 同轮只读进展：A级701条ok、B级3条ok；ET当日完整提取info_
 ## B-062 部署运维 已收到／进行中 2026-10-26 00:18 北京
 
 收到 A-014 补充三十三：PR79 merge `8c10f8f` 已验收合并，已核对 main `82c72c8f7df7d01fb867bf62cf9fa5fa220dfa85` 包含该合并。按 UD-A-47 安装该 main，仅重启 pages，并核验指定7个页面及 investor.css/investor.js 外部状态码。变更仅已授权页面部署，无迁移、权限、配置或其他服务重启；不占 A-022 开发任务位。
+
+## B-062 已安装，外部验证发现交接差异 2026-10-26 00:23 北京
+
+生产 head `82c72c8f7df7d01fb867bf62cf9fa5fa220dfa85`，包含 [PR79](https://github.com/XuQingsong/inves-cog/pull/79) merge `8c10f8f630fc2119821ffbcca325bebef410c9c5`。准确 PR head `de26466cf0a9b7b20668bbb873641dd85615c86e` 的 [phase1-blocking CI](https://github.com/XuQingsong/inves-cog/actions/runs/40207944236/job/121212822458) success；nightly skipped，Bugbot neutral/额度耗尽，不冒称这些检查通过。仅 pages 重启，其他原有 supervisor 服务 PID 与配置逐项保持、工作区干净。
+
+外部实际结果：`/`、`/stocks`、`/account?date=2026-10-22`、`/account?date=2026-10-23`、`/trust`、`/s/AVGO?date=2026-10-22`、`/s/LITE?date=2026-10-22` 均200/text/html；`/investor.js` 为200/text/javascript。`/investor.css` 为404，未满足交接中该路径200的预期。原因已核实：`web/api.py` 仅注册 JS 地址，`investor_html.py` 读取 CSS 后内嵌，生产账户页实际包含与部署 CSS 文件完全相同的样式内容，JS引用存在。因此该404不代表页面漏载样式，不能声称九项全200。
+
+下一步：需求方线上走查并确认是否接受 CSS 内嵌形式，或安排增加独立 CSS 地址；本轮没有跨线修改页面接口。代码安装与八项外部访问已完成，九项全200及最终页面验收未宣称完成。A-022后续自然运行仍按既定窗口跟进。
