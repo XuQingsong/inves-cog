@@ -361,7 +361,7 @@ def _events(payload):
     if not payload.get("news_fresh"):
         banner = (
             '<div class="banner warn" style="margin:0 0 6px"><b>原因暂不可信</b>'
-            "<span>当日新闻缺失，今天的大事暂无可信的原因解释；价格与持仓数据不受影响。</span></div>"
+            "<span>当日新闻缺失，下列“可能原因”引用的是旧闻，只作参考。</span></div>"
         )
     blocks = []
     for index, row in enumerate(rows):
@@ -375,16 +375,16 @@ def _events(payload):
             ticks.append(
                 f'<a class="tick{mark}" href="{_symbol_href(payload, ticker)}">{_text(ticker)}{_text(move)}</a>'
             )
-        items = (row.get("reasons") or []) if payload.get("news_fresh") else []
+        items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
-        if not payload.get("news_fresh"):
-            why = '<div class="small muted" style="margin-top:8px">当日新闻缺失，原因解释不可用。</div>'
-        elif reasons:
+        if reasons:
             label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
             why = (
                 f'<div style="margin-top:10px"><div class="small muted">{label}'
                 f'</div><ul class="news">{"".join(reasons)}</ul></div>'
             )
+        elif not payload.get("news_fresh"):
+            why = '<div class="small muted" style="margin-top:8px">当日新闻缺失，原因解释不可用。</div>'
         else:
             why = '<div class="small muted" style="margin-top:8px">暂无可引用的解释。</div>'
         held_count = sum(1 for ticker in members if ticker in held)
@@ -1522,15 +1522,15 @@ def _chart(trend, position, payload):
             f'<text x="{left - 6}" y="{y_at(price) + 4:.1f}" font-size="10" fill="#8A918F" '
             f'text-anchor="end">{price:.0f}</text>'
         )
-    placed = []
+    placed = {"R": [], "L": []}
     for name, price, color, dash in sorted(lines, key=lambda item: -item[1]):
         y = y_at(price)
-        side, ty = "R", y - 4
-        if any(item[0] == "R" and abs(item[1] - ty) < 12 for item in placed):
-            side = "L"
-            if any(item[0] == "L" and abs(item[1] - ty) < 12 for item in placed):
-                ty = y + 12
-        placed.append((side, ty))
+        ty = y - 4
+        side = "R" if all(abs(item - ty) >= 12 for item in placed["R"]) else "L"
+        while any(abs(item - ty) < 12 for item in placed[side]):
+            ty += 12
+        ty = min(ty, height - 16)
+        placed[side].append(ty)
         anchor, tx = ("end", right) if side == "R" else ("start", left + 4)
         dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
         svg.append(

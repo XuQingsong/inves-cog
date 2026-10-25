@@ -143,6 +143,8 @@ def _clear(admin):
     admin.execute("DELETE FROM ingest.short_interest WHERE observation_id LIKE 'b062-%'")
     admin.execute("DELETE FROM ingest.bars_daily WHERE source = 'b062'")
     admin.execute("DELETE FROM marketstate.daily WHERE factor_set = 'b062'")
+    admin.execute("DELETE FROM perception.reports WHERE anomaly_id LIKE 'b062-%'")
+    admin.execute("DELETE FROM perception.anomalies WHERE anomaly_id LIKE 'b062-%'")
 
 
 def _score_row(admin, ticker, tech, derived, entry):
@@ -313,6 +315,38 @@ def _seed(admin):
     _short(admin, "pltr-new", "PLTR", date(2026, 11, 15), 40, {"changePercent": 1, "settlementDate": "2026-11-15"})
     _short(admin, "wmt-old", "WMT", date(2026, 8, 1), 3.1, {"changePercent": 0})
     _short(admin, "wmt-new", "WMT", date(2026, 11, 28), 30, {"changePercent": 1, "settlementDate": "11/28/2026"})
+    for anomaly_id, tickers in (
+        ("b062-a1", ["AVGO", "MRVL"]),
+        ("b062-a2", ["AMD", "MU"]),
+    ):
+        admin.execute(
+            """
+            INSERT INTO perception.anomalies (
+                anomaly_id, trade_date, session, entry_paths, layer, severity, baskets, members, direction,
+                max_abs_z, data_quality, coverage, amplification, type_candidates_prelim, status, universe,
+                params_version, generated_at
+            ) VALUES (
+                %s, %s, 'close', ARRAY['A'], 'L3', 'alert', %s, %s, 'down',
+                2.4, '{}', '{}', '{}', ARRAY[]::text[], '已发现·原因未明', 'pool', 'b062', %s
+            )
+            """,
+            (anomaly_id, DAY, ["半导体设备"], Jsonb([{"ticker": name} for name in tickers]), SEEN),
+        )
+    admin.execute(
+        "INSERT INTO perception.reports (anomaly_id, report) VALUES ('b062-a1', %s)",
+        (
+            Jsonb(
+                {
+                    "move_card": {
+                        "解释": [
+                            {"一句话": "美债收益率上行引发成长股抛售", "发布时间": "2026-10-15T14:00:00+00:00"},
+                            {"一句话": "芯片股财报后获利了结", "发布时间": "2026-10-14T13:30:00+00:00"},
+                        ]
+                    }
+                }
+            ),
+        ),
+    )
 
 
 @pytest.fixture(scope="module")
@@ -584,3 +618,18 @@ def test_r2_pages_follow_prototype_layout(pages):
     visible = _visible(stock)
     assert "None" not in visible and "全部阻塞输入" not in visible
     assert "走势与位置" in stock and "位置与情绪" in stock
+
+
+def test_r3_market_event_cards_cite_stale_news(pages):
+    market = _get(pages, "/").text
+    assert "引用的是旧闻，只作参考" in market
+    cards = re.findall(r'<div class="event.*?(?=<div class="event|<div class="empty|$)', market, re.S)
+    assert cards
+    cited = [card for card in cards if "引用的是" in card]
+    assert cited
+    assert "可能原因 · 含旧闻" in cited[0]
+    for card in cited:
+        assert "当日新闻缺失，原因解释不可用" not in card
+    uncited = [card for card in cards if "引用的是" not in card]
+    if uncited:
+        assert "原因解释不可用" in uncited[0]

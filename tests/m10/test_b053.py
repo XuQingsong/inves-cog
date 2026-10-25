@@ -717,7 +717,8 @@ def test_v5_status_follows_queries(pages):
 def test_v6_reason_line_follows_news(pages):
     quiet = _get(pages, "/").text
     assert "原因暂不可信" in quiet
-    assert "存储供给增加" not in quiet
+    assert "存储供给增加" in quiet
+    assert "引用的是" in quiet
     admin = pages["admin"]
     try:
         admin.execute(

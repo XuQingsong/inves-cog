@@ -454,7 +454,8 @@ def test_w1_missing_news_shows_zero_and_untrusted(pages):
         assert _get(pages, "/stocks").status_code == 200
         home = _get(pages, "/").text
         assert "原因暂不可信" in home
-        assert "供给增加" not in home
+        assert "供给增加" in home
+        assert "引用的是" in home
         trust = _json(pages, "/api/pages/brief/trust")
         assert trust["news_day_count"] == 0
         assert trust["news_seen_beijing"] == "2036-10-15 23:00"
