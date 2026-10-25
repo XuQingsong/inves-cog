@@ -260,6 +260,8 @@ def _seed(admin):
                         {"ticker": "AAPL", "side": "sell", "kind": "reduce", "reason_zh": "止盈", "qty": 10},
                         {"ticker": "AAPL", "side": "sell", "kind": "reduce", "reason_zh": "止盈", "qty": 10},
                         {"ticker": "HD", "side": "sell", "kind": "reduce", "reason_zh": "波段止盈", "qty": 8},
+                        {"ticker": "HD", "side": "sell", "kind": "reduce", "reason_zh": "波段止盈", "qty": 8},
+                        {"ticker": "NVDA", "side": "sell", "kind": "reduce", "reason_zh": "分批止盈", "qty": 5},
                     ]
                 }
             ),
@@ -282,6 +284,16 @@ def _seed(admin):
             qty, fill_price, rule_ids, reason_zh, rule_set, params_version, status, intent
         ) VALUES (%s, 'b062-hd', %s, %s, 'HD', 'sell', 'reduce', 8, 95.5, ARRAY['M-59'],
                   '波段止盈', 'A', 'p-2026.10', 'filled', '{}')
+        """,
+        (PORTFOLIO, prior, DAY),
+    )
+    admin.execute(
+        """
+        INSERT INTO trading.orders (
+            portfolio_id, order_id, signal_date, trade_date, ticker, side, kind,
+            qty, rule_ids, reason_zh, rule_set, params_version, status, intent
+        ) VALUES (%s, 'b062-nvda', %s, %s, 'NVDA', 'sell', 'reduce', NULL, ARRAY['M-54'],
+                  '分批止盈；过期未成交（计划延误）', 'A', 'p-2026.10', 'expired', '{}')
         """,
         (PORTFOLIO, prior, DAY),
     )
@@ -498,7 +510,7 @@ def test_g10_future_shorts_and_extreme_pe_become_anomalies(pages):
     stocks = _get(pages, "/stocks").text
     trust = _get(pages, "/trust").text
     visible = _visible(stocks + trust)
-    assert "9/30 结算" in stocks and "8/1 结算" in stocks
+    assert "9/30 结算" in stocks and "停更 · 8/1" in stocks
     assert "11/15" not in visible and "11/28" not in visible
     assert "[-50,200]" not in visible and "无法反解" not in visible
     assert "市盈率不适用（盈利过低）" in visible
@@ -534,3 +546,41 @@ def test_g12_forbidden_words_stay_off_the_pages(pages):
         assert word not in blob
     assert _RULE.search(blob) is None
     assert _LOWER.findall(blob) == []
+
+
+def test_r1_account_review_fixes(pages):
+    account = _account(pages)
+    html = _get(pages, "/account").text
+    estimate = account["close_estimate"]
+    if isinstance(estimate, dict) and estimate.get("day_pnl"):
+        pnl, marked = estimate["day_pnl"], estimate["equity"]
+        assert account["day_change"] == pytest.approx(pnl / (marked - pnl))
+    closed = {(row["ticker"], row["reason_zh"]): row for row in account["closed_records"]}
+    assert closed[("NVDA", "分批止盈")]["fill_state"] == "过期未成交"
+    hd = closed[("HD", "波段止盈")]
+    assert hd["fill_state"] == "已成交" and hd["repeat"] == 2
+    assert sum(1 for row in account["closed_records"] if row["ticker"] == "HD") == 1
+    assert "过期未成交" in html and "已成交 · $95.50 · 8 股 ×2" in html
+    assert "再有 1 天低于 200 日线就触发破位减仓" in html
+    assert "警戒减仓单待成交" in html
+    assert 'class="v"' in html and "主题平均涨跌" not in html
+    assert 'class="foot"' in html and "展开其余" in html
+    visible = _visible(html)
+    assert "隐含 暂缺" not in visible and "25分位" not in visible
+
+
+def test_r2_pages_follow_prototype_layout(pages):
+    market = _get(pages, "/").text
+    trust = _get(pages, "/trust").text
+    stocks = _get(pages, "/stocks").text
+    stock = _get(pages, "/s/AVGO").text
+    assert "对我意味着什么" in market and "红色" not in _visible(market)
+    assert "涉及持仓" in market or "今天没有达到阈值的大事" in market
+    assert "冷静期覆盖层" in trust and "M9" not in _visible(trust)
+    assert '<details class="method">' in trust and "影响：" in trust
+    assert "空头数据停更：WMT 2026-08-01" in _visible(trust)
+    assert "估值" not in re.findall(r"<thead>.*?</thead>", stocks, re.S)[-1]
+    assert "×（" not in stocks
+    visible = _visible(stock)
+    assert "None" not in visible and "全部阻塞输入" not in visible
+    assert "走势与位置" in stock and "位置与情绪" in stock

@@ -33,6 +33,7 @@ MOVE_BAND = 0.07
 DISASTER_NEAR = 0.20
 VALUE_FAR = 2.0
 PE_EXTREME = 300
+SHORT_LAG_DAYS = 60
 EPS_NEAR_ZERO = 0.05
 NEWS_GAP = 1
 STALE_NEWS_DAYS = 3
@@ -1235,38 +1236,45 @@ def _sell_history(plans, state, fills=None):
                     "fill_price": item.get("fill_price") or item.get("price"),
                 }
             )
-    filled = {}
+    by_key = {}
     for row in fills or []:
-        filled.setdefault((str(row.get("trade_date")), row.get("ticker")), []).append(row)
+        by_key.setdefault((str(row.get("trade_date")), row.get("ticker")), []).append(row)
     for item in found:
-        matches = filled.get((str(item.get("trade_date")), item.get("ticker"))) or []
-        if not matches:
-            item["fill_state"] = "计划"
-            continue
-        match = matches.pop(0)
-        price = match.get("fill_price")
-        qty = match.get("qty")
-        item["fill_price"] = price
-        item["qty"] = qty
-        item["fill_state"] = "已成交"
-        item["source"] = "filled"
+        matches = by_key.get((str(item.get("trade_date")), item.get("ticker"))) or []
+        match = matches.pop(0) if matches else None
+        item["fill_state"] = ORDER_STATE.get(None if match is None else match.get("status"), "计划")
+        if match is not None and match.get("status") == "filled":
+            item["fill_price"] = match.get("fill_price")
+            item["qty"] = match.get("qty")
+            item["source"] = "filled"
     return _collapse_plans(found)
 
 
+ORDER_STATE = {
+    None: "计划",
+    "filled": "已成交",
+    "pending": "待成交",
+    "expired": "过期未成交",
+    "superseded": "被新计划替代",
+    "canceled": "已取消",
+    "blocked": "未执行",
+}
+
+
 def _collapse_plans(rows):
-    """Identical same-day plan rows are one line marked ×N. Different sizes stay separate."""
+    """Same day, ticker, reason and kind is one decision: keep one line, prefer the order outcome, mark ×N."""
     grouped = []
     index = {}
     for row in rows:
-        if row.get("fill_state") == "已成交":
-            grouped.append({**row, "repeat": 1})
-            continue
-        key = (str(row.get("trade_date")), row.get("ticker"), row.get("reason_zh"), row.get("kind"), row.get("qty"))
-        if key in index:
-            grouped[index[key]]["repeat"] += 1
-        else:
+        key = (str(row.get("trade_date")), row.get("ticker"), row.get("reason_zh"), row.get("kind"))
+        if key not in index:
             index[key] = len(grouped)
             grouped.append({**row, "repeat": 1})
+            continue
+        kept = grouped[index[key]]
+        kept["repeat"] += 1
+        if kept.get("fill_state") == "计划" and row.get("fill_state") != "计划":
+            grouped[index[key]] = {**row, "repeat": kept["repeat"]}
     return grouped
 
 
@@ -1277,10 +1285,10 @@ def _filled_orders(connection, portfolio, day):
         rows = _rows(
             connection,
             """
-            SELECT ticker, qty, fill_price, trade_date, reason_zh
+            SELECT ticker, qty, fill_price, trade_date, reason_zh, status
             FROM trading.orders
-            WHERE portfolio_id = %s AND status = 'filled' AND trade_date <= %s
-            ORDER BY trade_date, order_id
+            WHERE portfolio_id = %s AND trade_date <= %s
+            ORDER BY trade_date, (status = 'filled') DESC, order_id
             """,
             (portfolio, day),
         )
@@ -1498,6 +1506,7 @@ def _context(connection, day, clock):
     market_vix = None if market is None else _metric(market["vix"])
     resolved_vix, vix_source = resolve_vix(market_vix, _fred_vix(connection, day, cap))
     return {
+        "day": day,
         "cutoff": cutoff,
         "pool": pool,
         "order": order,
@@ -1746,6 +1755,7 @@ def _holding_row(ticker, position, stock, sell, pending, plan_payload, valuation
     if distance is None:
         distance = _number(tech.get("price_vs_ma200"))
     ma200 = None if kind == "观察波段仓" else level(price, distance)
+    levels = _mark_pending(levels, [row for row in pending if row["ticker"] == ticker])
     return {
         "ticker": ticker,
         "kind_label": kind,
@@ -1762,6 +1772,22 @@ def _holding_row(ticker, position, stock, sell, pending, plan_payload, valuation
         "books": stock["books"],
         "valuation": valuation,
     }
+
+
+def _mark_pending(levels, orders):
+    """An order already in the book means the rule fired; the card says it waits for the fill."""
+    if not orders:
+        return levels
+    marked = []
+    for row in levels:
+        name = str(row.get("name") or "").removesuffix("价")
+        hit = next((order for order in orders if name and name in str(order.get("reason_zh") or "")), None)
+        if hit is not None and row.get("status") in (None, "none"):
+            since = hit.get("signal_date") or hit.get("trade_date")
+            since_text = since.isoformat() if hasattr(since, "isoformat") else str(since)
+            row = {**row, "status": "pending", "pending_note": f"已触发；订单 {since_text} 起待成交，不等于已成交"}
+        marked.append(row)
+    return marked
 
 
 def _ruler_inputs(kind, price, cost, levels, ma200):
@@ -1870,6 +1896,12 @@ def page_brief_market(connection, day, clock):
         "down_share_5d_pct": None if market is None else market["down_share_5d_pct"],
         "spy_drawdown_252_pct": None if market is None else market["spy_drawdown_252_pct"],
         "index_closes": _index_closes(connection, day),
+        "member_rets": {
+            ticker: context["daily"][ticker]["ret"]
+            for row in events
+            for ticker in row.get("members") or []
+            if ticker in context["daily"]
+        },
         "held_tickers": sorted(context["positions"]),
         "events": events,
         "news_fresh": context["fresh"],
@@ -1936,7 +1968,10 @@ def page_brief_account(connection, day, clock):
         stock = themes.get(ticker) or _member(ticker, day, context["bars"], score, context["daily"], False, [])
         if "valuation" not in stock:
             stock["valuation"] = _card_for(context, ticker, score, stock["price"])
-        candidates.append(_candidate_row(stock, stock["valuation"]))
+        row = _candidate_row(stock, stock["valuation"])
+        row["sector"] = context["catalog"]["sector_of"].get(ticker)
+        row["ret"] = stock.get("ret")
+        candidates.append(row)
     ledger = context["ledger"]
     equity = None if ledger is None else ledger["equity"]
     cash = None if ledger is None else ledger["cash"]
@@ -1944,6 +1979,10 @@ def page_brief_account(connection, day, clock):
     previous = _previous_equity(connection, day, context["cutoff"], context["portfolio"])
     day_change = None if equity is None or previous in (None, 0) else equity / previous - 1
     estimate = close_estimate(context, day)
+    if isinstance(estimate, dict):
+        marked, pnl = _number(estimate.get("equity")), _number(estimate.get("day_pnl"))
+        base = None if marked is None or pnl is None else marked - pnl
+        day_change = None if base in (None, 0) else pnl / base
     pending_rows = sum(1 for row in holdings if str(row["next_step"]).startswith("待成交"))
     sentence = f"持仓{len(holdings)}只，待成交{pending_rows}笔。"
     fills, fills_readable = _filled_orders(connection, context["portfolio"], day)
@@ -2018,6 +2057,19 @@ def _anomalies_found(context):
             {
                 "title": f"空头结算日晚于页面日期：{shown}",
                 "detail": "这些记录没有写入页面上的空头占比。",
+            }
+        )
+    lagging = sorted(
+        (ticker, view["settlement"])
+        for ticker, view in (context.get("shorts") or {}).items()
+        if isinstance(view.get("settlement"), date) and (context["day"] - view["settlement"]).days > SHORT_LAG_DAYS
+    )
+    if lagging:
+        shown = "、".join(f"{ticker} {when.isoformat()}" for ticker, when in lagging)
+        items.append(
+            {
+                "title": f"空头数据停更：{shown}",
+                "detail": f"最近一期结算距页面日期超过 {SHORT_LAG_DAYS} 天，页面标为过期，不判断空头拥挤。",
             }
         )
     for ticker, score in sorted(context["scores"].items()):

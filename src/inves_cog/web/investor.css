@@ -177,3 +177,9 @@ details.method div{font-size:12px;color:var(--ink2);columns:2;column-gap:32px;ma
   .m-hide{display:none} .m-only{display:block}
   details.method div{columns:1}
 }
+.datebox .step{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;border-radius:8px;width:28px;height:28px;color:var(--ink2);text-decoration:none}
+.datebox .step:hover{background:var(--line2);text-decoration:none}
+.datebox .step.off{opacity:.35}
+.foot .links a{color:var(--muted)}
+tr.members td{border-bottom:1px solid var(--line)}
+@media (max-width:760px){.foot{flex-direction:column;gap:6px}}

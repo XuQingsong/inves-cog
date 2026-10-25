@@ -208,6 +208,15 @@ function bindStocks() {
     };
   });
 }
+function bindMore() {
+  document.querySelectorAll("[data-more]").forEach(function (link) {
+    link.onclick = function () {
+      var list = document.getElementById("rmore-list");
+      if (list) list.hidden = false;
+      link.remove();
+    };
+  });
+}
 function bindFold() {
   document.querySelectorAll("[data-ev]").forEach(function (head) {
     head.onclick = function () { head.parentElement.classList.toggle("open"); };
@@ -268,6 +277,7 @@ function boot() {
   bindIntra();
   bindStocks();
   bindFold();
+  bindMore();
 }
 if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", boot);
