@@ -2,6 +2,24 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-061  已完成  2026-10-25 11:37 北京
+
+- PR #77，head `944e910`。https://github.com/XuQingsong/inves-cog/pull/77 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40158493681 ：`phase1-blocking` 成功，771 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 151.656 秒（≤ 300）、status passed、collected 771、pending 0。日志 `771 passed, 21 deselected, 5 warnings in 151.69s`。suite xml time 151.652。`m0-ci.xml` 2 passed、0 failures、xml 0.408 秒（日志 `2 passed in 0.43s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。同分支更早的 `ae1f9d1`、`8f20da5` 曾失败，已被这次 head 取代。工件 `m0-clean-environment-evidence` id 12585279056。运行创建于 2026-10-25 11:30 北京，`phase1-blocking` 完成于 11:34 北京。B 线没有合并，没有部署，没有调用真实模型。
+- 相对 main `b26318d` 的 diff 是 `src/inves_cog/web/exit_levels.py`、`brief.py`、`brief_html.py`、`risk_brief.py`、`stock_brief.py`，以及 `tests/m10/test_b053.py`、`test_b054.py`、`test_b058.py`、`test_b059.py`、`test_b061.py`。没有新迁移、授权、上游。页面只读 `m4.yaml` 的卖出参数和波段参数，不调用 `sell_signal`，不改持仓，不改规则 A 的订单。
+- 清单里的 `dev50 < 0` 在可见文本写成「距 50 日线为负」。E6 和既有页面扫描都禁止英文代号，不能把 `dev50` 印到页面上。
+- E1｜通过｜`test_e1_kind_follows_swing_and_tier`、`test_e1_pages_show_the_holding_type`｜CI junit 0.000 秒、0.086 秒。HD、NFLX 为观察波段仓；AVGO、AMD、MU、MRVL 为进攻层核心；GOOGL、JNJ 为标准层核心；V 为防守层核心。缺类型时为类型暂缺，不猜测规则。
+- E2｜通过｜`test_e2_each_type_lists_only_its_rules`｜CI junit 0.039 秒。观察波段仓只有波段止盈价、波段止损价。防守层和标准层没有灾难止损价、翻倍止盈价。只有标准层有警戒减仓。进攻层有波段股数时才加波段部分止盈价。
+- E3｜通过｜`test_e3_prices_follow_the_parameter_file`、`test_e3_page_follows_a_replaced_parameter_file`｜CI junit 0.025 秒、0.060 秒。波段止盈价 = 50 日线 × (1+clamp(vol20, 参数)/100)，止损价 = 成本 × stop_fraction，灾难价 = 最高价 × disaster_peak_fraction，翻倍价 = 成本 × double_price。替换参数文件后 HD 止损触发价变为 56，AVGO 破位门槛变为 12；仓库里的 `m4.yaml` 未改。
+- E4｜通过｜`test_e4_double_alert_and_disaster_notes`、`test_e4_pages_quote_avgo_and_jnj`｜CI junit 0.010 秒、0.181 秒。AMD 翻倍止盈写明距 50 日线、择时分、距上次卖出 30 天、尚未减仓，附加条件当前满足，且不改持仓。AVGO 灾难止损写「同时需低于 200 日线，当前低于 200 日线」，破位写已经执行过、不再重复。JNJ 警戒减仓为「成长分 41.5 < 50；距 50 日线为负；账本版本已更新；尚未减仓，已触发」。恐慌打开时改写恐慌模式下暂停警戒减仓，不写已触发。
+- E5｜通过｜`test_e5_distance_bands`、`test_e5_swing_pages_skip_breakout_and_disaster`｜CI junit 0.000 秒、0.109 秒。价格距离小于 10% 为红，正好 10% 为橙，正好 20% 不提示。分数距离小于 5 分为红，正好 5 分为橙，正好 10 分不提示。HD、NFLX 的风险句只有波段止盈，不出现破位、灾难或「持有不足 10 个交易日」。
+- E6｜通过｜`test_e6_distance_wording_and_footer`｜CI junit 0.172 秒。距离写成还需上涨 12.8%、还需下跌，1 位小数。页脚有「观察波段仓只看波段止盈价」和「参数来自当前版本的卖出参数与波段参数」。可见文本没有 `M-` 编号、英文代号、4 位以上小数，也没有「止盈线距离」。
+- E7｜通过｜同一 CI 的 771 passed。B-048 至 B-060 与 A-017 的用例都在这次通过的集合里，没有失败。本地 `make phase1-test` 同为 771 passed、21 deselected、135.90 秒。
+- 夹具页文本（交易日 2041-03-18，复刻 10-22 的持仓类型）：
+  - 纸面账户：持仓9只，待成交0笔。红色 2 项，橙色 7 项。第一条红色：AMD 翻倍止盈价已达到触发价（$180.00），附加条件当前满足。JNJ 警戒减仓已触发：成长分 41.5 < 50，距 50 日线为负。HD、NFLX 为观察波段仓，只列波段止盈价还需上涨 12.8%（$112.80）和波段止损价还需下跌 34.4%（$65.60，成本的 82.0%）。AVGO 为进攻层核心：灾难止损还需下跌 40.0%（$60.00），翻倍止盈还需上涨 60.0%（$160.00）且附加条件当前未满足，破位连续 10 天已达到门槛 7 天、已经执行过不再重复。V 为防守层核心，只有破位减仓和基本面清仓。
+  - `/s/HD`：HD 今日 0.00%，纸面持有 100 股，观察波段仓。我的仓位只列波段止盈价还需上涨 12.8% 和波段止损价还需下跌 34.4%，不出现破位减仓或灾难止损。
+  - `/s/AVGO`：AVGO 今日 0.00%，纸面持有 100 股，进攻层核心。我的仓位写灾难止损价还需下跌 40.0%，同时需低于 200 日线且当前低于 200 日线；翻倍止盈价还需上涨 60.0%，附加条件当前未满足；破位减仓连续 10 天已达到，已经执行过、不再重复。风险句为已连续 10 天低于 200 日线；规则 A 已执行破位减仓，不再重复减仓。
+- 下一步：等需求方验收。
+
 ## B-061  进行中  2026-10-25 11:34 北京
 
 - PR #77，head `944e910`。https://github.com/XuQingsong/inves-cog/pull/77 。没有合并。
