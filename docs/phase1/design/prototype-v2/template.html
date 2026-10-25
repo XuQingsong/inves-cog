@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>今日 · 信息系统 v2 原型</title>
+<style>
+__CSS__
+.tag{display:inline-block;border-radius:5px;padding:0 6px;font-size:11px;line-height:18px;background:var(--line2);color:var(--ink2);margin-right:4px;white-space:nowrap}
+.tag.hot{background:var(--tp-bg);color:var(--tp)}
+.tag.macro{background:var(--r-mid-bg);color:var(--r-mid)}
+.nrow{display:grid;grid-template-columns:52px 1fr auto;gap:10px;padding:7px 4px;border-bottom:1px solid var(--line2);align-items:baseline}
+.nrow:last-child{border-bottom:0}
+.nrow .tm{font:12px var(--mono);color:var(--muted);padding-top:2px}
+.nrow .codes{font:11px var(--mono);color:var(--ink2);white-space:nowrap}
+.nrow .hl{min-width:0}
+.nrow .hl a{color:var(--ink)}
+.nrow .hl a:hover{color:var(--brand)}
+.mrow{display:grid;grid-template-columns:120px 1fr 74px 56px;gap:10px;padding:8px 4px;align-items:baseline}
+.mrow .tk{font:600 14px var(--mono)}
+.mnews{margin:0 0 8px 14px;padding:6px 10px 8px;border-left:2px solid var(--line2);border-bottom:1px solid var(--line2)}
+.mnews:last-child{border-bottom:1px solid var(--line2)}
+.scroll{max-height:1560px;overflow-y:auto;padding-right:6px}
+.cal{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:8px;background:#fff}
+.cal .cd{font:12px var(--mono);color:var(--muted)}
+.cal .cs{font:600 13px var(--mono)}
+.cal .pv{font-size:12px;color:var(--ink2);margin:4px 0 0 14px}
+.lboard{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.lboard{grid-template-columns:1fr}.mrow{grid-template-columns:52px 1fr 66px}.mrow .v4{display:none}.nrow{grid-template-columns:44px 1fr}.nrow .codes{display:none}}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+ <div class="brand"><b>inves·cog</b><div>投资研究工作台</div></div>
+ <nav class="nav">
+  <a class="on" href="#">今日<small>信息系统 v2 原型</small></a>
+  <a href="#">我的标的<small>59 只</small></a>
+  <a href="#">纸面账户<small>13 只持仓</small></a>
+  <a href="#">复盘与数据<small>口径与状态</small></a>
+ </nav>
+ <div class="datebox">
+  <div class="row">
+   <button id="prev">‹</button><span class="d" id="date"></span><span class="small muted" id="dow"></span><button id="next">›</button>
+   <span class="mode"><button data-l="en">英文</button><button data-l="zh">中文</button></span>
+  </div>
+  <div class="fresh">原型 · 生产数据 · 静态</div>
+ </div>
+</div></div>
+<main id="main"></main>
+<script>
+const DAYS=__DATA__;
+const DOW={"2026-10-22":"周四","2026-10-23":"周五"};
+const S={date:"2026-10-23",lang:"en"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const pct=(v,d=2)=>v==null?"—":`<span class="${v<0?"down":"up"}">${v<0?"−":"+"}${(Math.abs(v)*100).toFixed(d)}%</span>`;
+const hm=ts=>{const d=new Date(ts);return d.toLocaleString("en-US",{timeZone:"America/New_York",hour:"2-digit",minute:"2-digit",hour12:false})};
+const md=ds=>ds.slice(5).replace("-","/");
+const title=n=>esc(S.lang==="zh"&&n.headline_zh?n.headline_zh:n.headline);
+const late=(n,mod)=>n.late&&!(DAYS[S.date].late_notes||{})[mod]?'<span class="chip stale">事后补采</span>':"";
+const lateNote=mod=>{const d=DAYS[S.date].late_notes?.[mod];return d?`<span class="small muted">本日新闻于 ${d} 补采入库</span>`:""};
+const tags=n=>(n.tags||[]).map(t=>`<span class="tag${["财报","指引","评级","并购","财报前瞻"].includes(t)?" hot":t==="宏观"?" macro":""}">${t}</span>`).join("");
+const codes=n=>(n.primary||[]).map(t=>`<span class="tick${DAYS[S.date].held_tickers.includes(t)?" held":""}">${t}</span>`).join("");
+function newsRow(n,mod,extra){
+ return `<div class="nrow"><span class="tm">${hm(n.published)}</span><div class="hl">${tags(n)}<a href="${esc(n.url||"#")}" target="_blank" rel="noopener">${title(n)}</a> ${late(n,mod)}${extra||""}</div><span class="codes">${codes(n)}</span></div>`;
+}
+function kpi(d){
+ const idx=d.indexes.map(i=>`<div class="card kpi"><div class="l">${esc(i.name)}</div><div class="v">${pct(i.ret)}</div><div class="ft">盘后 ${i.post==null?"—":pct(i.post,2).replace(/<[^>]+>/g,"")}</div></div>`).join("");
+ const adv=d.advancers+d.decliners?Math.round(d.advancers/(d.advancers+d.decliners)*100):0;
+ return `<div class="grid g4">${idx}
+  <div class="card kpi"><div class="l">VIX</div><div class="v num">${d.vix.val??"—"}</div><div class="ft">前日 ${d.vix.prev??"—"} · 来源 Yahoo</div></div></div>
+ <div class="grid g4" style="margin-top:16px">
+  <div class="card tight"><div class="kv"><span class="k">涨跌家数</span><span><span class="num up">${d.advancers}</span> / <span class="num down">${d.decliners}</span> <span class="small muted">上涨占 ${adv}%</span></span></div></div>
+  <div class="card tight" style="grid-column:span 3"><div class="kv"><span class="k">一句话判断</span><span>${esc(d.judgment||"")}</span><span class="k">说明</span><span class="small ink2">${esc(d.implication||"")}</span></div></div>
+ </div>`;
+}
+function movers(d){
+ const rows=d.movers.map(m=>{
+  const warn=(!m.has_news)?'<div class="small muted">暂无相关新闻</div>':"";
+  const own=(m.news||[]).map(n=>`<div class="nrow" style="grid-template-columns:46px 1fr auto;border-bottom:0"><span class="tm">${hm(n.published)}</span><div class="hl">${tags(n)}<a href="${esc(n.url||"#")}" target="_blank" rel="noopener">${title(n)}</a> ${late(n,"movers")}</div><span class="codes">${codes(n)}</span></div>`).join("");
+  return `<div class="mrow"><span class="tk">${m.ticker} ${m.held?'<span class="chip held">持仓</span>':'<span class="chip buy">标的</span>'}</span><span class="small ink2">${esc(m.theme||"")}${warn}</span><span class="num r">${pct(m.ret)}</span><span class="num r v4">${m.vol==null?"—":m.vol.toFixed(1)+"×"}</span></div>${own?`<div class="mnews">${own}</div>`:""}`;
+ }).join("");
+ return `<div class="card sec"><h2>持仓与标的异动 ${lateNote("movers")}</h2><div class="small muted" style="margin-bottom:8px">当日涨跌幅绝对值最大的 8 只 · 每只最多 2 条相关新闻</div>${rows}</div>`;
+}
+function themes(d){
+ const rows=d.theme_news.map(n=>`<div class="nrow"><span class="tm">${hm(n.published)}</span><div class="hl"><span class="tag macro">${esc(n.theme)}</span><a href="${esc(n.url||"#")}" target="_blank" rel="noopener">${title(n)}</a> ${late(n,"theme")}</div><span class="codes">${codes(n)}</span></div>`).join("");
+ return `<div class="card sec"><h2>热门主题新闻 ${lateNote("theme")}</h2>${rows||'<div class="empty">无</div>'}</div>`;
+}
+function feed(d){
+ const rows=d.feed.map(n=>newsRow(n,"feed")).join("");
+ return `<div class="card"><h2>滚动新闻 <span class="small muted">最近 ${d.feed.length} 条 · 当日共 ${d.news_kept} 条入库</span> ${lateNote("feed")}</h2><div class="scroll">${rows||'<div class="empty">无</div>'}</div></div>`;
+}
+function cal(d){
+ const wk=d.earnings_week.map(e=>`<div class="cal"><span class="cd">${md(e.date)} · ${e.time}</span> <span class="cs">${e.symbol}</span> <span class="small ink2">${esc(e.name)}</span><span class="small muted" style="float:right">预期 EPS ${esc(e.eps||"—")} · ${esc(e.ests||"—")} 家</span></div>`).join("");
+ const mine=d.earnings_mine.map(e=>{
+  const pv=(e.previews||[]).map(n=>`<div class="pv"><span class="tag hot">财报前瞻</span><a href="${esc(n.url||"#")}" target="_blank" rel="noopener">${title(n)}</a></div>`).join("");
+  return `<div class="cal"><span class="cs">${e.symbol}</span>${e.held?' <span class="chip held">持仓</span>':' <span class="chip buy">标的</span>'} <span class="cd">${e.time} ${md(e.date)} · 预期 EPS ${esc(e.eps||"—")}</span>${pv}</div>`;
+ }).join("");
+ const econ=d.econ.map(e=>`<div class="nrow" style="grid-template-columns:64px 1fr auto"><span class="tm">${md(e.date)} ${esc(e.gmt||"")}</span><div class="hl">${esc(e.name)}</div><span class="small muted">预期 ${esc(e.consensus||"—").trim()||"—"} / 前值 ${esc(e.previous||"—")}</span></div>`).join("");
+ return `<div class="card"><h2>财报日历 <span class="small muted">来源 Nasdaq</span></h2><div class="scroll">
+  <h3>本周重点（市值前 10）</h3>${wk||'<div class="empty">无</div>'}
+  <h3 style="margin-top:14px">持仓与标的（未来 10 天）</h3>${mine||'<div class="empty">无</div>'}
+  <h3 style="margin-top:14px">本周宏观 <span class="small muted">Nasdaq 宏观日历 · 返回 asOf 10-25（覆盖本周）</span></h3>${econ||'<div class="empty">本周暂无关键宏观数据</div>'}</div></div>`;
+}
+function boards(d){
+ const L=d.leaders;
+ const t=(arr,showM)=>arr.map(r=>`<div class="nrow" style="grid-template-columns:64px 1fr auto"><span class="tk" style="font:600 13px var(--mono)">${r.ticker}</span><span class="small ink2">${esc(showM?("$"+Number(r.close).toFixed(2)):r.theme||"")}</span><span class="num">${pct(r.ret)}</span></div>`).join("");
+ return `<div class="card sec"><h2>涨跌排行榜</h2><div class="lboard">
+  <div><h3>标的池 · 涨幅前 5</h3>${t(L.pool_up)}</div>
+  <div><h3>标的池 · 跌幅前 5</h3>${t(L.pool_down)}</div>
+  <div><h3>全市场 · 涨幅前 5</h3>${t(L.mkt_up,true)}</div>
+  <div><h3>全市场 · 跌幅前 5</h3>${t(L.mkt_down,true)}</div></div></div>`;
+}
+function events(d){
+ if(!d.events.length) return `<div class="card sec"><h2>今天的大事</h2><div class="empty">今天没有达到阈值的大事</div></div>`;
+ const rows=d.events.map(e=>{
+  const mem=(e.members||[]).map(t=>`<a class="tick${d.held_tickers.includes(t)?" held":""}" href="#">${t}</a>`).join("");
+  const why=e.explanation?`<div class="small ink2" style="margin-top:6px">${esc(e.explanation)}</div>`:"";
+  return `<div class="event open"><div class="h"><div style="display:flex;gap:12px;align-items:baseline"><span class="sig">${e.max_abs_z==null?"—":Number(e.max_abs_z).toFixed(1)+"σ"}</span><b>${esc(e.title)}</b><span class="small ink2">涉及持仓 ${(e.members||[]).filter(t=>d.held_tickers.includes(t)).length} 只</span></div></div><div class="body" style="display:block"><div style="margin-top:8px">${mem}</div>${why}</div></div>`;
+ }).join("");
+ return `<div class="card sec"><h2>今天的大事</h2>${rows}</div>`;
+}
+function todo(d){
+ return `<div class="card sec"><h2>今日须知 <span class="small muted">示例：上线后每天由模型生成 1 次</span></h2><ul class="news" style="margin:0">${d.todo5.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`;
+}
+function foot(d){
+ return `<div class="foot"><span>原型 · 数据为 ${S.date} 生产快照 · 非投资建议</span><span>数据：Alpaca / Nasdaq / Yahoo · 规则层无大模型</span></div>`;
+}
+function render(){
+ const d=DAYS[S.date];
+ $("#date").textContent=S.date.replace(/-/g,".");$("#dow").textContent=DOW[S.date]||"";
+ $("#prev").classList.toggle("off",S.date==="2026-10-22");
+ $("#next").classList.toggle("off",S.date==="2026-10-23");
+ $("#prev").style.opacity=S.date==="2026-10-22"?.35:1;
+ $("#next").style.opacity=S.date==="2026-10-23"?.35:1;
+ $("#main").innerHTML=kpi(d)+todo(d)+movers(d)+themes(d)+`<div class="grid g2 sec">${feed(d)}${cal(d)}</div>`+boards(d)+events(d)+foot(d);
+}
+$("#prev").onclick=()=>{S.date="2026-10-22";render();window.scrollTo(0,0)};
+$("#next").onclick=()=>{S.date="2026-10-23";render();window.scrollTo(0,0)};
+document.querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{S.lang=b.dataset.l;document.querySelectorAll(".mode button").forEach(x=>x.classList.toggle("on",x===b));render()});
+document.querySelector('.mode button[data-l="en"]').classList.add("on");
+render();
+</script>
+</body>
+</html>

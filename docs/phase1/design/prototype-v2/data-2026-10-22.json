@@ -1,0 +1,2646 @@
+{
+ "date": "2026-10-22",
+ "late_notes": {
+  "movers": "10-24",
+  "theme": "10-24",
+  "feed": "10-24"
+ },
+ "indexes": [
+  {
+   "id": "SPY",
+   "name": "标普 500",
+   "ret": -0.011809750481832637,
+   "post": 0.0001832556678360575
+  },
+  {
+   "id": "QQQ",
+   "name": "纳指 100",
+   "ret": -0.028585217870932156,
+   "post": -0.00193052933410931
+  },
+  {
+   "id": "IWM",
+   "name": "罗素小盘",
+   "ret": 0.0006872106481481399,
+   "post": -0.0003614414284166534
+  }
+ ],
+ "advancers": 765,
+ "decliners": 512,
+ "judgment": "板块轮动而非全面恐慌",
+ "oneliner": "AI 网络与光−9.16%、半导体设备−9.10%领跌，必需消费 XLP+3.31%、区域银行 KRE+2.53%领涨，判断：板块轮动而非全面恐慌。",
+ "implication": "我的标的池偏重 AI 链，今天 59 只里 42 只下跌、19 只波动超过 7%；纸面账户 AI 持仓占 26%，详见「我的标的」「纸面账户」。",
+ "vix": {
+  "val": 19.03,
+  "prev": 16.68,
+  "source": "Yahoo"
+ },
+ "movers": [
+  {
+   "ticker": "NOK",
+   "held": false,
+   "theme": "AI 网络与光通信",
+   "ret": -0.14810810810810815,
+   "vol": 3.0471498207464407,
+   "has_news": true,
+   "news": [
+    {
+     "info_id": "news:fiscal.ai:101286775",
+     "published": "2026-10-22 08:01:44+00:00",
+     "seen": "2026-10-24 12:02:39.493740+00:00",
+     "late": true,
+     "source": "fiscal.ai",
+     "headline": "Nokia Reports Q3 2026 Financial Results and Updates Restructuring Costs",
+     "url": "https://www.streetinsider.com/Press+Releases?before_id=27217734",
+     "tickers": [
+      "NOK"
+     ],
+     "primary": [
+      "NOK"
+     ],
+     "held": false,
+     "tags": [
+      "财报"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "诺基亚发布 2026 年三季度财务业绩并更新重组成本"
+    },
+    {
+     "info_id": "news:fiscal.ai:101343728",
+     "published": "2026-10-22 11:01:45+00:00",
+     "seen": "2026-10-24 12:02:43.613240+00:00",
+     "late": true,
+     "source": "fiscal.ai",
+     "headline": "Nokia and Supermicro Partner to Deploy AI-Enabled Radio Access Networks",
+     "url": "https://www.vermoegenszentrum.ch/en/stock-exchange-and-markets/news/supermicro-partners-nokia-deploy-nvidia-based-ai-ran-solutions",
+     "tickers": [
+      "NOK"
+     ],
+     "primary": [
+      "NOK"
+     ],
+     "held": false,
+     "tags": [
+      "产品合作"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 3,
+     "headline_zh": "诺基亚与超微电脑合作部署 AI 无线接入网"
+    }
+   ]
+  },
+  {
+   "ticker": "COHR",
+   "held": false,
+   "theme": "AI 网络与光通信",
+   "ret": -0.1250789373973814,
+   "vol": 1.8091827221829888,
+   "has_news": true,
+   "news": [
+    {
+     "info_id": "news:fiscal.ai:102037931",
+     "published": "2026-10-22 20:31:55+00:00",
+     "seen": "2026-10-24 12:03:15.098162+00:00",
+     "late": true,
+     "source": "fiscal.ai",
+     "headline": "Coherent Corp. Named to TIME's America's Growth Leaders 2027 List",
+     "url": "https://www.globenewswire.com/news-release/2026/10/22/3386815/11543/en/coherent-named-one-of-time-s-america-s-growth-leaders-2027.html",
+     "tickers": [
+      "COHR"
+     ],
+     "primary": [
+      "COHR"
+     ],
+     "held": false,
+     "tags": [],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 2,
+     "headline_zh": "Coherent 入选《时代》2027 美国成长领袖榜"
+    }
+   ]
+  },
+  {
+   "ticker": "LRCX",
+   "held": false,
+   "theme": "半导体设备",
+   "ret": -0.11755684214562323,
+   "vol": 2.6260830425745105,
+   "has_news": true,
+   "news": [
+    {
+     "info_id": "news:benzinga:62519895",
+     "published": "2026-10-22 10:37:06+00:00",
+     "seen": "2026-10-24 12:02:42.576808+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Needham Maintains Buy on Lam Research, Lowers Price Target to $290",
+     "url": "https://www.benzinga.com/news/26/10/62519895/needham-maintains-buy-lam-research-lowers-price-target-290",
+     "tickers": [
+      "LRCX"
+     ],
+     "primary": [
+      "LRCX"
+     ],
+     "held": false,
+     "tags": [
+      "评级"
+     ],
+     "macro": null,
+     "weak_rating_only": true,
+     "importance": 4,
+     "headline_zh": "Needham 维持 Lam Research 买入评级，目标价下调至 290 美元"
+    },
+    {
+     "info_id": "news:benzinga:62520150",
+     "published": "2026-10-22 10:48:10+00:00",
+     "seen": "2026-10-24 12:02:42.653707+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Lam Research Says Supply Bottlenecks Are Holding Back Revenue",
+     "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62520150/lam-research-says-supply-bottlenecks-are-holding-back-revenue",
+     "tickers": [
+      "LRCX"
+     ],
+     "primary": [
+      "LRCX"
+     ],
+     "held": false,
+     "tags": [
+      "财报"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "Lam Research 称供应瓶颈正拖累营收"
+    }
+   ]
+  },
+  {
+   "ticker": "LITE",
+   "held": false,
+   "theme": "AI 网络与光通信",
+   "ret": -0.11538732808275542,
+   "vol": 1.2886330406011817,
+   "has_news": false,
+   "news": []
+  },
+  {
+   "ticker": "CIEN",
+   "held": false,
+   "theme": "AI 网络与光通信",
+   "ret": -0.10710134499363477,
+   "vol": 1.3421960964689679,
+   "has_news": false,
+   "news": []
+  },
+  {
+   "ticker": "GEV",
+   "held": false,
+   "theme": "数据中心电力与散热",
+   "ret": -0.10638068083635732,
+   "vol": 2.684110386417878,
+   "has_news": true,
+   "news": [
+    {
+     "info_id": "news:fiscal.ai:102037923",
+     "published": "2026-10-22 20:31:44+00:00",
+     "seen": "2026-10-24 12:03:14.789284+00:00",
+     "late": true,
+     "source": "fiscal.ai",
+     "headline": "GE Vernova Prepares for Q3 2026 Earnings Release",
+     "url": "https://www.barchart.com/story/news/8314748/gev-stock-earnings-preview-what-to-expect-from-ge-vernovas-q3-2026-report",
+     "tickers": [
+      "GEV"
+     ],
+     "primary": [
+      "GEV"
+     ],
+     "held": false,
+     "tags": [
+      "财报"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "GE Vernova 将发布 2026 年三季度财报"
+    },
+    {
+     "info_id": "news:fiscal.ai:102037922",
+     "published": "2026-10-22 20:31:44+00:00",
+     "seen": "2026-10-24 12:03:14.782862+00:00",
+     "late": true,
+     "source": "fiscal.ai",
+     "headline": "GE Vernova Shares Experience Significant Intraday Decline",
+     "url": "https://www.morningstar.com/news/dow-jones/202610228359/ge-vernova-down-over-10-on-track-for-largest-percent-decrease-since-january-2025-data-talk",
+     "tickers": [
+      "GEV"
+     ],
+     "primary": [
+      "GEV"
+     ],
+     "held": false,
+     "tags": [],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 2,
+     "headline_zh": "GE Vernova 盘中大幅下跌"
+    }
+   ]
+  },
+  {
+   "ticker": "CRWV",
+   "held": false,
+   "theme": "AI 服务器与算力云",
+   "ret": -0.10061468780329985,
+   "vol": 1.6952488565786574,
+   "has_news": true,
+   "news": [
+    {
+     "info_id": "news:fiscal.ai:102193353",
+     "published": "2026-10-22 22:01:27+00:00",
+     "seen": "2026-10-24 12:03:19.020866+00:00",
+     "late": true,
+     "source": "fiscal.ai",
+     "headline": "BofA Securities Analyzes CoreWeave's Financing Needs Ahead of Q3 Results",
+     "url": "https://news.futunn.com/en/post/1001993956/coreweave-s-funding-needs-remain-key-question-ahead-of-q3",
+     "tickers": [
+      "CRWV"
+     ],
+     "primary": [
+      "CRWV"
+     ],
+     "held": false,
+     "tags": [
+      "财报"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "美银证券分析 CoreWeave 三季度财报前的融资需求"
+    },
+    {
+     "info_id": "news:benzinga:62531967",
+     "published": "2026-10-22 15:04:10+00:00",
+     "seen": "2026-10-24 12:03:03.449170+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Eric Schmidt Rejects AI Bubble Fears, Says Anthropic Is Growing Twice as Fast as Google Did",
+     "url": "https://www.benzinga.com/markets/prediction-markets/26/10/62531967/eric-schmidt-ai-bubble-anthropic-growth",
+     "tickers": [
+      "CRWV",
+      "GOOGL",
+      "NVDA"
+     ],
+     "primary": [
+      "CRWV",
+      "GOOGL",
+      "NVDA"
+     ],
+     "held": true,
+     "tags": [],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 3,
+     "headline_zh": "埃里克·施密特驳斥 AI 泡沫论，称 Anthropic 增速是当年谷歌的两倍"
+    }
+   ]
+  },
+  {
+   "ticker": "KLAC",
+   "held": false,
+   "theme": "半导体设备",
+   "ret": -0.09545371106895917,
+   "vol": 2.2048402571600096,
+   "has_news": true,
+   "news": [
+    {
+     "info_id": "news:benzinga:62524540",
+     "published": "2026-10-22 12:50:36+00:00",
+     "seen": "2026-10-24 12:02:49.124851+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Lam Research Stock Sinks After Guidance Falls Short of Whispers: Cantor Calls It a 'Top Pick'",
+     "url": "https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/10/62524540/lam-research-sinks-guidance-cantor-top-pick",
+     "tickers": [
+      "AMAT",
+      "KLAC",
+      "LRCX",
+      "SOXX"
+     ],
+     "primary": [
+      "AMAT",
+      "KLAC",
+      "LRCX"
+     ],
+     "held": false,
+     "tags": [
+      "指引"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "Lam Research 指引不及市场预期股价大跌；Cantor 仍称其为“首选股”"
+    }
+   ]
+  }
+ ],
+ "mover_news": [
+  {
+   "info_id": "news:fiscal.ai:101286775",
+   "published": "2026-10-22 08:01:44+00:00",
+   "seen": "2026-10-24 12:02:39.493740+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Nokia Reports Q3 2026 Financial Results and Updates Restructuring Costs",
+   "url": "https://www.streetinsider.com/Press+Releases?before_id=27217734",
+   "tickers": [
+    "NOK"
+   ],
+   "primary": [
+    "NOK"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "诺基亚发布 2026 年三季度财务业绩并更新重组成本"
+  },
+  {
+   "info_id": "news:benzinga:62519895",
+   "published": "2026-10-22 10:37:06+00:00",
+   "seen": "2026-10-24 12:02:42.576808+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Needham Maintains Buy on Lam Research, Lowers Price Target to $290",
+   "url": "https://www.benzinga.com/news/26/10/62519895/needham-maintains-buy-lam-research-lowers-price-target-290",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "Needham 维持 Lam Research 买入评级，目标价下调至 290 美元"
+  },
+  {
+   "info_id": "news:benzinga:62520150",
+   "published": "2026-10-22 10:48:10+00:00",
+   "seen": "2026-10-24 12:02:42.653707+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Lam Research Says Supply Bottlenecks Are Holding Back Revenue",
+   "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62520150/lam-research-says-supply-bottlenecks-are-holding-back-revenue",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Lam Research 称供应瓶颈正拖累营收"
+  },
+  {
+   "info_id": "news:fiscal.ai:101354759",
+   "published": "2026-10-22 11:31:41+00:00",
+   "seen": "2026-10-24 12:02:44.490371+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Analysts Adjust Price Targets for Lam Research",
+   "url": "https://www.marketscreener.com/news/morgan-stanley-adjusts-price-target-on-lam-research-to-339-from-385-ce785cded98bfe22",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "分析师调整 Lam Research 目标价"
+  },
+  {
+   "info_id": "news:benzinga:62522840",
+   "published": "2026-10-22 12:07:20+00:00",
+   "seen": "2026-10-24 12:02:47.636193+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Mizuho Maintains Outperform on Lam Research, Lowers Price Target to $360",
+   "url": "https://www.benzinga.com/news/26/10/62522840/mizuho-maintains-outperform-lam-research-lowers-price-target-360",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "瑞穗维持 Lam Research 跑赢大盘评级，目标价下调至 360 美元"
+  },
+  {
+   "info_id": "news:benzinga:62524540",
+   "published": "2026-10-22 12:50:36+00:00",
+   "seen": "2026-10-24 12:02:49.124851+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Lam Research Stock Sinks After Guidance Falls Short of Whispers: Cantor Calls It a 'Top Pick'",
+   "url": "https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/10/62524540/lam-research-sinks-guidance-cantor-top-pick",
+   "tickers": [
+    "AMAT",
+    "KLAC",
+    "LRCX",
+    "SOXX"
+   ],
+   "primary": [
+    "AMAT",
+    "KLAC",
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "指引"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Lam Research 指引不及市场预期股价大跌；Cantor 仍称其为“首选股”"
+  },
+  {
+   "info_id": "news:fiscal.ai:101545934",
+   "published": "2026-10-22 15:01:55+00:00",
+   "seen": "2026-10-24 12:03:02.962616+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Analysts Adjust Price Targets for Lam Research Following Earnings Report",
+   "url": "https://www.marketscreener.com/news/bernstein-adjusts-price-target-on-lam-research-to-350-from-385-ce785cded98df722",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "财报",
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Lam Research 财报后分析师调整目标价"
+  },
+  {
+   "info_id": "news:benzinga:62539722",
+   "published": "2026-10-22 17:41:55+00:00",
+   "seen": "2026-10-24 12:03:08.699782+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Morgan Stanley Maintains Overweight on Lam Research, Lowers Price Target to $339",
+   "url": "https://www.benzinga.com/news/26/10/62539722/morgan-stanley-maintains-overweight-lam-research-lowers-price-target-339",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "摩根士丹利维持 Lam Research 增持评级，目标价下调至 339 美元"
+  },
+  {
+   "info_id": "news:benzinga:62541571",
+   "published": "2026-10-22 18:27:05+00:00",
+   "seen": "2026-10-24 12:03:12.061870+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Lam Research Analysts Cut Their Forecasts Following Q1 Earnings",
+   "url": "https://www.benzinga.com/analyst-stock-ratings/price-target/26/10/62541571/lam-research-analysts-cut-their-forecasts-following-q1-earnings",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Lam Research 一季度财报后分析师下调预测"
+  },
+  {
+   "info_id": "news:benzinga:62545279",
+   "published": "2026-10-22 20:02:53+00:00",
+   "seen": "2026-10-24 12:03:13.573511+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "UBS Maintains Buy on Lam Research, Lowers Price Target to $400",
+   "url": "https://www.benzinga.com/news/26/10/62545279/ubs-maintains-buy-lam-research-lowers-price-target-400",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "瑞银维持 Lam Research 买入评级，目标价下调至 400 美元"
+  }
+ ],
+ "theme_news": [
+  {
+   "theme": "互联网",
+   "info_id": "news:benzinga:62538128",
+   "published": "2026-10-22 17:07:14+00:00",
+   "seen": "2026-10-24 12:03:07.939080+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Wolfe Research Downgrades Netflix to Peer Perform",
+   "url": "https://www.benzinga.com/news/26/10/62538128/wolfe-research-downgrades-netflix-peer-perform",
+   "tickers": [
+    "NFLX"
+   ],
+   "primary": [
+    "NFLX"
+   ],
+   "held": true,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 5,
+   "headline_zh": "Wolfe Research 将奈飞下调至与同业持平"
+  },
+  {
+   "theme": "AI 算力芯片",
+   "info_id": "news:fiscal.ai:101433935",
+   "published": "2026-10-22 13:31:47+00:00",
+   "seen": "2026-10-24 12:02:57.518641+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Tigress Financial Initiates Coverage on Broadcom",
+   "url": "https://www.marketscreener.com/news/tigress-initiates-broadcom-at-buy-with-600-price-target-ce785cdedb89f42d",
+   "tickers": [
+    "AVGO"
+   ],
+   "primary": [
+    "AVGO"
+   ],
+   "held": true,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 5,
+   "headline_zh": "Tigress Financial 首次覆盖博通"
+  },
+  {
+   "theme": "金融与支付",
+   "info_id": "news:fiscal.ai:101433933",
+   "published": "2026-10-22 13:31:46+00:00",
+   "seen": "2026-10-24 12:02:57.506901+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Visa in Discussions to Acquire Fireblocks",
+   "url": "https://www.marketscreener.com/news/visa-in-discussions-to-buy-fireblocks-for-roughly-2-50-billion-axios-reports-ce785cdedb8bf021",
+   "tickers": [
+    "V"
+   ],
+   "primary": [
+    "V"
+   ],
+   "held": true,
+   "tags": [
+    "并购"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 5,
+   "headline_zh": "Visa 洽谈收购 Fireblocks"
+  },
+  {
+   "theme": "AI 算力芯片",
+   "info_id": "news:benzinga:62525864",
+   "published": "2026-10-22 13:16:49+00:00",
+   "seen": "2026-10-24 12:02:56.852773+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Tigress Financial Initiates Coverage On Broadcom with Buy Rating, Announces Price Target of $600",
+   "url": "https://www.benzinga.com/news/26/10/62525864/tigress-financial-initiates-coverage-broadcom-buy-rating-announces-price-target-600",
+   "tickers": [
+    "AVGO"
+   ],
+   "primary": [
+    "AVGO"
+   ],
+   "held": true,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 5,
+   "headline_zh": "Tigress Financial 首次覆盖博通，给予买入评级，目标价 600 美元"
+  },
+  {
+   "theme": "金融与支付",
+   "info_id": "news:benzinga:62523648",
+   "published": "2026-10-22 12:26:38+00:00",
+   "seen": "2026-10-24 12:02:48.203966+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "'Visa In Talks To Acquire Fireblocks For Around $2.5B' - Axios Pro Exclusive",
+   "url": "https://www.benzinga.com/m/26/10/62523648/visa-talks-acquire-fireblocks-around-2-5b-axios-pro-exclusive",
+   "tickers": [
+    "V"
+   ],
+   "primary": [
+    "V"
+   ],
+   "held": true,
+   "tags": [
+    "并购"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 5,
+   "headline_zh": "Axios 独家：“Visa 洽谈以约 25 亿美元收购 Fireblocks”"
+  },
+  {
+   "theme": "医疗",
+   "info_id": "news:fiscal.ai:101433940",
+   "published": "2026-10-22 13:31:51+00:00",
+   "seen": "2026-10-24 12:02:57.552423+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Johnson & Johnson Joins US Myeloma Network as First Industry Collaborator",
+   "url": "https://www.prnewswire.com/news-releases/the-international-myeloma-foundation-launches-us-myeloma-network-to-accelerate-clinical-trials-expand-access-and-improve-patient-care-302916144.html",
+   "tickers": [
+    "JNJ"
+   ],
+   "primary": [
+    "JNJ"
+   ],
+   "held": true,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "强生成为首家加入美国骨髓瘤网络的产业合作方"
+  },
+  {
+   "theme": "软件与平台",
+   "info_id": "news:fiscal.ai:101433926",
+   "published": "2026-10-22 13:31:43+00:00",
+   "seen": "2026-10-24 12:02:57.454940+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Adobe and BWT Alpine Formula One Team Announce Global Partnership",
+   "url": "https://www.prnewswire.co.uk/news-releases/adobe-and-bwt-alpine-formula-one-team-partner-to-fuel-fan-engagement-with-ai-powered-experiences-302916952.html",
+   "tickers": [
+    "ADBE"
+   ],
+   "primary": [
+    "ADBE"
+   ],
+   "held": true,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Adobe 与 BWT Alpine F1 车队宣布全球合作"
+  },
+  {
+   "theme": "消费硬件与汽车",
+   "info_id": "news:fiscal.ai:101433915",
+   "published": "2026-10-22 13:31:17+00:00",
+   "seen": "2026-10-24 12:02:57.346167+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Orangetheory Fitness Launches OTconnect for Apple Watch",
+   "url": "https://www.prnewswire.com/news-releases/orangetheory-fitness-launches-otconnect-for-apple-watch-302916283.html",
+   "tickers": [
+    "AAPL"
+   ],
+   "primary": [
+    "AAPL"
+   ],
+   "held": true,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Orangetheory Fitness 推出 Apple Watch 版 OTconnect"
+  },
+  {
+   "theme": "零售",
+   "info_id": "news:fiscal.ai:101433924",
+   "published": "2026-10-22 13:31:42+00:00",
+   "seen": "2026-10-24 12:02:57.437841+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "The Home Depot Foundation Pledges $1 Billion to Veteran Causes by 2032",
+   "url": "https://www.prnewswire.com/news-releases/the-home-depot-foundation-pledges-1-billion-to-veteran-causes-by-2032-302915941.html",
+   "tickers": [
+    "HD"
+   ],
+   "primary": [
+    "HD"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "家得宝基金会承诺到 2032 年向退伍军人事业捐助 10 亿美元"
+  },
+  {
+   "theme": "医疗",
+   "info_id": "news:benzinga:62522051",
+   "published": "2026-10-22 11:47:50+00:00",
+   "seen": "2026-10-24 12:02:45.786557+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Johnson & Johnson Announces Data From Its VARIPURE, Omny-IRE Trials Demonstrated 100% Of Participants Had Acute Procedural Success; Mean Ablation Rate Of 17.9 Minutes Observed",
+   "url": "https://www.benzinga.com/news/26/10/62522051/johnson-johnson-announces-data-its-varipure-omny-ire-trials-demonstrated-100-participants-had-acute-",
+   "tickers": [
+    "JNJ"
+   ],
+   "primary": [
+    "JNJ"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "强生公布 VARIPURE、Omny-IRE 试验数据：100% 受试者急性期手术成功，平均消融时间 17.9 分钟"
+  },
+  {
+   "theme": "软件与平台",
+   "info_id": "news:benzinga:62518616",
+   "published": "2026-10-22 09:59:11+00:00",
+   "seen": "2026-10-24 12:02:41.190361+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Exploring The Competitive Space: Adobe Versus Industry Peers In Software",
+   "url": "https://www.benzinga.com/news/26/10/62518616/exploring-competitive-space-adobe-versus-industry-peers-software",
+   "tickers": [
+    "ADBE"
+   ],
+   "primary": [
+    "ADBE"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "竞争格局分析：Adobe 与软件同业对比"
+  },
+  {
+   "theme": "AI 服务器与算力云",
+   "info_id": "news:fiscal.ai:102193353",
+   "published": "2026-10-22 22:01:27+00:00",
+   "seen": "2026-10-24 12:03:19.020866+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "BofA Securities Analyzes CoreWeave's Financing Needs Ahead of Q3 Results",
+   "url": "https://news.futunn.com/en/post/1001993956/coreweave-s-funding-needs-remain-key-question-ahead-of-q3",
+   "tickers": [
+    "CRWV"
+   ],
+   "primary": [
+    "CRWV"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "美银证券分析 CoreWeave 三季度财报前的融资需求"
+  },
+  {
+   "theme": "存储",
+   "info_id": "news:benzinga:62545154",
+   "published": "2026-10-22 20:01:34+00:00",
+   "seen": "2026-10-24 12:03:13.471893+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Western Digital Q1 Adj. EPS $4.64 Beats $4.07 Estimate, Sales $4.381B Beat $4.131B Estimate",
+   "url": "https://www.benzinga.com/news/earnings/26/10/62545154/western-digital-q1-adj-eps-4-64-beats-4-07-estimate-sales-4-381b-beat-4-131b-estimate",
+   "tickers": [
+    "WDC"
+   ],
+   "primary": [
+    "WDC"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "西部数据一季度调整后 EPS $4.64 超预期 $4.07，营收 $43.81 亿超预期 $41.31 亿"
+  },
+  {
+   "theme": "CPU 与代工",
+   "info_id": "news:fiscal.ai:101433947",
+   "published": "2026-10-22 13:31:56+00:00",
+   "seen": "2026-10-24 12:02:57.620754+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Qualcomm Schedules Fourth Quarter and Fiscal 2026 Earnings Release and Conference Call",
+   "url": "https://www.tradingview.com/news/prnewswire:a4bd562f9c722:0-qualcomm-schedules-fourth-quarter-and-fiscal-2026-earnings-release-and-conference-call/",
+   "tickers": [
+    "QCOM"
+   ],
+   "primary": [
+    "QCOM"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "高通定于发布 2026 财年四季度财报并召开电话会"
+  },
+  {
+   "theme": "CPU 与代工",
+   "info_id": "news:benzinga:62524716",
+   "published": "2026-10-22 12:58:57+00:00",
+   "seen": "2026-10-24 12:02:49.229447+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Intel Earnings Are Around the Corner: Here’s What to Expect",
+   "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62524716/intel-earnings-are-around-the-corner-heres-what-to-expect",
+   "tickers": [
+    "INTC"
+   ],
+   "primary": [
+    "INTC"
+   ],
+   "held": false,
+   "tags": [
+    "财报",
+    "财报前瞻"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "英特尔财报临近：预期看点"
+  }
+ ],
+ "feed": [
+  {
+   "info_id": "news:benzinga:62551919",
+   "published": "2026-10-23 07:57:59+00:00",
+   "seen": "2026-10-24 12:03:24.515767+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Treasury ETFs Soar as Tech Stocks Sell Off and 10-Year Yield Falls Below 5% — What's Fueling the Bond Rush?",
+   "url": "https://www.benzinga.com/etfs/sector-etfs/26/10/62551919/treasury-etfs-soar-as-tech-stocks-sell-off-and-10-year-yield-falls-below-5-whats-fueling-the-bond-rush",
+   "tickers": [
+    "BSV",
+    "SHY",
+    "TLT",
+    "VGLT"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [],
+   "macro": "利率",
+   "weak_rating_only": false,
+   "importance": 0,
+   "headline_zh": "科技股抛售、10 年期收益率跌破 5%，国债 ETF 大涨——债券热潮由何而来？"
+  },
+  {
+   "info_id": "news:benzinga:62551752",
+   "published": "2026-10-23 07:26:23+00:00",
+   "seen": "2026-10-24 12:03:24.441820+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Tesla Drops Plans To Produce Cybertruck For Australia And New Zealand Markets",
+   "url": "https://www.benzinga.com/news/26/10/62551752/tesla-drops-plans-produce-cybertruck-australia-and-new-zealand-markets",
+   "tickers": [
+    "ENZL",
+    "EWA",
+    "TSLA"
+   ],
+   "primary": [
+    "TSLA"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "特斯拉放弃在澳大利亚和新西兰生产 Cybertruck 的计划"
+  },
+  {
+   "info_id": "news:benzinga:62551736",
+   "published": "2026-10-23 07:19:22+00:00",
+   "seen": "2026-10-24 12:03:24.433545+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Meta, Nvidia Lead Tech Sell-Off as AI Spending Fears Rattle Wall Street, But Gene Munster Sides With Musk, Zuckerberg and Huang: ‘We’re Still Early'",
+   "url": "https://www.benzinga.com/markets/tech/26/10/62551736/meta-nvidia-lead-tech-sell-off-as-ai-spending-fears-rattle-wall-street-but-gene-munster-sides-with-musk-zuckerberg-and-huang-were-still-early",
+   "tickers": [
+    "GOOGL",
+    "META",
+    "NVDA",
+    "SOXQ",
+    "SPCX"
+   ],
+   "primary": [
+    "GOOGL",
+    "META",
+    "NVDA"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "AI 支出担忧冲击华尔街，Meta、英伟达领跌科技股；Gene Munster 站台马斯克、扎克伯格和黄仁勋：“我们仍处于早期”"
+  },
+  {
+   "info_id": "news:benzinga:62551721",
+   "published": "2026-10-23 07:18:03+00:00",
+   "seen": "2026-10-24 12:03:24.425405+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Western Digital (WDC) Stock Is Trending After Hours: Here’s What You Need to Know",
+   "url": "https://www.benzinga.com/markets/equities/26/10/62551721/western-digital-shares-fall-insider-sale-earnings",
+   "tickers": [
+    "WDC"
+   ],
+   "primary": [
+    "WDC"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "西部数据（WDC）盘后异动：你需要知道的事"
+  },
+  {
+   "info_id": "news:benzinga:62551688",
+   "published": "2026-10-23 07:14:22+00:00",
+   "seen": "2026-10-24 12:03:24.394635+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Pony.ai And inDrive Plan Astana Launch Of Gen-7 Robotaxis, Pending Kazakhstan Government Agreement, Under MOU With NVIDIA To Explore Autonomous Mobility",
+   "url": "https://www.benzinga.com/quote/NVDA",
+   "tickers": [
+    "NVDA",
+    "PONY"
+   ],
+   "primary": [
+    "NVDA"
+   ],
+   "held": true,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Pony.ai 与 inDrive 计划在阿斯塔纳推出第七代 Robotaxi，待哈萨克斯坦政府批准；英伟达签署谅解备忘录探索自动驾驶出行"
+  },
+  {
+   "info_id": "news:benzinga:62551605",
+   "published": "2026-10-23 07:11:39+00:00",
+   "seen": "2026-10-24 12:03:24.388796+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "OpenAI Signs Agreement With Poland’s NASK To Explore Collaboration On AI Safety, Security And Technical Research, Strengthening Safeguards Against Emerging Risks",
+   "url": "https://www.benzinga.com/quote/MSFT",
+   "tickers": [
+    "MSFT"
+   ],
+   "primary": [
+    "MSFT"
+   ],
+   "held": false,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "OpenAI 与波兰 NASK 签署协议，探索 AI 安全与技术研究合作，强化对新兴风险的防护"
+  },
+  {
+   "info_id": "news:fiscal.ai:102446461",
+   "published": "2026-10-23 07:02:55+00:00",
+   "seen": "2026-10-24 12:03:23.767662+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "BTCS S.A. to Serve as Anchor Investor for CMCC Global's Tokenized Bitcoin Funds",
+   "url": "https://www.prnewswire.com/news-releases/cmcc-global-partners-with-tether-and-bitfinex-securities-to-launch-the-first-tokenised-fund-of-funds-under-el-salvadors-digital-asset-framework-302916813.html",
+   "tickers": [
+    "BTF"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [],
+   "macro": "加密",
+   "weak_rating_only": false,
+   "importance": 0,
+   "headline_zh": "BTCS S.A. 将担任 CMCC Global 代币化比特币基金的锚定投资者"
+  },
+  {
+   "info_id": "news:benzinga:62551526",
+   "published": "2026-10-23 07:02:01+00:00",
+   "seen": "2026-10-24 12:03:23.084856+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "AI Stocks Are Getting Crushed, But This Strategist Says the Pullback Could Keep the Boom Alive: 'Restraint Prevents Excess'",
+   "url": "https://www.benzinga.com/markets/equities/26/10/62551526/james-thorne-ai-selloff-healthy-correction-restraint-more-time-to-run",
+   "tickers": [
+    "CRWV",
+    "META",
+    "ORCL",
+    "QQQ",
+    "SPY"
+   ],
+   "primary": [
+    "CRWV",
+    "META",
+    "ORCL"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "AI 股遭重挫，但这位策略师称回调或让热潮延续：“克制防止过度”"
+  },
+  {
+   "info_id": "news:benzinga:62551058",
+   "published": "2026-10-23 06:08:18+00:00",
+   "seen": "2026-10-24 12:03:22.607793+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Trump Asked Google’s Sundar Pichai to Rename Atlantic Ocean After America, But the CEO Wasn’t Having It: ‘Please Don’t Ask Us to Do That’",
+   "url": "https://www.benzinga.com/markets/tech/26/10/62551058/trump-asked-googles-sundar-pichai-to-rename-atlantic-ocean-after-america-but-the-ceo-wasnt-having-it-please-dont-ask-us-to-do-that",
+   "tickers": [
+    "GOOG",
+    "GOOGL"
+   ],
+   "primary": [
+    "GOOGL"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "报道称特朗普要求谷歌皮查伊把大西洋改名为“美国洋”，CEO 不买账：“请别要求我们这么做”"
+  },
+  {
+   "info_id": "news:benzinga:62550958",
+   "published": "2026-10-23 05:51:50+00:00",
+   "seen": "2026-10-24 12:03:22.434193+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Trump, World Liberty Financial Sued by Circle Investor Over Alleged $2 Billion UAE Crypto Windfall: ‘No President in American History Has Profited From His Office So Brazenly’",
+   "url": "https://www.benzinga.com/crypto/cryptocurrency/26/10/62550958/donald-trump-world-liberty-financial-circle-lawsuit",
+   "tickers": [
+    "BTCUSD",
+    "CRCL",
+    "USDCUSD",
+    "ZECUSD"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [],
+   "macro": "加密",
+   "weak_rating_only": false,
+   "importance": 0,
+   "headline_zh": "Circle 投资者起诉特朗普与 World Liberty Financial，涉 20 亿美元阿联酋加密暴利：“美国历史上没有总统如此公然以权谋私”"
+  },
+  {
+   "info_id": "news:benzinga:62550709",
+   "published": "2026-10-23 04:55:07+00:00",
+   "seen": "2026-10-24 12:03:22.170469+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Former Fed Adviser Danielle DiMartino Booth Warns Recession May Already Be Here: Treasury Rally Signals ‘Far More Consequential’ Shift",
+   "url": "https://www.benzinga.com/markets/economic-data/26/10/62550709/former-fed-insider-warns-recession-underway-treasury-rally",
+   "tickers": [
+    "AMZN",
+    "CRWV",
+    "IEF",
+    "META",
+    "ORCL",
+    "TLT"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [
+    "宏观"
+   ],
+   "macro": "利率",
+   "weak_rating_only": false,
+   "importance": -1,
+   "headline_zh": "前美联储顾问 Danielle DiMartino Booth 警告衰退或已到来：国债 rally 预示“更深远”的转折"
+  },
+  {
+   "info_id": "news:benzinga:62550501",
+   "published": "2026-10-23 03:27:59+00:00",
+   "seen": "2026-10-24 12:03:22.119829+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Ro Khanna Says Zuckerberg’s California Deal Undercuts Billionaire Tax Exodus Warnings: ‘Gavin, Can You and Sergey Brin Stop...’",
+   "url": "https://www.benzinga.com/news/politics/26/10/62550501/khanna-zuckerberg-california-billionaire-tax",
+   "tickers": [
+    "GOOG",
+    "GOOGL",
+    "META"
+   ],
+   "primary": [
+    "GOOGL",
+    "META"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "Ro Khanna 称扎克伯格的加州协议戳穿富豪税外流警告：“Gavin，你和 Sergey Brin 能不能别再……”"
+  },
+  {
+   "info_id": "news:benzinga:62550490",
+   "published": "2026-10-23 03:27:19+00:00",
+   "seen": "2026-10-24 12:03:22.111406+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Elizabeth Warren Says ‘Nobody Can Seem to Explain’ What Trump’s War With Iran Accomplished as Crypto Bettors Gauge Midterm Impact",
+   "url": "https://www.benzinga.com/markets/prediction-markets/26/10/62550490/elizabeth-warren-donald-trump-iran-war-midterms-polymarket",
+   "tickers": [
+    "BTCUSD",
+    "POLUSD",
+    "ZECUSD"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [],
+   "macro": "加密",
+   "weak_rating_only": false,
+   "importance": 0,
+   "headline_zh": "伊丽莎白·沃伦称“没人说得清”特朗普对伊朗战争取得了什么；加密博彩者评估中期选举影响"
+  },
+  {
+   "info_id": "news:benzinga:62550388",
+   "published": "2026-10-23 02:32:48+00:00",
+   "seen": "2026-10-24 12:03:22.094132+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Peter Schiff Warns Stock Market Crash Before Midterms 'Is Not Outside the Realm of Possibility' — 'This Is October'",
+   "url": "https://www.benzinga.com/markets/economic-data/26/10/62550388/peter-schiff-october-stock-market-crash-warning-midterms",
+   "tickers": [
+    "CRWV",
+    "META",
+    "QQQ",
+    "SPY"
+   ],
+   "primary": [
+    "CRWV",
+    "META"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "Peter Schiff 警告中期选举前股市崩盘“并非不可能”——“这可是十月”"
+  },
+  {
+   "info_id": "news:benzinga:62550345",
+   "published": "2026-10-23 02:19:57+00:00",
+   "seen": "2026-10-24 12:03:22.070694+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Bitcoin, Ethereum, XRP, Dogecoin Sink as Iran War Fears Return: Analyst Says Deeper BTC Correction Won’t Be ‘Weird’",
+   "url": "https://www.benzinga.com/crypto/cryptocurrency/26/10/62550345/bitcoin-ethereum-xrp-dogecoin-crypto-iran-war",
+   "tickers": [
+    "BMNR",
+    "BTCUSD",
+    "DOGEUSD",
+    "ETHUSD",
+    "MSTR",
+    "SOLUSD",
+    "XRPUSD"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [],
+   "macro": "加密",
+   "weak_rating_only": false,
+   "importance": -2,
+   "headline_zh": "伊朗战火担忧重燃，比特币、以太坊、XRP、狗狗币齐跌；分析师称 BTC 更深回调不奇怪"
+  },
+  {
+   "info_id": "news:fiscal.ai:102433279",
+   "published": "2026-10-23 02:01:47+00:00",
+   "seen": "2026-10-24 12:03:21.999246+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "New Street Research Adjusts Lam Research Price Target",
+   "url": "https://www.marketscreener.com/news/new-street-research-adjusts-lam-research-price-target-to-255-from-285-ce785cdedd8cf123",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "New Street Research 调整 Lam Research 目标价"
+  },
+  {
+   "info_id": "news:fiscal.ai:102433275",
+   "published": "2026-10-23 02:01:30+00:00",
+   "seen": "2026-10-24 12:03:21.971411+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Tesla Updates Long-Term Production Targets and Facility Plans",
+   "url": "https://www.morningstar.com/news/marketwatch/20261022104/teslas-stock-falls-as-elon-musk-leaves-investors-wanting-more",
+   "tickers": [
+    "TSLA"
+   ],
+   "primary": [
+    "TSLA"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "特斯拉更新长期产量目标与工厂规划"
+  },
+  {
+   "info_id": "news:fiscal.ai:102431104",
+   "published": "2026-10-23 00:01:39+00:00",
+   "seen": "2026-10-24 12:03:21.597683+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Mastercard Introduces AI-Powered Benefits Assistant 'Mastercard Max'",
+   "url": "https://glenbrook.com/payments-news/all-payments-news/",
+   "tickers": [
+    "MA"
+   ],
+   "primary": [
+    "MA"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "万事达推出 AI 驱动的权益助手“Mastercard Max”"
+  },
+  {
+   "info_id": "news:fiscal.ai:102311879",
+   "published": "2026-10-22 23:01:50+00:00",
+   "seen": "2026-10-24 12:03:21.514226+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Western Digital Declares Quarterly Cash Dividend",
+   "url": "https://www.marketscreener.com/news/western-digital-1q-profit-grows-on-data-storage-demand-higher-pricing-update-ce785cdede89f420",
+   "tickers": [
+    "WDC"
+   ],
+   "primary": [
+    "WDC"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "西部数据宣布季度现金分红"
+  },
+  {
+   "info_id": "news:fiscal.ai:102311878",
+   "published": "2026-10-22 23:01:48+00:00",
+   "seen": "2026-10-24 12:03:21.506360+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Netflix Releases 'My Sad Dead' Community Project",
+   "url": "https://about.netflix.com/newsroom",
+   "tickers": [
+    "NFLX"
+   ],
+   "primary": [
+    "NFLX"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "奈飞发布“My Sad Dead”社区项目"
+  },
+  {
+   "info_id": "news:fiscal.ai:102311876",
+   "published": "2026-10-22 23:01:40+00:00",
+   "seen": "2026-10-24 12:03:21.482261+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "ExxonMobil Joliet Refinery Experiences Operational Disruption",
+   "url": "https://dailycallernewsfoundation.org/2026/10/22/exxonmobil-joliet-refinery-gas-prices-michigan-ohio-indiana-tom-kloza/",
+   "tickers": [
+    "XOM"
+   ],
+   "primary": [
+    "XOM"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "埃克森美孚 Joliet 炼油厂出现运营中断"
+  },
+  {
+   "info_id": "news:fiscal.ai:102311875",
+   "published": "2026-10-22 23:01:36+00:00",
+   "seen": "2026-10-24 12:03:21.468817+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Mastercard Expands First-Party Trust Program in Europe",
+   "url": "https://glenbrook.com/payments-news/all-payments-news/",
+   "tickers": [
+    "MA"
+   ],
+   "primary": [
+    "MA"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "万事达在欧洲扩展第一方信任计划"
+  },
+  {
+   "info_id": "news:fiscal.ai:102311873",
+   "published": "2026-10-22 23:01:35+00:00",
+   "seen": "2026-10-24 12:03:21.451405+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Dell Technologies Capital Participates in Mave's $34 Million Series A Funding",
+   "url": "https://www.prnewswire.com/il/news-releases/mave-raises-34-million-to-build-the-agentic-secops-system-for-the-modern-enterprise-302916859.html",
+   "tickers": [
+    "DELL"
+   ],
+   "primary": [
+    "DELL"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "戴尔科技资本参与 Mave 3400 万美元 A 轮融资"
+  },
+  {
+   "info_id": "news:benzinga:62549307",
+   "published": "2026-10-22 22:15:02+00:00",
+   "seen": "2026-10-24 12:03:21.320143+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Bloom Energy Q3 2026 Earnings Call Transcript",
+   "url": "https://www.benzinga.com/news/26/10/62549307/bloom-energy-q3-2026-earnings-call-transcript",
+   "tickers": [
+    "BE"
+   ],
+   "primary": [
+    "BE"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "Bloom Energy 2026 年三季度财报电话会纪要"
+  },
+  {
+   "info_id": "news:fiscal.ai:102193353",
+   "published": "2026-10-22 22:01:27+00:00",
+   "seen": "2026-10-24 12:03:19.020866+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "BofA Securities Analyzes CoreWeave's Financing Needs Ahead of Q3 Results",
+   "url": "https://news.futunn.com/en/post/1001993956/coreweave-s-funding-needs-remain-key-question-ahead-of-q3",
+   "tickers": [
+    "CRWV"
+   ],
+   "primary": [
+    "CRWV"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "美银证券分析 CoreWeave 三季度财报前的融资需求"
+  },
+  {
+   "info_id": "news:benzinga:62548930",
+   "published": "2026-10-22 21:40:22+00:00",
+   "seen": "2026-10-24 12:03:18.875114+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "NBA Champion Tristan Thompson Is 'Even More Bullish' on Bitcoin",
+   "url": "https://www.benzinga.com/crypto/cryptocurrency/26/10/62548930/nba-champion-tristan-thompson-is-even-more-bullish-on-bitcoin",
+   "tickers": [
+    "BTCUSD",
+    "NEARUSD",
+    "SOLUSD",
+    "ZECUSD"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [],
+   "macro": "加密",
+   "weak_rating_only": false,
+   "importance": 0,
+   "headline_zh": "NBA 冠军 Tristan Thompson 对比特币“更加看多”"
+  },
+  {
+   "info_id": "news:benzinga:62548876",
+   "published": "2026-10-22 21:36:58+00:00",
+   "seen": "2026-10-24 12:03:18.836700+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Western Digital Q1 2027 Earnings Call Transcript",
+   "url": "https://www.benzinga.com/news/26/10/62548876/western-digital-q1-2027-earnings-call-transcript",
+   "tickers": [
+    "WDC"
+   ],
+   "primary": [
+    "WDC"
+   ],
+   "held": false,
+   "tags": [
+    "财报"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "西部数据 2027 财年一季度财报电话会纪要"
+  },
+  {
+   "info_id": "news:fiscal.ai:102138294",
+   "published": "2026-10-22 21:31:51+00:00",
+   "seen": "2026-10-24 12:03:16.369128+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Former Salesforce Global Head of Brand and Creative Scott Larson Joins OpenArt AI",
+   "url": "https://martechseries.com/video/openart-ai-hires-former-salesforce-global-head-of-brand-and-creative-scott-larson-as-company-nears-200m-arr/",
+   "tickers": [
+    "CRM"
+   ],
+   "primary": [
+    "CRM"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "前 Salesforce 全球品牌与创意负责人 Scott Larson 加盟 OpenArt AI"
+  },
+  {
+   "info_id": "news:fiscal.ai:102139989",
+   "published": "2026-10-22 21:31:50+00:00",
+   "seen": "2026-10-24 12:03:16.355602+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Wedbush Reports Micron Has No Plans for Denser DRAM Layout",
+   "url": "https://www.marketscreener.com/news/micron-technology-has-no-plans-to-move-to-denser-layout-of-dram-memory-cells-wedbush-says-ce785cdedc89f126",
+   "tickers": [
+    "MU"
+   ],
+   "primary": [
+    "MU"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "Wedbush 称美光暂无更密集 DRAM 布局计划"
+  },
+  {
+   "info_id": "news:fiscal.ai:102139990",
+   "published": "2026-10-22 21:31:50+00:00",
+   "seen": "2026-10-24 12:03:16.363149+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "RBC Capital Markets Maintains Outperform Rating on Micron",
+   "url": "https://www.moomoo.com/news/post/1002046064/micron-s-long-term-memory-strategy-supports-growth-outlook-rbc",
+   "tickers": [
+    "MU"
+   ],
+   "primary": [
+    "MU"
+   ],
+   "held": true,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "RBC 资本市场维持美光跑赢大盘评级"
+  },
+  {
+   "info_id": "news:fiscal.ai:102138290",
+   "published": "2026-10-22 21:31:32+00:00",
+   "seen": "2026-10-24 12:03:16.305485+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Urban Remedy Launches Chocolate Protein Collagen Shake at Select Costco Warehouses",
+   "url": "https://www.bevnet.com/pr/2026/10/22/urban-remedy-now-available-at-select-costco-warehouses-in-the-la-area",
+   "tickers": [
+    "COST"
+   ],
+   "primary": [
+    "COST"
+   ],
+   "held": false,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 3,
+   "headline_zh": "Urban Remedy 在部分 Costco 门店推出巧克力蛋白胶原奶昔"
+  },
+  {
+   "info_id": "news:fiscal.ai:102138289",
+   "published": "2026-10-22 21:31:30+00:00",
+   "seen": "2026-10-24 12:03:16.297636+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "Wall Street Analysts Update Ratings and Price Targets for GE Aerospace",
+   "url": "https://www.moomoo.com/hans/news/post/1002028551/a-quick-look-at-today-s-ratings-for-ge-aerospace",
+   "tickers": [
+    "GE"
+   ],
+   "primary": [
+    "GE"
+   ],
+   "held": false,
+   "tags": [
+    "评级"
+   ],
+   "macro": null,
+   "weak_rating_only": true,
+   "importance": 4,
+   "headline_zh": "华尔街分析师更新 GE 航空航天评级与目标价"
+  },
+  {
+   "info_id": "news:fiscal.ai:102138288",
+   "published": "2026-10-22 21:31:27+00:00",
+   "seen": "2026-10-24 12:03:16.093051+00:00",
+   "late": true,
+   "source": "fiscal.ai",
+   "headline": "SOAR AI, Inc. Announces Contracted GPU Deployments Featuring AMD Instinct™ Accelerators",
+   "url": "https://natlawreview.com/press-releases/soar-ai-releases-investor-presentation-outlining-its-planned-path-initial",
+   "tickers": [
+    "AMD"
+   ],
+   "primary": [
+    "AMD"
+   ],
+   "held": true,
+   "tags": [
+    "产品合作"
+   ],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 4,
+   "headline_zh": "SOAR AI 宣布采用 AMD Instinct 加速器的 GPU 部署合同"
+  },
+  {
+   "info_id": "news:benzinga:62548779",
+   "published": "2026-10-22 21:27:44+00:00",
+   "seen": "2026-10-24 12:03:16.078028+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "AI Sell-Off Spreads to Industrials: Caterpillar, GE Vernova, Vertiv Trapped in Bear Market",
+   "url": "https://www.benzinga.com/markets/equities/26/10/62548779/ai-sell-off-spreads-to-industrials-caterpillar-ge-vernova-vertiv-trapped-in-bear-market",
+   "tickers": [
+    "CAT",
+    "GEV",
+    "VRT"
+   ],
+   "primary": [
+    "CAT",
+    "GEV",
+    "VRT"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "AI 抛售蔓延至工业股：卡特彼勒、GE Vernova、Vertiv 陷入熊市"
+  },
+  {
+   "info_id": "news:benzinga:62548583",
+   "published": "2026-10-22 21:15:12+00:00",
+   "seen": "2026-10-24 12:03:15.990670+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Bill Ackman Says Meta Can Finance 'Whatever They Want,' Points to $82 Billion Cash",
+   "url": "https://www.benzinga.com/markets/prediction-markets/26/10/62548583/meta-ai-spending-bill-ackman-cash",
+   "tickers": [
+    "META"
+   ],
+   "primary": [
+    "META"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "Bill Ackman 称 Meta 有 820 亿美元现金，“想怎么花都行”"
+  },
+  {
+   "info_id": "news:benzinga:62548308",
+   "published": "2026-10-22 21:03:45+00:00",
+   "seen": "2026-10-24 12:03:15.920169+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "The Federal Communications Commission Said On Thursday It Has Granted A Waiver To Intel From Its Ban On Some Foreign-Made Advanced Robotics; FCC Said It Would Grant A One-Year Waiver Of Its Rules In Order To Prevent \"Potential Disruptions In The Availability Of Domestic Semiconductor Manufacturing Services For Intel’s Customers.\"",
+   "url": "https://www.benzinga.com/news/26/10/62548308/federal-communications-commission-said-thursday-it-has-granted-waiver-intel-its-ban-some-foreign-mad",
+   "tickers": [
+    "INTC"
+   ],
+   "primary": [
+    "INTC"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": "利率",
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "美国联邦通信委员会周四向英特尔授予一项豁免"
+  },
+  {
+   "info_id": "news:benzinga:62548071",
+   "published": "2026-10-22 20:51:16+00:00",
+   "seen": "2026-10-24 12:03:15.814948+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Western Digital Exec Says Customer Demand Remains Healthy And Our Visibility Is Extending Further Out",
+   "url": "https://www.benzinga.com/news/26/10/62548071/western-digital-exec-says-customer-demand-remains-healthy-and-our-visibility-extending-further-out",
+   "tickers": [
+    "WDC"
+   ],
+   "primary": [
+    "WDC"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "西部数据高管称客户需求健康、能见度在延长"
+  },
+  {
+   "info_id": "news:benzinga:62547949",
+   "published": "2026-10-22 20:45:43+00:00",
+   "seen": "2026-10-24 12:03:15.766819+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "SpaceX Says Any Potential Tesla Combination Would Be Subject To Further Approval By Our Special Committee, Board & Controlling Shareholder",
+   "url": "https://www.benzinga.com/news/26/10/62547949/spacex-says-any-potential-tesla-combination-would-be-subject-further-approval-our-special-committee-",
+   "tickers": [
+    "SPCX",
+    "TSLA"
+   ],
+   "primary": [
+    "TSLA"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "SpaceX 称任何与特斯拉的潜在合并都需进一步批准"
+  },
+  {
+   "info_id": "news:benzinga:62547937",
+   "published": "2026-10-22 20:45:20+00:00",
+   "seen": "2026-10-24 12:03:15.760387+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "Here’s How Much You Would Have Made Owning Lam Research Stock In The Last 15 Years",
+   "url": "https://www.benzinga.com/news/26/10/62547937/here-s-how-much-you-would-have-made-owning-lam-research-stock-last-15-years",
+   "tickers": [
+    "LRCX"
+   ],
+   "primary": [
+    "LRCX"
+   ],
+   "held": false,
+   "tags": [],
+   "macro": null,
+   "weak_rating_only": false,
+   "importance": 2,
+   "headline_zh": "过去 15 年持有 Lam Research 股票能赚多少"
+  },
+  {
+   "info_id": "news:benzinga:62547318",
+   "published": "2026-10-22 20:32:36+00:00",
+   "seen": "2026-10-24 12:03:15.164010+00:00",
+   "late": true,
+   "source": "benzinga",
+   "headline": "SCHD ETF Hits Record High as Inflows Rise While Tech Stocks and Treasury Yields Slip",
+   "url": "https://www.benzinga.com/etfs/specialty-etfs/26/10/62547318/schd-etf-hits-record-high-as-inflows-rise-while-tech-stocks-and-treasury-yields-slip",
+   "tickers": [
+    "QQQ",
+    "SCHD",
+    "SPY",
+    "VOO"
+   ],
+   "primary": [],
+   "held": false,
+   "tags": [
+    "宏观"
+   ],
+   "macro": "利率",
+   "weak_rating_only": false,
+   "importance": 1,
+   "headline_zh": "SCHD ETF 创新高，科技股与国债收益率走低之际资金持续流入"
+  }
+ ],
+ "earnings_week": [
+  {
+   "date": "2026-10-27",
+   "symbol": "V",
+   "name": "Visa Inc.",
+   "mktcap": 740324150000.0,
+   "time": "盘后",
+   "eps": "$3.43",
+   "ests": "12",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "GOOGL",
+   "name": "Alphabet Inc.",
+   "mktcap": 3965210590000.0,
+   "time": "盘后",
+   "eps": "$2.94",
+   "ests": "14",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "MSFT",
+   "name": "Microsoft Corporation",
+   "mktcap": 3869762390000.0,
+   "time": "盘后",
+   "eps": "$4.71",
+   "ests": "14",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "AMZN",
+   "name": "Amazon.com, Inc.",
+   "mktcap": 2700677220000.0,
+   "time": "盘后",
+   "eps": "$2.01",
+   "ests": "14",
+   "held": false,
+   "previews": [
+    {
+     "info_id": "news:benzinga:62522059",
+     "published": "2026-10-22 11:48:01+00:00",
+     "seen": "2026-10-24 12:02:45.794541+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Amazon Earnings Are a Week Away: Here’s What to Expect",
+     "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62522059/amazon-earnings-are-a-week-away-heres-what-to-expect",
+     "tickers": [
+      "AMZN"
+     ],
+     "primary": [
+      "AMZN"
+     ],
+     "held": false,
+     "tags": [
+      "财报",
+      "财报前瞻"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "亚马逊财报一周后发布：预期看点"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "LLY",
+   "name": "Eli Lilly and Company",
+   "mktcap": 1230061830000.0,
+   "time": "盘前",
+   "eps": "$5.38",
+   "ests": "3",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "MA",
+   "name": "Mastercard Incorporated",
+   "mktcap": 554698280000.0,
+   "time": "盘前",
+   "eps": "$5.14",
+   "ests": "11",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "INTC",
+   "name": "Intel Corporation",
+   "mktcap": 451820585000.0,
+   "time": "盘后",
+   "eps": "$0.28",
+   "ests": "13",
+   "held": false,
+   "previews": [
+    {
+     "info_id": "news:benzinga:62524716",
+     "published": "2026-10-22 12:58:57+00:00",
+     "seen": "2026-10-24 12:02:49.229447+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Intel Earnings Are Around the Corner: Here’s What to Expect",
+     "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62524716/intel-earnings-are-around-the-corner-heres-what-to-expect",
+     "tickers": [
+      "INTC"
+     ],
+     "primary": [
+      "INTC"
+     ],
+     "held": false,
+     "tags": [
+      "财报",
+      "财报前瞻"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "英特尔财报临近：预期看点"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-30",
+   "symbol": "XOM",
+   "name": "ExxonMobil Holdings Corporation",
+   "mktcap": 732866080000.0,
+   "time": "盘前",
+   "eps": "$3.96",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-30",
+   "symbol": "ABBV",
+   "name": "AbbVie Inc.",
+   "mktcap": 503964172000.0,
+   "time": "盘前",
+   "eps": "$3.76",
+   "ests": "5"
+  },
+  {
+   "date": "2026-10-30",
+   "symbol": "CVX",
+   "name": "Chevron Corporation",
+   "mktcap": 447867847000.0,
+   "time": "盘前",
+   "eps": "$4.78",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  }
+ ],
+ "earnings_mine": [
+  {
+   "date": "2026-10-27",
+   "symbol": "V",
+   "name": "Visa Inc.",
+   "mktcap": 740324150000.0,
+   "time": "盘后",
+   "eps": "$3.43",
+   "ests": "12",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-10-27",
+   "symbol": "STX",
+   "name": "Seagate Technology Holdings PLC",
+   "mktcap": 146869338000.0,
+   "time": "盘后",
+   "eps": "$7.17",
+   "ests": "4",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "GOOGL",
+   "name": "Alphabet Inc.",
+   "mktcap": 3965210590000.0,
+   "time": "盘后",
+   "eps": "$2.94",
+   "ests": "14",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "MSFT",
+   "name": "Microsoft Corporation",
+   "mktcap": 3869762390000.0,
+   "time": "盘后",
+   "eps": "$4.71",
+   "ests": "14",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "GEV",
+   "name": "GE Vernova Inc.",
+   "mktcap": 220369732000.0,
+   "time": "盘前",
+   "eps": "$4.03",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "KLAC",
+   "name": "KLA Corporation ",
+   "mktcap": 192919110000.0,
+   "time": "盘后",
+   "eps": "$1.18",
+   "ests": "8",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "NOW",
+   "name": "ServiceNow, Inc.",
+   "mktcap": 162337997000.0,
+   "time": "盘后",
+   "eps": "$0.56",
+   "ests": "12",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "FTNT",
+   "name": "Fortinet, Inc.",
+   "mktcap": 126917788000.0,
+   "time": "盘后",
+   "eps": "$0.77",
+   "ests": "11",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-28",
+   "symbol": "VRT",
+   "name": "Vertiv Holdings, LLC",
+   "mktcap": 75299840000.0,
+   "time": "盘前",
+   "eps": "$1.82",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "AMZN",
+   "name": "Amazon.com, Inc.",
+   "mktcap": 2700677220000.0,
+   "time": "盘后",
+   "eps": "$2.01",
+   "ests": "14",
+   "held": false,
+   "previews": [
+    {
+     "info_id": "news:benzinga:62522059",
+     "published": "2026-10-22 11:48:01+00:00",
+     "seen": "2026-10-24 12:02:45.794541+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Amazon Earnings Are a Week Away: Here’s What to Expect",
+     "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62522059/amazon-earnings-are-a-week-away-heres-what-to-expect",
+     "tickers": [
+      "AMZN"
+     ],
+     "primary": [
+      "AMZN"
+     ],
+     "held": false,
+     "tags": [
+      "财报",
+      "财报前瞻"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "亚马逊财报一周后发布：预期看点"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "LLY",
+   "name": "Eli Lilly and Company",
+   "mktcap": 1230061830000.0,
+   "time": "盘前",
+   "eps": "$5.38",
+   "ests": "3",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "MA",
+   "name": "Mastercard Incorporated",
+   "mktcap": 554698280000.0,
+   "time": "盘前",
+   "eps": "$5.14",
+   "ests": "11",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "INTC",
+   "name": "Intel Corporation",
+   "mktcap": 451820585000.0,
+   "time": "盘后",
+   "eps": "$0.28",
+   "ests": "13",
+   "held": false,
+   "previews": [
+    {
+     "info_id": "news:benzinga:62524716",
+     "published": "2026-10-22 12:58:57+00:00",
+     "seen": "2026-10-24 12:02:49.229447+00:00",
+     "late": true,
+     "source": "benzinga",
+     "headline": "Intel Earnings Are Around the Corner: Here’s What to Expect",
+     "url": "https://www.benzinga.com/trading-ideas/movers/26/10/62524716/intel-earnings-are-around-the-corner-heres-what-to-expect",
+     "tickers": [
+      "INTC"
+     ],
+     "primary": [
+      "INTC"
+     ],
+     "held": false,
+     "tags": [
+      "财报",
+      "财报前瞻"
+     ],
+     "macro": null,
+     "weak_rating_only": false,
+     "importance": 4,
+     "headline_zh": "英特尔财报临近：预期看点"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "CAT",
+   "name": "Caterpillar, Inc.",
+   "mktcap": 323634102000.0,
+   "time": "盘前",
+   "eps": "$7.12",
+   "ests": "11",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-29",
+   "symbol": "SNDK",
+   "name": "Sandisk Corporation",
+   "mktcap": 183248028000.0,
+   "time": "盘后",
+   "eps": "$45.22",
+   "ests": "4",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-30",
+   "symbol": "XOM",
+   "name": "ExxonMobil Holdings Corporation",
+   "mktcap": 732866080000.0,
+   "time": "盘前",
+   "eps": "$3.96",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-10-30",
+   "symbol": "CVX",
+   "name": "Chevron Corporation",
+   "mktcap": 447867847000.0,
+   "time": "盘前",
+   "eps": "$4.78",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-02",
+   "symbol": "AAPL",
+   "name": "Apple Inc.",
+   "mktcap": 5081985400000.0,
+   "time": "盘后",
+   "eps": "$2",
+   "ests": "8",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-11-02",
+   "symbol": "PLTR",
+   "name": "Palantir Technologies Inc.",
+   "mktcap": 471258857000.0,
+   "time": "盘后",
+   "eps": "$0.34",
+   "ests": "9",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-03",
+   "symbol": "AMD",
+   "name": "Advanced Micro Devices, Inc.",
+   "mktcap": 829183030000.0,
+   "time": "盘后",
+   "eps": "$1.68",
+   "ests": "13",
+   "held": true,
+   "previews": []
+  },
+  {
+   "date": "2026-11-03",
+   "symbol": "ANET",
+   "name": "Arista Networks, Inc.",
+   "mktcap": 215757701000.0,
+   "time": "盘后",
+   "eps": "$0.99",
+   "ests": "9",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-03",
+   "symbol": "ETN",
+   "name": "Eaton Corporation, PLC",
+   "mktcap": 143315714000.0,
+   "time": "盘前",
+   "eps": "$3.54",
+   "ests": "10",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-03",
+   "symbol": "SMCI",
+   "name": "Super Micro Computer, Inc.",
+   "mktcap": 22152871900.0,
+   "time": "盘后",
+   "eps": "$1.04",
+   "ests": "6",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-04",
+   "symbol": "ARM",
+   "name": "Arm Holdings plc",
+   "mktcap": 223558009000.0,
+   "time": "盘后",
+   "eps": "$0.22",
+   "ests": "7",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-04",
+   "symbol": "QCOM",
+   "name": "QUALCOMM Incorporated",
+   "mktcap": 181511930000.0,
+   "time": "盘后",
+   "eps": "$1.46",
+   "ests": "9",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-04",
+   "symbol": "COHR",
+   "name": "Coherent Corp.",
+   "mktcap": 40926962000.0,
+   "time": "盘后",
+   "eps": "$1.78",
+   "ests": "8",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-05",
+   "symbol": "LITE",
+   "name": "Lumentum Holdings Inc.",
+   "mktcap": 68167221000.0,
+   "time": "盘后",
+   "eps": "$3.82",
+   "ests": "6",
+   "held": false,
+   "previews": []
+  },
+  {
+   "date": "2026-11-06",
+   "symbol": "CEG",
+   "name": "Constellation Energy Corporation",
+   "mktcap": 90422788000.0,
+   "time": "未定",
+   "eps": "$3.91",
+   "ests": "3",
+   "held": false,
+   "previews": []
+  }
+ ],
+ "econ": [
+  {
+   "date": "2026-10-28",
+   "gmt": "10:00",
+   "name": "CB Consumer Confidence",
+   "consensus": "80.5",
+   "previous": "81.9"
+  },
+  {
+   "date": "2026-10-29",
+   "gmt": "14:00",
+   "name": "FOMC Statement",
+   "consensus": " ",
+   "previous": "&nbsp;"
+  },
+  {
+   "date": "2026-10-29",
+   "gmt": "14:00",
+   "name": "Fed Interest Rate Decision",
+   "consensus": "4.00%",
+   "previous": "4.00%"
+  },
+  {
+   "date": "2026-10-29",
+   "gmt": "14:30",
+   "name": "FOMC Press Conference",
+   "consensus": " ",
+   "previous": "&nbsp;"
+  },
+  {
+   "date": "2026-10-30",
+   "gmt": "08:30",
+   "name": "Core PCE Price Index",
+   "consensus": "0.3%",
+   "previous": "0.2%"
+  },
+  {
+   "date": "2026-10-30",
+   "gmt": "08:30",
+   "name": "Core PCE Prices",
+   "consensus": " ",
+   "previous": "3.30%"
+  },
+  {
+   "date": "2026-10-30",
+   "gmt": "08:30",
+   "name": "GDP",
+   "consensus": "3.2%",
+   "previous": "2.2%"
+  },
+  {
+   "date": "2026-10-30",
+   "gmt": "08:30",
+   "name": "GDP Price Index",
+   "consensus": "3.5%",
+   "previous": "6.1%"
+  }
+ ],
+ "leaders": {
+  "pool_up": [
+   {
+    "ticker": "ADBE",
+    "ret": 0.060730808437230444,
+    "theme": "软件与平台"
+   },
+   {
+    "ticker": "HD",
+    "ret": 0.04326096644808053,
+    "theme": "零售"
+   },
+   {
+    "ticker": "JNJ",
+    "ret": 0.038133291954379755,
+    "theme": "医疗"
+   },
+   {
+    "ticker": "CRM",
+    "ret": 0.03519728678964351,
+    "theme": "软件与平台"
+   },
+   {
+    "ticker": "NFLX",
+    "ret": 0.030904059040590237,
+    "theme": "互联网"
+   }
+  ],
+  "pool_down": [
+   {
+    "ticker": "NOK",
+    "ret": -0.14810810810810815,
+    "theme": "AI 网络与光通信"
+   },
+   {
+    "ticker": "COHR",
+    "ret": -0.1250789373973814,
+    "theme": "AI 网络与光通信"
+   },
+   {
+    "ticker": "LRCX",
+    "ret": -0.11755684214562323,
+    "theme": "半导体设备"
+   },
+   {
+    "ticker": "LITE",
+    "ret": -0.11538732808275542,
+    "theme": "AI 网络与光通信"
+   },
+   {
+    "ticker": "CIEN",
+    "ret": -0.10710134499363477,
+    "theme": "AI 网络与光通信"
+   }
+  ],
+  "mkt_up": [
+   {
+    "ticker": "POOL",
+    "ret": 0.1436441660867549,
+    "close": 197.21,
+    "mktcap": 5746198915.64
+   },
+   {
+    "ticker": "BMI",
+    "ret": 0.13483998179887746,
+    "close": 149.64,
+    "mktcap": 3723650365.6200004
+   },
+   {
+    "ticker": "KSS",
+    "ret": 0.11823104693140807,
+    "close": 24.78,
+    "mktcap": 2397911811.75
+   },
+   {
+    "ticker": "ZSL",
+    "ret": 0.11772620248906818,
+    "close": 33.23,
+    "mktcap": 4238630954.2499995
+   },
+   {
+    "ticker": "ALLE",
+    "ret": 0.11018867924528308,
+    "close": 176.52,
+    "mktcap": 12968109865.0
+   }
+  ],
+  "mkt_down": [
+   {
+    "ticker": "TTMI",
+    "ret": -0.2766519823788547,
+    "close": 73.89,
+    "mktcap": 10883591139.84
+   },
+   {
+    "ticker": "KALU",
+    "ret": -0.25306917830464437,
+    "close": 114.99,
+    "mktcap": 2422444961.64
+   },
+   {
+    "ticker": "CRS",
+    "ret": -0.2061603650586702,
+    "close": 292.26,
+    "mktcap": 18818874267.18
+   },
+   {
+    "ticker": "MRNA",
+    "ret": -0.175664130832757,
+    "close": 202.63,
+    "mktcap": 90347081680.7
+   },
+   {
+    "ticker": "OII",
+    "ret": -0.16942617373554103,
+    "close": 36.62,
+    "mktcap": 4332525446.85
+   }
+  ]
+ },
+ "events": [
+  {
+   "anomaly_id": "2026-10-22:close:001",
+   "event_id": null,
+   "max_abs_z": 4.738510145571063,
+   "direction": "down",
+   "title": "AI 资本开支链 23 只同日下跌",
+   "members": [
+    "AMD",
+    "ANET",
+    "AVGO",
+    "BE",
+    "CEG",
+    "CIEN",
+    "COHR",
+    "CRWV",
+    "DELL",
+    "ETN",
+    "GEV",
+    "LITE",
+    "MRVL",
+    "MU",
+    "NOK",
+    "NVDA",
+    "SKHY",
+    "SMCI",
+    "SNDK",
+    "STX",
+    "TSM",
+    "VRT",
+    "WDC"
+   ],
+   "explanation": "AI融资担忧重击芯片股，直接指向当日芯片板块的抛售情绪。；国债收益率上行触发英伟达和AMD下跌，利率压力叠加AI需求疑虑利空芯片股。",
+   "cited_at": "2026-10-15T16:22:12+00:00",
+   "reasons": [
+    {
+     "text": "AI融资担忧重击芯片股，直接指向当日芯片板块的抛售情绪。",
+     "cited_at": "2026-10-15T16:22:12+00:00",
+     "stale_note": "引用的是 7 天前的新闻"
+    },
+    {
+     "text": "国债收益率上行触发英伟达和AMD下跌，利率压力叠加AI需求疑虑利空芯片股。",
+     "cited_at": "2026-10-15T17:12:17+00:00",
+     "stale_note": "引用的是 7 天前的新闻"
+    }
+   ],
+   "untrusted": true
+  },
+  {
+   "anomaly_id": "2026-10-22:close:002",
+   "event_id": "evt-2026-10-22:close:002",
+   "max_abs_z": 2.316675703596027,
+   "direction": "down",
+   "title": "半导体设备 4 只集体下跌",
+   "members": [
+    "AMAT",
+    "ASML",
+    "KLAC",
+    "LRCX"
+   ],
+   "explanation": "点名近7个交易日表现最差的15只芯片股，直指半导体板块近期疲软，与AMAT、ASML、KLAC、LRCX当日下跌方向一致；摩根大通维持ASML增持但下调目标价至2350美元，对ASML构成负面信号，可能拖累ASML及同类半导体设备股",
+   "cited_at": "2026-10-15T15:34:53+00:00",
+   "reasons": [
+    {
+     "text": "点名近7个交易日表现最差的15只芯片股，直指半导体板块近期疲软，与AMAT、ASML、KLAC、LRCX当日下跌方向一致",
+     "cited_at": "2026-10-15T15:34:53+00:00",
+     "stale_note": "引用的是 7 天前的新闻"
+    },
+    {
+     "text": "摩根大通维持ASML增持但下调目标价至2350美元，对ASML构成负面信号，可能拖累ASML及同类半导体设备股",
+     "cited_at": "2026-10-15T15:42:55+00:00",
+     "stale_note": "引用的是 7 天前的新闻"
+    }
+   ],
+   "untrusted": true
+  }
+ ],
+ "held_tickers": [
+  "AAPL",
+  "ADBE",
+  "AMD",
+  "AVGO",
+  "GOOGL",
+  "HD",
+  "JNJ",
+  "LLY",
+  "MRVL",
+  "MU",
+  "NFLX",
+  "NVDA",
+  "V"
+ ],
+ "news_total": 3258,
+ "news_kept": 3228,
+ "todo5": [
+  "纳指 100 −2.86%、标普 −1.18%；AI 资本开支链 23 只同日下跌（4.7σ），判断为板块轮动而非全面恐慌。",
+  "异动集中在半导体与光通信：NOK −14.8%、COHR −12.5%、LRCX −11.8%、LITE −11.5%，另有半导体设备 4 只集体下跌（2.3σ）。",
+  "标的池 59 只中 42 只下跌、19 只波动超过 7%；纸面账户 AI 持仓占 26%，注意仓位集中度。",
+  "VIX 19.03（Yahoo），较前日 16.68 明显抬升；必需消费 XLP +3.31%、区域银行 KRE +2.53% 领涨。",
+  "下周进入财报密集期：GOOGL 10-28 盘后（预期 EPS $2.94），关注财报日历中持仓条目。"
+ ]
+}
