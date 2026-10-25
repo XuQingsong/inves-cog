@@ -205,9 +205,11 @@ def _book(context, day):
     sector_of = context["catalog"]["sector_of"]
     values = {}
     complete = cash is not None
-    for ticker, position in context["positions"].items():
+    positions = context["positions"]
+    same_day = any(_close(context, ticker, day) is not None for ticker in positions)
+    for ticker, position in positions.items():
         shares = _number(position.get("shares"))
-        close = _close(context, ticker, day)
+        close = _close(context, ticker, day, allow_prior=not same_day)
         if shares is None or close is None:
             complete = False
             continue
@@ -226,9 +228,11 @@ def _book(context, day):
     }
 
 
-def _close(context, ticker, day):
+def _close(context, ticker, day, allow_prior=False):
     rows = [row for row in context["bars"].get(ticker) or [] if row["trade_date"] <= day and row["close"] is not None]
-    if not rows or rows[-1]["trade_date"] != day:
+    if not rows:
+        return None
+    if rows[-1]["trade_date"] != day and not allow_prior:
         return None
     return float(rows[-1]["close"])
 

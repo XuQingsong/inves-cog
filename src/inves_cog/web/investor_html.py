@@ -414,9 +414,14 @@ def _risk_item(row, take):
     else:
         icon = '<span class="ico mid">▲</span>'
     ticker = row.get("ticker") or ""
+    text = "" if row.get("text") is None else str(row.get("text"))
+    prefix = f"{ticker} "
+    if ticker and text.startswith(prefix):
+        body = f'<span class="mono">{_text(ticker)}</span> {_text(text[len(prefix) :])}'
+    else:
+        body = _text(text)
     return (
-        f'<div class="ritem" data-go="{_text(ticker)}">{icon}<div><div class="t">'
-        f'<span class="mono">{_text(ticker)}</span> {_text(row.get("text"))}</div></div>'
+        f'<div class="ritem" data-go="{_text(ticker)}">{icon}<div><div class="t">{body}</div></div>'
         '<span class="go">定位</span></div>'
     )
 
