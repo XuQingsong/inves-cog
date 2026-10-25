@@ -365,8 +365,12 @@ def _alert(position, score, sell, panic):
     stage_ok = _stage(position) == 0
     stage = "尚未减仓" if stage_ok else "已经减过仓"
     text = f"警戒减仓：{quality}；{growth}；{under}；{version}；{stage}"
-    hit = fresh and stage_ok and dev is not None and dev < 0 and any(
-        gap is not None and gap < 0 for gap in (quality_gap, growth_gap)
+    hit = (
+        fresh
+        and stage_ok
+        and dev is not None
+        and dev < 0
+        and any(gap is not None and gap < 0 for gap in (quality_gap, growth_gap))
     )
     band = None if not fresh or dev is None or dev >= 0 else score_band(_closest([quality_gap, growth_gap]))
     risk = None
@@ -410,11 +414,7 @@ def _fundamental(position, score, sell):
         reasons.append("营收增速为负")
     if tier == "attack" and "runway_ok" in score and score.get("runway_ok") is False:
         reasons.append("现金跑道不足")
-    breaches = [
-        piece
-        for piece, gap in ((quality, quality_gap), (growth, growth_gap))
-        if gap is not None and gap < 0
-    ]
+    breaches = [piece for piece, gap in ((quality, quality_gap), (growth, growth_gap)) if gap is not None and gap < 0]
     text = f"基本面清仓：{quality}；{growth}"
     if reasons:
         text += "；" + "；".join(reasons)

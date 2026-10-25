@@ -216,23 +216,26 @@ def _account(payload):
     holdings = []
     for row in payload.get("holdings") or []:
         level = row.get("risk_level") if row.get("risk_level") in {"red", "orange"} else None
-        classes = []
         if level == "red":
-            classes.append("warn")
-        if level:
-            classes.append(f"risk-{level}")
-        mark = f' class="{" ".join(classes)}"' if classes else ""
+            mark = ' class="warn"'
+            paint = ' class="risk-red"'
+        elif level == "orange":
+            mark = ' class="risk-orange"'
+            paint = ""
+        else:
+            mark = ""
+            paint = ""
         valuation = _valuation(row.get("valuation"))
         tone = _tone(row.get("pnl"))
         pnl_mark = f' class="{tone}"' if tone else ""
         details = "<br>".join(_text(item.get("text") or MISSING) for item in row.get("levels") or [])
         holdings.append(
-            f'<tr{mark}><td><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
-            f"<td>{_text(row.get('kind_label') or MISSING)}</td>"
-            f"<td>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
+            f'<tr{mark}><td{paint}><a href="{_symbol_href(payload, row["ticker"])}">{_text(row["ticker"])}</a></td>'
+            f"<td{paint}>{_text(row.get('kind_label') or MISSING)}</td>"
+            f"<td{paint}>{_price(row.get('avg_cost'))} → {_price(row.get('price'))}</td>"
             f"<td{pnl_mark}>{_pct(row.get('pnl'))}</td>"
-            f"<td>{details or _text(MISSING)}</td>"
-            f"<td>{_text(row.get('next_step'))}</td><td>{valuation}</td></tr>"
+            f"<td{paint}>{details or _text(MISSING)}</td>"
+            f"<td{paint}>{_text(row.get('next_step'))}</td><td{paint}>{valuation}</td></tr>"
         )
     closed = []
     for row in payload.get("closed_records") or []:
