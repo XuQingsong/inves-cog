@@ -568,7 +568,7 @@ def test_v4_scores_and_valuation_are_copied(pages):
     assert "模型不适用" in html and "4321" not in html
     nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
     nvda_row = html.split('data-row="NVDA"', 1)[1].split('data-row="', 1)[0]
-    valuation = nvda_row.split("市盈率", 1)[1].split("</div>", 1)[0]
+    valuation = nvda_row.split('style="margin-top:4px">', 1)[1].split("</div>", 1)[0]
     assert "neutral" not in nvda["valuation"] and "bear" not in nvda["valuation"]
     assert "90" not in valuation
     assert nvda["valuation"]["state"] == "可用"
@@ -646,16 +646,17 @@ def test_v10_valuation_display_copies_payload_and_hides_price(pages):
         account_html = _get(pages, "/account").text
         stocks_html = _get(pages, "/stocks").text
         assert "4321" not in account_html and "4321" not in stocks_html
-        assert "22.8" in account_html and "27.70%" in account_html and "110.00%" in account_html
+        # B-062: one line per valuation, "市盈率 x · 历史 25/50/75 分位 a/b/c · 隐含增速 y%"; the stock
+        # table no longer carries a valuation column (it lives on the stock page).
+        assert "市盈率 22.8" in account_html and "隐含增速 27.7%" in account_html
         assert "无法反解：价格不在区间" in account_html
-        assert "未估值（金融股不适用）" in account_html
         avgo_row = account_html.split('data-row="AVGO"', 1)[1].split('data-row="', 1)[0]
-        assert '<div class="small">未估值（金融股不适用）</div>' in avgo_row
+        assert "未估值：金融股不适用" in avgo_row
         stock_row = next(part for part in stocks_html.split("<tr") if 'data-ticker="AVGO"' in part)
-        assert "<td>未估值（金融股不适用）</td>" in stock_row
+        assert "未估值" not in stock_row and "4321" not in stock_row
         nvda_stock = next(row for theme in stocks["themes"] for row in theme["members"] if row["ticker"] == "NVDA")
         assert nvda_stock["valuation"]["implied_growth"] == 27.7
-        assert "22.8" in stocks_html and "未估值（金融股不适用）" in stocks_html
+        assert "过去三年营收 +110.0%" in _get(pages, "/s/NVDA").text
     finally:
         empty = Jsonb({"label": label})
         admin.execute(

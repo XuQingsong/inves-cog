@@ -49,6 +49,20 @@ _KIND = {"exit": "全部卖出", "reduce": "减仓", "sell": "卖出"}
 _SIDE = {"buy": "买入", "sell": "卖出", "减仓": "减仓", "买入": "买入"}
 _MOVE = 0.07
 _SHORT_STALE = 20
+_RULE_KEYS = (
+    "持仓",
+    "波段",
+    "进攻层",
+    "标准层",
+    "破位",
+    "价格距离",
+    "主题占比",
+    "组合回撤",
+    "跌幅",
+    "参数",
+    "冷静期",
+    "异常",
+)
 _STYLE = Path(__file__).with_name("investor.css").read_text(encoding="utf-8")
 _EXTRA = """
 body:not(.intra) #intra-banner{display:none}
@@ -347,7 +361,7 @@ def _events(payload):
     if not payload.get("news_fresh"):
         banner = (
             '<div class="banner warn" style="margin:0 0 6px"><b>原因暂不可信</b>'
-            "<span>当日新闻缺失，下列“可能原因”引用的是旧闻，只作参考。</span></div>"
+            "<span>当日新闻缺失，今天的大事暂无可信的原因解释；价格与持仓数据不受影响。</span></div>"
         )
     blocks = []
     for index, row in enumerate(rows):
@@ -361,20 +375,12 @@ def _events(payload):
             ticks.append(
                 f'<a class="tick{mark}" href="{_symbol_href(payload, ticker)}">{_text(ticker)}{_text(move)}</a>'
             )
-        reasons = []
-        stale_any = False
-        for item in row.get("reasons") or []:
-            stale = item.get("stale_note")
-            stale_any = stale_any or bool(stale)
-            when = _utc_short(item.get("cited_at"))
-            chip = (
-                f' <span class="chip stale">旧闻 · {_text(when)}</span>'
-                if stale
-                else f' <span class="small muted">{_text(when)}</span>'
-            )
-            reasons.append(f"<li>{_text(item.get('text') or MISSING)}{chip}</li>")
-        if reasons:
-            label = "可能原因 · 引用旧闻" if stale_any or not payload.get("news_fresh") else "可能原因"
+        items = (row.get("reasons") or []) if payload.get("news_fresh") else []
+        reasons = [_reason_li(item) for item in items]
+        if not payload.get("news_fresh"):
+            why = '<div class="small muted" style="margin-top:8px">当日新闻缺失，原因解释不可用。</div>'
+        elif reasons:
+            label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
             why = (
                 f'<div style="margin-top:10px"><div class="small muted">{label}'
                 f'</div><ul class="news">{"".join(reasons)}</ul></div>'
@@ -386,12 +392,31 @@ def _events(payload):
         blocks.append(
             f'<div class="event{opened}"><div class="h" data-ev>'
             '<div style="display:flex;gap:12px;align-items:baseline">'
-            f'<span class="sig">{_text(z)}</span><b>{_text(row.get("title"))}</b>'
+            f'<span class="sig">{_text(z)}</span>{_event_title(row)}'
             f'<span class="small ink2">涉及持仓 {held_count} 只</span></div>'
             '<span class="small muted">展开 / 收起</span></div>'
             f'<div class="body"><div>{"".join(ticks)}</div>{why}</div></div>'
         )
     return banner + ("".join(blocks) or '<div class="empty">今天没有达到阈值的大事</div>')
+
+
+def _event_title(row):
+    title = f"<b>{_text(row.get('title'))}</b>"
+    if row.get("event_id"):
+        return f'<a href="/linkage/{_text(row["event_id"])}">{title}</a>'
+    return title
+
+
+def _reason_li(item):
+    raw = item.get("cited_at")
+    when = _utc_short(raw)
+    stale = item.get("stale_note")
+    chip = (
+        f'<span class="chip stale" title="{_text(raw)}">{_text(stale)} · {_text(when)}</span>'
+        if stale
+        else f'<span class="small muted" title="{_text(raw)}">{_text(when)}</span>'
+    )
+    return f"<li>{_text(item.get('text') or MISSING)} {chip}</li>"
 
 
 def _utc_short(value):
@@ -446,7 +471,8 @@ def _stocks(payload):
             f'<td class="r num {"" if vol is not None and vol >= 1.5 else "muted"}">{_text(_times(vol))}</td>'
             f'<td class="r num">{held_html} / {_count(theme.get("buyable_count"))}</td>'
             f'<td class="small">{_text(theme.get("line"))}</td><td class="r small">{short_html}</td></tr>'
-            f'<tr class="members" hidden><td colspan="6" style="background:#FAFCFB">{"".join(ticks)}'
+            f'<tr class="members"{"" if theme.get("open") else " hidden"}><td colspan="6" style="background:#FAFCFB">'
+            f"{''.join(ticks)}"
             f'<a href="#stable" class="small" data-only="{_text(sector)}" style="margin-left:8px">在下表只看这个主题 ↓'
             "</a>"
             "</td></tr>"
@@ -501,7 +527,7 @@ def _stocks(payload):
         + f'<tbody id="ttable">{"".join(theme_rows)}</tbody></table></div>'
         + '<div class="card sec">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
-        + f'<h2 style="margin:0">逐只明细 <span class="num muted" id="scount">{total} / {total}</span></h2>'
+        + f'<div class="hd"><h2>逐只明细</h2> <span class="num muted" id="scount">{total} / {total}</span></div>'
         + f'<div class="filters" id="sfilters">{filters}</div></div>'
         + f'<div style="overflow-x:auto"><table style="margin-top:10px"><thead><tr id="shead">{head}</tr></thead>'
         + f'<tbody id="stable">{"".join(rows)}</tbody></table></div>'
@@ -617,6 +643,7 @@ def _stock_row(payload, row, day):
 
 _PENDING_RE = re.compile(r"待成交[：:]\s*([^（(]+)[（(]?([^）)]*)")
 _EVENT_RE = re.compile(r"卷入[^，。；]+")
+_CLAUSE_RE = re.compile(r"下一次计划将减仓 [\d.]+%|持有不足 \d+ 个交易日，暂不减仓|恐慌模式下暂停[^，。；]*")
 _GAP_RE = re.compile(r"(质量分|成长分) ([\d.]+) → 门槛 ([\d.]+)，还差 ([\d.]+) 分")
 
 
@@ -667,7 +694,7 @@ def _account(payload):
         + f'<div class="grid g4 sec">{kpis}</div>'
         + '<div class="grid g-main sec"><div class="card">'
         + '<div style="display:flex;justify-content:space-between;align-items:center">'
-        + '<h2 style="margin:0">今天先看这些</h2>'
+        + '<div class="hd"><h2>今天先看这些</h2></div>'
         + '<span class="legend"><span>'
         + '<span class="ico hi" style="width:16px;height:16px;font-size:10px">!</span> 重点下行</span>'
         + '<span><span class="ico mid" style="width:16px;height:16px;font-size:10px">▲'
@@ -678,12 +705,23 @@ def _account(payload):
         + "</div></div>"
         + _holdings_card(payload)
         + '<div class="grid g2 sec"><div class="card">'
-        + f'<h2>待成交 <span class="num muted">{len(pending)}</span></h2>{_pending(payload)}</div>'
-        + '<div class="card"><h2>处置记录 <span class="small muted" style="font-weight:400">近 10 个交易日</span></h2>'
+        + f'<div class="hd"><h2>待成交</h2> <span class="num muted">{len(pending)}</span></div>'
+        + _pending(payload)
+        + "</div>"
+        + '<div class="card"><div class="hd"><h2>处置记录</h2> <span class="small muted">近 10 个交易日</span></div>'
         + _closed(payload)
         + "</div></div>"
         + _candidates(payload)
+        + _rule_notes(payload)
     )
+
+
+def _rule_notes(payload):
+    lines = [line for line in payload.get("formulas") or [] if any(key in str(line) for key in _RULE_KEYS)]
+    if not lines:
+        return ""
+    body = "".join(f"<p>{_text(_formula(line))}</p>" for line in lines)
+    return f'<details class="method"><summary>规则 A 卖出规则说明</summary><div>{body}</div></details>'
 
 
 def _side(order):
@@ -727,6 +765,9 @@ def _risk_brief(payload, line):
                 left = int(need - now)
                 phrases.append((2, f"再有 {left} 天低于 200 日线就触发破位减仓"))
                 details.append(f"连续 {int(now)} / {int(need)} 天")
+            elif isinstance(now, (int, float)) and isinstance(need, (int, float)) and now >= need > 0:
+                phrases.append((2, "已达破位减仓门槛"))
+                details.append(f"连续 {int(now)} / {int(need)} 天")
         elif name in ("灾难止损价", "波段止损价"):
             gap = level.get("gap")
             if isinstance(gap, (int, float)) and gap < 0.20:
@@ -738,6 +779,7 @@ def _risk_brief(payload, line):
                         details.append("已低于 200 日线" if cond.get("ok") else "尚高于 200 日线")
                 if name == "波段止损价":
                     details.append("成本 × 82%")
+    details.extend(_CLAUSE_RE.findall(text))
     day = row.get("day")
     if isinstance(day, (int, float)) and day <= -0.05:
         phrases.append((4, f"今日 {_signed(day * 100, 1)}"))
@@ -928,7 +970,7 @@ def _holdings_card(payload):
         '<div class="card sec" style="padding:0;overflow:hidden">'
         '<div style="padding:18px 18px '
         '12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">'
-        '<div><h2 style="margin:0 0 4px">持仓与关键价位</h2><div class="small ink2">价格尺只画该持仓类型适用的价位；'
+        '<div><div class="hd"><h2>持仓与关键价位</h2></div><div class="small ink2">价格尺只画该持仓类型适用的价位；'
         "实线着色 = 现价到最近触发价的距离；没有价格触发线的核心仓，用虚线标出到 200 "
         "日线的距离。点击一行在原位展开全部条件。"
         "</div>"
@@ -949,9 +991,9 @@ def _next_view(step):
     if hit:
         reason = human_reason(hit.group(1)).strip()
         note = hit.group(2).strip()
-        return f"{reason}单待成交", note
+        return f"待成交：{reason}", note
     if "额度已满" in text:
-        return "暂不加仓", "该档买入额度已满"
+        return text, ""
     if text in ("继续持有", MISSING):
         return text, ""
     return text, "今日计划（计划记录，尚未成交）"
@@ -1018,6 +1060,8 @@ def _rule_lines(level):
     note = [part for part in parts if part not in value]
     if tail.strip() and not level.get("conds"):
         note.append(tail.strip().rstrip("。"))
+    elif "附加条件当前" in tail:
+        note.append("附加条件当前" + tail.rsplit("附加条件当前", 1)[1].strip().rstrip("。"))
     if level.get("pending_note"):
         note.insert(0, str(level["pending_note"]))
     shown = " · ".join(item.replace("质量分 ", "质量 ").replace("成长分 ", "成长 ") for item in value)
@@ -1157,7 +1201,8 @@ def _candidates(payload):
     )
     return (
         '<div class="card sec"><div style="display:flex;justify-content:space-between;align-items:flex-end">'
-        f'<div><h2 style="margin:0 0 4px">待选股票 · 符合买入条件，尚未持有</h2><div class="small ink2">{_text(note)}'
+        '<div><div class="hd"><h2>待选股票</h2> <span class="small muted">符合买入条件，尚未持有</span></div>'
+        f'<div class="small ink2">{_text(note)}'
         "</div>"
         "</div>"
         f'<span class="small muted">{len(rows)} 只</span></div>{body}</div>'
@@ -1172,7 +1217,7 @@ _TRUST_IMPACT = {
     "新闻": "大事原因标“暂不可信”，只能引用旧闻；价格、持仓和规则 A 计算不受影响。",
     "VIX": "市场情绪可用；行情汇总缺 VIX 时改用 FRED 官方数据。",
     "冷静期覆盖层": "页面不显示冷静期；规则 A 照常执行，不受影响。",
-    "估值": "多数成长股、周期股估值模型不适用，页面只显示市盈率、历史分位和隐含增速，不显示目标价。",
+    "估值": "多数成长股、周期股估值模型不适用，页面只显示市盈率、历史分位和隐含增速，不给出估值价位。",
     "订单": "过期和被替代的旧单已标终态；待成交单按下一交易日开盘价成交。",
     "纸面计划": "计划缺失的日子，账户页沿用最近一次持仓并提示，不显示成空仓。",
     "空头数据": "空头占比、回补天数只作参考；超过 20 个自然日即视为过期，过期数据不判断拥挤。",
@@ -1205,7 +1250,7 @@ def _trust(payload):
             news_bad = cls != "ok"
             extra = (
                 f"最近入库 {_text(payload.get('news_seen_beijing') or MISSING)} · "
-                f"当日 {_count(payload.get('news_day_count'))} 条"
+                f"最近 1 个交易日 {_count(payload.get('news_day_count'))} 条"
             )
         else:
             extra = _text(item.get("detail") or "")
@@ -1230,6 +1275,7 @@ def _trust(payload):
         review = (
             '<div class="empty">还没有完成的复盘记录。<br><span class="small">积累后显示：事后 1 / 5 / 20 个交易日，'
             "异常发现、原因解释和规则 A 动作的命中率。</span></div>"
+            f'<div class="small muted" style="margin-top:8px">{_text(payload.get("review_gap") or MISSING)}</div>'
         )
     anomalies = payload.get("anomalies") or []
     found = (
@@ -1249,8 +1295,8 @@ def _trust(payload):
         + '<div class="card sec"><div style="display:flex;justify-content:space-between"><h2>数据状态</h2>'
         + f'<span class="small muted">点击查看影响</span></div><div class="status">{"".join(cards)}</div></div>'
         + '<div class="grid g2 sec"><div class="card"><h2>系统之前说的对不对</h2>'
-        + f'{review}</div><div class="card"><h2>发现的数据异常 '
-        + f'<span class="num muted">{len(anomalies)}</span></h2>{found}</div></div>'
+        + f'{review}</div><div class="card"><div class="hd"><h2>发现的数据异常</h2> '
+        + f'<span class="num muted">{len(anomalies)}</span></div>{found}</div></div>'
         + '<details class="method"><summary>计算口径说明</summary><div>'
         + "<p>止盈接近单独列为止盈提示，不计入下行风险数。</p><p>组合回撤与距历史高点同一口径。</p>"
         + formulas
@@ -1370,9 +1416,15 @@ def _stock_position(payload, position, held):
         account = f"/account{_query(payload)}#{_text(payload.get('symbol'))}"
         return (
             '<div class="card sec"><div style="display:flex;justify-content:space-between;align-items:center">'
-            f'<h2 style="margin:0">我的仓位 · {_text(position.get("holding_kind") or MISSING)}</h2>'
+            '<div class="hd"><h2>我的仓位</h2> '
+            f'<span class="small muted">{_text(position.get("holding_kind") or MISSING)}</span></div>'
             f'<a href="{account}">在纸面账户中定位 →</a></div>'
-            '<div style="display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:center;margin-top:8px">'
+            + (
+                f'<div class="small ink2" style="margin-top:4px">{_text(position.get("risk_text"))}</div>'
+                if position.get("risk_text")
+                else ""
+            )
+            + '<div style="display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:center;margin-top:8px">'
             f'<div class="kv">{rows}</div>{_ruler_box(spec, 620)}</div>'
             f'<div class="rules">{_rules(position.get("levels") or [])}</div></div>'
         )
@@ -1397,15 +1449,9 @@ def _stock_position(payload, position, held):
 def _stock_news(payload):
     blocks = []
     for row in payload.get("events") or []:
-        reasons = []
-        for item in row.get("reasons") or []:
-            stale = item.get("stale_note")
-            when = _utc_short(item.get("cited_at"))
-            chip = f' <span class="chip stale">旧闻 · {_text(when)}</span>' if stale else ""
-            reasons.append(f"<li>{_text(item.get('text') or MISSING)}{chip}</li>")
-        label = (
-            "可能原因 · 引用旧闻" if any(item.get("stale_note") for item in row.get("reasons") or []) else "可能原因"
-        )
+        items = row.get("reasons") or []
+        reasons = [_reason_li(item) for item in items]
+        label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
         status = str(row.get("status") or "")
         why = (
             f'<div class="small muted">{label}</div><ul class="news">{"".join(reasons)}</ul>'
@@ -1426,12 +1472,12 @@ def _stock_news(payload):
         stale = old is not None and day is not None and (day - old).days >= 1
         items.append(
             f"<li>{_text(item.get('summary'))} "
-            f'<span class="small muted">· {_text(item.get("source"))} · {_text(when[5:16] or MISSING)}</span>'
+            f'<span class="small muted">· {_text(item.get("source"))} · {_text(when or MISSING)}</span>'
             + (' <span class="chip stale">旧闻</span>' if stale else "")
             + "</li>"
         )
     today = sum(1 for item in payload.get("news") or [] if _as_date(item.get("published_beijing")) == day)
-    listing = f'<ul class="news">{"".join(items)}</ul>' if items else '<div class="empty">没有相关新闻</div>'
+    listing = f'<ul class="news">{"".join(items)}</ul>' if items else '<div class="empty">截点内没有该股新闻</div>'
     return (
         "".join(blocks)
         + f'<div class="small muted" style="margin-top:12px">最近新闻（{_text(payload.get("date"))} 当日 {today} 条）'

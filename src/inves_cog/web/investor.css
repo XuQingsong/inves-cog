@@ -183,3 +183,6 @@ details.method div{font-size:12px;color:var(--ink2);columns:2;column-gap:32px;ma
 .foot .links a{color:var(--muted)}
 tr.members td{border-bottom:1px solid var(--line)}
 @media (max-width:760px){.foot{flex-direction:column;gap:6px}}
+.hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hd h2{margin:0}
+.card > .hd{margin-bottom:12px}

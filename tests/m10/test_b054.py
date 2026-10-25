@@ -425,7 +425,7 @@ def test_f1_close_session_drives_judgment(pages):
     assert market["judgment"] == "板块轮动而非全面恐慌"
     assert "判断：板块轮动而非全面恐慌" in market["oneliner"]
     assert "判断：分化" not in market["oneliner"]
-    block = html.split("标普 500", 1)[1].split("</div>", 1)[0]
+    block = html.split("标普 500", 1)[1].split('class="card kpi"', 1)[0]
     assert "−1.18%" in block
     assert "盘后" in block and "+0.02%" in block.split("盘后", 1)[1]
     assert "+0.02%" not in block.split("盘后", 1)[0]
@@ -473,7 +473,7 @@ def test_f4_visible_numbers_follow_the_mockup(pages):
     assert "$1,462,351" in account
     assert "$125,598" in account
     assert "−1.18%" in market and "+0.07%" in market and "−2.86%" in market
-    assert "1.8倍" in stocks
+    assert "1.8×" in stocks
     assert "1.8×" in _row(stocks, "AMAT")
     nvda = _cells(_row(stocks, "NVDA"))
     assert nvda[4] == "44"
@@ -523,8 +523,16 @@ def test_f6_next_step_is_plain_chinese(pages):
 
 
 def test_f7_unvalued_reasons_are_short_chinese(pages):
-    html = _get(pages, "/stocks").text + _get(pages, "/account").text
-    visible = _visible(html)
+    # B-062 moved valuation off the stock table; the short reasons now show on the account page and
+    # on each stock page. Check every unvalued stock's own page.
+    stocks = _json(pages, "/api/pages/brief/stocks")
+    unvalued = [
+        row["ticker"]
+        for theme in stocks["themes"]
+        for row in theme["members"]
+        if (row.get("valuation") or {}).get("state") == "未估值"
+    ]
+    visible = _visible(_get(pages, "/account").text + "".join(_get(pages, f"/s/{ticker}").text for ticker in unvalued))
     for phrase in ("缺少每股收益数据", "周期股行业参数缺失", "亏损且无增长", "金融股不适用", "估值方法异常"):
         assert phrase in visible
     assert "book_value" not in visible
@@ -551,7 +559,7 @@ def test_f8_pending_count_nav_and_buyable_cell(pages):
     held = _cells(_row(stocks, "NVDA"))
     assert held[8] == "持有"
     buyable = _cells(_row(stocks, "LITE"))
-    assert buyable[8] == "未持有 可买"
+    assert buyable[8] == "可买"
     assert "可买" not in held[8]
 
 

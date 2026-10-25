@@ -433,7 +433,7 @@ def test_e4_pages_quote_avgo_and_jnj(pages):
     assert "距 50 日线为负" in alert["text"] and alert["text"].endswith("已触发")
     avgo = _visible(_get(pages, "/s/AVGO").text)
     assert "进攻层核心" in avgo
-    assert "同时需低于 200 日线，当前低于 200 日线" in avgo
+    assert "同时低于 200 日线 （当前低于）" in " ".join(avgo.split()) or "同时低于 200 日线（当前低于）" in avgo
     assert "已连续 10 天低于 200 日线；规则 A 已执行破位减仓，不再重复减仓" in avgo
     assert "附加条件当前未满足" in avgo
 
