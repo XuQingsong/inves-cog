@@ -12,7 +12,6 @@ from inves_cog.web.brief import (
     _number,
     _price,
     _tech,
-    disaster_line,
     format_fraction,
     format_points,
     half_up,
@@ -32,17 +31,23 @@ DD_APPROACH_POINTS = 2
 _EVENT_TITLE = re.compile(r"^(?P<name>.+?) \d+ 只(?:集体|同日)(?P<way>下跌|上涨)$")
 EMPTY = "当前没有需要关注的风险"
 RISK_FORMULAS = (
-    "距灾难止损线 = (现价 − 灾难线) / 现价。小于 10% 为红，达到 10% 且小于 20% 为橙，达到 20% 不提示。"
-    "距离写成不带符号的 1 位小数。",
-    "跌破 200 日线的连续天数取账本评分，不从日线自算。已执行过破位减仓为橙。"
+    "持仓先分类型：观察波段仓、进攻层核心、标准层核心、防守层核心。只列出该类型会执行的卖出条件。",
+    "观察波段仓只看波段止盈价和波段止损价。止盈价是 50 日线乘以 1 加夹紧后的波动阈值，止损价是成本乘以止损比例。",
+    "进攻层核心另看灾难止损价和翻倍止盈价。灾难止损价是持有期最高价乘以灾难比例，并且现价要低于 200 日线。"
+    "翻倍止盈价是成本乘以翻倍倍数，还要看距 50 日线、择时分、距上次卖出的天数，以及是否尚未减仓。",
+    "标准层核心看破位减仓、警戒减仓和基本面清仓。防守层核心看破位减仓和基本面清仓。有波段股数时另看波段部分止盈价。",
+    "价格距离小于 10% 为红，达到 10% 且小于 20% 为橙，达到 20% 不提示。"
+    "分数距离小于 5 分为红，达到 5 分且小于 10 分为橙。",
+    "跌破 200 日线的连续天数取账本评分，只对核心仓提示，不从日线自算。已执行过破位减仓为橙。"
     "达到门槛且持有满最短天数、非恐慌为红，并写下次减仓比例。持有不足或恐慌为橙。"
-    "未达门槛时，达到减仓天数减 1 为红，否则为橙。天数和比例取卖出参数。",
+    "未达门槛时，达到减仓天数减 1 为红，否则为橙。观察波段仓不提示破位和灾难止损。",
     "持仓属于当日池内异常为橙；暴露为直接时为红。",
     "当日覆盖层冷静期生效为橙，并写明冷静期内不加仓。",
     "主题占比 = 该主题持仓收盘市值 / 按收盘估算的总资产。超过 25% 为橙，超过 35% 为红。正好等于不升级。",
     f"组合回撤 = 按收盘估算的总资产 / 历史峰值 − 1。比回撤刹车高 {DD_APPROACH_POINTS} 个百分点以内为橙，"
     "达到回撤刹车为红。刹车线和更深闸门取风险参数。",
     "持仓当日跌幅达到或超过 5% 为橙。",
+    "距离写成还需上涨或还需下跌，1 位小数。参数来自当前版本的卖出参数与波段参数。",
     "页面只给风险着色和人话，不改规则 A 的订单。",
 )
 
@@ -292,15 +297,29 @@ def _held_days(context, position):
 
 
 def _stock_line(ticker, position, day, context, sell, below_days, cooling, events):
+    from inves_cog.web.exit_levels import build_levels, holding_kind, merged_score
+
     price = _marked(context, ticker, day)
-    line = disaster_line(_number(position.get("peak_price")), price, sell)
-    gap = None if price in (None, 0) or line is None else (price - line) / price
+    state = context.get("state") if isinstance(context.get("state"), dict) else {}
+    ledger = state.get("scores") if isinstance(state.get("scores"), dict) else {}
+    page_scores = context.get("scores") if isinstance(context.get("scores"), dict) else {}
+    score = merged_score(page_scores.get(ticker), ledger.get(ticker))
+    kind = holding_kind(position)
+    built = build_levels(
+        position,
+        score,
+        sell,
+        context.get("swing") or {},
+        price=price,
+        index=_number(state.get("index")),
+        panic=state.get("panic") is True,
+    )
     parts = []
     levels = []
-    disaster = disaster_level(gap)
-    if disaster is not None:
-        levels.append(disaster)
-        parts.append(f"距灾难止损线 {format_plain_percent(gap)}（{price_text(line)}）")
+    for row in built:
+        if row.get("risk_level") and row.get("risk_text"):
+            levels.append(row["risk_level"])
+            parts.append(row["risk_text"])
     ret = None if ticker not in context["daily"] else context["daily"][ticker].get("ret")
     if day_level(ret) is not None:
         levels.append("orange")
@@ -309,21 +328,22 @@ def _stock_line(ticker, position, day, context, sell, below_days, cooling, event
     if event is not None:
         levels.append(event[0])
         parts.append(event[1])
-    tier = position.get("tier_now")
-    rule_days = below_days.get(tier)
-    fraction = (sell.get("broken_fraction") or {}).get(tier)
-    clause = below_clause(
-        _score_days(context, ticker),
-        rule_days,
-        _stage(position),
-        _held_days(context, position),
-        sell.get("minimum_age"),
-        context.get("state", {}).get("panic") is True,
-        fraction,
-    )
-    if clause is not None:
-        levels.append(clause[0])
-        parts.append(clause[1])
+    if kind not in {"观察波段仓", "类型暂缺"}:
+        tier = position.get("tier_now")
+        rule_days = below_days.get(tier)
+        fraction = (sell.get("broken_fraction") or {}).get(tier)
+        clause = below_clause(
+            _score_days(context, ticker),
+            rule_days,
+            _stage(position),
+            _held_days(context, position),
+            sell.get("minimum_age"),
+            state.get("panic") is True,
+            fraction,
+        )
+        if clause is not None:
+            levels.append(clause[0])
+            parts.append(clause[1])
     if ticker in cooling:
         levels.append("orange")
         parts.append("冷静期内不加仓")

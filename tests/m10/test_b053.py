@@ -523,12 +523,12 @@ def test_v3_page_values_match_the_formulas(pages, tmp_path, monkeypatch):
     multiples = [row["volume_multiple"] for row in theme["members"] if row["volume_multiple"] is not None]
     assert theme["volume_multiple"] == sum(multiples) / len(multiples)
     nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
-    sell = account["sell"]
-    assert nvda["below_days"] == 3
-    assert nvda["take_profit"] == nvda["avg_cost"] * sell["double_price"]
-    assert nvda["disaster"] == max(nvda["peak_price"], nvda["price"]) * sell["disaster_peak_fraction"]
+    assert nvda["kind_label"] == "标准层核心"
+    names = [item["name"] for item in nvda["levels"]]
+    assert names == ["破位减仓", "警戒减仓", "基本面清仓"]
+    assert next(item["trigger"] for item in nvda["levels"] if item["name"] == "破位减仓") == 3
     flat = [row for theme_row in stocks["themes"] for row in theme_row["members"] if row["ticker"] == "NVDA"][0]
-    assert nvda["ma200"] == nvda["price"] / (1 + flat["price_vs_ma200"] / 100)
+    assert level(nvda["price"], flat["price_vs_ma200"]) == nvda["price"] / (1 + flat["price_vs_ma200"] / 100)
     amd = next(row for row in account["candidates"] if row["ticker"] == "AMD")
     assert amd["ma50"] == amd["price"] / (1 + amd["dev50"] / 100)
     assert amd["year_high"] == amd["price"] / (1 + amd["drawdown252"] / 100)
@@ -546,9 +546,8 @@ def test_v3_page_values_match_the_formulas(pages, tmp_path, monkeypatch):
     monkeypatch.setattr(brief, "PARAMS_ROOT", tmp_path)
     changed = _json(pages, "/api/pages/brief/account")
     row = next(item for item in changed["holdings"] if item["ticker"] == "NVDA")
-    assert row["take_profit"] == 150
-    assert row["disaster"] == 50
-    assert row["below_days"] == 9
+    assert next(item["trigger"] for item in row["levels"] if item["name"] == "破位减仓") == 9
+    assert all(item["name"] not in {"灾难止损价", "翻倍止盈价"} for item in row["levels"])
     assert yaml.safe_load((ROOT / "config/params/p-2026.10/m4.yaml").read_text())["m4"]["sell"]["double_price"] == 2
 
 
@@ -743,10 +742,11 @@ def test_v7_account_table(pages):
     assert sum(len(row["pending"]) for row in account["holdings"]) == 5
     nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
     apple = next(row for row in account["holdings"] if row["ticker"] == "AAPL")
-    assert nvda["near_disaster"] is True and apple["near_disaster"] is False
-    assert "止盈线" in html and "200日线" in html and "灾难止损线" in html
-    assert html.count("距灾难线过近") == 2
-    assert html.count('class="warn"') == 1
+    assert nvda["kind_label"] == apple["kind_label"] == "标准层核心"
+    assert "类型" in html and "适用条件" in html and "标准层核心" in html
+    assert "距灾难线过近" not in html
+    nvda_row = html.split(">NVDA<", 1)[1].split("</tr>", 1)[0]
+    assert "破位减仓" in nvda_row and "灾难止损价" not in nvda_row and "翻倍止盈价" not in nvda_row
     sources = {row["source"] for row in account["closed_records"]}
     assert sources == {"plan", "exits"}
     assert any(row["reason_zh"] == "止盈" and row["ticker"] == "INTC" for row in account["closed_records"])

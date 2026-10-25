@@ -94,8 +94,7 @@ _RULE_ID = re.compile(r"M-\d+")
 FORMULAS = (
     "主题平均涨跌 = 该主题有收益的成员当日收益算术平均。",
     "成交量倍数 = 当日成交量 / 前20日均量。",
-    "止盈线 = 成本 × 卖出参数中的翻倍倍数。",
-    "灾难止损线 = 峰值与现价的较大者 × 卖出参数中的灾难比例。",
+    "卖出价位按持仓类型取卖出参数：翻倍止盈和灾难止损只用于进攻层核心，不套到每一只持仓。",
     "200日线 = 现价 / (1 + 距200日线百分比/100)。",
     "50日线 = 现价 / (1 + 距50日线百分比/100)。",
     "一年高点 = 现价 / (1 + 距一年高点百分比/100)。",
@@ -459,6 +458,12 @@ def sell_params(version):
     path = PARAMS_ROOT / version / "m4.yaml"
     loaded = yaml.safe_load(path.read_text())
     return loaded["m4"]["sell"]
+
+
+def swing_params(version):
+    path = PARAMS_ROOT / version / "m4.yaml"
+    loaded = yaml.safe_load(path.read_text())
+    return loaded["m4"]["swing"]
 
 
 def params_version(plan):
@@ -1328,6 +1333,7 @@ def _context(connection, day, clock):
     news_items = _day_news(connection, day, cutoff)
     version = params_version(plan)
     sell = sell_params(version)
+    swing = swing_params(version)
     cap = _visible_cap(day, cutoff)
     shorts, latest_short = _load_shorts(connection, pool, cap)
     option_rows = _load_option_rows(connection, cap)
@@ -1364,6 +1370,7 @@ def _context(connection, day, clock):
         "fresh": fresh,
         "version": version,
         "sell": sell,
+        "swing": swing,
         "shorts": shorts,
         "short_state": short_state,
         "short_detail": short_detail,
@@ -1542,26 +1549,33 @@ def _theme_line(_sector, average, members):
     return theme_sentence(average, volume, [row["rsi"] for row in members])
 
 
-def _holding_row(ticker, position, stock, sell, pending, plan_payload, valuation):
+def _holding_row(ticker, position, stock, sell, pending, plan_payload, valuation, context):
+    from inves_cog.web.exit_levels import build_levels, holding_kind, merged_score
+
     price = stock["price"]
+    state = context.get("state") if isinstance(context.get("state"), dict) else {}
+    ledger = state.get("scores") if isinstance(state.get("scores"), dict) else {}
+    page_scores = context.get("scores") if isinstance(context.get("scores"), dict) else {}
+    score = merged_score(page_scores.get(ticker), ledger.get(ticker))
+    levels = build_levels(
+        position,
+        score,
+        sell,
+        context.get("swing") or {},
+        price=price,
+        index=_number(state.get("index")),
+        panic=state.get("panic") is True,
+    )
     avg_cost = _number(position.get("avg_cost"))
-    peak = _number(position.get("peak_price"))
-    line = disaster_line(peak, price, sell)
-    tier = position.get("tier_now") or stock.get("tier")
-    days = None if sell is None or tier is None else (sell.get("below_days") or {}).get(tier)
     pnl = None if price is None or avg_cost in (None, 0) else price / avg_cost - 1
     return {
         "ticker": ticker,
+        "kind_label": holding_kind(position),
         "shares": position.get("shares"),
         "avg_cost": avg_cost,
-        "peak_price": peak,
         "price": price,
         "pnl": pnl,
-        "take_profit": take_profit(avg_cost, sell),
-        "ma200": level(price, stock["price_vs_ma200"]),
-        "disaster": line,
-        "below_days": days,
-        "near_disaster": near_disaster(price, line),
+        "levels": levels,
         "next_step": _next_step(ticker, pending, plan_payload),
         "pending": [row["order_id"] for row in pending if row["ticker"] == ticker],
         "books": stock["books"],
@@ -1698,7 +1712,16 @@ def page_brief_account(connection, day, clock):
         if "valuation" not in stock:
             stock["valuation"] = _card_for(context, ticker, context["scores"].get(ticker), stock["price"])
         holdings.append(
-            _holding_row(ticker, position, stock, context["sell"], context["pending"], plan_payload, stock["valuation"])
+            _holding_row(
+                ticker,
+                position,
+                stock,
+                context["sell"],
+                context["pending"],
+                plan_payload,
+                stock["valuation"],
+                context,
+            )
         )
     held = set(context["positions"])
     candidates = []
@@ -1717,9 +1740,8 @@ def page_brief_account(connection, day, clock):
     day_change = None if equity is None or previous in (None, 0) else equity / previous - 1
     drawdown = None if equity is None or peak in (None, 0) else equity / peak - 1
     estimate = close_estimate(context, day)
-    near = sum(1 for row in holdings if row["near_disaster"])
     pending_rows = sum(1 for row in holdings if str(row["next_step"]).startswith("待成交"))
-    sentence = f"持仓{len(holdings)}只，距灾难线过近{near}只，待成交{pending_rows}笔。"
+    sentence = f"持仓{len(holdings)}只，待成交{pending_rows}笔。"
     return {
         "page": "/account",
         "date": day,

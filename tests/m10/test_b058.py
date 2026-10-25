@@ -4,10 +4,8 @@ import re
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from html import unescape
-from pathlib import Path
 
 import pytest
-import yaml
 from fastapi.testclient import TestClient
 from psycopg.types.json import Jsonb
 
@@ -16,7 +14,7 @@ from inves_cog.ingest.fundamentals.health import BLOCKING
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.perception.review.calendar import cutoff
 from inves_cog.trading.scoring.rules import BOOK_KEYS, ENTRY, EXCLUDED
-from inves_cog.web.brief import citation_stale_note, disaster_line, level, short_sentence, volume_multiple
+from inves_cog.web.brief import citation_stale_note, level, short_sentence, volume_multiple
 from inves_cog.web.pages import VALUATION_LABEL
 from inves_cog.web.public import create_app
 from inves_cog.web.stock_brief import (
@@ -514,9 +512,9 @@ def test_d2_oneliners_match_the_template(pages):
         29,
         held=True,
         shares=731,
-        distance=0.25,
         buyable=False,
         blocker=None,
+        kind="标准层核心",
     )
     assert "接近超卖" in nvda["oneliner"] and "纸面持有 731 股" in nvda["oneliner"]
     assert lite["oneliner"] == stock_oneliner(
@@ -527,7 +525,6 @@ def test_d2_oneliners_match_the_template(pages):
         55,
         held=False,
         shares=None,
-        distance=None,
         buyable=True,
         blocker=None,
     )
@@ -540,7 +537,6 @@ def test_d2_oneliners_match_the_template(pages):
         72,
         held=False,
         shares=None,
-        distance=None,
         buyable=False,
         blocker="质量分低于门槛",
     )
@@ -641,15 +637,12 @@ def test_d6_valuation_and_consensus(pages):
 def test_d7_position_blocks(pages):
     nvda = _json(pages, "NVDA")["position"]
     price = pages["closes"]["NVDA"][-1]
-    root = Path(__file__).resolve().parents[2]
-    sell = yaml.safe_load((root / "config/params/p-2026.10/m4.yaml").read_text())
-    fraction = sell["m4"]["sell"]["disaster_peak_fraction"]
     assert nvda["kind"] == "held" and nvda["shares"] == 731
+    assert nvda["holding_kind"] == "标准层核心"
     assert nvda["pnl"] == price / 80 - 1
-    assert nvda["take_profit"] == 80 * 2
-    assert nvda["disaster"] == disaster_line(200, price, {"disaster_peak_fraction": fraction})
-    assert nvda["disaster_gap"] == (price - nvda["disaster"]) / price == 0.25
-    assert nvda["below_days"] == 3
+    names = [item["name"] for item in nvda["levels"]]
+    assert names == ["破位减仓", "警戒减仓", "基本面清仓"]
+    assert next(item["trigger"] for item in nvda["levels"] if item["name"] == "破位减仓") == 3
     assert any("试仓买入" in item for item in nvda["pending"])
     assert "试仓买入" in nvda["next_step"]
     lite = _json(pages, "LITE")["position"]
