@@ -61,3 +61,7 @@
 ## A-022 复核修订 已完成，待验收合并
 
 [PR75](https://github.com/XuQingsong/inves-cog/pull/75)，head `c637d015477ea18d02b6f9bf8643174846ef3207`，[准确 CI](https://github.com/XuQingsong/inves-cog/actions/runs/40126687106/job/120969540260) 通过：754 passed、21 deselected。T1/T3–T7 沿用需求方已接受行为并通过本次全量回归；T2 新增 `test_a022_4500000_tokens_allows_item_1500_then_defers_1501_by_count` 两条路径均通过，550 万 token 触线延期用例通过。已自行决定：仅按已记录方案兼容旧参数，无其他。下一步：需求方验收合并后安装，再核验真实运行和预算；当前未部署。
+
+## A-022 / B-060 部署 已收到／进行中
+
+收到 10:45 验收与补充三十一：A-022 merge `e53e991`、B-060 merge `5e83718` 已合并，按 UD-A-47 一次快进、仅重启 scheduler/pages，确认新预算后停止临时新闻看门程序。已只读确认生产仍为上次 B-059 部署版本且工作区干净；本轮执行安装、预算和外部页面验证，首个 ET 交易日统计另验。变更：仅上述已授权进程重启，无迁移、权限或配置变更。
