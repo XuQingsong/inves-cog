@@ -68,9 +68,7 @@ def test_e2_each_type_lists_only_its_rules():
     tech = {"vol20": 40, "dev50": 0, "price_vs_ma200": -1}
     books = {"quality": 80, "growth": 80, "timing": 60}
     score = {"tech": tech, "books": books, "consec_below200": 1}
-    swing_names, _rows = _names(
-        {"swing_only": True, "tier_now": "defense", "avg_cost": 80}, score, 100
-    )
+    swing_names, _rows = _names({"swing_only": True, "tier_now": "defense", "avg_cost": 80}, score, 100)
     assert swing_names == ["波段止盈价", "波段止损价"]
     attack_names, _rows = _names(
         {"tier_now": "attack", "avg_cost": 80, "peak_price": 100, "stage": 0, "swing_shares": 0},
