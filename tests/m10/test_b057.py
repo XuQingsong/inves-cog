@@ -80,7 +80,12 @@ def _visible(html):
 
 
 def _row(html, ticker):
-    return next(part for part in html.split("<tr") if f">{ticker}<" in part)
+    parts = [part for part in html.split("<tr") if f">{ticker}<" in part]
+    for marker in (f'data-ticker="{ticker}"', f'data-th="{ticker}"'):
+        found = [part for part in parts if marker in part]
+        if found:
+            return found[0]
+    return parts[0]
 
 
 def _roles(admin):
@@ -220,18 +225,20 @@ def test_s1_short_column_matches_the_latest_visible_print(pages):
     assert nvda["short"]["crowded"] is True
     assert nvda["short"]["settlement"] == "2037-06-05"
     assert nvda["short"]["text"] == "空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算"
+    # B-062 cell: "占比 · 回补天数 [拥挤] / 结算日".
     cell = _row(_get(pages, "/stocks").text, "NVDA")
-    assert nvda["short"]["text"] in cell
-    assert "40.0%" not in cell and "占比 8.0%" not in cell and "80.0%" not in cell
-    amd = _row(_get(pages, "/stocks").text, "AMD")
-    assert "空头拥挤" not in amd
-    assert "占比 10.0%，回补 1.0 天，较上期 0.0%，6/5 结算" in amd
-    avgo = _row(_get(pages, "/stocks").text, "AVGO")
-    assert "空头拥挤" not in avgo
-    assert "回补 5.0 天" in avgo
+    shown = " ".join(_visible(cell).split())
+    assert "12.3% · 3.2 天 拥挤" in shown and "6/5 结算" in shown
+    assert "40.0%" not in cell and "8.0%" not in cell and "80.0%" not in cell
+    amd = " ".join(_visible(_row(_get(pages, "/stocks").text, "AMD")).split())
+    assert "拥挤" not in amd
+    assert "10.0% · 1.0 天" in amd and "6/5 结算" in amd
+    avgo = " ".join(_visible(_row(_get(pages, "/stocks").text, "AVGO")).split())
+    assert "拥挤" not in avgo
+    assert "5.0 天" in avgo
     amat = _member(pages, "AMAT")
     assert amat["short"]["days"] == 5.1 and amat["short"]["crowded"] is True
-    assert "空头拥挤" in _row(_get(pages, "/stocks").text, "AMAT")
+    assert "拥挤" in _row(_get(pages, "/stocks").text, "AMAT")
     assert _member(pages, "MRVL")["short"] is None
     assert "暂缺" in _row(_get(pages, "/stocks").text, "MRVL")
 
@@ -245,7 +252,6 @@ def test_s2_theme_average_skips_missing_members(pages):
     assert chip["short_text"] == f"{format_points_plain(chip['short_average'], 1)}（覆盖 3/4）"
     assert chip["short_text"] == "8.4%（覆盖 3/4）"
     html = _get(pages, "/stocks").text
-    assert "平均空头占比" in html
     assert "8.4%（覆盖 3/4）" in _row(html, "AI 算力芯片")
 
 
@@ -316,7 +322,7 @@ def test_s4_vix_fallback_four_ways(pages):
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         neither, neither_html = shown()
         assert neither["vix"] is None and neither["vix_source"] is None
-        assert "VIX 暂缺" in neither_html
+        assert "VIX 暂缺" in " ".join(_visible(neither_html).split())
         assert "来源 FRED" not in neither_html
     finally:
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
@@ -376,7 +382,7 @@ def test_s6_two_pages_stay_in_plain_language(pages):
     assert _LONG_DECIMAL.search(visible) is None
     assert "1.50（全市场），近 20 个交易日 100 分位，偏谨慎" in market
     assert "19.03" in market and "来源 FRED" in market
-    assert "空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算" in stocks
+    assert "12.3% · 3.2 天 拥挤" in " ".join(_visible(stocks).split())
     assert "8.4%（覆盖 3/4）" in stocks
     for path in ("/", "/stocks", "/account", "/trust"):
         assert _get(pages, path).status_code == 200

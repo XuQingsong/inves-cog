@@ -11,6 +11,7 @@ from inves_cog.web.brief import (
     _event_title,
     _number,
     _price,
+    _session_closes,
     _tech,
     format_fraction,
     format_points,
@@ -159,23 +160,38 @@ def portfolio_view(connection, day, context):
     below_days = sell.get("below_days") or {}
     risk = risk_params(context["version"])
     lines = []
+    takes = []
     by_ticker = {}
     for ticker, position in sorted(context["positions"].items()):
-        built = _stock_line(ticker, position, day, context, sell, below_days, cooling, events)
-        if built is None:
-            continue
-        lines.append(built)
-        by_ticker[ticker] = built
+        down, take = _stock_line(ticker, position, day, context, sell, below_days, cooling, events)
+        if down is not None:
+            lines.append(down)
+            by_ticker[ticker] = down
+        if take is not None:
+            takes.append(take)
     lines.extend(_theme_lines(book))
     drawdown = _drawdown_line(book, risk)
     if drawdown is not None:
         lines.append(drawdown)
     lines.sort(key=_line_key)
+    takes.sort(key=lambda row: row.get("ticker") or "")
     reds = [row for row in lines if row["level"] == "red"]
     oranges = [row for row in lines if row["level"] == "orange"]
+    holding_reds = [row for row in reds if row.get("ticker")]
+    holding_oranges = [row for row in oranges if row.get("ticker")]
     note = f"红色 {len(reds)} 项，橙色 {len(oranges)} 项。"
     note += f"第一条红色：{reds[0]['text']}" if reds else "没有红色项。"
-    return {"lines": lines, "by_ticker": by_ticker, "note": note, "card": _card(book, risk), "empty": EMPTY}
+    note += f"下行重点 {len(holding_reds)} 项，关注 {len(holding_oranges)} 项，止盈提示 {len(takes)} 项。"
+    return {
+        "lines": lines,
+        "take_profits": takes,
+        "by_ticker": by_ticker,
+        "note": note,
+        "card": _card(book, risk),
+        "empty": EMPTY,
+        "down_red": len(holding_reds),
+        "down_orange": len(holding_oranges),
+    }
 
 
 def _line_key(row):
@@ -189,9 +205,11 @@ def _book(context, day):
     sector_of = context["catalog"]["sector_of"]
     values = {}
     complete = cash is not None
-    for ticker, position in context["positions"].items():
+    positions = context["positions"]
+    same_day = any(_close(context, ticker, day) is not None for ticker in positions)
+    for ticker, position in positions.items():
         shares = _number(position.get("shares"))
-        close = _close(context, ticker, day)
+        close = _close(context, ticker, day, allow_prior=not same_day)
         if shares is None or close is None:
             complete = False
             continue
@@ -210,9 +228,11 @@ def _book(context, day):
     }
 
 
-def _close(context, ticker, day):
+def _close(context, ticker, day, allow_prior=False):
     rows = [row for row in context["bars"].get(ticker) or [] if row["trade_date"] <= day and row["close"] is not None]
-    if not rows or rows[-1]["trade_date"] != day:
+    if not rows:
+        return None
+    if rows[-1]["trade_date"] != day and not allow_prior:
         return None
     return float(rows[-1]["close"])
 
@@ -296,6 +316,16 @@ def _held_days(context, position):
     return index - entry
 
 
+_TAKE_PROFIT = {"翻倍止盈价", "波段止盈价", "波段部分止盈价"}
+
+
+def _short_risk(text):
+    """One conclusion. The long condition list stays on the holding card."""
+    if not text:
+        return ""
+    return text.split("。", 1)[0]
+
+
 def _stock_line(ticker, position, day, context, sell, below_days, cooling, events):
     from inves_cog.web.exit_levels import build_levels, holding_kind, merged_score
 
@@ -316,11 +346,18 @@ def _stock_line(ticker, position, day, context, sell, below_days, cooling, event
     )
     parts = []
     levels = []
+    takes = []
     for row in built:
+        if row.get("name") in _TAKE_PROFIT:
+            if row.get("risk_level") and row.get("risk_text"):
+                takes.append(_short_risk(row["risk_text"]))
+            continue
         if row.get("risk_level") and row.get("risk_text"):
             levels.append(row["risk_level"])
-            parts.append(row["risk_text"])
+            parts.append(_short_risk(row["risk_text"]))
     ret = None if ticker not in context["daily"] else context["daily"][ticker].get("ret")
+    if ret is None:
+        ret = _bar_return(context, ticker, day)
     if day_level(ret) is not None:
         levels.append("orange")
         parts.append(f"今日 {format_fraction(ret)}")
@@ -347,10 +384,21 @@ def _stock_line(ticker, position, day, context, sell, below_days, cooling, event
     if ticker in cooling:
         levels.append("orange")
         parts.append("冷静期内不加仓")
-    if not parts:
+    down = None
+    if parts:
+        level = "red" if "red" in levels else "orange"
+        down = {"level": level, "ticker": ticker, "text": f"{ticker} " + "，".join(parts) + "。", "group": "down"}
+    take = None
+    if takes:
+        take = {"level": "tp", "ticker": ticker, "text": f"{ticker} " + "，".join(takes) + "。", "group": "tp"}
+    return down, take
+
+
+def _bar_return(context, ticker, day):
+    close, previous = _session_closes(context["bars"].get(ticker) or [], day)
+    if close is None or previous in (None, 0):
         return None
-    level = "red" if "red" in levels else "orange"
-    return {"level": level, "ticker": ticker, "text": f"{ticker} " + "，".join(parts) + "。"}
+    return close / previous - 1
 
 
 def _event_for(ticker, events):

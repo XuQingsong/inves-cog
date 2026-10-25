@@ -3,9 +3,10 @@
 import os
 from datetime import date, datetime
 from decimal import Decimal
+from pathlib import Path
 
 from fastapi import FastAPI
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, Response
 
 from inves_cog.clock import SystemClock
 from inves_cog.web.brief import page_brief_account, page_brief_market, page_brief_stocks, page_brief_trust
@@ -134,7 +135,14 @@ def create_app(dsn=None, clock=None):
     return app
 
 
+_INVESTOR_JS = Path(__file__).with_name("investor.js")
+
+
 def _register_html(app, call, clock):
+    @app.get("/investor.js")
+    def investor_script():
+        return Response(_INVESTOR_JS.read_text(encoding="utf-8"), media_type="text/javascript; charset=utf-8")
+
     def chosen(requested):
         if requested is None:
             return latest_visible_session(clock)

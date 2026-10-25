@@ -339,13 +339,14 @@ def test_w1_stock_news_count_and_preview(pages):
     assert nvda["news"][0]["published_beijing"] == "2036-10-23 02:30"
     assert nvda["news"][1]["source"] == "路透"
     assert all(item["summary"] != "截点后不计入" for item in nvda["news"])
-    html = _get(pages, "/stocks").text
-    cell = _row(html, "NVDA")
-    assert "今日新闻" in html
-    assert ">2<" in cell
+    # B-062: the stock table dropped its news column; the stock page lists the news instead.
+    html = _get(pages, "/s/NVDA").text
+    cell = html.split("最近新闻", 1)[1]
     assert "英伟达获得大单" in cell and "路透" in cell and "2036-10-22 22:00" in cell
     assert "NVDA beats" in cell and "Wire" in cell and "2036-10-23 02:30" in cell
     assert "截点后不计入" not in html and "下一交易日" not in html
+    stocks_html = _get(pages, "/stocks").text
+    assert "截点后不计入" not in stocks_html and "下一交易日" not in stocks_html
     stocks = _json(pages, "/api/pages/brief/stocks")
     chip = next(theme for theme in stocks["themes"] if theme["sector"] == "AI 算力芯片")
     assert chip["news_count"] == 2
@@ -436,7 +437,8 @@ def test_w6_equal_percentiles_say_the_sample_is_thin(pages):
     stocks = _json(pages, "/api/pages/brief/stocks")
     mrvl = next(row for theme in stocks["themes"] for row in theme["members"] if row["ticker"] == "MRVL")
     assert mrvl["valuation"]["pe_p25"] == mrvl["valuation"]["pe_p50"] == mrvl["valuation"]["pe_p75"] == 53
-    cell = _row(_get(pages, "/stocks").text, "MRVL")
+    page = _get(pages, "/s/MRVL").text
+    cell = page.split("<h2>基本面与估值</h2>", 1)[1].split("</p>", 1)[0]
     assert "历史样本不足" in cell
     assert "53" not in cell
 
@@ -452,7 +454,8 @@ def test_w1_missing_news_shows_zero_and_untrusted(pages):
         assert _get(pages, "/stocks").status_code == 200
         home = _get(pages, "/").text
         assert "原因暂不可信" in home
-        assert "供给增加" not in home
+        assert "供给增加" in home
+        assert "引用的是" in home
         trust = _json(pages, "/api/pages/brief/trust")
         assert trust["news_day_count"] == 0
         assert trust["news_seen_beijing"] == "2036-10-15 23:00"
@@ -504,7 +507,7 @@ def test_w1_missing_news_shows_zero_and_untrusted(pages):
 
 def test_w7_three_page_digest(pages):
     parts = []
-    for path, title in (("/", "市场总览"), ("/stocks", "我的标的"), ("/account", "纸面账户")):
+    for path, title in (("/", "市场总览"), ("/stocks", "我的标的"), ("/account", "纸面账户"), ("/s/NVDA", "个股")):
         parts.append(f"## {title}\n{_visible(_get(pages, path).text)}")
     Path("/tmp/b055-digest.txt").write_text("\n\n".join(parts), encoding="utf-8")
     text = Path("/tmp/b055-digest.txt").read_text(encoding="utf-8")

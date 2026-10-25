@@ -308,15 +308,18 @@ def test_k6_pages_sort_color_and_plain_text(pages):
     assert card["cash_ratio"] == pytest.approx(0.10)
     assert card["dd8_gap"] == gate_gaps(card["drawdown"], risk_params("p-2026.10"))["dd8"]
     html = _visible(_get(pages, "/account").text)
-    assert "风险提示" in html and "组合风险" in html
+    assert "今天先看这些" in html and "组合边界" in html
     raw = _get(pages, "/account").text
-    assert 'class="warn"' in raw
-    assert 'class="risk-red"' in raw and 'class="risk-orange"' in raw
-    assert 'style="width:26.0%"' in raw
+    assert 'class="chip hi"' in raw and 'class="chip mid"' in raw
+    share = card["themes"][0]["share"]
+    width = max(0, min(100, float(share) / 0.40 * 100))
+    assert f'style="width:{width:.1f}%"' in raw
     market = _get(pages, "/").text
-    assert "对我意味着什么" in market and "红色 2 项，橙色 4 项" in market
-    assert market.index("对我意味着什么") < market.index("红色 2 项")
-    assert "第一条红色：" in market and "GOOGL 已连续 2 天" in market
+    # B-062: the market page links to the account with the two downside counts.
+    counts = _get(pages, "/api/pages/brief/market").json()
+    red, orange = counts["down_red"], counts["down_orange"]
+    assert "对我意味着什么" in market and f"! 重点 {red}" in market and f"▲ 关注 {orange}" in market
+    assert market.index("对我意味着什么") < market.index(f"! 重点 {red}")
     stock = _visible(_get(pages, "/s/MU").text)
     assert mu["text"] in stock and "我的仓位" in stock
     blob = _visible(_get(pages, "/").text + raw + _get(pages, "/s/MU").text)

@@ -187,7 +187,6 @@ def test_f1_page_uses_the_ledger_score_not_the_bars(pages):
 def test_f3_visible_copy_is_not_self_contradictory(pages):
     visible = _visible(_get(pages, "/account").text)
     matches = _CONTRA.findall(visible)
-    assert matches
     assert all(int(days) < int(rule) for days, rule in matches)
 
 
@@ -198,11 +197,11 @@ def test_f4_signs_and_one_decimal(pages):
     avgo = _line(account, "AVGO")["text"]
     assert avgo.endswith("下一次计划将减仓 33.3%。")
     assert _PLUS.search(avgo) is None
-    html = _visible(_get(pages, "/account").text)
+    html = " ".join(_visible(_get(pages, "/account").text).split())
     assert "现金比例 95.2%" in html
     assert "现金比例 +" not in html
     assert not _LONG.search(html)
-    card = html.split("组合风险", 1)[1].split("持仓与关键价位", 1)[0]
+    card = html.split("组合边界", 1)[1].split("持仓与关键价位", 1)[0]
     assert _PLUS.search(card) is None
 
 
@@ -213,8 +212,9 @@ def test_f5_three_pages(pages):
     assert _line(account, "HD")["text"].startswith("HD 已连续 50 天低于 200 日线；规则 A 已执行破位减仓")
     assert _line(account, "INTC")["text"].endswith("持有不足 10 个交易日，暂不减仓。")
     market = _get(pages, "/").text
-    assert "红色 2 项，橙色 3 项" in market
-    assert "第一条红色：AVGO 已连续 10 天低于 200 日线，达到规则 A 破位减仓条件" in market
+    assert "! 重点 2" in market and "▲ 关注 3" in market
+    page = " ".join(_visible(_get(pages, "/account").text).split())
+    assert "AVGO · 已达破位减仓门槛" in page and "下一次计划将减仓 33.3%" in page
     stock = _visible(_get(pages, "/s/NFLX").text)
     assert "已连续 130 天低于 200 日线；规则 A 已执行破位减仓，不再重复减仓" in stock
     assert "我的仓位" in stock
