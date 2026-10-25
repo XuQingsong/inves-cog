@@ -2,6 +2,13 @@
 
 > 只由 B 线 agent 写。格式见 main 上的 ops/README.md 第 4 节，最新的写在最上面。
 
+## B-062  已收到  2026-10-25 18:21 北京
+
+- 来源 main `9aafc18`。B-061 已关单（2026-10-25 12:00）。
+- 按终稿原型重做市场、标的、账户、信任、个股五页和窄屏。范围只在 `src/inves_cog/web/` 与 `tests/m10/`。原型在 `docs/phase1/design/prototype/`。价格和条件继续用 B-061 的退出价位，页面层不重算规则。
+- 不调模型，不部署，不改库结构、权限、配置。
+- 下一步：对照 G1–G12 和原型实现，开新 PR。
+
 ## B-061  已完成  2026-10-25 11:37 北京
 
 - PR #77，head `944e910`。https://github.com/XuQingsong/inves-cog/pull/77 。CI https://github.com/XuQingsong/inves-cog/actions/runs/40158493681 ：`phase1-blocking` 成功，771 passed、21 deselected。`blocking.json` 为 exit_code 0、duration 151.656 秒（≤ 300）、status passed、collected 771、pending 0。日志 `771 passed, 21 deselected, 5 warnings in 151.69s`。suite xml time 151.652。`m0-ci.xml` 2 passed、0 failures、xml 0.408 秒（日志 `2 passed in 0.43s`）。nightly 跳过。Cursor Bugbot conclusion neutral。同一 head 只有这一次运行。同分支更早的 `ae1f9d1`、`8f20da5` 曾失败，已被这次 head 取代。工件 `m0-clean-environment-evidence` id 12585279056。运行创建于 2026-10-25 11:30 北京，`phase1-blocking` 完成于 11:34 北京。B 线没有合并，没有部署，没有调用真实模型。
