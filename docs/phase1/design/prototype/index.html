@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>inves·cog 投资者页面 · 交互原型 v1</title>
+<style>
+:root{
+  --canvas:#F5F3EE; --card:#FFFFFF; --line:#E7E2D8; --line2:#F0ECE4;
+  --ink:#1F2A2A; --ink2:#4E5958; --muted:#8A918F;
+  --brand:#23705E; --brand-bg:#E6F1EC;
+  --up:#25804F; --down:#C0392B;
+  --r-hi:#8E2350; --r-hi-bg:#F8E4EC; --r-hi-line:#B8346A;
+  --r-mid:#8A5A00; --r-mid-bg:#FDF0D8; --r-mid-line:#D08A16;
+  --tp:#2D5F86; --tp-bg:#E5EEF6; --tp-line:#3C78A8;
+  --ref:#7C8583; --gap-bg:#F3F1EC;
+  --mono:"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--ink);font:14px/1.55 var(--sans)}
+a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
+.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)} .muted{color:var(--muted)} .ink2{color:var(--ink2)}
+small,.small{font-size:12px}
+/* header */
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.top-in{max-width:1280px;margin:0 auto;padding:10px 32px;display:flex;align-items:center;gap:24px}
+.brand b{font-size:18px;letter-spacing:.5px} .brand div{font-size:12px;color:var(--muted)}
+.nav{display:flex;gap:6px;flex:1}
+.nav a{display:block;padding:8px 14px;border-radius:10px;color:var(--ink);min-width:150px}
+.nav a small{display:block;color:var(--muted)}
+.nav a.on{background:var(--brand-bg);color:var(--brand)} .nav a:hover{text-decoration:none;background:var(--line2)}
+.nav .badges{margin-left:6px;white-space:nowrap} .nav a{white-space:nowrap}
+.dot{display:inline-block;min-width:20px;padding:0 6px;border-radius:9px;font-size:11px;line-height:18px;text-align:center;font-family:var(--mono)}
+.dot.hi{background:var(--r-hi-bg);color:var(--r-hi)} .dot.mid{background:var(--r-mid-bg);color:var(--r-mid)}
+.datebox{text-align:right}
+.datebox .row{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.datebox button{border:1px solid var(--line);background:#fff;border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--ink2)}
+.datebox button:hover{background:var(--line2)}
+.datebox .d{font-family:var(--mono);font-size:15px;padding:0 4px}
+.fresh{font-size:12px;color:var(--muted)}
+.mode{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:6px}
+.mode button{border:0;background:#fff;padding:2px 8px;font-size:12px;cursor:pointer;color:var(--ink2);width:auto;height:auto;border-radius:0}
+.mode button.on{background:var(--ink);color:#fff}
+/* layout */
+main{max-width:1280px;margin:0 auto;padding:24px 32px 48px}
+.crumb{font-size:12px;color:var(--muted)}
+h1{font-size:28px;margin:4px 0 4px;font-weight:650;letter-spacing:.2px}
+h2{font-size:18px;margin:0 0 12px;font-weight:650}
+h3{font-size:15px;margin:0 0 8px;font-weight:650}
+.sub{color:var(--ink2);margin:0}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1fr 1fr}
+.g-main{grid-template-columns:2fr 1fr}
+.card{background:var(--card);border-radius:14px;padding:20px 24px;border:1px solid var(--line2)}
+.card.tight{padding:14px 18px}
+.sec{margin-top:20px}
+.kpi .l{font-size:12px;color:var(--muted)} .kpi .v{font:600 30px/1.2 var(--mono);margin:6px 0 4px} .kpi .ft{font-size:12px;color:var(--muted)}
+.banner{border-radius:12px;padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start}
+.banner.warn{background:var(--r-mid-bg);color:#5E3E00;border:1px solid #F1D9A8}
+.banner.info{background:var(--tp-bg);color:#234A69;border:1px solid #CADBEA}
+.banner b{white-space:nowrap}
+.gap{background:var(--gap-bg);border:1px dashed #CFC8BA;border-radius:8px;padding:6px 10px;font-size:12px;color:var(--ink2);display:inline-block}
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:1px 8px;font-size:12px;line-height:20px;white-space:nowrap}
+.chip.hi{background:var(--r-hi-bg);color:var(--r-hi)} .chip.mid{background:var(--r-mid-bg);color:var(--r-mid)}
+.chip.tp{background:var(--tp-bg);color:var(--tp)} .chip.ok{background:var(--line2);color:var(--ink2)}
+.chip.miss{background:var(--gap-bg);color:var(--muted);border:1px dashed #CFC8BA}
+.chip.stale{background:#FFF7E8;color:#8A5A00;border:1px dashed #E5C07B}
+.chip.held{background:var(--brand-bg);color:var(--brand)} .chip.buy{background:#EEF4E6;color:#4F6B1F}
+.ico{display:inline-flex;width:22px;height:22px;border-radius:6px;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.ico.hi{background:var(--r-hi-bg);color:var(--r-hi)} .ico.mid{background:var(--r-mid-bg);color:var(--r-mid)} .ico.tp{background:var(--tp-bg);color:var(--tp)}
+/* filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.f{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--ink2)}
+.f:hover{background:var(--line2)} .f.on{background:var(--brand-bg);border-color:#BFDCCF;color:var(--brand)}
+.f .c{font-family:var(--mono);margin-left:4px;color:var(--muted)}
+select.f,input.f{padding:5px 10px;font:13px var(--sans)}
+/* risk list */
+.rlist{display:flex;flex-direction:column}
+.ritem{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:10px 8px;border-radius:10px;cursor:pointer}
+.ritem:hover{background:var(--line2)}
+.ritem .t{font-weight:600} .ritem .s{font-size:12px;color:var(--ink2)}
+.ritem .go{font-size:12px;color:var(--brand);opacity:0;align-self:center} .ritem:hover .go{opacity:1}
+.rgroup{font-size:12px;color:var(--muted);margin:8px 0 2px 8px;letter-spacing:.5px}
+.more{font-size:13px;color:var(--brand);cursor:pointer;margin:6px 8px;display:inline-block}
+/* bars */
+.bar{height:6px;background:var(--line2);border-radius:3px;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--brand)}
+.bar .th{position:absolute;top:-3px;width:1px;height:12px;background:#B9B2A4}
+.conc{display:grid;grid-template-columns:1fr 60px;gap:4px 10px;align-items:center;margin:8px 0}
+.gate{margin-top:14px}
+.gate .track{position:relative;height:28px}
+.gate .axis{position:absolute;left:0;right:0;top:12px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--r-hi-bg),var(--r-mid-bg) 45%,var(--line2) 80%)}
+/* table */
+table{width:100%;border-collapse:collapse}
+th{font-weight:500;font-size:12px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.s{cursor:pointer;user-select:none} th.s:hover{color:var(--ink)} th.s.on{color:var(--brand)}
+td{padding:9px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+td.r,th.r{text-align:right}
+tr.click{cursor:pointer} tr.click:hover td{background:#FBFAF7}
+/* holdings */
+.hrow{display:grid;grid-template-columns:130px 175px 1fr 270px 20px;gap:16px;padding:14px 18px;border-top:1px solid var(--line2);cursor:pointer;align-items:center}
+.hrow:hover{background:#FBFAF7}
+.hrow.open{background:#FAFCFB}
+.hrow .tk{font:600 16px var(--mono)} .hrow .ty{font-size:12px;color:var(--muted)}
+.hrow .px{font-family:var(--mono);font-size:13px} .hrow .pl{font:600 15px var(--mono)}
+.hrow .nx{font-size:13px} .hrow .nx .lead{font-weight:600;margin:3px 0 1px}
+.caret{color:var(--muted);transition:transform .15s} .open .caret{transform:rotate(90deg)}
+.hhead{display:grid;grid-template-columns:130px 175px 1fr 270px 20px;gap:16px;padding:8px 18px;font-size:12px;color:var(--muted);background:#FAF8F4;border-top:1px solid var(--line)}
+.detail{display:none;padding:4px 18px 18px 18px;background:#FAFCFB;border-top:1px dashed var(--line)}
+.detail.show{display:block}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.rule{border-radius:10px;padding:10px 14px;border:1px solid var(--line);background:#fff;border-left-width:4px}
+.rule .h{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rule .n{font-weight:600}
+.rule .v{font-family:var(--mono);font-size:13px;margin-top:4px}
+.rule .x{font-size:12px;color:var(--ink2);margin-top:2px}
+.rule.st-none{border-left-color:#CFC8BA}
+.rule.st-pending{border-left-color:var(--r-hi-line);background:#FFFAFC}
+.rule.st-hold{border-left-color:var(--r-mid-line);background:#FFFCF5}
+.rule.st-done{border-left-color:#B9B2A4;background:#F7F6F3}
+.rule.st-done .n,.rule.st-done .v{color:var(--ink2)}
+.stc{font-size:11px;border-radius:5px;padding:0 6px;line-height:18px;white-space:nowrap}
+.st-none .stc{background:var(--line2);color:var(--ink2)}
+.st-pending .stc{background:var(--r-hi-bg);color:var(--r-hi)}
+.st-hold .stc{background:var(--r-mid-bg);color:var(--r-mid)}
+.st-done .stc{background:#E9E6DF;color:var(--ink2)}
+.conds{margin:6px 0 0;padding:0;list-style:none;font-size:12px}
+.conds li{display:flex;gap:6px} .conds .y{color:var(--up)} .conds .n2{color:var(--down)}
+.flash{animation:fl 1.4s ease}
+@keyframes fl{0%{background:#FFF3C4}100%{background:#FAFCFB}}
+/* ruler svg */
+svg text{font-family:var(--mono)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);align-items:center}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+/* status */
+.status{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff}
+.stat:hover{border-color:#CFC8BA}
+.stat .h{display:flex;justify-content:space-between;align-items:center}
+.stat .w{font-size:12px;color:var(--ink2);margin-top:6px}
+.stat .imp{display:none;font-size:12px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);color:var(--ink2)}
+.stat.open .imp{display:block}
+/* misc */
+.tabs{display:flex;gap:6px;margin:6px 0 0}
+.event{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:10px;background:#fff}
+.event .h{display:flex;justify-content:space-between;cursor:pointer;gap:12px}
+.event .body{display:none;margin-top:10px} .event.open .body{display:block}
+.tick{display:inline-block;font:12px var(--mono);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin:2px 4px 2px 0;color:var(--ink2)}
+.tick.held{border-color:#BFDCCF;background:var(--brand-bg);color:var(--brand)}
+.sig{font:600 13px var(--mono);color:var(--ink2);min-width:46px}
+.news li{margin:4px 0} .news{padding-left:18px;margin:6px 0}
+.foot{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+details.method summary{cursor:pointer;color:var(--ink2);font-size:13px}
+details.method{margin-top:16px}
+details.method div{font-size:12px;color:var(--ink2);columns:2;column-gap:32px;margin-top:8px}
+.view{display:none} .view.on{display:block}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+.toast.show{opacity:.92}
+.gauge{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,#DCEFE4,#F3EFD9 40%,#F8DCC4 70%,#F1C3C3);margin:26px 0 22px}
+.gauge .pin{position:absolute;top:-7px;width:2px;height:24px;background:var(--ink)}
+.gauge .pl{position:absolute;top:-24px;transform:translateX(-50%);font:600 12px var(--mono);white-space:nowrap}
+.gauge .zl{position:absolute;top:14px;font-size:11px;color:var(--muted);transform:translateX(-50%)}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.ds-sw{height:44px;border-radius:8px;border:1px solid var(--line)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
+.kv .k{color:var(--muted)}
+.m-only{display:none}
+@media (max-width:760px){
+  .top-in{flex-wrap:wrap;padding:10px 14px;gap:10px}
+  .nav{order:3;flex-basis:100%;overflow-x:auto}
+  .nav a{min-width:auto;padding:6px 10px} .nav a small{display:none}
+  main{padding:14px}
+  .g4{grid-template-columns:1fr 1fr} .g3,.g2,.g-main{grid-template-columns:1fr}
+  .kpi .v{font-size:22px}
+  .hhead{display:none}
+  .hrow{grid-template-columns:1fr auto;gap:6px 10px}
+  .hrow .c-ruler{grid-column:1 / -1} .hrow .c-next{grid-column:1 / -1} .hrow .caret{display:none}
+  .rules{grid-template-columns:1fr}
+  .status{grid-template-columns:1fr 1fr}
+  h1{font-size:22px}
+  .m-hide{display:none} .m-only{display:block}
+  details.method div{columns:1}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><b>inves·cog</b><div>投资研究工作台</div></div>
+  <nav class="nav" id="nav"></nav>
+  <div class="datebox">
+    <div class="row"><button id="prev" title="前一交易日">‹</button><span class="d" id="date"></span><span id="dow" class="small ink2"></span><button id="next" title="后一交易日">›</button></div>
+    <div class="fresh"><span id="fresh"></span><span class="mode" title="原型示例：切换盘中数据标注"><button data-m="close" class="on">收盘</button><button data-m="intra">盘中</button></span></div>
+  </div>
+</div></header>
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+<script>
+const D = {"themes":[{"name":"AI 网络与光通信","chg":-11.35,"vol":1.8,"held":0,"buy":2,"note":"被集中抛售，放量；RSI 均值 26，已超卖","news":0,"short":"3.1%（覆盖 3/5）"},{"name":"半导体设备","chg":-9.1,"vol":2.1,"held":0,"buy":0,"note":"被集中抛售，放量；RSI 均值 8，已超卖","news":0,"short":"暂缺（覆盖 0/4）"},{"name":"数据中心电力与散热","chg":-7.84,"vol":1.7,"held":0,"buy":0,"note":"被集中抛售，放量；RSI 均值 28，已超卖","news":0,"short":"3.9%（覆盖 4/5）"},{"name":"存储","chg":-7.42,"vol":1.3,"held":1,"buy":2,"note":"被集中抛售，放量；RSI 均值 23，已超卖","news":0,"short":"暂缺（覆盖 0/5）"},{"name":"AI 服务器与算力云","chg":-7.35,"vol":1.3,"held":0,"buy":0,"note":"被集中抛售；RSI 均值 24，已超卖","news":0,"short":"暂缺（覆盖 0/3）"},{"name":"AI 算力芯片","chg":-6.38,"vol":1.3,"held":4,"buy":0,"note":"被集中抛售，放量；RSI 均值 29，已超卖","news":0,"short":"暂缺（覆盖 0/4）"},{"name":"CPU 与代工","chg":-5.68,"vol":1.4,"held":0,"buy":0,"note":"被集中抛售，放量；RSI 均值 21，已超卖","news":0,"short":"暂缺（覆盖 0/4）"},{"name":"互联网","chg":-2.9,"vol":1.5,"held":2,"buy":2,"note":"跟随下跌","news":0,"short":"暂缺（覆盖 0/4）"},{"name":"工业","chg":-2.84,"vol":1.3,"held":0,"buy":0,"note":"跟随下跌","news":0,"short":"1.4%（覆盖 2/2）"},{"name":"消费硬件与汽车","chg":-0.92,"vol":1.4,"held":1,"buy":0,"note":"平稳","news":0,"short":"暂缺（覆盖 0/2）"},{"name":"能源","chg":0.02,"vol":0.9,"held":0,"buy":2,"note":"平稳","news":0,"short":"1.1%（覆盖 2/2）"},{"name":"软件与平台","chg":0.73,"vol":1.3,"held":1,"buy":2,"note":"平稳","news":0,"short":"2.8%（覆盖 3/6）"},{"name":"网络安全","chg":0.95,"vol":1.3,"held":0,"buy":0,"note":"平稳","news":0,"short":"0.8%（覆盖 1/4）"},{"name":"金融与支付","chg":1.23,"vol":1.1,"held":1,"buy":1,"note":"资金流入，走强","news":0,"short":"0.9%（覆盖 1/3）"},{"name":"医疗","chg":2.85,"vol":1.1,"held":2,"buy":0,"note":"资金流入，走强","news":0,"short":"1.1%（覆盖 3/3）"},{"name":"零售","chg":3.05,"vol":1.2,"held":1,"buy":0,"note":"资金流入，走强","news":0,"short":"0.9%（覆盖 2/3）"}],"stocks":[{"t":"NOK","theme":"AI 网络与光通信","chg":-14.81,"vol":3.0,"rsi":25.0,"d200":-23.04,"dhigh":-53.23,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"未估值（缺少每股收益数据）","news":0,"short_ratio":null,"dtc":1.0,"short_date":"9/30","crowded":false},{"t":"LITE","theme":"AI 网络与光通信","chg":-11.54,"vol":1.3,"rsi":23.0,"d200":-4.28,"dhigh":-33.6,"held":false,"buyable":true,"event":"AI 资本开支链 23 只同日下跌","val":"市盈率 暂缺 25分位 25 50分位 42 75分位 163 隐含 暂缺 营收 +19.48% EPS 暂缺","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"ANET","theme":"AI 网络与光通信","chg":-7.19,"vol":1.5,"rsi":28.0,"d200":4.59,"dhigh":-21.07,"held":false,"buyable":true,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 54.1 25分位 34 50分位 42 75分位 50 隐含 +51.27% 营收 +26.05% EPS +23.92%","news":0,"short_ratio":0.9,"dtc":2.3,"short_date":"9/30","crowded":false},{"t":"CIEN","theme":"AI 网络与光通信","chg":-10.71,"vol":1.3,"rsi":38.0,"d200":-19.73,"dhigh":-48.54,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 72.0 25分位 23 50分位 31 75分位 49 隐含 暂缺 营收 +12.51% EPS +357.14%","news":0,"short_ratio":2.7,"dtc":1.4,"short_date":"9/30","crowded":false},{"t":"COHR","theme":"AI 网络与光通信","chg":-12.51,"vol":1.8,"rsi":13.0,"d200":-29.61,"dhigh":-51.32,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 50.4 25分位 26 50分位 30 75分位 35 隐含 暂缺 营收 +11.32% EPS 暂缺","news":0,"short_ratio":5.6,"dtc":1.7,"short_date":"9/30","crowded":false},{"t":"AMAT","theme":"半导体设备","chg":-8.16,"vol":2.0,"rsi":5.0,"d200":-14.93,"dhigh":-48.05,"held":false,"buyable":false,"event":"半导体设备 4 只集体下跌","val":"模型不适用 市盈率 32.4 25分位 16 50分位 20 75分位 24 隐含 暂缺 营收 +5.13% EPS +38.02%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"LRCX","theme":"半导体设备","chg":-11.76,"vol":2.6,"rsi":6.0,"d200":-18.76,"dhigh":-46.89,"held":false,"buyable":false,"event":"半导体设备 4 只集体下跌","val":"模型不适用 市盈率 34.3 25分位 17 50分位 21 75分位 26 隐含 暂缺 营收 +18.16% EPS +48.12%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"KLAC","theme":"半导体设备","chg":-9.55,"vol":2.2,"rsi":4.0,"d200":-18.59,"dhigh":-51.0,"held":false,"buyable":false,"event":"半导体设备 4 只集体下跌","val":"模型不适用 市盈率 40.4 25分位 17 50分位 23 75分位 30 隐含 暂缺 营收 +8.96% EPS +20.39%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"ASML","theme":"半导体设备","chg":-6.93,"vol":1.4,"rsi":16.0,"d200":-1.62,"dhigh":-21.56,"held":false,"buyable":false,"event":"半导体设备 4 只集体下跌","val":"模型不适用 市盈率 55.9 25分位 34 50分位 40 75分位 50 隐含 暂缺 营收 +18.31% EPS +34.20%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"VRT","theme":"数据中心电力与散热","chg":-7.81,"vol":1.6,"rsi":13.0,"d200":-27.28,"dhigh":-48.01,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 44.3 历史样本不足 隐含 +44.01% 营收 +21.56% EPS +111.48%","news":0,"short_ratio":3.7,"dtc":3.1,"short_date":"9/30","crowded":false},{"t":"ETN","theme":"数据中心电力与散热","chg":-6.33,"vol":1.8,"rsi":24.0,"d200":-6.67,"dhigh":-19.78,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"市盈率 37.6 25分位 17 50分位 28 75分位 35 隐含 暂缺 营收 +10.85% EPS −1.21%","news":0,"short_ratio":2.1,"dtc":3.7,"short_date":"9/30","crowded":false},{"t":"GEV","theme":"数据中心电力与散热","chg":-10.64,"vol":2.7,"rsi":27.0,"d200":-11.78,"dhigh":-29.57,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"市盈率 23.8 历史样本不足 隐含 暂缺 营收 暂缺 EPS +735.25%","news":0,"short_ratio":2.8,"dtc":3.2,"short_date":"9/30","crowded":false},{"t":"CEG","theme":"数据中心电力与散热","chg":-5.74,"vol":1.0,"rsi":49.0,"d200":-9.6,"dhigh":-36.42,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 24.9 历史样本不足 隐含 暂缺 营收 −2.08% EPS +7.10%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"BE","theme":"数据中心电力与散热","chg":-8.7,"vol":1.7,"rsi":26.0,"d200":-0.5,"dhigh":-37.03,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"市盈率 132.8 历史样本不足 隐含 +46.66% 营收 +40.50% EPS −97.27%","news":0,"short_ratio":7.1,"dtc":1.0,"short_date":"9/30","crowded":false},{"t":"MU","theme":"存储","chg":-6.26,"vol":1.2,"rsi":24.0,"d200":17.42,"dhigh":-29.42,"held":true,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 11.5 25分位 7 50分位 19 75分位 27 隐含 暂缺 营收 +104.65% EPS +879.31%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"SKHY","theme":"存储","chg":-8.07,"vol":1.3,"rsi":12.0,"d200":null,"dhigh":null,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"未估值（缺少每股收益数据）","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"WDC","theme":"存储","chg":-6.43,"vol":1.5,"rsi":36.0,"d200":-14.43,"dhigh":-52.54,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 14.6 25分位 14 50分位 26 75分位 55 隐含 暂缺 营收 +1.60% EPS +371.46%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"STX","theme":"存储","chg":-7.86,"vol":1.2,"rsi":25.0,"d200":-5.83,"dhigh":-41.31,"held":false,"buyable":true,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 46.2 25分位 10 50分位 16 75分位 25 隐含 暂缺 营收 +18.20% EPS +105.32%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"SNDK","theme":"存储","chg":-8.51,"vol":1.3,"rsi":17.0,"d200":2.36,"dhigh":-46.0,"held":false,"buyable":true,"event":"AI 资本开支链 23 只同日下跌","val":"未估值（缺少每股收益数据）","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"DELL","theme":"AI 服务器与算力云","chg":-6.78,"vol":1.0,"rsi":28.0,"d200":41.21,"dhigh":-23.02,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"市盈率 26.3 25分位 7 50分位 19 75分位 24 隐含 暂缺 营收 +17.33% EPS +150.58%","news":0,"short_ratio":null,"dtc":1.4,"short_date":"9/30","crowded":false},{"t":"SMCI","theme":"AI 服务器与算力云","chg":-5.2,"vol":1.2,"rsi":27.0,"d200":3.65,"dhigh":-36.0,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 10.3 25分位 14 50分位 19 75分位 23 隐含 −3.75% 营收 +76.34% EPS +94.05%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"CRWV","theme":"AI 服务器与算力云","chg":-10.06,"vol":1.7,"rsi":18.0,"d200":-39.64,"dhigh":-60.27,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 暂缺 历史样本不足 隐含 暂缺 营收 暂缺 EPS 暂缺","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"NVDA","theme":"AI 算力芯片","chg":-4.4,"vol":1.2,"rsi":30.0,"d200":4.25,"dhigh":-11.3,"held":true,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 26.8 25分位 44 50分位 55 75分位 75 隐含 +27.74% 营收 +110.07% EPS +125.36%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"AMD","theme":"AI 算力芯片","chg":-8.1,"vol":1.4,"rsi":24.0,"d200":26.81,"dhigh":-21.79,"held":true,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 130.6 25分位 58 50分位 109 75分位 163 隐含 +95.63% 营收 +23.60% EPS +122.29%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"AVGO","theme":"AI 算力芯片","chg":-4.31,"vol":1.3,"rsi":34.0,"d200":-12.15,"dhigh":-32.88,"held":true,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"未估值（周期股行业参数缺失）","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"MRVL","theme":"AI 算力芯片","chg":-8.7,"vol":1.3,"rsi":30.0,"d200":24.97,"dhigh":-29.38,"held":true,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"市盈率 74.0 历史样本不足 隐含 暂缺 营收 +18.93% EPS 暂缺","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"INTC","theme":"CPU 与代工","chg":-8.04,"vol":1.4,"rsi":12.0,"d200":-0.12,"dhigh":-39.34,"held":false,"buyable":false,"event":null,"val":"未估值（亏损且无增长）","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"QCOM","theme":"CPU 与代工","chg":-2.88,"vol":1.5,"rsi":35.0,"d200":2.05,"dhigh":-31.15,"held":false,"buyable":false,"event":null,"val":"市盈率 19.7 25分位 17 50分位 20 75分位 26 隐含 暂缺 营收 +4.53% EPS −15.36%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"ARM","theme":"CPU 与代工","chg":-7.28,"vol":1.1,"rsi":10.0,"d200":-6.87,"dhigh":-52.19,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 216.6 历史样本不足 隐含 暂缺 营收 暂缺 EPS 暂缺","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"TSM","theme":"CPU 与代工","chg":-4.52,"vol":1.5,"rsi":26.0,"d200":3.83,"dhigh":-15.12,"held":false,"buyable":false,"event":"AI 资本开支链 23 只同日下跌","val":"模型不适用 市盈率 296.3 历史样本不足 隐含 +50.27% 营收 +18.45% EPS +51.22%","news":0,"short_ratio":null,"dtc":3.1,"short_date":"9/30","crowded":false},{"t":"META","theme":"互联网","chg":-6.98,"vol":2.1,"rsi":30.0,"d200":2.58,"dhigh":-16.56,"held":false,"buyable":true,"event":null,"val":"市盈率 22.1 25分位 25 50分位 28 75分位 32 隐含 +18.51% 营收 +23.92% EPS +29.85%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"GOOGL","theme":"互联网","chg":-3.15,"vol":1.2,"rsi":32.0,"d200":-5.01,"dhigh":-19.47,"held":true,"buyable":false,"event":null,"val":"市盈率 16.3 25分位 24 50分位 27 75分位 31 隐含 暂缺 营收 +15.48% EPS +112.26%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"AMZN","theme":"互联网","chg":-4.57,"vol":1.4,"rsi":49.0,"d200":2.93,"dhigh":-11.84,"held":false,"buyable":true,"event":null,"val":"模型不适用 市盈率 20.1 25分位 45 50分位 76 75分位 124 隐含 暂缺 营收 +12.97% EPS +89.48%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"NFLX","theme":"互联网","chg":3.09,"vol":1.5,"rsi":50.0,"d200":-18.63,"dhigh":-42.07,"held":true,"buyable":false,"event":null,"val":"未估值（缺少每股收益数据）","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"CAT","theme":"工业","chg":-4.89,"vol":1.2,"rsi":17.0,"d200":-12.88,"dhigh":-33.89,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 30.3 25分位 16 50分位 19 75分位 33 隐含 暂缺 营收 +4.88% EPS +18.28%","news":0,"short_ratio":1.7,"dtc":3.2,"short_date":"9/30","crowded":false},{"t":"GE","theme":"工业","chg":-0.79,"vol":1.4,"rsi":33.0,"d200":-9.24,"dhigh":-23.0,"held":false,"buyable":false,"event":null,"val":"未估值（周期股行业参数缺失）","news":0,"short_ratio":1.1,"dtc":2.4,"short_date":"9/30","crowded":false},{"t":"AAPL","theme":"消费硬件与汽车","chg":1.23,"vol":1.3,"rsi":72.0,"d200":18.45,"dhigh":0.0,"held":true,"buyable":false,"event":null,"val":"市盈率 40.0 25分位 19 50分位 27 75分位 33 隐含 暂缺 营收 +6.73% EPS +32.17%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"TSLA","theme":"消费硬件与汽车","chg":-3.08,"vol":1.4,"rsi":52.0,"d200":-3.12,"dhigh":-23.54,"held":false,"buyable":false,"event":null,"val":"市盈率 411.6 25分位 69 50分位 177 75分位 333 隐含 暂缺 营收 +2.59% EPS −37.24%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"XOM","theme":"能源","chg":0.08,"vol":1.0,"rsi":82.0,"d200":16.62,"dhigh":-0.42,"held":false,"buyable":true,"event":null,"val":"未估值（缺少每股收益数据）","news":0,"short_ratio":1.0,"dtc":2.6,"short_date":"9/30","crowded":false},{"t":"CVX","theme":"能源","chg":-0.04,"vol":0.9,"rsi":81.0,"d200":18.53,"dhigh":-0.04,"held":false,"buyable":true,"event":null,"val":"模型不适用 市盈率 21.8 25分位 15 50分位 17 75分位 24 隐含 暂缺 营收 −0.84% EPS +33.85%","news":0,"short_ratio":1.2,"dtc":2.0,"short_date":"9/30","crowded":false},{"t":"MSFT","theme":"软件与平台","chg":-2.23,"vol":1.0,"rsi":52.0,"d200":19.43,"dhigh":-4.12,"held":false,"buyable":true,"event":null,"val":"市盈率 29.0 25分位 29 50分位 33 75分位 37 隐含 +25.31% 营收 +16.12% EPS +31.60%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"ORCL","theme":"软件与平台","chg":-2.78,"vol":1.2,"rsi":36.0,"d200":-20.99,"dhigh":-55.69,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 19.7 25分位 20 50分位 28 75分位 37 隐含 暂缺 营收 +12.09% EPS +47.69%","news":0,"short_ratio":1.6,"dtc":1.5,"short_date":"9/30","crowded":false},{"t":"CRM","theme":"软件与平台","chg":3.52,"vol":1.2,"rsi":65.0,"d200":25.93,"dhigh":-5.99,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 22.8 25分位 53 50分位 121 75分位 241 隐含 暂缺 营收 +9.93% EPS +59.30%","news":0,"short_ratio":4.0,"dtc":2.6,"short_date":"9/30","crowded":false},{"t":"NOW","theme":"软件与平台","chg":2.53,"vol":1.6,"rsi":78.0,"d200":36.43,"dhigh":-17.04,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 98.1 25分位 99 50分位 163 75分位 512 隐含 +75.30% 营收 +22.49% EPS +0.38%","news":0,"short_ratio":2.9,"dtc":2.7,"short_date":"9/30","crowded":false},{"t":"ADBE","theme":"软件与平台","chg":6.07,"vol":1.6,"rsi":72.0,"d200":7.1,"dhigh":-24.83,"held":true,"buyable":false,"event":null,"val":"模型不适用 市盈率 15.1 25分位 38 50分位 49 75分位 54 隐含 暂缺 营收 +11.20% EPS +11.87%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"PLTR","theme":"软件与平台","chg":-2.74,"vol":1.0,"rsi":55.0,"d200":28.17,"dhigh":-6.15,"held":false,"buyable":true,"event":null,"val":"模型不适用 市盈率 167.7 历史样本不足 隐含 +115.93% 营收 +44.39% EPS +290.00%","news":0,"short_ratio":null,"dtc":0.8,"short_date":"11/15","crowded":false},{"t":"CRWD","theme":"网络安全","chg":-0.58,"vol":1.2,"rsi":34.0,"d200":46.04,"dhigh":-14.67,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 4758.8 历史样本不足 隐含 暂缺 营收 +26.87% EPS 暂缺","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"PANW","theme":"网络安全","chg":2.21,"vol":1.4,"rsi":35.0,"d200":34.46,"dhigh":-15.48,"held":false,"buyable":false,"event":null,"val":"模型不适用 市盈率 887.3 历史样本不足 隐含 暂缺 营收 +18.54% EPS −75.00% 无法反解：价格不在[-50,200]增速对应的价值区间","news":0,"short_ratio":0.8,"dtc":6.4,"short_date":"10/15","crowded":true},{"t":"FTNT","theme":"网络安全","chg":-0.61,"vol":1.1,"rsi":42.0,"d200":37.56,"dhigh":-11.18,"held":false,"buyable":false,"event":null,"val":"市盈率 61.1 25分位 42 50分位 54 75分位 92 隐含 暂缺 营收 +14.71% EPS +12.75%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"ZS","theme":"网络安全","chg":2.78,"vol":1.3,"rsi":71.0,"d200":43.35,"dhigh":-29.29,"held":false,"buyable":false,"event":null,"val":"市盈率 暂缺 历史样本不足 隐含 暂缺 营收 +27.51% EPS 暂缺","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"JPM","theme":"金融与支付","chg":0.4,"vol":0.8,"rsi":57.0,"d200":4.36,"dhigh":-7.84,"held":false,"buyable":true,"event":null,"val":"未估值（金融股不适用）","news":0,"short_ratio":0.9,"dtc":2.6,"short_date":"9/30","crowded":false},{"t":"V","theme":"金融与支付","chg":1.59,"vol":1.2,"rsi":93.0,"d200":21.76,"dhigh":0.0,"held":true,"buyable":false,"event":null,"val":"市盈率 35.3 历史样本不足 隐含 暂缺 营收 +11.81% EPS +14.75%","news":0,"short_ratio":null,"dtc":2.8,"short_date":"9/30","crowded":false},{"t":"MA","theme":"金融与支付","chg":1.7,"vol":1.4,"rsi":97.0,"d200":18.57,"dhigh":0.0,"held":false,"buyable":false,"event":null,"val":"市盈率 34.8 25分位 35 50分位 39 75分位 43 隐含 +29.18% 营收 +26.03% EPS +22.59%","news":0,"short_ratio":null,"dtc":2.0,"short_date":"9/30","crowded":false},{"t":"UNH","theme":"医疗","chg":1.91,"vol":0.9,"rsi":81.0,"d200":17.84,"dhigh":-2.61,"held":false,"buyable":false,"event":null,"val":"未估值（金融股不适用）","news":0,"short_ratio":1.8,"dtc":3.3,"short_date":"9/30","crowded":false},{"t":"LLY","theme":"医疗","chg":2.83,"vol":1.2,"rsi":78.0,"d200":20.53,"dhigh":0.0,"held":true,"buyable":false,"event":null,"val":"市盈率 43.8 25分位 33 50分位 41 75分位 66 隐含 +29.59% 营收 +39.23% EPS +94.77%","news":0,"short_ratio":0.7,"dtc":2.9,"short_date":"9/30","crowded":false},{"t":"JNJ","theme":"医疗","chg":3.81,"vol":1.3,"rsi":60.0,"d200":9.14,"dhigh":-3.89,"held":true,"buyable":false,"event":null,"val":"市盈率 40.7 25分位 22 50分位 24 75分位 27 隐含 暂缺 营收 −2.30% EPS −36.49%","news":0,"short_ratio":0.9,"dtc":3.3,"short_date":"9/30","crowded":false},{"t":"COST","theme":"零售","chg":1.99,"vol":1.3,"rsi":91.0,"d200":5.11,"dhigh":-6.96,"held":false,"buyable":false,"event":null,"val":"市盈率 49.0 25分位 37 50分位 43 75分位 52 隐含 暂缺 营收 暂缺 EPS +14.00%","news":0,"short_ratio":null,"dtc":null,"short_date":null,"crowded":false},{"t":"WMT","theme":"零售","chg":2.82,"vol":1.3,"rsi":91.0,"d200":2.31,"dhigh":-9.75,"held":false,"buyable":false,"event":null,"val":"市盈率 43.9 25分位 25 50分位 31 75分位 40 隐含 暂缺 营收 +5.21% EPS +3.76%","news":0,"short_ratio":0.6,"dtc":1.8,"short_date":"11/28","crowded":false},{"t":"HD","theme":"零售","chg":4.33,"vol":1.0,"rsi":86.0,"d200":-2.38,"dhigh":-16.19,"held":true,"buyable":false,"event":null,"val":"市盈率 22.9 25分位 21 50分位 23 75分位 25 隐含 暂缺 营收 +2.99% EPS −2.86%","news":0,"short_ratio":1.2,"dtc":2.0,"short_date":"9/30","crowded":false}],"holdings":[{"t":"AAPL","type":"标准层核心","costpx":"$260 → $348","pnl":33.8,"cond":"破位减仓：连续 0 天 → 门槛 3 天，还差 3 天警戒减仓：质量分 90.5 → 门槛 55，还差 35.5 分；成长分 71 → 门槛 50，还差 21 分；距 50 日线不为负；账本版本已更新；已经减过仓基本面清仓：质量分 90.5 → 门槛 45，还差 45.5 分；成长分 71 → 门槛 40，还差 31 分","next":"继续持有","val":"市盈率 40.0 25分位 19 50分位 27 75分位 33 隐含 暂缺 营收 +6.73% EPS +32.17%"},{"t":"ADBE","type":"标准层核心","costpx":"$244 → $271","pnl":11.0,"cond":"破位减仓：连续 0 天 → 门槛 3 天，还差 3 天；持有不足 10 个交易日，暂不减仓警戒减仓：质量分 94.9 → 门槛 55，还差 39.9 分；成长分 62.5 → 门槛 50，还差 12.5 分；距 50 日线为负；账本版本未更新；尚未减仓基本面清仓：质量分 94.9 → 门槛 45，还差 49.9 分；成长分 62.5 → 门槛 40，还差 22.5 分波段部分止盈价：现价 $270.55 → 触发 $300.36，还需上涨 11.0%","next":"该档买入额度已满，暂不加仓","val":"模型不适用 市盈率 15.1 25分位 38 50分位 49 75分位 54 隐含 暂缺 营收 +11.20% EPS +11.87%"},{"t":"AMD","type":"进攻层核心","costpx":"$201 → $508","pnl":153.29,"cond":"灾难止损价：现价 $507.93 → 触发 $389.65，还需下跌 23.3%。同时需低于 200 日线，当前不低于 200 日线翻倍止盈价：现价 $507.93 → 触发 $401.06，已达到触发价。距 50 日线当前 2.1，条件是低于 3，满足；择时分当前 75.5，条件是低于 55，未满足；偏离或择时满足其一，当前满足；距上次卖出 1 天，至少 20 天，未满足；尚未减仓，满足。附加条件当前未满足破位减仓：连续 0 天 → 门槛 7 天，还差 7 天基本面清仓：质量分 83.8 → 门槛 45，还差 38.8 分；成长分 92.7 → 门槛 40，还差 52.7 分","next":"分批止盈","val":"模型不适用 市盈率 130.6 25分位 58 50分位 109 75分位 163 隐含 +95.63% 营收 +23.60% EPS +122.29%"},{"t":"AVGO","type":"进攻层核心","costpx":"$362 → $323","pnl":-10.62,"cond":"灾难止损价：现价 $323.24 → 触发 $288.94，还需下跌 10.6%。同时需低于 200 日线，当前低于 200 日线翻倍止盈价：现价 $323.24 → 触发 $723.29，还需上涨 123.8%。距 50 日线当前 -6.3，条件是低于 3，满足；择时分当前 40.9，条件是低于 55，满足；偏离或择时满足其一，当前满足；距上次卖出 27 天，至少 20 天，满足；已经减过仓，未满足。附加条件当前未满足破位减仓：连续 10 天 → 门槛 7 天，已达到；已经执行过，不再重复基本面清仓：质量分 92.7 → 门槛 45，还差 47.7 分；成长分 92.8 → 门槛 40，还差 52.8 分波段部分止盈价：现价 $323.24 → 触发 $394.51，还需上涨 22.0%","next":"继续持有","val":"未估值（周期股行业参数缺失）"},{"t":"GOOGL","type":"标准层核心","costpx":"$333 → $324","pnl":-2.73,"cond":"破位减仓：连续 2 天 → 门槛 3 天，还差 1 天警戒减仓：质量分 82.4 → 门槛 55，还差 27.4 分；成长分 79.6 → 门槛 50，还差 29.6 分；距 50 日线为负；账本版本已更新；尚未减仓基本面清仓：质量分 82.4 → 门槛 45，还差 37.4 分；成长分 79.6 → 门槛 40，还差 39.6 分","next":"确认加仓","val":"市盈率 16.3 25分位 24 50分位 27 75分位 31 隐含 暂缺 营收 +15.48% EPS +112.26%"},{"t":"HD","type":"观察波段仓","costpx":"$309 → $328","pnl":5.99,"cond":"波段止盈价：现价 $327.73 → 触发 $350.12，还需上涨 6.8%波段止损价：现价 $327.73 → 触发 $253.54，还需下跌 22.6%。触发价为成本的 82.0%","next":"继续持有","val":"市盈率 22.9 25分位 21 50分位 23 75分位 25 隐含 暂缺 营收 +2.99% EPS −2.86%"},{"t":"JNJ","type":"标准层核心","costpx":"$225 → $268","pnl":18.97,"cond":"破位减仓：连续 0 天 → 门槛 3 天，还差 3 天警戒减仓：质量分 90.3 → 门槛 55，还差 35.3 分；成长分 41.5 < 50；距 50 日线为负；账本版本已更新；已经减过仓基本面清仓：质量分 90.3 → 门槛 45，还差 45.3 分；成长分 41.5 → 门槛 40，还差 1.5 分","next":"待成交：警戒减仓（2026-10-21 起）","val":"市盈率 40.7 25分位 22 50分位 24 75分位 27 隐含 暂缺 营收 −2.30% EPS −36.49%"},{"t":"LLY","type":"标准层核心","costpx":"$1,039 → $1,307","pnl":25.78,"cond":"破位减仓：连续 0 天 → 门槛 3 天，还差 3 天警戒减仓：质量分 95 → 门槛 55，还差 40 分；成长分 76.9 → 门槛 50，还差 26.9 分；距 50 日线不为负；账本版本已更新；尚未减仓基本面清仓：质量分 95 → 门槛 45，还差 50 分；成长分 76.9 → 门槛 40，还差 36.9 分","next":"该档买入额度已满，暂不加仓","val":"市盈率 43.8 25分位 33 50分位 41 75分位 66 隐含 +29.59% 营收 +39.23% EPS +94.77%"},{"t":"MRVL","type":"进攻层核心","costpx":"$138 → $223","pnl":61.97,"cond":"灾难止损价：现价 $223.47 → 触发 $189.86，还需下跌 15.0%。同时需低于 200 日线，当前不低于 200 日线翻倍止盈价：现价 $223.47 → 触发 $275.94，还需上涨 23.5%。距 50 日线当前 0.9，条件是低于 3，满足；择时分当前 76.6，条件是低于 55，未满足；偏离或择时满足其一，当前满足；距上次卖出 45 天，至少 20 天，满足；尚未减仓，满足。附加条件当前满足破位减仓：连续 0 天 → 门槛 7 天，还差 7 天基本面清仓：质量分 82 → 门槛 45，还差 37 分；成长分 87.3 → 门槛 40，还差 47.3 分","next":"继续持有","val":"市盈率 74.0 历史样本不足 隐含 暂缺 营收 +18.93% EPS 暂缺"},{"t":"MU","type":"进攻层核心","costpx":"$590 → $856","pnl":45.24,"cond":"灾难止损价：现价 $856.49 → 触发 $728.14，还需下跌 15.0%。同时需低于 200 日线，当前不低于 200 日线翻倍止盈价：现价 $856.49 → 触发 $1,179.38，还需上涨 37.7%。距 50 日线当前 -7.3，条件是低于 3，满足；择时分当前 65.4，条件是低于 55，未满足；偏离或择时满足其一，当前满足；距上次卖出 6 天，至少 20 天，未满足；尚未减仓，满足。附加条件当前未满足破位减仓：连续 0 天 → 门槛 7 天，还差 7 天基本面清仓：质量分 91.5 → 门槛 45，还差 46.5 分；成长分 95.8 → 门槛 40，还差 55.8 分波段部分止盈价：现价 $856.49 → 触发 $1,087.41，还需上涨 27.0%","next":"波段买入","val":"模型不适用 市盈率 11.5 25分位 7 50分位 19 75分位 27 隐含 暂缺 营收 +104.65% EPS +879.31%"},{"t":"NFLX","type":"观察波段仓","costpx":"$71.55 → $67.05","pnl":-6.29,"cond":"波段止盈价：现价 $67.05 → 触发 $84.99，还需上涨 26.8%波段止损价：现价 $67.05 → 触发 $58.67，还需下跌 12.5%。触发价为成本的 82.0%","next":"继续持有","val":"未估值（缺少每股收益数据）"},{"t":"NVDA","type":"标准层核心","costpx":"$200 → $212","pnl":6.01,"cond":"破位减仓：连续 0 天 → 门槛 3 天，还差 3 天警戒减仓：质量分 90.9 → 门槛 55，还差 35.9 分；成长分 95.6 → 门槛 50，还差 45.6 分；距 50 日线为负；账本版本已更新；尚未减仓基本面清仓：质量分 90.9 → 门槛 45，还差 45.9 分；成长分 95.6 → 门槛 40，还差 55.6 分","next":"该档买入额度已满，暂不加仓","val":"模型不适用 市盈率 26.8 25分位 44 50分位 55 75分位 75 隐含 +27.74% 营收 +110.07% EPS +125.36%"},{"t":"V","type":"防守层核心","costpx":"$367 → $414","pnl":12.95,"cond":"破位减仓：连续 0 天 → 门槛 10 天，还差 10 天基本面清仓：质量分 91.7 → 门槛 50，还差 41.7 分；成长分 63.4 → 门槛 35，还差 28.4 分","next":"继续持有","val":"市盈率 35.3 历史样本不足 隐含 暂缺 营收 +11.81% EPS +14.75%"}],"closed":[{"t":"UNH","date":"2026-10-09","kind":"exit","reason":"全部卖出","src":"plan"},{"t":"MU","date":"2026-10-13","kind":"reduce","reason":"分批止盈","src":"plan"},{"t":"AMD","date":"2026-10-19","kind":"reduce","reason":"分批止盈","src":"plan"},{"t":"AMD","date":"2026-10-21","kind":"reduce","reason":"分批止盈","src":"plan"},{"t":"AMD","date":"2026-10-21","kind":"reduce","reason":"分批止盈","src":"plan"},{"t":"AMD","date":"2026-10-22","kind":"reduce","reason":"分批止盈","src":"plan"},{"t":"JNJ","date":"2026-10-22","kind":"reduce","reason":"警戒减仓","src":"plan"}],"cands":[{"t":"AMZN","theme":"互联网","q":61.2,"g":76.3,"v":57.4,"tm":69.1,"ma50":256.0,"high":284.0,"price":250.37,"chg":-4.57,"val":"模型不适用 市盈率 20.1 25分位 45 50分位 76 75分位 124 隐含 暂缺 营收 +12.97% EPS +89.48%"},{"t":"ANET","theme":"AI 网络与光通信","q":94.5,"g":76.7,"v":34.0,"tm":58.6,"ma50":197.0,"high":217.0,"price":171.28,"chg":-7.19,"val":"模型不适用 市盈率 54.1 25分位 34 50分位 42 75分位 50 隐含 +51.27% 营收 +26.05% EPS +23.92%"},{"t":"CVX","theme":"能源","q":77.2,"g":80.1,"v":68.2,"tm":71.8,"ma50":210.0,"high":227.0,"price":226.91,"chg":-0.04,"val":"模型不适用 市盈率 21.8 25分位 15 50分位 17 75分位 24 隐含 暂缺 营收 −0.84% EPS +33.85%"},{"t":"JPM","theme":"金融与支付","q":79.7,"g":76.8,"v":75.8,"tm":67.9,"ma50":346.0,"high":365.0,"price":336.38,"chg":0.4,"val":"未估值（金融股不适用）"},{"t":"LITE","theme":"AI 网络与光通信","q":52.0,"g":96.0,"v":14.4,"tm":51.9,"ma50":928.0,"high":1133.0,"price":752.31,"chg":-11.54,"val":"市盈率 暂缺 25分位 25 50分位 42 75分位 163 隐含 暂缺 营收 +19.48% EPS 暂缺"},{"t":"META","theme":"互联网","q":81.7,"g":72.8,"v":62.1,"tm":65.3,"ma50":663.0,"high":778.0,"price":649.16,"chg":-6.98,"val":"市盈率 22.1 25分位 25 50分位 28 75分位 32 隐含 +18.51% 营收 +23.92% EPS +29.85%"},{"t":"MSFT","theme":"软件与平台","q":89.5,"g":70.2,"v":45.8,"tm":80.2,"ma50":508.0,"high":543.0,"price":520.63,"chg":-2.23,"val":"市盈率 29.0 25分位 29 50分位 33 75分位 37 隐含 +25.31% 营收 +16.12% EPS +31.60%"},{"t":"PLTR","theme":"软件与平台","q":94.1,"g":92.2,"v":18.3,"tm":76.3,"ma50":184.0,"high":209.0,"price":196.15,"chg":-2.74,"val":"模型不适用 市盈率 167.7 历史样本不足 隐含 +115.93% 营收 +44.39% EPS +290.00%"},{"t":"SNDK","theme":"存储","q":93.7,"g":96.0,"v":74.8,"tm":55.8,"ma50":1599.0,"high":2335.0,"price":1260.9,"chg":-8.51,"val":"未估值（缺少每股收益数据）"},{"t":"STX","theme":"存储","q":89.1,"g":88.0,"v":41.5,"tm":50.1,"ma50":829.0,"high":1094.0,"price":642.07,"chg":-7.86,"val":"模型不适用 市盈率 46.2 25分位 10 50分位 16 75分位 25 隐含 暂缺 营收 +18.20% EPS +105.32%"},{"t":"XOM","theme":"能源","q":73.3,"g":69.5,"v":61.2,"tm":71.8,"ma50":165.0,"high":179.0,"price":178.25,"chg":0.08,"val":"未估值（缺少每股收益数据）"}],"series":{"AVGO":[370.31,371.45,373.55,392.41,392.6,394.12,399.46,395.46,390.89,390.89,392.22,374.12,373.74,364.59,351.82,352.97,356.21,349.15,347.63,346.87,358.49,356.4,357.54,357.16,355.25,348.01,348.58,356.21,353.16,350.68,351.44,338.87,334.86,335.05,340.77,348.39,352.01,353.35,346.49,343.06,344.77,342.49,346.49,343.63,338.1,346.49,351.82,361.54,362.11,350.11,351.25,346.3,348.01,340.01,338.67,327.24,331.43,331.43,333.91,323.24],"LITE":[693.12,714.01,779.99,849.27,826.18,838.28,889.96,812.98,820.68,931.75,880.07,926.25,969.14,873.47,827.28,878.97,866.87,829.48,885.57,938.35,955.95,894.36,914.16,869.07,870.17,847.08,881.17,977.94,988.94,935.05,926.25,834.98,838.28,919.66,893.26,930.65,953.75,944.95,937.25,928.45,941.65,920.76,973.54,971.34,1045.02,1084.61,1091.21,1133.0,1111.01,1048.32,1103.31,995.54,987.84,896.56,869.07,823.98,833.88,821.78,850.37,752.5]}};
+/* ---------- holdings: transcribed from live /account?date=2026-10-22 ---------- */
+const H = [
+ {t:'GOOGL',type:'标准层核心',cost:333,px:324.00,pnl:-2.7,day:-3.15,ma200:341.09,theme:'互联网',
+  next:'确认加仓',nextNote:'今日计划：确认加仓（计划记录）',
+  rules:[
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 2 天 → 门槛 3 天',x:'还差 1 天；第 3 天收盘仍低于 200 日线即触发'},
+   {n:'警戒减仓',st:'none',v:'质量 82.4 → 55 · 成长 79.6 → 50',x:'还差 27.4 分 / 29.6 分；距 50 日线为负'},
+   {n:'基本面清仓',st:'none',v:'质量 82.4 → 45 · 成长 79.6 → 40',x:'还差 37.4 分 / 39.6 分'}],
+  val:'市盈率 16.3 · 历史 25/50/75 分位 24/27/31'},
+ {t:'JNJ',type:'标准层核心',cost:225,px:268.00,pnl:19.0,day:3.81,ma200:245.56,theme:'医疗',
+  next:'警戒减仓单待成交',nextNote:'10-21 起待成交',
+  rules:[
+   {n:'警戒减仓',st:'pending',v:'成长 41.5 < 50 · 距 50 日线为负',x:'已触发；减仓单 10-21 起待成交，不等于已成交'},
+   {n:'基本面清仓',st:'none',v:'质量 90.3 → 45 · 成长 41.5 → 40',x:'成长分还差 1.5 分即触发清仓'},
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 3 天',x:'现价高于 200 日线 9.1%'}],
+  val:'市盈率 40.7 · 历史 25/50/75 分位 22/24/27'},
+ {t:'AVGO',type:'进攻层核心',cost:362,px:323.24,pnl:-10.6,day:-4.31,ma200:367.96,theme:'AI 算力芯片',
+  stop:{n:'灾难止损',p:288.94},tp:[{n:'波段部分止盈',p:394.51},{n:'翻倍止盈',p:723.29}],
+  next:'继续持有',nextNote:'破位减仓已执行，不再重复',
+  rules:[
+   {n:'灾难止损',st:'none',v:'$323.24 → $288.94，还需下跌 10.6%',conds:[['同时低于 200 日线',true,'当前低于']]},
+   {n:'跌破 200 日线减仓',st:'done',v:'连续 10 天 → 门槛 7 天',x:'已执行过破位减仓，不再重复'},
+   {n:'波段部分止盈',st:'none',v:'$323.24 → $394.51，还需上涨 22.0%',x:'只作用于波段股数'},
+   {n:'翻倍分批止盈',st:'none',v:'$323.24 → $723.29，还需上涨 123.8%',conds:[['距 50 日线 < 3（当前 −6.3）',true],['择时分 < 55（当前 40.9）',true],['距上次卖出 ≥ 20 天（当前 27）',true],['尚未减仓',false,'已经减过仓']]},
+   {n:'基本面清仓',st:'none',v:'质量 92.7 → 45 · 成长 92.8 → 40',x:'还差 47.7 分 / 52.8 分'}],
+  val:'未估值：周期股行业参数缺失'},
+ {t:'MRVL',type:'进攻层核心',cost:138,px:223.47,pnl:62.0,day:-8.70,ma200:178.82,theme:'AI 算力芯片',
+  stop:{n:'灾难止损',p:189.86},tp:[{n:'翻倍止盈',p:275.94}],
+  next:'继续持有',nextNote:'今日 −8.7%，卷入 AI 资本开支链下跌',
+  rules:[
+   {n:'灾难止损',st:'none',v:'$223.47 → $189.86，还需下跌 15.0%',conds:[['同时低于 200 日线',false,'当前高于 200 日线 25.0%']]},
+   {n:'翻倍分批止盈',st:'none',v:'$223.47 → $275.94，还需上涨 23.5%',conds:[['距 50 日线 < 3（当前 0.9）',true],['择时分 < 55（当前 76.6）',false],['偏离或择时满足其一',true],['距上次卖出 ≥ 20 天（当前 45）',true],['尚未减仓',true]],x:'附加条件当前满足，价格到达即执行'},
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 7 天',x:''},
+   {n:'基本面清仓',st:'none',v:'质量 82 → 45 · 成长 87.3 → 40',x:'还差 37 分 / 47.3 分'}],
+  val:'市盈率 74.0 · 历史样本不足'},
+ {t:'MU',type:'进攻层核心',cost:590,px:856.49,pnl:45.2,day:-6.26,ma200:729.43,theme:'存储',
+  stop:{n:'灾难止损',p:728.14},tp:[{n:'波段部分止盈',p:1087.41},{n:'翻倍止盈',p:1179.38}],
+  next:'波段买入',nextNote:'今日计划：波段买入（计划记录）',
+  rules:[
+   {n:'灾难止损',st:'none',v:'$856.49 → $728.14，还需下跌 15.0%',conds:[['同时低于 200 日线',false,'当前高于 200 日线 17.4%']],x:'注意：灾难价与 200 日线（$729.43）几乎重合'},
+   {n:'波段部分止盈',st:'none',v:'$856.49 → $1,087.41，还需上涨 27.0%'},
+   {n:'翻倍分批止盈',st:'none',v:'$856.49 → $1,179.38，还需上涨 37.7%',conds:[['距 50 日线 < 3（当前 −7.3）',true],['择时分 < 55（当前 65.4）',false],['距上次卖出 ≥ 20 天（当前 6）',false],['尚未减仓',true]]},
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 7 天'},
+   {n:'基本面清仓',st:'none',v:'质量 91.5 → 45 · 成长 95.8 → 40',x:'还差 46.5 分 / 55.8 分'}],
+  val:'市盈率 11.5 · 历史 25/50/75 分位 7/19/27 · 模型不适用'},
+ {t:'NFLX',type:'观察波段仓',cost:71.55,px:67.05,pnl:-6.3,day:3.09,theme:'互联网',
+  stop:{n:'波段止损',p:58.67},tp:[{n:'波段止盈',p:84.99}],
+  next:'继续持有',nextNote:'止损价为成本的 82%',
+  rules:[
+   {n:'波段止损',st:'none',v:'$67.05 → $58.67，还需下跌 12.5%',x:'触发价 = 成本 × 82%'},
+   {n:'波段止盈',st:'none',v:'$67.05 → $84.99，还需上涨 26.8%'}],
+  val:'未估值：缺少每股收益数据'},
+ {t:'AMD',type:'进攻层核心',cost:201,px:507.93,pnl:153.3,day:-8.10,ma200:400.54,theme:'AI 算力芯片',
+  stop:{n:'灾难止损',p:389.65},tp:[{n:'翻倍止盈',p:401.06,reached:true}],
+  next:'分批止盈',nextNote:'今日计划：分批止盈（计划记录）',
+  rules:[
+   {n:'翻倍分批止盈',st:'hold',v:'$507.93 已高于触发价 $401.06',conds:[['距 50 日线 < 3（当前 2.1）',true],['择时分 < 55（当前 75.5）',false],['偏离或择时满足其一',true],['距上次卖出 ≥ 20 天（当前 1）',false],['尚未减仓',true]],x:'价格已到，卖出间隔不足，暂不执行'},
+   {n:'灾难止损',st:'none',v:'$507.93 → $389.65，还需下跌 23.3%',conds:[['同时低于 200 日线',false,'当前高于 200 日线 26.8%']]},
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 7 天'},
+   {n:'基本面清仓',st:'none',v:'质量 83.8 → 45 · 成长 92.7 → 40',x:'还差 38.8 分 / 52.7 分'}],
+  val:'市盈率 130.6 · 历史 25/50/75 分位 58/109/163 · 隐含增速 95.6%'},
+ {t:'NVDA',type:'标准层核心',cost:200,px:212.00,pnl:6.0,day:-4.40,ma200:203.36,theme:'AI 算力芯片',
+  next:'暂不加仓',nextNote:'该档买入额度已满',
+  rules:[
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 3 天',x:'现价高于 200 日线 4.2%，离跌破较近'},
+   {n:'警戒减仓',st:'none',v:'质量 90.9 → 55 · 成长 95.6 → 50',x:'距 50 日线为负'},
+   {n:'基本面清仓',st:'none',v:'质量 90.9 → 45 · 成长 95.6 → 40'}],
+  val:'市盈率 26.8 · 历史 25/50/75 分位 44/55/75 · 隐含增速 27.7%'},
+ {t:'HD',type:'观察波段仓',cost:309.20,px:327.73,pnl:6.0,day:null,theme:'零售',
+  stop:{n:'波段止损',p:253.54},tp:[{n:'波段止盈',p:350.12}],
+  next:'继续持有',nextNote:'只适用波段止盈 / 止损',
+  rules:[
+   {n:'波段止盈',st:'none',v:'$327.73 → $350.12，还需上涨 6.8%'},
+   {n:'波段止损',st:'none',v:'$327.73 → $253.54，还需下跌 22.6%',x:'触发价 = 成本 × 82%'}],
+  val:'市盈率 22.9 · 历史 25/50/75 分位 21/23/25'},
+ {t:'ADBE',type:'标准层核心',cost:244,px:270.55,pnl:11.0,day:6.07,ma200:252.62,theme:'软件与平台',
+  tp:[{n:'波段部分止盈',p:300.36}],
+  next:'暂不加仓',nextNote:'该档买入额度已满',
+  rules:[
+   {n:'波段部分止盈',st:'none',v:'$270.55 → $300.36，还需上涨 11.0%',x:'只作用于波段股数'},
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 3 天',x:'持有不足 10 个交易日，即使达到门槛也暂不减仓'},
+   {n:'警戒减仓',st:'none',v:'质量 94.9 → 55 · 成长 62.5 → 50',x:'还差 39.9 分 / 12.5 分'},
+   {n:'基本面清仓',st:'none',v:'质量 94.9 → 45 · 成长 62.5 → 40'}],
+  val:'市盈率 15.1 · 历史 25/50/75 分位 38/49/54 · 模型不适用'},
+ {t:'AAPL',type:'标准层核心',cost:260,px:348.00,pnl:33.8,day:1.23,ma200:293.79,theme:'消费硬件与汽车',
+  next:'继续持有',nextNote:'',
+  rules:[
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 3 天'},
+   {n:'警戒减仓',st:'none',v:'质量 90.5 → 55 · 成长 71 → 50',x:'本轮已减过一次'},
+   {n:'基本面清仓',st:'none',v:'质量 90.5 → 45 · 成长 71 → 40'}],
+  val:'市盈率 40.0 · 历史 25/50/75 分位 19/27/33'},
+ {t:'LLY',type:'标准层核心',cost:1039,px:1307.00,pnl:25.8,day:2.83,ma200:1084.38,theme:'医疗',
+  next:'暂不加仓',nextNote:'该档买入额度已满',
+  rules:[
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 3 天'},
+   {n:'警戒减仓',st:'none',v:'质量 95 → 55 · 成长 76.9 → 50'},
+   {n:'基本面清仓',st:'none',v:'质量 95 → 45 · 成长 76.9 → 40'}],
+  val:'市盈率 43.8 · 历史 25/50/75 分位 33/41/66 · 隐含增速 29.6%'},
+ {t:'V',type:'防守层核心',cost:367,px:414.00,pnl:13.0,day:1.59,ma200:340.01,theme:'金融与支付',
+  next:'继续持有',nextNote:'',
+  rules:[
+   {n:'跌破 200 日线减仓',st:'none',v:'连续 0 天 → 门槛 10 天'},
+   {n:'基本面清仓',st:'none',v:'质量 91.7 → 50 · 成长 63.4 → 35',x:'还差 41.7 分 / 28.4 分'}],
+  val:'市盈率 35.3 · 历史样本不足'},
+];
+/* downside risks and take-profit hints — follow the live colouring rules, take-profit separated (UD-C-03) */
+const RISK = [
+ {t:'GOOGL',lv:'hi',txt:'再有 1 天低于 200 日线就触发破位减仓',sub:'连续 2 / 3 天 · 已低于 200 日线 5.0%（$341.09）'},
+ {t:'JNJ',lv:'hi',txt:'警戒减仓单待成交；成长分离清仓门槛只差 1.5 分',sub:'成长 41.5 → 清仓门槛 40'},
+ {t:'AVGO',lv:'mid',txt:'离灾难止损还需下跌 10.6%',sub:'$288.94 · 已低于 200 日线 · 破位减仓已执行'},
+ {t:'MRVL',lv:'mid',txt:'今日 −8.7%，离灾难止损 15.0%',sub:'卷入 AI 资本开支链下跌 · 尚高于 200 日线'},
+ {t:'AMD',lv:'mid',txt:'今日 −8.1%，卷入 AI 资本开支链下跌',sub:'灾难止损还需下跌 23.3%'},
+ {t:'MU',lv:'mid',txt:'今日 −6.3%，离灾难止损 15.0%',sub:'灾难价与 200 日线几乎重合'},
+ {t:'NFLX',lv:'mid',txt:'离波段止损还需下跌 12.5%',sub:'$58.67 = 成本 × 82%'},
+ {t:'NVDA',lv:'mid',txt:'卷入 AI 资本开支链下跌',sub:'今日 −4.4% · 高于 200 日线 4.2%'},
+];
+const TP = [
+ {t:'AMD',txt:'翻倍价已到，卖出间隔不足暂不执行',sub:'$401.06 已越过 · 距上次卖出 1 / 20 天'},
+ {t:'HD',txt:'波段止盈还需上涨 6.8%',sub:'止盈价 $350.12'},
+ {t:'ADBE',txt:'波段部分止盈还需上涨 11.0%',sub:'止盈价 $300.36'},
+];
+const ACC = {equity:1456525, day:-5826, dd:-3.65, cash:125598, cashPct:8.6, brake:-8, gate:-12, holdings:13, slots:12, slotCount:14,
+  conc:[['医疗',20.2],['AI 算力芯片',20.2],['金融与支付',12.7]], pending:[{t:'JNJ',side:'减仓',why:'警戒减仓：成长分 41.5 低于 50，且低于 50 日线',since:'10-21'}]};
+const MKT = {
+  verdict:'板块轮动而非全面恐慌', lead:'AI 网络与光 −9.16%、半导体设备 −9.10% 领跌；必需消费 +3.31%、区域银行 +2.53% 领涨',
+  idx:[['标普 500',-1.18,0.02],['纳指 100',-2.86,-0.19],['罗素小盘',0.07,-0.04]], up:765, dn:512,
+  down:[['AI 网络与光',-9.16],['半导体设备',-9.10],['数据中心电力',-7.84],['AI 资本开支链',-7.63],['NAND / DRAM / HBM',-7.61]],
+  upl:[['必需消费 XLP',3.31],['区域银行 KRE',2.53],['公用事业 XLU',2.07],['医疗 XLV',1.32],['房地产 XLRE',1.09]],
+  style:[['动量相对价值',-3.32],['等权相对市值加权',1.91],['小盘相对纳指',2.93]], disp:5.4,
+  vix:19.03, vixPrev:18.72, vix3m:20.12, pc:null, down5:37.9, spxHigh:-1.94, mood:'谨慎，未恐慌',
+  events:[{sig:'4.7σ',name:'AI 资本开支链 23 只同日下跌',theme:'AI'},{sig:'2.3σ',name:'半导体设备 4 只集体下跌',theme:'半导体设备 4 只集体下跌'}],
+  cites:[['AI 融资担忧重击芯片股，直接指向当日芯片板块的抛售情绪。','10-15 16:22 UTC'],['国债收益率上行触发英伟达和 AMD 下跌，利率压力叠加 AI 需求疑虑利空芯片股。','10-15 17:12 UTC']]
+};
+const NEWS = {
+ AVGO:[['QUICK SPARK: DRAM ETF Extends Losing Streak, But CEO Sees Long-Term Upside','10-16 04:27'],['Nike, Moderna, Walmart Get a Lift as Traders Flee AI Stocks','10-16 02:15'],['Defensives Lead Sectors In Thursday Trading As Technology Trails','10-15 23:09'],['Capital Over Chips: Broadcom CEO Warns Financing Costs Could Slow AI Expansion','10-15 20:42'],['Micron Stock Slides Again Thursday: What\'s Going On?','10-15 17:47'],['Why Is Broadcom Stock Falling on Wednesday?','10-15 02:09']],
+ LITE:[['$100 Invested In Lumentum Holdings 10 Years Ago Would Be Worth This Much Today','10-16 04:00'],['QUICK SPARK: Meet the 15 Worst-Performing Chip Stocks in the Last 7 Sessions','10-15 23:34'],['EXCLUSIVE: Micron Is Not Close to Peak Earnings, Jordi Visser Says. But He Prefers Optics and Crypto','10-14 02:36'],['Lumentum Stock Rises After CEO Says AI Demand Has the Company Sold Out Through Early 2029','10-09 20:54']]
+};
+const STOCKPAGE = {
+ AVGO:{line:'AVGO 今日 −4.31%，随 AI 资本开支链同日下跌；放量 1.3 倍、RSI 34；纸面持有 82 股，进攻层核心。',
+  ret:[['当日',-4.31],['盘后',-0.20],['近 5 日',-6.12],['近 20 日',-7.74],['近 60 日',-12.71]], ma50:359, ma200:368, high:482, d50:-9.88,d200:-12.15,dh:-32.88, rsi:34, vol:1.3,
+  rel:'弱于板块 0.4σ · AI 算力芯片当日 −6.38%', short:null, scores:[92.7,92.8,47.4,35.5], val:'未估值：周期股行业参数缺失', cons:'暂无一致预期（轮询中）', held:true},
+ LITE:{line:'LITE 今日 −11.54%，随 AI 资本开支链同日下跌；成交量 1.3 倍、RSI 23 接近超卖；尚未持有，可买。',
+  ret:[['当日',-11.54],['盘后',-1.48],['近 5 日',-13.46],['近 20 日',-19.00],['近 60 日',24.93]], ma50:928, ma200:786, high:1133, d50:-18.88,d200:-4.28,dh:-33.60, rsi:23, vol:1.3,
+  rel:'强于板块 0.2σ · AI 网络与光通信当日 −11.35%', short:null, scores:[52,96,14.4,51.9], val:'市盈率暂缺 · 历史 25/50/75 分位 25/42/163 · 过去三年营收 +19.48%', cons:'暂无一致预期（轮询中）', held:false,
+  why:'规则 A 开仓名额已满（名额 12，当前计数 14）'}
+};
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(v,d=1,plus=true)=>v==null?'<span class="muted">暂缺</span>':`<span class="num ${v>0?'up':v<0?'down':''}">${v>0&&plus?'+':''}${v<0?'−':''}${Math.abs(v).toFixed(d)}%</span>`;
+const usd=(v,d=2)=>v==null?'暂缺':'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)};
+const S={date:'2026-10-22',mode:'close',view:'account',stock:'AVGO'};
+const DATES={'2026-10-21':'周三','2026-10-22':'周四','2026-10-23':'周五'};
+const riskHi=RISK.filter(r=>r.lv==='hi').length, riskMid=RISK.filter(r=>r.lv==='mid').length;
+
+/* ---------- price ruler (SVG) ---------- */
+function textW(s,fs=11){let w=0;for(const ch of s){w+=/[\u3000-\u9fff\uff00-\uffef]/.test(ch)?fs:fs*0.61}return w}
+function ruler(h,w=470){
+  const pts=[];
+  if(h.stop) pts.push({k:'stop',n:h.stop.n,p:h.stop.p});
+  (h.tp||[]).forEach(x=>pts.push({k:'tp',n:x.n,p:x.p,reached:x.reached}));
+  if(h.ma200 && h.type!=='观察波段仓') pts.push({k:'ref',n:'200 日线',p:h.ma200});
+  pts.push({k:'cost',n:'成本',p:h.cost});
+  pts.push({k:'cur',n:'现价',p:h.px});
+  let lo=Math.min(...pts.map(x=>x.p)), hi=Math.max(...pts.map(x=>x.p)); const pad=(hi-lo)*0.05||1; lo-=pad; hi+=pad;
+  const L=10,R=w-10, X=p=>L+(p-lo)/(hi-lo)*(R-L), Y=54, H=112;
+  const lanes={t0:32,t1:19,t2:7,b0:78,b1:92,b2:106}, used={t0:[],t1:[],t2:[],b0:[],b1:[],b2:[]};
+  const free=(ln,a,b)=>used[ln].every(([c,d])=>b+6<c||a>d+6);
+  const trig=pts.filter(x=>(x.k==='stop'||x.k==='tp')&&!x.reached);
+  let near=null; trig.forEach(x=>{const d=Math.abs(x.p-h.px)/h.px; if(!near||d<near.d) near={...x,d}});
+  let svg=`<svg width="${w}" height="${H}" viewBox="0 0 ${w} ${H}" style="max-width:100%;height:auto" role="img" aria-label="${h.t} 价格尺">`;
+  svg+=`<line x1="${L}" y1="${Y}" x2="${R}" y2="${Y}" stroke="#E2DDD3" stroke-width="4" stroke-linecap="round"/>`;
+  let distTxt='';
+  if(near){const c=near.k==='stop'?'var(--r-hi-line)':'var(--tp-line)'; const x1=X(h.px),x2=X(near.p); const dist=(near.p/h.px-1)*100;
+    svg+=`<line x1="${x1}" y1="${Y}" x2="${x2}" y2="${Y}" stroke="${c}" stroke-width="5" stroke-linecap="round" opacity=".85"/>`;
+    const lab=`${dist>0?'+':'−'}${Math.abs(dist).toFixed(1)}%`, lw=textW(lab), mid=(x1+x2)/2; let a=Math.max(2,Math.min(w-2-lw,mid-lw/2));
+    distTxt=`<text x="${a}" y="${Y-8}" font-size="11" fill="${c}" font-weight="700" paint-order="stroke" stroke="#fff" stroke-width="3">${lab}</text>`;}
+  else { const ref=pts.find(x=>x.k==='ref'); if(ref){ const x1=X(h.px),x2=X(ref.p), below=h.px<ref.p, dist=below?(1-h.px/ref.p)*100:(1-ref.p/h.px)*100, warm=below||dist<10, c=warm?'var(--r-mid-line)':'#B9B2A4';
+    svg+=`<line x1="${x1}" y1="${Y}" x2="${x2}" y2="${Y}" stroke="${c}" stroke-width="${warm?4:3}" stroke-dasharray="5 3" opacity=".8"/>`;
+    const lab=below?`已低于 200 日线 ${dist.toFixed(1)}%`:`再跌 ${dist.toFixed(1)}% 跌破 200 日线`, lw=textW(lab), mid=(x1+x2)/2, a=Math.max(2,Math.min(w-2-lw,mid-lw/2));
+    distTxt=`<text x="${a}" y="${Y-8}" font-size="11" fill="${warm?'var(--r-mid)':'var(--ref)'}" font-weight="${warm?700:400}" paint-order="stroke" stroke="#fff" stroke-width="3">${lab}</text>`;}}
+  const pref={cur:['b0','b1','b2','t0'],cost:['b0','b1','b2','t0','t1'],ref:['b0','b1','b2','t0','t1','t2'],stop:['t0','t1','t2','b0','b1','b2'],tp:['t0','t1','t2','b0','b1','b2']};
+  const order=pts.map(x=>({...x,x:X(x.p)})).sort((a,b)=>(a.k==='cur'?-1:b.k==='cur'?1:a.x-b.x));
+  order.forEach(o=>{
+    o.lab=`${o.n} ${usd(o.p)}${o.reached?' ✓':''}`; const lw=textW(o.lab);
+    let a=Math.max(2,Math.min(w-2-lw,o.x-lw/2));
+    o.lane=pref[o.k].find(ln=>free(ln,a,a+lw))||pref[o.k][pref[o.k].length-1];
+    used[o.lane].push([a,a+lw]); o.a=a;
+  });
+  order.forEach(o=>{
+    const col=o.k==='stop'?'var(--r-hi)':o.k==='tp'?'var(--tp)':o.k==='cur'?'var(--ink)':'var(--ref)';
+    const ly=lanes[o.lane], top=o.lane[0]==='t';
+    svg+=`<line x1="${o.x}" y1="${Y}" x2="${o.x}" y2="${top?ly+3:ly-11}" stroke="${col}" stroke-width="1" ${o.k==='ref'?'stroke-dasharray="2 2"':''} opacity=".55"/>`;
+    if(o.k==='ref') svg+=`<line x1="${o.x}" y1="${Y-10}" x2="${o.x}" y2="${Y+10}" stroke="${col}" stroke-width="2" stroke-dasharray="3 2"/>`;
+    else svg+=`<circle cx="${o.x}" cy="${Y}" r="${o.k==='cur'?6:4.5}" fill="${o.k==='cur'?'#1F2A2A':(o.reached?'#fff':col)}" stroke="${col}" stroke-width="${o.reached?2:0}"/>`;
+    svg+=`<text x="${o.a}" y="${ly}" font-size="11" fill="${col}" ${o.k==='cur'?'font-weight="700"':''}>${esc(o.lab)}</text>`;
+  });
+  return svg+distTxt+'</svg>';
+}
+function ruleCard(r){
+  const label={none:'未到门槛',pending:'已到门槛 · 待执行',hold:'已到门槛 · 暂不执行',done:'已执行 · 不再重复'}[r.st];
+  let c=`<div class="rule st-${r.st}"><div class="h"><span class="n">${r.n}</span><span class="stc">${label}</span></div><div class="v">${esc(r.v)}</div>`;
+  if(r.conds) c+=`<ul class="conds">${r.conds.map(([t,ok,note])=>`<li><span class="${ok?'y':'n2'}">${ok?'✓':'✗'}</span><span>${esc(t)}${note?` <span class="muted">（${esc(note)}）</span>`:''}</span></li>`).join('')}</ul>`;
+  if(r.x) c+=`<div class="x">${esc(r.x)}</div>`;
+  return c+'</div>';
+}
+/* ---------- nav / header ---------- */
+function header(){
+  const items=[['market','市场总览','大环境怎么样'],['stocks','我的标的','59 只各自怎样'],['account','纸面账户','仓位怎么处理'],['trust','复盘与数据','系统靠不靠谱']];
+  $('#nav').innerHTML=items.map(([k,a,b])=>`<a href="#${k}" class="${S.view===k||(S.view==='stock'&&k==='stocks')?'on':''}">${a}${k==='account'?`<span class="badges"><span class="dot hi" title="重点下行">${riskHi}</span> <span class="dot mid" title="下行关注">${riskMid}</span></span>`:''}<small>${b}</small></a>`).join('')+`<a href="#ds" class="${S.view==='ds'?'on':''}" style="min-width:auto">规范<small>设计系统</small></a>`;
+  $('#date').textContent=S.date.replace(/-/g,'.'); $('#dow').textContent=DATES[S.date]||'';
+  $('#fresh').innerHTML = S.mode==='intra' ? '<span class="chip stale">盘中 · 截至 14:30 ET · 延迟约 16 分钟</span>' : (S.date==='2026-10-23'?'收盘快照 · 数据截至 10-23 16:00 ET':'收盘快照 · 数据截至 10-22 16:00 ET');
+  document.querySelectorAll('.mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===S.mode));
+}
+function intraBanner(){return S.mode==='intra'?`<div class="banner info"><b>盘中示例</b><span>盘中每 30 分钟刷新指数、标的和持仓盈亏，免费行情延迟约 16 分钟；盘中数据只用于看盘和风险高亮，<b>不进入规则 A 的交易决策</b>。此处为状态示例，数值仍为收盘快照。</span></div>`:''}
+function foot(extra=''){return `<div class="foot"><span>纸面跟踪，非投资建议 · ${S.date} 快照${extra}</span><span>交互原型 v1 · 数据取自线上 2026-10-22 页面</span></div>`}
+
+/* ---------- ACCOUNT ---------- */
+let hFilter='all', hSort='risk';
+function vAccount(){
+  const missing=S.date==='2026-10-23';
+  const head=missing?`<div class="banner warn"><b>10-23 计划缺失</b><span>当天纸面计划没有生成，以下沿用 <b>10-22 收盘后的持仓状态</b>，不代表空仓；价位与条件以 10-22 为准。原因见「复盘与数据」。</span></div>`:'';
+  const ddGap=(ACC.dd-ACC.brake), gGap=(ACC.dd-ACC.gate);
+  const ddX=v=>Math.max(0,Math.min(100,(v-(-14))/(0-(-14))*100));
+  let h=`${intraBanner()}${head}<div class="crumb">纸面账户 / 每日持仓检查</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px">
+   <div><h1>${riskHi} 项重点下行风险，JNJ 减仓单待成交</h1><p class="sub">13 只持仓 · 下行风险：重点 ${riskHi} / 关注 ${riskMid} · 止盈提示 ${TP.length} 项（不计入风险）</p></div>
+   <div class="small muted" style="text-align:right">纸面跟踪，非投资建议</div></div>
+  <div class="grid g4 sec">
+   <div class="card kpi"><div class="l">总资产</div><div class="v">${usd(ACC.equity,0)}</div><div class="ft">按 10-22 收盘估算</div></div>
+   <div class="card kpi"><div class="l">当日损益</div><div class="v down">−$5,826</div><div class="ft">−0.40% · 按收盘估算</div></div>
+   <div class="card kpi"><div class="l">距历史高点</div><div class="v">−3.65%</div><div class="ft">与回撤刹车同一口径</div></div>
+   <div class="card kpi"><div class="l">现金</div><div class="v">${usd(ACC.cash,0)}</div><div class="ft">占总资产 ${ACC.cashPct}%</div></div>
+  </div>
+  <div class="grid g-main sec">
+   <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">今天先看这些</h2><span class="legend"><span><span class="ico hi" style="width:16px;height:16px;font-size:10px">!</span> 重点下行</span><span><span class="ico mid" style="width:16px;height:16px;font-size:10px">▲</span> 下行关注</span></span></div>
+    <div class="rgroup">下行风险</div><div class="rlist" id="rlist"></div>
+    <div class="more" id="rmore"></div>
+    <div class="rgroup" style="margin-top:14px">止盈提示 · 不计入风险</div>
+    <div class="rlist">${TP.map(r=>`<div class="ritem" data-go="${r.t}"><span class="ico tp">↗</span><div><div class="t"><span class="mono">${r.t}</span> · ${esc(r.txt)}</div><div class="s">${esc(r.sub)}</div></div><span class="go">查看 →</span></div>`).join('')}</div>
+   </div>
+   <div class="card"><h2>组合边界</h2>
+    <div class="small muted">主题集中度 · 关注线 25% · 高风险线 35%</div>
+    ${ACC.conc.map(([n,v])=>`<div class="conc"><span>${n}</span><span class="num" style="text-align:right">${v.toFixed(1)}%</span><div class="bar" style="grid-column:1/-1"><i style="width:${v/40*100}%"></i><span class="th" style="left:${25/40*100}%"></span><span class="th" style="left:${35/40*100}%"></span></div></div>`).join('')}
+    <div class="gate"><div class="small muted">组合回撤</div>
+     <div class="track"><div class="axis"></div>
+      <div style="position:absolute;left:${ddX(ACC.gate)}%;top:4px;height:20px;border-left:2px solid var(--r-hi-line)"></div>
+      <div style="position:absolute;left:${ddX(ACC.brake)}%;top:4px;height:20px;border-left:2px solid var(--r-mid-line)"></div>
+      <div style="position:absolute;left:${ddX(ACC.dd)}%;top:6px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--ink)"></div></div>
+     <div class="small" style="display:flex;justify-content:space-between"><span style="color:var(--r-hi)">更深闸门 −12%</span><span style="color:var(--r-mid)">回撤刹车 −8%</span><span class="num">当前 −3.65%</span><span class="muted">0</span></div>
+     <p style="margin:10px 0 0">离回撤刹车还有 <b class="num">${ddGap.toFixed(2)}</b> 个百分点，离更深闸门还有 <b class="num">${gGap.toFixed(2)}</b> 个百分点</p></div>
+    <div style="border-top:1px solid var(--line2);margin-top:14px;padding-top:12px" class="kv">
+     <span class="k">持仓 / 名额</span><span><b class="num">13 / 12</b> <span class="small muted">规则 A 计数 14，暂无新增名额</span></span>
+     <span class="k">现金比例</span><span class="num">8.6%</span></div>
+   </div>
+  </div>
+  <div class="card sec" style="padding:0;overflow:hidden">
+   <div style="padding:18px 18px 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+    <div><h2 style="margin:0 0 4px">持仓与关键价位</h2><div class="small ink2">价格尺只画该持仓类型适用的价位；实线着色 = 现价到最近触发价的距离；没有价格触发线的核心仓，用虚线标出到 200 日线的距离。点击一行在原位展开全部条件。</div></div>
+    <div class="legend"><span><i style="background:var(--r-hi-line)"></i>止损 / 灾难</span><span><i style="background:var(--tp-line)"></i>止盈</span><span><i style="background:#9AA19F"></i>成本</span><span><span style="display:inline-block;width:14px;border-top:2px dashed var(--ref);margin-right:4px;vertical-align:3px"></span>200 日线（参考）</span><span><i style="background:var(--ink)"></i>现价</span></div>
+   </div>
+   <div style="padding:0 18px 14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div class="filters" id="hfilters"></div>
+    <div class="filters"><span class="small muted">排序</span><button class="f" data-s="risk">风险优先</button><button class="f" data-s="pnl">盈亏</button><button class="f" data-s="day">当日涨跌</button></div>
+   </div>
+   <div class="hhead"><span>股票 / 持仓类型</span><span>成本 → 现价 / 盈亏</span><span>适用价位</span><span>下一步 / 估值</span><span></span></div>
+   <div id="hlist"></div>
+  </div>
+  <div class="grid g2 sec">
+   <div class="card"><h2>待成交 <span class="num muted">1</span></h2>
+    <table><tr><th>股票</th><th>方向</th><th>原因</th><th>起始</th><th class="r">数量</th></tr>
+    ${ACC.pending.map(p=>`<tr class="click" data-go="${p.t}"><td class="mono"><b>${p.t}</b></td><td><span class="chip hi">${p.side}</span></td><td class="small">${esc(p.why)}</td><td class="num">${p.since}</td><td class="r"><span class="chip miss">暂缺</span></td></tr>`).join('')}</table>
+    <div class="small muted" style="margin-top:8px">按下一交易日开盘价成交；数量由规则 A 账本提供。</div></div>
+   <div class="card"><h2>处置记录 <span class="small muted" style="font-weight:400">近 10 个交易日</span></h2>
+    <table><tr><th>日期</th><th>股票</th><th>动作</th><th>原因</th><th>状态</th></tr>
+    ${D.closed.slice().reverse().map(c=>`<tr><td class="num">${c.date.slice(5)}</td><td class="mono"><b>${c.t}</b></td><td>${c.kind==='exit'?'全部卖出':'减仓'}</td><td>${esc(c.reason)}</td><td><span class="chip ok">计划</span></td></tr>`).join('')}</table>
+    <div class="small muted" style="margin-top:8px">“计划”= 规则 A 计划记录；成交后显示“已成交 · 价格 · 股数”。</div></div>
+  </div>
+  <div class="card sec"><div style="display:flex;justify-content:space-between;align-items:flex-end"><div><h2 style="margin:0 0 4px">待选股票 · 符合买入条件，尚未持有</h2><div class="small ink2">名额已满（13 / 12），暂不会开新仓；列出供观察。</div></div><span class="small muted">${D.cands.length} 只</span></div>
+   <table style="margin-top:10px"><thead><tr><th>股票</th><th>主题</th><th class="r">现价</th><th class="r">当日</th><th class="r">50 日线</th><th class="r">一年高点</th><th>质量 / 成长 / 估值 / 择时</th><th>估值参考</th></tr></thead><tbody>
+   ${D.cands.map(c=>`<tr class="click" data-stock="${c.t}"><td class="mono"><b>${c.t}</b></td><td class="small">${c.theme}</td><td class="r num">${usd(c.price)}</td><td class="r">${pct(c.chg,2)}</td><td class="r num">${usd(c.ma50,0)}</td><td class="r num">${usd(c.high,0)}</td><td class="num small">${[c.q,c.g,c.v,c.tm].map(x=>x.toFixed(1)).join(' / ')}</td><td class="small ink2">${esc(c.val.replace(/25分位 (\S+) 50分位 (\S+) 75分位 (\S+)/,'历史分位 $1/$2/$3').replace(/ 隐含 暂缺/,'').replace(/ 营收.*$/,''))}</td></tr>`).join('')}
+   </tbody></table></div>
+  ${foot()}`;
+  $('#main').innerHTML=h;
+  // risk list
+  const top=RISK.slice(0,5), rest=RISK.slice(5);
+  const ri=r=>`<div class="ritem" data-go="${r.t}"><span class="ico ${r.lv}">${r.lv==='hi'?'!':'▲'}</span><div><div class="t"><span class="mono">${r.t}</span> · ${esc(r.txt)}</div><div class="s">${esc(r.sub)}</div></div><span class="go">定位 →</span></div>`;
+  $('#rlist').innerHTML=top.map(ri).join('');
+  $('#rmore').textContent=`展开其余 ${rest.length} 项关注：${rest.map(r=>r.t).join(' · ')} ↓`;
+  $('#rmore').onclick=()=>{$('#rlist').innerHTML=RISK.map(ri).join('');$('#rmore').remove();bindGo()};
+  renderHoldings(); bindGo();
+  document.querySelectorAll('[data-s]').forEach(b=>{b.classList.toggle('on',b.dataset.s===hSort);b.onclick=()=>{hSort=b.dataset.s;document.querySelectorAll('[data-s]').forEach(x=>x.classList.toggle('on',x===b));renderHoldings()}});
+  document.querySelectorAll('[data-stock]').forEach(r=>r.onclick=()=>{location.hash='s/'+r.dataset.stock});
+}
+function renderHoldings(){
+  const lv=t=>{const r=RISK.find(x=>x.t===t); if(r) return r.lv==='hi'?0:1; return TP.find(x=>x.t===t)?2:3};
+  const fs=[['all','全部持仓',H.length],['down','下行风险',RISK.length],['tp','止盈提示',TP.length],['core','核心仓',H.filter(h=>h.type!=='观察波段仓').length],['swing','观察波段仓',H.filter(h=>h.type==='观察波段仓').length]];
+  $('#hfilters').innerHTML=fs.map(([k,n,c])=>`<button class="f ${hFilter===k?'on':''}" data-hf="${k}">${n}<span class="c">${c}</span></button>`).join('');
+  document.querySelectorAll('[data-hf]').forEach(b=>b.onclick=()=>{hFilter=b.dataset.hf;renderHoldings()});
+  let list=H.filter(h=>hFilter==='all'||(hFilter==='down'&&RISK.some(r=>r.t===h.t))||(hFilter==='tp'&&TP.some(r=>r.t===h.t))||(hFilter==='core'&&h.type!=='观察波段仓')||(hFilter==='swing'&&h.type==='观察波段仓'));
+  list=list.slice().sort((a,b)=>hSort==='risk'?lv(a.t)-lv(b.t):hSort==='pnl'?b.pnl-a.pnl:((a.day??99)-(b.day??99)));
+  $('#hlist').innerHTML=list.map(h=>{
+    const r=RISK.find(x=>x.t===h.t), tp=TP.find(x=>x.t===h.t);
+    const tag=r?`<span class="chip ${r.lv}">${r.lv==='hi'?'! 重点下行':'▲ 下行关注'}</span>`:tp?'<span class="chip tp">↗ 止盈提示</span>':'<span class="chip ok">正常</span>';
+    const extra=r&&tp?' <span class="chip tp">↗ 止盈提示</span>':'';
+    return `<div class="hrow" id="row-${h.t}" data-row="${h.t}">
+     <div><div class="tk">${h.t}</div><div class="ty">${h.type}</div></div>
+     <div><div class="px">${usd(h.cost)} → ${usd(h.px)}</div><div class="pl ${h.pnl>=0?'up':'down'}">${h.pnl>0?'+':h.pnl<0?'−':''}${Math.abs(h.pnl).toFixed(1)}%</div><div class="small muted">当日 ${h.day==null?'暂缺':pct(h.day,2)}</div></div>
+     <div class="c-ruler">${ruler(h,innerWidth<760?innerWidth-44:470)}</div>
+     <div class="c-next"><div>${tag}${extra}</div><div class="nx"><div class="lead">${esc(h.next)}</div><div class="small ink2">${esc(h.nextNote)}</div><div class="small muted" style="margin-top:4px">${esc(h.val)}</div></div></div>
+     <span class="caret">›</span></div>
+     <div class="detail" id="det-${h.t}"><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><b>${h.t} · ${h.type} · 适用的离场条件</b><span class="small"><a href="#s/${h.t}">打开个股页 →</a> · <a href="javascript:void 0" data-close="${h.t}">收起 ↑</a></span></div>
+     <div class="small ink2">价格门槛与附加条件分别判断；风险提示不代表已生成订单。${h.type==='观察波段仓'?'观察波段仓不适用破位、灾难、警戒规则。':''}</div>
+     <div class="rules">${h.rules.map(ruleCard).join('')}</div></div>`}).join('');
+  document.querySelectorAll('[data-row]').forEach(r=>r.onclick=()=>toggleRow(r.dataset.row));
+  document.querySelectorAll('[data-close]').forEach(a=>a.onclick=e=>{e.stopPropagation();toggleRow(a.dataset.close,false)});
+}
+function toggleRow(t,force){const d=$('#det-'+t), r=$('#row-'+t); if(!d)return; const on=force??!d.classList.contains('show'); d.classList.toggle('show',on); r.classList.toggle('open',on)}
+function bindGo(){document.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>{
+  if(!$('#row-'+el.dataset.go)){hFilter='all';renderHoldings()}
+  toggleRow(el.dataset.go,true); const r=$('#row-'+el.dataset.go); r.scrollIntoView({behavior:'smooth',block:'center'}); const d=$('#det-'+el.dataset.go); d.classList.remove('flash'); void d.offsetWidth; d.classList.add('flash')})}
+
+/* ---------- MARKET ---------- */
+function vMarket(){
+  const ai=D.stocks.filter(s=>s.event&&s.event.startsWith('AI')), semi=D.stocks.filter(s=>s.event&&s.event.startsWith('半导体'));
+  const mx=10, bar=(n,v)=>`<div style="display:grid;grid-template-columns:150px 1fr 64px;gap:10px;align-items:center;margin:6px 0"><span class="small">${n}</span><div style="position:relative;height:14px"><div style="position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line)"></div><div style="position:absolute;top:2px;height:10px;border-radius:3px;${v<0?`right:50%;width:${Math.abs(v)/mx*50}%;background:#E8B4AE`:`left:50%;width:${v/mx*50}%;background:#A9D2BA`}"></div></div><span class="r">${pct(v,2)}</span></div>`;
+  const vixX=v=>(v-10)/(40-10)*100;
+  $('#main').innerHTML=`${intraBanner()}<div class="crumb">市场总览 / ${S.date}</div>
+  <h1>判断：${MKT.verdict}</h1><p class="sub">${MKT.lead}</p>
+  <div class="grid g4 sec">${MKT.idx.map(([n,v,p])=>`<div class="card kpi"><div class="l">${n}</div><div class="v ${v<0?'down':'up'}">${v>0?'+':'−'}${Math.abs(v).toFixed(2)}%</div><div class="ft">盘后 ${pct(p,2)}</div><div class="gap" style="margin-top:8px">近 20 日走势：待接入</div></div>`).join('')}
+   <div class="card kpi"><div class="l">涨 / 跌家数</div><div class="v"><span class="up">${MKT.up}</span> / <span class="down">${MKT.dn}</span></div><div class="bar" style="height:8px;background:#F1D4D0"><i style="width:${MKT.up/(MKT.up+MKT.dn)*100}%;background:#A9D2BA"></i></div><div class="ft" style="margin-top:6px">上涨占 ${(MKT.up/(MKT.up+MKT.dn)*100).toFixed(0)}%，指数跌而多数股涨</div></div></div>
+  <div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>
+   <p style="margin:0">标的池偏重 AI 链：59 只里 <b>42</b> 只下跌、<b>19</b> 只波动超过 7%；纸面账户 AI 持仓占 <b>26%</b>。账户下行风险 <a href="#account"><span class="chip hi">! 重点 ${riskHi}</span> <span class="chip mid">▲ 关注 ${riskMid}</span></a>，止盈提示 ${TP.length} 项。</p></div>
+  <div class="grid g-main sec">
+   <div class="card"><h2>板块与资金：AI 链领跌，防御板块领涨</h2>
+    <div class="grid g2" style="gap:24px"><div><div class="small muted">领跌</div>${MKT.down.map(([n,v])=>bar(n,v)).join('')}</div><div><div class="small muted">领涨</div>${MKT.upl.map(([n,v])=>bar(n,v)).join('')}</div></div>
+    <div class="filters" style="margin-top:12px">${MKT.style.map(([n,v])=>`<span class="chip ok">${n} ${pct(v,2)}</span>`).join('')}<span class="chip ok">板块分化 <span class="num">${MKT.disp}σ</span></span></div>
+    <div class="gap" style="margin-top:12px">没有真实资金流，这里用板块相对强弱近似；免费资金流原型（主动买卖、大单、ETF 申赎）规划中。</div></div>
+   <div class="card"><h2>情绪：${MKT.mood}</h2>
+    <div class="small muted">VIX（来源 FRED）</div>
+    <div class="gauge"><div class="pin" style="left:${vixX(MKT.vix)}%"></div><div class="pl" style="left:${vixX(MKT.vix)}%">${MKT.vix}</div>
+     <span class="zl" style="left:8%">乐观</span><span class="zl" style="left:35%">谨慎</span><span class="zl" style="left:68%">紧张</span><span class="zl" style="left:92%">恐慌</span></div>
+    <div class="kv"><span class="k">前日</span><span class="num">18.72（+0.31）</span><span class="k">3 个月 VIX</span><span class="num">20.12 · 期限结构正常</span><span class="k">期权看跌/看涨比</span><span><span class="chip stale">过期 · 最近 10/13</span></span><span class="k">近 5 日下跌股占比</span><span class="num">37.9%</span><span class="k">标普距一年高点</span><span>${pct(MKT.spxHigh,2)}</span></div></div>
+  </div>
+  <div class="card sec"><h2>今天的大事</h2>
+   <div class="banner warn" style="margin:0 0 6px"><b>原因暂不可信</b><span>当日新闻缺失（新闻最近入库 10-16），下列“可能原因”引用的是 7 天前的新闻，只作参考。</span></div>
+   ${[[MKT.events[0],ai],[MKT.events[1],semi]].map(([e,m],i)=>`<div class="event ${i===0?'open':''}"><div class="h" data-ev><div style="display:flex;gap:12px;align-items:baseline"><span class="sig">${e.sig}</span><b>${e.name}</b><span class="small ink2">涉及持仓 ${m.filter(s=>s.held).length} 只</span></div><span class="small muted">展开 / 收起</span></div>
+    <div class="body"><div>${m.map(s=>`<a href="#s/${s.t}" class="tick ${s.held?'held':''}">${s.t} ${s.chg>0?'+':'−'}${Math.abs(s.chg).toFixed(1)}%</a>`).join('')}</div>
+    ${i===0?`<div style="margin-top:10px"><div class="small muted">可能原因 · 引用 7 天前的新闻</div><ul class="news">${MKT.cites.map(([c,t])=>`<li>${esc(c)} <span class="chip stale">旧闻 · ${t}</span></li>`).join('')}</ul></div>`:`<div class="small muted" style="margin-top:8px">暂无可引用的解释。</div>`}</div></div>`).join('')}
+  </div>
+  ${foot()}`;
+  document.querySelectorAll('[data-ev]').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
+}
+
+/* ---------- STOCKS ---------- */
+let sF={k:'all',theme:'',q:''}, sSort={c:'chg',d:1}, openTheme=null;
+function vStocks(){
+  const worst=D.themes[0];
+  $('#main').innerHTML=`${intraBanner()}<div class="crumb">我的标的 / ${S.date}</div>
+  <h1>跌最多的是 ${worst.name}，平均 ${worst.chg.toFixed(2).replace('-','−')}%</h1>
+  <p class="sub">59 只里 42 只下跌；AI 链 7 个主题全部被集中抛售、RSI 均值进入超卖区，医疗、零售、金融逆势走强。</p>
+  <div class="card sec"><div style="display:flex;justify-content:space-between"><h2>主题强弱</h2><span class="small muted">点击主题展开成员</span></div>
+   <table><thead><tr><th>主题</th><th style="width:34%">平均涨跌</th><th class="r">量比</th><th class="r">持有 / 可买</th><th>一句话</th><th class="r">空头占比</th></tr></thead><tbody id="ttable"></tbody></table></div>
+  <div class="card sec"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><h2 style="margin:0">逐只明细 <span class="num muted" id="scount"></span></h2>
+   <div class="filters" id="sfilters"></div></div>
+   <div style="overflow-x:auto"><table style="margin-top:10px"><thead><tr id="shead"></tr></thead><tbody id="stable"></tbody></table></div>
+   <div class="small muted" style="margin-top:8px">点击表头排序；点击代码打开个股页。异动 = 当日涨跌超过 ±7% 或量比 ≥ 2 倍；空头拥挤 = 空头占比 > 10% 或回补天数 > 5 天。</div></div>
+  ${foot()}`;
+  renderThemes(); renderStocks();
+}
+function renderThemes(){
+  const mx=12;
+  $('#ttable').innerHTML=D.themes.map(t=>`<tr class="click" data-th="${t.name}"><td><b>${t.name}</b></td>
+   <td><div style="display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center"><div style="position:relative;height:12px"><div style="position:absolute;left:50%;top:-2px;bottom:-2px;border-left:1px solid var(--line)"></div><div style="position:absolute;top:1px;height:10px;border-radius:3px;${t.chg<0?`right:50%;width:${Math.min(50,Math.abs(t.chg)/mx*50)}%;background:#E8B4AE`:`left:50%;width:${t.chg/mx*50}%;background:#A9D2BA`}"></div></div>${pct(t.chg,2)}</div></td>
+   <td class="r num ${t.vol>=1.5?'':'muted'}">${t.vol.toFixed(1)}×</td><td class="r num">${t.held?`<span class="chip held">${t.held}</span>`:'0'} / ${t.buy}</td><td class="small">${esc(t.note)}</td><td class="r small">${t.short.startsWith('暂缺')?`<span class="chip miss">${t.short}</span>`:t.short}</td></tr>
+   ${openTheme===t.name?`<tr><td colspan="6" style="background:#FAFCFB">${D.stocks.filter(s=>s.theme===t.name).map(s=>`<a href="#s/${s.t}" class="tick ${s.held?'held':''}">${s.t} ${s.chg>0?'+':'−'}${Math.abs(s.chg).toFixed(1)}%</a>`).join('')}<a href="javascript:void 0" class="small" data-only="${t.name}" style="margin-left:8px">在下表只看这个主题 ↓</a></td></tr>`:''}`).join('');
+  document.querySelectorAll('[data-th]').forEach(r=>r.onclick=()=>{openTheme=openTheme===r.dataset.th?null:r.dataset.th;renderThemes()});
+  document.querySelectorAll('[data-only]').forEach(a=>a.onclick=e=>{e.stopPropagation();sF.theme=a.dataset.only;renderStocks();$('#stable').scrollIntoView({behavior:'smooth',block:'start'})});
+}
+function renderStocks(){
+  const isMove=s=>Math.abs(s.chg)>7||s.vol>=2;
+  const fs=[['all','全部',D.stocks.length],['held','持仓',D.stocks.filter(s=>s.held).length],['buy','可买',D.stocks.filter(s=>s.buyable).length],['move','异动',D.stocks.filter(isMove).length],['crowd','空头拥挤',D.stocks.filter(s=>s.crowded).length]];
+  $('#sfilters').innerHTML=fs.map(([k,n,c])=>`<button class="f ${sF.k===k?'on':''}" data-sf="${k}">${n}<span class="c">${c}</span></button>`).join('')+
+   `<select class="f" id="sth"><option value="">全部主题</option>${D.themes.map(t=>`<option ${sF.theme===t.name?'selected':''}>${t.name}</option>`).join('')}</select><input class="f" id="sq" placeholder="搜索代码" value="${esc(sF.q)}" style="width:110px">`;
+  document.querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{sF.k=b.dataset.sf;renderStocks()});
+  $('#sth').onchange=e=>{sF.theme=e.target.value;renderStocks()};
+  $('#sq').oninput=e=>{sF.q=e.target.value.toUpperCase();renderStocksBody()};
+  const cols=[['t','代码'],['theme','主题'],['chg','当日'],['vol','量比'],['rsi','RSI'],['d200','距 200 日线'],['dhigh','距一年高点'],['short_ratio','空头'],['st','状态'],['event','事件']];
+  $('#shead').innerHTML=cols.map(([k,n])=>`<th class="s ${['chg','vol','rsi','d200','dhigh','short_ratio'].includes(k)?'r':''} ${sSort.c===k?'on':''}" data-sc="${k}">${n}${sSort.c===k?(sSort.d>0?' ↑':' ↓'):''}</th>`).join('');
+  document.querySelectorAll('[data-sc]').forEach(h=>h.onclick=()=>{const c=h.dataset.sc; sSort={c,d:sSort.c===c?-sSort.d:1}; renderStocks()});
+  renderStocksBody();
+}
+function renderStocksBody(){
+  const isMove=s=>Math.abs(s.chg)>7||s.vol>=2;
+  let L=D.stocks.filter(s=>(sF.k==='all'||(sF.k==='held'&&s.held)||(sF.k==='buy'&&s.buyable)||(sF.k==='move'&&isMove(s))||(sF.k==='crowd'&&s.crowded))&&(!sF.theme||s.theme===sF.theme)&&(!sF.q||s.t.includes(sF.q)));
+  const key=s=>sSort.c==='st'?(s.held?0:s.buyable?1:2):s[sSort.c];
+  L.sort((a,b)=>{const x=key(a),y=key(b); if(x==null)return 1; if(y==null)return -1; return (x>y?1:x<y?-1:0)*sSort.d});
+  $('#scount').textContent=`${L.length} / 59`;
+  $('#stable').innerHTML=L.map(s=>`<tr><td><a class="mono" href="#s/${s.t}"><b>${s.t}</b></a></td><td class="small">${s.theme}</td><td class="r">${pct(s.chg,2)}</td>
+   <td class="r num ${s.vol>=2?'':'muted'}">${s.vol.toFixed(1)}×</td><td class="r num">${s.rsi??'—'}${s.rsi<30?'<span class="small muted"> 超卖</span>':s.rsi>70?'<span class="small muted"> 超买</span>':''}</td>
+   <td class="r">${pct(s.d200,1)}</td><td class="r">${pct(s.dhigh,1)}</td>
+   <td class="r small">${s.short_ratio!=null?`<span class="num">${s.short_ratio.toFixed(1)}%</span>`:'<span class="muted">暂缺</span>'}${s.dtc!=null?` · <span class="num">${s.dtc}</span> 天`:''}${s.crowded?' <span class="chip mid">拥挤</span>':''}${s.short_date?`<div class="muted">${s.short_date} 结算</div>`:''}</td>
+   <td>${s.held?'<span class="chip held">持有</span>':s.buyable?'<span class="chip buy">可买</span>':'<span class="small muted">不可买</span>'}</td>
+   <td class="small ink2">${s.event?esc(s.event.replace(' 同日下跌','').replace(' 集体下跌','')):'—'}</td></tr>`).join('')||`<tr><td colspan="10"><div class="empty">没有符合条件的标的</div></td></tr>`;
+}
+
+/* ---------- STOCK DETAIL ---------- */
+function chart(t,sp){
+  const s=D.series[t]; const w=760,h=220,L=56,R=w-12,T=14,B=h-24;
+  const lines=[{n:'200 日线（当前）',p:sp.ma200,c:'var(--ref)',dash:'4 3'},{n:'50 日线（当前）',p:sp.ma50,c:'#B39B6B',dash:'2 3'}];
+  const hh=H.find(x=>x.t===t); if(hh){lines.push({n:'成本',p:hh.cost,c:'#9AA19F',dash:''}); if(hh.stop) lines.push({n:hh.stop.n,p:hh.stop.p,c:'var(--r-hi-line)',dash:''});}
+  let lo=Math.min(...s,...lines.map(l=>l.p)), hi=Math.max(...s,...lines.map(l=>l.p)); const pad=(hi-lo)*.06; lo-=pad; hi+=pad;
+  const X=i=>L+i/(s.length-1)*(R-L), Y=p=>T+(hi-p)/(hi-lo)*(B-T);
+  let g=`<svg width="100%" viewBox="0 0 ${w} ${h}" role="img">`;
+  for(let k=0;k<=4;k++){const p=lo+(hi-lo)*k/4; g+=`<line x1="${L}" x2="${R}" y1="${Y(p)}" y2="${Y(p)}" stroke="#F0ECE4"/><text x="${L-6}" y="${Y(p)+4}" font-size="10" fill="#8A918F" text-anchor="end">${p.toFixed(0)}</text>`}
+  const placed=[]; lines.slice().sort((a,b)=>b.p-a.p).forEach(l=>{const y=Y(l.p); let side='R', ty=y-4;
+    if(placed.some(q=>q.side==='R'&&Math.abs(q.ty-ty)<12)){side='L'; if(placed.some(q=>q.side==='L'&&Math.abs(q.ty-ty)<12)) ty=y+12;}
+    placed.push({side,ty});
+    g+=`<line x1="${L}" x2="${R}" y1="${y}" y2="${y}" stroke="${l.c}" stroke-width="1.2" ${l.dash?`stroke-dasharray="${l.dash}"`:''}/><text x="${side==='R'?R:L+4}" y="${ty}" font-size="10" fill="${l.c}" text-anchor="${side==='R'?'end':'start'}" paint-order="stroke" stroke="#fff" stroke-width="3">${l.n} ${usd(l.p)}</text>`});
+  g+=`<polyline fill="none" stroke="#1F2A2A" stroke-width="1.8" points="${s.map((p,i)=>`${X(i).toFixed(1)},${Y(p).toFixed(1)}`).join(' ')}"/>`;
+  g+=`<circle cx="${X(s.length-1)}" cy="${Y(s[s.length-1])}" r="4" fill="#1F2A2A"/>`;
+  g+=`<text x="${L}" y="${h-6}" font-size="10" fill="#8A918F">约 60 个交易日前</text><text x="${R}" y="${h-6}" font-size="10" fill="#8A918F" text-anchor="end">10-22 收盘 ${usd(s[s.length-1])}</text>`;
+  return g+'</svg>';
+}
+function vStock(){
+  const t=S.stock; const sp=STOCKPAGE[t];
+  if(!sp){ const s=D.stocks.find(x=>x.t===t); $('#main').innerHTML=`<div class="crumb"><a href="#stocks">← 返回我的标的</a></div><h1>${t}</h1><div class="empty">原型只做了 AVGO（持仓）和 LITE（未持有）两个个股页示例。${s?`${t} 当日 ${pct(s.chg,2)}，主题 ${s.theme}。`:''}<br><a href="#s/AVGO">看 AVGO</a> · <a href="#s/LITE">看 LITE</a></div>${foot()}`; return;}
+  const hh=H.find(x=>x.t===t); const r=RISK.find(x=>x.t===t);
+  $('#main').innerHTML=`${intraBanner()}<div class="crumb"><a href="#stocks">← 返回我的标的</a> · <span class="tabs" style="display:inline-flex"><a class="f ${t==='AVGO'?'on':''}" href="#s/AVGO">示例：AVGO 持仓</a><a class="f ${t==='LITE'?'on':''}" href="#s/LITE">示例：LITE 未持有</a></span></div>
+  <div style="display:flex;gap:12px;align-items:baseline;margin-top:8px"><h1 class="mono" style="margin:0">${t}</h1>${sp.held?`<span class="chip held">纸面持有 · ${hh.type}</span>`:'<span class="chip buy">未持有 · 可买</span>'}${r?`<span class="chip ${r.lv}">${r.lv==='hi'?'! 重点下行':'▲ 下行关注'}</span>`:''}</div>
+  <p class="sub" style="margin-top:6px">${esc(sp.line)}</p>
+  <div class="grid g-main sec">
+   <div class="card"><div style="display:flex;justify-content:space-between"><h2>走势与位置</h2><span class="small muted">近 60 个交易日收盘；水平线为当前均线与关键价位</span></div>${chart(t,sp)}
+    <div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:10px;gap:10px">${sp.ret.map(([n,v])=>`<div><div class="small muted">${n}</div><div style="font-size:16px">${pct(v,2)}</div></div>`).join('')}</div></div>
+   <div class="card"><h2>位置与情绪</h2><div class="kv">
+     <span class="k">距 50 日线</span><span>${pct(sp.d50,1)} <span class="small muted">（${usd(sp.ma50,0)}）</span></span>
+     <span class="k">距 200 日线</span><span>${pct(sp.d200,1)} <span class="small muted">（${usd(sp.ma200,0)}）</span></span>
+     <span class="k">距一年高点</span><span>${pct(sp.dh,1)} <span class="small muted">（${usd(sp.high,0)}）</span></span>
+     <span class="k">RSI</span><span class="num">${sp.rsi}${sp.rsi<30?' 接近超卖':''}</span>
+     <span class="k">成交量</span><span class="num">${sp.vol} 倍${sp.vol>=1.3?'，放量':''}</span>
+     <span class="k">相对板块</span><span class="small">${sp.rel}</span>
+     <span class="k">资金流</span><span><span class="chip miss">暂缺</span></span>
+     <span class="k">空头</span><span><span class="chip miss">暂缺</span></span></div>
+    <h3 style="margin-top:16px">四项评分</h3><div class="grid g4" style="gap:6px">${['质量','成长','估值','择时'].map((n,i)=>`<div><div class="small muted">${n}</div><div class="num" style="font-size:16px">${sp.scores[i]}</div><div class="bar"><i style="width:${sp.scores[i]}%"></i></div></div>`).join('')}</div></div>
+  </div>
+  ${hh?`<div class="card sec"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">我的仓位 · ${hh.type}</h2><a href="#account" data-acc="${t}">在纸面账户中定位 →</a></div>
+    <div style="display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center;margin-top:8px"><div class="kv"><span class="k">股数</span><span class="num">82</span><span class="k">成本 → 现价</span><span class="num">${usd(hh.cost)} → ${usd(hh.px)}</span><span class="k">盈亏</span><span>${pct(hh.pnl,1)}</span><span class="k">下一步</span><span>${hh.next}</span></div><div>${ruler(hh,620)}</div></div>
+    <div class="rules">${hh.rules.map(ruleCard).join('')}</div></div>`
+   :`<div class="card sec"><h2>为什么没买</h2><p style="margin:0">${esc(sp.why)}</p><div class="kv" style="margin-top:8px"><span class="k">回调参考</span><span class="num">${usd(sp.ma50,0)}（50 日线）</span><span class="k">上方参考</span><span class="num">${usd(sp.high,0)}（一年高点）</span></div></div>`}
+  <div class="grid g2 sec">
+   <div class="card"><h2>新闻与事件</h2>
+    <div class="event open" style="margin-top:0"><div class="h"><b>AI 资本开支链 23 只同日下跌</b><span class="chip mid">已发现 · 原因未明</span></div><div class="body"><ul class="news">${MKT.cites.map(([c,tm])=>`<li>${esc(c)} <span class="chip stale">旧闻 · ${tm}</span></li>`).join('')}</ul></div></div>
+    <div class="small muted" style="margin-top:12px">最近新闻（${S.date} 当日 0 条）</div>
+    <ul class="news">${NEWS[t].map(([n,tm])=>`<li>${esc(n)} <span class="small muted">· benzinga · ${tm}</span> <span class="chip stale">旧闻</span></li>`).join('')}</ul></div>
+   <div class="card"><h2>基本面与估值</h2><p style="margin:0">${esc(sp.val)}</p><p class="small muted">${sp.cons}</p>
+    <div class="gap">系统目前没有可信的目标价，不显示“合理价”。</div>
+    <h3 style="margin-top:16px">数据时间</h3><div class="kv small"><span class="k">行情</span><span>10-22</span><span class="k">新闻</span><span><span class="chip stale">10-16 · 过期</span></span><span class="k">空头</span><span><span class="chip miss">暂缺</span></span><span class="k">估值</span><span>10-22</span><span class="k">一致预期</span><span><span class="chip miss">轮询中</span></span></div></div>
+  </div>${foot()}`;
+  const a=document.querySelector('[data-acc]'); if(a) a.onclick=e=>{e.preventDefault();location.hash='account/'+t};
+}
+
+/* ---------- TRUST ---------- */
+const STAT=[
+ ['新闻','miss','缺失','最近入库 10-16 08:54 · 10-22 当日 0 条','大事原因标“暂不可信”；个股新闻停在 10-16。新闻补采已恢复，按每日 1,500 条完整提取额度处理。'],
+ ['VIX','ok','正常','10-22 · 来源 FRED','市场情绪可用；行情汇总缺 VIX 时自动改用 FRED。'],
+ ['冷静期覆盖层','miss','未上线','尚无生产输出','页面不显示冷静期；规则 A 照常执行，不受影响。'],
+ ['估值','part','部分不适用','10-22 · 多数成长/周期股模型不适用','页面只显示市盈率、历史分位、隐含增速，不显示目标价。'],
+ ['订单','ok','正常','1 笔待成交（JNJ）','过期和被替代的旧单已清理。'],
+ ['纸面计划','ok','已生成','10-22 计划已生成','10-23 计划缺失时，账户页沿用 10-22 持仓并提示。'],
+ ['空头数据','stale','过期','最近结算 9/30','空头占比、回补天数仅作参考；超过 20 个自然日即视为过期。'],
+ ['期权数据','stale','过期','最近 10/13','看跌/看涨比不参与情绪判断；超过 2 个交易日即视为过期。'],
+];
+const ANOM=[
+ ['PLTR、WMT 空头数据的结算日（11/15、11/28）晚于页面日期 10-22','可能误用了未来数据或日期解析错误，需排查'],
+ ['CRWD 市盈率 4,758.8、PANW 887.3','盈利接近零导致的极端值；页面应显示“市盈率不适用”'],
+ ['AMD 10-21 有两条相同的“分批止盈”计划记录','需确认是重复记录还是两笔不同的减仓'],
+];
+function vTrust(){
+  const cls={ok:'ok',miss:'miss',stale:'stale',part:'mid'};
+  const bad=STAT.filter(s=>s[1]!=='ok').length;
+  $('#main').innerHTML=`${intraBanner()}<div class="crumb">复盘与数据 / ${S.date}</div>
+  <h1>${bad} 项数据有缺口：今天的“原因”解释不可信</h1><p class="sub">新闻停在 10-16，大事原因只能引用旧闻；价格、持仓、规则 A 计算不受影响。</p>
+  <div class="card sec"><div style="display:flex;justify-content:space-between"><h2>数据状态</h2><span class="small muted">点击查看影响</span></div>
+   <div class="status">${STAT.map(([n,c,l,w,imp])=>`<div class="stat" data-stat><div class="h"><b>${n}</b><span class="chip ${cls[c]}">${l}</span></div><div class="w">${w}</div><div class="imp"><b>影响：</b>${imp}</div></div>`).join('')}</div></div>
+  <div class="grid g2 sec">
+   <div class="card"><h2>系统之前说的对不对</h2><div class="empty">还没有完成的复盘记录。<br><span class="small">积累后显示：事后 1 / 5 / 20 个交易日，异常发现、原因解释和规则 A 动作的命中率。</span></div></div>
+   <div class="card"><h2>发现的数据异常 <span class="num muted">${ANOM.length}</span></h2>
+    ${ANOM.map(([a,b])=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)"><span class="ico mid">▲</span><div><div>${esc(a)}</div><div class="small ink2">${esc(b)}</div></div></div>`).join('')}</div>
+  </div>
+  <details class="method"><summary>计算口径说明</summary><div>
+   <p>主题平均涨跌 = 该主题成员当日收益的算术平均。</p><p>成交量倍数 = 当日成交量 / 前 20 日均量。</p>
+   <p>价格距离小于 10% 为重点，10%–20% 为关注；分数距离小于 5 分为重点，5–10 分为关注。</p>
+   <p>跌破 200 日线的连续天数取规则 A 账本，不从日线自行计算；观察波段仓不提示破位和灾难止损。</p>
+   <p>止盈接近单独列为“止盈提示”，不计入下行风险数。</p><p>组合回撤 = 按收盘估算的总资产 / 历史峰值 − 1；“距历史高点”与刹车距离同一口径。</p>
+   <p>空头数据超过 20 个自然日为过期，期权数据超过 2 个交易日为过期。</p><p>页面不给出目标价，只引用已有估值输入。</p></div></details>
+  ${foot()}`;
+  document.querySelectorAll('[data-stat]').forEach(s=>s.onclick=()=>s.classList.toggle('open'));
+}
+
+/* ---------- DESIGN SYSTEM ---------- */
+function vDS(){
+  const sw=[['画布','--canvas'],['卡片','--card'],['主文字','--ink'],['次文字','--ink2'],['品牌 / 操作','--brand'],['上涨（文字）','--up'],['下跌（文字）','--down'],['重点下行','--r-hi'],['重点下行底','--r-hi-bg'],['下行关注','--r-mid'],['下行关注底','--r-mid-bg'],['止盈提示','--tp'],['止盈提示底','--tp-bg'],['参考线','--ref']];
+  const cs=getComputedStyle(document.documentElement);
+  $('#main').innerHTML=`<div class="crumb">设计系统</div><h1>颜色只表达一件事</h1>
+  <p class="sub">涨跌只用数字的文字颜色；风险等级只用图标 + 底色标签；止盈提示用蓝灰色，不与涨跌、风险混用。</p>
+  <div class="card sec"><h2>01 颜色</h2><div class="grid" style="grid-template-columns:repeat(7,1fr)">${sw.map(([n,v])=>`<div><div class="ds-sw" style="background:var(${v})"></div><div class="small">${n}</div><div class="small mono muted">${cs.getPropertyValue(v).trim()}</div></div>`).join('')}</div></div>
+  <div class="grid g2 sec">
+   <div class="card"><h2>02 字体与数字</h2><div style="font-size:28px;font-weight:650">标题 28 / 650</div><div style="font-size:18px;font-weight:650">卡片标题 18 / 650</div><div>正文 14 / 1.55</div><div class="small">辅助 12</div><div class="num" style="font-size:30px;margin-top:8px">$1,456,525 · −10.6%</div><div class="small muted">中文用系统无衬线字体，数字用系统等宽字体；不加载网络字体。价格 2 位小数带 $，百分比 1–2 位小数。</div></div>
+   <div class="card"><h2>03 标签</h2><div class="filters"><span class="chip hi">! 重点下行</span><span class="chip mid">▲ 下行关注</span><span class="chip tp">↗ 止盈提示</span><span class="chip ok">正常</span><span class="chip held">持有</span><span class="chip buy">可买</span><span class="chip miss">暂缺</span><span class="chip stale">过期 · 9/30</span><span class="chip stale">旧闻</span></div>
+    <h3 style="margin-top:16px">筛选与排序</h3><div class="filters"><button class="f on">全部持仓<span class="c">13</span></button><button class="f">下行风险<span class="c">8</span></button><button class="f">止盈提示<span class="c">3</span></button></div>
+    <div class="small muted" style="margin-top:8px">筛选只改变显示范围，排序只改变顺序，都不改变风险级别和规则结果。</div></div>
+  </div>
+  <div class="card sec"><h2>04 规则的四种状态</h2><div class="small ink2">风险严重程度（红/橙）和规则执行状态是两套信息，不能只凭颜色判断是否有订单。</div>
+   <div class="rules" style="grid-template-columns:repeat(4,1fr)">${[{n:'灾难止损',st:'none',v:'$323.24 → $288.94，还需下跌 10.6%'},{n:'警戒减仓',st:'pending',v:'成长 41.5 < 50',x:'减仓单待成交'},{n:'翻倍分批止盈',st:'hold',v:'$507.93 已高于 $401.06',x:'卖出间隔 1 / 20 天'},{n:'跌破 200 日线减仓',st:'done',v:'连续 10 天 → 门槛 7 天',x:'不再重复'}].map(ruleCard).join('')}</div></div>
+  <div class="card sec"><h2>05 价格尺</h2><div class="small ink2">只画适用价位；实心圆 = 触发价，空心圆 ✓ = 已越过的触发价，虚线 = 200 日线参考（核心仓才画）；着色线段 = 现价到最近未触发价位的距离。标签自动上下交错避免重叠。</div>
+   <div class="grid g2" style="margin-top:10px">${['AVGO','HD','GOOGL','AMD'].map(t=>{const h=H.find(x=>x.t===t);return `<div class="card tight" style="background:#FAF8F4"><b class="mono">${t}</b> <span class="small muted">${h.type}</span><div>${ruler(h,540)}</div></div>`}).join('')}</div></div>
+  <div class="card sec"><h2>06 状态集</h2><div class="grid g3">
+   <div class="banner warn" style="margin:0"><b>计划缺失</b><span>当日计划没有生成，沿用前一日持仓并提示，不显示成空仓。</span></div>
+   <div class="banner info" style="margin:0"><b>盘中</b><span>盘中 · 截至 14:30 ET · 延迟约 16 分钟；不进入规则 A。</span></div>
+   <div class="banner warn" style="margin:0"><b>原因暂不可信</b><span>当日新闻缺失，只引用旧闻并标注。</span></div>
+   <div><span class="chip miss">暂缺</span> <span class="small ink2">数值未知，不填零、不画虚构走势。</span></div>
+   <div><span class="chip stale">过期 · 结算 9/30</span> <span class="small ink2">有值但超过有效期。</span></div>
+   <div><span class="small ink2">部分覆盖：</span><span class="num">3.1%</span> <span class="small muted">（覆盖 3/5）</span></div>
+   <div class="empty">当前没有需要关注的下行风险</div><div class="empty">还没有完成的复盘记录</div><div class="empty">没有符合条件的标的</div></div></div>
+  <div class="card sec"><h2>07 交互约定</h2><ul class="small" style="margin:0;padding-left:18px;line-height:1.9">
+   <li>风险项 / 待成交行 → 定位到持仓行并<b>原位展开</b>条件，高亮 1.4 秒；再次点击行或“收起”恢复。</li>
+   <li>主题行 → 展开成员；“在下表只看这个主题”联动下方筛选。</li><li>明细表点击表头排序，再点一次反向；筛选与搜索可以叠加。</li>
+   <li>大事卡片、数据状态卡片可展开收起；股票代码处处可点进个股页。</li>
+   <li>日期 ‹ › 切换交易日；右上角“收盘 / 盘中”标注数据状态（原型演示 10-23 计划缺失、盘中两种状态）。</li>
+   <li>手机宽度（< 760px）：导航横向滚动，持仓行变成两行，价格尺占满一行，条件卡片单列。</li></ul></div>
+  ${foot()}`;
+}
+/* ---------- router ---------- */
+function route(){
+  const h=location.hash.slice(1)||'account';
+  let open=null;
+  if(h.startsWith('s/')){S.view='stock';S.stock=h.slice(2).toUpperCase()}
+  else if(h.startsWith('account/')){S.view='account';open=h.slice(8).toUpperCase()}
+  else S.view=['market','stocks','account','trust','ds'].includes(h)?h:'account';
+  header(); ({market:vMarket,stocks:vStocks,account:vAccount,trust:vTrust,stock:vStock,ds:vDS})[S.view](); window.scrollTo(0,0);
+  if(open&&$('#row-'+open)){toggleRow(open,true);$('#row-'+open).scrollIntoView({block:'start'})}
+}
+const order=Object.keys(DATES);
+$('#prev').onclick=()=>{const i=order.indexOf(S.date); if(i<=1){toast('原型只含 10-22（正常）和 10-23（计划缺失）两个示例日');return} S.date=order[i-1]; route()};
+$('#next').onclick=()=>{const i=order.indexOf(S.date); if(i>=order.length-1){toast('10-23 之后还没有数据');return} S.date=order[i+1]; if(S.view!=='account'){location.hash='account'} route(); toast('示例：10-23 计划缺失状态')};
+document.querySelectorAll('.mode button').forEach(b=>b.onclick=()=>{S.mode=b.dataset.m;route()});
+window.addEventListener('hashchange',route); route();
+</script>
+</body>
+</html>
