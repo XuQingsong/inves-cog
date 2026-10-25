@@ -202,7 +202,7 @@ def test_f4_signs_and_one_decimal(pages):
     assert "现金比例 95.2%" in html
     assert "现金比例 +" not in html
     assert not _LONG.search(html)
-    card = html.split("组合风险", 1)[1].split("持仓与关键价位", 1)[0]
+    card = html.split("组合边界", 1)[1].split("持仓与关键价位", 1)[0]
     assert _PLUS.search(card) is None
 
 

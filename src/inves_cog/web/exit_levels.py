@@ -138,6 +138,8 @@ def _blank(name, text):
         "text": text,
         "risk_level": None,
         "risk_text": None,
+        "status": "none",
+        "conds": [],
     }
 
 
@@ -174,6 +176,8 @@ def _price_level(name, price, trigger, *, upward, note=""):
         "text": text,
         "risk_level": band,
         "risk_text": risk,
+        "status": "pending" if gap == 0 else "none",
+        "conds": [],
     }
 
 
@@ -230,7 +234,15 @@ def _disaster(position, score, sell, price):
     fraction = num(sell.get("disaster_peak_fraction"))
     high = _peak(position, price)
     trigger = None if high is None or fraction is None else high * fraction
-    return _price_level("灾难止损价", price, trigger, upward=False, note=_ma200_note(score))
+    row = _price_level("灾难止损价", price, trigger, upward=False, note=_ma200_note(score))
+    tech = score.get("tech") if isinstance(score.get("tech"), dict) else {}
+    versus = num(tech.get("price_vs_ma200"))
+    below_line = versus is not None and versus < 0
+    note = "当前低于" if below_line else "当前不低于"
+    row["conds"] = [{"text": "同时低于 200 日线", "ok": below_line, "note": note}]
+    if row["gap"] == 0 and not below_line:
+        row["status"] = "hold"
+    return row
 
 
 def _stage(position):
@@ -278,6 +290,21 @@ def _double(position, score, sell, price, index):
     row = _price_level("翻倍止盈价", price, trigger, upward=True, note=note)
     if row["risk_level"] is not None and not ready:
         row["risk_text"] += "。附加条件当前未满足"
+    row["conds"] = [
+        {"text": f"距 50 日线 < {score_text(dev_limit)}（当前 {score_text(dev)}）", "ok": dev_ok, "note": ""},
+        {"text": f"择时分 < {score_text(time_limit)}（当前 {score_text(timing)}）", "ok": time_ok, "note": ""},
+        {"text": "偏离或择时满足其一", "ok": either, "note": ""},
+        {
+            "text": wait.replace("，满足", "").replace("，未满足", ""),
+            "ok": wait_ok,
+            "note": "",
+        },
+        {"text": "尚未减仓", "ok": stage_ok, "note": "" if stage_ok else "已经减过仓"},
+    ]
+    if row["gap"] == 0 and not ready:
+        row["status"] = "hold"
+    elif row["gap"] == 0 and ready:
+        row["status"] = "pending"
     return row
 
 
@@ -298,10 +325,19 @@ def _breakout(position, score, sell, index, panic):
         head = f"破位减仓：连续 {shown} 天 → 门槛 {int(rule_days)} 天，已达到"
     else:
         head = f"破位减仓：连续 {shown} 天 → 门槛 {int(rule_days)} 天，还差 {int(rule_days) - shown} 天"
-    tail = _break_gates(position, sell, index, panic) + _break_extras(position, score, sell)
+    gates = _break_gates(position, sell, index, panic)
+    tail = gates + _break_extras(position, score, sell)
     if tail:
         head += "；" + "；".join(tail)
-    return _blank("破位减仓", head) | {"current": shown, "trigger": rule_days}
+    if "已经执行过" in head:
+        status = "done"
+    elif rule_days is not None and shown >= rule_days and gates:
+        status = "hold"
+    elif rule_days is not None and shown >= rule_days:
+        status = "pending"
+    else:
+        status = "none"
+    return _blank("破位减仓", head) | {"current": shown, "trigger": rule_days, "status": status}
 
 
 def _break_gates(position, sell, index, panic):
@@ -387,7 +423,13 @@ def _alert(position, score, sell, panic):
     elif band is not None:
         risk = f"警戒减仓接近门槛：{quality}；{growth}；{under}"
         level_name = band
-    return _blank("警戒减仓", text) | {"risk_level": level_name, "risk_text": risk}
+    if hit and panic:
+        status = "hold"
+    elif hit:
+        status = "pending"
+    else:
+        status = "none"
+    return _blank("警戒减仓", text) | {"risk_level": level_name, "risk_text": risk, "status": status}
 
 
 def _newer(score, position):
@@ -422,9 +464,9 @@ def _fundamental(position, score, sell):
     if fired:
         text += "，已触发"
         triggered = "基本面清仓已触发：" + "；".join(fired)
-        return _blank("基本面清仓", text) | {"risk_level": "red", "risk_text": triggered}
+        return _blank("基本面清仓", text) | {"risk_level": "red", "risk_text": triggered, "status": "pending"}
     band = score_band(_closest([quality_gap, growth_gap]))
     risk = None
     if band is not None:
         risk = f"基本面清仓接近门槛：{quality}；{growth}"
-    return _blank("基本面清仓", text) | {"risk_level": band, "risk_text": risk}
+    return _blank("基本面清仓", text) | {"risk_level": band, "risk_text": risk, "status": "none"}

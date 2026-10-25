@@ -407,10 +407,14 @@ def test_e1_pages_show_the_holding_type(pages):
     assert holdings["V"]["kind_label"] == "防守层核心"
 
 
+def _take(payload, ticker):
+    return next(row for row in payload["take_profits"] if row.get("ticker") == ticker)
+
+
 def test_e5_swing_pages_skip_breakout_and_disaster(pages):
     account = _account(pages)
     for ticker in ("HD", "NFLX"):
-        text = _line(account, ticker)["text"]
+        text = _take(account, ticker)["text"]
         for word in _FORBIDDEN:
             assert word not in text
         assert "波段止盈价还需上涨 12.8%" in text

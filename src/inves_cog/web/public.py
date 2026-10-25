@@ -74,6 +74,7 @@ def _html_page(path):
         "/paper/health",
         "/paper/ledger",
         "/review",
+        "/investor.js",
     }:
         return True
     for prefix in ("/linkage/", "/s/", "/stock/", "/paper/stock/"):

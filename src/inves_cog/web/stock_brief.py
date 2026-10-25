@@ -34,6 +34,7 @@ from inves_cog.web.brief import (
     half_up,
     human_reason,
     level,
+    parse_settlement,
     short_sentence,
     volume_multiple,
 )
@@ -289,7 +290,13 @@ def _short_for(connection, symbol, cap, cached):
         """,
         (symbol, cap),
     )
-    return None if row is None else _short_view(row)
+    if row is None:
+        return None
+    raw = row.get("raw") if isinstance(row.get("raw"), dict) else {}
+    parsed = parse_settlement(raw.get("settlementDate")) or parse_settlement(row.get("settlement_date"))
+    if parsed is not None and parsed > cap:
+        return None
+    return _short_view(row)
 
 
 def _news(connection, symbol, cutoff):
@@ -474,6 +481,9 @@ def _position_block(symbol, held, member, gate, context, valuation):
             "price": row["price"],
             "pnl": row["pnl"],
             "levels": row["levels"],
+            "ruler": row["ruler"],
+            "day": row["day"],
+            "ma200": row["ma200"],
             "pending": [plain_skip(item.get("reason_zh")) for item in pending],
             "next_step": plain_text(row["next_step"]),
             "blocker": None,
@@ -536,7 +546,7 @@ def _sentences(symbol, trend, short_text, resid_text, sector, theme_ret, news, e
     elif valuation.get("state") == "未估值":
         valuation_sentence = f"{valuation.get('text') or '未估值'}。"
     else:
-        pe = MISSING if valuation.get("pe") is None else f"{half_up(valuation['pe'], 1):.1f}"
+        pe = valuation.get("pe_text") or MISSING
         implied = format_points(valuation.get("implied_growth"))
         growth = format_points(valuation.get("rev_cagr_3y"))
         valuation_sentence = f"市盈率 {pe}，隐含增速 {implied}，过去三年营收 {growth}。"

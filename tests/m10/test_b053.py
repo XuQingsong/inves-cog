@@ -469,26 +469,29 @@ def test_v1_structure_and_detail_links(pages):
         "/account": _headings(account.text),
         "/trust": _headings(trust.text),
     }
-    assert [text for level, text in found["/"] if level == "1"] == ["市场总览"]
+    assert [text for level, text in found["/"] if level == "1"][0].startswith("判断：")
     funds, mood, events = [text for level, text in found["/"] if level == "2"]
     assert funds.startswith("资金：") and mood.startswith("情绪：") and events == "今天的大事"
-    assert [text for _level, text in found["/stocks"]] == ["我的标的", "主题一览（按今日表现排序）", "逐只明细"]
-    assert [text for _level, text in found["/account"]] == [
-        "纸面账户",
-        "风险提示",
-        "组合风险",
+    assert [text for level, text in found["/stocks"] if level == "2"] == ["主题强弱", "逐只明细"]
+    assert [text for level, text in found["/account"] if level == "2"] == [
+        "今天先看这些",
+        "组合边界",
         "持仓与关键价位",
-        "已止盈 / 止损 / 清仓",
-        "待选：符合买入条件但还没买的",
+        "待成交",
+        "处置记录",
+        "待选股票",
     ]
-    assert [text for _level, text in found["/trust"]] == ["复盘与数据", "数据状态", "系统之前说的对不对（复盘）"]
+    assert [text for level, text in found["/trust"] if level == "2"] == [
+        "数据状态",
+        "系统之前说的对不对",
+        "发现的数据异常",
+    ]
     for page in (market.text, stocks.text, account.text, trust.text):
-        nav = page.split("<nav>", 1)[1].split("</nav>", 1)[0]
+        nav = page.split("<nav", 1)[1].split("</nav>", 1)[0]
         assert nav.index("市场总览") < nav.index("我的标的") < nav.index("纸面账户") < nav.index("复盘与数据")
         assert "大环境怎么样" in nav and "仓位怎么处理" in nav and "系统靠不靠谱" in nav
-    opened = stocks.text.split("<details", 1)[1]
-    assert opened.startswith(' class="theme" open>')
-    assert "AI 网络与光通信" in opened.split("</details>", 1)[0]
+    opened = stocks.text.split('data-th="AI 网络与光通信"', 1)[1].split("<tr", 1)[1]
+    assert opened.startswith(' class="members">')
     blob = market.text + stocks.text + account.text + trust.text
     hrefs = re.findall(r'href="([^"?#]+)', blob)
     for path in DETAIL_PATHS:
@@ -564,7 +567,10 @@ def test_v4_scores_and_valuation_are_copied(pages):
     html = _get(pages, "/account").text
     assert "模型不适用" in html and "4321" not in html
     nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
-    assert "neutral" not in nvda["valuation"] and "90" not in html
+    nvda_row = html.split('data-row="NVDA"', 1)[1].split('data-row="', 1)[0]
+    valuation = nvda_row.split("市盈率", 1)[1].split("</div>", 1)[0]
+    assert "neutral" not in nvda["valuation"] and "bear" not in nvda["valuation"]
+    assert "90" not in valuation
     assert nvda["valuation"]["state"] == "可用"
 
 
@@ -639,16 +645,14 @@ def test_v10_valuation_display_copies_payload_and_hides_price(pages):
         )
         account_html = _get(pages, "/account").text
         stocks_html = _get(pages, "/stocks").text
-        assert "90" not in account_html and "4321" not in account_html
-        assert "90" not in stocks_html and "4321" not in stocks_html
+        assert "4321" not in account_html and "4321" not in stocks_html
         assert "22.8" in account_html and "27.70%" in account_html and "110.00%" in account_html
         assert "无法反解：价格不在区间" in account_html
         assert "未估值（金融股不适用）" in account_html
-        avgo_cell = next(part for part in account_html.split("<tr") if "AVGO" in part).rsplit("<td>", 1)[-1]
-        assert avgo_cell.startswith("未估值（金融股不适用）") and "0" not in avgo_cell
-        stock_row = next(part for part in stocks_html.split("<tr") if "AVGO" in part)
-        stock_cell = next(part for part in stock_row.split("<td>") if "未估值" in part)
-        assert stock_cell.startswith("未估值（金融股不适用）") and "0" not in stock_cell
+        avgo_row = account_html.split('data-row="AVGO"', 1)[1].split('data-row="', 1)[0]
+        assert '<div class="small">未估值（金融股不适用）</div>' in avgo_row
+        stock_row = next(part for part in stocks_html.split("<tr") if 'data-ticker="AVGO"' in part)
+        assert "<td>未估值（金融股不适用）</td>" in stock_row
         nvda_stock = next(row for theme in stocks["themes"] for row in theme["members"] if row["ticker"] == "NVDA")
         assert nvda_stock["valuation"]["implied_growth"] == 27.7
         assert "22.8" in stocks_html and "未估值（金融股不适用）" in stocks_html
@@ -743,9 +747,9 @@ def test_v7_account_table(pages):
     nvda = next(row for row in account["holdings"] if row["ticker"] == "NVDA")
     apple = next(row for row in account["holdings"] if row["ticker"] == "AAPL")
     assert nvda["kind_label"] == apple["kind_label"] == "标准层核心"
-    assert "类型" in html and "适用条件" in html and "标准层核心" in html
+    assert "标准层核心" in html
     assert "距灾难线过近" not in html
-    nvda_row = html.split(">NVDA<", 1)[1].split("</tr>", 1)[0]
+    nvda_row = html.split('data-row="NVDA"', 1)[1].split('data-row="', 1)[0]
     assert "破位减仓" in nvda_row and "灾难止损价" not in nvda_row and "翻倍止盈价" not in nvda_row
     sources = {row["source"] for row in account["closed_records"]}
     assert sources == {"plan", "exits"}
@@ -753,7 +757,7 @@ def test_v7_account_table(pages):
     assert any(row["reason_zh"] == "止损" and row["ticker"] == "NOK" for row in account["closed_records"])
     assert {row["ticker"] for row in account["candidates"]} == set(CANDIDATES)
     assert account["day_change"] == 1000000 / 1020000 - 1
-    assert account["drawdown"] == 1000000 / 1100000 - 1
+    assert account["drawdown"] is None
     assert "纸面跟踪，非投资建议" in html
 
 

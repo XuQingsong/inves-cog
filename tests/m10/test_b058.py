@@ -555,7 +555,8 @@ def test_d3_window_returns_and_sparkline(pages):
         assert trend["ret_60"] == session_return(series, 60)
         html = _get(pages, f"/s/{symbol}").text
         assert len(_points(html)) == len(trend["closes"]) == min(60, len(series))
-        assert "<script" not in html and "http://" not in html and "https://" not in html
+        assert html.count("<script") == 1 and 'src="/investor.js"' in html
+        assert "<script>" not in html and "http://" not in html and "https://" not in html
     nvda = _json(pages, "NVDA")["trend"]
     assert nvda["ret"] == -0.044 and nvda["post"] == 0.012
     price = pages["closes"]["NVDA"][-1]
