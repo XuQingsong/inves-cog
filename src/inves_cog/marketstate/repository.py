@@ -31,5 +31,5 @@ class Repository:
 
     def vix(self):
         return self.query(
-            "SELECT * FROM ingest.macro_observations WHERE series_id = ANY(%s)", (["VIX_CBOE", "VIXCLS", "VIX3M_CBOE"],)
+            "SELECT * FROM ingest.macro_observations WHERE series_id = ANY(%s)", (["VIX_CBOE", "VIX_YAHOO", "VIXCLS", "VIX3M_CBOE", "VIX3M_YAHOO"],)
         ).fetchall()

@@ -234,7 +234,7 @@ def market_row(returns, macro, tickers, rotation, *, day):
             vix[key] = row["value"]
 
     def value(d):
-        return vix.get(("VIX_CBOE", d), vix.get(("VIXCLS", d)))
+        return vix.get(("VIX_CBOE", d), vix.get(("VIX_YAHOO", d), vix.get(("VIXCLS", d))))
 
     current, term = value(day), vix.get(("VIX3M_CBOE", day))
     prior = [value(d) for d in returns.index[-253:-1]]

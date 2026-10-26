@@ -317,7 +317,12 @@ def _mood(payload, heading):
         + '<span class="zl" style="left:8%">乐观</span><span class="zl" style="left:35%">谨慎</span>'
         '<span class="zl" style="left:68%">紧张</span><span class="zl" style="left:92%">恐慌</span></div>'
     )
-    source = "（来源 FRED）" if payload.get("vix_source") == "FRED" else ""
+    vsrc = payload.get("vix_source")
+    source = "（来源 " + str(vsrc) + "）" if vsrc else ""
+    asof = payload.get("vix_asof")
+    _pd = payload.get("date")
+    if asof and _pd and str(asof)[:10] < str(_pd)[:10]:
+        source += "（截至 " + str(asof)[5:10].replace("-", "/") + "）"
     vix3m, prev3m = payload.get("vix3m"), payload.get("vix3m_prev")
     if vix3m is None:
         term = _miss()
@@ -333,8 +338,6 @@ def _mood(payload, heading):
     option_state = payload.get("option_state")
     if put_call and put_call != MISSING:
         pc_html = _text(put_call)
-    elif option_state == "过期" and payload.get("option_detail"):
-        pc_html = f'<span class="chip stale">过期 · {_text(payload.get("option_detail"))}</span>'
     else:
         pc_html = _miss()
     down5 = payload.get("down_share_5d_pct")
@@ -451,8 +454,6 @@ def _stocks(payload):
         vol = theme.get("volume_multiple")
         held = int(theme.get("held_count") or 0)
         held_html = f'<span class="chip held">{held}</span>' if held else "0"
-        short_text = theme.get("short_text") or MISSING
-        short_html = _miss(short_text) if str(short_text).startswith(MISSING) else _text(short_text)
         avg = theme.get("average")
         points = 0.0 if avg is None else float(avg) * 100
         width = min(50.0, abs(points) / 12 * 50)
@@ -470,8 +471,8 @@ def _stocks(payload):
             "</div></td>"
             f'<td class="r num {"" if vol is not None and vol >= 1.5 else "muted"}">{_text(_times(vol))}</td>'
             f'<td class="r num">{held_html} / {_count(theme.get("buyable_count"))}</td>'
-            f'<td class="small">{_text(theme.get("line"))}</td><td class="r small">{short_html}</td></tr>'
-            f'<tr class="members"{"" if theme.get("open") else " hidden"}><td colspan="6" style="background:#FAFCFB">'
+            f'<td class="small">{_text(theme.get("line"))}</td></tr>'
+            f'<tr class="members"{"" if theme.get("open") else " hidden"}><td colspan="5" style="background:#FAFCFB">'
             f"{''.join(ticks)}"
             f'<a href="#stable" class="small" data-only="{_text(sector)}" style="margin-left:8px">在下表只看这个主题 ↓'
             "</a>"
@@ -487,7 +488,7 @@ def _stocks(payload):
             ("rsi", "RSI", True),
             ("d200", "距 200 日线", True),
             ("dhigh", "距一年高点", True),
-            ("short_ratio", "空头", True),
+            ("tech", "形态", True),
             ("st", "状态", False),
             ("event", "事件", False),
         )
@@ -498,12 +499,12 @@ def _stocks(payload):
         "held": sum(1 for row in flat if row.get("held")),
         "buy": sum(1 for row in flat if row.get("entry_pass") is True and not row.get("held")),
         "move": sum(1 for row in flat if _is_move(row)),
-        "crowd": sum(1 for row in flat if _crowded(row, day)),
+        "crowd": sum(1 for row in flat if isinstance(row.get("tech"), dict) and row["tech"].get("rsi_state") == "超买"),
     }
     filters = "".join(
         f'<button class="f{" on" if key == "all" else ""}" data-sf="{key}">{label}<span class="c">{counts[key]}'
         "</span></button>"
-        for key, label in (("all", "全部"), ("held", "持仓"), ("buy", "可买"), ("move", "异动"), ("crowd", "空头拥挤"))
+        for key, label in (("all", "全部"), ("held", "持仓"), ("buy", "可买"), ("move", "异动"), ("crowd", "超买"))
     )
     filters += (
         '<select class="f" id="sth"><option value="">全部主题</option>'
@@ -523,7 +524,7 @@ def _stocks(payload):
         + '<div class="card sec"><div style="display:flex;justify-content:space-between"><h2>主题强弱</h2>'
         + '<span class="small muted">点击主题展开成员</span></div>'
         + '<table><thead><tr><th>主题</th><th style="width:30%">平均涨跌</th><th class="r">量比</th>'
-        + '<th class="r">持有 / 可买</th><th>一句话</th><th class="r">空头占比</th></tr></thead>'
+        + '<th class="r">持有 / 可买</th><th>一句话</th></tr></thead>'
         + f'<tbody id="ttable">{"".join(theme_rows)}</tbody></table></div>'
         + '<div class="card sec">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
@@ -533,7 +534,7 @@ def _stocks(payload):
         + f'<tbody id="stable">{"".join(rows)}</tbody></table></div>'
         + '<div class="small muted" style="margin-top:8px">点击表头排序；点击代码打开个股页。'
         + "异动 = 当日涨跌超过 ±7% 或量比 ≥ 2 倍；"
-        + "空头拥挤 = 空头占比 > 10% 或回补天数 > 5 天（过期数据不判断）。</div></div>"
+        + "超买 = RSI(14) ≥ 70（技术参考，不触发交易）。</div></div>"
     )
 
 
@@ -552,7 +553,6 @@ def _short_stale(short, day):
 
 
 def _crowded(row, day):
-    short = row.get("short") if isinstance(row.get("short"), dict) else None
     return bool(short and short.get("crowded") and not _short_stale(short, day))
 
 
@@ -587,7 +587,6 @@ def _stock_row(payload, row, day):
     ticker = row.get("ticker") or ""
     ret = row.get("ret")
     vol = row.get("volume_multiple")
-    short = row.get("short") if isinstance(row.get("short"), dict) else None
     held = bool(row.get("held"))
     buy = row.get("entry_pass") is True and not held
     if held:
@@ -700,6 +699,7 @@ def _account(payload):
         + '<span><span class="ico mid" style="width:16px;height:16px;font-size:10px">▲'
         + "</span> 下行关注</span></span></div>"
         + _risk_groups(payload)
+        + _earnings_chips(payload)
         + '</div><div class="card"><h2>组合边界</h2>'
         + _bounds(payload)
         + "</div></div>"
@@ -1345,8 +1345,6 @@ def _stock(payload):
         if vol is None
         else f'<span class="num">{half_up(vol, 1):.1f} 倍</span>' + ("，放量" if vol >= 1.3 else "")
     )
-    short = payload.get("short_text")
-    short_html = _miss() if not short or short == MISSING else _text(short)
     resid = payload.get("resid_text")
     rel = (_text(resid) if resid and resid != MISSING else "") + (
         f" · {_text(payload.get('sector'))}当日 {_text(format_fraction(payload.get('theme_ret')))}"
@@ -1379,11 +1377,14 @@ def _stock(payload):
         + f'<span class="k">成交量</span><span>{vol_html}</span>'
         + f'<span class="k">相对板块</span><span class="small">{rel or _miss()}</span>'
         + f'<span class="k">资金流</span><span>{_miss()}</span>'
-        + f'<span class="k">空头</span><span>{short_html}</span></div>'
+        + f'<span class="k">形态</span><span>{_tech_cell(payload.get("tech"))} '
+        + '<span class="small muted">技术参考，不触发交易</span></span>'
+        + f'<span class="k">下次财报</span><span>{_next_earn(payload)}</span></div>'
         + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div></div>'
         + position_html
         + '<div class="grid g2 sec"><div class="card"><h2>新闻与事件</h2>'
         + _stock_news(payload)
+        + _stock_feed(payload)
         + '</div><div class="card"><h2>基本面与估值</h2>'
         + f'<p style="margin:0">{_text(_valuation(payload.get("valuation"), full=True))}</p>'
         + _consensus(payload.get("consensus"))
@@ -1804,3 +1805,250 @@ def _num_attr(value):
     if value is None:
         return ""
     return escape(str(value), quote=True)
+
+
+# ---------- B-063 today-page news modules ----------
+
+
+def _hm(iso):
+    try:
+        moment = _parse_iso(iso)
+        return moment.astimezone(NY).strftime("%H:%M") if moment else "—"
+    except Exception:
+        return "—"
+
+
+def _parse_iso(value):
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value
+    return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+
+
+def _md_local(value):
+    text = str(value or "")[:10]
+    return text[5:].replace("-", "/") if len(text) >= 10 else text
+
+
+def _nrule(item):
+    rule = item.get("rule")
+    if rule is None:
+        return {}
+    if isinstance(rule, dict):
+        return rule
+    return {
+        "primary_tickers": getattr(rule, "primary_tickers", []),
+        "tags": getattr(rule, "tags", []),
+        "macro": getattr(rule, "macro"),
+        "importance": getattr(rule, "importance", 0),
+        "held": getattr(rule, "held", False),
+    }
+
+
+def _ntags(item):
+    tags = _nrule(item).get("tags") or []
+    out = ""
+    for tag in tags:
+        cls = " hot" if tag in ("财报", "指引", "评级", "并购", "财报前瞻") else " macro" if tag == "宏观" else ""
+        out += f'<span class="tag{cls}">{_text(tag)}</span>'
+    return out
+
+
+def _ncodes(item, held):
+    return "".join(
+        f'<span class="tick{" held" if t in held else ""}">{_text(t)}</span>' for t in (_nrule(item).get("primary_tickers") or [])
+    )
+
+
+def _nlate(item):
+    return '<span class="chip stale">事后补采</span>' if item.get("late") else ""
+
+
+def _news_row(item, held):
+    title = _text(item.get("headline") or item.get("summary"))
+    url = _text(item.get("url") or "#")
+    return (
+        f'<div class="nrow"><span class="tm">{_hm(item.get("published_at") or item.get("published"))}</span>'
+        f'<div class="hl">{_ntags(item)}<a href="{url}" target="_blank" rel="noopener">{title}</a> {_nlate(item)}</div>'
+        f'<span class="codes">{_ncodes(item, held)}</span></div>'
+    )
+
+
+def _tech_chip(tech):
+    if not isinstance(tech, dict):
+        return ""
+    shape = tech.get("shape")
+    if not shape or shape == "数据不足":
+        return ""
+    cls = " ok" if shape in ("震荡", "空头反弹") else " mid" if shape == "多头回调" else " buy" if shape == "多头排列" else " hi"
+    sig = " · " + "、".join(tech.get("signals") or []) if tech.get("signals") else ""
+    return f'<span class="chip{cls}" title="技术参考，不触发交易">{_text(shape)}{_text(sig)}</span>'
+
+
+def _movers_module(payload):
+    mods = payload.get("news_modules") or {}
+    rows = []
+    held = set(payload.get("held_tickers") or [])
+    for m in mods.get("movers") or []:
+        warn = '<div class="small muted">暂无相关新闻</div>' if not m.get("has_news") else ""
+        own = "".join(_news_row(n, held) for n in m.get("news") or [])
+        own_html = f'<div class="mnews">{own}</div>' if own else ""
+        badge = '<span class="chip held">持仓</span>' if m.get("held") else '<span class="chip buy">标的</span>'
+        rows.append(
+            f'<div class="mrow"><span class="tk">{_text(m["ticker"])} {badge}{_tech_chip(m.get("tech"))}</span>'
+            f'<span class="small ink2">{_text(m.get("theme"))}{warn}</span>'
+            f'<span class="num r">{_pct(m.get("ret"))}</span>'
+            f'<span class="num r v4">{_text(_times(m.get("vol")))}</span></div>{own_html}'
+        )
+    if not rows:
+        return ""
+    return (
+        '<div class="card sec"><h2>持仓与标的异动</h2>'
+        '<div class="small muted" style="margin-bottom:8px">当日涨跌幅绝对值最大的 8 只 · 每只最多 2 条相关新闻</div>'
+        + "".join(rows)
+        + "</div>"
+    )
+
+
+def _theme_news_module(payload):
+    mods = payload.get("news_modules") or {}
+    held = set(payload.get("held_tickers") or [])
+    rows = []
+    for n in mods.get("theme_news") or []:
+        rows.append(
+            f'<div class="nrow"><span class="tm">{_hm(n.get("published_at") or n.get("published"))}</span>'
+            f'<div class="hl"><span class="tag macro">{_text(n.get("theme"))}</span>'
+            f'<a href="{_text(n.get("url") or "#")}" target="_blank" rel="noopener">{_text(n.get("headline"))}</a> {_nlate(n)}</div>'
+            f'<span class="codes">{_ncodes(n, held)}</span></div>'
+        )
+    if not rows:
+        return ""
+    return f'<div class="card sec"><h2>热门主题新闻</h2>{"".join(rows)}</div>'
+
+
+def _feed_module(payload):
+    mods = payload.get("news_modules") or {}
+    held = set(payload.get("held_tickers") or [])
+    feed = mods.get("feed") or []
+    rows = "".join(_news_row(n, held) for n in feed)
+    body = rows or '<div class="empty">无</div>'
+    return (
+        f'<div class="card"><h2>滚动新闻 <span class="small muted">最近 {len(feed)} 条</span></h2>'
+        f'<div class="scroll">{body}</div></div>'
+    )
+
+
+_ETIME = {"pre": "盘前", "post": "盘后", "unknown": "未定", "pre-market": "盘前", "after-hours": "盘后"}
+
+
+def _calendar_module(payload):
+    earnings = payload.get("earnings")
+    econ = payload.get("econ")
+    if earnings is None and econ is None:
+        return '<div class="card"><h2>财报日历</h2><div class="empty">日历待接入</div></div>'
+    parts = ['<div class="card"><h2>财报日历 <span class="small muted">来源 Nasdaq</span></h2><div class="scroll">']
+    if earnings is None:
+        parts.append('<h3>本周重点（市值前 10）</h3><div class="empty">日历待接入</div>')
+    else:
+        wk = "".join(
+            f'<div class="cal"><span class="cd">{_md_local(e["report_date"])} · {_ETIME.get(str(e.get("time")), _text(e.get("time")))}</span>'
+            f' <span class="cs">{_text(e["ticker"])}</span> <span class="small ink2">{_text(e.get("company"))}</span>'
+            f'<span class="small muted" style="float:right">预期 EPS {_text(e.get("eps_forecast") or "—")} · {_count(e.get("n_estimates"))} 家</span></div>'
+            for e in earnings.get("week") or []
+        )
+        parts.append("<h3>本周重点（市值前 10）</h3>" + (wk or '<div class="empty">无</div>'))
+        mine = []
+        for e in earnings.get("mine") or []:
+            pvs = "".join(
+                f'<div class="pv"><span class="tag hot">财报前瞻</span><a href="{_text(n.get("url") or "#")}" target="_blank" rel="noopener">{_text(n.get("headline"))}</a></div>'
+                for n in e.get("previews") or []
+            )
+            chip = '<span class="chip held">持仓</span>' if e.get("held") else '<span class="chip buy">标的</span>'
+            mine.append(
+                f'<div class="cal"><span class="cs">{_text(e["ticker"])}</span> {chip} '
+                f'<span class="cd">{_ETIME.get(str(e.get("time")), _text(e.get("time")))} {_md_local(e["report_date"])} · 预期 EPS {_text(e.get("eps_forecast") or "—")}</span>{pvs}</div>'
+            )
+        parts.append('<h3 style="margin-top:14px">持仓与标的（未来 10 天）</h3>' + ("".join(mine) or '<div class="empty">无</div>'))
+    if econ is None:
+        parts.append('<h3 style="margin-top:14px">本周宏观</h3><div class="empty">日历待接入</div>')
+    else:
+        rows = "".join(
+            f'<div class="nrow" style="grid-template-columns:64px 1fr auto"><span class="tm">{_md_local(e["event_date"])} {_text(e.get("event_time_et") or "")}</span>'
+            f'<div class="hl">{_text(e.get("name"))}</div>'
+            f'<span class="small muted">预期 {_text((e.get("consensus") or "—").strip() or "—")} / 前值 {_text(e.get("previous") or "—")}</span></div>'
+            for e in econ
+        )
+        parts.append(
+            '<h3 style="margin-top:14px">本周宏观</h3>' + (rows or '<div class="empty">本周暂无关键宏观数据</div>')
+        )
+    parts.append("</div></div>")
+    return "".join(parts)
+
+
+def _close_cell(r):
+    return "$" + (f"{float(r.get('close')):.2f}" if r.get("close") is not None else "—")
+
+
+def _leaderboards_module(payload):
+    mods = payload.get("news_modules") or {}
+
+    def rows(items, extra):
+        return "".join(
+            f'<div class="nrow" style="grid-template-columns:64px 1fr auto"><span style="font:600 13px var(--mono)">{_text(r["ticker"])}</span>'
+            f'<span class="small ink2">{_text(extra(r))}</span><span class="num">{_pct(r.get("ret"))}</span></div>'
+            for r in items
+        )
+
+    up = mods.get("pool_leaders_up") or []
+    down = mods.get("pool_leaders_down") or []
+    wup = payload.get("wide_movers_up") or []
+    wdown = payload.get("wide_movers_down") or []
+    return (
+        '<div class="card sec"><h2>涨跌排行榜</h2><div class="lboard">'
+        f'<div><h3>标的池 · 涨幅前 5</h3>{rows(up, lambda r: r.get("theme") or "")}</div>'
+        f'<div><h3>标的池 · 跌幅前 5</h3>{rows(down, lambda r: r.get("theme") or "")}</div>'
+        f'<div><h3>全市场 · 涨幅前 5</h3>{rows(wup, _close_cell)}</div>'
+        f'<div><h3>全市场 · 跌幅前 5</h3>{rows(wdown, _close_cell)}</div>'
+        "</div></div>"
+    )
+
+
+def _earnings_chips(payload):
+    near = payload.get("earnings_near") or []
+    if not near:
+        return ""
+    bits = " ".join(
+        f'<span class="chip ok">财报临近 {_text(e["ticker"])} {_ETIME.get(str(e.get("time")), _text(e.get("time")))} {_md_local(e["report_date"])}</span>'
+        for e in near[:6]
+    )
+    return f'<div class="small" style="margin-top:8px">{bits}</div>'
+
+
+def _tech_cell(tech):
+    if not isinstance(tech, dict):
+        return '<span class="muted">暂缺</span>'
+    shape = tech.get("shape") or "数据不足"
+    rsi = tech.get("rsi")
+    rsi_txt = "" if rsi is None else f" · RSI {half_up(rsi, 1):.1f}{' 超买' if rsi >= 70 else ' 超卖' if rsi <= 30 else ''}"
+    sig = "、".join(tech.get("signals") or [])
+    extra = f'<div class="muted">{_text(sig)}</div>' if sig else ""
+    return f'<span class="num">{_text(shape)}</span><span class="small muted">{_text(rsi_txt)}</span>{extra}'
+
+
+def _next_earn(payload):
+    e = payload.get("next_earnings")
+    if not isinstance(e, dict):
+        return _miss()
+    return (
+        f'{_text(_ETIME.get(str(e.get("time")), _text(e.get("time"))))} '
+        f'{_text(_md_local(e.get("report_date")))} · 预期 EPS {_text(e.get("eps_forecast") or "—")}'
+    )
+
+
+def _stock_feed(payload):
+    feed = payload.get("news_feed") or []
+    held = set(payload.get("held_tickers") or [])
+    rows = "".join(_news_row(n, held) for n in feed)
+    empty = '<div class="empty">近 7 天没有该股新闻</div>'
+    return '<h3 style="margin-top:14px">新闻流（近 7 天）</h3>' + (rows or empty)

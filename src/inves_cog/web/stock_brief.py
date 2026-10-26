@@ -532,7 +532,8 @@ def _sentences(symbol, trend, short_text, resid_text, sector, theme_ret, news, e
         f"近 60 日 {format_fraction(trend['ret_60'])}。"
     )
     theme_name = sector or MISSING
-    funds_sentence = f"{short_text}；{resid_text}；{theme_name}当日 {format_fraction(theme_ret)}。"
+    funds_parts = [p for p in (short_text, resid_text, f"{theme_name}当日 {format_fraction(theme_ret)}") if p and p != MISSING]
+    funds_sentence = "；".join(funds_parts) + "。"
     if news:
         news_sentence = f"最近 {len(news)} 条，最新：{news[0]['summary']}。"
     else:
@@ -630,8 +631,8 @@ def page_brief_stock(connection, day, clock, symbol):
     valuation = _card_for(context, symbol, score_row, member["price"])
     # Fair and neutral prices stay off this payload.
     valuation.pop("neutral", None)
-    short = _short_for(connection, symbol, cap, context["shorts"])
-    short_text = MISSING if short is None else short_sentence(short)
+    short = None
+    short_text = None
     resid = None if close_row is None else _num(close_row["resid_z"])
     sector, theme_ret = _theme_view(context, day, symbol)
     news = _news(connection, symbol, context["cutoff"])
@@ -681,7 +682,9 @@ def page_brief_stock(connection, day, clock, symbol):
         position,
     )
     news_stamp = news[0]["published_beijing"] if news else MISSING
-    short_stamp = MISSING if short is None else _quote_date(short.get("settlement"))
+    news_feed = _news_feed(connection, symbol, day, context)
+    next_earnings = _next_earnings(context["earnings_cal"], symbol, day)
+    tech = context["technicals"].get(symbol)
     range_row = context["ranges"].get(symbol)
     value_stamp = MISSING if range_row is None else day.isoformat()
     consensus_stamp = "暂无" if consensus is None else consensus["as_of"]
@@ -698,6 +701,9 @@ def page_brief_stock(connection, day, clock, symbol):
         "sector": sector,
         "theme_ret": theme_ret,
         "news": news,
+        "news_feed": news_feed,
+        "next_earnings": next_earnings,
+        "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
         "valuation": valuation,
@@ -707,7 +713,6 @@ def page_brief_stock(connection, day, clock, symbol):
         "stamps": [
             {"label": "行情", "value": day.isoformat()},
             {"label": "新闻", "value": news_stamp},
-            {"label": "空头", "value": short_stamp},
             {"label": "估值", "value": value_stamp},
             {"label": "一致预期", "value": consensus_stamp},
         ],
@@ -719,3 +724,56 @@ def page_brief_stock(connection, day, clock, symbol):
 def covered_gate_reasons():
     """Production gate codes this page knows how to say. Tests fail if a new one appears."""
     return set(_HEALTH_REASON) | set(BLOCKING) | set(EXCLUDED) | set(_BOOK_BELOW) | set(_BOOK_MISSING)
+
+
+def _news_feed(connection, symbol, day, context):
+    """This ticker's last-7-day news, ranked by importance then time."""
+    from inves_cog.perception.news.rules import rank_day
+
+    start, end = _day_window(day)
+    start = start - timedelta(days=7)
+    rows = _rows(
+        connection,
+        """
+        SELECT info_id, published_at, first_seen_at, source, headline, tickers, url, extraction_source
+        FROM ingest.info_items
+        WHERE kind = 'news' AND published_at >= %s AND published_at < %s AND %s = ANY(tickers)
+        ORDER BY published_at DESC, info_id
+        """,
+        (start, end, symbol),
+    )
+    items = []
+    for row in rows:
+        published = _parse_ts(row["published_at"])
+        seen = _parse_ts(row["first_seen_at"])
+        items.append(
+            {
+                "info_id": row["info_id"],
+                "summary": _news_summary(_object(row["extraction_source"]), row["headline"]),
+                "headline": row["headline"] or "",
+                "url": row["url"],
+                "source": row["source"] or MISSING,
+                "published_at": None if published is None else published.isoformat(),
+                "published_beijing": _beijing_text(published),
+                "tickers": [name for name in (row["tickers"] or []) if isinstance(name, str)],
+                "first_seen_at": None if seen is None else seen.isoformat(),
+                "late": seen is not None and seen > context["cutoff"],
+            }
+        )
+    held = set(context["positions"])
+    universe = set(context["pool"]) | held
+    ranked = rank_day(items, universe, held, day)
+    feed = [
+        n
+        for n in ranked
+        if symbol in n["rule"].primary_tickers or symbol in n["tickers"]
+    ]
+    feed.sort(key=lambda n: (-n["rule"].importance, -(n["published"].timestamp() if n["published"] else 0)))
+    return feed[:15]
+
+
+def _next_earnings(earnings, symbol, day):
+    if not earnings:
+        return None
+    future = sorted(r for r in earnings if r["ticker"] == symbol and r["report_date"] >= day)
+    return future[0] if future else None

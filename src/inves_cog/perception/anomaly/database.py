@@ -58,7 +58,7 @@ class DatabasePanel:
             """
             SELECT series_id, observation_date, value, realtime_start
             FROM ingest.macro_observations
-            WHERE series_id IN ('VIX_CBOE', 'VIXCLS', 'DGS2', 'DTWEXBGS', 'DCOILWTICO', 'VIX3M_CBOE')
+            WHERE series_id IN ('VIX_CBOE', 'VIX_YAHOO', 'VIXCLS', 'DGS2', 'DTWEXBGS', 'DCOILWTICO', 'VIX3M_CBOE', 'VIX3M_YAHOO')
               AND observation_date BETWEEN %s AND %s
             """,
             (start - timedelta(days=40), end),
