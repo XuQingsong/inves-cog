@@ -181,7 +181,7 @@ def translate_day(connection, writer, client, day, *, clock):
     if usage["calls"] >= MAX_CALLS_PER_DAY:
         return {"status": "capped", "reason": "calls", **usage}
     _, user_template = _prompt()
-    cutoff = datetime.now(NY)
+    cutoff = clock.now_utc().astimezone(NY)
     candidates = page_candidates(connection, day, cutoff)
     if not candidates:
         return {"status": "ok", "translated": 0, "remaining": 0}
