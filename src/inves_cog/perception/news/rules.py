@@ -39,7 +39,10 @@ TAG_RULES = [
         r"|sees? (Q[1-4]|FY|full[- ]year|.{0,30}(sales|EPS|capex|revenue|est\b))|preliminary"
         r"|seen growing|\w+ implied",
     ),
-    ("并购", r"merger|acquisition|acquires?|takeover|buyout|to buy\b|\bbid\b|for sale|to be acquired|explores? .*(sale|sell|buyout)"),
+    (
+        "并购",
+        r"merger|acquisition|acquires?|takeover|buyout|to buy\b|\bbid\b|for sale|to be acquired|explores? .*(sale|sell|buyout)",
+    ),
     ("监管关税", r"tariff|export control|sanction|antitrust|\bFTC\b|\bDOJ\b|regulat"),
     ("诉讼召回", r"lawsuit|litigation|\bsues?\b|recall|settlement"),
     ("宏观", r"\b(Fed|FOMC|Powell|CPI|PCE|payrolls|jobs report|treasury yields?|inflation|GDP)\b"),
