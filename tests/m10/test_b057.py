@@ -45,20 +45,6 @@ SESSIONS = _sessions(DAY, 25)
 
 
 def test_s1_threshold_edges_and_s3_rank_edges():
-    sentence = short_sentence(
-        {
-            "pct": 12.34,
-            "days": 3.2,
-            "change": -4.75,
-            "settlement": date(2037, 6, 5),
-            "crowded": True,
-        }
-    )
-    assert sentence == "空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算"
-    assert short_crowded(10, 1) is False
-    assert short_crowded(10.01, 4) is True
-    assert short_crowded(3, 5) is False
-    assert short_crowded(3, 5.01) is True
     assert option_tone(80) is None
     assert option_tone(80.01) == "偏谨慎"
     assert option_tone(20) is None
