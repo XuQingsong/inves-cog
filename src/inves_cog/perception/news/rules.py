@@ -41,7 +41,8 @@ TAG_RULES = [
     ),
     (
         "并购",
-        r"merger|acquisition|acquires?|takeover|buyout|to buy\b|\bbid\b|for sale|to be acquired|explores? .*(sale|sell|buyout)",
+        r"merger|acquisition|acquires?|takeover|buyout|to buy\b|\bbid\b|for sale|to be acquired|explores? .*(sale"
+        r"|sell|buyout)",
     ),
     ("监管关税", r"tariff|export control|sanction|antitrust|\bFTC\b|\bDOJ\b|regulat"),
     ("诉讼召回", r"lawsuit|litigation|\bsues?\b|recall|settlement"),
