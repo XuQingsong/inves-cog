@@ -429,8 +429,6 @@ def test_translate_payload_headlines_only(monkeypatch):
 def test_translate_titles_contract_success(monkeypatch):
     translate = _patch_candidates(monkeypatch, _items(2))
     writer = _StubConn({})
-    written = []
-    writer.execute = lambda sql, params=None: (_ for _ in ()).throw(StopIteration) if False else _Cur([])
     client = _FakeClient(results=[{"titles": ["一", "二"]}])
     result = translate.translate_day(_StubConn({}), writer, client, DAY, clock=CLOCK)
     assert result["translated"] == 2
