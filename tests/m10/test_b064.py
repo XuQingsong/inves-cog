@@ -421,5 +421,51 @@ def test_translate_payload_headlines_only(monkeypatch):
     import json as _json
     import re as _re
 
-    titles = _json.loads(_re.search(r"\[.*\]", payload["user"], _re.S).group(0))
+    # the last JSON array in the prompt is the input headlines block
+    titles = _json.loads(_re.findall(r"\[.*?\]", payload["user"], _re.S)[-1])
     assert titles == [f"Headline {i}" for i in range(2)]
+
+
+def test_translate_titles_contract_success(monkeypatch):
+    translate = _patch_candidates(monkeypatch, _items(2))
+    writer = _StubConn({})
+    client = _FakeClient(results=[{"titles": ["一", "二"]}])
+    result = translate.translate_day(_StubConn({}), writer, client, DAY, clock=CLOCK)
+    assert result["translated"] == 2
+
+
+def test_translate_rejects_non_titles_shape(monkeypatch):
+    translate = _patch_candidates(monkeypatch, _items(2))
+    writer = _StubConn({})
+    # bare array (old contract) and wrong-key object must both be discarded
+    client = _FakeClient(results=[["一", "二"]])
+    result = translate.translate_day(_StubConn({}), writer, client, DAY, clock=CLOCK)
+    assert result["translated"] == 0 and len(client.calls) == 1
+
+
+def test_translate_real_client_json_object_path(monkeypatch):
+    """End-to-end: real Client with injected transport returning {"titles": [...]}."""
+    from inves_cog.llm.client import Client
+    from inves_cog.llm.registry import Registry
+
+    registry = Registry(__import__("pathlib").Path(__file__).resolve().parents[2] / "config/llm_tasks.yaml")
+    sent = []
+
+    def transport(spec, payload):
+        sent.append(payload)
+        # real transport enforces response_format=json_object and returns a dict
+        assert isinstance(payload, dict)
+        return {"titles": ["标题一", "标题二"], "_usage": {"input_tokens": 10, "output_tokens": 20}}
+
+    client = Client(registry=registry, transport=transport, clock=CLOCK)
+    translate = _patch_candidates(monkeypatch, _items(2))
+    writer = _StubConn({})
+    result = translate.translate_day(_StubConn({}), writer, client, DAY, clock=CLOCK)
+    assert result["translated"] == 2 and len(sent) == 1
+
+
+def test_prompt_titles_wording_no_note():
+    from inves_cog.perception.news.translate import _prompt
+
+    _, user = _prompt()
+    assert '{"titles"' in user and "修订" not in user and not user.rstrip().endswith(">")

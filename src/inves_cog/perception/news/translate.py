@@ -34,6 +34,7 @@ def _prompt():
     text = PROMPT_PATH.read_text(encoding="utf-8")
     system = re.search(r"## system\n(.*?)## user", text, re.S).group(1).strip()
     user = re.search(r"（每批最多 50 条）\n(.*)", text, re.S).group(1).strip()
+    user = "\n".join(line for line in user.splitlines() if not line.startswith(">")).strip()
     return system, user
 
 
@@ -219,8 +220,6 @@ def translate_day(connection, writer, client, day, *, clock):
             log.warning("news_translate call failed: %s", type(exc).__name__)
             break
         titles = result.get("titles") if isinstance(result, dict) else None
-        if isinstance(result, dict) and titles is None and isinstance(result.get("items"), list):
-            titles = result["items"]
         if not isinstance(titles, list) or len(titles) != len(batch):
             log.warning("news_translate count mismatch expected=%s got=%s", len(batch), titles)
             calls += 1
