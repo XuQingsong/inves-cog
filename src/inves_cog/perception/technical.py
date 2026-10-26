@@ -87,7 +87,15 @@ def technicals(closes, volumes=None):
                 signals.append("金叉")
             if b50 / 50 > b200 / 200 and a50 / 50 <= a200 / 200:
                 signals.append("死叉")
-    return {"shape": shape, "rsi": rsi, "rsi_state": _rsi_state(rsi), "signals": signals}
+    # One entry per signal kind: keep the most recent occurrence within the
+    # 10-session window (earliest appended first, so last wins on dedupe).
+    seen = set()
+    deduped = []
+    for label in reversed(signals):
+        if label not in seen:
+            seen.add(label)
+            deduped.insert(0, label)
+    return {"shape": shape, "rsi": rsi, "rsi_state": _rsi_state(rsi), "signals": deduped}
 
 
 def _rsi_state(rsi):

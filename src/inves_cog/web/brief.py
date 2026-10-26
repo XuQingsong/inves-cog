@@ -1389,13 +1389,13 @@ def _context(connection, day, clock):
     if day == clock.today_trade_date():
         has_close = _one(
             connection,
-            "SELECT 1 AS x FROM marketstate.daily WHERE trade_date = %s LIMIT 1",
+            "SELECT 1 AS x FROM marketstate.daily WHERE trade_date = %s AND session = 'close' LIMIT 1",
             (day,),
         )
         if has_close is None:
             prior = _one(
                 connection,
-                "SELECT MAX(trade_date) AS d FROM marketstate.daily WHERE trade_date < %s",
+                "SELECT MAX(trade_date) AS d FROM marketstate.daily WHERE trade_date < %s AND session = 'close'",
                 (day,),
             )
             carry_from = None if prior is None else prior["d"]

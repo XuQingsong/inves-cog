@@ -363,3 +363,32 @@ def test_feed_rules_unit():
     rows = group_weak_ratings(items)
     grouped = [r for r in rows if r.get("grouped")]
     assert len(grouped) == 1 and grouped[0]["group_count"] == 2
+
+
+def test_signal_dedupe_keeps_latest():
+    from inves_cog.perception.technical import technicals
+
+    # Falling closes trigger 跌破 20 日新低 on several days in the window.
+    closes = list(range(300, 220, -1))
+    sig = technicals(closes)["signals"]
+    assert sig.count("跌破 20 日新低") == 1
+
+
+def test_date_picker_and_today_link(pages):
+    html = _get(pages, "/").text
+    assert 'type="date"' in html and ">今天</a>" in html
+
+
+def test_carryover_requires_close_session(pages):
+    admin = pages["admin"]
+    admin.execute(
+        "INSERT INTO marketstate.daily (trade_date, ticker, session, ret, factor_set, health_codes)"
+        " VALUES (%s, 'NVDA', 'post', 0.05, 'b064', '{}')",
+        (DAY,),
+    )
+    try:
+        market = _get(pages, "/api/pages/brief/market").json()
+        # post-only rows do NOT count as close data: carry-over still applies.
+        assert market["carry_from"] == str(PREV)
+    finally:
+        admin.execute("DELETE FROM marketstate.daily WHERE trade_date = %s AND session = 'post'", (DAY,))
