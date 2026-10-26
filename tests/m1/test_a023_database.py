@@ -76,7 +76,8 @@ def check_a023_database(c):
     assert not repo.pending_info(32, as_of=CLOCK.now_utc(), include_news=False)
     from inves_cog.ingest.embedding_backfill import collect
 
-    assert collect(c, "text-embedding-async-v1") == []
+    assert collect(c, "text-embedding-async-v1", include_news=False) == []
+    assert collect(c, "text-embedding-async-v1", include_news=True)
     c.execute(
         "INSERT INTO trading.ledger (portfolio_id,trade_date,phase,extractor,rule_set,params_version,"
         "cash,peak_equity,state,observed_at) VALUES "
@@ -88,3 +89,37 @@ def check_a023_database(c):
 
 def test_a023_postgres_roles_queue_cleanup_embeddings_and_holdings(database):
     check_a023_database(database)
+
+
+def check_calendar_reschedule(c):
+    from datetime import date
+    from inves_cog.ingest.resilience import parse_earnings, parse_econ
+
+    repo = Repository(c)
+    c.execute("SET LOCAL ROLE role_ingest")
+    for table, parser, fixture in [
+        ("earnings_calendar", parse_earnings, "earnings_2026-10-28.json"),
+        ("econ_calendar", parse_econ, "econ_2026-10-28.json"),
+    ]:
+        raw = json.loads((Path(__file__).parent / "fixtures/a023" / fixture).read_text())
+        rows = parser(raw, date(2026, 10, 28), CLOCK)[:1]
+        repo.replace_calendar_day(table, date(2026, 10, 28), "Nasdaq", rows)
+        # Another source's record must survive a Nasdaq refresh.
+        other = [{**r, "source": "Other"} for r in rows]
+        repo.replace_calendar_day(table, date(2026, 10, 28), "Other", other)
+        moved = [
+            {**r, ("report_date" if table == "earnings_calendar" else "event_date"): date(2026, 10, 30)} for r in rows
+        ]
+        repo.replace_calendar_day(table, date(2026, 10, 30), "Nasdaq", moved)
+        repo.replace_calendar_day(table, date(2026, 10, 28), "Nasdaq", [])
+        column = "report_date" if table == "earnings_calendar" else "event_date"
+        actual = c.execute("SELECT " + column + " d,source FROM ingest." + table).fetchall()
+        assert {(r["d"], r["source"]) for r in actual} == {
+            (date(2026, 10, 28), "Other"),
+            (date(2026, 10, 30), "Nasdaq"),
+        }
+    c.execute("RESET ROLE")
+
+
+def test_a023_calendar_reschedule_removes_old_day_preserves_other_source(database):
+    check_calendar_reschedule(database)

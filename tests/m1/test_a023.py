@@ -205,3 +205,64 @@ def test_a023_all_frozen_v18_vix_days_keep_cboe_and_identical_replay(monkeypatch
     assert actual["return_pct"] == baseline["return_pct"]
     assert actual["comparison"]["actual_count"] == actual["comparison"]["expected_count"] == 90
     assert actual["comparison"]["differences"] == []
+
+
+def test_a023_review_budget_config_restored():
+    import yaml
+    from inves_cog.ingest.settings import ROOT
+
+    assert (
+        yaml.safe_load((ROOT / "config/params/p-2026.10/m1.yaml").read_text())["m1"]["llm_daily_token_budget"]
+        == 1500000
+    )
+
+
+def test_a023_calendar_refresh_only_successful_dates(monkeypatch):
+    from inves_cog.ingest.resilience import collect_calendars
+
+    repo = Mock()
+    repo.health_rows.return_value = {}
+    p = SimpleNamespace(repo=repo, clock=CLOCK, stocks=[], values={})
+    first, moved, failed = date(2026, 10, 28), date(2026, 10, 30), date(2026, 10, 29)
+    monkeypatch.setattr("inves_cog.ingest.resilience.calendar_days", lambda day: [first, failed, moved])
+    raw = sample("earnings_2026-10-28.json")
+    raw["data"]["rows"] = [raw["data"]["rows"][0]]
+
+    def get(url, **kwargs):
+        d = kwargs["params"]["date"]
+        if d == failed.isoformat():
+            raise RuntimeError("recorded outage")
+        return {"data": {"rows": []}} if d == first.isoformat() else raw
+
+    collect_calendars(p, "earnings", http=SimpleNamespace(get=get))
+    calls = repo.replace_calendar_day.call_args_list
+    assert [c.args[1] for c in calls] == [first, moved]
+    assert calls[0].args[3] == []
+    assert calls[1].args[3][0]["ticker"] == "GOOG"
+
+
+def test_a023_news_health_recovers_on_successful_collection():
+    from datetime import timedelta
+    from collections import Counter
+    from inves_cog.ingest.pipeline import Pipeline
+    from inves_cog.ingest.service import check_news_gap
+
+    rows = {}
+    repo = Mock()
+    repo.health_rows.side_effect = lambda: rows
+    repo.write_health.side_effect = lambda row: rows.update({row["source"]: row})
+    repo.latest_news_at.return_value = CLOCK.now_utc() - timedelta(hours=3)
+    assert not check_news_gap(repo, CLOCK)["healthy"]
+    assert rows["AlpacaNews"]["status"] == "unavailable"
+    p = Pipeline.__new__(Pipeline)
+    p.clock, p.repo, p.day_override = CLOCK, repo, None
+    repo.processed = 0
+    p.alpaca = Mock()
+    p.alpaca.news.return_value = []
+    repo.counts = Counter()
+    repo.get_cursor.return_value = {"through": CLOCK.now_utc().isoformat()}
+    repo.latest_news_at.return_value = CLOCK.now_utc()
+    p.runtime().run(["news_poll"])
+    assert rows["AlpacaNews"]["status"] == "ok"
+    assert rows["AlpacaNews"]["consecutive_failures"] == 0
+    assert rows["AlpacaNews"]["last_success_at"] == CLOCK.now_utc()
