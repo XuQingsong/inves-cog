@@ -93,7 +93,7 @@ def _seed(admin):
     )
     _snap(admin, "ES=F", 6050.0, 6000.0)  # +0.83%
     _snap(admin, "SPY", 604.2, 600.0)  # +0.70%
-    _snap(admin, "^TNX", 4.40, 4.408)  # -0.8BP
+    _snap(admin, "^TNX", 4.40, 4.408)  # -0.8 基点
     _snap(admin, "NVDA", 200.4, 200.0)  # sector avg uses snapshot
     admin.execute(
         "INSERT INTO ingest.macro_observations"
@@ -133,8 +133,8 @@ def test_strip_renders_and_bp(pages):
     html = _get(pages, "/").text
     assert 'id="mstrip"' in html and 'id="sstrip"' in html
     assert "标普期货" in html and "美债 10 年" in html
-    # ^TNX 4.40 vs 4.408 -> -0.8BP
-    assert "-0.8BP" in html
+    # ^TNX 4.40 vs 4.408 -> -0.8 基点
+    assert "-0.8 基点" in html
 
 
 def test_dgs2_prior_day_label(pages):

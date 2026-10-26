@@ -2283,7 +2283,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
             return {
                 "label": label,
                 "value": f"{float(snap['last']):.2f}%",
-                "chg": f"{'+' if bp >= 0 else ''}{bp:.1f}BP",
+                "chg": f"{'+' if bp >= 0 else ''}{bp:.1f} 基点",
                 "dir": -1 if bp > 0 else (1 if bp < 0 else 0),
                 "title": title + " · 收益率上升对股市偏空，显示为红",
             }
