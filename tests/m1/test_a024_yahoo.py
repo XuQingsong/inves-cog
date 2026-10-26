@@ -200,3 +200,34 @@ def test_direct_collectors_do_not_fetch_outside_authorized_window():
     for collect in [collect_intraday, collect_yahoo_intraday]:
         assert collect(p, http=http)["processed_count"] == 0
     http.get.assert_not_called()
+
+
+def test_yahoo_all_requests_fail_once_each_and_health_marks_failure(monkeypatch):
+    from inves_cog.ingest.http import HTTPClient, Response
+    from inves_cog.ingest.intraday import collect_yahoo_intraday
+
+    send = Mock(return_value=Response(429, {"chart": {"result": None}}))
+    made = []
+
+    def client(**kwargs):
+        made.append(kwargs)
+        return HTTPClient(send=send, **kwargs)
+
+    monkeypatch.setattr("inves_cog.ingest.intraday.HTTPClient", client)
+    repo = Mock()
+    p = SimpleNamespace(clock=CLOCK, repo=repo)
+    health = HealthBook(clock=CLOCK, persist=repo.write_health)
+    runner = JobRunner(clock=CLOCK, health=health, persist=repo.write_job)
+    result = runner.run("yahoo_intraday", "YahooIntraday", lambda: collect_yahoo_intraday(p))
+    assert result["processed_count"] == 0 and result["source_success"] is False
+    assert send.call_count == 13 and made == [{"timeout": 10, "retries": 0}]
+    assert health.rows["YahooIntraday"]["consecutive_failures"] == 1
+    assert health.rows["YahooIntraday"]["status"] == "degraded"
+    repo.write.assert_not_called()
+
+
+@pytest.mark.parametrize("moment", ["2026-10-26T04:30:00-04:00", "2026-10-26T16:00:00-04:00"])
+def test_both_sources_use_persisted_starts_to_avoid_retries_in_same_slot(moment):
+    clock = FrozenClock(datetime.fromisoformat(moment))
+    tasks = ["intraday_snapshots", "yahoo_intraday"]
+    assert not set(tasks) & set(due_tasks(clock, dict.fromkeys(tasks, clock.now_utc())))

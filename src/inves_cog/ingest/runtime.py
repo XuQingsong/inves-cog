@@ -46,6 +46,7 @@ def due_tasks(clock, last_runs):
     due("news_prefill", after=480, before=490)
     due("news_poll", interval=10)
     due("intraday_snapshots", interval=30 if minute < 960 else 60, after=240, before=1200, session=True)
+    due("yahoo_intraday", interval=30 if minute < 960 else 60, after=240, before=1200, session=True)
     due("news_watchdog", interval=10, after=600, before=1200, session=True)
     due("earnings_calendar", after=360)
     due("econ_calendar", after=360)

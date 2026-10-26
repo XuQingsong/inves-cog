@@ -43,6 +43,7 @@ serverurl=unix://{state}/supervisor.sock
             "news_full",
             "news_poll",
             "intraday_snapshots",
+            "yahoo_intraday",
             "news_watchdog",
             "vix_daily",
             "earnings_calendar",

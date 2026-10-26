@@ -94,7 +94,9 @@ def test_a024_collect_scope_consistent_adjustment_and_partial_health():
     result = collect_intraday(p, http=http)
     assert result["processed_count"] == 1 and result["status"] == "degraded"
     first, second = http.get.call_args_list
-    assert first.kwargs["params"]["symbols"] == "GOOGL,IWM,OUTSIDE,QQQ,SPY"
+    from inves_cog.ingest.intraday import ETF_TICKERS
+
+    assert set(first.kwargs["params"]["symbols"].split(",")) == ETF_TICKERS | {"GOOGL", "OUTSIDE"}
     assert first.kwargs["params"]["feed"] == "delayed_sip"
     assert second.kwargs["params"]["adjustment"] == "all" and second.kwargs["params"]["asof"] == "2026-10-26"
     assert second.kwargs["params"]["start"].startswith("2026-10-23")
