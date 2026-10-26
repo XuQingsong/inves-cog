@@ -202,3 +202,23 @@ tr.members td{border-bottom:1px solid var(--line)}
 .lboard{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .scroll{max-height:1560px;overflow-y:auto;padding-right:6px}
 @media (max-width:760px){.lboard{grid-template-columns:1fr}.mrow{grid-template-columns:52px 1fr 66px}.mrow .v4{display:none}.nrow{grid-template-columns:44px 1fr}.nrow .codes{display:none}}
+
+/* B-065 market ticker + sector strips */
+.mstrip { padding: 8px 12px; }
+.ticker-row { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; }
+.tcell { flex: 0 0 auto; font: 12px var(--mono); }
+.tcell b { margin-right: 4px; font-weight: 600; }
+.tcell small { margin-left: 4px; }
+.tcell .up { color: var(--up); }
+.tcell .down { color: var(--down); }
+.sstrip { padding: 8px 12px; }
+.sector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+.scell { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; text-decoration: none; color: inherit; }
+.scell:hover { border-color: var(--brand); }
+.scell .sname { font-size: 12px; font-weight: 600; }
+.scell .num { font: 13px var(--mono); }
+.scell .num.up { color: var(--up); }
+.scell .num.down { color: var(--down); }
+@media (max-width: 640px) {
+  .sector-grid { grid-template-columns: 1fr 1fr; }
+}

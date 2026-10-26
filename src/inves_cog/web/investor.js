@@ -301,6 +301,11 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
     apply(cur);
   };
   apply(localStorage.getItem(KEY) === "en" ? "en" : "zh");
+          if (location.hash.indexOf("#theme-") === 0) {
+            var row = doc.getElementById(location.hash.slice(1));
+            var live = document.getElementById(location.hash.slice(1));
+            if (live && !live.classList.contains("open")) live.click();
+          }
 
   var more = document.querySelector("[data-feed-more]");
   if (more) {
@@ -319,11 +324,16 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
         .then(function (r) { return r.text(); })
         .then(function (html) {
           var doc = new DOMParser().parseFromString(html, "text/html");
-          ["movers", "themes", "feed"].forEach(function (id) {
+          ["movers", "themes", "feed", "mstrip", "sstrip"].forEach(function (id) {
             var oldEl = document.getElementById(id), newEl = doc.getElementById(id);
             if (oldEl && newEl) oldEl.innerHTML = newEl.innerHTML;
           });
           apply(localStorage.getItem(KEY) === "en" ? "en" : "zh");
+          if (location.hash.indexOf("#theme-") === 0) {
+            var row = doc.getElementById(location.hash.slice(1));
+            var live = document.getElementById(location.hash.slice(1));
+            if (live && !live.classList.contains("open")) live.click();
+          }
         })
         .catch(function () {});
     }, 10 * 60 * 1000);
