@@ -352,7 +352,7 @@ def test_w1_stock_news_count_and_preview(pages):
     assert "截点后不计入" not in stocks_html and "下一交易日" not in stocks_html
     stocks = _json(pages, "/api/pages/brief/stocks")
     chip = next(theme for theme in stocks["themes"] if theme["sector"] == "AI 算力芯片")
-    assert chip["news_count"] == 2
+    assert chip["news_count"] == 3
 
 
 def test_w2_event_reasons_then_morning_page(pages):
