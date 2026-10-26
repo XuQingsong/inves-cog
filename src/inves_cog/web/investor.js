@@ -293,7 +293,7 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
     document.querySelectorAll(".nzh").forEach(function (e) { e.hidden = !zh; });
     document.querySelectorAll(".nen").forEach(function (e) { e.hidden = zh; });
     var b = document.getElementById("lang-toggle");
-    if (b) b.textContent = zh ? "中文 / English" : "English / 中文";
+    if (b) b.textContent = zh ? "中文 / 英文" : "英文 / 中文";
   }
   window.__setLang = function () {
     var cur = localStorage.getItem(KEY) === "en" ? "zh" : "en";
