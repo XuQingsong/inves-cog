@@ -1580,6 +1580,10 @@ def _header(payload):
         + prev_link
         + f'<span class="d">{_text(shown)}</span><span class="small">{dow}</span>'
         + next_link
+        + _date_picker(payload)
+        + '<a class="step" href="'
+        + _text(payload.get("page") or "/")
+        + '">今天</a>'
         + '</div><div class="fresh"><span>'
         + _text(fresh)
         + '</span><span class="mode"><button id="lang-toggle" onclick="__setLang()">中文 / 英文</button>'
@@ -1689,6 +1693,18 @@ def _near(day, step):
             return cursor
         cursor -= timedelta(days=1)
     return None
+
+
+def _date_picker(payload):
+    day = _day(payload)
+    value = "" if day is None else day.isoformat()
+    page = payload.get("page") or "/"
+    nav = f"location.href='{_text(page)}?date='+this.value"
+    return (
+        f'<input type="date" value="{_text(value)}" max="{_text(payload.get("today") or value)}" '
+        f'onchange="{nav}" '
+        'style="font:12px var(--mono);border:1px solid var(--line);border-radius:6px;padding:1px 4px">'
+    )
 
 
 def _date_link(payload, day, label):

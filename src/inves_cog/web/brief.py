@@ -1389,13 +1389,13 @@ def _context(connection, day, clock):
     if day == clock.today_trade_date():
         has_close = _one(
             connection,
-            "SELECT 1 AS x FROM marketstate.daily WHERE trade_date = %s LIMIT 1",
+            "SELECT 1 AS x FROM marketstate.daily WHERE trade_date = %s AND session = 'close' LIMIT 1",
             (day,),
         )
         if has_close is None:
             prior = _one(
                 connection,
-                "SELECT MAX(trade_date) AS d FROM marketstate.daily WHERE trade_date < %s",
+                "SELECT MAX(trade_date) AS d FROM marketstate.daily WHERE trade_date < %s AND session = 'close'",
                 (day,),
             )
             carry_from = None if prior is None else prior["d"]
@@ -1883,6 +1883,7 @@ def page_brief_market(connection, day, clock):
         "events": events,
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
+        "today": clock.today_trade_date().isoformat(),
         "is_today": context["day"] == clock.today_trade_date(),
         "intraday": context["intraday"],
         "news_modules": _news_views(context),
