@@ -519,17 +519,23 @@ def test_w7_three_page_digest(pages):
     assert "按 10月22日 收盘估算" in text
 
 
+# Mirrors migrations/phase1_m1_0006_calendars.sql (A-023) exactly so the test
+# exercises the real contract whether or not the migration already ran.
 _EARNINGS_DDL = """
 CREATE TABLE IF NOT EXISTS ingest.earnings_calendar (
-    ticker text, report_date date, time text CHECK (time IN ('pre','post','unknown')),
-    eps_forecast numeric, n_estimates int, market_cap numeric, company text,
-    source text, fetched_at timestamptz, PRIMARY KEY (ticker, report_date, source)
+    ticker text NOT NULL, report_date date NOT NULL,
+    time text NOT NULL CHECK (time IN ('pre','post','unknown')),
+    eps_forecast numeric, n_estimates int, market_cap numeric,
+    company text, source text NOT NULL, fetched_at timestamptz NOT NULL,
+    PRIMARY KEY (ticker,report_date,source)
 )
 """
 _ECON_DDL = """
 CREATE TABLE IF NOT EXISTS ingest.econ_calendar (
-    event_date date, event_time_et text, country text, name text,
-    actual text, consensus text, previous text, source text, fetched_at timestamptz
+    event_date date NOT NULL, event_time_et text, country text NOT NULL, name text NOT NULL,
+    actual text, consensus text, previous text,
+    source text NOT NULL, fetched_at timestamptz NOT NULL,
+    PRIMARY KEY (event_date,country,name,source)
 )
 """
 
@@ -557,20 +563,22 @@ def test_b063_calendar_vix_and_earnings(pages):
                 """,
                 (ticker, when, span, eps, count, cap, company, seen),
             )
-        for name, when, tm, country in (
-            ("FOMC Statement", DAY + timedelta(days=4), "14:00", "United States"),
-            ("Atlanta Fed GDPNow", DAY + timedelta(days=4), "10:00", "United States"),
-            ("Initial Jobless Claims", DAY + timedelta(days=5), "08:30", "United States"),
-            ("Initial Jobless Claims", DAY + timedelta(days=5), "08:30", "United States"),
-            ("Some EU Event", DAY + timedelta(days=5), "09:00", "Euro Area"),
+        # Two identical-name rows from different sources: valid under the A-023 PK,
+        # and the page dedups on name+date+time so the assertion still holds.
+        for name, when, tm, country, source in (
+            ("FOMC Statement", DAY + timedelta(days=4), "14:00", "United States", "nasdaq"),
+            ("Atlanta Fed GDPNow", DAY + timedelta(days=4), "10:00", "United States", "nasdaq"),
+            ("Initial Jobless Claims", DAY + timedelta(days=5), "08:30", "United States", "nasdaq"),
+            ("Initial Jobless Claims", DAY + timedelta(days=5), "08:30", "United States", "nasdaq-mirror"),
+            ("Some EU Event", DAY + timedelta(days=5), "09:00", "Euro Area", "nasdaq"),
         ):
             admin.execute(
                 """
                 INSERT INTO ingest.econ_calendar (
                     event_date, event_time_et, country, name, actual, consensus, previous, source, fetched_at
-                ) VALUES (%s, %s, %s, %s, '', '', '', 'nasdaq', %s)
+                ) VALUES (%s, %s, %s, %s, '', '', '', %s, %s)
                 """,
-                (when, tm, country, name, seen),
+                (when, tm, country, name, source, seen),
             )
         admin.execute(
             """
