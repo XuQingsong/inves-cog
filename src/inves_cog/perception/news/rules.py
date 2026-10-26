@@ -46,10 +46,14 @@ TAG_RULES = [
     (
         "产品合作",
         r"partnership|partners with|collaborat|\bMoU\b|memorandum|joins? .{0,25}ecosystem"
-        r"|(launches|unveils|announces).{0,30}(launch|product|platform|service)"
-        r"|unveil|deploy|contract",
+        r"|\b(launch|launches|launching|to launch|unveil|unveils|unveiling)\b"
+        r"|deploy|contract",
     ),
-    ("公司行动", r"stock split|share split|\bsplit\b|buybacks?|share repurchase|dividend"),
+    (
+        "公司行动",
+        r"(announces|declares|raises|boosts|cuts|initiates|suspends).{0,30}dividend"
+        r"|quarterly (cash )?dividend|stock split|\d-for-\d|buybacks?|share repurchase",
+    ),
 ]
 MACRO_RULES = [
     ("利率", r"Fed|FOMC|yield|rate cut|rate hike|treasur"),
