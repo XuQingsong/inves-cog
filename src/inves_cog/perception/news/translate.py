@@ -10,7 +10,7 @@ ET day; usage metering reuses ingest.llm_calls via the standard Client.
 import json
 import logging
 import re
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 from pathlib import Path
 
 import yaml
