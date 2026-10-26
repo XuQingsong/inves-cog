@@ -245,3 +245,15 @@ PR83追加完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87`。先失败测�
 ## B-064 后续页面修复部署已完成
 
 生产快进至PR85验收merge `469f16a27ce35f27a9b522e7799ee7c5598c20ea`，准确head `5efc16feadacc590956991435f96944168566a6d` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40347548455/job/121658403663) success。仅pages重启、其他运行PID和配置保持、工作区干净；服务器外部/与/stocks均200。未重跑迁移，翻译仍未启动，预算及读取身份两项缺陷仍待需求方/B线修复，不能把页面修复算作翻译问题已解决。
+
+## A-024 已完成（追加代码交付，待需求方验收合并）
+
+PR83准确完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87` 的[PR合并phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40350168656/job/121667735576) success：881 passed、33 deselected，另2项环境检查通过。分支CI此刻仍在运行，不冒称通过；nightly skipped、Bugbot neutral。追加先失败测试`e8da608d7daee98dbd92407206a66a140d0f4073`后实现历史保留；目标及兼容98 passed、静态检查通过。逐项：15 ETF追加保留原池/持仓并集；13 Yahoo原始代码/source=Yahoo；真实响应夹具覆盖原时间、实际延迟、前收/缺前收、分钟线成对回退、错代码/未来/陈旧值拒收；三收益率百分比及基点换算验证；无2年期/无FRED变更；两来源健康/失败隔离、逐代码继续、无HTTP重试；同交易日三时段/假日/DST/持久开始时间避免同槽重试。表结构/30天清理不变，M0默认最小权限原真实PG结果继续适用。
+
+单位证据：[Yahoo收益率报道](https://sg.finance.yahoo.com/news/ai-trade-rout-sparks-flight-to-treasurys-bond-yields-sink-chart-of-the-day-151821305.html/)直接将TNX标为5.05%；[财政部日收益率](https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?field_tdr_date_value=2026&field_tdr_date_value_month=202610&type=daily_treasury_yield_curve)提供同百分比量纲交叉核对。夹具记录4.980与前收4.988，对应-0.8基点，不缩放10倍。来源/时间不同，不声称两者价格完全一致。
+
+已自行决定的内部Yahoo独立调度/延迟口径已先记录，无新增预算/权限。当前仅代码交付；A024未合并、未生产迁移或安装，盘前首尾/首日公开报价对照仍待合并部署后的真实交易日，不伪造完整覆盖。A023两交易日收盘观察继续，当前未到收盘窗口；自动化保持开启。
+
+## B-064 翻译启动阻塞补证（离线，无真实模型请求）
+
+用真实Client重试/记账逻辑及计数transport模拟：初始当日5次、49990 token，前两次Timeout后第三次成功，translate_day返回calls=6；实际transport和记账各3次，累计真实尝试8次，已知token50190，确认突破6次/5万授权上限。零真实模型/网络请求、未改B源码。另默认ingest读取marketstate.rotation权限失败已实测。需要需求方/B线修复并验收合并；A已完成独立的表/页面及后续页面修复部署，无需用户重复原授权。
