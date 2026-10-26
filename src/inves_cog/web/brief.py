@@ -397,8 +397,13 @@ VIX3M_SERIES = [("VIX3M_CBOE", "CBOE"), ("VIX3M_YAHOO", "Yahoo")]
 
 
 def _series_latest(connection, series, cap):
-    """Latest visible observation across the ordered series; first hit wins."""
-    for series_id, label in series:
+    """Latest visible observation across the series set.
+
+    The newest observation_date wins; the series preference order only breaks
+    same-date ties, so a stale high-preference series never shadows a newer one.
+    """
+    best = None
+    for order, (series_id, label) in enumerate(series):
         row = _one(
             connection,
             """
@@ -410,9 +415,14 @@ def _series_latest(connection, series, cap):
             """,
             (series_id, cap, cap),
         )
-        if row is not None and row["value"] is not None:
-            return _metric(row["value"]), label, row["observation_date"]
-    return None, None, None
+        if row is None or row["value"] is None:
+            continue
+        candidate = (row["observation_date"], -order, _metric(row["value"]), label, row["observation_date"])
+        if best is None or candidate > best:
+            best = candidate
+    if best is None:
+        return None, None, None
+    return best[2], best[3], best[4]
 
 
 VIX_STALE_SESSIONS = 3

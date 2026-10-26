@@ -697,7 +697,14 @@ def test_v5_status_follows_queries(pages):
             """,
             (SEEN, SEEN),
         )
-        admin.execute("UPDATE marketstate.market SET vix = 31 WHERE trade_date = %s", (DAY,))
+        admin.execute(
+            """
+            INSERT INTO ingest.macro_observations (
+                series_id, observation_date, value, units, realtime_start, fetched_at
+            ) VALUES ('VIX_CBOE', %s, 31, 'index', %s, %s)
+            """,
+            (DAY, DAY, SEEN),
+        )
         admin.execute("DELETE FROM overlay.versions WHERE date = %s", (DAY,))
         admin.execute(
             "UPDATE trading.orders SET signal_date = %s, trade_date = %s WHERE portfolio_id = %s",
