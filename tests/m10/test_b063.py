@@ -2,6 +2,8 @@
 
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from inves_cog.perception.news.rules import classify, rank_day, theme_of
 from inves_cog.perception.technical import technicals, wilder_rsi
 
@@ -93,3 +95,24 @@ def test_rsi_wilder():
     mixed = [100 + ((-1) ** i) for i in range(30)]
     r = wilder_rsi(mixed)
     assert r is not None and 40 <= r <= 60
+
+
+def test_engine_vix_series_order():
+    """market_row VIX: CBOE wins, Yahoo only when CBOE missing; VIX3M Yahoo fallback."""
+    pd = pytest.importorskip("pandas")
+    from datetime import date as _d
+
+    from inves_cog.marketstate.engine import market_row
+
+    day = _d(2037, 6, 15)
+    returns = pd.DataFrame({"SPY": [0.0]}, index=[day])
+    macro = [
+        {"series_id": "VIX_YAHOO", "observation_date": day, "value": 20.0},
+        {"series_id": "VIXCLS", "observation_date": day, "value": 21.0},
+        {"series_id": "VIX3M_YAHOO", "observation_date": day, "value": 22.0},
+    ]
+    row = market_row(returns, macro, [], [], day=day)
+    assert row["vix"] == 20.0 and row["vix3m"] == 22.0
+    macro.append({"series_id": "VIX_CBOE", "observation_date": day, "value": 19.0})
+    row = market_row(returns, macro, [], [], day=day)
+    assert row["vix"] == 19.0

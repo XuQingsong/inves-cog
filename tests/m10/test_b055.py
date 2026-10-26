@@ -517,3 +517,87 @@ def test_w7_three_page_digest(pages):
     assert "AI 产业链 23 只同日下跌" in text
     assert "英伟达获得大单" in text
     assert "按 10月22日 收盘估算" in text
+
+
+_EARNINGS_DDL = """
+CREATE TABLE IF NOT EXISTS ingest.earnings_calendar (
+    ticker text, report_date date, time text CHECK (time IN ('pre','post','unknown')),
+    eps_forecast numeric, n_estimates int, market_cap numeric, company text,
+    source text, fetched_at timestamptz, PRIMARY KEY (ticker, report_date, source)
+)
+"""
+_ECON_DDL = """
+CREATE TABLE IF NOT EXISTS ingest.econ_calendar (
+    event_date date, event_time_et text, country text, name text,
+    actual text, consensus text, previous text, source text, fetched_at timestamptz
+)
+"""
+
+
+def test_b063_calendar_vix_and_earnings(pages):
+    """A-023 calendar tables present: week/mine/near + econ whitelist + safe_url (B-063)."""
+    admin = pages["admin"]
+    admin.execute(_EARNINGS_DDL)
+    admin.execute(_ECON_DDL)
+    seen = CLOCK.now_utc()
+    try:
+        admin.execute("DELETE FROM ingest.earnings_calendar")
+        admin.execute("DELETE FROM ingest.econ_calendar")
+        rows = [
+            ("NVDA", DAY + timedelta(days=2), "post", 5.5, 40, None, "NVIDIA"),
+            ("MSFT", DAY + timedelta(days=3), "post", 2.9, 30, 3000000, "Microsoft"),
+            ("XYZ", DAY + timedelta(days=4), "pre", 1.0, 5, 10, "Small Cap"),
+        ]
+        for ticker, when, span, eps, count, cap, company in rows:
+            admin.execute(
+                """
+                INSERT INTO ingest.earnings_calendar (
+                    ticker, report_date, time, eps_forecast, n_estimates, market_cap, company, source, fetched_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'nasdaq', %s)
+                """,
+                (ticker, when, span, eps, count, cap, company, seen),
+            )
+        for name, when, tm, country in (
+            ("FOMC Statement", DAY + timedelta(days=4), "14:00", "United States"),
+            ("Atlanta Fed GDPNow", DAY + timedelta(days=4), "10:00", "United States"),
+            ("Initial Jobless Claims", DAY + timedelta(days=5), "08:30", "United States"),
+            ("Initial Jobless Claims", DAY + timedelta(days=5), "08:30", "United States"),
+            ("Some EU Event", DAY + timedelta(days=5), "09:00", "Euro Area"),
+        ):
+            admin.execute(
+                """
+                INSERT INTO ingest.econ_calendar (
+                    event_date, event_time_et, country, name, actual, consensus, previous, source, fetched_at
+                ) VALUES (%s, %s, %s, %s, '', '', '', 'nasdaq', %s)
+                """,
+                (when, tm, country, name, seen),
+            )
+        admin.execute(
+            """
+            INSERT INTO ingest.info_items (
+                info_id, kind, published_at, first_seen_at, source, source_level, headline,
+                tickers, entities, url, extraction_status, flags, payload, extraction_source
+            ) VALUES (
+                'b063-jsurl', 'news', %s, %s, 'fixture', 1, 'NVDA javascript url', '{NVDA}', '{}',
+                'javascript:alert(1)', 'ok', '{}', '{}', '{}'
+            )
+            """,
+            (SEEN, SEEN),
+        )
+        market = _json(pages, "/api/pages/brief/market")
+        week = [e["ticker"] for e in market["earnings"]["week"]]
+        assert "MSFT" in week and "NVDA" in week
+        mine = [e["ticker"] for e in market["earnings"]["mine"]]
+        assert mine[0] == "NVDA"
+        assert any(e.get("market_cap") is None for e in market["earnings"]["mine"] if e["ticker"] == "NVDA")
+        names = [e["name"] for e in market["econ"]]
+        assert "FOMC Statement" in names and "GDPNow" not in " ".join(names)
+        assert names.count("Initial Jobless Claims") == 1 and "Some EU Event" not in names
+        html = _get(pages, "/").text
+        assert "javascript:" not in html
+        account = _get(pages, "/account").text
+        assert "财报临近" in account and "NVDA" in account
+    finally:
+        admin.execute("DELETE FROM ingest.info_items WHERE info_id = 'b063-jsurl'")
+        admin.execute("DELETE FROM ingest.earnings_calendar")
+        admin.execute("DELETE FROM ingest.econ_calendar")

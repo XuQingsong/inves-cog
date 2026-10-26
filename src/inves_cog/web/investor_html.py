@@ -330,6 +330,7 @@ def _mood(payload, heading):
     _pd = payload.get("date")
     if asof and _pd and str(asof)[:10] < str(_pd)[:10]:
         source += "（截至 " + str(asof)[5:10].replace("-", "/") + "）"
+
     vix3m, prev3m = payload.get("vix3m"), payload.get("vix3m_prev")
     if vix3m is None:
         term = _miss()
@@ -351,7 +352,9 @@ def _mood(payload, heading):
     vix_html = _miss() if vix is None else f'<span class="num">{float(vix):.2f}</span>'
     return (
         f'<div class="card"><h2>{_text(heading)}</h2>'
-        f'<div class="small muted">VIX{_text(source)}</div>{gauge}'
+        f'<div class="small muted">VIX{_text(source)}'
+        + (' <span class="chip stale">过期</span>' if payload.get("vix_stale") else "")
+        + f"</div>{gauge}"
         '<div class="kv">'
         f'<span class="k">VIX</span><span>{vix_html}</span>'
         f'<span class="k">3 个月 VIX</span><span>{term}</span>'
@@ -553,12 +556,7 @@ def _is_move(row):
     return (ret is not None and abs(float(ret)) >= _MOVE) or (vol is not None and float(vol) >= 2)
 
 
-def _short_stale(short, day):
-    when = _as_date(short.get("settlement")) if isinstance(short, dict) else None
-    return when is not None and day is not None and (day - when).days > _SHORT_STALE
-
-
-def _crowded(row, day):
+def _overbought(row):
     tech = row.get("tech")
     return isinstance(tech, dict) and tech.get("rsi_state") == "超买"
 
@@ -590,7 +588,7 @@ def _stock_row(payload, row, day):
             f'data-held="{1 if held else 0}"',
             f'data-buy="{1 if buy else 0}"',
             f'data-move="{1 if _is_move(row) else 0}"',
-            f'data-crowd="{1 if _crowded(row, day) else 0}"',
+            f'data-crowd="{1 if _overbought(row) else 0}"',
             f'data-chg="{_num_attr(ret)}"',
             f'data-vol="{_num_attr(vol)}"',
             f'data-rsi="{_num_attr(rsi)}"',
@@ -1789,6 +1787,11 @@ def _num_attr(value):
 # ---------- B-063 today-page news modules ----------
 
 
+def _safe_url(url):
+    text = str(url or "")
+    return text if text.startswith(("http://", "https://")) else "#"
+
+
 def _hm(iso):
     try:
         moment = _parse_iso(iso)
@@ -1847,7 +1850,7 @@ def _nlate(item):
 
 def _news_row(item, held):
     title = _text(item.get("headline") or item.get("summary"))
-    url = _text(item.get("url") or "#")
+    url = _text(_safe_url(item.get("url")))
     return (
         f'<div class="nrow"><span class="tm">{_hm(item.get("published_at") or item.get("published"))}</span>'
         f'<div class="hl">{_ntags(item)}<a href="{url}" target="_blank" rel="noopener">{title}</a> {_nlate(item)}</div>'
@@ -1907,7 +1910,7 @@ def _theme_news_module(payload):
         rows.append(
             f'<div class="nrow"><span class="tm">{_hm(n.get("published_at") or n.get("published"))}</span>'
             f'<div class="hl"><span class="tag macro">{_text(n.get("theme"))}</span>'
-            f'<a href="{_text(n.get("url") or "#")}" target="_blank" rel="noopener">'
+            f'<a href="{_text(_safe_url(n.get("url")))}" target="_blank" rel="noopener">'
             f"{_text(n.get('headline'))}</a> {_nlate(n)}</div>"
             f'<span class="codes">{_ncodes(n, held)}</span></div>'
         )
@@ -1955,7 +1958,7 @@ def _cal_mine(e):
     line = f"{_e_time(e)} {_md_local(e['report_date'])} · 预期 EPS {_e_eps(e)}"
     pvs = "".join(
         f'<div class="pv"><span class="tag hot">财报前瞻</span>'
-        f'<a href="{_text(n.get("url") or "#")}" target="_blank" rel="noopener">'
+        f'<a href="{_text(_safe_url(n.get("url")))}" target="_blank" rel="noopener">'
         f"{_text(n.get('headline'))}</a></div>"
         for n in e.get("previews") or []
     )

@@ -274,9 +274,10 @@ def test_s4_vix_fallback_four_ways(pages):
     try:
         admin.execute("UPDATE marketstate.market SET vix = 18.72 WHERE trade_date = %s", (DAY,))
         both, both_html = shown()
-        assert both["vix"] == pytest.approx(18.72)
-        assert both["vix_source"] == "CBOE"
-        assert "18.72" in both_html and "来源 FRED" not in both_html
+        # B-063: the page resolves VIX from ingest.macro_observations, not marketstate.market.
+        assert both["vix"] == pytest.approx(19.03)
+        assert both["vix_source"] == "FRED"
+        assert "来源 CBOE" not in both_html
         admin.execute(
             """
             DELETE FROM ingest.macro_observations
@@ -285,9 +286,8 @@ def test_s4_vix_fallback_four_ways(pages):
             (DAY,),
         )
         market_only, market_html = shown()
-        assert market_only["vix"] == pytest.approx(18.72)
-        assert market_only["vix_source"] == "CBOE"
-        assert "来源 FRED" not in market_html
+        assert market_only["vix"] == pytest.approx(11.11)
+        assert market_only["vix_source"] == "FRED"
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         neither, neither_html = shown()
         # B-063: stale series fall back to the latest observation with an as-of note.
@@ -339,3 +339,53 @@ def test_s6_two_pages_stay_in_plain_language(pages):
     assert "拥挤" not in " ".join(_visible(stocks).split()) and "空头" not in stocks
     for path in ("/", "/stocks", "/account", "/trust"):
         assert _get(pages, path).status_code == 200
+
+
+def test_s7_vix_yahoo_source_label(pages):
+    """VIX_YAHOO wins the same-day slot when VIX_CBOE is missing (B-063 order)."""
+    admin = pages["admin"]
+    admin.execute(
+        """
+        INSERT INTO ingest.macro_observations (
+            series_id, observation_date, value, units, realtime_start, fetched_at
+        ) VALUES ('VIX_YAHOO', %s, 20.5, 'index', %s, %s)
+        """,
+        (DAY, DAY, CLOCK.now_utc()),
+    )
+    try:
+        market = _json(pages, "/api/pages/brief/market")
+        assert market["vix"] == pytest.approx(20.5)
+        assert market["vix_source"] == "Yahoo"
+        assert "Yahoo" in _get(pages, "/").text
+    finally:
+        admin.execute(
+            "DELETE FROM ingest.macro_observations WHERE series_id = 'VIX_YAHOO' AND observation_date = %s", (DAY,)
+        )
+
+
+def test_s8_stale_vix_marks_trust_and_page(pages):
+    """Latest value older than 3 sessions renders 过期 on the page and trust (B-063)."""
+    admin = pages["admin"]
+    try:
+        admin.execute(
+            "DELETE FROM ingest.macro_observations WHERE series_id = 'VIXCLS' AND observation_date >= %s",
+            (DAY - timedelta(days=1),),
+        )
+        admin.execute(
+            """
+            INSERT INTO ingest.macro_observations (
+                series_id, observation_date, value, units, realtime_start, fetched_at
+            ) VALUES ('VIX_CBOE', %s, 17.7, 'index', %s, %s)
+            """,
+            (DAY - timedelta(days=6), DAY - timedelta(days=6), CLOCK.now_utc()),
+        )
+        market = _json(pages, "/api/pages/brief/market")
+        assert market["vix"] == pytest.approx(17.7)
+        assert market["vix_source"] == "CBOE" and market["vix_stale"]
+        assert "过期" in _get(pages, "/").text
+        states = {row["item"]: row["state"] for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
+        assert states["VIX"] == "过期"
+    finally:
+        admin.execute("DELETE FROM ingest.macro_observations WHERE series_id = 'VIX_CBOE'")
+        _clear(admin)
+        _seed(admin)

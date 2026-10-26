@@ -26,7 +26,6 @@ from inves_cog.web.brief import (
     _parse_ts,
     _reports,
     _rows,
-    _short_view,
     _themes,
     _visible_anomalies,
     event_reasons,
@@ -35,7 +34,6 @@ from inves_cog.web.brief import (
     half_up,
     human_reason,
     level,
-    parse_settlement,
     volume_multiple,
 )
 from inves_cog.web.pages import _tickers
@@ -273,30 +271,6 @@ def _sessions(connection, day, symbol):
     )
     found = {row["session"]: row for row in rows}
     return found.get("close"), found.get("post")
-
-
-def _short_for(connection, symbol, cap, cached):
-    view = cached.get(symbol)
-    if view is not None:
-        return view
-    row = _one(
-        connection,
-        """
-        SELECT settlement_date, days_to_cover, si_pct_shares_outstanding, raw
-        FROM ingest.short_interest
-        WHERE ticker = %s AND settlement_date <= %s
-        ORDER BY settlement_date DESC, observation_id DESC
-        LIMIT 1
-        """,
-        (symbol, cap),
-    )
-    if row is None:
-        return None
-    raw = row.get("raw") if isinstance(row.get("raw"), dict) else {}
-    parsed = parse_settlement(raw.get("settlementDate")) or parse_settlement(row.get("settlement_date"))
-    if parsed is not None and parsed > cap:
-        return None
-    return _short_view(row)
 
 
 def _news(connection, symbol, cutoff):

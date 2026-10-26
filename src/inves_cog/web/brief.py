@@ -294,31 +294,6 @@ def settlement_label(day):
     return f"{day.month}/{day.day} 结算"
 
 
-def short_sentence(view):
-    """Conclusion first when the name is crowded, then the four upstream figures."""
-    head = "空头拥挤 " if view["crowded"] else ""
-    return (
-        f"{head}占比 {format_points_plain(view['pct'], 1)}，"
-        f"回补 {format_days(view['days'])} 天，"
-        f"较上期 {format_points_signed(view['change'], 1)}，"
-        f"{settlement_label(view['settlement'])}"
-    )
-
-
-def theme_short_summary(members):
-    """Arithmetic mean of members that have a share. Missing members stay out of the denominator."""
-    values = []
-    for row in members:
-        short = row.get("short")
-        if short is not None and short.get("pct") is not None:
-            values.append(short["pct"])
-    covered = len(values)
-    total = len(members)
-    average = None if covered == 0 else sum(values) / covered
-    text = f"{format_points_plain(average, 1)}（覆盖 {covered}/{total}）"
-    return average, covered, total, text
-
-
 def _recent_sessions(day, count):
     found = []
     cursor = day
@@ -355,14 +330,6 @@ def option_sentence(view):
     return f"{format_ratio(view['value'])}（{view['label']}），近 20 个交易日 {rank}{tone}"
 
 
-def short_status(latest, day):
-    """Calendar age. More than 20 days since the latest settlement is stale."""
-    if latest is None:
-        return MISSING, None
-    state = "过期" if (day - latest).days > SHORT_STALE_DAYS else "新鲜"
-    return state, f"结算 {latest.month}/{latest.day}"
-
-
 def option_status(rows, day):
     """Session age. More than 2 trading days since the latest print is stale."""
     dates = [
@@ -388,86 +355,6 @@ def _change_percent(raw):
     if not isinstance(raw, dict):
         return None
     return _metric(raw.get("changePercent"))
-
-
-def _short_view(row):
-    pct = _metric(row.get("si_pct_shares_outstanding"))
-    days = _metric(row.get("days_to_cover"))
-    if pct is None and days is None:
-        return None
-    return {
-        "pct": pct,
-        "days": days,
-        "change": _change_percent(row.get("raw")),
-        "settlement": row.get("settlement_date"),
-        "crowded": short_crowded(pct, days),
-    }
-
-
-def parse_settlement(value):
-    """Accept a date, or the ISO / compact / US strings FINRA sends."""
-    if isinstance(value, datetime):
-        return value.date()
-    if isinstance(value, date):
-        return value
-    if value is None:
-        return None
-    text = str(value).strip()
-    for fmt, size in (("%Y-%m-%d", 10), ("%Y%m%d", 8), ("%m/%d/%Y", 10), ("%m/%d/%y", 8)):
-        try:
-            return datetime.strptime(text[:size], fmt).date()
-        except ValueError:
-            continue
-    return None
-
-
-def _load_shorts(connection, tickers, cap):
-    if not tickers:
-        return {}, None, []
-    rows = _rows(
-        connection,
-        """
-        SELECT ticker, settlement_date, days_to_cover, si_pct_shares_outstanding, raw
-        FROM ingest.short_interest
-        WHERE ticker = ANY(%s) AND settlement_date IS NOT NULL
-        ORDER BY ticker, settlement_date, observation_id
-        """,
-        (list(tickers),),
-    )
-    grouped = {}
-    future = []
-    for row in rows:
-        column = parse_settlement(row.get("settlement_date"))
-        raw = row.get("raw") if isinstance(row.get("raw"), dict) else {}
-        parsed = parse_settlement(raw.get("settlementDate")) or column
-        effective = parsed if parsed is not None else column
-        if effective is None:
-            continue
-        if effective > cap:
-            future.append({"ticker": row["ticker"], "settlement": effective})
-            continue
-        stored = dict(row)
-        stored["settlement_date"] = effective
-        grouped.setdefault(row["ticker"], []).append(stored)
-    views = {}
-    latest = None
-    for ticker, items in grouped.items():
-        view = _short_view(items[-1])
-        if view is None:
-            continue
-        views[ticker] = view
-        settlement = view["settlement"]
-        if latest is None or settlement > latest:
-            latest = settlement
-    seen = []
-    found = set()
-    for item in future:
-        key = (item["ticker"], item["settlement"])
-        if key in found:
-            continue
-        found.add(key)
-        seen.append(item)
-    return views, latest, seen
 
 
 def _load_option_rows(connection, cap):
@@ -537,17 +424,45 @@ def _series_latest(connection, series, cap):
     return None, None, None
 
 
-def _fred_vix(connection, day, cap):
-    """Latest visible VIX: CBOE -> Yahoo -> FRED. Returns (value, source, as_of)."""
-    if day > cap:
-        return None, None, None
-    return _series_latest(connection, VIX_SERIES, cap)
+VIX_STALE_SESSIONS = 3
 
 
-def _fred_vix3m(connection, day, cap):
-    if day > cap:
-        return None, None, None
-    return _series_latest(connection, VIX3M_SERIES, cap)
+def _series_today(connection, series, day, cap):
+    """Same-day observation in preference order."""
+    for series_id, label in series:
+        row = _one(
+            connection,
+            """
+            SELECT value
+            FROM ingest.macro_observations
+            WHERE series_id = %s AND observation_date = %s AND realtime_start <= %s
+            ORDER BY realtime_start DESC
+            LIMIT 1
+            """,
+            (series_id, day, cap),
+        )
+        if row is not None and row["value"] is not None:
+            return _metric(row["value"]), label, day
+    return None, None, None
+
+
+def _vix_resolve(connection, day, cap):
+    """VIX: same-day CBOE -> Yahoo -> FRED; else latest visible with as-of + stale flag."""
+    value, source, asof = _series_today(connection, VIX_SERIES, day, cap)
+    if value is not None:
+        return value, source, asof, False
+    value, source, asof = _series_latest(connection, VIX_SERIES, cap)
+    stale = asof is not None and session_gap(asof, day) > VIX_STALE_SESSIONS
+    return value, source, asof, stale
+
+
+def _vix3m_resolve(connection, day, cap):
+    value, source, asof = _series_today(connection, VIX3M_SERIES, day, cap)
+    if value is not None:
+        return value, source, asof, False
+    value, source, asof = _series_latest(connection, VIX3M_SERIES, cap)
+    stale = asof is not None and session_gap(asof, day) > VIX_STALE_SESSIONS
+    return value, source, asof, stale
 
 
 def sell_params(version):
@@ -1433,10 +1348,11 @@ def _member_events(anomalies, catalog, stocks):
     return membership
 
 
-def _statuses(fresh, vix, overlay, pending_late, plan, valuation_status):
+def _statuses(fresh, vix, vix_stale, overlay, pending_late, plan, valuation_status):
+    vix_state = MISSING if vix is None else ("过期" if vix_stale else "已有")
     return [
         {"item": "新闻", "state": "新鲜" if fresh else "缺失"},
-        {"item": "VIX", "state": "已有" if vix is not None else MISSING},
+        {"item": "VIX", "state": vix_state},
         {"item": "M9", "state": "已上线" if overlay else "未上线/缺失"},
         {"item": "估值", "state": valuation_status},
         {"item": "订单", "state": "警示" if pending_late else "正常"},
@@ -1524,24 +1440,13 @@ def _context(connection, day, clock):
     sell = sell_params(version)
     swing = swing_params(version)
     cap = _visible_cap(day, cutoff)
-    shorts, latest_short, short_future = _load_shorts(connection, pool, cap)
     option_rows = _load_option_rows(connection, cap)
-    short_state, short_detail = short_status(latest_short, day)
     option_state, option_detail = option_status(option_rows, day)
-    market_vix = None if market is None else _metric(market["vix"])
-    if market_vix is not None:
-        resolved_vix, vix_source, vix_asof = market_vix, "CBOE", day
-    else:
-        resolved_vix, vix_source, vix_asof = _fred_vix(connection, day, cap)
-    vix3m = None if market is None else _metric(market["vix3m"])
-    vix3m_source = "CBOE" if vix3m is not None else None
-    if vix3m is None:
-        vix3m, vix3m_source, vix3m_asof = _fred_vix3m(connection, day, cap)
-    else:
-        vix3m_asof = day
+    resolved_vix, vix_source, vix_asof, vix_stale = _vix_resolve(connection, day, cap)
+    vix3m, vix3m_source, vix3m_asof, vix3m_stale = _vix3m_resolve(connection, day, cap)
     option = _option_view(option_rows, day)
     option_latest = max((row["trade_date"] for row in option_rows if row["trade_date"] <= day), default=None)
-    option_stale = option_latest is not None and session_gap(option_latest, day) > 3
+    option_stale = option_latest is not None and session_gap(option_latest, day) > OPTION_STALE_SESSIONS
     # News rules layer: classify every item stored for this session.
     from inves_cog.perception.news.rules import rank_day
 
@@ -1553,7 +1458,7 @@ def _context(connection, day, clock):
         day,
     )
     technicals = _technicals(bars, day)
-    earnings = _earnings_calendar(connection)
+    earnings = _earnings_calendar(connection, day)
     econ = _econ_calendar(connection, day)
     return {
         "day": day,
@@ -1597,9 +1502,11 @@ def _context(connection, day, clock):
         "vix": resolved_vix,
         "vix_source": vix_source,
         "vix_asof": vix_asof,
+        "vix_stale": vix_stale,
         "vix3m_fb": vix3m,
         "vix3m_source": vix3m_source,
         "vix3m_asof": vix3m_asof,
+        "vix3m_stale": vix3m_stale,
         "news_ranked": news_ranked,
         "technicals": technicals,
         "earnings_cal": earnings,
@@ -1767,17 +1674,6 @@ def _themes(context, day):
     return ordered
 
 
-def _attach_short(member, view):
-    if view is None:
-        member["short"] = None
-        member["short_text"] = MISSING
-        return
-    stored = dict(view)
-    stored["text"] = short_sentence(stored)
-    member["short"] = stored
-    member["short_text"] = stored["text"]
-
-
 def _theme_line(_sector, average, members):
     volume = theme_average([row["volume_multiple"] for row in members])
     return theme_sentence(average, volume, [row["rsi"] for row in members])
@@ -1918,7 +1814,7 @@ def page_brief_market(connection, day, clock):
     else:
         mood = "情绪：谨慎，未恐慌"
     _wmovers = _wide_movers(connection, day)
-    _wm = {"up": _wmovers[:5], "down": _wmovers[-5:][::-1] if len(_wmovers) >= 5 else _wmovers}
+    _wm = {"up": _wmovers[:5], "down": sorted(_wmovers, key=lambda r: r["ret"])[:5]}
     fallen = "、".join(row["name"] for row in down[:2])
     risen = "、".join(row["name"] for row in up[:2])
     funds = f"资金：{fallen}领跌，{risen}领涨"
@@ -1946,7 +1842,7 @@ def page_brief_market(connection, day, clock):
         "vix_source": context["vix_source"],
         "put_call": context["option"],
         "put_call_text": MISSING if context["option"] is None else context["option"]["text"],
-        "vix3m": None if market is None else market["vix3m"],
+        "vix3m": context["vix3m_fb"],
         "vix3m_prev": _previous_vix3m(connection, day),
         "down_share_5d_pct": None if market is None else market["down_share_5d_pct"],
         "spy_drawdown_252_pct": None if market is None else market["spy_drawdown_252_pct"],
@@ -1968,6 +1864,10 @@ def page_brief_market(connection, day, clock):
         ),
         "econ": _econ_module(context["econ_cal"]),
         "vix_asof": context["vix_asof"],
+        "vix_stale": context["vix_stale"],
+        "vix3m_source": context["vix3m_source"],
+        "vix3m_asof": context["vix3m_asof"],
+        "vix3m_stale": context["vix3m_stale"],
         "implication": implication,
         "pool_count": len(context["pool"]),
         "formulas": list(FORMULAS),
@@ -2087,6 +1987,7 @@ def page_brief_account(connection, day, clock):
             "disaster_peak_fraction": context["sell"]["disaster_peak_fraction"],
             "below_days": dict(context["sell"]["below_days"]),
         },
+        "earnings_near": _account_earnings_near(context, day),
         "formulas": list(FORMULAS),
         "label": PAPER_LABEL,
     } | packed
@@ -2179,6 +2080,7 @@ def page_brief_trust(connection, day, clock):
     statuses = _statuses(
         context["fresh"],
         vix,
+        context["vix_stale"],
         _overlay_present(connection, day, context["cutoff"]),
         late,
         context["plan"],
@@ -2236,7 +2138,7 @@ def _table_exists(connection, name):
     return row is not None and row["t"] is not None
 
 
-def _earnings_calendar(connection):
+def _earnings_calendar(connection, day):
     if not _table_exists(connection, "ingest.earnings_calendar"):
         return None
     rows = _rows(
@@ -2244,7 +2146,10 @@ def _earnings_calendar(connection):
         """
         SELECT ticker, report_date, time, eps_forecast, n_estimates, market_cap, company
         FROM ingest.earnings_calendar
+        WHERE report_date > %s AND report_date <= %s + 14
+        ORDER BY report_date, ticker
         """,
+        (day, day),
     )
     return rows
 
@@ -2312,7 +2217,7 @@ def _earnings_modules(earnings, day, pool, held, ranked):
     items = list(seen.values())
     week_pool = sorted(
         (r for r in items if day < r["report_date"] <= day + timedelta(days=8)),
-        key=lambda r: -_money_cap(r.get("market_cap")) or 0,
+        key=lambda r: -(_money_cap(r.get("market_cap")) or 0),
     )[:10]
     week = sorted(week_pool, key=lambda r: (r["report_date"], -(_money_cap(r.get("market_cap")) or 0)))
     universe = set(pool) | set(held)
