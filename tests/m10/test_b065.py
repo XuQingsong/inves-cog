@@ -42,7 +42,7 @@ def _roles(admin):
 
 def _clear(admin):
     admin.execute("DELETE FROM ingest.intraday_snapshots WHERE source = 'b065'")
-    admin.execute("DELETE FROM ingest.macro_observations WHERE series_id = 'DGS2' AND source = 'b065'")
+    admin.execute("DELETE FROM ingest.macro_observations WHERE series_id = 'DGS2' AND observation_date = %s", (PREV,))
     admin.execute("DELETE FROM trading.ledger WHERE portfolio_id = %s", (PORTFOLIO,))
     admin.execute("DELETE FROM marketstate.daily WHERE trade_date IN (%s, %s)", (DAY, PREV))
     admin.execute("DELETE FROM marketstate.rotation WHERE trade_date IN (%s, %s)", (DAY, PREV))
@@ -51,7 +51,8 @@ def _clear(admin):
 
 def _snap(admin, ticker, last, prev_close, session="pre", minutes=30):
     admin.execute(
-        "INSERT INTO ingest.intraday_snapshots (ticker, as_of, session, last, prev_close, delay_minutes, source, fetched_at)"
+        "INSERT INTO ingest.intraday_snapshots"
+        " (ticker, as_of, session, last, prev_close, delay_minutes, source, fetched_at)"
         " VALUES (%s, %s, %s, %s, %s, 15, 'b065', %s)",
         (ticker, SEEN + timedelta(minutes=minutes), session, last, prev_close, SEEN + timedelta(minutes=minutes)),
     )
@@ -93,9 +94,10 @@ def _seed(admin):
     _snap(admin, "^TNX", 4.40, 4.408)  # -0.8BP
     _snap(admin, "NVDA", 200.4, 200.0)  # sector avg uses snapshot
     admin.execute(
-        "INSERT INTO ingest.macro_observations (series_id, observation_date, value, source, fetched_at)"
-        " VALUES ('DGS2', %s, 3.85, 'b065', %s)",
-        (PREV, SEEN),
+        "INSERT INTO ingest.macro_observations"
+        " (series_id, observation_date, value, units, realtime_start, fetched_at)"
+        " VALUES ('DGS2', %s, 3.85, 'pct', %s, %s)",
+        (PREV, PREV, SEEN),
     )
 
 
