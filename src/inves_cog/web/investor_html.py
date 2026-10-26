@@ -1858,8 +1858,8 @@ def _sector_strip(payload):
         detail.append(held)
         cells.append(
             f'<a class="scell" href="/stocks#{_text(c["slug"])}"><span class="sname">{_text(c["sector"])}</span>'
-            f'<span class="num {cls}">{_text(_pct(avg))}</span>'
-            f'<span class="small muted">{" · ".join(d for d in detail if d)}</span></a>'
+            f'<span class="num {cls}">{_pct(avg)}</span>'
+            f'<span class="small muted">{_text(" · ".join(d for d in detail if d))}</span></a>'
         )
     return f'<div class="card sstrip" id="sstrip"><div class="sector-grid">{"".join(cells)}</div></div>'
 
