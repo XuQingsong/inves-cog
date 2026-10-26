@@ -1,11 +1,12 @@
 """Investor stock page. Derived display only; scores, states and valuation stay upstream."""
 
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.fundamentals.health import BLOCKING
 from inves_cog.ingest.market import NY
+from inves_cog.perception.news.rules import rank_day
 from inves_cog.trading.scoring.rules import BOOK_KEYS, ENTRY, EXCLUDED
 from inves_cog.web.brief import (
     MISSING,
@@ -15,6 +16,7 @@ from inves_cog.web.brief import (
     _books,
     _card_for,
     _context,
+    _day_window,
     _event_title,
     _holding_row,
     _member,
@@ -27,7 +29,6 @@ from inves_cog.web.brief import (
     _short_view,
     _themes,
     _visible_anomalies,
-    _visible_cap,
     event_reasons,
     format_fraction,
     format_points,
@@ -35,7 +36,6 @@ from inves_cog.web.brief import (
     human_reason,
     level,
     parse_settlement,
-    short_sentence,
     volume_multiple,
 )
 from inves_cog.web.pages import _tickers
@@ -532,7 +532,9 @@ def _sentences(symbol, trend, short_text, resid_text, sector, theme_ret, news, e
         f"近 60 日 {format_fraction(trend['ret_60'])}。"
     )
     theme_name = sector or MISSING
-    funds_parts = [p for p in (short_text, resid_text, f"{theme_name}当日 {format_fraction(theme_ret)}") if p and p != MISSING]
+    funds_parts = [
+        p for p in (short_text, resid_text, f"{theme_name}当日 {format_fraction(theme_ret)}") if p and p != MISSING
+    ]
     funds_sentence = "；".join(funds_parts) + "。"
     if news:
         news_sentence = f"最近 {len(news)} 条，最新：{news[0]['summary']}。"
@@ -606,7 +608,6 @@ def page_brief_stock(connection, day, clock, symbol):
     context, closed = _context(connection, day, clock)
     if closed is not None:
         return closed
-    cap = _visible_cap(day, context["cutoff"])
     bars = _bars(connection, symbol, day)
     gate = _gate_score(_score_row(connection, day, symbol))
     score_row = (
@@ -631,7 +632,6 @@ def page_brief_stock(connection, day, clock, symbol):
     valuation = _card_for(context, symbol, score_row, member["price"])
     # Fair and neutral prices stay off this payload.
     valuation.pop("neutral", None)
-    short = None
     short_text = None
     resid = None if close_row is None else _num(close_row["resid_z"])
     sector, theme_ret = _theme_view(context, day, symbol)
@@ -728,8 +728,6 @@ def covered_gate_reasons():
 
 def _news_feed(connection, symbol, day, context):
     """This ticker's last-7-day news, ranked by importance then time."""
-    from inves_cog.perception.news.rules import rank_day
-
     start, end = _day_window(day)
     start = start - timedelta(days=7)
     rows = _rows(
@@ -763,11 +761,7 @@ def _news_feed(connection, symbol, day, context):
     held = set(context["positions"])
     universe = set(context["pool"]) | held
     ranked = rank_day(items, universe, held, day)
-    feed = [
-        n
-        for n in ranked
-        if symbol in n["rule"].primary_tickers or symbol in n["tickers"]
-    ]
+    feed = [n for n in ranked if symbol in n["rule"].primary_tickers or symbol in n["tickers"]]
     feed.sort(key=lambda n: (-n["rule"].importance, -(n["published"].timestamp() if n["published"] else 0)))
     return feed[:15]
 

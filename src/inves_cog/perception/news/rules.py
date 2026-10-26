@@ -3,9 +3,10 @@
 Read-time computation only; nothing is written back to ingest. The rules were
 tuned against the production dump in docs/phase1/design/prototype-v2/build.py.
 """
+
 import re
 from dataclasses import dataclass, field
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
 NY = ZoneInfo("America/New_York")
@@ -13,8 +14,16 @@ NY = ZoneInfo("America/New_York")
 STRONG_RATING = re.compile(r"upgrade|downgrade|initiates? coverage", re.I)
 
 TAG_RULES = [
-    ("财报", r"\b(earnings|EPS|revenue|quarterly results|Q[1-4] results|financial results)\b|reports? (third|second|first|fourth) quarter"),
-    ("财报前瞻", r"earnings preview|what to expect|ahead of earnings|earnings (on deck|this week)|priced for .* swings|earnings volatility"),
+    (
+        "财报",
+        r"\b(earnings|EPS|revenue|quarterly results|Q[1-4] results|financial results)\b"
+        r"|reports? (third|second|first|fourth) quarter",
+    ),
+    (
+        "财报前瞻",
+        r"earnings preview|what to expect|ahead of earnings|earnings (on deck|this week)"
+        r"|priced for .* swings|earnings volatility",
+    ),
     ("评级", r"upgrade|downgrade|initiates? coverage|price target|\bPT\b|reiterat"),
     ("指引", r"guidance|outlook|raises? (FY|full-year)|lowers? (FY|full-year)|cuts? forecast"),
     ("并购", r"merger|acquisition|acquires?|takeover|buyout|to buy\b"),
@@ -97,7 +106,9 @@ def rank_day(items, universe, holdings, day):
         rule = classify(item.get("headline"), item.get("tickers"), universe, holdings)
         published = _ts(item.get("published_at"))
         seen = _ts(item.get("first_seen_at")) or published
-        classified.append({**item, "rule": rule, "published": published, "seen": seen, "late": seen is not None and seen > late_cut})
+        classified.append(
+            {**item, "rule": rule, "published": published, "seen": seen, "late": seen is not None and seen > late_cut}
+        )
     best = {}
     for item in sorted(classified, key=lambda x: (x["published"] or datetime.min.replace(tzinfo=NY))):
         best.setdefault(item["rule"].dedup_key, item)

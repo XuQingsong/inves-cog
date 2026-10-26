@@ -40,7 +40,12 @@ def technicals(closes, volumes=None):
     """
     n = len(closes)
     if n < 30:
-        return {"shape": "数据不足", "rsi": wilder_rsi(closes), "rsi_state": _rsi_state(wilder_rsi(closes)), "signals": []}
+        return {
+            "shape": "数据不足",
+            "rsi": wilder_rsi(closes),
+            "rsi_state": _rsi_state(wilder_rsi(closes)),
+            "signals": [],
+        }
     ma20, ma50, ma200 = _ma(closes, 20), _ma(closes, 50), _ma(closes, 200)
     prev_ma50 = sum(closes[-60:-10]) / 50 if n >= 60 else None
     close = closes[-1]
@@ -75,12 +80,12 @@ def technicals(closes, volumes=None):
             signals.append("跌破 20 日新低")
         a50 = sum(closes[max(0, i - 49) : i + 1])
         b50 = sum(closes[max(0, i - 50) : i])
-        a200 = sum(closes[max(0, i - 199) : i + 1])
         b200 = sum(closes[max(0, i - 200) : i])
+        a200 = sum(closes[max(0, i - 199) : i + 1])
         if i >= 200 and i - 1 >= 199:
-            if b50 / 50 < b200 / 200 <= a50 / 50:
+            if b50 / 50 < b200 / 200 and a50 / 50 >= a200 / 200:
                 signals.append("金叉")
-            if b50 / 50 > b200 / 200 >= a50 / 50:
+            if b50 / 50 > b200 / 200 and a50 / 50 <= a200 / 200:
                 signals.append("死叉")
     return {"shape": shape, "rsi": rsi, "rsi_state": _rsi_state(rsi), "signals": signals}
 

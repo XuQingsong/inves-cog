@@ -1965,7 +1965,9 @@ def page_brief_market(connection, day, clock):
         "news_modules": _news_views(context),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
-        "earnings": _earnings_modules(context["earnings_cal"], day, context["pool"], set(context["positions"]), context["news_ranked"]),
+        "earnings": _earnings_modules(
+            context["earnings_cal"], day, context["pool"], set(context["positions"]), context["news_ranked"]
+        ),
         "econ": _econ_module(context["econ_cal"]),
         "vix_asof": context["vix_asof"],
         "implication": implication,
@@ -2285,11 +2287,7 @@ def _wide_movers(connection, day):
         {"day": day},
     )
     names = {row["ticker"] for row in rows}
-    clean = [
-        row
-        for row in rows
-        if not (WARRANT_SUFFIX.match(row["ticker"]) and row["ticker"][:-1] in names)
-    ]
+    clean = [row for row in rows if not (WARRANT_SUFFIX.match(row["ticker"]) and row["ticker"][:-1] in names)]
     return clean
 
 
@@ -2324,11 +2322,7 @@ def _earnings_modules(earnings, day, pool, held, ranked):
     for r in sorted(items, key=lambda x: x["report_date"]):
         if r["ticker"] not in universe or not (day < r["report_date"] <= day + timedelta(days=10)):
             continue
-        previews = [
-            n
-            for n in ranked
-            if "财报前瞻" in n["rule"].tags and r["ticker"] in n["rule"].primary_tickers
-        ][:3]
+        previews = [n for n in ranked if "财报前瞻" in n["rule"].tags and r["ticker"] in n["rule"].primary_tickers][:3]
         mine.append({**r, "held": r["ticker"] in held, "previews": previews})
     return {"week": week, "mine": mine, "near": _earnings_near(items, day, held)}
 
@@ -2402,7 +2396,9 @@ def _news_views(context):
     for theme, items in sorted(by_theme.items(), key=lambda kv: (-max(i["rule"].importance for i in kv[1]), kv[0])):
         items.sort(key=lambda n: (-n["rule"].importance, n["published"]))
         pick.extend({"theme": theme, **n} for n in items[:2])
-    pick.sort(key=lambda n: (-n["rule"].held, -n["rule"].importance, -(n["published"].timestamp() if n["published"] else 0)))
+    pick.sort(
+        key=lambda n: (-n["rule"].held, -n["rule"].importance, -(n["published"].timestamp() if n["published"] else 0))
+    )
     feed = [n for n in ranked if n["rule"].primary_tickers or n["rule"].macro][:40]
     movers_down = sorted((m for m in members.values() if m["ret"] is not None), key=lambda m: m["ret"])
     return {
