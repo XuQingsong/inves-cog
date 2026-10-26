@@ -392,3 +392,34 @@ def test_carryover_requires_close_session(pages):
         assert market["carry_from"] == str(PREV)
     finally:
         admin.execute("DELETE FROM marketstate.daily WHERE trade_date = %s AND session = 'post'", (DAY,))
+
+
+def test_translate_estimate_blocks_crossing_batch(monkeypatch):
+    # usage 49,990 tokens + estimated batch cost > 50,000 -> batch skipped
+    translate = _patch_candidates(monkeypatch, _items(2))
+    monkeypatch.setattr(translate, "_usage", lambda *a, **k: {"calls": 0, "tokens": 49990})
+    result = translate.translate_day(_StubConn({}), _StubConn({}), _FakeClient(), DAY, clock=CLOCK)
+    assert result["translated"] == 0
+
+
+def test_translate_failures_count_toward_cap(monkeypatch):
+    # llm_calls already has 6 rows (incl. failures) -> no request attempted
+    translate = _patch_candidates(monkeypatch, _items(2))
+    monkeypatch.setattr(translate, "_usage", lambda *a, **k: {"calls": 6, "tokens": 100})
+    client = _FakeClient()
+    translate.translate_day(_StubConn({}), _StubConn({}), client, DAY, clock=CLOCK)
+    assert client.calls == []
+
+
+def test_translate_payload_headlines_only(monkeypatch):
+    translate = _patch_candidates(monkeypatch, _items(2))
+    client = _FakeClient()
+    translate.translate_day(_StubConn({}), _StubConn({}), client, DAY, clock=CLOCK)
+    payload = client.calls[0][1]
+    assert set(payload) == {"system", "user", "count"}
+    # user payload is the prompt + a JSON array of headline strings, nothing else
+    import json as _json
+    import re as _re
+
+    titles = _json.loads(_re.search(r"\[.*\]", payload["user"], _re.S).group(0))
+    assert titles == [f"Headline {i}" for i in range(2)]
