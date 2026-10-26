@@ -201,3 +201,9 @@ PR81 head `9132f323d10595d63a75abc700dc22bd0c4a3394`，先失败测试 `a38bdcb`
 有界只读实测同一现有key：SPY snapshots feed=sip为403（无最近SIP订阅），iex为200且有盘前成交，delayed_sip为200且有盘前成交；截止当前减16分钟的历史SIP分钟线为200，04:00 ET起有成交。本次共5次请求（含1次上一交易日日线复权验证），无重试、无模型调用、无业务库写入。官方说明：[snapshots](https://docs.alpaca.markets/us/reference/stocksnapshots-1)将delayed_sip定义为15分钟延迟；[FAQ](https://docs.alpaca.markets/us/docs/market-data-faq)确认免费IEX与SIP历史15分钟限制；[历史bars](https://docs.alpaca.markets/us/reference/stockbars)支持all复权及asof日期。
 
 变更/已自行决定：本单使用已验证delayed_sip全市场快照，不采用IEX作为全市场替代；as_of取latestTrade原时间，delay_minutes按注入采集时间减实际成交时间向上取整、且不低于已核实的15分钟套餐延迟，不把陈旧成交写成零延迟。仅存当日04–20时段真实成交，不将前一日成交伪装成盘前新行情；prev_close另取上一交易日历史日线all复权、asof当天，与当天原始成交处于同一当前股数/除息口径。真实SPY快照及日线响应保存为离线夹具。频率及30天清理按原任务，不改交易/页面或A023运维观察。下一步先失败测试后实现，同一A024分支交付。
+
+## A-024 进行中（PR83已送验，完整CI运行中）
+
+[PR83](https://github.com/XuQingsong/inves-cog/pull/83)，完整head `e6dc3ed275e702ca8b3cdb9139e358470d2bb0c6`。先失败测试`cd13dd0`（15 failed/7 passed），再实现；实际配置股票池59只，采集并集包含SPY/QQQ/IWM与池外持仓，不漏重复代码。真实SPY快照/前日all复权响应已作夹具。时间取原成交时间、延迟实际向上取整且至少15分钟、前日陈旧成交不入本日快照；缺前收盘留NULL并标记健康降级，失败不重试同槽。按三时段频率与交易日运行，30天清理仅限新表，不改规则A或页面。
+
+目标与兼容回归61 passed，静态检查通过；真实本地隔离PostgreSQL已验证新表迁移、role_ingest写/role_web只读和严格早于30天清理，测试数据已回滚且测试库已停。准确head的phase1-blocking仍在运行，不冒称通过。下一步CI通过后送需求方验收，未合并、迁移生产或部署；首个交易日盘前首尾/条数及SPY公开报价对照待安装后自然验真。A023两日收盘观察继续，不重复启动。
