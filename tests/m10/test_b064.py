@@ -32,6 +32,21 @@ CREATE TABLE IF NOT EXISTS perception.news_translations (
     info_id text PRIMARY KEY, title_zh text NOT NULL, model text NOT NULL, translated_at timestamptz NOT NULL
 )
 """
+_CALENDAR_DDL = """
+CREATE TABLE IF NOT EXISTS ingest.earnings_calendar (
+    ticker text NOT NULL, report_date date NOT NULL,
+    time text NOT NULL CHECK (time IN ('pre','post','unknown')),
+    eps_forecast numeric, n_estimates int, market_cap numeric,
+    company text, source text NOT NULL, fetched_at timestamptz NOT NULL,
+    PRIMARY KEY (ticker,report_date,source)
+);
+CREATE TABLE IF NOT EXISTS ingest.econ_calendar (
+    event_date date NOT NULL, event_time_et text, country text NOT NULL, name text NOT NULL,
+    actual text, consensus text, previous text,
+    source text NOT NULL, fetched_at timestamptz NOT NULL,
+    PRIMARY KEY (event_date,country,name,source)
+)
+"""
 INTRADAY_DDL = """
 CREATE TABLE IF NOT EXISTS ingest.intraday_snapshots (
     ticker text, as_of timestamptz, session text CHECK (session IN ('pre','regular','post')),
@@ -61,6 +76,9 @@ def _clear(admin):
 
 
 def _seed(admin):
+    admin.execute(TRANSLATE_DDL)
+    admin.execute(INTRADAY_DDL)
+    admin.execute(_CALENDAR_DDL)
     _clear(admin)
     for kind, name, ret in [("index", "SPY", -0.01), ("index", "QQQ", -0.02), ("index", "IWM", 0.01)]:
         admin.execute(
@@ -121,33 +139,10 @@ def _seed(admin):
             """,
             (f"b064-f{i}", SEEN + timedelta(minutes=i), SEEN + timedelta(minutes=i), f"NVIDIA earnings beat #{i}"),
         )
-    admin.execute(TRANSLATE_DDL)
     admin.execute(
         "INSERT INTO perception.news_translations (info_id, title_zh, model, translated_at)"
         " VALUES ('b064-n1', '英伟达三季度业绩强劲，上调全年指引', 'deepseek-v4.1-flash', %s)",
         (SEEN,),
-    )
-    admin.execute(INTRADAY_DDL)
-    admin.execute(
-        """
-        CREATE TABLE IF NOT EXISTS ingest.earnings_calendar (
-            ticker text NOT NULL, report_date date NOT NULL,
-            time text NOT NULL CHECK (time IN ('pre','post','unknown')),
-            eps_forecast numeric, n_estimates int, market_cap numeric,
-            company text, source text NOT NULL, fetched_at timestamptz NOT NULL,
-            PRIMARY KEY (ticker,report_date,source)
-        )
-        """
-    )
-    admin.execute(
-        """
-        CREATE TABLE IF NOT EXISTS ingest.econ_calendar (
-            event_date date NOT NULL, event_time_et text, country text NOT NULL, name text NOT NULL,
-            actual text, consensus text, previous text,
-            source text NOT NULL, fetched_at timestamptz NOT NULL,
-            PRIMARY KEY (event_date,country,name,source)
-        )
-        """
     )
     for ticker, last in (("SPY", 604.2), ("NVDA", 200.4)):
         admin.execute(
