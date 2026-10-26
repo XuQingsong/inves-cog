@@ -41,7 +41,36 @@ def main():
             result = check_bars_start(Repository(connection), clock)
             if result:
                 print(json_text(result), flush=True)
+            news = check_news_gap(Repository(connection), clock)
+            if not news["healthy"]:
+                print(json_text(news), flush=True)
         time.sleep(30)
+
+
+def check_news_gap(repo, clock):
+    """Two-hour absence after ET10 on exchange sessions; independent of models."""
+    from datetime import timedelta
+
+    now = clock.now_utc()
+    local = now.astimezone(NY)
+    latest = repo.latest_news_at()
+    active = trading_day(local.date()) and 10 <= local.hour < 20
+    healthy = not active or latest is not None and now - latest < timedelta(hours=2)
+    old = repo.health_rows().get("AlpacaNews", {})
+    if active and not healthy:
+        repo.write_health(
+            dict(
+                source="AlpacaNews",
+                last_attempt_at=now,
+                last_success_at=old.get("last_success_at"),
+                status="unavailable",
+                latency_sec=None,
+                items_last_run=0,
+                consecutive_failures=old.get("consecutive_failures", 0) + 1,
+                note="No Alpaca news inserted in past 2h; latest_data_at=" + (latest.isoformat() if latest else "none"),
+            )
+        )
+    return {"processed_count": 0, "healthy": healthy, "status": "ok" if healthy else "degraded"}
 
 
 if __name__ == "__main__":

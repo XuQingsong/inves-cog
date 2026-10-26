@@ -22,6 +22,7 @@ ORIGINAL = [
     "issuer_profiles",
 ]
 ADDED = ["news_prefill", "news_full", "fred", "cboe", "finra", "fed_news"]
+A023_ADDED = ["news_poll", "news_watchdog", "vix_daily", "earnings_calendar", "econ_calendar"]
 
 
 @pytest.mark.parametrize("platform_name", ["Linux", "Darwin"])
@@ -31,7 +32,9 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
     config = ConfigParser(interpolation=None)
     config.read_string(configuration(root, python))
     command = shlex.split(config["program:scheduler"]["command"])
-    assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *ORIGINAL, *ADDED]
+    # A023 extends the task list while preserving all A018 windows and services.
+    expected_tasks = [*ORIGINAL, *ADDED[:2], *A023_ADDED, *ADDED[2:]]
+    assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *expected_tasks]
     expected = {
         "daily_modules": ["scripts/schedule_daily_modules.py", "--tasks", "market_structure", "rule_a_scores"],
         "anomaly_daily": ["scripts/schedule_daily_modules.py", "--tasks", "anomaly_daily", "premarket_review"],

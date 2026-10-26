@@ -1,0 +1,68 @@
+{
+  "data": {
+    "asOf": "Wed, Oct 28, 2026",
+    "headers": {
+      "time": "Time",
+      "symbol": "Symbol",
+      "name": "Company Name",
+      "marketCap": "Market Cap",
+      "fiscalQuarterEnding": "Fiscal Quarter Ending",
+      "epsForecast": "Consensus EPS* Forecast",
+      "noOfEsts": "# of Ests",
+      "lastYearRptDt": "Last Year's Report Date",
+      "lastYearEPS": "Last year's EPS*"
+    },
+    "rows": [
+      {
+        "lastYearRptDt": "10/29/2025",
+        "lastYearEPS": "$2.87",
+        "time": "time-after-hours",
+        "symbol": "GOOG",
+        "name": "Alphabet Inc.",
+        "marketCap": "$3,965,210,590,000",
+        "fiscalQuarterEnding": "Sep/2026",
+        "epsForecast": "$2.94",
+        "noOfEsts": "14"
+      },
+      {
+        "lastYearRptDt": "10/29/2025",
+        "lastYearEPS": "$2.87",
+        "time": "time-after-hours",
+        "symbol": "GOOGL",
+        "name": "Alphabet Inc.",
+        "marketCap": "$3,965,210,590,000",
+        "fiscalQuarterEnding": "Sep/2026",
+        "epsForecast": "$2.94",
+        "noOfEsts": "14"
+      },
+      {
+        "lastYearRptDt": "10/29/2025",
+        "lastYearEPS": "$4.13",
+        "time": "time-after-hours",
+        "symbol": "MSFT",
+        "name": "Microsoft Corporation",
+        "marketCap": "$3,869,762,390,000",
+        "fiscalQuarterEnding": "Sep/2026",
+        "epsForecast": "$4.71",
+        "noOfEsts": "14"
+      },
+      {
+        "lastYearRptDt": "10/22/2025",
+        "lastYearEPS": "$1.64",
+        "time": "time-pre-market",
+        "symbol": "GEV",
+        "name": "GE Vernova Inc.",
+        "marketCap": "$220,369,732,000",
+        "fiscalQuarterEnding": "Sep/2026",
+        "epsForecast": "$4.03",
+        "noOfEsts": "7"
+      }
+    ]
+  },
+  "message": null,
+  "status": {
+    "rCode": 200,
+    "bCodeMessage": null,
+    "developerMessage": null
+  }
+}

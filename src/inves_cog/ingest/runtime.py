@@ -44,6 +44,11 @@ def due_tasks(clock, last_runs):
 
     due("bars_prefill", after=480, before=490, session=True)
     due("news_prefill", after=480, before=490)
+    due("news_poll", interval=10)
+    due("news_watchdog", interval=10, after=600, before=1200, session=True)
+    due("earnings_calendar", after=360)
+    due("econ_calendar", after=360)
+    due("vix_daily", after=1245, session=True)
     due("bars_full", after=1220, session=True)
     due("wide_universe", after=1220, session=True)
     due("m6_market_inputs", after=1220, session=True)

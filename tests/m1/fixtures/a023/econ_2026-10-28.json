@@ -1,0 +1,67 @@
+{
+  "data": {
+    "asOf": "Sun, Oct 25, 2026",
+    "headers": {
+      "gmt": "Time",
+      "country": "Country",
+      "eventName": "Event",
+      "actual": "Actual",
+      "consensus": "Consensus",
+      "previous": "Previous",
+      "description": "Description"
+    },
+    "rows": [
+      {
+        "gmt": "01:00",
+        "country": "Japan",
+        "eventName": "BoJ Core CPI",
+        "actual": "&nbsp;",
+        "consensus": " ",
+        "previous": "2.3%",
+        "description": "Measures the change in the price of goods and services purchased by consumers, excluding food and energy. The BoJ usually pays more attention to the core inflation data."
+      },
+      {
+        "gmt": "08:00",
+        "country": "United States",
+        "eventName": "Building Permits",
+        "actual": "&nbsp;",
+        "consensus": "-0.2%",
+        "previous": "-2.1%",
+        "description": "Building Permits is a report closely watched by economists and investors alike. Since all related factors associated with the construction of a building are important economic activities (for example, financing and employment), the building permit report can give a major hint as to the state of the economy in the near future. A higher than expected number should be taken as positive to the USD, while a lower than expected number as negative."
+      },
+      {
+        "gmt": "08:00",
+        "country": "United States",
+        "eventName": "Building Permits",
+        "actual": "&nbsp;",
+        "consensus": "1.400M",
+        "previous": "1.403M",
+        "description": "Building Permits measures the change in the number of new building permits issued by the government. Building permits are a key indicator of demand in the housing market.\r\n&lt;BR/&gt;&lt;BR/&gt;A higher than expected reading should be taken as positive/bullish for the USD, while a lower than expected reading should be taken as negative/bearish for the USD."
+      },
+      {
+        "gmt": "08:15",
+        "country": "United States",
+        "eventName": "ADP Employment Change Weekly",
+        "actual": "&nbsp;",
+        "consensus": " ",
+        "previous": "18.50K",
+        "description": "The ADP weekly report provides the change in private sector employment, offering the most current view of the labor market based on ADP&#039;s fine-grained, high-frequency data. Traders often consider employment figures from ADP, America&#039;s largest payrolls provider, as the harbringer of the Bureau of Labor Statistics release of Nonfarm Payrolls.\r\nThis data is released by Automatic Data Processing Inc, provides a four-week moving average of the latest total private-employment change in the US. Generally, a rise in the indicator has positive implications for consumer spending and is simulative of economic growth. Therefore, a high reading is traditionally seen as bullish for the US Dollar (USD), while a low reading is seen as bearish."
+      },
+      {
+        "gmt": "08:30",
+        "country": "United States",
+        "eventName": "Core Durable Goods Orders",
+        "actual": "&nbsp;",
+        "consensus": "0.6%",
+        "previous": "0.2%",
+        "description": "Core Durable Goods Orders measures the change in the total value of new orders for long lasting manufactured goods, excluding transportation items. Because aircraft orders are very volatile, the core number gives a better gauge of ordering trends. A higher reading indicates increased manufacturing activity.&lt;BR/&gt;&lt;BR/&gt;A higher than expected reading should be taken as positive/bullish for the USD,\r\nwhile a lower than expected reading should be taken as negative/bearish for the USD."
+      }
+    ]
+  },
+  "message": null,
+  "status": {
+    "rCode": 200,
+    "bCodeMessage": null,
+    "developerMessage": null
+  }
+}
