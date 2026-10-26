@@ -14,7 +14,7 @@ from inves_cog.ingest.fundamentals.health import BLOCKING
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.perception.review.calendar import cutoff
 from inves_cog.trading.scoring.rules import BOOK_KEYS, ENTRY, EXCLUDED
-from inves_cog.web.brief import citation_stale_note, level, short_sentence, volume_multiple
+from inves_cog.web.brief import citation_stale_note, level, volume_multiple
 from inves_cog.web.pages import VALUATION_LABEL
 from inves_cog.web.public import create_app
 from inves_cog.web.stock_brief import (
@@ -568,9 +568,6 @@ def test_d3_window_returns_and_sparkline(pages):
 
 def test_d4_short_residual_and_theme(pages):
     nvda = _json(pages, "NVDA")
-    expected = short_sentence(
-        {"pct": 12.34, "days": 3.2, "change": -4.75, "settlement": DAY - timedelta(days=10), "crowded": True}
-    )
     assert nvda["short_text"] is None
     assert nvda["resid_text"] == "弱于板块 1.2σ"
     assert nvda["theme_ret"] == (-0.044 + -0.02) / 2

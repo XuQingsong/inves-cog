@@ -15,7 +15,6 @@ from inves_cog.ingest.market import trading_day
 from inves_cog.perception.review.calendar import cutoff
 from inves_cog.web.brief import (
     OPTION_CATEGORIES,
-    format_points_plain,
     option_percentile,
     option_tone,
     short_crowded,
@@ -208,16 +207,6 @@ def _member(pages, ticker):
 
 
 def test_s1_short_column_matches_the_latest_visible_print(pages):
-    stored = (
-        pages["admin"]
-        .execute(
-            """
-        SELECT si_pct_shares_outstanding, days_to_cover, raw, settlement_date
-        FROM ingest.short_interest WHERE observation_id = 'b057-nvda'
-        """
-        )
-        .fetchone()
-    )
     # B-063: short interest removed from investor pages; column now shows 形态.
     nvda = _member(pages, "NVDA")
     assert "short" not in nvda and "tech" in nvda
