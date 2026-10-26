@@ -195,3 +195,9 @@ PR81 head `9132f323d10595d63a75abc700dc22bd0c4a3394`，先失败测试 `a38bdcb`
 ## A-024 已收到／进行中
 
 收到 main `c22f7330cc466543c65c85f683f02ee7a37d1080` 的A-024：只为看盘接入盘前/盘中/盘后快照，不进入规则A。A-023后续两交易日观察保留为独立运维项。变更：新增固定接口intraday_snapshots、按交易日三时段频率调度及30天清理；范围仅ingest/迁移/调度及对应测试。先核实现有Alpaca免费权限可用feed、盘前成交和官方延迟口径，再按已核实接口实现；核实不清不猜测。只做有界只读行情探测，不改生产库、不触发模型、不换key/套餐。先失败夹具测试后实现，准确CI后送验，合并前不部署。
+
+## A-024 进行中（数据源与延迟已核实）
+
+有界只读实测同一现有key：SPY snapshots feed=sip为403（无最近SIP订阅），iex为200且有盘前成交，delayed_sip为200且有盘前成交；截止当前减16分钟的历史SIP分钟线为200，04:00 ET起有成交。本次共5次请求（含1次上一交易日日线复权验证），无重试、无模型调用、无业务库写入。官方说明：[snapshots](https://docs.alpaca.markets/us/reference/stocksnapshots-1)将delayed_sip定义为15分钟延迟；[FAQ](https://docs.alpaca.markets/us/docs/market-data-faq)确认免费IEX与SIP历史15分钟限制；[历史bars](https://docs.alpaca.markets/us/reference/stockbars)支持all复权及asof日期。
+
+变更/已自行决定：本单使用已验证delayed_sip全市场快照，不采用IEX作为全市场替代；as_of取latestTrade原时间，delay_minutes按注入采集时间减实际成交时间向上取整、且不低于已核实的15分钟套餐延迟，不把陈旧成交写成零延迟。仅存当日04–20时段真实成交，不将前一日成交伪装成盘前新行情；prev_close另取上一交易日历史日线all复权、asof当天，与当天原始成交处于同一当前股数/除息口径。真实SPY快照及日线响应保存为离线夹具。频率及30天清理按原任务，不改交易/页面或A023运维观察。下一步先失败测试后实现，同一A024分支交付。
