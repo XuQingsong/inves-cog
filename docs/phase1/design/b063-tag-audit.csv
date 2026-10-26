@@ -1,14 +1,14 @@
 published_at,source,symbols,headline,primary_tickers,tags,importance
-2026-10-22T06:55:52+00:00,benzinga,NVDA|SMCI,"Supermicro Launches NVIDIA Vera CPU Rack With 256 Liquid-Cooled CPUs, Supporting Up To 22,500 Agent Sandboxes Per Rack For Agentic AI",NVDA|SMCI,产品合作,4
+2026-10-22T06:55:52+00:00,benzinga,NVDA|SMCI,"Supermicro Launches NVIDIA Vera CPU Rack With 256 Liquid-Cooled CPUs, Supporting Up To 22,500 Agent Sandboxes Per Rack For Agentic AI",NVDA|SMCI,,3
 2026-10-22T07:06:56+00:00,benzinga,SKHY|SSNLF,"Stock Futures Sink, Asian Markets Turn Red as US, Israel Draw Up Post-Midterm Iran Strike Plans: Report",SKHY,,2
-2026-10-22 15:01:41+00:00,fiscal.ai,META,Meta Announces 2-for-1 Stock Split and $825 Billion AI Infrastructure Commitment,META,,2
-2026-10-22 17:50:25+00:00,benzinga,NFLX|SKYD,"Trump Admin Warned Netflix Its Warner Bid Was Going Nowhere, John Malone Says",NFLX,,3
-2026-10-21T21:55:54+00:00,benzinga,TSLA,Tesla Executive Says Launching Cybercabs In Dallas Next Month,TSLA,产品合作,3
+2026-10-22 15:01:41+00:00,fiscal.ai,META,Meta Announces 2-for-1 Stock Split and $825 Billion AI Infrastructure Commitment,META,公司行动,4
+2026-10-22 17:50:25+00:00,benzinga,NFLX|SKYD,"Trump Admin Warned Netflix Its Warner Bid Was Going Nowhere, John Malone Says",NFLX,并购,5
+2026-10-21T21:55:54+00:00,benzinga,TSLA,Tesla Executive Says Launching Cybercabs In Dallas Next Month,TSLA,,2
 2026-10-21T12:01:45+00:00,fiscal.ai,MU,Fubon Securities Initiates Coverage of Micron Technology with Buy Rating,MU,评级,5
 2026-10-23 14:58:27+00:00,benzinga,EWY|META|MU|NVDA|SKHY,"EXCLUSIVE: Korea's Chip Selloff Flashes Rare 'Capitulation' Signal Ahead of SK Hynix Earnings, Analyst Says",META|MU|NVDA|SKHY,财报,5
 2026-10-22 11:31:36+00:00,fiscal.ai,NVDA,LG Innotek Partners with NVIDIA for HSB-Enabled Sensing Solutions,NVDA,产品合作,4
 2026-10-23 15:39:09+00:00,benzinga,FTNT,"JP Morgan Maintains Underweight on Fortinet, Raises Price Target to $140",FTNT,评级,2
-2026-10-23 15:51:43+00:00,benzinga,BE,"Bloom Energy Posts Strong Q3, Production Ramp Weighs On Near-Term Margin",BE,,2
+2026-10-23 15:51:43+00:00,benzinga,BE,"Bloom Energy Posts Strong Q3, Production Ramp Weighs On Near-Term Margin",BE,财报,4
 2026-10-21T09:28:07+00:00,benzinga,BTCUSD|META|POLUSD|ZECUSD,Mark Zuckerberg Will Announce Muse on Meta Glasses Soon? Crypto Bettors Say Don't Hold Your Breath,META,,2
 2026-10-22 20:31:20+00:00,fiscal.ai,NVDA,"Merck Collaborates with NVIDIA, Microsoft, and Dawn Health on Patient Support Model",NVDA,产品合作,4
 2026-10-22 15:01:55+00:00,fiscal.ai,LRCX,Analysts Adjust Price Targets for Lam Research Following Earnings Report,LRCX,财报|评级,4
@@ -17,16 +17,16 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 14:40:09+00:00,benzinga,META,Meta Just Burned Cash for the First Time Since Its IPO Year: Wall Street Raised Its Targets Anyway,META,,2
 2026-10-21T13:31:59+00:00,fiscal.ai,QCOM,Susquehanna Adjusts Price Target on Qualcomm to $185,QCOM,评级,2
 2026-10-23 17:12:04+00:00,benzinga,META,"'Meta's Muse AI To Counter China Models With Subscribers, Not Ads; Meta Plans To Offer Paid Enterprise Services, Will Take Commissions From Sellers On Purchases Made Using Agents, Alexandr Wang Says' - Nikkei Asia",META,,2
-2026-10-22 19:01:41+00:00,fiscal.ai,INTC,SUNMI Launches Windows Commercial Product Family Featuring Intel Core Ultra Processors,INTC,产品合作,3
+2026-10-22 19:01:41+00:00,fiscal.ai,INTC,SUNMI Launches Windows Commercial Product Family Featuring Intel Core Ultra Processors,INTC,,2
 2026-10-21T11:53:21+00:00,benzinga,CRWV,"Piper Sandler Maintains Overweight on CoreWeave, Lowers Price Target to $124",CRWV,评级,2
 2026-10-23 11:45:22+00:00,benzinga,AMZN|EAGL|FDN|FNGU|META,AWS Margin Expansion Drives the Bull Case for Amazon,AMZN|META,,2
 2026-10-22 13:31:34+00:00,fiscal.ai,NVDA,Zadara Achieves NVIDIA AI Cloud Ready Validation,NVDA,,3
 2026-10-22 18:15:24+00:00,benzinga,BE|MRVL|NVDA|ORCL,Bloom Energy’s October Stock Slump Deepens: Options Signal Post-Earnings Bounce to $230,BE|MRVL|NVDA|ORCL,财报,5
 2026-10-22 16:21:26+00:00,benzinga,META,State Of Rhode Island Attorney General Neronha Sues Meta For Fraudulent Advertisements,META,诉讼召回,3
-2026-10-21T14:01:57+00:00,benzinga,AAPL,Apple Says It Will Have 'Limited' iPhone Duo Units Available For Walk-In Customers On October 23 Launch Date,AAPL,产品合作,4
+2026-10-21T14:01:57+00:00,benzinga,AAPL,Apple Says It Will Have 'Limited' iPhone Duo Units Available For Walk-In Customers On October 23 Launch Date,AAPL,,3
 2026-10-21T11:33:11+00:00,benzinga,ENRD|NVDA,Einride AB Partners With Nvidia To Evaluate AI Reasoning Driving Model Nvidia Alpamayo,NVDA,产品合作,4
 2026-10-23 19:01:32+00:00,fiscal.ai,JPM,JPMorgan Chase & Co. Decreases Holding in Spire Healthcare Group PLC,JPM,,2
-2026-10-23 19:01:26+00:00,fiscal.ai,AAPL,"Apple Launches First Foldable Smartphone, the iPhone Duo",AAPL,产品合作,4
+2026-10-23 19:01:26+00:00,fiscal.ai,AAPL,"Apple Launches First Foldable Smartphone, the iPhone Duo",AAPL,,3
 2026-10-21T14:12:37+00:00,benzinga,TSLA,Tesla Stock Is Trading Just Under Its 200-Day Average Into Earnings. Here’s What Investors Are Watching,TSLA,财报,4
 2026-10-23 08:32:07+00:00,fiscal.ai,SKHY,SK hynix Shelves IPO Plans for Solidigm Subsidiary,SKHY,,2
 2026-10-22 18:51:45+00:00,benzinga,META,"DA Davidson Maintains Buy on Meta Platforms, Raises Price Target to $800",META,评级,2
@@ -34,15 +34,15 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-21T17:23:24+00:00,benzinga,GE,"BNP Paribas Maintains Underperform on GE Aerospace, Lowers Price Target to $280",GE,评级,2
 2026-10-22 09:40:21+00:00,benzinga,GOOG|GOOGL,Sundar Pichai Is Using AI Agents to Track Google 24/7: 'Made All of Us... Be Better at What We Do',GOOGL,,3
 2026-10-22 09:23:35+00:00,benzinga,TSLA,Elon Musk Met Xi Jinping and Took Tesla FSD to China — Now His CFO Says Getting the Green Light for Unsupervised Driving Is ‘Hard’,TSLA,,2
-2026-10-21T12:27:43+00:00,benzinga,ENTR|RISN|SMCI|SMCY|SPCX,"Super Micro Stock Gains on Strong Outlook, Fuels Dan Niles’ AI Rally Call",SMCI,指引,4
+2026-10-21T12:27:43+00:00,benzinga,ENTR|RISN|SMCI|SMCY|SPCX,"Super Micro Stock Gains on Strong Outlook, Fuels Dan Niles’ AI Rally Call",SMCI,,2
 2026-10-22 12:21:25+00:00,benzinga,META,Meta's $145 Billion AI Bet Doesn't Scare This Bull: Why He Thinks Bears Are Wrong,META,,2
 2026-10-21T21:37:41+00:00,benzinga,META,Meta Platforms Q3 2026 Earnings Call Transcript,META,财报,4
 2026-10-22 20:19:35+00:00,benzinga,DIS|META,"Meta’s Muse Downloads Top 10 Million, Join Elite Company: Here’s the 2 Non-Game Apps to Hit Same Milestone",META,,2
 2026-10-23 13:31:37+00:00,fiscal.ai,VRT,Vertiv Announces Participation in Baird 2026 Global Industrial Conference,VRT,,2
-2026-10-23 19:01:30+00:00,fiscal.ai,NFLX,Netflix Announces Record Share Buybacks and Revised 2026 Financial Guidance,NFLX,指引,5
+2026-10-23 19:01:30+00:00,fiscal.ai,NFLX,Netflix Announces Record Share Buybacks and Revised 2026 Financial Guidance,NFLX,指引|公司行动,5
 2026-10-23 18:28:24+00:00,benzinga,AMZN|NVDA,"Amazon CEO Andy Jassy Says AI Inference Is Still 10 Times Too Expensive, Claims Amazon Chips Offer Answer",AMZN|NVDA,,3
 2026-10-22 13:12:14+00:00,benzinga,META,StoneX Reiterates Hold on Meta Platformsto Hold,META,评级,2
-2026-10-21T13:22:13+00:00,benzinga,NVDA,Amadeus And NVIDIA Sign MoU To Accelerate AI-Powered Flight Search And Optimize Computing Efficiency,NVDA,,3
+2026-10-21T13:22:13+00:00,benzinga,NVDA,Amadeus And NVIDIA Sign MoU To Accelerate AI-Powered Flight Search And Optimize Computing Efficiency,NVDA,产品合作,4
 2026-10-22 13:31:28+00:00,fiscal.ai,MSFT,Infragistics Announces Collaboration with Microsoft to Advance Blazor,MSFT,产品合作,3
 2026-10-23 12:02:27+00:00,benzinga,WDC,"Rosenblatt Maintains Buy on Western Digital, Lowers Price Target to $650",WDC,评级,2
 2026-10-23 19:36:17+00:00,benzinga,CRWV,"UBS Maintains Buy on CoreWeave, Lowers Price Target to $105",CRWV,评级,2
@@ -56,11 +56,11 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 12:01:36+00:00,fiscal.ai,AMZN,Uzbekistan Engages in Telecom Discussions with Amazon,AMZN,,2
 2026-10-23 17:01:53+00:00,benzinga,NOW,Bank of America Boosts ServiceNow Forecast Ahead of Earnings: Here's What Could Fuel Growth,NOW,财报|财报前瞻,4
 2026-10-22 12:01:40+00:00,fiscal.ai,JNJ,Johnson & Johnson Reports New Clinical Data for VARIPULSE and OMNYPULSE Platforms,JNJ,,3
-2026-10-23 18:00:20+00:00,benzinga,TSLA,"Tesla Outlook is 'Grim,' Former Hedge Fund Manager Won’t Touch Stock 'With 10-Foot Pole'",TSLA,指引,4
+2026-10-23 18:00:20+00:00,benzinga,TSLA,"Tesla Outlook is 'Grim,' Former Hedge Fund Manager Won’t Touch Stock 'With 10-Foot Pole'",TSLA,,2
 2026-10-22 13:05:28+00:00,benzinga,TSLA,"Tesla Got Trump Tariff Refunds, and Elon Musk Isn’t Sitting on the Cash — CFO Says Money Is Going Into...",TSLA,监管关税,3
 2026-10-22 09:57:34+00:00,benzinga,META,"Pivotal Research Maintains Buy on Meta Platforms, Raises Price Target to $960",META,评级,2
 2026-10-23 15:58:35+00:00,benzinga,SPCX|TSLA,"Elon Musk's Tesla-SpaceX Merger Could Face Antitrust Hurdles Over Starlink Access, ‘Vertical Foreclosure’, Former DOJ Official Warns",TSLA,并购|监管关税,4
-2026-10-22 17:56:52+00:00,benzinga,NOK|VGK,"ICEYE, Nokia Ink Mou With Ukraine To Explore Cooperation In Space",NOK,,2
+2026-10-22 17:56:52+00:00,benzinga,NOK|VGK,"ICEYE, Nokia Ink Mou With Ukraine To Explore Cooperation In Space",NOK,产品合作,3
 2026-10-21T18:06:30+00:00,benzinga,AMZN|NVDA,"Amazon's Nvidia Chips Are Sitting in Warehouses Without Power as AI Spending Soars, Business Insider Reports",AMZN|NVDA,,3
 2026-10-21T19:02:15+00:00,benzinga,GOOGL|NET,Ex-Google CEO Eric Schmidt Says AI Could Eliminate 20% of Jobs at Large Companies,GOOGL,,3
 2026-10-23 16:20:56+00:00,benzinga,MU|SKHY|XLK,What's Going On With Micron Technology Stock Friday?,MU|SKHY,,3
@@ -68,11 +68,11 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-21T20:44:33+00:00,benzinga,META,"Meta CEO Says We Are Also Working On New Smaller Models That Are Coming Out Soon And Will Deliver Muse Wonder Level Intelligence More Efficiently; Glasses Sales Continue To Grow Rapidly; Now With Muse, We Expect Paid Subscriptions Will Increase",META,,2
 2026-10-22 19:01:30+00:00,fiscal.ai,AAPL,Apple Reportedly Testing Second-Generation iPhone Duo Prototypes,AAPL,,3
 2026-10-21T15:22:13+00:00,benzinga,INTC,Intel Anticipates Operations At Fab 62 To Begin By 2028 End,INTC,,2
-2026-10-22 10:31:35+00:00,fiscal.ai,TSLA,Tesla to Launch Cybercab Robotaxi Service in Dallas,TSLA,产品合作,3
+2026-10-22 10:31:35+00:00,fiscal.ai,TSLA,Tesla to Launch Cybercab Robotaxi Service in Dallas,TSLA,,2
 2026-10-21T11:45:28+00:00,benzinga,NVDA|ZS,Zscaler Supports Nvidia OpenShell Reference Architecture For Safe AI Agents,NVDA|ZS,,3
-2026-10-22T05:14:17+00:00,benzinga,NOK,"Nokia AI & Cloud Sales More Than Double YoY, EUR 1.5B New Orders; Optical And IP Networks Seen Growing 25%-30% In 2027",NOK,,2
+2026-10-22T05:14:17+00:00,benzinga,NOK,"Nokia AI & Cloud Sales More Than Double YoY, EUR 1.5B New Orders; Optical And IP Networks Seen Growing 25%-30% In 2027",NOK,财报|指引,4
 2026-10-23 09:58:28+00:00,benzinga,AAPL,"Assessing Apple's Performance Against Competitors In Technology Hardware, Storage &amp; Peripherals Industry",AAPL,,3
-2026-10-23 18:01:54+00:00,fiscal.ai,COST,Costco Launches New 'Beauty Table' Program,COST,产品合作,3
+2026-10-23 18:01:54+00:00,fiscal.ai,COST,Costco Launches New 'Beauty Table' Program,COST,,2
 2026-10-22 12:09:30+00:00,benzinga,TSLA,"Mizuho Maintains Outperform on Tesla, Raises Price Target to $460",TSLA,评级,2
 2026-10-22 19:43:23+00:00,benzinga,DRAM|SOXX|STX|WDC,Western Digital Is Down 55% From Its June Peak. Can DRAM and SOXX ETFs Hold Up?,STX|WDC,,2
 2026-10-22 10:45:11+00:00,benzinga,TSLA,"Cantor Fitzgerald Reiterates Overweight on Tesla, Maintains $485 Price Target",TSLA,评级,2
@@ -87,7 +87,7 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-21T10:31:50+00:00,fiscal.ai,FTNT,Arete Downgrades Fortinet to Sell,FTNT,评级,4
 2026-10-23 11:31:43+00:00,fiscal.ai,AAPL,"Apple Insider Sells Shares Worth $814,748",AAPL,,3
 2026-10-21T10:23:00+00:00,benzinga,META,"Meta's Muse AI Agent Gains Traction Ahead of Q3 Earnings, Hits 10 Million Downloads in 40 Days as OpenAI’s ChatGPT App Installs Slide 25% in US: Report",META,财报,4
-2026-10-21T09:59:36+00:00,benzinga,META|MSFT|ORCL,Trump Floats ‘Dividend’ Payments to Communities Hosting AI Data Centers — Tells Big Tech That Financial Deals Can Turn Local Opposition Into ‘Extremely Popular’ Support,META|MSFT|ORCL,,2
+2026-10-21T09:59:36+00:00,benzinga,META|MSFT|ORCL,Trump Floats ‘Dividend’ Payments to Communities Hosting AI Data Centers — Tells Big Tech That Financial Deals Can Turn Local Opposition Into ‘Extremely Popular’ Support,META|MSFT|ORCL,公司行动,4
 2026-10-23 18:01:48+00:00,fiscal.ai,SNDK,SanDisk Showcases New Automotive and Enterprise NAND Flash Solutions,SNDK,,2
 2026-10-21T21:20:58+00:00,benzinga,META,Meta Platfroms CFO Says We Expect Our New AI Businesses Can Begin Contributing Incremental Revenue In 2027,META,财报,4
 2026-10-22 18:01:47+00:00,fiscal.ai,FTNT,Fortinet Announces Coordinated Security Hardening Updates,FTNT,,2
@@ -96,17 +96,17 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 10:31:24+00:00,fiscal.ai,AMZN,"Amazon Pledges 30,000 Entry-Level Jobs for UK Youth by 2030",AMZN,,2
 2026-10-21T09:58:40+00:00,benzinga,ADBE,Performance Comparison: Adobe And Competitors In Software Industry,ADBE,,3
 2026-10-22 23:01:40+00:00,fiscal.ai,XOM,ExxonMobil Joliet Refinery Experiences Operational Disruption,XOM,,2
-2026-10-22 11:01:45+00:00,fiscal.ai,STX,BofA Securities Maintains Buy Rating on Seagate Technology,STX,,2
-2026-10-22 15:01:46+00:00,fiscal.ai,XOM,Shell and ExxonMobil Joint Venture Infineum Explores $8 Billion Sale,XOM,,2
+2026-10-22 11:01:45+00:00,fiscal.ai,STX,BofA Securities Maintains Buy Rating on Seagate Technology,STX,评级,2
+2026-10-22 15:01:46+00:00,fiscal.ai,XOM,Shell and ExxonMobil Joint Venture Infineum Explores $8 Billion Sale,XOM,并购,4
 2026-10-21T20:45:43+00:00,benzinga,TSLA,"Tesla On AI Compute Says Continued Construction For Austin Fab, Where We Plan To Start Commissioning Equipment In 2027",TSLA,,2
 2026-10-21T20:31:31+00:00,fiscal.ai,LRCX,"Lam Research Corporation Reports Financial Results for the Quarter Ended September 27, 2026",LRCX,财报,4
-2026-10-21T18:01:59+00:00,fiscal.ai,SMCI,Supermicro Reports Preliminary September Quarter Gross Margin Update,SMCI,,2
+2026-10-21T18:01:59+00:00,fiscal.ai,SMCI,Supermicro Reports Preliminary September Quarter Gross Margin Update,SMCI,指引,4
 2026-10-22 17:58:54+00:00,benzinga,AMZN|GOOG|GOOGL,Anthropic Donates Agent Skills Open Standard To Agentic AI Foundation,AMZN|GOOGL,,3
 2026-10-23 13:32:00+00:00,fiscal.ai,NOW,Bank of America Analyst Raises ServiceNow Price Target to $180,NOW,评级,2
 2026-10-21T14:44:15+00:00,benzinga,CRWD|NVDA,CrowdStrike Stock Climbs: What's Going On?,CRWD|NVDA,,3
 2026-10-21T12:04:57+00:00,benzinga,ORCL,"Southwest General Integrating Oracle Health Patient Accounting, Oracle Health Data Intelligence, Oracle Fusion Cloud Applications",ORCL,,2
 2026-10-21T10:32:09+00:00,fiscal.ai,NVDA,NVIDIA Announces Healthcare Collaborations and New Protein Design Model,NVDA,产品合作,4
-2026-10-21T10:16:25+00:00,benzinga,NOK|NVDA|TMUS,Nvidia Launches Tools For Telecom Operators For Turning Networks Into Distributed Intelligence Platforms,NOK|NVDA,产品合作,4
+2026-10-21T10:16:25+00:00,benzinga,NOK|NVDA|TMUS,Nvidia Launches Tools For Telecom Operators For Turning Networks Into Distributed Intelligence Platforms,NOK|NVDA,,3
 2026-10-22 13:06:28+00:00,benzinga,PLTR|STGW,Stagwell Expands Partnership With Palantir Over AI-Powered Marketing Services,PLTR,产品合作,3
 2026-10-21T15:01:38+00:00,fiscal.ai,GE,Multiple Analysts Adjust Price Targets and Ratings for GE Aerospace,GE,评级,2
 2026-10-23 22:15:16+00:00,benzinga,STX,Here’s How Much You Would Have Made Owning Seagate Technology Hldgs Stock In The Last 20 Years,STX,,2
@@ -116,10 +116,10 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-23 15:01:36+00:00,fiscal.ai,AMZN,Amazon Delivery Drivers at OIL9 Facility Join Teamsters,AMZN,,2
 2026-10-23 16:58:06+00:00,benzinga,AAPL|SPY,Michael Burry Warns Washington Has Little Room Left to Fight the Next Crisis,AAPL,,3
 2026-10-21T13:24:20+00:00,benzinga,MSFT,"ChatGPT Ads Expands To 26 New Countries As Over 100,000 Advertisers Have Used The Platform",MSFT,,2
-2026-10-21T13:31:59+00:00,fiscal.ai,QCOM,Qualcomm Announces Quarterly Cash Dividend,QCOM,,2
+2026-10-21T13:31:59+00:00,fiscal.ai,QCOM,Qualcomm Announces Quarterly Cash Dividend,QCOM,公司行动,4
 2026-10-21T23:01:29+00:00,fiscal.ai,AMZN,3M and Amazon Web Services Announce Strategic Collaboration on Optical Connectivity,AMZN,产品合作,3
 2026-10-22 12:07:20+00:00,benzinga,LRCX,"Mizuho Maintains Outperform on Lam Research, Lowers Price Target to $360",LRCX,评级,2
-2026-10-22 08:22:10+00:00,benzinga,NOK,Nokia Sees Q4 Sales $7.118B-$7.355B vs $7.300B Est,NOK,,2
+2026-10-22 08:22:10+00:00,benzinga,NOK,Nokia Sees Q4 Sales $7.118B-$7.355B vs $7.300B Est,NOK,财报|指引,4
 2026-10-23 09:59:18+00:00,benzinga,BE,"BTIG Maintains Buy on Bloom Energy, Lowers Price Target to $250",BE,评级,2
 2026-10-22 18:18:40+00:00,benzinga,BX|GOOGL|NVDA,Blackstone CEO Sounds Alarm on AI Supply Crunch: 'Seldom in My Career Have I Seen' Anything Like It,GOOGL|NVDA,,3
 2026-10-21T22:00:12+00:00,benzinga,TSLA,Tesla Executive Says Expect Around Q2 Next Year To Turn On Some Customer Cars To Be Part Of Robotaxi Fleet; Trying To To Get Cybercabs To Customers By The End Of This Year,TSLA,,2
@@ -128,13 +128,13 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 12:50:36+00:00,benzinga,AMAT|KLAC|LRCX|SOXX,Lam Research Stock Sinks After Guidance Falls Short of Whispers: Cantor Calls It a 'Top Pick',AMAT|KLAC|LRCX,指引,4
 2026-10-22 12:00:27+00:00,benzinga,CEG,"HSBC Initiates Coverage On Constellation Energy with Buy Rating, Announces Price Target of $335",CEG,评级,4
 2026-10-21T14:40:10+00:00,benzinga,ADBE|CRM|META|NVDA|SPCX,Nvidia Stock ‘Still Underappreciated by Investors’: Gene Munster Sees Growth Opportunities from GTC Berlin,ADBE|CRM|META|NVDA,,3
-2026-10-21T19:00:10+00:00,benzinga,BE,Bloom Energy Q3 Preview: Analysts Expect Top Nancy Pelosi Holding to Grow Revenue 102% (CORRECTED),BE,财报,4
-2026-10-23 15:01:44+00:00,fiscal.ai,DELL,Dell Technologies Joins NVIDIA DSX POD Ecosystem for AI Infrastructure,DELL,,2
+2026-10-21T19:00:10+00:00,benzinga,BE,Bloom Energy Q3 Preview: Analysts Expect Top Nancy Pelosi Holding to Grow Revenue 102% (CORRECTED),BE,财报|财报前瞻,4
+2026-10-23 15:01:44+00:00,fiscal.ai,DELL,Dell Technologies Joins NVIDIA DSX POD Ecosystem for AI Infrastructure,DELL,产品合作,3
 2026-10-22 10:12:58+00:00,benzinga,NFLX,"Pivotal Research Maintains Hold on Netflix, Lowers Price Target to $65",NFLX,评级,3
 2026-10-22 14:59:44+00:00,benzinga,V,'Crypto custody specialist Fireblocks denies it's in talks to be acquired by Visa' - CoinDesk,V,并购,5
 2026-10-23 00:01:39+00:00,fiscal.ai,MA,Mastercard Introduces AI-Powered Benefits Assistant 'Mastercard Max',MA,,2
 2026-10-22 10:31:35+00:00,fiscal.ai,TSLA,Tesla Targets Late 2027 for Full Production of Optimus Robots,TSLA,,2
-2026-10-22T04:20:38+00:00,benzinga,META,"Mark Zuckerberg Says Muse Could Out-Earn Facebook, Instagram Per User, But Analyst Warns It’s 'Losing' More Money Than Any Other Product Meta Has Launched",META,产品合作,3
+2026-10-22T04:20:38+00:00,benzinga,META,"Mark Zuckerberg Says Muse Could Out-Earn Facebook, Instagram Per User, But Analyst Warns It’s 'Losing' More Money Than Any Other Product Meta Has Launched",META,,2
 2026-10-21T11:31:56+00:00,benzinga,NTNX|SMCI,"Nutanix, Supermicro Announce Plans For Jointly Engineered On-Premises AI Inference System, Available In Early 2027",SMCI,,2
 2026-10-21T17:51:03+00:00,benzinga,LLY,"Leerink Partners Maintains Outperform on Eli Lilly, Raises Price Target to $1316",LLY,评级,3
 2026-10-21T18:01:33+00:00,fiscal.ai,JNJ,Erste Group Downgrades Johnson & Johnson to Hold,JNJ,评级,5
@@ -151,7 +151,7 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 11:01:37+00:00,fiscal.ai,TSM,TSMC Explores Rare Earth-Free Factory Equipment Amid China Supply Concerns,TSM,,2
 2026-10-21T13:32:13+00:00,fiscal.ai,NOK,Nokia Collaborates with NVIDIA and Telecom Operators on AI-RAN Trials,NOK,产品合作,3
 2026-10-23 10:38:41+00:00,benzinga,NVDA|STLA,"Stellantis, Nvidia And AI Mobility Company Wayve Partner With French Government To Advance Deployment Of Autonomous Vehicles In France And Accelerating Their Development Across The EU",NVDA,产品合作,4
-2026-10-21T21:32:04+00:00,fiscal.ai,AMZN,Amazon's Blink Brand Launches Five New Security Cameras,AMZN,产品合作,3
+2026-10-21T21:32:04+00:00,fiscal.ai,AMZN,Amazon's Blink Brand Launches Five New Security Cameras,AMZN,,2
 2026-10-23 21:31:54+00:00,fiscal.ai,AAPL,Simfabric Signs Agreement with Apple for iPhone Duo App Development,AAPL,,3
 2026-10-21T08:16:35+00:00,benzinga,SPCX|TSLA,"TSLA, SPCX Stocks Are Trending In Pre-Market After Elon Musk Confirms Tesla-SpaceX Merger Committees",TSLA,并购,4
 2026-10-22 13:31:56+00:00,fiscal.ai,QCOM,Qualcomm Schedules Fourth Quarter and Fiscal 2026 Earnings Release and Conference Call,QCOM,财报,4
@@ -159,7 +159,7 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 22:01:27+00:00,fiscal.ai,CRWV,BofA Securities Analyzes CoreWeave's Financing Needs Ahead of Q3 Results,CRWV,财报,4
 2026-10-22 14:44:56+00:00,benzinga,META,"Scotiabank Maintains Sector Perform on Meta Platforms, Raises Price Target to $650",META,评级,2
 2026-10-22 09:57:31+00:00,benzinga,MU,"Needham Reiterates Buy on Micron Technology, Maintains $1650 Price Target",MU,评级,3
-2026-10-23 15:49:07+00:00,benzinga,META,Meta's Q3 FCF Turns Negative On AI Spend—Q4 Capex Implied At $49B-59B,META,,2
+2026-10-23 15:49:07+00:00,benzinga,META,Meta's Q3 FCF Turns Negative On AI Spend—Q4 Capex Implied At $49B-59B,META,财报|指引,4
 2026-10-23 12:01:54+00:00,fiscal.ai,NOW,Guggenheim Adjusts Price Target on ServiceNow to $175 From $125,NOW,评级,2
 2026-10-22 18:01:43+00:00,fiscal.ai,PLTR,Stagwell Expands Strategic AI Partnership with Palantir,PLTR,产品合作,3
 2026-10-21T11:37:18+00:00,benzinga,NOW|NVDA,"ServiceNow Announces Updates For Governance, Security Across Its AI Offering With Nvidia",NOW|NVDA,,3
@@ -167,7 +167,7 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 16:00:00+00:00,benzinga,SPCX|TSLA,"‘If You’re Not in a Body Anymore, There’s Definitely Gonna Be Some Difference’ — Elon Musk Says We Could Upload Ourselves Into Humanoids to Live Forever",TSLA,,2
 2026-10-22 12:28:04+00:00,benzinga,TSLA,"GLJ Research Reiterates Sell on Tesla, Maintains $24.86 Price Target",TSLA,评级,2
 2026-10-22T06:37:25+00:00,benzinga,TSLA|VGK,"Tesla September Registrations Rise 72.5% YoY To 68,776 Across EU, EFTA And UK; Jan-Sep Up 50.0% To 260,575, Market Share 2.5% Vs 1.7%",TSLA,,2
-2026-10-22 13:39:50+00:00,benzinga,SHEL|XOM,'Shell And Exxon’s $8B UK Chemicals Unit Put Up For Sale' - Financial Times,XOM,,2
+2026-10-22 13:39:50+00:00,benzinga,SHEL|XOM,'Shell And Exxon’s $8B UK Chemicals Unit Put Up For Sale' - Financial Times,XOM,并购,4
 2026-10-21T20:31:57+00:00,benzinga,META,"Meta Platforms Says AI Investments Benefits Delivering To Core Business Position Us To Sustain Strong Overall Revenue Growth Throughout 2027; Beyond 2026, Expect To Continue Investing Aggressively To Support Both Our Core Business And Emerging AI Initiatives",META,财报,4
 2026-10-22 11:01:45+00:00,fiscal.ai,NOK,Nokia and Supermicro Partner to Deploy AI-Enabled Radio Access Networks,NOK,产品合作,3
 2026-10-23 19:01:31+00:00,fiscal.ai,SNDK,SanDisk Storage Malaysia Recognized with BrandLaureate Award,SNDK,,2
@@ -183,12 +183,12 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-21T14:49:08+00:00,benzinga,NFLX,"Piper Sandler Maintains Overweight on Netflix, Lowers Price Target to $78",NFLX,评级,3
 2026-10-23 19:01:49+00:00,fiscal.ai,GE,GE Aerospace F404 Engine Deliveries and Production Impact on India's Tejas Fighter Program,GE,,2
 2026-10-22 21:36:58+00:00,benzinga,WDC,Western Digital Q1 2027 Earnings Call Transcript,WDC,财报,4
-2026-10-21T15:01:29+00:00,fiscal.ai,MA,Mastercard Gateway Launches in Syria,MA,产品合作,3
+2026-10-21T15:01:29+00:00,fiscal.ai,MA,Mastercard Gateway Launches in Syria,MA,,2
 2026-10-22 13:14:49+00:00,benzinga,GOOGL,Google CEO Says Fully Self-Improving AI Is Still a Long Way Off,GOOGL,,3
 2026-10-21T12:27:06+00:00,benzinga,NFLX,"Wedbush Maintains Outperform on Netflix, Lowers Price Target to $80",NFLX,评级,3
-2026-10-21T11:34:44+00:00,benzinga,CRWV,"CoreWeave Announces Physical AI Launchables, Prebuilt Templates For Running Robotics And Autonomous Vehicle Simulation Workloads On Its Cloud",CRWV,产品合作,3
+2026-10-21T11:34:44+00:00,benzinga,CRWV,"CoreWeave Announces Physical AI Launchables, Prebuilt Templates For Running Robotics And Autonomous Vehicle Simulation Workloads On Its Cloud",CRWV,,2
 2026-10-22 11:38:10+00:00,benzinga,GOOG|GOOGL,"Voltus, Google Expand Agreement To Construct 1 GW Virtual Power Plant In PJM Grid",GOOGL,,3
-2026-10-21T12:09:23+00:00,benzinga,SPCX|TSLA,SpaceX Earnings: 7 Big Questions Elon Musk Answered — and What Investors Should Watch Next,TSLA,财报,4
+2026-10-21T12:09:23+00:00,benzinga,SPCX|TSLA,SpaceX Earnings: 7 Big Questions Elon Musk Answered — and What Investors Should Watch Next,TSLA,,2
 2026-10-22 21:31:51+00:00,fiscal.ai,CRM,Former Salesforce Global Head of Brand and Creative Scott Larson Joins OpenArt AI,CRM,,2
 2026-10-22 11:31:40+00:00,fiscal.ai,FTNT,Fortinet Devices Targeted in Recent Cybersecurity Campaign,FTNT,,2
 2026-10-22 17:00:07+00:00,benzinga,TSLA,"Elon Musk’s Mom Says a Tunnel ‘Makes Your Life Happier’ as Boring Company Brings 900,000-Pound Machine to San Antonio",TSLA,,2
@@ -197,5 +197,5 @@ published_at,source,symbols,headline,primary_tickers,tags,importance
 2026-10-22 11:31:41+00:00,fiscal.ai,LRCX,Analysts Adjust Price Targets for Lam Research,LRCX,评级,2
 2026-10-22 19:40:37+00:00,benzinga,META,"UBS Maintains Buy on Meta Platforms, Raises Price Target to $892",META,评级,2
 2026-10-21T12:16:17+00:00,benzinga,AMZN|EBAY|MMM|TWLO|UNH,"Amazon, Twilio, eBay And A Health Care Stock: CNBC’s ‘Final Trades’",AMZN|UNH,,2
-2026-10-21T20:08:02+00:00,benzinga,LRCX,Lam Research Sees Q2 Adj EPS $2.18-$2.48 vs $2.31 Est; Sees Sales $8.200B-$9.000B vs $8.533B Est,LRCX,财报,4
+2026-10-21T20:08:02+00:00,benzinga,LRCX,Lam Research Sees Q2 Adj EPS $2.18-$2.48 vs $2.31 Est; Sees Sales $8.200B-$9.000B vs $8.533B Est,LRCX,财报|指引,4
 2026-10-22 14:30:28+00:00,benzinga,SPCX|TSLA,Tesla Stock Is Trending: What's Going On?,TSLA,,2

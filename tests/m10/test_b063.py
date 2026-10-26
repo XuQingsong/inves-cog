@@ -116,3 +116,31 @@ def test_engine_vix_series_order():
     macro.append({"series_id": "VIX_CBOE", "observation_date": day, "value": 19.0})
     row = market_row(returns, macro, [], [], day=day)
     assert row["vix"] == 19.0
+
+
+def test_audit_gap_headlines():
+    """Real headlines the 200-row audit flagged, now covered (B-063 follow-up)."""
+    assert "评级" in _classify("BofA Securities Maintains Buy Rating on Seagate Technology", ["STX"]).tags
+    assert "评级" in _classify("Truist Maintains Outperform on Bloom Energy", ["BE"]).tags
+    assert "指引" in _classify("Sees Q4 Sales $1.2B vs $1.1B Est", ["AAPL"]).tags
+    assert "指引" in _classify("Sees Q2 Adj EPS $0.30", ["AAPL"]).tags
+    assert "指引" in _classify("Preliminary Third Quarter Update Beats Estimates", ["MU"]).tags
+    assert "指引" in _classify("Chipmaker Seen Growing 25%-30% In 2027", ["NVDA"]).tags
+    assert "指引" in _classify("Q4 Capex Implied $14B", ["MSFT"]).tags
+    assert "指引" not in _classify("Analyst Says Outlook Is 'Grim' for Retail", ["M"]).tags
+    assert "财报" in _classify("Meta Posts Strong Q3", ["META"]).tags
+    assert "财报" in _classify("Q3 FCF Turns Negative", ["META"]).tags
+    assert "财报" in _classify("Sales More Than Double YoY", ["NVDA"]).tags
+    assert "财报前瞻" in _classify("NFLX Q3 Preview: What to Watch", ["NFLX"]).tags
+    assert "并购" in _classify("Netflix Makes Hostile Bid for Warner Bros", ["NFLX"]).tags
+    assert "并购" in _classify("Netflix Explores $8 Billion Sale", ["NFLX"]).tags
+    assert "并购" in _classify("Studio Put Up For Sale", ["WBD"]).tags
+    assert "并购" in _classify("Target to be acquired by PE firm", ["TGT"]).tags
+    assert "产品合作" in _classify("Visa and Singapore Tourism Board Sign Three-Year Partnership MOU", ["V"]).tags
+    assert "产品合作" in _classify("AMD Inks MoU with Hyperscaler", ["AMD"]).tags
+    assert "产品合作" in _classify("Nokia Joins Open RAN Ecosystem", ["NOK"]).tags
+    assert "产品合作" not in _classify("Analyst Says Company Has Launched Too Many Products", ["AAPL"]).tags
+    split = _classify("Meta Announces 2-for-1 Stock Split and $40B Buyback, Raises Dividend", ["META"])
+    assert "公司行动" in split.tags and split.importance >= 4
+    spacex = _classify("SpaceX Earnings Boost Tesla Sentiment", ["TSLA"])
+    assert "财报" not in spacex.tags and "财报前瞻" not in spacex.tags

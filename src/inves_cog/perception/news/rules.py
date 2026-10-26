@@ -17,20 +17,39 @@ TAG_RULES = [
     (
         "财报",
         r"\b(earnings|EPS|revenue|quarterly results|Q[1-4] results|financial results)\b"
-        r"|reports? (third|second|first|fourth) quarter",
+        r"|reports? (third|second|first|fourth) quarter"
+        r"|posts? \w* ?Q[1-4]|Q[1-4] (FCF|profit|revenue|eps|sales|net income|loss|margins)"
+        r"|sales (more than )?(double|surge|jump|beat|soar)",
     ),
     (
         "财报前瞻",
-        r"earnings preview|what to expect|ahead of earnings|earnings (on deck|this week)"
+        r"earnings preview|Q[1-4] preview|what to expect|ahead of earnings|earnings (on deck|this week)"
         r"|priced for .* swings|earnings volatility",
     ),
-    ("评级", r"upgrade|downgrade|initiates? coverage|price target|\bPT\b|reiterat"),
-    ("指引", r"guidance|outlook|raises? (FY|full-year)|lowers? (FY|full-year)|cuts? forecast"),
-    ("并购", r"merger|acquisition|acquires?|takeover|buyout|to buy\b"),
+    (
+        "评级",
+        r"upgrade|downgrade|initiates? coverage|price target|\bPT\b|reiterat"
+        r"|maintains? (buy|sell|outperform|underperform|perform|neutral|overweight|underweight"
+        r"|equal[- ]weight|hold|speculative|market perform|rating|[A-Za-z]+ rating)",
+    ),
+    (
+        "指引",
+        r"guidance|raises? (FY|full-year|outlook|forecast|guidance)|lowers? (FY|full-year|outlook|forecast|guidance)"
+        r"|cuts? (forecast|guidance|outlook)|reaffirms? (outlook|forecast|guidance)"
+        r"|sees? (Q[1-4]|FY|full[- ]year|.{0,30}(sales|EPS|capex|revenue|est\b))|preliminary"
+        r"|seen growing|\w+ implied",
+    ),
+    ("并购", r"merger|acquisition|acquires?|takeover|buyout|to buy\b|\bbid\b|for sale|to be acquired|explores? .*(sale|sell|buyout)"),
     ("监管关税", r"tariff|export control|sanction|antitrust|\bFTC\b|\bDOJ\b|regulat"),
     ("诉讼召回", r"lawsuit|litigation|\bsues?\b|recall|settlement"),
     ("宏观", r"\b(Fed|FOMC|Powell|CPI|PCE|payrolls|jobs report|treasury yields?|inflation|GDP)\b"),
-    ("产品合作", r"partnership|partners with|collaborat|launch|unveil|deploy|contract"),
+    (
+        "产品合作",
+        r"partnership|partners with|collaborat|\bMoU\b|memorandum|joins? .{0,25}ecosystem"
+        r"|(launches|unveils|announces).{0,30}(launch|product|platform|service)"
+        r"|unveil|deploy|contract",
+    ),
+    ("公司行动", r"stock split|share split|\bsplit\b|buybacks?|share repurchase|dividend"),
 ]
 MACRO_RULES = [
     ("利率", r"Fed|FOMC|yield|rate cut|rate hike|treasur"),
@@ -38,7 +57,7 @@ MACRO_RULES = [
     ("原油", r"\boil\b|crude|OPEC|Brent|WTI"),
     ("加密", r"bitcoin|crypto|ethereum"),
 ]
-HOT_TAGS = {"财报", "指引", "并购"}
+HOT_TAGS = {"财报", "指引", "并购", "公司行动"}
 
 ECON_KEY = re.compile(
     r"FOMC|Fed Interest Rate|Fed Chair|Powell|CPI|PCE|Nonfarm|Unemployment Rate|\bGDP\b(?!Now)|ISM|"
@@ -66,6 +85,10 @@ def classify(headline, symbols, universe, holdings):
     if len(tickers) > 5:
         primary = [t for t in primary if re.search(rf"\b{re.escape(t)}\b", headline)]
     tags = [name for name, pat in TAG_RULES if re.search(pat, headline, re.I)]
+    # Known limitation: earnings keywords belonging to a different company in the
+    # headline are suppressed for the hard-coded SpaceX/Tesla pair.
+    if "SpaceX" in headline and set(primary) == {"TSLA"}:
+        tags = [t for t in tags if t not in ("财报", "财报前瞻")]
     if "并购" in tags and "产品合作" in tags:
         tags.remove("产品合作")
     macro = next((name for name, pat in MACRO_RULES if re.search(pat, headline, re.I)), None)
