@@ -1701,7 +1701,7 @@ def _date_picker(payload):
     page = payload.get("page") or "/"
     nav = f"location.href='{_text(page)}?date='+this.value"
     return (
-        f'<input type="date" value="{_text(value)}" max="{date.today().isoformat()}" '
+        f'<input type="date" value="{_text(value)}" max="{_text(payload.get("today") or value)}" '
         f'onchange="{nav}" '
         'style="font:12px var(--mono);border:1px solid var(--line);border-radius:6px;padding:1px 4px">'
     )

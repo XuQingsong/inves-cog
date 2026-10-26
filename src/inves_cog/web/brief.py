@@ -1883,6 +1883,7 @@ def page_brief_market(connection, day, clock):
         "events": events,
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
+        "today": clock.today_trade_date().isoformat(),
         "is_today": context["day"] == clock.today_trade_date(),
         "intraday": context["intraday"],
         "news_modules": _news_views(context),
