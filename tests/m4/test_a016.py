@@ -260,6 +260,7 @@ def test_e7_add_only_m9_program_separate_migration():
         "financials",
         "watchdog",
         "embedding",
+        "news_translate",
     }
 
 

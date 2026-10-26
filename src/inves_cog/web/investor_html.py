@@ -5,6 +5,7 @@ import re
 from datetime import date, datetime, timedelta
 from html import escape
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import NY, next_trading_day, trading_day
 from inves_cog.web.brief import (
@@ -19,6 +20,8 @@ from inves_cog.web.exit_levels import money
 from inves_cog.web.pages import CLOSED
 from inves_cog.web.risk_brief import format_plain_percent, risk_params
 from inves_cog.web.ruler import ruler
+
+SH = ZoneInfo("Asia/Shanghai")
 
 NAV = (
     ("/", "市场总览", "大环境怎么样"),
@@ -88,7 +91,7 @@ def render_brief(payload):
         main = _market(payload)
     title = payload.get("title") or "每日页面"
     body = _header(payload) + "<main>" + _intra() + main + _foot(payload) + "</main>"
-    return _document(title, body)
+    return _document(title, body, refresh=bool(payload.get("is_today")))
 
 
 # ---------- shared pieces ----------
@@ -193,10 +196,11 @@ def _market(payload):
         )
         ret = row.get("ret")
         big = MISSING if ret is None else _signed(float(ret) * 100, 2)
+        intra = _intra_line((payload.get("intraday") or {}).get(row.get("id")))
         cards.append(
-            f'<div class="card kpi"><div class="l">{_text(row.get("name"))}</div>'
+            f'<div class="card kpi"><div class="l">{_text(row.get("name"))}{_carry_tag(payload)}</div>'
             f'<div class="v {_tone(ret)}">{_text(big)}</div>'
-            f'<div class="ft">盘后 {_pct(row.get("post"))}</div>{spark}</div>'
+            f'{intra}<div class="ft">盘后 {_pct(row.get("post"))}</div>{spark}</div>'
         )
     up, down = payload.get("advancers"), payload.get("decliners")
     total = (up or 0) + (down or 0)
@@ -237,6 +241,7 @@ def _market(payload):
         _crumb(f"市场总览 / {_text(payload.get('date'))}")
         + f"<h1>判断：{_text(judgment)}</h1>"
         + f'<p class="sub">{_text(_lead(payload))}</p>'
+        + _carry_banner(payload)
         + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
@@ -1577,7 +1582,8 @@ def _header(payload):
         + next_link
         + '</div><div class="fresh"><span>'
         + _text(fresh)
-        + '</span><span class="mode"><button data-m="close" class="on">收盘</button>'
+        + '</span><span class="mode"><button id="lang-toggle" onclick="__setLang()">中文 / 英文</button>'
+        + '<button data-m="close" class="on">收盘</button>'
         + '<button data-m="intra">盘中</button></span></div></div></div></header>'
     )
 
@@ -1626,11 +1632,16 @@ def _formula(line):
     return text
 
 
-def _document(title, body):
+REFRESH_META = ""
+
+
+def _document(title, body, refresh=False):
+    global REFRESH_META
+    REFRESH_META = '<meta name="refresh-today" content="1">' if refresh else ""
     return (
         '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        f"<title>{_text(title)}</title><style>{_STYLE}{_EXTRA}</style></head>"
+        f"<title>{_text(title)}</title>{REFRESH_META}<style>{_STYLE}{_EXTRA}</style></head>"
         f'<body>{body}<script src="/investor.js"></script></body></html>'
     )
 
@@ -1787,6 +1798,41 @@ def _num_attr(value):
 # ---------- B-063 today-page news modules ----------
 
 
+def _carry_banner(payload):
+    day = payload.get("carry_from")
+    if not day:
+        return ""
+    return (
+        '<div class="banner info"><b>收盘数据未到</b>'
+        f"<span>以下收盘数据沿用 {str(day)[5:].replace('-', '/')}，新闻与日历为今日。</span></div>"
+    )
+
+
+def _carry_tag(payload):
+    day = payload.get("carry_from")
+    if not day:
+        return ""
+    return f' <span class="chip stale">沿用 {str(day)[5:].replace("-", "/")} 收盘</span>'
+
+
+_SESSION_LABEL = {"pre": "盘前", "regular": "盘中", "post": "盘后"}
+
+
+def _intra_line(row):
+    if not row:
+        return ""
+    last, prev = row.get("last"), row.get("prev_close")
+    if last is None or prev in (None, 0):
+        return ""
+    pct = float(last) / float(prev) - 1
+    session = _SESSION_LABEL.get(row.get("session"), _text(row.get("session")))
+    moment = _parse_iso(row.get("as_of"))
+    hm = moment.astimezone(NY).strftime("%H:%M") if moment else "—"
+    delay = row.get("delay_minutes")
+    tail = f" · 延迟约 {delay} 分钟" if delay is not None else ""
+    return f'<div class="small muted">{session} {_signed(pct * 100, 2)} · 截至 {hm} 美东{tail}</div>'
+
+
 def _safe_url(url):
     text = str(url or "")
     return text if text.startswith(("http://", "https://")) else "#"
@@ -1795,7 +1841,7 @@ def _safe_url(url):
 def _hm(iso):
     try:
         moment = _parse_iso(iso)
-        return moment.astimezone(NY).strftime("%H:%M") if moment else "—"
+        return moment.astimezone(SH).strftime("%H:%M") + " 北京" if moment else "—"
     except Exception:
         return "—"
 
@@ -1848,13 +1894,44 @@ def _nlate(item):
     return '<span class="chip stale">事后补采</span>' if item.get("late") else ""
 
 
+def _ntitle(item, url):
+    """Headline link: Chinese title when translated, English on hover/toggle."""
+    en = str(item.get("headline") or item.get("summary") or "")
+    zh = item.get("title_zh")
+    attrs = f'href="{url}" target="_blank" rel="noopener" title="{_text(en)}"'
+    if zh:
+        return f'<a {attrs}><span class="nzh">{_text(zh)}</span><span class="nen" hidden>{_text(en)}</span></a>'
+    return f"<a {attrs}>{_text(en)}</a>"
+
+
 def _news_row(item, held):
-    title = _text(item.get("headline") or item.get("summary"))
+    if item.get("grouped"):
+        return _group_row(item, held)
     url = _text(_safe_url(item.get("url")))
     return (
         f'<div class="nrow"><span class="tm">{_hm(item.get("published_at") or item.get("published"))}</span>'
-        f'<div class="hl">{_ntags(item)}<a href="{url}" target="_blank" rel="noopener">{title}</a> {_nlate(item)}</div>'
+        f'<div class="hl">{_ntags(item)}{_ntitle(item, url)} {_nlate(item)}</div>'
         f'<span class="codes">{_ncodes(item, held)}</span></div>'
+    )
+
+
+def _group_row(item, held):
+    """One collapsed row for a ticker's weak-rating headlines (B-064)."""
+    members = item.get("group_items") or [item]
+    sources = []
+    for m in members:
+        src = m.get("source")
+        if src and src not in sources:
+            sources.append(src)
+    ticker = item.get("group_ticker") or ""
+    count = item.get("group_count") or len(members)
+    names = "、".join(_text(x) for x in sources[:4])
+    detail = "".join(_news_row(m, held) for m in members)
+    return (
+        f'<details class="nrow ngroup"><summary>'
+        f'<span class="tm">{_hm(item.get("published_at") or item.get("published"))}</span>'
+        f'<span class="hl"><span class="tag">评级</span>{_text(ticker)} 今日 {count} 家机构调整目标价（{names}）</span>'
+        f'<span class="codes">{_ncodes(item, held)}</span></summary>{detail}</details>'
     )
 
 
@@ -1886,19 +1963,21 @@ def _movers_module(payload):
         own = "".join(_news_row(n, held) for n in m.get("news") or [])
         own_html = f'<div class="mnews">{own}</div>' if own else ""
         badge = '<span class="chip held">持仓</span>' if m.get("held") else '<span class="chip buy">标的</span>'
+        intra = _intra_line((payload.get("intraday") or {}).get(m.get("ticker")))
         rows.append(
             f'<div class="mrow"><span class="tk">{_text(m["ticker"])} {badge}{_tech_chip(m.get("tech"))}</span>'
             f'<span class="small ink2">{_text(m.get("theme"))}{warn}</span>'
             f'<span class="num r">{_pct(m.get("ret"))}</span>'
-            f'<span class="num r v4">{_text(_times(m.get("vol")))}</span></div>{own_html}'
+            f'<span class="num r v4">{_text(_times(m.get("vol")))}</span></div>{intra}{own_html}'
         )
     if not rows:
         return ""
+    carry = _carry_tag(payload)
+    note = ' <span class="muted">盘前数据不进入规则 A</span>' if payload.get("intraday") else ""
     return (
-        '<div class="card sec"><h2>持仓与标的异动</h2>'
-        '<div class="small muted" style="margin-bottom:8px">当日涨跌幅绝对值最大的 8 只 · 每只最多 2 条相关新闻</div>'
-        + "".join(rows)
-        + "</div>"
+        f'<div class="card sec" id="movers"><h2>持仓与标的异动{carry}</h2>'
+        '<div class="small muted" style="margin-bottom:8px">'
+        f"当日涨跌幅绝对值最大的 8 只 · 每只最多 1 条相关新闻{note}</div>" + "".join(rows) + "</div>"
     )
 
 
@@ -1910,8 +1989,7 @@ def _theme_news_module(payload):
         rows.append(
             f'<div class="nrow"><span class="tm">{_hm(n.get("published_at") or n.get("published"))}</span>'
             f'<div class="hl"><span class="tag macro">{_text(n.get("theme"))}</span>'
-            f'<a href="{_text(_safe_url(n.get("url")))}" target="_blank" rel="noopener">'
-            f"{_text(n.get('headline'))}</a> {_nlate(n)}</div>"
+            f"{_ntitle(n, _text(_safe_url(n.get('url'))))} {_nlate(n)}</div>"
             f'<span class="codes">{_ncodes(n, held)}</span></div>'
         )
     if not rows:
@@ -1923,11 +2001,21 @@ def _feed_module(payload):
     mods = payload.get("news_modules") or {}
     held = set(payload.get("held_tickers") or [])
     feed = mods.get("feed") or []
-    rows = "".join(_news_row(n, held) for n in feed)
-    body = rows or '<div class="empty">无</div>'
+    rows = []
+    for i, n in enumerate(feed):
+        row = _news_row(n, held)
+        if i >= 10:
+            row = row.replace('<div class="nrow"', '<div class="nrow x" hidden', 1).replace(
+                '<details class="nrow', '<details class="nrow x" hidden', 1
+            )
+        rows.append(row)
+    more = (
+        f'<button class="small" data-feed-more>展开剩余 {max(0, len(feed) - 10)} 条</button>' if len(feed) > 10 else ""
+    )
+    body = "".join(rows) or '<div class="empty">无</div>'
     return (
-        f'<div class="card"><h2>滚动新闻 <span class="small muted">最近 {len(feed)} 条</span></h2>'
-        f'<div class="scroll">{body}</div></div>'
+        f'<div class="card" id="feed"><h2>滚动新闻 <span class="small muted">最近 {len(feed)} 条</span></h2>'
+        f'<div class="scroll">{body}{more}</div></div>'
     )
 
 
@@ -1957,9 +2045,7 @@ def _cal_mine(e):
     chip = '<span class="chip held">持仓</span>' if e.get("held") else '<span class="chip buy">标的</span>'
     line = f"{_e_time(e)} {_md_local(e['report_date'])} · 预期 EPS {_e_eps(e)}"
     pvs = "".join(
-        f'<div class="pv"><span class="tag hot">财报前瞻</span>'
-        f'<a href="{_text(_safe_url(n.get("url")))}" target="_blank" rel="noopener">'
-        f"{_text(n.get('headline'))}</a></div>"
+        f'<div class="pv"><span class="tag hot">财报前瞻</span>{_ntitle(n, _text(_safe_url(n.get("url"))))}</div>'
         for n in e.get("previews") or []
     )
     return (

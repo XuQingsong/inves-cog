@@ -12,7 +12,7 @@ from inves_cog.clock import SystemClock
 from inves_cog.web.brief import page_brief_account, page_brief_market, page_brief_stocks, page_brief_trust
 from inves_cog.web.brief_html import render_brief
 from inves_cog.web.db import open_reader
-from inves_cog.web.html_page import latest_visible_session, render_page
+from inves_cog.web.html_page import default_session, latest_visible_session, render_page
 from inves_cog.web.pages import (
     page_graph,
     page_health,
@@ -143,17 +143,13 @@ def _register_html(app, call, clock):
     def investor_script():
         return Response(_INVESTOR_JS.read_text(encoding="utf-8"), media_type="text/javascript; charset=utf-8")
 
-    def chosen(requested):
-        if requested is None:
-            return latest_visible_session(clock)
-        return requested
-
     def show(builder, requested, **extra):
-        payload = call(builder, chosen(requested), **extra)
+        payload = call(builder, requested or latest_visible_session(clock), **extra)
         return HTMLResponse(render_page(payload))
 
     def show_brief(builder, requested, **extra):
-        payload = call(builder, chosen(requested), **extra)
+        # B-064: brief pages default to today; close cards carry the prior session.
+        payload = call(builder, requested or default_session(clock), **extra)
         return HTMLResponse(render_brief(payload))
 
     @app.get("/")
