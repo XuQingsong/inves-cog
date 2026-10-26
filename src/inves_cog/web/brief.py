@@ -342,15 +342,6 @@ def option_status(rows, day):
     return state, f"最近 {latest.month}/{latest.day}"
 
 
-def resolve_vix(market_vix, fred_vix):
-    """Market state wins. FRED is only the same-day fallback, and the page names that source."""
-    if market_vix is not None:
-        return market_vix, None
-    if fred_vix is not None:
-        return fred_vix, "FRED"
-    return None, None
-
-
 def _change_percent(raw):
     if not isinstance(raw, dict):
         return None
