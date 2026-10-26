@@ -17,8 +17,6 @@ from inves_cog.web.brief import (
     OPTION_CATEGORIES,
     option_percentile,
     option_tone,
-    short_crowded,
-    short_sentence,
 )
 from inves_cog.web.public import create_app
 
