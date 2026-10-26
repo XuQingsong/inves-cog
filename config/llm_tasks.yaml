@@ -71,3 +71,9 @@ tasks:
     timeout_seconds: 120
     retries: 2
     failure_status: 抽取失败
+  news_translate:
+    tier: other
+    model: deepseek-v4.1-flash
+    timeout_seconds: 120
+    retries: 1
+    failure_status: 翻译失败

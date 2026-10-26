@@ -170,3 +170,41 @@ def theme_of(item, pool_theme, holdings):
     in_title = [t for t in rule.primary_tickers if re.search(rf"\b{re.escape(t)}\b", headline)]
     pick = in_title[0] if in_title else rule.primary_tickers[0]
     return pool_theme.get(pick) or pick
+
+
+FEED_HOT = {"财报", "财报前瞻", "指引", "并购", "公司行动", "宏观"}
+
+
+def feed_keep(rule, holdings):
+    """B-064 feed whitelist: held-related, hot tags, or strong rating only."""
+    if rule.held or any(t in holdings for t in rule.primary_tickers):
+        return True
+    if set(rule.tags) & FEED_HOT:
+        return True
+    if rule.macro:
+        return True
+    return "评级" in rule.tags and not rule.weak_rating_only
+
+
+def group_weak_ratings(items):
+    """Group weak_rating_only rows per primary ticker; others pass through."""
+    grouped, rest = {}, []
+    for n in items:
+        if n["rule"].weak_rating_only and n["rule"].primary_tickers:
+            grouped.setdefault(n["rule"].primary_tickers[0], []).append(n)
+        else:
+            rest.append(n)
+    rows = list(rest)
+    for ticker, members in grouped.items():
+        members.sort(key=lambda n: n["published"] or datetime.min.replace(tzinfo=NY), reverse=True)
+        rows.append(
+            {
+                **members[0],
+                "grouped": True,
+                "group_ticker": ticker,
+                "group_count": len(members),
+                "group_items": members,
+            }
+        )
+    rows.sort(key=lambda n: n["published"] or datetime.min.replace(tzinfo=NY), reverse=True)
+    return rows

@@ -18,6 +18,7 @@ OTHER_TASKS = frozenset(
         "claim_extraction",
         "systemic_event_tag",
         "summary_oneliner",
+        "news_translate",
     }
 )
 

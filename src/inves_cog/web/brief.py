@@ -1383,6 +1383,23 @@ def _context(connection, day, clock):
         return None, closed
     pool, _etfs = _universe()
     order, grouped = _sectors()
+    # B-064: before today's close exists, close-derived cards carry the prior
+    # trading day's snapshot; news/calendar stay on `day`.
+    carry_from = None
+    if day == clock.today_trade_date():
+        has_close = _one(
+            connection,
+            "SELECT 1 AS x FROM marketstate.daily WHERE trade_date = %s LIMIT 1",
+            (day,),
+        )
+        if has_close is None:
+            prior = _one(
+                connection,
+                "SELECT MAX(trade_date) AS d FROM marketstate.daily WHERE trade_date < %s",
+                (day,),
+            )
+            carry_from = None if prior is None else prior["d"]
+    data_day = carry_from or day
     daily, _daily_post = _by_session(
         _rows(
             connection,
@@ -1391,7 +1408,7 @@ def _context(connection, day, clock):
             FROM marketstate.daily
             WHERE trade_date = %s
             """,
-            (day,),
+            (data_day,),
         ),
         lambda row: row["ticker"],
     )
@@ -1403,21 +1420,21 @@ def _context(connection, day, clock):
             FROM marketstate.rotation
             WHERE trade_date = %s AND group_kind = ANY(%s)
             """,
-            (day, ["index", "style", "sector", "l3"]),
+            (data_day, ["index", "style", "sector", "l3"]),
         ),
         lambda row: (row["group_kind"], row["group_id"]),
     )
     rotation = list(rotation_close.values())
-    market = _one(connection, "SELECT * FROM marketstate.market WHERE trade_date = %s", (day,))
+    market = _one(connection, "SELECT * FROM marketstate.market WHERE trade_date = %s", (data_day,))
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
-    scores = _scores(connection, day)
-    ranges = _ranges(connection, day, cutoff)
-    ledger = _book(connection, day, cutoff)
+    scores = _scores(connection, data_day)
+    ranges = _ranges(connection, data_day, cutoff)
+    ledger = _book(connection, data_day, cutoff)
     portfolio = None if ledger is None else ledger["portfolio_id"]
     state = _state(ledger)
     positions = _positions(state)
-    bars = _bars(connection, day, list(dict.fromkeys([*pool, *positions])))
+    bars = _bars(connection, data_day, list(dict.fromkeys([*pool, *positions])))
     plan = _plan(connection, day, cutoff)
     if portfolio is None and plan is not None:
         owner = _one(
@@ -1458,11 +1475,18 @@ def _context(connection, day, clock):
         held_set,
         day,
     )
-    technicals = _technicals(bars, day)
+    translations = _translations(connection, [n["info_id"] for n in news_ranked])
+    for n in news_ranked:
+        zh = translations.get(n["info_id"])
+        if zh:
+            n["title_zh"] = zh
+    technicals = _technicals(bars, data_day)
     earnings = _earnings_calendar(connection, day)
     econ = _econ_calendar(connection, day)
+    intraday = _intraday(connection, day)
     return {
         "day": day,
+        "carry_from": carry_from,
         "cutoff": cutoff,
         "pool": pool,
         "order": order,
@@ -1512,6 +1536,7 @@ def _context(connection, day, clock):
         "technicals": technicals,
         "earnings_cal": earnings,
         "econ_cal": econ,
+        "intraday": intraday,
     }, None
 
 
@@ -1857,6 +1882,9 @@ def page_brief_market(connection, day, clock):
         "held_tickers": sorted(context["positions"]),
         "events": events,
         "news_fresh": context["fresh"],
+        "carry_from": context["carry_from"],
+        "is_today": context["day"] == clock.today_trade_date(),
+        "intraday": context["intraday"],
         "news_modules": _news_views(context),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
@@ -2171,6 +2199,35 @@ def _econ_calendar(connection, day):
     return rows
 
 
+def _intraday(connection, day):
+    """Latest intraday snapshot per ticker for `day` (A-024 contract)."""
+    if not _table_exists(connection, "ingest.intraday_snapshots"):
+        return {}
+    start, end = _day_window(day)
+    rows = _rows(
+        connection,
+        """
+        SELECT DISTINCT ON (ticker) ticker, as_of, session, last, prev_close, delay_minutes
+        FROM ingest.intraday_snapshots
+        WHERE as_of >= %s AND as_of < %s
+        ORDER BY ticker, as_of DESC
+        """,
+        (start, end),
+    )
+    return {row["ticker"]: dict(row) for row in rows}
+
+
+def _translations(connection, info_ids):
+    if not info_ids or not _table_exists(connection, "perception.news_translations"):
+        return {}
+    rows = _rows(
+        connection,
+        "SELECT info_id, title_zh FROM perception.news_translations WHERE info_id = ANY(%s)",
+        (info_ids,),
+    )
+    return {row["info_id"]: row["title_zh"] for row in rows}
+
+
 WARRANT_SUFFIX = re.compile(r"^[A-Z]+[WUR]$")
 
 
@@ -2286,7 +2343,7 @@ def _news_views(context):
             (n for n in ranked if m["ticker"] in n["rule"].primary_tickers),
             key=lambda n: (-n["rule"].importance, n["published"]),
         )
-        m["news"] = own[:2]
+        m["news"] = own[:1]
         m["has_news"] = bool(own)
     # hot themes
     by_theme = {}
@@ -2299,15 +2356,17 @@ def _news_views(context):
     pick = []
     for theme, items in sorted(by_theme.items(), key=lambda kv: (-max(i["rule"].importance for i in kv[1]), kv[0])):
         items.sort(key=lambda n: (-n["rule"].importance, n["published"]))
-        pick.extend({"theme": theme, **n} for n in items[:2])
+        pick.extend({"theme": theme, **n} for n in items[:1])
     pick.sort(
         key=lambda n: (-n["rule"].held, -n["rule"].importance, -(n["published"].timestamp() if n["published"] else 0))
     )
-    feed = [n for n in ranked if n["rule"].primary_tickers or n["rule"].macro][:40]
+    from inves_cog.perception.news.rules import feed_keep, group_weak_ratings
+
+    feed = group_weak_ratings([n for n in ranked if feed_keep(n["rule"], held)])[:40]
     movers_down = sorted((m for m in members.values() if m["ret"] is not None), key=lambda m: m["ret"])
     return {
         "movers": top8,
-        "theme_news": pick[:15],
+        "theme_news": pick[:8],
         "feed": feed,
         "pool_leaders_down": movers_down[:5],
         "pool_leaders_up": movers_down[-5:][::-1],
