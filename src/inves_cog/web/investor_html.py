@@ -241,6 +241,7 @@ def _market(payload):
         _crumb(f"市场总览 / {_text(payload.get('date'))}")
         + f"<h1>判断：{_text(judgment)}</h1>"
         + f'<p class="sub">{_text(_lead(payload))}</p>'
+        + _carry_banner(payload)
         + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
@@ -1581,7 +1582,8 @@ def _header(payload):
         + next_link
         + '</div><div class="fresh"><span>'
         + _text(fresh)
-        + '</span><span class="mode"><button data-m="close" class="on">收盘</button>'
+        + '</span><span class="mode"><button id="lang-toggle" onclick="__setLang()">中文 / English</button>'
+        + '<button data-m="close" class="on">收盘</button>'
         + '<button data-m="intra">盘中</button></span></div></div></div></header>'
     )
 

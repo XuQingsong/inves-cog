@@ -140,7 +140,7 @@ def _groups(connection):
 
 def _latest_rotation_day(connection):
     row = connection.execute("SELECT MAX(trade_date) AS d FROM marketstate.rotation").fetchone()
-    return row["d"] if row else date.today()
+    return row["d"] if row else None
 
 
 def _mover_tickers(connection, day, universe, holdings):
