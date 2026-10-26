@@ -96,7 +96,8 @@ def _seed(admin):
     admin.execute(
         "INSERT INTO ingest.macro_observations"
         " (series_id, observation_date, value, units, realtime_start, fetched_at)"
-        " VALUES ('DGS2', %s, 3.85, 'pct', %s, %s)",
+        " VALUES ('DGS2', %s, 3.85, 'pct', %s, %s)"
+        " ON CONFLICT (series_id, observation_date, realtime_start) DO UPDATE SET value = 3.85",
         (PREV, PREV, SEEN),
     )
 
