@@ -161,7 +161,10 @@ def test_launch_and_dividend_edge_cases():
     ):
         assert "产品合作" in _classify(h, ["NVDA"], pool={"NVDA"}, held=set()).tags, h
     assert "产品合作" not in _classify("Product Meta Has Launched", ["META"], {"META"}, set()).tags
-    assert "公司行动" not in _classify(
-        "Trump Floats 'Dividend' Payments to Communities Hosting AI Data Centers", ["NVDA"], {"NVDA"}, set()
-    ).tags
+    assert (
+        "公司行动"
+        not in _classify(
+            "Trump Floats 'Dividend' Payments to Communities Hosting AI Data Centers", ["NVDA"], {"NVDA"}, set()
+        ).tags
+    )
     assert "公司行动" in _classify("Company Announces Quarterly Cash Dividend", ["NVDA"], {"NVDA"}, set()).tags
