@@ -32,8 +32,8 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
     config = ConfigParser(interpolation=None)
     config.read_string(configuration(root, python))
     command = shlex.split(config["program:scheduler"]["command"])
-    # A023 extends the task list while preserving all A018 windows and services.
-    expected_tasks = [*ORIGINAL, *ADDED[:2], *A023_ADDED, *ADDED[2:]]
+    # A023/A024 extend the list while preserving all A018 windows and services.
+    expected_tasks = [*ORIGINAL, *ADDED[:2], A023_ADDED[0], "intraday_snapshots", *A023_ADDED[1:], *ADDED[2:]]
     assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *expected_tasks]
     expected = {
         "daily_modules": ["scripts/schedule_daily_modules.py", "--tasks", "market_structure", "rule_a_scores"],

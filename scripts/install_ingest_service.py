@@ -42,6 +42,7 @@ serverurl=unix://{state}/supervisor.sock
             "news_prefill",
             "news_full",
             "news_poll",
+            "intraday_snapshots",
             "news_watchdog",
             "vix_daily",
             "earnings_calendar",

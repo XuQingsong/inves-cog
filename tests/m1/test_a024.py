@@ -105,9 +105,8 @@ def test_a024_collect_scope_consistent_adjustment_and_partial_health():
 
 
 def test_a024_failure_no_http_retry_and_persisted_health(monkeypatch):
-    from inves_cog.ingest.intraday import collect_intraday
-
     from inves_cog.ingest.http import HTTPClient, Response
+    from inves_cog.ingest.intraday import collect_intraday
     from inves_cog.ingest.jobs import HealthBook, JobRunner
 
     send = Mock(return_value=Response(403, {"message": "not available"}))

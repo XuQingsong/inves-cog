@@ -27,7 +27,7 @@ def check_a024_database(c):
     c.execute("SET LOCAL ROLE role_web")
     actual = c.execute("SELECT * FROM ingest.intraday_snapshots ORDER BY as_of").fetchall()
     assert len(actual) == 2 and actual[0]["as_of"] == CLOCK.now_utc() - timedelta(days=30)
-    assert actual[-1]["last"] == row["last"]
+    assert float(actual[-1]["last"]) == pytest.approx(row["last"])
     assert (
         c.execute(
             "SELECT has_table_privilege(current_user,'ingest.intraday_snapshots','INSERT') AS can_write"

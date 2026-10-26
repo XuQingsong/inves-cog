@@ -722,6 +722,7 @@ class Pipeline:
         return {"processed_count": len(rows)}
 
     def runtime(self):
+        from inves_cog.ingest.intraday import collect_intraday
         from inves_cog.ingest.market_structure import collect_issuer_profiles, collect_market_inputs
         from inves_cog.ingest.resilience import collect_calendars, collect_vix
         from inves_cog.ingest.service import check_news_gap
@@ -733,6 +734,7 @@ class Pipeline:
             "wide_universe": ("AlpacaWide", self.wide),
             "news_full": ("AlpacaNews", self.news),
             "news_poll": ("AlpacaNews", self.news),
+            "intraday_snapshots": ("AlpacaIntraday", lambda: collect_intraday(self)),
             "news_watchdog": ("Scheduler:news_watchdog", lambda: check_news_gap(self.repo, self.clock)),
             "vix_daily": ("VolatilitySources", lambda: collect_vix(self)),
             "earnings_calendar": ("EarningsCalendar", lambda: collect_calendars(self, "earnings")),

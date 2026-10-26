@@ -19,6 +19,10 @@ def json_text(value):
 
 
 TABLES = {
+    "intraday_snapshots": (
+        "ticker as_of session last prev_close delay_minutes source fetched_at",
+        "ticker,as_of,source",
+    ),
     "bars_minute": ("ticker ts_utc open high low close volume session source", "ticker,ts_utc"),
     "bars_daily": ("ticker trade_date open high low close volume post_close adj_factor source", "ticker,trade_date"),
     "wide_universe": ("trade_date ticker mktcap adv20 included exclude_reason notes", "trade_date,ticker"),
@@ -144,6 +148,10 @@ class Repository:
         with self.transaction():
             self.connection.execute(sql, values)
         self.processed += 1
+
+    def cleanup_intraday(self, before):
+        with self.transaction():
+            return self.connection.execute("DELETE FROM ingest.intraday_snapshots WHERE as_of<%s", (before,)).rowcount
 
     def replace_calendar_day(self, table, day, source, rows):
         """Atomically replace one successfully fetched date and source only."""
