@@ -38,13 +38,7 @@ def validate_async_row(row, count, dimensions):
     return index, vector, None
 
 
-def collect(connection, model, limit=None):
-    from pathlib import Path
-
-    import yaml
-
-    params = yaml.safe_load((Path(__file__).resolve().parents[3] / "config/params/p-2026.10/m1.yaml").read_text())["m1"]
-    include_news = params.get("news_llm_enabled", False)
+def collect(connection, model, limit=None, *, include_news=False):
     groups = {}
     with connection.transaction(), connection.cursor(name="model_embedding_input") as cursor:
         cursor.execute(
@@ -286,6 +280,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=[m for m in MODEL_DIMENSIONS if m != "text-embedding-v3"], required=True)
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--include-news", action="store_true", help="Explicitly enable news embedding inputs")
     parser.add_argument("--token-budget", type=int, default=0)
     parser.add_argument("--env", type=Path, default=ROOT / ".env")
     args = parser.parse_args()
@@ -294,13 +289,14 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     started = clock.now_utc()
     with connect(values) as connection:
-        suffix = f"-limit{args.limit}" if args.limit else ""
+        # Never reuse an old cached plan that may contain now-disabled news.
+        suffix = ("-with-news" if args.include_news else "-no-news") + (f"-limit{args.limit}" if args.limit else "")
         plan = folder / (args.model + suffix + "-plan.json.gz")
         if plan.exists():
             with gzip.open(plan, "rt") as handle:
                 groups = json.load(handle)
         else:
-            groups = collect(connection, args.model, args.limit)
+            groups = collect(connection, args.model, args.limit, include_news=args.include_news)
             with gzip.open(plan, "wt") as handle:
                 json.dump(groups, handle, ensure_ascii=False)
         sink = Sink(connection, args.model, clock)

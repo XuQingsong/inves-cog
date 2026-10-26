@@ -93,6 +93,7 @@ def test_a023_postgres_roles_queue_cleanup_embeddings_and_holdings(database):
 
 def check_calendar_reschedule(c):
     from datetime import date
+
     from inves_cog.ingest.resilience import parse_earnings, parse_econ
 
     repo = Repository(c)

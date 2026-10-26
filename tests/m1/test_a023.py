@@ -209,6 +209,7 @@ def test_a023_all_frozen_v18_vix_days_keep_cboe_and_identical_replay(monkeypatch
 
 def test_a023_review_budget_config_restored():
     import yaml
+
     from inves_cog.ingest.settings import ROOT
 
     assert (
@@ -242,8 +243,9 @@ def test_a023_calendar_refresh_only_successful_dates(monkeypatch):
 
 
 def test_a023_news_health_recovers_on_successful_collection():
-    from datetime import timedelta
     from collections import Counter
+    from datetime import timedelta
+
     from inves_cog.ingest.pipeline import Pipeline
     from inves_cog.ingest.service import check_news_gap
 

@@ -145,6 +145,33 @@ class Repository:
             self.connection.execute(sql, values)
         self.processed += 1
 
+    def replace_calendar_day(self, table, day, source, rows):
+        """Atomically replace one successfully fetched date and source only."""
+        if table == "earnings_calendar":
+            date_key, keys = "report_date", ("ticker",)
+        elif table == "econ_calendar":
+            date_key, keys = "event_date", ("country", "name")
+        else:
+            raise ValueError("Unknown calendar")
+        if any(r[date_key] != day or r["source"] != source for r in rows):
+            raise ValueError("Calendar refresh outside fetched date/source")
+        identities = {tuple(r[k] for k in keys) for r in rows}
+        with self.transaction():
+            previous = self.connection.execute(
+                f"SELECT {','.join(keys)} FROM ingest.{table} WHERE {date_key}=%s AND source=%s FOR UPDATE",
+                (day, source),
+            ).fetchall()
+            for row in rows:
+                self.write(table, row, update=tuple(k for k in row if k not in {*keys, date_key, "source"}))
+            for old in previous:
+                identity = tuple(old[k] for k in keys)
+                if identity not in identities:
+                    where = " AND ".join(k + "=%s" for k in keys)
+                    self.connection.execute(
+                        f"DELETE FROM ingest.{table} WHERE {date_key}=%s AND source=%s AND {where}",
+                        (day, source, *identity),
+                    )
+
     def write_job(self, row):
         fields = (
             "task_name trade_date started_at ended_at status processed_count error_"

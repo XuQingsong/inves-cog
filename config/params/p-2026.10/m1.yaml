@@ -28,6 +28,6 @@ m1:
   summary_characters: 500
   extraction_characters: 2000
   news_llm_enabled: false
-  llm_daily_token_budget: 5500000
+  llm_daily_token_budget: 1500000
   embedding: {model: text-embedding-v3, dimensions: 1024}
   fred_series: [CPIAUCSL, PAYEMS, DGS2, VIXCLS, DCOILWTICO, DTWEXBGS]

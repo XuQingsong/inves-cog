@@ -246,16 +246,7 @@ def collect_calendars(pipeline, kind, *, http=None):
                     headers=HEADERS,
                 )
                 rows = parser(raw, target, pipeline.clock)
-                for row in rows:
-                    pipeline.repo.write(
-                        table,
-                        row,
-                        update=tuple(
-                            k
-                            for k in row
-                            if k not in {"ticker", "report_date", "source", "event_date", "country", "name"}
-                        ),
-                    )
+                pipeline.repo.replace_calendar_day(table, target, "Nasdaq", rows)
                 saved.extend(rows)
             except Exception:
                 failed_days.append(target)
