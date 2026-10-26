@@ -213,3 +213,13 @@ PR81 head `9132f323d10595d63a75abc700dc22bd0c4a3394`，先失败测试 `a38bdcb`
 [PR83](https://github.com/XuQingsong/inves-cog/pull/83)，准确完整head `e6dc3ed275e702ca8b3cdb9139e358470d2bb0c6` 的[PR合并phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40321185092/job/121566217489)与[分支CI](https://github.com/XuQingsong/inves-cog/actions/runs/40321096329/job/121565929968)均success：826 passed、33 deselected，另2项环境检查通过；nightly为skipped不冒称通过。先失败测试提交`cd13dd0`、后实现提交已保留。真实SPY响应夹具、交易日/假日/DST、三个时段频率、成交原时间与实际延迟、池外持仓并集、全市场delayed_sip及一致复权、无同槽重试、来源健康和真实PG30天清理/最小角色合同全部通过。
 
 已自行决定项沿用先前已记录的已核实delayed_sip及真实延迟/复权口径，无新增范围。只读核实不等于生产安装或首日验收；当前未合并、未在生产建表或注册采集。下一步需求方验收合并并下发部署后安装，首个真实交易日核验盘前首尾时间/条数、SPY涨跌与Google/券商公开数据对照，保留各时点原行情时间、不伪造完整盘前覆盖。A023两个收盘运行窗口仍独立跟进，自动化保持开启。
+
+## B-064 部署 已收到／进行中；翻译启动前预算阻塞
+
+收到A-014补充三十六，核实PR84已合并，merge `a37acfd82a8e36de351ce34667ce614538214651`；准确head `040615c08d6b43658ec4d7b48e5d75e9a9a4139f` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40335211811/job/121614818457) success。变更：安装该版本、指定news_translations迁移、仅重启pages；管理员仅DDL，业务用现有最小角色。
+
+启动前发现预算未闭环：translate_day的tokens只取初始值、循环不更新；calls按client.call累计，但Client每次可重试2次，真实尝试/记账次数可超过6；Client本身没有该任务日限额。先完成不依赖模型的安装/表/页面核验，news_translate暂不启动，不扩大预算、不修改B代码。需需求方/B线修正真实尝试计数和token硬限额后验收合并，A继续启动。
+
+## A-024 追加范围 已收到／进行中
+
+收到复核一：原实现通过，同一PR83追加15只ETF及13个Yahoo宏观代码。变更：两来源独立健康及失败隔离，保持美股三时段、同表/30天清理；先核实收益率单位，真实响应夹具先失败测试后实现。不采2年期、不改FRED/页面。原迁移无GRANT，role_ingest写/role_web只读继承M0 schema默认权限，真实隔离PG已验证。未合并前不部署A024。
