@@ -1,4 +1,5 @@
 """B-063: news rules layer, technicals, VIX fallback — pure unit tests (no DB)."""
+
 from datetime import datetime, timedelta, timezone
 
 from inves_cog.perception.news.rules import classify, rank_day, theme_of
@@ -43,8 +44,13 @@ def test_primary_tickers_filter():
 def test_dedup():
     ts = datetime(2026, 10, 23, 9, 0, tzinfo=NY)
     items = [
-        {"info_id": i, "headline": "NVDA beats revenue estimates", "tickers": ["NVDA"],
-         "published_at": ts + timedelta(minutes=i), "first_seen_at": ts + timedelta(minutes=i)}
+        {
+            "info_id": i,
+            "headline": "NVDA beats revenue estimates",
+            "tickers": ["NVDA"],
+            "published_at": ts + timedelta(minutes=i),
+            "first_seen_at": ts + timedelta(minutes=i),
+        }
         for i in range(3)
     ]
     ranked = rank_day(items, POOL, HELD, datetime(2026, 10, 23, tzinfo=NY).date())
@@ -53,10 +59,14 @@ def test_dedup():
 
 def test_late_flag():
     pub = datetime(2026, 10, 23, 8, 0, tzinfo=NY)
-    late = {"info_id": 1, "headline": "NVDA update", "tickers": ["NVDA"],
-            "published_at": pub, "first_seen_at": datetime(2026, 10, 24, 9, 0, tzinfo=NY)}
-    fresh = {"info_id": 2, "headline": "NVDA news", "tickers": ["NVDA"],
-             "published_at": pub, "first_seen_at": pub}
+    late = {
+        "info_id": 1,
+        "headline": "NVDA update",
+        "tickers": ["NVDA"],
+        "published_at": pub,
+        "first_seen_at": datetime(2026, 10, 24, 9, 0, tzinfo=NY),
+    }
+    fresh = {"info_id": 2, "headline": "NVDA news", "tickers": ["NVDA"], "published_at": pub, "first_seen_at": pub}
     ranked = rank_day([late, fresh], POOL, HELD, pub.date())
     by_id = {n["info_id"]: n for n in ranked}
     assert by_id[1]["late"] and not by_id[2]["late"]

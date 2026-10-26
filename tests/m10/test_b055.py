@@ -334,11 +334,14 @@ def _nvda(pages):
 
 def test_w1_stock_news_count_and_preview(pages):
     nvda = _nvda(pages)
-    assert nvda["news_count"] == 2
-    assert [item["summary"] for item in nvda["news"]] == ["NVDA beats", "英伟达获得大单"]
+    assert nvda["news_count"] == 3
+    summaries = [item["summary"] for item in nvda["news"]]
+    assert summaries[:2] == ["NVDA beats", "英伟达获得大单"]
+    late = [item for item in nvda["news"] if item["summary"] == "截点后不计入"]
+    assert late and late[0]["late"]
     assert nvda["news"][0]["published_beijing"] == "2036-10-23 02:30"
     assert nvda["news"][1]["source"] == "路透"
-    assert all(item["summary"] != "截点后不计入" for item in nvda["news"])
+    # B-063: published-in-window news stays visible even when ingested after the cutoff.
     # B-062: the stock table dropped its news column; the stock page lists the news instead.
     html = _get(pages, "/s/NVDA").text
     cell = html.split("最近新闻", 1)[1]
@@ -380,7 +383,7 @@ def test_w2_event_reasons_then_morning_page(pages):
 
 def test_w3_news_status_follows_the_fixture(pages):
     trust = _json(pages, "/api/pages/brief/trust")
-    assert trust["news_day_count"] == 2
+    assert trust["news_day_count"] == 3
     expected = SEEN.astimezone(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
     assert trust["news_seen_beijing"] == expected
     html = _get(pages, "/trust").text

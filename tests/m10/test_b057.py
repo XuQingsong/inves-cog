@@ -218,41 +218,21 @@ def test_s1_short_column_matches_the_latest_visible_print(pages):
         )
         .fetchone()
     )
+    # B-063: short interest removed from investor pages; column now shows 形态.
     nvda = _member(pages, "NVDA")
-    assert nvda["short"]["pct"] == stored["si_pct_shares_outstanding"]
-    assert nvda["short"]["days"] == stored["days_to_cover"]
-    assert nvda["short"]["change"] == stored["raw"]["changePercent"]
-    assert nvda["short"]["crowded"] is True
-    assert nvda["short"]["settlement"] == "2037-06-05"
-    assert nvda["short"]["text"] == "空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算"
-    # B-062 cell: "占比 · 回补天数 [拥挤] / 结算日".
-    cell = _row(_get(pages, "/stocks").text, "NVDA")
-    shown = " ".join(_visible(cell).split())
-    assert "12.3% · 3.2 天 拥挤" in shown and "6/5 结算" in shown
-    assert "40.0%" not in cell and "8.0%" not in cell and "80.0%" not in cell
-    amd = " ".join(_visible(_row(_get(pages, "/stocks").text, "AMD")).split())
-    assert "拥挤" not in amd
-    assert "10.0% · 1.0 天" in amd and "6/5 结算" in amd
-    avgo = " ".join(_visible(_row(_get(pages, "/stocks").text, "AVGO")).split())
-    assert "拥挤" not in avgo
-    assert "5.0 天" in avgo
-    amat = _member(pages, "AMAT")
-    assert amat["short"]["days"] == 5.1 and amat["short"]["crowded"] is True
-    assert "拥挤" in _row(_get(pages, "/stocks").text, "AMAT")
-    assert _member(pages, "MRVL")["short"] is None
-    assert "暂缺" in _row(_get(pages, "/stocks").text, "MRVL")
+    assert "short" not in nvda and "tech" in nvda
+    for ticker in ("NVDA", "AMD", "AVGO", "AMAT", "MRVL"):
+        row = _row(_get(pages, "/stocks").text, ticker)
+        assert "拥挤" not in row and "结算" not in row
+        assert "数据不足" in row or "暂缺" in row or "排列" in row or "回调" in row or "反弹" in row or "震荡" in row
 
 
 def test_s2_theme_average_skips_missing_members(pages):
     stocks = _json(pages, "/api/pages/brief/stocks")
     chip = next(theme for theme in stocks["themes"] if theme["sector"] == "AI 算力芯片")
-    assert chip["short_covered"] == 3
-    assert chip["short_members"] == 4
-    assert chip["short_average"] == pytest.approx((12.34 + 10.0 + 3.0) / 3)
-    assert chip["short_text"] == f"{format_points_plain(chip['short_average'], 1)}（覆盖 3/4）"
-    assert chip["short_text"] == "8.4%（覆盖 3/4）"
+    assert "short_covered" not in chip and "short_average" not in chip
     html = _get(pages, "/stocks").text
-    assert "8.4%（覆盖 3/4）" in _row(html, "AI 算力芯片")
+    assert "8.4%（覆盖 3/4）" not in html
 
 
 def test_s3_put_call_uses_total_then_equity(pages):
@@ -306,7 +286,7 @@ def test_s4_vix_fallback_four_ways(pages):
         admin.execute("UPDATE marketstate.market SET vix = 18.72 WHERE trade_date = %s", (DAY,))
         both, both_html = shown()
         assert both["vix"] == pytest.approx(18.72)
-        assert both["vix_source"] is None
+        assert both["vix_source"] == "CBOE"
         assert "18.72" in both_html and "来源 FRED" not in both_html
         admin.execute(
             """
@@ -317,7 +297,7 @@ def test_s4_vix_fallback_four_ways(pages):
         )
         market_only, market_html = shown()
         assert market_only["vix"] == pytest.approx(18.72)
-        assert market_only["vix_source"] is None
+        assert market_only["vix_source"] == "CBOE"
         assert "来源 FRED" not in market_html
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         neither, neither_html = shown()

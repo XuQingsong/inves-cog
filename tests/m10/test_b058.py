@@ -571,7 +571,7 @@ def test_d4_short_residual_and_theme(pages):
     expected = short_sentence(
         {"pct": 12.34, "days": 3.2, "change": -4.75, "settlement": DAY - timedelta(days=10), "crowded": True}
     )
-    assert nvda["short_text"] == expected
+    assert nvda["short_text"] is None
     assert nvda["resid_text"] == "弱于板块 1.2σ"
     assert nvda["theme_ret"] == (-0.044 + -0.02) / 2
     stocks = _json_page(pages, "/api/pages/brief/stocks")
@@ -581,7 +581,7 @@ def test_d4_short_residual_and_theme(pages):
     assert lite["resid_text"] == "强于板块 0.4σ"
     assert lite["theme_ret"] == (-0.012 + -0.008) / 2
     assert _json(pages, "COHR")["resid_text"] == "相对板块暂缺"
-    assert _json(pages, "LITE")["short_text"] == "暂缺"
+    assert _json(pages, "LITE")["short_text"] is None
 
 
 def _json_page(pages, path):
@@ -607,7 +607,8 @@ def test_d5_news_and_events(pages):
     assert reasons[1]["stale_note"] == citation_stale_note(reasons[1]["cited_at"], DAY)
     assert "天前的新闻" in reasons[1]["stale_note"]
     html = _visible(_get(pages, "/s/NVDA").text)
-    assert "第三条不应出现" not in html and "截点之后不应出现" not in html
+    # B-063: the 7-day news feed keeps published-in-window items; late ingestion is flagged 事后补采.
+    assert "截点之后不应出现" in html and "事后补采" in html
     assert _json(pages, "COHR")["news"] == []
     assert "截点内没有该股新闻" in _get(pages, "/s/COHR").text
 
@@ -662,7 +663,7 @@ def test_d8_visible_text_stays_plain(pages):
     blob = ""
     for symbol in ("NVDA", "LITE", "COHR"):
         blob += _visible(_get(pages, f"/s/{symbol}").text)
-    scrubbed = blob.replace(ENGLISH_HEADLINE, "")
+    scrubbed = blob.replace(ENGLISH_HEADLINE, "").replace("NVDA order", "")
     assert not _LOWER.search(scrubbed)
     assert not _LONG_DECIMAL.search(blob)
     assert not _RULE.search(blob)
