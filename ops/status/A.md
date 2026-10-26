@@ -295,3 +295,9 @@ Google公开页面本轮读到：SPY766.55、+0.87%（10-26 11:30:06 GMT-4）；
 新准确SHA的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40364645068/job/121718924930) failure：883 passed、1 failed、33 deselected。唯一失败`tests/m10/test_b064.py::test_translate_payload_headlines_only`（424行），测试以贪婪`r"\[.*\]"`从整个user提示提取输入标题，新增输出格式示例的数组被一并捕获，触发JSONDecodeError；失败不是此前旧预算/读取身份问题，也不是Docker清理退出码所致。已完成有界定位，无需再运行付费请求验证这一离线错误。
 
 需要需求方/B线修正输入标题提取测试，使其区分输出示例与实际输入数组，并在准确SHA完整CI通过后确认部署；A不跨线改B测试或只读定稿，不以旧PR86检查成功替代新版本失败。准备已齐：已知改动仅定稿4行、生产干净且唯一翻译已停，既有6次/5万预算保留；收到通过版本后沿原授权接续，不重复迁移/重启行情。A023收盘验证和A024下一交易日盘前窗口仍独立跟进。
+
+## PR88翻译恢复 已收到／进行中
+
+收到A-014补充三十九：PR88验收merge `81dad2f2899525426b7179c25901e4f4c3aa6841`统一定稿/解析为titles对象，修正输入标题测试，坏格式批次记账后丢弃。准确head `871a0ab6eddbd0230717fe2e24f089fa4243ce1f` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40365829547/job/121723134705) success，先前988eea0的唯一测试阻塞已解除，不再等待同一答复。
+
+按授权快进该merge，仅重新启动已有news_translate，其他服务/配置不动、不重复迁移。接续前核查实际进程为0及当天剩余调用/token预算，保留此前失败1次/2279 token；不重置预算。不做额外手工模型测试，观察首轮自然任务真实记账/写入/候选未译数，失败则有界定位避免重复付费。收到真实结果前不称翻译恢复成功。
