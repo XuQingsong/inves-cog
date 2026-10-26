@@ -279,3 +279,11 @@ A-024 CI收口：同一完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87` 的
 按PR86已验收修复启动后，唯一进程及WEB读取/perception写入身份均已核实；首个真实请求失败（llm_calls status=failed），input1328/output951，总2279 token，usage无缺失；译文表0条、当前候选80/未译80。PR86原先预算和读权限缺陷已解除，不重提旧授权。新阻塞：定稿提示词要求“只输出JSON数组”，但共享transport强制response_format=json_object并在返回后拒绝非dict，Client也只接受dict，translate_day又只读titles/items字段；协议互不兼容。没有保存/输出模型原文，不能断言未记录的原始返回具体形态；已确认代码合同矛盾与首个真实失败一致，继续仅做离线复现，不追加付费诊断。
 
 已仅停止news_translate并确认进程0；行情scheduler/pages及其他服务继续，无额外真实模型调用。需要需求方/B线提交并验收统一提示词/调用器/返回解析合同的修复（提示词只读，A不改B代码），合并并下发后A立即接续启动与真实写入验证。不能将已记账调用或部署成功当翻译业务成功。
+
+## A-024 首轮公开报价对照／翻译离线补证
+
+Google公开页面本轮读到：SPY766.55、+0.87%（10-26 11:30:06 GMT-4）；Google TNX49.84（10:24:52 GMT-5，指数为收益率10倍，折为4.984%）；CLW00 100.94/前结算103.27（14:21:26 UTC）；GCW00 4034.30/4007.90（15:23:55 UTC）。链接：[SPY](https://www.google.com/finance/quote/SPY:NYSEARCA?hl=en)、[TNX](https://www.google.com/finance/quote/TNX:INDEXCBOE?hl=en)、[WTI](https://www.google.com/finance/quote/CLW00:NYMEX?hl=en)、[黄金](https://www.google.com/finance/quote/GCW00:COMEX?hl=en)。
+
+与本库首批对照：SPY766.5658、约+0.868%，前收与Google涨跌相符，两个报价相隔约16分钟；TNX本库4.984%与Google49.84/10一致，前收4.988%，即-0.4基点，不能把49.84直接与4.984相减。WTI本库102.49，Google100.94，相差1.55，但Google报价比本库早约90分钟；黄金4030.6对4034.30，相差-3.7、时间差约28分钟。两商品前结算分别103.27与4007.90一致；Google连续合约与Yahoo当前12月合约的逐笔同合约/同时间对齐未取得，不能把量级/方向对照冒称精确同刻价格验收。一次直读较新页面能取得原报价时间但未解析到价格，工具重取不可访问，已收口不继续增加诊断；下一自然验收窗口保留明确时间/合约限制。
+
+翻译离线补证：注入HTTP响应为定稿要求的1条JSON数组，transport实际发送response_format=json_object，抛“Dialogue response lacks a valid JSON object”；1次纯离线transport执行、0真实网络/模型请求，未修改B代码或定稿文档。新协议阻塞已明确同步，不再把预算/读身份已修复项当阻塞。翻译保持stopped，真实累计仅失败1次/2279 token、译文0/候选未译80，等待需求方统一合同修复并验收合并。行情和页面不受此局部停止影响。
