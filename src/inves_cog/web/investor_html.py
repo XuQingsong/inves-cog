@@ -1973,7 +1973,7 @@ def _calendar_module(payload):
     econ = payload.get("econ")
     if earnings is None and econ is None:
         return '<div class="card"><h2>财报日历</h2><div class="empty">日历待接入</div></div>'
-    parts = ['<div class="card"><h2>财报日历 <span class="small muted">来源 Nasdaq</span></h2><div class="scroll">']
+    parts = ['<div class="card"><h2>财报日历 <span class="small muted">来源 日历</span></h2><div class="scroll">']
     empty = '<div class="empty">无</div>'
     if earnings is None:
         parts.append('<h3>本周重点（市值前 10）</h3><div class="empty">日历待接入</div>')
