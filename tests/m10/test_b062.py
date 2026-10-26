@@ -551,7 +551,7 @@ def test_g10_future_shorts_and_extreme_pe_become_anomalies(pages):
     assert PLAIN in visible
     payload = _get(pages, "/api/pages/brief/trust").json()
     titles = " ".join(row["title"] + row["detail"] for row in payload["anomalies"])
-    assert "PLTR 2026-11-15" in titles and "WMT 2026-11-28" in titles
+    assert "PLTR 2026-11-15" not in titles and "WMT 2026-11-28" not in titles
     assert "CRWD 市盈率不适用（盈利过低）" in titles
     assert "PANW 市盈率不适用（盈利过低）" in titles
     assert "CRWD 隐含增速超出可解释范围" in titles

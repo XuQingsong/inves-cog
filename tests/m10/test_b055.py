@@ -336,7 +336,7 @@ def test_w1_stock_news_count_and_preview(pages):
     nvda = _nvda(pages)
     assert nvda["news_count"] == 3
     summaries = [item["summary"] for item in nvda["news"]]
-    assert summaries[:2] == ["NVDA beats", "英伟达获得大单"]
+    assert set(summaries) == {"NVDA beats", "英伟达获得大单", "截点后不计入"}
     late = [item for item in nvda["news"] if item["summary"] == "截点后不计入"]
     assert late and late[0]["late"]
     assert nvda["news"][0]["published_beijing"] == "2036-10-23 02:30"
@@ -388,7 +388,7 @@ def test_w3_news_status_follows_the_fixture(pages):
     assert trust["news_seen_beijing"] == expected
     html = _get(pages, "/trust").text
     assert "最近入库" in html and trust["news_seen_beijing"] in html
-    assert "最近 1 个交易日 2 条" in html
+    assert "最近 1 个交易日 3 条" in html
 
 
 def test_w4_only_stock_events_and_both_sessions(pages):

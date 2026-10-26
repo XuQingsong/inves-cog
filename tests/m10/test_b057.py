@@ -290,9 +290,9 @@ def test_s4_vix_fallback_four_ways(pages):
         assert "来源 FRED" not in market_html
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         neither, neither_html = shown()
-        assert neither["vix"] is None and neither["vix_source"] is None
-        assert "VIX 暂缺" in " ".join(_visible(neither_html).split())
-        assert "来源 FRED" not in neither_html
+        # B-063: stale series fall back to the latest observation with an as-of note.
+        assert neither["vix"] == pytest.approx(11.11) and neither["vix_source"] == "FRED"
+        assert "11.11" in neither_html and "截至" in neither_html
     finally:
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         admin.execute(
@@ -308,29 +308,14 @@ def test_s4_vix_fallback_four_ways(pages):
 def test_s5_short_and_option_freshness(pages):
     trust = _json(pages, "/api/pages/brief/trust")
     states = {row["item"]: row for row in trust["statuses"]}
-    assert states["空头数据"]["state"] == "新鲜"
-    assert states["空头数据"]["detail"] == "结算 6/5"
+    # B-063: short interest removed from all pages including 复盘数据状态.
+    assert "空头数据" not in states
     assert states["期权数据"]["state"] == "新鲜"
     assert states["期权数据"]["detail"] == "最近 6/15"
     html = _get(pages, "/trust").text
-    assert "空头数据" in html and "新鲜" in html and "结算 6/5" in html
-    assert "期权数据" in html and "最近 6/15" in html
+    assert "空头数据" not in html and "期权数据" in html and "最近 6/15" in html
     admin = pages["admin"]
-    stale_short = DAY - timedelta(days=21)
-    fresh_short = DAY - timedelta(days=20)
     try:
-        admin.execute(
-            "UPDATE ingest.short_interest SET settlement_date = %s WHERE observation_id LIKE 'b057-%%'",
-            (stale_short,),
-        )
-        aged = {row["item"]: row for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
-        assert aged["空头数据"]["state"] == "过期"
-        admin.execute(
-            "UPDATE ingest.short_interest SET settlement_date = %s WHERE observation_id LIKE 'b057-%%'",
-            (fresh_short,),
-        )
-        edged = {row["item"]: row for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
-        assert edged["空头数据"]["state"] == "新鲜"
         admin.execute("DELETE FROM ingest.options_stats WHERE source = 'b057' AND trade_date > %s", (SESSIONS[-4],))
         quiet = {row["item"]: row for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
         assert quiet["期权数据"]["state"] == "过期"
@@ -351,7 +336,6 @@ def test_s6_two_pages_stay_in_plain_language(pages):
     assert _LONG_DECIMAL.search(visible) is None
     assert "1.50（全市场），近 20 个交易日 100 分位，偏谨慎" in market
     assert "19.03" in market and "来源 FRED" in market
-    assert "12.3% · 3.2 天 拥挤" in " ".join(_visible(stocks).split())
-    assert "8.4%（覆盖 3/4）" in stocks
+    assert "拥挤" not in " ".join(_visible(stocks).split()) and "空头" not in stocks
     for path in ("/", "/stocks", "/account", "/trust"):
         assert _get(pages, path).status_code == 200

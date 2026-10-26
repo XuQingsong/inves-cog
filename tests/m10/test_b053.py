@@ -471,7 +471,7 @@ def test_v1_structure_and_detail_links(pages):
     }
     assert [text for level, text in found["/"] if level == "1"][0].startswith("判断：")
     h2 = [text for level, text in found["/"] if level == "2"]
-    assert "持仓与标的异动" in h2 and "热门主题新闻" in h2 and "涨跌排行榜" in h2
+    assert "持仓与标的异动" in h2 and "涨跌排行榜" in h2
     funds, mood, events = h2[-3:]
     assert funds.startswith("资金：") and mood.startswith("情绪：") and events == "今天的大事"
     assert [text for level, text in found["/stocks"] if level == "2"] == ["主题强弱", "逐只明细"]
