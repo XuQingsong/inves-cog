@@ -265,3 +265,17 @@ A-024 CI收口：同一完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87` 的
 收到A-014补充三十八，main `1af17152e093f7bc066fc8d3dbcb471c41ce0254` 包含A024验收merge `89fd55e85ba2be6271d4591432843c30b802aa59`与PR86翻译修复merge `b67661e14cde8732e0f47bec9ec98296db1d2f96`。PR86准确head `6e7a95357b890a7a5fa467018072bc734bf333d3` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40351762587/job/121673407804) success。已核实读取改为现有WEB登录、写用perception、重试0、每次请求前重读实际用量并预留估算，与新验收授权一致，不再等待同一问题答复。
 
 变更：安装已验收版本、仅执行A024指定表迁移；scheduler现有任务只追加intraday_snapshots/yahoo_intraday；按安装模板只增news_translate程序，重启scheduler与pages并启动唯一翻译进程，其他服务/角色保持。管理员只DDL，业务仍用既有最小登录；不重跑B064表迁移/旧补采。今天已过盘前，真实首日只能报告部署后覆盖，完整盘前首尾待下一交易日自然运行，不伪造。先核查进程/表/已有收据，有界部署和真实采集用量核验后回报。
+
+## A-024 部署及首轮真实行情已完成；盘前首尾待自然窗口
+
+生产head `89fd55e85ba2be6271d4591432843c30b802aa59`，A024/PR86均已验收合并后安装。指定迁移SHA256 `3eb645a5a981d713c5f8261cc80311b398f81ff700b40e409870f281e51be820`已提交一次，既有最小登录权限独立核验通过，无角色/额外授权变更。只重启scheduler/pages并注册news_translate；其他运行PID与原配置字段保持。实际scheduler原17任务全部保留，仅追加intraday_snapshots/yahoo_intraday，旧scheduler确认退出。
+
+16:02:41 UTC独立只读核验：Alpaca自然采集77条/77代码，原成交时间15:46:11.570021至15:46:25.289620 UTC；Yahoo13条/13代码，原报价时间15:46:22至16:01:29 UTC。两任务均已结束status=ok，两个source_health均ok、consecutive_failures=0、缺当前成交/前收均0。不是把命令发出或存活当数据成功。四个外部页面均200。
+
+首次公开样本：SPY766.5658/前收759.97，as_of15:46:25 UTC，delay16；TNX4.984/4.988，as_of15:46:22，delay16；CL=F102.49/103.27，as_of15:51:29，delay11；GC=F4030.6/4007.9，as_of15:51:28，delay11。今日盘前0条，因为部署在ET12:01以后，不能补造盘前覆盖；下一交易日ET04–09:30自然首尾与收盘后汇总继续，A024尚未关单。
+
+## 新闻翻译真实运行失败／已停止重复付费；需要需求方/B线修复协议
+
+按PR86已验收修复启动后，唯一进程及WEB读取/perception写入身份均已核实；首个真实请求失败（llm_calls status=failed），input1328/output951，总2279 token，usage无缺失；译文表0条、当前候选80/未译80。PR86原先预算和读权限缺陷已解除，不重提旧授权。新阻塞：定稿提示词要求“只输出JSON数组”，但共享transport强制response_format=json_object并在返回后拒绝非dict，Client也只接受dict，translate_day又只读titles/items字段；协议互不兼容。没有保存/输出模型原文，不能断言未记录的原始返回具体形态；已确认代码合同矛盾与首个真实失败一致，继续仅做离线复现，不追加付费诊断。
+
+已仅停止news_translate并确认进程0；行情scheduler/pages及其他服务继续，无额外真实模型调用。需要需求方/B线提交并验收统一提示词/调用器/返回解析合同的修复（提示词只读，A不改B代码），合并并下发后A立即接续启动与真实写入验证。不能将已记账调用或部署成功当翻译业务成功。
