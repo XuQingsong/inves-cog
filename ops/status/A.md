@@ -207,3 +207,9 @@ PR81 head `9132f323d10595d63a75abc700dc22bd0c4a3394`，先失败测试 `a38bdcb`
 [PR83](https://github.com/XuQingsong/inves-cog/pull/83)，完整head `e6dc3ed275e702ca8b3cdb9139e358470d2bb0c6`。先失败测试`cd13dd0`（15 failed/7 passed），再实现；实际配置股票池59只，采集并集包含SPY/QQQ/IWM与池外持仓，不漏重复代码。真实SPY快照/前日all复权响应已作夹具。时间取原成交时间、延迟实际向上取整且至少15分钟、前日陈旧成交不入本日快照；缺前收盘留NULL并标记健康降级，失败不重试同槽。按三时段频率与交易日运行，30天清理仅限新表，不改规则A或页面。
 
 目标与兼容回归61 passed，静态检查通过；真实本地隔离PostgreSQL已验证新表迁移、role_ingest写/role_web只读和严格早于30天清理，测试数据已回滚且测试库已停。准确head的phase1-blocking仍在运行，不冒称通过。下一步CI通过后送需求方验收，未合并、迁移生产或部署；首个交易日盘前首尾/条数及SPY公开报价对照待安装后自然验真。A023两日收盘观察继续，不重复启动。
+
+## A-024 已完成（代码交付，待需求方验收合并）
+
+[PR83](https://github.com/XuQingsong/inves-cog/pull/83)，准确完整head `e6dc3ed275e702ca8b3cdb9139e358470d2bb0c6` 的[PR合并phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40321185092/job/121566217489)与[分支CI](https://github.com/XuQingsong/inves-cog/actions/runs/40321096329/job/121565929968)均success：826 passed、33 deselected，另2项环境检查通过；nightly为skipped不冒称通过。先失败测试提交`cd13dd0`、后实现提交已保留。真实SPY响应夹具、交易日/假日/DST、三个时段频率、成交原时间与实际延迟、池外持仓并集、全市场delayed_sip及一致复权、无同槽重试、来源健康和真实PG30天清理/最小角色合同全部通过。
+
+已自行决定项沿用先前已记录的已核实delayed_sip及真实延迟/复权口径，无新增范围。只读核实不等于生产安装或首日验收；当前未合并、未在生产建表或注册采集。下一步需求方验收合并并下发部署后安装，首个真实交易日核验盘前首尾时间/条数、SPY涨跌与Google/券商公开数据对照，保留各时点原行情时间、不伪造完整盘前覆盖。A023两个收盘运行窗口仍独立跟进，自动化保持开启。
