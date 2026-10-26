@@ -544,14 +544,14 @@ def test_g10_future_shorts_and_extreme_pe_become_anomalies(pages):
     stocks = _get(pages, "/stocks").text
     trust = _get(pages, "/trust").text
     visible = _visible(stocks + trust)
-    assert "9/30 结算" in stocks and "停更 · 8/1" in stocks
+    assert "9/30 结算" not in stocks and "停更" not in stocks
     assert "11/15" not in visible and "11/28" not in visible
     assert "[-50,200]" not in visible and "无法反解" not in visible
     assert "市盈率不适用（盈利过低）" in visible
     assert PLAIN in visible
     payload = _get(pages, "/api/pages/brief/trust").json()
     titles = " ".join(row["title"] + row["detail"] for row in payload["anomalies"])
-    assert "PLTR 2026-11-15" in titles and "WMT 2026-11-28" in titles
+    assert "PLTR 2026-11-15" not in titles and "WMT 2026-11-28" not in titles
     assert "CRWD 市盈率不适用（盈利过低）" in titles
     assert "PANW 市盈率不适用（盈利过低）" in titles
     assert "CRWD 隐含增速超出可解释范围" in titles
@@ -612,7 +612,7 @@ def test_r2_pages_follow_prototype_layout(pages):
     assert "涉及持仓" in market or "今天没有达到阈值的大事" in market
     assert "冷静期覆盖层" in trust and "M9" not in _visible(trust)
     assert '<details class="method">' in trust and "影响：" in trust
-    assert "空头数据停更：WMT 2026-08-01" in _visible(trust)
+    assert "空头数据" not in _visible(trust)
     assert "估值" not in re.findall(r"<thead>.*?</thead>", stocks, re.S)[-1]
     assert "×（" not in stocks
     visible = _visible(stock)

@@ -470,7 +470,9 @@ def test_v1_structure_and_detail_links(pages):
         "/trust": _headings(trust.text),
     }
     assert [text for level, text in found["/"] if level == "1"][0].startswith("判断：")
-    funds, mood, events = [text for level, text in found["/"] if level == "2"]
+    h2 = [text for level, text in found["/"] if level == "2"]
+    assert "持仓与标的异动" in h2 and "涨跌排行榜" in h2
+    funds, mood, events = h2[-3:]
     assert funds.startswith("资金：") and mood.startswith("情绪：") and events == "今天的大事"
     assert [text for level, text in found["/stocks"] if level == "2"] == ["主题强弱", "逐只明细"]
     assert [text for level, text in found["/account"] if level == "2"] == [
@@ -681,7 +683,6 @@ def test_v5_status_follows_queries(pages):
         "估值": "模型不适用",
         "订单": "警示",
         "计划": "已有",
-        "空头数据": "暂缺",
         "期权数据": "暂缺",
     }
     try:
@@ -696,7 +697,14 @@ def test_v5_status_follows_queries(pages):
             """,
             (SEEN, SEEN),
         )
-        admin.execute("UPDATE marketstate.market SET vix = 31 WHERE trade_date = %s", (DAY,))
+        admin.execute(
+            """
+            INSERT INTO ingest.macro_observations (
+                series_id, observation_date, value, units, realtime_start, fetched_at
+            ) VALUES ('VIX_CBOE', %s, 31, 'index', %s, %s)
+            """,
+            (DAY, DAY, SEEN),
+        )
         admin.execute("DELETE FROM overlay.versions WHERE date = %s", (DAY,))
         admin.execute(
             "UPDATE trading.orders SET signal_date = %s, trade_date = %s WHERE portfolio_id = %s",
