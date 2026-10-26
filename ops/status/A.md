@@ -257,3 +257,5 @@ PR83准确完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87` 的[PR合并phas
 ## B-064 翻译启动阻塞补证（离线，无真实模型请求）
 
 用真实Client重试/记账逻辑及计数transport模拟：初始当日5次、49990 token，前两次Timeout后第三次成功，translate_day返回calls=6；实际transport和记账各3次，累计真实尝试8次，已知token50190，确认突破6次/5万授权上限。零真实模型/网络请求、未改B源码。另默认ingest读取marketstate.rotation权限失败已实测。需要需求方/B线修复并验收合并；A已完成独立的表/页面及后续页面修复部署，无需用户重复原授权。
+
+A-024 CI收口：同一完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87` 的[分支phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40350160852/job/121667704954)也已success（5m16s），与PR合并检查均通过。代码可供需求方最终复核；不自动合并、未生产部署。
