@@ -142,5 +142,5 @@ def test_audit_gap_headlines():
     assert "产品合作" not in _classify("Analyst Says Company Has Launched Too Many Products", ["AAPL"]).tags
     split = _classify("Meta Announces 2-for-1 Stock Split and $40B Buyback, Raises Dividend", ["META"])
     assert "公司行动" in split.tags and split.importance >= 4
-    spacex = _classify("SpaceX Earnings Boost Tesla Sentiment", ["TSLA"])
+    spacex = _classify("SpaceX Earnings Boost Tesla Sentiment", ["TSLA"], POOL | {"TSLA"})
     assert "财报" not in spacex.tags and "财报前瞻" not in spacex.tags
