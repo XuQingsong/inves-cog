@@ -564,6 +564,15 @@ def test_f8_pending_count_nav_and_buyable_cell(pages):
 
 
 def test_f9_vix_and_holdings_clause(pages):
+    admin = pages["admin"]
+    admin.execute(
+        """
+        INSERT INTO ingest.macro_observations (
+            series_id, observation_date, value, units, realtime_start, fetched_at
+        ) VALUES ('VIX_CBOE', %s, 18.72, 'index', %s, %s)
+        """,
+        (DAY, DAY, SEEN),
+    )
     market = _json(pages, "/api/pages/brief/market")
     html = _get(pages, "/").text
     assert market["vix"] == pytest.approx(18.72)

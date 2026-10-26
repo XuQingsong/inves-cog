@@ -16,7 +16,7 @@ from inves_cog.perception.anomaly.detect import detect_snapshot
 from inves_cog.perception.anomaly.universe import pool_names, rotation_names
 
 MACRO_SERIES = {
-    "VIX": ("VIX_CBOE", "VIXCLS"),
+    "VIX": ("VIX_CBOE", "VIX_YAHOO", "VIXCLS"),
     "DGS2": ("DGS2",),
     "DTWEXBGS": ("DTWEXBGS",),
     "DCOILWTICO": ("DCOILWTICO",),

@@ -15,11 +15,8 @@ from inves_cog.ingest.market import trading_day
 from inves_cog.perception.review.calendar import cutoff
 from inves_cog.web.brief import (
     OPTION_CATEGORIES,
-    format_points_plain,
     option_percentile,
     option_tone,
-    short_crowded,
-    short_sentence,
 )
 from inves_cog.web.public import create_app
 
@@ -48,20 +45,6 @@ SESSIONS = _sessions(DAY, 25)
 
 
 def test_s1_threshold_edges_and_s3_rank_edges():
-    sentence = short_sentence(
-        {
-            "pct": 12.34,
-            "days": 3.2,
-            "change": -4.75,
-            "settlement": date(2037, 6, 5),
-            "crowded": True,
-        }
-    )
-    assert sentence == "空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算"
-    assert short_crowded(10, 1) is False
-    assert short_crowded(10.01, 4) is True
-    assert short_crowded(3, 5) is False
-    assert short_crowded(3, 5.01) is True
     assert option_tone(80) is None
     assert option_tone(80.01) == "偏谨慎"
     assert option_tone(20) is None
@@ -208,51 +191,21 @@ def _member(pages, ticker):
 
 
 def test_s1_short_column_matches_the_latest_visible_print(pages):
-    stored = (
-        pages["admin"]
-        .execute(
-            """
-        SELECT si_pct_shares_outstanding, days_to_cover, raw, settlement_date
-        FROM ingest.short_interest WHERE observation_id = 'b057-nvda'
-        """
-        )
-        .fetchone()
-    )
+    # B-063: short interest removed from investor pages; column now shows 形态.
     nvda = _member(pages, "NVDA")
-    assert nvda["short"]["pct"] == stored["si_pct_shares_outstanding"]
-    assert nvda["short"]["days"] == stored["days_to_cover"]
-    assert nvda["short"]["change"] == stored["raw"]["changePercent"]
-    assert nvda["short"]["crowded"] is True
-    assert nvda["short"]["settlement"] == "2037-06-05"
-    assert nvda["short"]["text"] == "空头拥挤 占比 12.3%，回补 3.2 天，较上期 −4.8%，6/5 结算"
-    # B-062 cell: "占比 · 回补天数 [拥挤] / 结算日".
-    cell = _row(_get(pages, "/stocks").text, "NVDA")
-    shown = " ".join(_visible(cell).split())
-    assert "12.3% · 3.2 天 拥挤" in shown and "6/5 结算" in shown
-    assert "40.0%" not in cell and "8.0%" not in cell and "80.0%" not in cell
-    amd = " ".join(_visible(_row(_get(pages, "/stocks").text, "AMD")).split())
-    assert "拥挤" not in amd
-    assert "10.0% · 1.0 天" in amd and "6/5 结算" in amd
-    avgo = " ".join(_visible(_row(_get(pages, "/stocks").text, "AVGO")).split())
-    assert "拥挤" not in avgo
-    assert "5.0 天" in avgo
-    amat = _member(pages, "AMAT")
-    assert amat["short"]["days"] == 5.1 and amat["short"]["crowded"] is True
-    assert "拥挤" in _row(_get(pages, "/stocks").text, "AMAT")
-    assert _member(pages, "MRVL")["short"] is None
-    assert "暂缺" in _row(_get(pages, "/stocks").text, "MRVL")
+    assert "short" not in nvda and "tech" in nvda
+    for ticker in ("NVDA", "AMD", "AVGO", "AMAT", "MRVL"):
+        row = _row(_get(pages, "/stocks").text, ticker)
+        assert "拥挤" not in row and "结算" not in row
+        assert "数据不足" in row or "暂缺" in row or "排列" in row or "回调" in row or "反弹" in row or "震荡" in row
 
 
 def test_s2_theme_average_skips_missing_members(pages):
     stocks = _json(pages, "/api/pages/brief/stocks")
     chip = next(theme for theme in stocks["themes"] if theme["sector"] == "AI 算力芯片")
-    assert chip["short_covered"] == 3
-    assert chip["short_members"] == 4
-    assert chip["short_average"] == pytest.approx((12.34 + 10.0 + 3.0) / 3)
-    assert chip["short_text"] == f"{format_points_plain(chip['short_average'], 1)}（覆盖 3/4）"
-    assert chip["short_text"] == "8.4%（覆盖 3/4）"
+    assert "short_covered" not in chip and "short_average" not in chip
     html = _get(pages, "/stocks").text
-    assert "8.4%（覆盖 3/4）" in _row(html, "AI 算力芯片")
+    assert "8.4%（覆盖 3/4）" not in html
 
 
 def test_s3_put_call_uses_total_then_equity(pages):
@@ -305,9 +258,10 @@ def test_s4_vix_fallback_four_ways(pages):
     try:
         admin.execute("UPDATE marketstate.market SET vix = 18.72 WHERE trade_date = %s", (DAY,))
         both, both_html = shown()
-        assert both["vix"] == pytest.approx(18.72)
-        assert both["vix_source"] is None
-        assert "18.72" in both_html and "来源 FRED" not in both_html
+        # B-063: the page resolves VIX from ingest.macro_observations, not marketstate.market.
+        assert both["vix"] == pytest.approx(19.03)
+        assert both["vix_source"] == "FRED"
+        assert "来源 CBOE" not in both_html
         admin.execute(
             """
             DELETE FROM ingest.macro_observations
@@ -316,14 +270,13 @@ def test_s4_vix_fallback_four_ways(pages):
             (DAY,),
         )
         market_only, market_html = shown()
-        assert market_only["vix"] == pytest.approx(18.72)
-        assert market_only["vix_source"] is None
-        assert "来源 FRED" not in market_html
+        assert market_only["vix"] == pytest.approx(11.11)
+        assert market_only["vix_source"] == "FRED"
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         neither, neither_html = shown()
-        assert neither["vix"] is None and neither["vix_source"] is None
-        assert "VIX 暂缺" in " ".join(_visible(neither_html).split())
-        assert "来源 FRED" not in neither_html
+        # B-063: stale series fall back to the latest observation with an as-of note.
+        assert neither["vix"] == pytest.approx(11.11) and neither["vix_source"] == "FRED"
+        assert "11.11" in neither_html and "截至" in neither_html
     finally:
         admin.execute("UPDATE marketstate.market SET vix = NULL WHERE trade_date = %s", (DAY,))
         admin.execute(
@@ -339,29 +292,14 @@ def test_s4_vix_fallback_four_ways(pages):
 def test_s5_short_and_option_freshness(pages):
     trust = _json(pages, "/api/pages/brief/trust")
     states = {row["item"]: row for row in trust["statuses"]}
-    assert states["空头数据"]["state"] == "新鲜"
-    assert states["空头数据"]["detail"] == "结算 6/5"
+    # B-063: short interest removed from all pages including 复盘数据状态.
+    assert "空头数据" not in states
     assert states["期权数据"]["state"] == "新鲜"
     assert states["期权数据"]["detail"] == "最近 6/15"
     html = _get(pages, "/trust").text
-    assert "空头数据" in html and "新鲜" in html and "结算 6/5" in html
-    assert "期权数据" in html and "最近 6/15" in html
+    assert "空头数据" not in html and "期权数据" in html and "最近 6/15" in html
     admin = pages["admin"]
-    stale_short = DAY - timedelta(days=21)
-    fresh_short = DAY - timedelta(days=20)
     try:
-        admin.execute(
-            "UPDATE ingest.short_interest SET settlement_date = %s WHERE observation_id LIKE 'b057-%%'",
-            (stale_short,),
-        )
-        aged = {row["item"]: row for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
-        assert aged["空头数据"]["state"] == "过期"
-        admin.execute(
-            "UPDATE ingest.short_interest SET settlement_date = %s WHERE observation_id LIKE 'b057-%%'",
-            (fresh_short,),
-        )
-        edged = {row["item"]: row for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
-        assert edged["空头数据"]["state"] == "新鲜"
         admin.execute("DELETE FROM ingest.options_stats WHERE source = 'b057' AND trade_date > %s", (SESSIONS[-4],))
         quiet = {row["item"]: row for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
         assert quiet["期权数据"]["state"] == "过期"
@@ -382,7 +320,56 @@ def test_s6_two_pages_stay_in_plain_language(pages):
     assert _LONG_DECIMAL.search(visible) is None
     assert "1.50（全市场），近 20 个交易日 100 分位，偏谨慎" in market
     assert "19.03" in market and "来源 FRED" in market
-    assert "12.3% · 3.2 天 拥挤" in " ".join(_visible(stocks).split())
-    assert "8.4%（覆盖 3/4）" in stocks
+    assert "拥挤" not in " ".join(_visible(stocks).split()) and "空头" not in stocks
     for path in ("/", "/stocks", "/account", "/trust"):
         assert _get(pages, path).status_code == 200
+
+
+def test_s7_vix_yahoo_source_label(pages):
+    """VIX_YAHOO wins the same-day slot when VIX_CBOE is missing (B-063 order)."""
+    admin = pages["admin"]
+    admin.execute(
+        """
+        INSERT INTO ingest.macro_observations (
+            series_id, observation_date, value, units, realtime_start, fetched_at
+        ) VALUES ('VIX_YAHOO', %s, 20.5, 'index', %s, %s)
+        """,
+        (DAY, DAY, CLOCK.now_utc()),
+    )
+    try:
+        market = _json(pages, "/api/pages/brief/market")
+        assert market["vix"] == pytest.approx(20.5)
+        assert market["vix_source"] == "Yahoo"
+        assert "Yahoo" in _get(pages, "/").text
+    finally:
+        admin.execute(
+            "DELETE FROM ingest.macro_observations WHERE series_id = 'VIX_YAHOO' AND observation_date = %s", (DAY,)
+        )
+
+
+def test_s8_stale_vix_marks_trust_and_page(pages):
+    """Latest value older than 3 sessions renders 过期 on the page and trust (B-063)."""
+    admin = pages["admin"]
+    try:
+        admin.execute(
+            "DELETE FROM ingest.macro_observations WHERE series_id = 'VIXCLS' AND observation_date >= %s",
+            (DAY - timedelta(days=1),),
+        )
+        admin.execute(
+            """
+            INSERT INTO ingest.macro_observations (
+                series_id, observation_date, value, units, realtime_start, fetched_at
+            ) VALUES ('VIX_CBOE', %s, 17.7, 'index', %s, %s)
+            """,
+            (DAY - timedelta(days=6), DAY - timedelta(days=6), CLOCK.now_utc()),
+        )
+        market = _json(pages, "/api/pages/brief/market")
+        assert market["vix"] == pytest.approx(17.7)
+        assert market["vix_source"] == "CBOE" and market["vix_stale"]
+        assert "过期" in _get(pages, "/").text
+        states = {row["item"]: row["state"] for row in _json(pages, "/api/pages/brief/trust")["statuses"]}
+        assert states["VIX"] == "过期"
+    finally:
+        admin.execute("DELETE FROM ingest.macro_observations WHERE series_id = 'VIX_CBOE'")
+        _clear(admin)
+        _seed(admin)
