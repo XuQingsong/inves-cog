@@ -173,3 +173,17 @@ PR81 head `9132f323d10595d63a75abc700dc22bd0c4a3394`，先失败测试 `a38bdcb`
 ## A-023 部署 已收到／进行中
 
 收到 A-014 补充三十五，已核对 main `2230398baabe6e069436a7461e8750f773835d40` 包含已验收 merge `221e3ed62c696cedbd4fcd6d9e1e7e387df301a7`。变更：仅执行本单两张日历表迁移、补齐生产scheduler现有列表中的news_poll/news_watchdog/vix_daily/earnings_calendar/econ_calendar，重启scheduler与独立ingest看门服务；按明确授权各运行一次三项新采集，并把旧新闻pending按规则收口，不调用模型。迁移管理员仅用于DDL，业务采集使用现有role_ingest，不改角色或其他服务配置。部署前已确认生产干净、仍为B063版本，真实进程清单已留作对照；先核查旧作业退出和重复运行凭据，远端有界执行并保留阶段进度。真实数据、外部页面及两交易日观察未验证前不宣称业务完成。
+
+## A-023 部署及首轮真实采集已完成；连续两交易日验证进行中
+
+已安装验收 merge `221e3ed62c696cedbd4fcd6d9e1e7e387df301a7`（PR81）。准确PR head `c447aeb1889dcb232488bd3add7d053dc02f6ab7` 的[PR合并CI](https://github.com/XuQingsong/inves-cog/actions/runs/40293718315/job/121474583908) success。指定日历迁移已提交一次；业务采集身份核实为现有最小登录`inves_cog_ingest`，管理员只用于DDL。仅scheduler及独立ingest看门服务重启，旧采集/处理进程确认退出，新enrich仅1个；其他原有运行服务PID、其他配置和生产工作区保持。
+
+实际进程参数核验的scheduler任务列表：`bars_prefill bars_full wide_universe sec_submissions sec_index sec_atom m6_market_inputs issuer_profiles fred cboe finra fed_news news_poll news_watchdog vix_daily earnings_calendar econ_calendar`。原12项全部保留、追加5项；真实配置`news_llm_enabled=false`、`llm_daily_token_budget=1500000`。没有重跑旧迁移/补采或手工模型调用，手工三项新采集各运行一次，均已结束，无对应运行中作业。
+
+首轮真实结果（2026-10-26 09:10:37 UTC独立只读核验）：VIX_CBOE及VIX_YAHOO的10-23值均为19.45（Yahoo原始浮点19.450000762939453）；VIX3M_YAHOO共17条，四个VIX系列本次各17条、合计68条成功。财报日历2512条；宏观日历响应134条、按规定主键去重后128条。未来10个交易日中财报覆盖持仓5个代码、股票池28个代码，具体代码清单存项目私有运行收据，不公开持仓明细。
+
+逐源source_health：VIX_CBOE/VIX3M_CBOE/VIX_YAHOO/VIX3M_YAHOO均ok、各17条、最新数据2026-10-23；NasdaqEarnings ok、2512条、最新2026-11-06；NasdaqEconomic ok、134条、最新2026-11-07；AlpacaNews ok、首轮2645条、最新入库09:07:30 UTC，后续轮询374条亦ok。全部consecutive_failures=0、无错误摘要。Alpha备用本次未触发，不能冒称其真实调用通过。日历空响应按已验收规则处理，没有改为空响应保留。
+
+新闻自然轮询已恢复。上线后实际新插入739条（不同于含重复项的轮询processed_count），新闻模型调用0次；10805条上线前旧新闻已标rules_only，剩余news pending=0，正文/时间/旧审计保留。指定外部`/?date=2026-10-23`、`/s/GOOGL?date=2026-10-23`、`/trust`均200/text/html。
+
+私有部署、采集、独立验证收据已保存，可核对开始/结束/迁移摘要与覆盖清单；本轮已完成安装与首轮真实结果，未把进程存活当业务成功。下一步连续ET10-26与10-27两个交易日，在当日收盘数据采集后回报VIX当日值/来源、日历及覆盖、新闻实际入库与新闻模型调用。当前仍为10-26盘前，不能提前宣称两交易日完成；其他已授权自然作业继续，自动化保持开启。
