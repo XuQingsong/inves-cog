@@ -95,6 +95,24 @@ def select_membership(candidates, previous, adv, day, *, monthly):
     return daily_liquidity(previous, adv, day)
 
 
+def rule_only_news(item, clock):
+    result = dict(item)
+    old = item.get("extraction_source", {})
+    result["extraction_status"] = "ok"
+    result["extraction_source"] = {
+        **old,
+        "news_triage": {
+            "layer": "rules_only",
+            "reason": "rules_only",
+            "llm_full": False,
+            "embedding_attempted": False,
+            "marked_at": clock.now_utc().isoformat(),
+        },
+        "a023_previous_triage": old.get("news_triage"),
+    }
+    return result
+
+
 class Pipeline:
     def __init__(
         self, *, clock, repository, values, llm, sec, alpaca=None, fred=None, embed=None, websites=None, trends=None
@@ -125,6 +143,7 @@ class Pipeline:
             else:
                 self.entities.append({"entity_id": "ticker:" + ticker, "tickers": [ticker], **company})
         params = yaml.safe_load((ROOT / "config/params/p-2026.10/m1.yaml").read_text())["m1"]
+        self.news_llm_enabled = params.get("news_llm_enabled", False)
         self.triage = NewsTriage(
             llm=self.llm,
             embed=self.embed,
@@ -152,6 +171,8 @@ class Pipeline:
         count = 0
         for item in items:
             check()
+            if item["kind"] == "news" and not getattr(self, "news_llm_enabled", True):
+                item = rule_only_news(item, self.clock)
             previous = self.repo.info_signature(item["info_id"])
             if previous != (item["headline"], item["body"]):
                 # The durable pending row is the queue. Collection never waits
@@ -165,8 +186,13 @@ class Pipeline:
     def enrich_pending(self, limit=32):
         counts = Counter()
         try:
-            items = self.repo.pending_info(limit, as_of=self.clock.now_utc())
-            for result in self.triage.process(items):
+            if not getattr(self, "news_llm_enabled", True):
+                counts["rules_only"] = self.repo.finish_pending_news(max(limit, 512), as_of=self.clock.now_utc())
+                counts["processed_count"] += counts["rules_only"]
+                items = self.repo.pending_info(limit, as_of=self.clock.now_utc(), include_news=False)
+            else:
+                items = self.repo.pending_info(limit, as_of=self.clock.now_utc())
+            for result in self.triage.process(items) if items else []:
                 check()
                 if self.repo.apply_enrichment(result):
                     counts["processed_count"] += 1
@@ -188,7 +214,12 @@ class Pipeline:
         return report
 
     def enrich_on_demand(self, items):
-        results = self.triage.process(items, on_demand=True)
+        if not getattr(self, "news_llm_enabled", True):
+            news = [rule_only_news(item, self.clock) for item in items if item["kind"] == "news"]
+            other = [item for item in items if item["kind"] != "news"]
+            results = news + (self.triage.process(other, on_demand=True) if other else [])
+        else:
+            results = self.triage.process(items, on_demand=True)
         for result in results:
             self.repo.apply_enrichment(result)
         return results
@@ -283,7 +314,17 @@ class Pipeline:
         self.repo.set_cursor(
             "news", {"through": self.clock.now_utc().isoformat(), "bootstrap_complete": True}, self.clock.now_utc()
         )
-        return {"processed_count": count, **{key: self.repo.counts[key] - before[key] for key in before}}
+        from inves_cog.ingest.service import check_news_gap
+
+        latest = self.repo.latest_news_at()
+        gap = check_news_gap(self.repo, self.clock)
+        return {
+            "processed_count": count,
+            **{key: self.repo.counts[key] - before[key] for key in before},
+            "source_success": gap["healthy"],
+            "status": "ok" if gap["healthy"] else "degraded",
+            "note": "latest_data_at=" + (latest.isoformat() if latest else "none"),
+        }
 
     def wide(self):
         alpaca = self.require(self.alpaca, "Alpaca")
@@ -682,6 +723,8 @@ class Pipeline:
 
     def runtime(self):
         from inves_cog.ingest.market_structure import collect_issuer_profiles, collect_market_inputs
+        from inves_cog.ingest.resilience import collect_calendars, collect_vix
+        from inves_cog.ingest.service import check_news_gap
 
         health = HealthBook(clock=self.clock, rows=self.repo.health_rows(), persist=self.repo.write_health)
         tasks = {
@@ -689,6 +732,11 @@ class Pipeline:
             "bars_prefill": ("Alpaca", lambda: self.bars(prefill=True)),
             "wide_universe": ("AlpacaWide", self.wide),
             "news_full": ("AlpacaNews", self.news),
+            "news_poll": ("AlpacaNews", self.news),
+            "news_watchdog": ("Scheduler:news_watchdog", lambda: check_news_gap(self.repo, self.clock)),
+            "vix_daily": ("VolatilitySources", lambda: collect_vix(self)),
+            "earnings_calendar": ("EarningsCalendar", lambda: collect_calendars(self, "earnings")),
+            "econ_calendar": ("EconomicCalendar", lambda: collect_calendars(self, "econ")),
             "news_prefill": ("AlpacaNews", self.news),
             "sec_submissions": ("SEC", self.submissions),
             "sec_index": ("SECDailyIndex", self.index),

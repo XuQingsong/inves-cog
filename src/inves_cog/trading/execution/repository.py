@@ -79,17 +79,11 @@ class Repository:
             signals[ticker] = enrich(snapshots, states.state_asof, ticker, "fixed")
         macro = self.connection.execute(
             "SELECT series_id,observation_date,realtime_start,value FROM ingest.macro_observations "
-            "WHERE series_id IN ('VIX_CBOE','VIXCLS') AND observation_date<=%s AND realtime_start<=%s "
+            "WHERE series_id IN ('VIX_CBOE','VIX_YAHOO','VIXCLS') AND observation_date<=%s AND realtime_start<=%s "
             "ORDER BY observation_date,series_id,realtime_start",
             (through, through),
         ).fetchall()
-        vix, source = {}, {}
-        for row in macro:
-            day = row["observation_date"]
-            if row["value"] is not None and (
-                day not in vix or row["series_id"] == "VIX_CBOE" or source[day] != "VIX_CBOE"
-            ):
-                vix[day], source[day] = row["value"], row["series_id"]
+        vix, source = select_vix(macro)
         first_dates = {
             r["ticker"]: r["first_trade_date"]
             for r in self.connection.execute(
@@ -156,3 +150,14 @@ class Repository:
             "published=EXCLUDED.published,generated_at=EXCLUDED.generated_at,payload=EXCLUDED.payload",
             (engine.portfolio_id, plan["trade_date"], plan["signal_date"], plan["published"], stamp, jsonb(plan)),
         )
+
+
+def select_vix(rows):
+    """PIT rows already filtered by caller; source rank dominates row order."""
+    priority = {"VIX_CBOE": 0, "VIX_YAHOO": 1, "VIXCLS": 2}
+    vix, source = {}, {}
+    for row in rows:
+        day, series = row["observation_date"], row["series_id"]
+        if row["value"] is not None and (day not in source or priority[series] <= priority[source[day]]):
+            vix[day], source[day] = row["value"], series
+    return vix, source

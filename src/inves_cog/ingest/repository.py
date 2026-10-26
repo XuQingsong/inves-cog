@@ -60,6 +60,14 @@ TABLES = {
         "series_id observation_date value units realtime_start fetched_at",
         "series_id,observation_date,realtime_start",
     ),
+    "earnings_calendar": (
+        "ticker report_date time eps_forecast n_estimates market_cap company source fetched_at",
+        "ticker,report_date,source",
+    ),
+    "econ_calendar": (
+        "event_date event_time_et country name actual consensus previous source fetched_at",
+        "event_date,country,name,source",
+    ),
     "website_snapshots": ("url captured_at body", "url,captured_at"),
     "source_health": (
         "source last_success_at last_attempt_at status latency_sec items_last_run note consecutive_failures",
@@ -361,7 +369,36 @@ class Repository:
         ).fetchone()
         return row["body"] if row else None
 
-    def pending_info(self, limit=32, *, as_of):
+    def latest_news_at(self):
+        row = self.connection.execute(
+            "SELECT max(first_seen_at) AS latest FROM ingest.info_items "
+            "WHERE kind='news' AND source IN ('benzinga','fiscal.ai','Alpaca')"
+        ).fetchone()
+        return row["latest"]
+
+    def holding_tickers(self):
+        rows = self.connection.execute("""SELECT jsonb_object_keys(coalesce(state->'positions','{}'::jsonb)) AS ticker
+            FROM (SELECT state FROM trading.ledger WHERE portfolio_id='paper-fixed'
+                  ORDER BY observed_at DESC LIMIT 1) latest""").fetchall()
+        return [r["ticker"] for r in rows]
+
+    def finish_pending_news(self, limit=32, *, as_of):
+        with self.transaction():
+            rows = self.connection.execute(
+                """WITH selected AS (
+                SELECT info_id FROM ingest.info_items WHERE kind='news' AND extraction_status='pending'
+                AND first_seen_at<=%s ORDER BY first_seen_at,info_id LIMIT %s FOR UPDATE SKIP LOCKED)
+                UPDATE ingest.info_items i SET extraction_status='ok',
+                extraction_source=i.extraction_source || jsonb_build_object(
+                    'a023_previous_triage',i.extraction_source->'news_triage',
+                    'news_triage',jsonb_build_object('layer','rules_only','reason','rules_only',
+                        'llm_full',false,'embedding_attempted',false,'marked_at',%s::timestamptz))
+                FROM selected WHERE i.info_id=selected.info_id RETURNING i.info_id""",
+                (as_of, limit, as_of),
+            ).fetchall()
+        return len(rows)
+
+    def pending_info(self, limit=32, *, as_of, include_news=True):
         # UD-COORD-36: a fixed publication boundary for news only. Keep original
         # pending status and contents; a skip is not a successful extraction.
         cutoff = "2026-10-21 00:00 America/New_York"
@@ -411,6 +448,7 @@ class Repository:
                 FROM ingest.info_items AS i CROSS JOIN holdings CROSS JOIN monitored
                 WHERE i.extraction_status='pending'
                 AND (i.kind<>'news' OR i.published_at>=%s::timestamptz)
+                AND ({"true" if include_news else "i.kind<>'news'"})
                 AND coalesce((i.extraction_source->'news_triage'->>'retry_at')::timestamptz,i.first_seen_at)<=%s
             ) SELECT {columns} FROM ranked
             ORDER BY
@@ -423,9 +461,17 @@ class Repository:
             ).fetchall()
         ]
 
-    def has_pending_info(self, *, as_of):
+    def has_pending_info(self, *, as_of, include_news=True):
+        if not include_news:
+            row = self.connection.execute(
+                """SELECT EXISTS (SELECT 1 FROM ingest.info_items
+                WHERE kind='news' AND extraction_status='pending' AND first_seen_at<=%s) AS pending""",
+                (as_of,),
+            ).fetchone()
+            if row["pending"]:
+                return True
         # Polling must apply the identical policy, including an old-only queue.
-        return bool(self.pending_info(1, as_of=as_of))
+        return bool(self.pending_info(1, as_of=as_of, include_news=include_news))
 
     def llm_usage(self, as_of):
         return dict(

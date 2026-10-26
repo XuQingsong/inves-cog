@@ -39,15 +39,21 @@ def validate_async_row(row, count, dimensions):
 
 
 def collect(connection, model, limit=None):
+    from pathlib import Path
+
+    import yaml
+
+    params = yaml.safe_load((Path(__file__).resolve().parents[3] / "config/params/p-2026.10/m1.yaml").read_text())["m1"]
+    include_news = params.get("news_llm_enabled", False)
     groups = {}
     with connection.transaction(), connection.cursor(name="model_embedding_input") as cursor:
         cursor.execute(
             """SELECT i.info_id,i.headline,i.body,
             md5(i.headline || E'\\n' || coalesce(i.body,'')) AS fingerprint
-            FROM ingest.info_items i WHERE NOT EXISTS (
+            FROM ingest.info_items i WHERE (%s OR i.kind<>'news') AND NOT EXISTS (
                 SELECT 1 FROM ingest.info_embeddings e WHERE e.info_id=i.info_id AND e.model=%s)
             ORDER BY md5(i.info_id)""",
-            (model,),
+            (include_news, model),
         )
         for row in cursor:
             text = (row["headline"] + "\n" + extraction_body(row["body"])[:2000]).replace("\r", " ").replace("\n", " ")

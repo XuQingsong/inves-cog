@@ -86,7 +86,7 @@ def main():
                     persist=pipeline.repo.write_job,
                 )
                 while True:
-                    if pipeline.repo.has_pending_info(as_of=clock.now_utc()):
+                    if pipeline.repo.has_pending_info(as_of=clock.now_utc(), include_news=pipeline.news_llm_enabled):
                         output = runner.run("info_enrichment", "InfoExtraction", pipeline.enrich_pending)
                         print(json_text(output), flush=True)
                     else:

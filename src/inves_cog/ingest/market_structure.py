@@ -7,7 +7,6 @@ from datetime import datetime
 from io import StringIO
 
 from inves_cog.ingest.adapters import alpaca_splits, cik_mapping
-from inves_cog.ingest.http import HTTPClient
 from inves_cog.ingest.market import split_factors
 
 EXTRA_ETFS = ["XLB", "XLRE", "XLC", "RSP", "KRE", "MTUM", "VLUE"]
@@ -63,17 +62,12 @@ def collect_market_inputs(pipeline):
 
     health = HealthBook(clock=pipeline.clock, rows=pipeline.repo.health_rows(), persist=pipeline.repo.write_health)
     count, failures = 0, []
-    http = HTTPClient(pool=True)
-    for series, url in VIX_URLS.items():
-        try:
-            rows = parse_cboe_csv(http.get(url), series_id=series, clock=pipeline.clock)
-            for row in rows:
-                pipeline.repo.write("macro_observations", row, update=("value", "fetched_at"))
-            count += len(rows)
-            health.record(series, success=bool(rows), count=len(rows), degraded=not rows)
-        except Exception as exc:
-            failures.append({"source": series, "reason": type(exc).__name__ + ": " + str(exc)})
-            health.record(series, success=False, note=str(exc), degraded=True)
+    from inves_cog.ingest.resilience import collect_vix
+
+    volatility = collect_vix(pipeline)
+    count += volatility["processed_count"]
+    if volatility["status"] != "ok":
+        failures.append({"source": "VolatilitySources", "reason": volatility["note"]})
     try:
         from datetime import timedelta
 
