@@ -241,3 +241,7 @@ PR83追加完整head `d912a6dbeba07f1fd99f5efd7787ac5d86ce3e87`。先失败测�
 ## B-064 后续页面修复部署 已收到／进行中
 
 收到A-014补充三十七（main `8cdfe7a016e4db20c8180535f3dcc7ce78146160`），PR85 merge `469f16a27ce35f27a9b522e7799ee7c5598c20ea` 已验收。按授权快进并仅重启pages，核验/与/stocks；不重复上次迁移，不启动尚有预算/读取身份缺口的翻译服务，其他运行服务保持。
+
+## B-064 后续页面修复部署已完成
+
+生产快进至PR85验收merge `469f16a27ce35f27a9b522e7799ee7c5598c20ea`，准确head `5efc16feadacc590956991435f96944168566a6d` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40347548455/job/121658403663) success。仅pages重启、其他运行PID和配置保持、工作区干净；服务器外部/与/stocks均200。未重跑迁移，翻译仍未启动，预算及读取身份两项缺陷仍待需求方/B线修复，不能把页面修复算作翻译问题已解决。
