@@ -43,6 +43,7 @@ def _roles(admin):
 def _clear(admin):
     admin.execute("DELETE FROM ingest.intraday_snapshots WHERE source = 'b065'")
     admin.execute("DELETE FROM ingest.macro_observations WHERE series_id = 'DGS2' AND observation_date = %s", (PREV,))
+    admin.execute("DELETE FROM ingest.bars_daily WHERE ticker = 'NVDA' AND trade_date = %s", (PREV,))
     admin.execute("DELETE FROM trading.ledger WHERE portfolio_id = %s", (PORTFOLIO,))
     admin.execute("DELETE FROM marketstate.daily WHERE trade_date IN (%s, %s)", (DAY, PREV))
     admin.execute("DELETE FROM marketstate.rotation WHERE trade_date IN (%s, %s)", (DAY, PREV))
@@ -74,7 +75,8 @@ def _seed(admin):
     )
     admin.execute(
         "INSERT INTO ingest.bars_daily (ticker, trade_date, close, volume, source)"
-        " VALUES ('NVDA', %s, 100, 1000000, 'b065')",
+        " VALUES ('NVDA', %s, 100, 1000000, 'b065')"
+        " ON CONFLICT (ticker, trade_date) DO UPDATE SET close = 100",
         (PREV,),
     )
     admin.execute(
