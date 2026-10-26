@@ -44,10 +44,11 @@ class Registry:
         parsed = {}
         for name, fields in tasks.items():
             timeout = 300 if name == "anomaly_candidates" else 900
+            retries = 0 if name in DIFFICULT_TASKS or name == "news_translate" else 2
             expected = (
-                TaskSpec("difficult", "glm-5.3", timeout, 0, "待分析")
+                TaskSpec("difficult", "glm-5.3", timeout, retries, "待分析")
                 if name in DIFFICULT_TASKS
-                else TaskSpec("other", "deepseek-v4.1-flash", 120, 2, "抽取失败")
+                else TaskSpec("other", "deepseek-v4.1-flash", 120, retries, "抽取失败")
             )
             try:
                 spec = TaskSpec(**fields)

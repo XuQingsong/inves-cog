@@ -39,7 +39,8 @@ def main():
             moment = clock.now_utc()
             ok, slot = due(moment, last_run)
             if ok:
-                connection = connect(values)
+                reader_url = values.get("INVES_COG_WEB_DATABASE_URL")
+                connection = connect({"INVES_COG_DATABASE_URL": reader_url}) if reader_url else connect(values)
                 writer_url = values.get("INVES_COG_PERCEPTION_DATABASE_URL")
                 writer = connect({"INVES_COG_DATABASE_URL": writer_url}) if writer_url else None
                 if writer is None:

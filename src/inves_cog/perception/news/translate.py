@@ -193,12 +193,21 @@ def translate_day(connection, writer, client, day, *, clock):
         ).fetchall()
         have = {r["info_id"] for r in rows}
     todo = [n for n in candidates if n["info_id"] not in have]
-    calls, tokens, written = usage["calls"], usage["tokens"], 0
+    written = 0
+    calls = usage["calls"]
     for start in range(0, len(todo), BATCH):
-        if calls >= MAX_CALLS_PER_DAY or tokens >= MAX_TOKENS_PER_DAY:
-            log.info("news_translate day cap reached calls=%s tokens=%s", calls, tokens)
-            break
+        usage = _usage(connection, day)
         batch = todo[start : start + BATCH]
+        estimate = _estimate(batch, user_template)
+        if usage["calls"] >= MAX_CALLS_PER_DAY or usage["tokens"] + estimate > MAX_TOKENS_PER_DAY:
+            log.info(
+                "news_translate day cap reached calls=%s tokens=%s estimate=%s",
+                usage["calls"],
+                usage["tokens"],
+                estimate,
+            )
+            break
+        calls = usage["calls"]
         headlines = [n["headline"] or "" for n in batch]
         user = user_template.replace("{headlines_json_array}", json.dumps(headlines, ensure_ascii=False))
         try:
@@ -228,6 +237,13 @@ def translate_day(connection, writer, client, day, *, clock):
             written += 1
         calls += 1
     return {"status": "ok", "translated": written, "remaining": len(todo) - written, "calls": calls}
+
+
+def _estimate(batch, user_template):
+    """Reserved tokens for the next request: input ~ (prompt+batch chars)/2,
+    output ~ 40 tokens per headline."""
+    chars = len(user_template) + sum(len(n["headline"] or "") for n in batch)
+    return chars // 2 + len(batch) * 40
 
 
 def _usage(connection, day):
