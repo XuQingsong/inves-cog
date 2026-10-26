@@ -48,6 +48,7 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
         "financials": ["scripts/schedule_financials.py"],
         "watchdog": ["-m", "inves_cog.ingest.service"],
         "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
+        "news_translate": ["scripts/schedule_translate.py"],
     }
     programs = {name.removeprefix("program:") for name in config.sections() if name.startswith("program:")}
     assert programs == {"scheduler", *expected} | ({"awake"} if platform_name == "Darwin" else set())

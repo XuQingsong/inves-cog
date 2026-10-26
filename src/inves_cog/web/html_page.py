@@ -114,6 +114,20 @@ def latest_visible_session(clock):
     raise RuntimeError("no visible trade date")
 
 
+def default_session(clock):
+    """B-064: today when it's a trading day, else the latest prior trading day.
+
+    Unlike latest_visible_session this does not wait for the 01:00 cutoff —
+    the page falls back to the previous close for close-derived cards.
+    """
+    day = clock.now_utc().astimezone(NY).date()
+    for _ in range(14):
+        if trading_day(day):
+            return day
+        day = day - timedelta(days=1)
+    raise RuntimeError("no visible trade date")
+
+
 def render_page(payload):
     """Return an HTML document for one page payload."""
     if not isinstance(payload, dict):

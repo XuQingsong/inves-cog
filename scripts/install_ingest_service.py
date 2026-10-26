@@ -74,6 +74,7 @@ serverurl=unix://{state}/supervisor.sock
         "financials": [str(root / "scripts/schedule_financials.py")],
         "watchdog": ["-m", "inves_cog.ingest.service"],
         "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
+        "news_translate": [str(root / "scripts/schedule_translate.py")],
     }
     for name, arguments in programs.items():
         restart = "unexpected" if name == "embedding" else "true"
