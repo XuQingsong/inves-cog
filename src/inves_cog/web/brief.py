@@ -2353,7 +2353,7 @@ def _market_strip(connection, context, day):
             if last_asof is None or asof > last_asof:
                 last_asof, last_session = asof, snap.get("session")
         items.append(_strip_item(ticker, label, kind, snap, close_idx.get(ticker), day, dgs2))
-    etf_row = [_strip_item(t, t, "etf", intraday.get(t), close_idx.get(t)) for t in SECTOR_ETFS]
+    etf_row = [_strip_item(t, t, "etf", intraday.get(t), close_idx.get(t), day) for t in SECTOR_ETFS]
     tail = None
     if last_asof is not None:
         label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(last_session, "")
