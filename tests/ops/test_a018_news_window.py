@@ -72,8 +72,11 @@ def test_ud36_exact_et_boundary_unknown_date_and_non_news_queue(queue):
     pipeline = Pipeline.__new__(Pipeline)
     pipeline.repo, pipeline.clock, pipeline.triage = repo, FrozenClock(NOW), CountingExtractor()
     result = pipeline.enrich_pending()
+    # A-026: pending sec_8k rows are converted to rules-only first and never
+    # reach the model path; the two news items still go through triage.
     assert result["processed_count"] == 4
-    assert len(pipeline.triage.calls) == 4 and old["info_id"] not in pipeline.triage.calls
+    assert len(pipeline.triage.calls) == 2
+    assert old["info_id"] not in pipeline.triage.calls and sec["info_id"] not in pipeline.triage.calls
 
 
 def test_ud36_marks_old_without_mutating_original_content_or_claiming_extracted(queue):
