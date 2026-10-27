@@ -469,3 +469,7 @@ OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日
 追加验收逐项：免费账户权限/限频及IEX盘前盘后时段的真实和官方证据见上一条及PR；ET04–20每分钟与SIP同scope，独立无enrich进程与AlpacaIEX健康；test_iex_polls_same_minute_windows_as_sip_even_when_exchange_closed、test_pipeline_registers_iex_with_independent_source_health及服务配置集合测试通过。source=Alpaca:iex/delay_minutes=0/as_of原成交/session原时段/prev_close全市场同缓存，test_iex_last_print_may_be_previous_day_without_fabricating_freshness、test_iex_batch_scope_uses_same_sip_previous_cache_and_never_updates_duplicate通过。test_iex_real_pg_separate_source_and_duplicate_trade_time核验同成交时间重采不改首次fetched_at、IEX/SIP同时间独立两行；不把零feed延迟当刚发生，缺/陈旧/未来/错误交易所样本均有测试。原第二版调度、保留清理、退避、健康汇总和角色权限回归仍通过。
 
 所有代码已推送；未部署、未运行新增生产轮询或迁移。唯一真实请求只是明确要求的免费接口核实，未写业务表，无模型调用/历史补算。下一步由需求方验收合并并下发安装；A届时先核实main包含已验收merge再部署，不自动合并。首交易日IEX三类标的时间差/与SIP价差以及原分钟行情全天证据仍待实际安装和自然窗口，未提前认作完成。自动化持续开启。
+
+## A-014 补充四十二 已收到／进行中：安装A025
+
+收到main `2582cbd61f18a8372b8a64c10c934846e8999a6c`部署任务；PR90已验收merge `0f3912fa80652dc6b1542c701df2ba4c4ac4037e`在main，准确head `ebd1df21a5c844b7247df1af8884fbc7716f2bf6` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40490321442/job/122142329527) success。先核对远端工作区、receipt/表状态、监督/实际进程及运行中作业，避免重复DDL与轮询。按授权只快进该merge、安装0008，基于当前完整服务配置仅移除主scheduler两行情任务并新增四个独立行情程序；先停止旧scheduler及其唯一enrich子进程并确认退出，再启动新scheduler及四程序，保持enrich只有1个、不手动调模型。模型参数hash、其他原有任务/业务进程保持；迁移仅已批准新表/CHECK、使用既有迁移账号，不以管理员跑业务。10分钟内读真实各source最新时间/进程/Alpaca停止标记，首日长期观察不冒充已完成。
