@@ -136,7 +136,7 @@ def assert_public_rss(clock):
 def assert_failure_reasons(result):
     errors = result["extraction_source"]["errors"]
     assert errors["entity_tagging"]["type"] and errors["entity_tagging"]["message"]
-    assert errors["info_fields_extraction"]["type"] and errors["info_fields_extraction"]["message"]
+    assert "info_fields_extraction" not in errors
     assert errors["embedding"]["type"] == "ValueError"
 
 

@@ -144,8 +144,16 @@ class Pipeline:
                 self.entities.append({"entity_id": "ticker:" + ticker, "tickers": [ticker], **company})
         params = yaml.safe_load((ROOT / "config/params/p-2026.10/m1.yaml").read_text())["m1"]
         self.news_llm_enabled = params.get("news_llm_enabled", False)
+        pool_ciks = set()
+        try:
+            mapping = cik_mapping(self.sec)
+            relevant = set(self.stocks) | set(self.repo.holding_tickers())
+            pool_ciks = {mapping[t] for t in relevant if t in mapping}
+        except Exception:
+            pool_ciks = set()
         self.triage = NewsTriage(
             llm=self.llm,
+            pool_ciks=pool_ciks,
             embed=self.embed,
             entities=self.entities,
             monitored_ids={e["entity_id"] for e in self.monitored},
@@ -167,6 +175,36 @@ class Pipeline:
             raise SourceError(source + " configuration missing: 等待 R5", confirmed_unavailable=True)
         return value
 
+    def _pending_relevant_filings(self):
+        """info_ids of pending filings whose issuer is in pool/holdings — kept
+        pending so news_card still runs for them."""
+        try:
+            rows = self.repo.connection.execute(
+                "SELECT info_id, headline, tickers, extraction_source FROM ingest.info_items"
+                " WHERE extraction_status='pending' AND kind IN ('sec_8k','form4')"
+            ).fetchall()
+        except Exception:
+            return set()
+        keep = set()
+        if not isinstance(rows, (list, tuple)):
+            return keep
+        for row in rows:
+            item = {
+                "headline": row["headline"],
+                "tickers": row["tickers"] or [],
+                "entities": [],
+                "extraction_source": row["extraction_source"] or {},
+            }
+            relevant = False
+            for probe in ("holding", "tracked", "_filing_relevant"):
+                fn = getattr(self.triage, probe, None)
+                if callable(fn) and fn(item):
+                    relevant = True
+                    break
+            if relevant:
+                keep.add(row["info_id"])
+        return keep
+
     def info(self, items):
         count = 0
         for item in items:
@@ -186,6 +224,15 @@ class Pipeline:
     def enrich_pending(self, limit=32):
         counts = Counter()
         try:
+            converted = None
+            if hasattr(self.repo, "finish_pending_rules_only"):
+                converted = self.repo.finish_pending_rules_only(
+                    max(limit, 512),
+                    as_of=self.clock.now_utc(),
+                    exclude_ids=self._pending_relevant_filings(),
+                )
+            counts["rules_only_structured"] = converted if isinstance(converted, int) else 0
+            counts["processed_count"] += counts["rules_only_structured"]
             if not getattr(self, "news_llm_enabled", True):
                 counts["rules_only"] = self.repo.finish_pending_news(max(limit, 512), as_of=self.clock.now_utc())
                 counts["processed_count"] += counts["rules_only"]

@@ -5,7 +5,7 @@ import math
 import re
 import unicodedata
 from copy import deepcopy
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -168,7 +168,7 @@ def enrich(item, *, llm, embed, entities, clock, close_read=False):
         from inves_cog.ingest.news_card import attach_news_card
 
         attach_news_card(result, llm, entities)
-    else:
+    elif item["kind"] == "news":
         try:
             tags = llm.call("entity_tagging", payload)
             if not isinstance(tags.get("entities"), list) or not all(isinstance(e, str) for e in tags["entities"]):
@@ -181,36 +181,6 @@ def enrich(item, *, llm, embed, entities, clock, close_read=False):
             record_extraction_error(result, "entity_tagging", exc)
             failed = True
             result["flags"].append("entity_tagging_failed")
-    if item["kind"] in {"news", "sec_8k"}:
-        try:
-            fields = llm.call("info_fields_extraction", payload)
-            for key in ("is_guidance", "is_rating_change"):
-                value = fields.get(key)
-                if value is not None and not isinstance(value, bool):
-                    raise ValueError("Invalid boolean extraction")
-                result[key] = value
-                if value is not None:
-                    result["extraction_source"][key] = "llm"
-            direction = fields.get("guidance_direction")
-            if direction is not None and direction not in {"up", "down", "maintain"}:
-                raise ValueError("Invalid guidance direction")
-            result["guidance_direction"] = direction
-            if direction is not None:
-                result["extraction_source"]["guidance_direction"] = "llm"
-            if result["published_at"] is None and fields.get("published_at"):
-                stamp = datetime.fromisoformat(fields["published_at"].replace("Z", "+00:00"))
-                if stamp.tzinfo is None or stamp > clock.now_utc():
-                    raise ValueError("Invalid extracted publication time")
-                result["published_at"] = stamp.astimezone(timezone.utc)
-                result["extraction_source"]["published_at"] = "llm"
-                result["flags"].remove("published_at_missing")
-                result["flags"].append("published_at_extracted")
-        except Exception as exc:
-            record_extraction_error(result, "info_fields_extraction", exc)
-            failed = True
-            for key in ("is_guidance", "guidance_direction", "is_rating_change"):
-                result[key] = None
-                result["extraction_source"].pop(key, None)
     result["extraction_status"] = "failed" if failed else "ok"
     if embed is not None:
         try:

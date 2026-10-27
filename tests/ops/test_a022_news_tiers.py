@@ -93,12 +93,12 @@ def test_a022_tiers_route_real_source_shapes_and_c_uses_no_model():
         [fiscal_low, fiscal_pool, benzinga_pool, benzinga_macro, benzinga_other, sec, monitored, held]
     )
 
-    assert [meta(row)["tier"] for row in rows] == ["C", "A", "A", "A", "A", "A", "A", "A"]
+    assert [meta(row)["tier"] for row in rows] == ["C", "A", "A", "A", "A", "C", "A", "A"]
     assert meta(rows[0])["reason"] == "rules_only_low_value"
     assert rows[0]["extraction_status"] == "ok" and rows[0]["embedding"] is None
     assert models.calls.count("entity_tagging") == 1
-    assert models.calls.count("news_card") == 7
-    assert models.calls.count("info_fields_extraction") == 7
+    assert models.calls.count("news_card") == 6
+    assert models.calls.count("info_fields_extraction") == 0
     assert meta(rows[4])["screened"] and meta(rows[4])["material"]
 
 
@@ -168,7 +168,7 @@ def test_a022_last_full_slot_goes_to_holding_before_pool():
     assert rows[0]["extraction_status"] == "pending"
     assert meta(rows[0])["reason"] == "full_daily_limit"
     assert rows[1]["extraction_status"] == "ok"
-    assert models.calls == ["news_card", "info_fields_extraction"]
+    assert models.calls == ["news_card"]
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"daily_budget": 1_500_000}])
@@ -179,12 +179,12 @@ def test_a022_4500000_tokens_allows_item_1500_then_defers_1501_by_count(kwargs):
     first = triage.process([item("item-1500", "benzinga", "Apple first", tickers=["AAPL"])])[0]
     assert triage.daily_budget == 5_500_000
     assert first["extraction_status"] == "ok"
-    assert len(models.calls) == 2
+    assert len(models.calls) == 1
     stats["full_items"] = 1500
     second = triage.process([item("item-1501", "benzinga", "Apple second", tickers=["AAPL"])])[0]
     assert second["extraction_status"] == "pending"
     assert meta(second)["reason"] == "full_daily_limit"
-    assert len(models.calls) == 2
+    assert len(models.calls) == 1
 
 
 def test_a022_usage_query_counts_full_articles_once_and_screen_calls():
