@@ -840,13 +840,18 @@ def _news_summary(source, headline):
     return MISSING
 
 
-def _day_news(connection, day, cutoff):
+def _day_news(connection, day, cutoff, is_today=False):
     """News published in the ET session, regardless of when it was stored.
 
     The rules layer needs the raw headline, url and first_seen_at; 'late'
-    marks items stored after the page cutoff (事后补采).
+    marks items stored after the page cutoff (事后补采). On today's page the
+    window is the last 24 hours ending at the cutoff, so pre-04:00 ET items
+    still show (B-066).
     """
-    start, end = _day_window(day)
+    if is_today:
+        start, end = cutoff - timedelta(hours=24), cutoff
+    else:
+        start, end = _day_window(day)
     rows = _rows(
         connection,
         """
@@ -1453,7 +1458,8 @@ def _context(connection, day, clock):
     context_portfolio = portfolio
     seen = _news_seen(connection, cutoff)
     fresh = _news_fresh(seen, day)
-    news_items = _day_news(connection, day, cutoff)
+    is_today_page = day == clock.today_trade_date()
+    news_items = _day_news(connection, day, cutoff, is_today_page)
     version = params_version(plan)
     sell = sell_params(version)
     swing = swing_params(version)
@@ -1483,7 +1489,7 @@ def _context(connection, day, clock):
     technicals = _technicals(bars, data_day)
     earnings = _earnings_calendar(connection, day)
     econ = _econ_calendar(connection, day)
-    intraday = _intraday(connection, day)
+    intraday = _intraday(connection, day, is_today_page)
     return {
         "day": day,
         "carry_from": carry_from,
@@ -1810,7 +1816,9 @@ def page_brief_market(connection, day, clock):
     rotation = context["rotation"]
     catalog = context["catalog"]
     spy, qqq, iwm = (_index_ret(rotation, name) for name in ("SPY", "QQQ", "IWM"))
-    advancers, decliners = _breadth(context["daily"])
+    is_today_page = day == clock.today_trade_date()
+    wide = _wide_snapshot_breadth(connection, day) if is_today_page else None
+    advancers, decliners = wide if wide is not None else _breadth(context["daily"])
     judgment = judge(spy, qqq, iwm, advancers, decliners)
     groups = [row for row in rotation if row["group_kind"] in {"l3", "sector"}]
     down, up = _leaders(groups)
@@ -1839,7 +1847,8 @@ def page_brief_market(connection, day, clock):
         mood = "情绪：恐慌"
     else:
         mood = "情绪：谨慎，未恐慌"
-    _wmovers = _wide_movers(connection, day)
+    is_today = day == clock.today_trade_date()
+    _wmovers, wide_asof = _wide_movers(connection, day, is_today)
     _wm = {"up": _wmovers[:5], "down": sorted(_wmovers, key=lambda r: r["ret"])[:5]}
     fallen = "、".join(row["name"] for row in down[:2])
     risen = "、".join(row["name"] for row in up[:2])
@@ -1883,14 +1892,18 @@ def page_brief_market(connection, day, clock):
         "events": events,
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
+        "freshness": _freshness(context, clock),
+        "et_now": clock.now_utc().astimezone(NY).strftime("%H:%M"),
+        "trading_day": trading_day(day),
         "today": clock.today_trade_date().isoformat(),
         "is_today": context["day"] == clock.today_trade_date(),
         "intraday": context["intraday"],
         "mstrip": _market_strip(connection, context, day),
         "sector_strip": _sector_strip(context, _themes(context, day)),
-        "news_modules": _news_views(context),
+        "news_modules": _news_views_today(context) if is_today_page else _news_views(context),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
+        "wide_asof": wide_asof,
         "earnings": _earnings_modules(
             context["earnings_cal"], day, context["pool"], set(context["positions"]), context["news_ranked"]
         ),
@@ -2202,11 +2215,18 @@ def _econ_calendar(connection, day):
     return rows
 
 
-def _intraday(connection, day):
-    """Latest intraday snapshot per ticker for `day` (A-024 contract)."""
+def _intraday(connection, day, is_today=False):
+    """Latest intraday snapshot per ticker (A-024 contract).
+
+    For today's page the latest row within the last 3 calendar days wins —
+    after-hours/overnight rows carry over into the next morning (B-066).
+    Historical dates stay on the same-day window.
+    """
     if not _table_exists(connection, "ingest.intraday_snapshots"):
         return {}
     start, end = _day_window(day)
+    if is_today:
+        start -= timedelta(days=3)
     rows = _rows(
         connection,
         """
@@ -2261,22 +2281,29 @@ def _snap_ret(snap):
     return float(snap["last"]) / float(snap["prev_close"]) - 1
 
 
-def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
+def _strip_item(ticker, label, kind, snap, close_ret, day, dgs2=None):
     """One ticker-strip cell: value + signed change (bp for yields)."""
     if ticker == "DGS2" and dgs2 is not None:
+        d = dgs2["observation_date"]
         return {
             "label": label,
             "value": f"{float(dgs2['value']):.2f}%",
-            "chg": "前一日",
+            "chg": f"收盘 {d:%m/%d}",
             "dir": 0,
-            "title": f"前一日收盘 {dgs2['observation_date']}",
+            "tag": f"收盘 {d:%m/%d}",
+            "title": f"收盘 {d}",
         }
     if snap is not None:
         ret = _snap_ret(snap)
         if ret is None:
             return {"label": label, "value": "—", "chg": None, "dir": 0, "title": "暂缺"}
         asof = snap["as_of"].astimezone(NY)
-        title = f"截至 {asof:%H:%M} 美东 · 延迟约 {snap.get('delay_minutes', 0)} 分钟"
+        bj = snap["as_of"].astimezone(_SHANGHAI)
+        sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
+        when = f"{sess} {asof:%m/%d %H:%M}" if asof.date() != day else f"{sess} {asof:%H:%M}"
+        title = (
+            f"北京 {bj:%m-%d %H:%M} · 延迟约 {snap.get('delay_minutes', 0)} 分钟 · {snap.get('source') or 'snapshot'}"
+        )
         if kind == "yield":
             bp = (float(snap["last"]) - float(snap["prev_close"])) * 100
             # yield up = risk-off (red for stocks), down = green
@@ -2285,6 +2312,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
                 "value": f"{float(snap['last']):.2f}%",
                 "chg": f"{'+' if bp >= 0 else ''}{bp:.1f} 基点",
                 "dir": -1 if bp > 0 else (1 if bp < 0 else 0),
+                "tag": when,
                 "title": title + " · 收益率上升对股市偏空，显示为红",
             }
         return {
@@ -2292,6 +2320,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
             "value": f"{float(snap['last']):,.2f}",
             "chg": f"{'+' if ret >= 0 else ''}{ret * 100:.2f}%",
             "dir": 1 if ret > 0 else (-1 if ret < 0 else 0),
+            "tag": when,
             "title": title,
         }
     if close_ret is not None:
@@ -2300,6 +2329,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
             "value": f"{'+' if close_ret >= 0 else ''}{close_ret * 100:.2f}%",
             "chg": "收盘",
             "dir": 1 if close_ret > 0 else (-1 if close_ret < 0 else 0),
+            "tag": "收盘",
             "title": "当日收盘",
         }
     return {"label": label, "value": "—", "chg": None, "dir": 0, "title": "暂缺"}
@@ -2326,8 +2356,8 @@ def _market_strip(connection, context, day):
             asof = snap["as_of"].astimezone(NY)
             if last_asof is None or asof > last_asof:
                 last_asof, last_session = asof, snap.get("session")
-        items.append(_strip_item(ticker, label, kind, snap, close_idx.get(ticker), dgs2))
-    etf_row = [_strip_item(t, t, "etf", intraday.get(t), close_idx.get(t)) for t in SECTOR_ETFS]
+        items.append(_strip_item(ticker, label, kind, snap, close_idx.get(ticker), day, dgs2))
+    etf_row = [_strip_item(t, t, "etf", intraday.get(t), close_idx.get(t), day) for t in SECTOR_ETFS]
     tail = None
     if last_asof is not None:
         label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(last_session, "")
@@ -2370,6 +2400,45 @@ def _slug(sector):
     return sector.replace(" ", "-").replace("/", "-")
 
 
+def _freshness(context, clock):
+    """'数据更新至 北京 HH:MM（美东 HH:MM）' from the newest snapshot used;
+    include the date when the snapshot is not on today's ET date."""
+    intraday = context.get("intraday") or {}
+    latest = max((r["as_of"] for r in intraday.values() if r.get("as_of")), default=None)
+    if latest is None:
+        return None
+    bj = latest.astimezone(_SHANGHAI)
+    et = latest.astimezone(NY)
+    today = clock.today_trade_date() if clock is not None else et.date()
+    if et.date() != today:
+        return f"数据更新至 北京 {bj:%m-%d %H:%M}（美东 {et:%m-%d %H:%M}）"
+    return f"数据更新至 北京 {bj:%H:%M}（美东 {et:%H:%M}）"
+
+
+def _news_views_today(context):
+    """Today's movers ranked by latest snapshot change over ALL members.
+
+    Snapshot ret wins, close ret as fallback; members without either are not
+    candidates. Snapshot metadata is attached for the header chip."""
+    intraday = context.get("intraday") or {}
+
+    def mover_key(member):
+        snap = intraday.get(member["ticker"])
+        if snap is not None and _snap_ret(snap) is not None:
+            return abs(_snap_ret(snap))
+        return abs(member["ret"]) if member["ret"] is not None else None
+
+    mods = _news_views(context, mover_key)
+    for m in mods["movers"]:
+        snap = intraday.get(m["ticker"])
+        if snap is not None and _snap_ret(snap) is not None:
+            m["snap_ret"] = _snap_ret(snap)
+            m["snap_asof"] = snap["as_of"].astimezone(NY).strftime("%H:%M")
+            m["snap_delay"] = snap.get("delay_minutes")
+            m["snap_session"] = snap.get("session")
+    return mods
+
+
 def _translations(connection, info_ids):
     if not info_ids or not _table_exists(connection, "perception.news_translations"):
         return {}
@@ -2384,8 +2453,76 @@ def _translations(connection, info_ids):
 WARRANT_SUFFIX = re.compile(r"^[A-Z]+[WUR]$")
 
 
-def _wide_movers(connection, day):
-    """Whole-market movers: price >= $5, ADV20 >= $20M, no warrants/units."""
+def _wide_snapshot_breadth(connection, day):
+    """Advance/decline counts from today's ingest.wide_snapshots, or None."""
+    if not _table_exists(connection, "ingest.wide_snapshots"):
+        return None
+    rows = _rows(
+        connection,
+        """
+        SELECT DISTINCT ON (ticker) ticker, last / prev_close - 1 AS ret
+        FROM ingest.wide_snapshots
+        WHERE as_of >= %s AND prev_close > 0
+        ORDER BY ticker, as_of DESC
+        """,
+        (_day_window(day)[0],),
+    )
+    if not rows:
+        return None
+    return (
+        sum(1 for r in rows if r["ret"] is not None and float(r["ret"]) > 0),
+        sum(1 for r in rows if r["ret"] is not None and float(r["ret"]) < 0),
+    )
+
+
+def _wide_movers(connection, day, is_today=False):
+    """Whole-market movers: price >= $5, ADV20 >= $20M, no warrants/units.
+
+    On today's page prefer ingest.wide_snapshots (A-025) latest rows when
+    present — returns (rows, as_of); falls back to close data with as_of=None.
+    """
+    if is_today and _table_exists(connection, "ingest.wide_snapshots"):
+        rows = _rows(
+            connection,
+            """
+            SELECT DISTINCT ON (ticker) ticker, last AS close, prev_close,
+                   last / prev_close - 1 AS ret, as_of
+            FROM ingest.wide_snapshots
+            WHERE as_of >= %s AND prev_close > 0
+            ORDER BY ticker, as_of DESC
+            """,
+            (_day_window(day)[0],),
+        )
+        if rows:
+            as_of = max(r["as_of"] for r in rows)
+            adv = {}
+            if _table_exists(connection, "ingest.wide_universe"):
+                for row in _rows(
+                    connection,
+                    """
+                    SELECT DISTINCT ON (ticker) ticker, adv20
+                    FROM ingest.wide_universe
+                    WHERE trade_date < %s AND included
+                    ORDER BY ticker, trade_date DESC
+                    """,
+                    (day,),
+                ):
+                    adv[row["ticker"]] = row["adv20"]
+            names = {r["ticker"] for r in rows}
+            clean = [
+                row
+                for row in rows
+                if row["close"] is not None
+                and float(row["close"]) >= 5
+                and (row["ticker"] not in adv or (adv[row["ticker"]] or 0) >= 20000000)
+                and not (WARRANT_SUFFIX.match(row["ticker"]) and row["ticker"][:-1] in names)
+            ]
+            clean.sort(key=lambda r: r["ret"], reverse=True)
+            return clean, as_of
+    return _wide_movers_close(connection, day), None
+
+
+def _wide_movers_close(connection, day):
     rows = _rows(
         connection,
         """
@@ -2466,8 +2603,11 @@ def _econ_module(econ):
     return out[:8]
 
 
-def _news_views(context):
-    """Market-page news modules from the ranked rules layer."""
+def _news_views(context, mover_key=None):
+    """Market-page news modules from the ranked rules layer.
+
+    mover_key(member) -> sortable change magnitude for the movers block;
+    defaults to abs(close ret)."""
     ranked = context["news_ranked"]
     tech = context["technicals"]
     grouped = context["grouped"]
@@ -2490,7 +2630,12 @@ def _news_views(context):
             close, prev = _session_closes(history, context["day"])
             if close is not None and prev not in (None, 0):
                 m["ret"] = close / prev - 1
-    top8 = sorted((m for m in members.values() if m["ret"] is not None), key=lambda m: -abs(m["ret"]))[:8]
+    if mover_key is None:
+
+        def mover_key(m):
+            return abs(m["ret"]) if m["ret"] is not None else None
+
+    top8 = sorted((m for m in members.values() if mover_key(m) is not None), key=lambda m: -mover_key(m))[:8]
     for m in top8:
         own = sorted(
             (n for n in ranked if m["ticker"] in n["rule"].primary_tickers),
