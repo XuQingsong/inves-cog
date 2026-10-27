@@ -42,6 +42,7 @@ def test_day_volume_nullable_on_non_sip():
 def test_scores_carry_signal_date():
     # regression: trading.daily_scores has signal_date, not trade_date
     from unittest.mock import MagicMock
+
     from inves_cog.web.brief import _scores
 
     older = {

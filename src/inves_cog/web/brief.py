@@ -1016,7 +1016,7 @@ def close_estimate(context, day):
     if cash is None or not positions:
         return None
     intraday = context.get("intraday") or {}
-    is_today = day == context["day"]
+    is_today = day == context.get("day")
     equity = cash
     pnl = 0.0
     missing = 0
