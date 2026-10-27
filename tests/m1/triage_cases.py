@@ -73,7 +73,7 @@ def assert_news_triage(root, clock):
     for row in rows[:-1]:
         full(row)
     results = engine().process(rows)
-    layers = [r['extraction_source']['news_triage']['layer'] for r in results]
+    layers = [r["extraction_source"]["news_triage"]["layer"] for r in results]
     assert layers == [2, 2, 2, 2, 1, 3], layers
     assert len(usage) == 5
     assert results[-1]["embedding"] is None and not results[-1]["extraction_source"]["news_triage"]["llm_full"]

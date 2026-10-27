@@ -1,4 +1,5 @@
 """A-026: non-news LLM scope reduction."""
+
 from datetime import datetime, timedelta, timezone
 
 from inves_cog.ingest.info import enrich
@@ -54,9 +55,7 @@ def test_news_still_tags():
 
 
 def test_structured_items_rules_only():
-    triage = NewsTriage(
-        llm=None, embed=None, entities=[], monitored_ids=set(), pool_tickers=set(), clock=_clock()
-    )
+    triage = NewsTriage(llm=None, embed=None, entities=[], monitored_ids=set(), pool_tickers=set(), clock=_clock())
     for kind in ("short_interest", "macro"):
         result = triage.rules(_item(kind, "x"))
         assert result["extraction_source"]["news_triage"]["reason"] == "rules_only_structured"
