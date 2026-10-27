@@ -1893,12 +1893,35 @@ def _intra_line(row):
     if last is None or prev in (None, 0):
         return ""
     pct = float(last) / float(prev) - 1
-    session = _SESSION_LABEL.get(row.get("session"), _text(row.get("session")))
     moment = _parse_iso(row.get("as_of"))
-    hm = moment.astimezone(NY).strftime("%H:%M") if moment else "—"
-    delay = row.get("delay_minutes")
-    tail = f" · 延迟约 {delay} 分钟" if delay is not None else ""
-    return f'<div class="small muted">{session} {_signed(pct * 100, 2)} · 截至 {hm} 美东{tail}</div>'
+    src = row.get("source") or ""
+    src_label = {
+        "Alpaca:iex": "Alpaca IEX",
+        "Alpaca:delayed_sip": "Alpaca 延迟 SIP",
+        "Yahoo": "Yahoo",
+        "FRED": "FRED",
+    }.get(src, src or "snapshot")
+    if src == "Alpaca:iex" and moment:
+        label = f"IEX 实时 {moment.astimezone(NY):%H:%M:%S}"
+    elif src == "Alpaca:delayed_sip" and moment:
+        label = f"延迟 15 分 {moment.astimezone(NY):%H:%M}"
+    else:
+        session = _SESSION_LABEL.get(row.get("session"), _text(row.get("session")))
+        hm = moment.astimezone(NY).strftime("%H:%M") if moment else "—"
+        delay = row.get("delay_minutes")
+        label = f"{session} · 截至 {hm} 美东" + (f" · 延迟约 {delay} 分钟" if delay is not None else "")
+    alt = row.get("alt")
+    alt_text = ""
+    if alt is not None:
+        a_src = {
+            "Alpaca:iex": "Alpaca IEX",
+            "Alpaca:delayed_sip": "Alpaca 延迟 SIP",
+            "Yahoo": "Yahoo",
+            "FRED": "FRED",
+        }.get(alt.get("source") or "", alt.get("source") or "snapshot")
+        a_asof = _parse_iso(alt.get("as_of"))
+        alt_text = f" · {a_src} {float(alt['last']):.2f} 于 {a_asof.astimezone(NY):%H:%M}" if a_asof else ""
+    return f'<div class="small muted" title="{_text(src_label + alt_text)}">{label} {_signed(pct * 100, 2)}</div>'
 
 
 def _safe_url(url):
