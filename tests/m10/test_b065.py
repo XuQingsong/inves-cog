@@ -284,9 +284,9 @@ def test_wide_adv20_filter(pages):
     admin.execute(WIDE_DDL)
     # ZZZ liquid ($25M ADV), BBB2 illiquid ($1M ADV) -> filter keeps ZZZ only
     admin.execute(
-        "INSERT INTO ingest.wide_universe (ticker, trade_date, mktcap, adv20, included, fetched_at)"
-        " VALUES ('ZZZ', %s, 1e9, 25000000, true, %s), ('BBB2', %s, 1e9, 1000000, true, %s)",
-        (PREV, SEEN, PREV, SEEN),
+        "INSERT INTO ingest.wide_universe (ticker, trade_date, mktcap, adv20, included, notes)"
+        " VALUES ('ZZZ', %s, 1e9, 25000000, true, '{}'), ('BBB2', %s, 1e9, 1000000, true, '{}')",
+        (PREV, PREV),
     )
     for ticker, last, prev in (("ZZZ", 20.0, 10.0), ("BBB2", 20.0, 10.0)):
         admin.execute(
