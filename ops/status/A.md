@@ -409,3 +409,13 @@ UD-A-51命令纠正：用户截图显示此前提供的CPUQuota=infinity被syste
 最新main `89b0107390f83d15160bf5f92873ae7645d973ed`任务明确替代第一版：本单不修改任何llm、token预算、非新闻处理或模型脚本。此前ACK仅记录首版，未实现模型改动，立即转为分钟级行情。变更：Alpaca股票ETF交易日04–20每分钟；Yahoo白天每分钟、交易日前夜每15分钟及周末BTC例外；wide池09:30–16每5分钟新表ingest.wide_snapshots；intraday CHECK增加overnight；同原时间DO NOTHING；健康15分钟汇总、Yahoo连续失败指数退避最长15分钟并持久化；7天后按每代码/源/半小时保留原始观测、30天清理，wide只留当日与上一交易日。不改web/trading/日终任务，不提前生产DDL。
 
 限频已核对Alpaca官方文档 https://docs.alpaca.markets/us/docs/about-market-data-api ：Basic历史REST200请求/分钟，支持批量snapshots。分钟股票1次批量、wide每5分钟分批及前收日缓存，远低于200；必须识别429并停止该Alpaca采集路径，记录明确限频阻塞，不擅自降频。现有源权限沿用delayed_sip，不购新套餐。Yahoo没有已承诺免费频率，按任务频率且失败退避，不宣称保证约15分钟延迟；原始as_of和实际延迟如实保存，尤其收益率并非持续交易。
+
+## A-025 第二版进行中：PR90已提交，准确head CI待完成
+
+PR https://github.com/XuQingsong/inves-cog/pull/90 ，head `20937bdbb8a601c40da8e93d22818f88209d2ba6`；先失败测试提交`530de79`（11失败），后实现`8099920`及导入排序修正。准确PR CI https://github.com/XuQingsong/inves-cog/actions/runs/40470763936/job/122077059496 当前pending，不能当通过。
+
+实现按第二版：股票/宏观/宽池各自独立Supervisor程序，避免日终/SEC长任务阻塞分钟更新；行情专用调度不会拉起enrich，按下一分钟边界唤醒，原日终程序保持。范围不变的批量股票与ETF、白天每分钟/隔夜每15分钟Yahoo、宽池每5分钟；休市BTC例外，原始报价时段overnight。前收按交易日/批次缓存，缺值也缓存空值不每分钟重复查询；Yahoo整源连续失败1/2/4/8/15分钟退避，部分代码失败不拖停正常代码。重启保留退避/健康计数、任务数据库锁防并发；Alpaca429持久化停两条快照路径并待操作处理，不降频。复用source_cursors保存状态，无额外状态表/角色。15分钟source_health汇总成功失败数/最新as_of/退避。新迁移0008仅overnight CHECK及wide_snapshots表；同原时间DO NOTHING；7天后半小时首条原始观测（UTC半小时桶避免夏令时重叠小时合并），30天清理；宽池只留当日和上一交易日。
+
+本地证据：相关M1/服务配置/A016回归159 passed；新增专项最终23 passed（不含容器PG入口）。独立临时PG:55423真实应用0008并通过重复键不覆盖、7/30天压缩、宽池两日清理、role_ingest写/role_web只读；数据回滚。ruff及diff检查通过。本机直接全套pytest缺容器环境/依赖导致大量环境失败，另发现服务列表旧断言已按授权配置改动更新并经相关回归通过，不冒称全套本机通过。正式准确headCI仍待返回。
+
+没有模型预算/非新闻处理/脚本改动，没有真实模型调用、历史补采或生产DDL/安装。下一步检查正式CI、失败则修复，交需求方验收合并后部署并采首交易日真实证据；Yahoo收益率等非持续交易，不承诺伪造15分钟新鲜报价。持续自动化保持。
