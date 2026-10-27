@@ -1592,8 +1592,7 @@ def _header(payload):
         + '</div><div class="fresh"><span>'
         + _text(fresh)
         + '</span><span class="mode"><button id="lang-toggle" onclick="__setLang()">中文 / 英文</button>'
-        + '<button data-m="close" class="on">收盘</button>'
-        + '<button data-m="intra">盘中</button></span></div></div></div></header>'
+        + "</span></div></div></div></header>"
     )
 
 
@@ -2075,7 +2074,8 @@ def _feed_module(payload):
     )
     body = "".join(rows) or '<div class="empty">无</div>'
     return (
-        f'<div class="card" id="feed"><h2>滚动新闻 <span class="small muted">最近 {len(feed)} 条</span></h2>'
+        f'<div class="card" id="feed"><h2>滚动新闻 <span class="small muted">'
+        f"{'最近 24 小时' if payload.get('is_today') else f'最近 {len(feed)} 条'}</span></h2>"
         f'<div class="scroll">{body}{more}</div></div>'
     )
 

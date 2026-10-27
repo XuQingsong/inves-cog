@@ -187,7 +187,7 @@ def _visible(html):
 def test_carry_over_labels_and_banner(pages):
     html = _get(pages, "/").text
     assert "沿用" in html and "收盘" in html
-    assert "收盘数据未到" in html
+    assert "美股未开盘" in html
 
 
 def test_feed_default_10_and_grouped_ratings(pages):

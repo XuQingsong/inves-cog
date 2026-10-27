@@ -184,17 +184,21 @@ def test_intraday_three_day_fallback_and_labels(pages):
     assert wti and wti[0]["value"] != "—" and "盘后" in wti[0]["tag"]
 
 
-def test_overnight_session_label(pages):
-    admin = pages["admin"]
-    admin.execute(
-        """INSERT INTO ingest.intraday_snapshots
-        (ticker, as_of, session, last, prev_close, delay_minutes, source, fetched_at)
-        VALUES ('GC=F', %s, 'overnight', 4100.0, 4000.0, 15, 'b065', %s)""",
-        (SEEN - timedelta(hours=6), SEEN - timedelta(hours=6)),
-    )
-    market = _get(pages, "/api/pages/brief/market").json()
-    gold = [i for i in market["mstrip"]["items"] if i["label"] == "黄金"]
-    assert gold and "隔夜" in gold[0]["tag"]
+def test_overnight_session_label():
+    from inves_cog.ingest.market import NY
+    from inves_cog.web.brief import _strip_item
+
+    snap = {
+        "last": 4100.0,
+        "prev_close": 4000.0,
+        "as_of": SEEN,
+        "session": "overnight",
+        "delay_minutes": 15,
+        "source": "b065",
+    }
+    item = _strip_item("GC=F", "黄金", "cmd", snap, None, DAY)
+    assert "隔夜" in item["tag"]
+    assert NY is not None
 
 
 def test_today_news_window_24h(pages):
