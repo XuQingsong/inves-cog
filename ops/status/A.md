@@ -461,3 +461,11 @@ OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日
 变更细节：追加独立iex_snapshots无enrich进程，task=iex_intraday、source_health=AlpacaIEX，和SIP相同完整scope/同一个已缓存调整全市场前收；source=Alpaca:iex、delay_minutes=0，健康另记max_trade_age_seconds区分实际陈旧。无schema/角色新增；重复成交PK DO NOTHING，IEX与SIP同时间因source不同可共存；429共用Alpaca停止标记（现含SIP/IEX/wide三路），其他源互不拖停。
 
 离线相关M1/服务配置/A016回归174 passed；额外IEX/Yahoo调度不启动enrich两参数通过，ruff/diff通过。独立临时PG实测IEX/SIP同时间独立记录、重复成交不改首次fetched_at、前收同口径通过并回滚，临时PG已停。证据测试tests/m1/test_a025_iex.py与fixtures/a025/，生产公开探测证据inves-cog-data/ops/a025-iex-public-probe-20261027.json。下一步收口准确CI并交需求方验收，不提前部署或把请求发出当业务采集成功；所有模型改动仍暂缓。
+
+## A-025（含IEX追加）已完成：准确新head正式CI通过，待验收合并部署
+
+原PR90 https://github.com/XuQingsong/inves-cog/pull/90 ，完整最终head `ebd1df21a5c844b7247df1af8884fbc7716f2bf6`。[准确PR phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40490321442/job/122142329527) success；同SHA分支CI https://github.com/XuQingsong/inves-cog/actions/runs/40490315343/job/122142310498 success。干净容器946 passed/33 deselected，另2项CI断言通过，含真实临时PG的IEX/SIP主键、重复成交不覆盖、同口径前收测试；不是旧head的通过结果。最终再次fetch确认main仍`aac8f6cd8de2994bc47e8cc2153eef60605e72ac`，无新修订或暂停。
+
+追加验收逐项：免费账户权限/限频及IEX盘前盘后时段的真实和官方证据见上一条及PR；ET04–20每分钟与SIP同scope，独立无enrich进程与AlpacaIEX健康；test_iex_polls_same_minute_windows_as_sip_even_when_exchange_closed、test_pipeline_registers_iex_with_independent_source_health及服务配置集合测试通过。source=Alpaca:iex/delay_minutes=0/as_of原成交/session原时段/prev_close全市场同缓存，test_iex_last_print_may_be_previous_day_without_fabricating_freshness、test_iex_batch_scope_uses_same_sip_previous_cache_and_never_updates_duplicate通过。test_iex_real_pg_separate_source_and_duplicate_trade_time核验同成交时间重采不改首次fetched_at、IEX/SIP同时间独立两行；不把零feed延迟当刚发生，缺/陈旧/未来/错误交易所样本均有测试。原第二版调度、保留清理、退避、健康汇总和角色权限回归仍通过。
+
+所有代码已推送；未部署、未运行新增生产轮询或迁移。唯一真实请求只是明确要求的免费接口核实，未写业务表，无模型调用/历史补算。下一步由需求方验收合并并下发安装；A届时先核实main包含已验收merge再部署，不自动合并。首交易日IEX三类标的时间差/与SIP价差以及原分钟行情全天证据仍待实际安装和自然窗口，未提前认作完成。自动化持续开启。
