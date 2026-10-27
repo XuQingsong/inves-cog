@@ -495,11 +495,14 @@ def _stocks(payload):
             "</a>"
             "</td></tr>"
         )
+    carried = max((row["carried_from"] for row in flat if row.get("carried_from")), default=None)
+    carry_th = _carry_chip({"carried_from": carried})
     head = "".join(
-        f'<th class="s{" r" if right else ""}" data-sc="{key}">{label}</th>'
+        f'<th class="s{" r" if right else ""}" data-sc="{key}">{label}{carry_th if key == "rsi" else ""}</th>'
         for key, label, right in (
             ("t", "代码", False),
             ("theme", "主题", False),
+            ("px", "现价", True),
             ("chg", "当日", True),
             ("vol", "量比", True),
             ("rsi", "RSI", True),
@@ -569,9 +572,25 @@ def _overbought(row):
     return isinstance(tech, dict) and tech.get("rsi_state") == "超买"
 
 
+def _px_cell(row):
+    price = row.get("snap_price")
+    tag = row.get("snap_tag")
+    if price is None:
+        price = row.get("price")
+        return f"{float(price):,.2f}" if price else '<span class="muted">暂缺</span>'
+    small = f'<small class="muted">{_text(tag)}</small>' if tag else ""
+    return f"{float(price):,.2f}{small}"
+
+
+def _carry_chip(row):
+    d = row.get("carried_from") or (row.get("score") or {}).get("carried_from")
+    return f' <small class="chip stale">沿用 {str(d)[5:].replace("-", "/")} 收盘</small>' if d else ""
+
+
 def _stock_row(payload, row, day):
     ticker = row.get("ticker") or ""
     ret = row.get("ret")
+    shown_ret = row.get("snap_ret") if (payload.get("is_today") and row.get("snap_ret") is not None) else ret
     vol = row.get("volume_multiple")
     held = bool(row.get("held"))
     buy = row.get("entry_pass") is True and not held
@@ -597,7 +616,7 @@ def _stock_row(payload, row, day):
             f'data-buy="{1 if buy else 0}"',
             f'data-move="{1 if _is_move(row) else 0}"',
             f'data-crowd="{1 if _overbought(row) else 0}"',
-            f'data-chg="{_num_attr(ret)}"',
+            f'data-chg="{_num_attr(shown_ret)}"',
             f'data-vol="{_num_attr(vol)}"',
             f'data-rsi="{_num_attr(rsi)}"',
             f'data-d200="{_num_attr(row.get("price_vs_ma200"))}"',
@@ -612,7 +631,8 @@ def _stock_row(payload, row, day):
         f"<tr {attrs}>"
         f'<td><a class="mono" href="{_symbol_href(payload, ticker)}"><b>{_text(ticker)}</b></a></td>'
         f'<td class="small">{_text(row.get("sector"))}</td>'
-        f'<td class="r">{_pct(ret)}</td>'
+        f'<td class="r">{_px_cell(row)}</td>'
+        f'<td class="r">{_pct(shown_ret)}</td>'
         f'<td class="r num {"" if vol is not None and vol >= 2 else "muted"}">{_text(_times(vol))}</td>'
         f'<td class="r num">{rsi_html}</td>'
         f'<td class="r">{_pts(row.get("price_vs_ma200"))}</td>'
@@ -1309,7 +1329,9 @@ def _stock(payload):
     elif position.get("risk_level") == "orange":
         chips += ' <span class="chip mid">▲ 下行关注</span>'
     returns = "".join(
-        f'<div><div class="small muted">{label}</div><div style="font-size:16px">{_pct(trend.get(key))}</div></div>'
+        f'<div><div class="small muted">{label}</div><div style="font-size:16px">{_pct(trend.get(key))}</div>'
+        + (f'<div class="small muted">{_text(trend[key + "_tag"])}</div>' if trend.get(key + "_tag") else "")
+        + "</div>"
         for label, key in (
             ("当日", "ret"),
             ("盘后", "post"),
@@ -1351,7 +1373,13 @@ def _stock(payload):
         + _chart(trend, position, payload)
         + f'<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:10px;gap:10px">{returns}'
         + "</div></div>"
-        + '<div class="card"><h2>位置与情绪</h2><div class="kv">'
+        + '<div class="card"><h2>位置与情绪'
+        + (
+            f' <span class="chip stale">沿用 {_text(payload["carried_from"][5:].replace("-", "/"))} 收盘</span>'
+            if payload.get("carried_from")
+            else ""
+        )
+        + '</h2><div class="kv">'
         + f'<span class="k">距 50 日线</span><span>{_pts(trend.get("dev50"))} '
         + f'<span class="small muted">（{money(trend.get("ma50"))}）</span></span>'
         + f'<span class="k">距 200 日线</span><span>{_pts(trend.get("price_vs_ma200"))} '

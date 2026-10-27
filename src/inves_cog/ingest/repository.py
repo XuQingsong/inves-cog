@@ -20,7 +20,7 @@ def json_text(value):
 
 TABLES = {
     "intraday_snapshots": (
-        "ticker as_of session last prev_close delay_minutes source fetched_at",
+        "ticker as_of session last prev_close delay_minutes source day_volume fetched_at",
         "ticker,as_of,source",
     ),
     "wide_snapshots": ("ticker as_of last prev_close source fetched_at", "ticker,as_of,source"),
