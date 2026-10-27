@@ -445,3 +445,7 @@ OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日
 按明确任务停止预览：部署前核实8091监听的唯一/tmp/b063_serve.py PID3794194，部署并核验页面成功后仅向该匹配且同账号预览发TERM；独立ps确认相关b063/b062-preview活动进程0，ss确认8091不再监听，未把SSH结束当退出。证据生产`/home/claudeuser/inves-cog-data/ops/b066-verification-20261027.json`，无私有页面内容/持仓/密钥输出。
 
 下一步需求方线上走查；A025继续待验收合并与部署指令，A024盘前首尾和A023第二日收盘按自然窗口继续，不重复执行已完成安装或模型调用。
+
+## A-025追加IEX 已收到／进行中
+
+最新main `aac8f6cd8de2994bc47e8cc2153eef60605e72ac`明确追加用户IEX要求，沿用PR90现有提交，不重启任务；原第二版无模型变更继续有效。变更：同股票/ETF范围、ET04–20每分钟额外一次批量GET `/v2/stocks/trades/latest?feed=iex`，写原表独立source=Alpaca:iex/as_of原成交/delay_minutes=0，prev_close复用SIP同日调整全市场前收缓存；主键重复跳过，不新增schema/角色、不改web/trading。IEX与SIP分开来源健康，单源非429失败不阻断另一源；429仍停止Alpaca新快照路径并报告，不擅降频。核实官方免费权限与IEX系统时段后明确哪些时段无新成交，不用当前时间伪装陈旧成交；先失败测试再实现，准确新head CI重跑。新增接口沿既有Alpaca凭据，不购套餐，不调用模型。
