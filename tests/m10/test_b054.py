@@ -431,11 +431,11 @@ def test_f1_close_session_drives_judgment(pages):
     assert "+0.02%" not in block.split("盘后", 1)[0]
     stocks = _get(pages, "/stocks").text
     amat = _cells(_row(stocks, "AMAT"))
-    assert "−8.00%" in amat[2]
-    assert "+5.00%" not in amat[2]
+    assert "−8.00%" in amat[3]
+    assert "+5.00%" not in amat[3]
     nvda = _cells(_row(stocks, "NVDA"))
-    assert "−4.40%" in nvda[2]
-    assert "+5.00%" not in nvda[2]
+    assert "−4.40%" in nvda[3]
+    assert "+5.00%" not in nvda[3]
 
 
 def test_f2_visible_text_has_no_basket_codes(pages):
@@ -476,7 +476,7 @@ def test_f4_visible_numbers_follow_the_mockup(pages):
     assert "1.8×" in stocks
     assert "1.8×" in _row(stocks, "AMAT")
     nvda = _cells(_row(stocks, "NVDA"))
-    assert nvda[4] == "44"
+    assert nvda[5] == "44"
     assert "44.4" not in visible
     assert "22.8" in account
     assert "22.84" not in visible
@@ -557,9 +557,9 @@ def test_f8_pending_count_nav_and_buyable_cell(pages):
         assert "大环境怎么样" in nav and "仓位怎么处理" in nav and "系统靠不靠谱" in nav
     stocks = _get(pages, "/stocks").text
     held = _cells(_row(stocks, "NVDA"))
-    assert held[8] == "持有"
+    assert held[9] == "持有"
     buyable = _cells(_row(stocks, "LITE"))
-    assert buyable[8] == "可买"
+    assert buyable[9] == "可买"
     assert "可买" not in held[8]
 
 
