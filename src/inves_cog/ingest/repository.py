@@ -463,6 +463,23 @@ class Repository:
                   ORDER BY observed_at DESC LIMIT 1) latest""").fetchall()
         return [r["ticker"] for r in rows]
 
+    def finish_pending_rules_only(self, limit=512, *, as_of):
+        """Convert pending structured (short_interest/macro) and non-relevant
+        filing items to rules-only, preserving the audit trail."""
+        rows = self.connection.execute(
+            "SELECT info_id, extraction_source FROM ingest.info_items"
+            " WHERE extraction_status='pending' AND kind IN ('short_interest','macro') LIMIT %s",
+            (limit,),
+        ).fetchall()
+        for row in rows:
+            src = dict(row["extraction_source"] or {})
+            src["news_triage"] = {"layer": "rules_only", "reason": "rules_only", "marked_at": as_of.isoformat()}
+            self.connection.execute(
+                "UPDATE ingest.info_items SET extraction_status='ok', extraction_source=%s WHERE info_id=%s",
+                (json.dumps(src), row["info_id"]),
+            )
+        return len(rows)
+
     def finish_pending_news(self, limit=32, *, as_of):
         with self.transaction():
             rows = self.connection.execute(

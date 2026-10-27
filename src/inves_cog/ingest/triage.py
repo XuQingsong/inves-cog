@@ -74,6 +74,11 @@ class NewsTriage:
 
     def rules(self, item):
         result = deepcopy(item)
+        # A-026: structured non-news items never reach the model.
+        if item["kind"] in {"short_interest", "macro"}:
+            meta = {"rule_entities": [], "llm_full": False, "reason": "rules_only_structured"}
+            result.setdefault("extraction_source", {})["news_triage"] = meta
+            return result
         text = result["headline"] + " " + extraction_body(result["body"])
         identifiers = set(result["entities"])
         for entity in self.entities:
@@ -118,11 +123,23 @@ class NewsTriage:
             self.holding(item)
             or self.tracked(item)
             or bool(set(item["entities"]) & self.monitored_ids)
-            or item["kind"] == "sec_8k"
+            or (item["kind"] in {"sec_8k", "form4"} and self._filing_relevant(item))
             or item["source_level"] == 1
             or item["source"].casefold() == "benzinga"
             and bool(MACRO_PATTERN.search(item["headline"] + " " + extraction_body(item["body"])))
         )
+
+    def _filing_relevant(self, item):
+        """Filing issuer must be in the pool or current holdings (CIK/ticker)."""
+        ciks = {str(e.get("cik") or "") for e in self.entities if e.get("cik")}
+        headline = item["headline"]
+        import re as _re
+
+        for match in _re.findall(r"\((\d{10})\)", headline):
+            if match in ciks:
+                return True
+        pool = {t.upper() for e in self.entities for t in e.get("tickers", [])}
+        return bool({t.upper() for t in item["tickers"]} & pool)
 
     def over_budget(self):
         stats = self.usage_today()

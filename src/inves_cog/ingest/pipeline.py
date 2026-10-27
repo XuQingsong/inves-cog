@@ -186,6 +186,10 @@ class Pipeline:
     def enrich_pending(self, limit=32):
         counts = Counter()
         try:
+            counts["rules_only_structured"] = self.repo.finish_pending_rules_only(
+                max(limit, 512), as_of=self.clock.now_utc()
+            )
+            counts["processed_count"] += counts["rules_only_structured"]
             if not getattr(self, "news_llm_enabled", True):
                 counts["rules_only"] = self.repo.finish_pending_news(max(limit, 512), as_of=self.clock.now_utc())
                 counts["processed_count"] += counts["rules_only"]
