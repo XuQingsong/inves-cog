@@ -5,7 +5,6 @@ Reads raw production dumps in ./raw (news, movers, page APIs, Nasdaq calendars,
 Yahoo VIX), applies the deterministic rules layer, writes data-YYYY-MM-DD.json
 and a self-contained index.html with both days embedded.
 """
-
 import json
 import re
 from datetime import datetime, timedelta
@@ -20,14 +19,8 @@ UTC = ZoneInfo("UTC")
 
 STRONG_RATING = re.compile(r"upgrade|downgrade|initiates? coverage", re.I)
 TAG_RULES = [
-    (
-        "财报",
-        r"\b(earnings|EPS|revenue|quarterly results|Q[1-4] results|financial results)\b|reports? (third|second|first|fourth) quarter",
-    ),
-    (
-        "财报前瞻",
-        r"earnings preview|what to expect|ahead of earnings|earnings (on deck|this week)|priced for .* swings|earnings volatility",
-    ),
+    ("财报", r"\b(earnings|EPS|revenue|quarterly results|Q[1-4] results|financial results)\b|reports? (third|second|first|fourth) quarter"),
+    ("财报前瞻", r"earnings preview|what to expect|ahead of earnings|earnings (on deck|this week)|priced for .* swings|earnings volatility"),
     ("评级", r"upgrade|downgrade|initiates? coverage|price target|\bPT\b|reiterat"),
     ("指引", r"guidance|outlook|raises? (FY|full-year)|lowers? (FY|full-year)|cuts? forecast"),
     ("并购", r"merger|acquisition|acquires?|takeover|buyout|to buy\b"),
@@ -250,15 +243,7 @@ def build_day(day):
             if key in seen_econ:
                 continue
             seen_econ.add(key)
-            econ.append(
-                {
-                    "date": date,
-                    "gmt": r.get("gmt"),
-                    "name": r.get("eventName"),
-                    "consensus": r.get("consensus"),
-                    "previous": r.get("previous"),
-                }
-            )
+            econ.append({"date": date, "gmt": r.get("gmt"), "name": r.get("eventName"), "consensus": r.get("consensus"), "previous": r.get("previous")})
     econ.sort(key=lambda e: (e["date"], e["gmt"] or ""))
     econ = econ[:8]
 
@@ -267,13 +252,8 @@ def build_day(day):
     leaders = {
         "pool_up": [{"ticker": t, "ret": pool[t]["ret"], "theme": pool[t]["theme"]} for t in pool_sorted[-5:][::-1]],
         "pool_down": [{"ticker": t, "ret": pool[t]["ret"], "theme": pool[t]["theme"]} for t in pool_sorted[:5]],
-        "mkt_up": [
-            {"ticker": m["ticker"], "ret": m["ret"], "close": m["close"], "mktcap": m["mktcap"]} for m in movers[:5]
-        ],
-        "mkt_down": [
-            {"ticker": m["ticker"], "ret": m["ret"], "close": m["close"], "mktcap": m["mktcap"]}
-            for m in movers[-5:][::-1]
-        ],
+        "mkt_up": [{"ticker": m["ticker"], "ret": m["ret"], "close": m["close"], "mktcap": m["mktcap"]} for m in movers[:5]],
+        "mkt_down": [{"ticker": m["ticker"], "ret": m["ret"], "close": m["close"], "mktcap": m["mktcap"]} for m in movers[-5:][::-1]],
     }
 
     vix_all = VIX["closes"]
@@ -363,29 +343,10 @@ def main():
     html = html.replace("__DATA__", json.dumps(days, ensure_ascii=False, default=str))
     (ROOT / "index.html").write_text(html)
     for d, blob in days.items():
-        print(
-            d,
-            "news",
-            blob["news_total"],
-            "kept",
-            blob["news_kept"],
-            "movers",
-            len(blob["movers"]),
-            "mover_news",
-            len(blob["mover_news"]),
-            "theme",
-            len(blob["theme_news"]),
-            "feed",
-            len(blob["feed"]),
-            "e_wk",
-            len(blob["earnings_week"]),
-            "e_mine",
-            len(blob["earnings_mine"]),
-            "econ",
-            len(blob["econ"]),
-            "events",
-            len(blob["events"]),
-        )
+        print(d, "news", blob["news_total"], "kept", blob["news_kept"], "movers", len(blob["movers"]),
+              "mover_news", len(blob["mover_news"]), "theme", len(blob["theme_news"]), "feed", len(blob["feed"]),
+              "e_wk", len(blob["earnings_week"]), "e_mine", len(blob["earnings_mine"]), "econ", len(blob["econ"]),
+              "events", len(blob["events"]))
 
 
 if __name__ == "__main__":

@@ -6,34 +6,17 @@ from inves_cog.perception.attribution.diagnose import build_packet, write_packet
 from inves_cog.perception.attribution.links import inspect_links
 
 items = [
-    {
-        "info_id": "n1",
-        "headline": "Acme ships new chip",
-        "summary": "Acme said shipments began.",
-        "source_root": "r1",
-        "published_at": "2026-10-10T00:00:00+00:00",
-    },
-    {
-        "info_id": "n2",
-        "headline": "Other news",
-        "summary": "Unrelated.",
-        "source_root": "r2",
-        "published_at": "2026-10-10T01:00:00+00:00",
-        "claims": [{"subject": "X"}],
-    },
+    {"info_id": "n1", "headline": "Acme ships new chip", "summary": "Acme said shipments began.", "source_root": "r1",
+     "published_at": "2026-10-10T00:00:00+00:00"},
+    {"info_id": "n2", "headline": "Other news", "summary": "Unrelated.", "source_root": "r2",
+     "published_at": "2026-10-10T01:00:00+00:00", "claims": [{"subject": "X"}]},
 ]
 
 print("== L1 candidate without links")
 row = {"mechanism": "需求", "info_ids": ["n1"], "affected": [{"ticker": "NVDA"}, {"ticker": "AMD"}, {"ticker": "INTC"}]}
 out = inspect_links(row, items, [])
-print(
-    "affected kept:",
-    [a["ticker"] for a in out["affected"]],
-    "| link_checked:",
-    out.get("link_checked"),
-    "| research_gaps:",
-    out.get("research_gaps"),
-)
+print("affected kept:", [a["ticker"] for a in out["affected"]], "| link_checked:", out.get("link_checked"),
+      "| research_gaps:", out.get("research_gaps"))
 
 print("== L1b same candidate with empty links list")
 out = inspect_links({**row, "links": [], "竞争解释": [], "反证条件": "x"}, items, [])

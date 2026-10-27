@@ -1,1 +1,1 @@
-pytest_plugins = ["tests.harness.plugin"]
+pytest_plugins = ['tests.harness.plugin']
