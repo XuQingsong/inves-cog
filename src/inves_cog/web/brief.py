@@ -1019,9 +1019,12 @@ def close_estimate(context, day):
             missing += 1
             equity += shares * close
             pnl += shares * (close - previous)
-    label = "盘中估算，仅供看盘"
-    if missing:
-        label += f"；{missing} 只未取到快照按收盘计"
+    if is_today and intraday:
+        label = "盘中估算，仅供看盘"
+        if missing:
+            label += f"；{missing} 只未取到快照按收盘计"
+    else:
+        label = f"按 {day.month}月{day.day}日 收盘估算"
     return {"equity": equity, "day_pnl": pnl, "label": label}
 
 
