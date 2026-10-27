@@ -52,6 +52,7 @@ class NewsTriage:
         monitored_ids,
         pool_tickers,
         clock,
+        pool_ciks=None,
         daily_budget=NEWS_DAILY_TOKEN_LIMIT,
         usage_today=None,
         cached_root=None,
@@ -60,6 +61,7 @@ class NewsTriage:
         screen_daily_limit=120,
     ):
         self.llm, self.embed, self.entities, self.clock = llm, embed, entities, clock
+        self.pool_ciks = {str(c).zfill(10) for c in (pool_ciks or set()) if c}
         self.workers = workers
         self.monitored_ids, self.pool = set(monitored_ids), set(pool_tickers)
         # Pipeline still passes the frozen 1.5M configuration. A-022's reviewed
@@ -131,12 +133,10 @@ class NewsTriage:
 
     def _filing_relevant(self, item):
         """Filing issuer must be in the pool or current holdings (CIK/ticker)."""
-        ciks = {str(e.get("cik") or "") for e in self.entities if e.get("cik")}
-        headline = item["headline"]
         import re as _re
 
-        for match in _re.findall(r"\((\d{10})\)", headline):
-            if match in ciks:
+        for match in _re.findall(r"\((\d{10})\)", item["headline"]):
+            if match in self.pool_ciks:
                 return True
         pool = {t.upper() for e in self.entities for t in e.get("tickers", [])}
         return bool({t.upper() for t in item["tickers"]} & pool)
@@ -312,7 +312,14 @@ class NewsTriage:
             representatives[root] = item
             meta = self.meta(item)
             stamp = item["published_at"] or item["first_seen_at"]
-            if not on_demand and stamp < self.clock.now_utc() - timedelta(days=30):
+            # A-026: structured items and non-relevant filings never reach any model.
+            if item["kind"] in {"short_interest", "macro"}:
+                meta.update(tier="C", layer=3, reason="rules_only_structured")
+            elif item["kind"] in {"sec_8k", "form4"} and not (
+                self.holding(item) or self.tracked(item) or self._filing_relevant(item)
+            ):
+                meta.update(tier="C", layer=3, reason="filing_not_in_pool")
+            elif not on_demand and stamp < self.clock.now_utc() - timedelta(days=30):
                 meta.update(tier="C", layer=3, reason="historical_rules_only")
             elif on_demand or self.primary(item):
                 meta.update(tier="A", layer=2, reason="on_demand" if on_demand else "rule_hit")

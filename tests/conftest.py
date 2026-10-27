@@ -4,9 +4,6 @@ pytest_plugins = ["tests.harness.plugin"]
 
 
 # A-026: tests must never make a real LLM transport network request.
-
-
-# A-026: tests must never make a real LLM transport network request.
 @pytest.fixture(autouse=True)
 def _no_real_llm_transport(monkeypatch):
     # A real transport (send=None) would hit the network; force a forbidden send.
