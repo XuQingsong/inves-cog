@@ -208,3 +208,37 @@ def test_freshness_and_banner(pages):
     html = _get(pages, "/").text
     assert "数据更新至 北京" in html and "美股未开盘" in html
     assert "盘中示例" not in html and 'data-m="intra"' not in html
+
+
+WIDE_DDL = """
+CREATE TABLE IF NOT EXISTS ingest.wide_snapshots (
+    ticker text, as_of timestamptz, last numeric, prev_close numeric,
+    source text NOT NULL, fetched_at timestamptz NOT NULL,
+    PRIMARY KEY (ticker, as_of, source)
+)
+"""
+
+
+def test_wide_snapshots_movers_and_breadth(pages):
+    admin = pages["admin"]
+    admin.execute(WIDE_DDL)
+    for ticker, last, prev in (("AAA", 20.0, 10.0), ("BBB", 5.0, 10.0), ("NVDA", 210.0, 200.0)):
+        admin.execute(
+            "INSERT INTO ingest.wide_snapshots (ticker, as_of, last, prev_close, source, fetched_at)"
+            " VALUES (%s, %s, %s, %s, 'b065', %s)",
+            (ticker, SEEN + timedelta(minutes=40), last, prev, SEEN + timedelta(minutes=40)),
+        )
+    try:
+        market = _get(pages, "/api/pages/brief/market").json()
+        assert market["wide_asof"] is not None
+        up = market["wide_movers_up"]
+        assert up and up[0]["ticker"] == "AAA" and abs(up[0]["ret"] - 1.0) < 1e-6
+        down = market["wide_movers_down"]
+        assert down and down[0]["ticker"] == "BBB"
+    finally:
+        admin.execute("DELETE FROM ingest.wide_snapshots WHERE source = 'b065'")
+
+
+def test_wide_snapshots_absent_keeps_close(pages):
+    market = _get(pages, "/api/pages/brief/market").json()
+    assert market["wide_asof"] is None

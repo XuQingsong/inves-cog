@@ -336,6 +336,6 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
           }
         })
         .catch(function () {});
-    }, 10 * 60 * 1000);
+    }, 60 * 1000);
   }
 })();

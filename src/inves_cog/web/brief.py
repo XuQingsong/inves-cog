@@ -1816,7 +1816,9 @@ def page_brief_market(connection, day, clock):
     rotation = context["rotation"]
     catalog = context["catalog"]
     spy, qqq, iwm = (_index_ret(rotation, name) for name in ("SPY", "QQQ", "IWM"))
-    advancers, decliners = _breadth(context["daily"])
+    is_today_page = day == clock.today_trade_date()
+    wide = _wide_snapshot_breadth(connection, day) if is_today_page else None
+    advancers, decliners = wide if wide is not None else _breadth(context["daily"])
     judgment = judge(spy, qqq, iwm, advancers, decliners)
     groups = [row for row in rotation if row["group_kind"] in {"l3", "sector"}]
     down, up = _leaders(groups)
@@ -1845,7 +1847,8 @@ def page_brief_market(connection, day, clock):
         mood = "情绪：恐慌"
     else:
         mood = "情绪：谨慎，未恐慌"
-    _wmovers = _wide_movers(connection, day)
+    is_today = day == clock.today_trade_date()
+    _wmovers, wide_asof = _wide_movers(connection, day, is_today)
     _wm = {"up": _wmovers[:5], "down": sorted(_wmovers, key=lambda r: r["ret"])[:5]}
     fallen = "、".join(row["name"] for row in down[:2])
     risen = "、".join(row["name"] for row in up[:2])
@@ -1898,6 +1901,7 @@ def page_brief_market(connection, day, clock):
         "news_modules": _news_views(context),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
+        "wide_asof": wide_asof,
         "earnings": _earnings_modules(
             context["earnings_cal"], day, context["pool"], set(context["positions"]), context["news_ranked"]
         ),
@@ -2417,8 +2421,61 @@ def _translations(connection, info_ids):
 WARRANT_SUFFIX = re.compile(r"^[A-Z]+[WUR]$")
 
 
-def _wide_movers(connection, day):
-    """Whole-market movers: price >= $5, ADV20 >= $20M, no warrants/units."""
+def _wide_snapshot_breadth(connection, day):
+    """Advance/decline counts from today's ingest.wide_snapshots, or None."""
+    if not _table_exists(connection, "ingest.wide_snapshots"):
+        return None
+    rows = _rows(
+        connection,
+        """
+        SELECT DISTINCT ON (ticker) ticker, last / prev_close - 1 AS ret
+        FROM ingest.wide_snapshots
+        WHERE as_of >= %s AND prev_close > 0
+        ORDER BY ticker, as_of DESC
+        """,
+        (_day_window(day)[0],),
+    )
+    if not rows:
+        return None
+    return (
+        sum(1 for r in rows if r["ret"] is not None and float(r["ret"]) > 0),
+        sum(1 for r in rows if r["ret"] is not None and float(r["ret"]) < 0),
+    )
+
+
+def _wide_movers(connection, day, is_today=False):
+    """Whole-market movers: price >= $5, ADV20 >= $20M, no warrants/units.
+
+    On today's page prefer ingest.wide_snapshots (A-025) latest rows when
+    present — returns (rows, as_of); falls back to close data with as_of=None.
+    """
+    if is_today and _table_exists(connection, "ingest.wide_snapshots"):
+        rows = _rows(
+            connection,
+            """
+            SELECT DISTINCT ON (ticker) ticker, last AS close, prev_close,
+                   last / prev_close - 1 AS ret, as_of
+            FROM ingest.wide_snapshots
+            WHERE as_of >= %s AND prev_close > 0
+            ORDER BY ticker, as_of DESC
+            """,
+            (_day_window(day)[0],),
+        )
+        if rows:
+            as_of = max(r["as_of"] for r in rows)
+            clean = [
+                row
+                for row in rows
+                if row["close"] is not None
+                and float(row["close"]) >= 5
+                and not (WARRANT_SUFFIX.match(row["ticker"]) and row["ticker"][:-1] in {r["ticker"] for r in rows})
+            ]
+            clean.sort(key=lambda r: r["ret"], reverse=True)
+            return clean, as_of
+    return _wide_movers_close(connection, day), None
+
+
+def _wide_movers_close(connection, day):
     rows = _rows(
         connection,
         """
