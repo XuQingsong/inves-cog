@@ -581,3 +581,13 @@ IEX SPY/NVDA/SMCI首次采集与成交差0.482/0.533/9.872秒；本次读取年�
 ## A-014 补充四十五 已收到／进行中：部署B068
 
 main `1e30f9e40db4037ad2ad4858faaa43cea96f0428`下发明确运维安装。PR94已合并`e5329528699f2c96efcb41900df5e769bfd803af`；准确head `f5dbd97ced5eeec29c7ecce4e627ef23228c5a3e` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40551779386/job/122357157544) SUCCESS已核对。变更：按批准迁移0009仅新增intraday_snapshots.day_volume bigint，先迁移再重启四个快照及pages，其余进程保持；识别并停止指定8091预览。先核对生产receipt/列是否已存在、真实运行作业和进程，再安装已验收main，保存迁移证据，核对自然SIP非空比例及四页状态/暂缺数。无参数或模型调用变更，不重复已完成0007/0008迁移。
+
+## A-014 补充四十五 已完成：B068已上线，成交量自然写入已验证
+
+2026-10-27 17:53:40 UTC生产已快进验收merge `e5329528699f2c96efcb41900df5e769bfd803af`（[PR94](https://github.com/XuQingsong/inves-cog/pull/94)，准确head `f5dbd97ced5eeec29c7ecce4e627ef23228c5a3e` 的[phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/40551779386/job/122357157544)）。先确认day_volume不存在和受影响作业空闲，停止四个旧快照进程并确认真实退出，快进已合并代码；迁移0009单次提交成功、新列bigint，之后才启动四路快照并重启pages。迁移SHA256 `3af6af88d490df0caf23040aa782232ba5fd83f4cf625f6ba91bff2486e05b23`；仅迁移使用批准的本项目DDL账号，业务ingest和web角色权限独立核验、均非管理员。没有重跑0007/0008。
+
+新PID stock_snapshots4057908、iex_snapshots4057916、macro_snapshots4057966、wide_snapshots4058013、pages4058025，均RUNNING；主scheduler3981483、翻译3258700、M93599229等其余Supervisor业务PID保持。配置字节和两份模型参数hash保持，生产工作区干净。指定/tmp/b063_serve.py活动预览0，8091无监听，未把SSH退出当远端进程退出。证据本项目`ops/b068-deploy-20261027.json`（phaseinstalled）。
+
+独立核验于17:54:02 UTC开始（重启结束后22秒）：重启后新写入Alpaca:delayed_sip共77行/77代码，day_volume非空77/77=100%；最新自然批次fetched_at17:54:00.929350，原成交范围17:38:32.626026–17:39:00.635157。历史旧行未回填，100%只指上线后新采集行。三个分钟作业已自然完成17:54、failed0；wide进程已运行，但该核验点尚未到17:55五分钟窗口，不把进程存活当下一批宽池完成。Alpaca停止标记不存在。没有手工补采或调用模型。
+
+四页真实HTTP响应均200；按返回HTML中“暂缺”文本出现次数：`/`9、`/stocks`77、`/s/NVDA`6、`/account`1。仅报告计数，不输出私有页面/持仓；不把200或成交量100%冒称所有缺失字段已清零。证据`ops/b068-verification-20261027T175402Z.json`。已自行决定：无新增。下一步需求方线上走查；A025第三盘中样本19:00 UTC后、全天/隔夜及A026午夜费用观察继续原窗口，部署运维已完成，无需用户额外操作。
