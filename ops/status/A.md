@@ -429,3 +429,7 @@ PR https://github.com/XuQingsong/inves-cog/pull/90 ，完整head `20937bdbb8a601
 自行实现细节已记录：利用已有source_cursors持久化轮询/前收缓存，不另建状态表；独立三个进程避免长任务阻塞；UTC半小时桶保留夏令时重叠小时；Yahoo部分失败不拖停仍有效代码，整源连续失败才退避；未获取真实延迟保证的代码如实标旧。未改任何模型策略、预算、web/trading/docs/golden，无真实模型调用/历史补采/生产DDL。A不合并PR；下一步需求方验收合并并下发部署后，安装0008和对应服务配置，仅 then 采集首交易日所需真实证据。未将代码完成说成线上行情已变为分钟级。
 
 OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日pre共Yahoo1条，原as_of08:00:36、fetched08:00:42；Alpaca04:00批次0条，两来源degraded。此时delayed SIP尚不足以返回ET04:00后的15分钟延迟成交，Yahoo四公开样例当日0，不用旧日替代或提前认作全盘前验证完成；保留ET04–09:30自然窗口结束再回报首尾。未手动补采或模型重试。
+
+## A-014 补充四十一 已收到／进行中：部署B-066
+
+收到main `33d4db736c4ea362c38a4d3d024d8f28f0864f07`部署指令。PR89 head `1e171b7d5ee2226745c19fa8e8987ad103106150` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40479506220/job/122105958683) success，验收merge `85adfbeb00dcc0f47b39b3c3f7313dda2647e60b`已在main。先核对生产工作区/实际进程/版本，按授权快进到该merge只重启pages；核验/、/stocks、/account、/trust以及首页“数据更新至”与最近24小时新闻，再精确识别停止8091的/tmp/b063_serve.py和b062-preview预览进程并确认实际退出。变更仅页面安装和指定预览下线，无迁移、模型/补采或其他业务重启；A025仍未合并，不提前安装0008或新行情服务。
