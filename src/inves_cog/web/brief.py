@@ -840,13 +840,18 @@ def _news_summary(source, headline):
     return MISSING
 
 
-def _day_news(connection, day, cutoff):
+def _day_news(connection, day, cutoff, is_today=False):
     """News published in the ET session, regardless of when it was stored.
 
     The rules layer needs the raw headline, url and first_seen_at; 'late'
-    marks items stored after the page cutoff (事后补采).
+    marks items stored after the page cutoff (事后补采). On today's page the
+    window is the last 24 hours ending at the cutoff, so pre-04:00 ET items
+    still show (B-066).
     """
-    start, end = _day_window(day)
+    if is_today:
+        start, end = cutoff - timedelta(hours=24), cutoff
+    else:
+        start, end = _day_window(day)
     rows = _rows(
         connection,
         """
@@ -1453,7 +1458,8 @@ def _context(connection, day, clock):
     context_portfolio = portfolio
     seen = _news_seen(connection, cutoff)
     fresh = _news_fresh(seen, day)
-    news_items = _day_news(connection, day, cutoff)
+    is_today_page = day == clock.today_trade_date()
+    news_items = _day_news(connection, day, cutoff, is_today_page)
     version = params_version(plan)
     sell = sell_params(version)
     swing = swing_params(version)
@@ -1483,7 +1489,7 @@ def _context(connection, day, clock):
     technicals = _technicals(bars, data_day)
     earnings = _earnings_calendar(connection, day)
     econ = _econ_calendar(connection, day)
-    intraday = _intraday(connection, day)
+    intraday = _intraday(connection, day, is_today_page)
     return {
         "day": day,
         "carry_from": carry_from,
@@ -1883,6 +1889,7 @@ def page_brief_market(connection, day, clock):
         "events": events,
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
+        "freshness": _freshness(context, clock),
         "today": clock.today_trade_date().isoformat(),
         "is_today": context["day"] == clock.today_trade_date(),
         "intraday": context["intraday"],
@@ -2202,11 +2209,18 @@ def _econ_calendar(connection, day):
     return rows
 
 
-def _intraday(connection, day):
-    """Latest intraday snapshot per ticker for `day` (A-024 contract)."""
+def _intraday(connection, day, is_today=False):
+    """Latest intraday snapshot per ticker (A-024 contract).
+
+    For today's page the latest row within the last 3 calendar days wins —
+    after-hours/overnight rows carry over into the next morning (B-066).
+    Historical dates stay on the same-day window.
+    """
     if not _table_exists(connection, "ingest.intraday_snapshots"):
         return {}
     start, end = _day_window(day)
+    if is_today:
+        start -= timedelta(days=3)
     rows = _rows(
         connection,
         """
@@ -2261,7 +2275,7 @@ def _snap_ret(snap):
     return float(snap["last"]) / float(snap["prev_close"]) - 1
 
 
-def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
+def _strip_item(ticker, label, kind, snap, close_ret, day, dgs2=None):
     """One ticker-strip cell: value + signed change (bp for yields)."""
     if ticker == "DGS2" and dgs2 is not None:
         return {
@@ -2276,7 +2290,12 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
         if ret is None:
             return {"label": label, "value": "—", "chg": None, "dir": 0, "title": "暂缺"}
         asof = snap["as_of"].astimezone(NY)
-        title = f"截至 {asof:%H:%M} 美东 · 延迟约 {snap.get('delay_minutes', 0)} 分钟"
+        bj = snap["as_of"].astimezone(_SHANGHAI)
+        sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
+        when = f"{sess} {asof:%m/%d %H:%M}" if asof.date() != day else f"{sess} {asof:%H:%M}"
+        title = (
+            f"北京 {bj:%m-%d %H:%M} · 延迟约 {snap.get('delay_minutes', 0)} 分钟 · {snap.get('source') or 'snapshot'}"
+        )
         if kind == "yield":
             bp = (float(snap["last"]) - float(snap["prev_close"])) * 100
             # yield up = risk-off (red for stocks), down = green
@@ -2285,6 +2304,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
                 "value": f"{float(snap['last']):.2f}%",
                 "chg": f"{'+' if bp >= 0 else ''}{bp:.1f} 基点",
                 "dir": -1 if bp > 0 else (1 if bp < 0 else 0),
+                "tag": when,
                 "title": title + " · 收益率上升对股市偏空，显示为红",
             }
         return {
@@ -2292,6 +2312,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
             "value": f"{float(snap['last']):,.2f}",
             "chg": f"{'+' if ret >= 0 else ''}{ret * 100:.2f}%",
             "dir": 1 if ret > 0 else (-1 if ret < 0 else 0),
+            "tag": when,
             "title": title,
         }
     if close_ret is not None:
@@ -2300,6 +2321,7 @@ def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
             "value": f"{'+' if close_ret >= 0 else ''}{close_ret * 100:.2f}%",
             "chg": "收盘",
             "dir": 1 if close_ret > 0 else (-1 if close_ret < 0 else 0),
+            "tag": "收盘",
             "title": "当日收盘",
         }
     return {"label": label, "value": "—", "chg": None, "dir": 0, "title": "暂缺"}
@@ -2326,7 +2348,7 @@ def _market_strip(connection, context, day):
             asof = snap["as_of"].astimezone(NY)
             if last_asof is None or asof > last_asof:
                 last_asof, last_session = asof, snap.get("session")
-        items.append(_strip_item(ticker, label, kind, snap, close_idx.get(ticker), dgs2))
+        items.append(_strip_item(ticker, label, kind, snap, close_idx.get(ticker), day, dgs2))
     etf_row = [_strip_item(t, t, "etf", intraday.get(t), close_idx.get(t)) for t in SECTOR_ETFS]
     tail = None
     if last_asof is not None:
@@ -2368,6 +2390,17 @@ def _sector_strip(context, themes):
 
 def _slug(sector):
     return sector.replace(" ", "-").replace("/", "-")
+
+
+def _freshness(context, clock):
+    """'数据更新至 北京 HH:MM（美东 HH:MM）' from the newest snapshot used."""
+    intraday = context.get("intraday") or {}
+    latest = max((r["as_of"] for r in intraday.values() if r.get("as_of")), default=None)
+    if latest is None:
+        return None
+    bj = latest.astimezone(_SHANGHAI)
+    et = latest.astimezone(NY)
+    return f"数据更新至 北京 {bj:%H:%M}（美东 {et:%H:%M}）"
 
 
 def _translations(connection, info_ids):

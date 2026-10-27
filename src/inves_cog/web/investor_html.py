@@ -90,7 +90,7 @@ def render_brief(payload):
     else:
         main = _market(payload)
     title = payload.get("title") or "每日页面"
-    body = _header(payload) + "<main>" + _intra() + main + _foot(payload) + "</main>"
+    body = _header(payload) + "<main>" + main + _foot(payload) + "</main>"
     return _document(title, body, refresh=bool(payload.get("is_today")))
 
 
@@ -1575,7 +1575,9 @@ def _header(payload):
     dow = "" if day is None else f"周{_WEEK[day.weekday()]}"
     prev_link = _date_link(payload, _near(day, -1), "‹")
     next_link = _date_link(payload, _near(day, 1), "›")
-    fresh = MISSING if day is None else f"收盘快照 · 数据截至 {day.month}-{day.day} 16:00 ET"
+    fresh = payload.get("freshness") or (
+        MISSING if day is None else f"收盘快照 · 数据截至 {day.month}-{day.day} 16:00 ET"
+    )
     return (
         '<header class="top"><div class="top-in"><div class="brand"><b>INVES·COG</b><div>投资研究工作台</div></div>'
         + _nav(payload)
@@ -1592,15 +1594,6 @@ def _header(payload):
         + '</span><span class="mode"><button id="lang-toggle" onclick="__setLang()">中文 / 英文</button>'
         + '<button data-m="close" class="on">收盘</button>'
         + '<button data-m="intra">盘中</button></span></div></div></div></header>'
-    )
-
-
-def _intra():
-    return (
-        '<div class="banner info" id="intra-banner"><b>盘中示例</b><span>'
-        "盘中每 30 分钟刷新指数、标的和持仓盈亏，免费行情延迟约 16 分钟；"
-        "盘中数据只用于看盘和风险高亮，不进入规则 A 的交易决策。此处为状态示例，数值仍为收盘快照。"
-        "</span></div>"
     )
 
 
@@ -1825,9 +1818,10 @@ def _ticker_strip(payload):
     for it in strip.get("items") or []:
         cls = "up" if it["dir"] > 0 else ("down" if it["dir"] < 0 else "flat")
         chg = f'<small class="{cls}">{_text(it["chg"])}</small>' if it.get("chg") else ""
+        tag = f'<small class="muted">{_text(it["tag"])}</small>' if it.get("tag") else ""
         cells.append(
             f'<span class="tcell" title="{_text(it.get("title") or "")}">'
-            f"<b>{_text(it['label'])}</b> {_text(it['value'])}{chg}</span>"
+            f"<b>{_text(it['label'])}</b> {_text(it['value'])}{chg}{tag}</span>"
         )
     tail = strip.get("tail")
     note = f'<span class="small muted">{_text(tail)}</span>' if tail else ""
@@ -1869,8 +1863,9 @@ def _carry_banner(payload):
     if not day:
         return ""
     return (
-        '<div class="banner info"><b>收盘数据未到</b>'
-        f"<span>以下收盘数据沿用 {str(day)[5:].replace('-', '/')}，新闻与日历为今日。</span></div>"
+        '<div class="banner info"><b>美股未开盘</b>'
+        "<span>行情为最新可得值，收盘后自动换成今日收盘；"
+        f"以下收盘数据沿用 {str(day)[5:].replace('-', '/')}，新闻与日历为今日。</span></div>"
     )
 
 
@@ -1881,7 +1876,7 @@ def _carry_tag(payload):
     return f' <span class="chip stale">沿用 {str(day)[5:].replace("-", "/")} 收盘</span>'
 
 
-_SESSION_LABEL = {"pre": "盘前", "regular": "盘中", "post": "盘后"}
+_SESSION_LABEL = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}
 
 
 def _intra_line(row):
@@ -2085,7 +2080,14 @@ def _feed_module(payload):
     )
 
 
-_ETIME = {"pre": "盘前", "post": "盘后", "unknown": "未定", "pre-market": "盘前", "after-hours": "盘后"}
+_ETIME = {
+    "pre": "盘前",
+    "post": "盘后",
+    "overnight": "隔夜",
+    "unknown": "未定",
+    "pre-market": "盘前",
+    "after-hours": "盘后",
+}
 
 
 def _e_time(e):

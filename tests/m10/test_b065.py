@@ -168,3 +168,43 @@ def test_theme_anchor_on_stocks(pages):
     market = _get(pages, "/api/pages/brief/market").json()
     for card in market.get("sector_strip") or []:
         assert card["slug"].startswith("theme-") and card["slug"] in html
+
+
+def test_intraday_three_day_fallback_and_labels(pages):
+    # 3-day old snapshot is still usable on today's page (B-066 chain)
+    admin = pages["admin"]
+    admin.execute(
+        """INSERT INTO ingest.intraday_snapshots
+        (ticker, as_of, session, last, prev_close, delay_minutes, source, fetched_at)
+        VALUES ('CL=F', %s, 'post', 90.0, 89.0, 15, 'b065', %s)""",
+        (SEEN - timedelta(days=2), SEEN - timedelta(days=2)),
+    )
+    market = _get(pages, "/api/pages/brief/market").json()
+    wti = [i for i in market["mstrip"]["items"] if i["label"] == "WTI"]
+    assert wti and wti[0]["value"] != "—" and "盘后" in wti[0]["tag"]
+
+
+def test_overnight_session_label(pages):
+    admin = pages["admin"]
+    admin.execute(
+        """INSERT INTO ingest.intraday_snapshots
+        (ticker, as_of, session, last, prev_close, delay_minutes, source, fetched_at)
+        VALUES ('GC=F', %s, 'overnight', 4100.0, 4000.0, 15, 'b065', %s)""",
+        (SEEN - timedelta(hours=6), SEEN - timedelta(hours=6)),
+    )
+    market = _get(pages, "/api/pages/brief/market").json()
+    gold = [i for i in market["mstrip"]["items"] if i["label"] == "黄金"]
+    assert gold and "隔夜" in gold[0]["tag"]
+
+
+def test_today_news_window_24h(pages):
+    market = _get(pages, "/api/pages/brief/market").json()
+    assert market["is_today"] is True
+    html = _get(pages, "/").text
+    assert "最近 24 小时" in html
+
+
+def test_freshness_and_banner(pages):
+    html = _get(pages, "/").text
+    assert "数据更新至 北京" in html and "美股未开盘" in html
+    assert "盘中示例" not in html and 'data-m="intra"' not in html
