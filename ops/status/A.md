@@ -555,3 +555,15 @@ A024公开页面交叉对照本轮有界结果：web工具四个Google Finance U
 15:41:23 UTC实际首轮日志rules_only_structured=512/processed513/statusok；已有2轮累计1024（macro1018、sec_8k6）。剩余macro742、sec_8k120；按现有发行人映射/标的与持仓仅1条相关、119条未匹配。重启后模型调用0、参数保持；行情四路自然正常。旧队列retry_at=10-28 04:00 UTC（ET午夜）、reason=daily_budget；has_pending_info经pending_info过滤future retry而跳过它们，只有新条目碰巧唤醒时才推进一批，不把偶发推进当积压已清。
 
 按A026要求4“现有待处理的非相关公告、空头、宏观条目转为rules-only，审计保留”，本轮运维补齐明确授权的余量：复用已验收Repository.finish_pending_rules_only纯数据库方法（不运行triage/process/enrich、不建立模型客户端），现有业务role_ingest执行；用库内issuer_profiles/sec_filings CIK映射及当前标的/持仓确定保留公告，已有相关或holding标记保守跳过。先检查无进行中info_enrichment、当前head/唯一receipt，短事务锁定队列防止新相关公告并发插入被误转，受影响上限5000/30秒，保存0600原始提取审计副本并记录转换前后按kind数量；仅改变已批准目标的status/news_triage，保留原文、原发布时间/首次可见时间及其他审计字段，不动新闻、不补采、不调模型、不改参数/角色/代码。若相关性映射缺失或并发安全检查失败则不写，不越过范围。这里是首次补齐剩余未转换行，不重复转换已完成1024条；实际条数以执行时状态为准，首轮日志仍如实为自然512，不把人工纯规则数量冒称日志首轮。
+
+## A-014 补充四十四 安装与积压核验已完成（两自然日费用观察进行中）
+
+生产已于2026-10-27 15:27:52 UTC（ET11:27:52）安装目标 `dff926798ac76932b7ea110461982af6eb5f3b86`，早于ET10-27 23:30截止。包含PR91准确head `49dc405ba20574a91d3869896f4d8d45b8f57508` [CI success](https://github.com/XuQingsong/inves-cog/actions/runs/40528031606/job/122272829343)及PR93准确head `0f7fd294143eb9cff4019f7d822968bb177387c0` [CI success](https://github.com/XuQingsong/inves-cog/actions/runs/40525380949/job/122263413965)，均先验收合并后才安装。无迁移，m1/llm_tasks两个参数文件hash保持，Supervisor配置字节保持；业务非管理员账号核验通过。
+
+实际进程：主scheduler3981483、唯一enrich3981485、stock_snapshots3981506、iex_snapshots3981533、macro_snapshots3981543、wide_snapshots3981583、pages3981611均RUNNING各1；对应旧PID均确认退出，其他业务（包括进行中的consensus）PID保持，没有将本地SSH结束当远端退出。15:50只读确认四路行情都已在新启动后自然完成作业，failed0，Alpaca停止标记无。外部/及/stocks均200。B067补充首页11条行内行情显示IEX标签、全部title明确Alpaca IEX，/stocks200（该页无此行内组件，不冒称11条属于stocks）；证据ops/b067-followup-verification-20261027.json。
+
+自然enrich日志真实首轮：rules_only_structured=512，processed_count513，statusok，deferred/tagging_failed/embedding_failed均0；后续自然两轮累计rules_only_structured1024。旧每日预算延后元数据让纯规则积压在空闲门控中仍等待午夜，按A026要求4复用已验收纯规则方法补齐861（macro742、无关sec_8k119），不是手工模型/enrich/triage调用。业务账号短事务保护，相关公告保留；原文、原发布时间、首次可见时间等字段hash前后相同，所有旧提取源审计完整保存于0600文件`ops/a026-rules-only-backlog-audit-20261027.private.json`，SHA256 `946f4f3373c1313d62a50e342bc6b698671a0517438b9f11cfa111eb0ae69a73`；操作receipt `ops/a026-rules-only-backlog-completion-20261027.json` phasecommitted，不再重跑。
+
+最终独立核验15:52:33 UTC：pending仅sec_8k1，macro0、short_interest0、form40；唯一保留项属于原清理审计的相关公告，现有CIK/ticker映射已匹配标的/持仓。15:50曾有另3条新pending，15:52已由自然循环自行处理，没有重复人工清理或把正常在途条目误判为长期阻塞。现有相关公告保持其原retry_at=10-28 04:00 UTC；纯规则清理没有提前触发它的模型调用。新版本安装至15:50按task用量查询为空，故目前info_fields_extraction/entity_tagging/news_card均0，但只证明这段自然运行，不冒称未来午夜批次或完整自然日已通过。
+
+部署及核验receipt：ops/a026-deploy-20261027.json、a026-initial-verification-20261027.json、a026-pending-gate-diagnosis-20261027.json；均在生产本项目data目录，不输出私有正文/持仓/凭据。后续按任务：10-28 05:00 UTC（ET01）后报10-28午夜起calls/token及news_card关联范围；10-29同口径再报并单列完整10-28，10-30美东10-29结束后收口第二个完整自然日。旧安装前调用与新版本时段分开，不手工调模型验证。A025盘中12ET/15ET、全日及隔夜观察继续，原自动化保持ACTIVE。
