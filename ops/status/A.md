@@ -369,3 +369,5 @@ A024盘前0条（中午才部署）；regular/post已存Alpaca693/223条、Yahoo
 ## B-065页面部署 已收到／进行中
 
 收到最新main `efe01928308a4bc3511cde710e65a12b451edd1a` 的A014补充四十，PR87 merge `f7a361822b94e45b91bd08d7537eb0d569aea22a`已验收，范围仅web页面。按授权快进并仅重启pages，核验/与/stocks外部状态及ES=F/^TNX/CL=F/GC=F今日快照展示；不重复迁移/模型任务，不恢复仍因账号限额暂缓的M9。最新合并规则由需求方验收后直接合并、A仍不得合并，已读并遵循；不将B065部署当作UD-A-51账号限额已解除。
+
+UD-A-51命令纠正：用户截图显示此前提供的CPUQuota=infinity被systemd拒绝；这是A给出的参数错误，不能把该命令当已生效。已核对systemd官方resource-control手册：CPUQuota置空用于清除配额。正确管理员命令为`sudo systemctl set-property user-1002.slice MemoryHigh=infinity MemoryMax=infinity CPUQuota=`，两内存参数仍infinity。已在用户对话更正，所有本地待执行恢复脚本同步替换错误参数；实际值仍须读取核验，未重复执行需密码的命令。用户既有UD-A-51授权持续有效，不再索取。
