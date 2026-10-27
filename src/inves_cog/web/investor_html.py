@@ -1861,11 +1861,18 @@ def _carry_banner(payload):
     day = payload.get("carry_from")
     if not day:
         return ""
-    return (
-        '<div class="banner info"><b>美股未开盘</b>'
-        "<span>行情为最新可得值，收盘后自动换成今日收盘；"
-        f"以下收盘数据沿用 {str(day)[5:].replace('-', '/')}，新闻与日历为今日。</span></div>"
-    )
+    et = payload.get("et_now") or ""
+    trading = payload.get("trading_day")
+    if not trading:
+        head, note = "休市", "显示最近交易日数据"
+    elif et < "09:30":
+        head, note = "美股未开盘", "行情为最新可得值，收盘后自动换成今日收盘"
+    elif et < "16:00":
+        head, note = "盘中", "行情延迟约 15 分钟，收盘后换成今日收盘"
+    else:
+        head, note = "已收盘", "收盘数据整理中，暂用最新行情"
+    carry = f"以下收盘数据沿用 {str(day)[5:].replace('-', '/')}，新闻与日历为今日。"
+    return f'<div class="banner info"><b>{head}</b><span>{note}；{carry}</span></div>'
 
 
 def _carry_tag(payload):
@@ -2024,11 +2031,20 @@ def _movers_module(payload):
         own_html = f'<div class="mnews">{own}</div>' if own else ""
         badge = '<span class="chip held">持仓</span>' if m.get("held") else '<span class="chip buy">标的</span>'
         intra = _intra_line((payload.get("intraday") or {}).get(m.get("ticker")))
+        snap_ret = m.get("snap_ret")
+        main_ret = snap_ret if snap_ret is not None else m.get("ret")
+        sub = (
+            f'<span class="small muted">收盘 {_signed(m["ret"] * 100, 2) if m.get("ret") is not None else "—"}</span>'
+            if snap_ret is not None
+            else ""
+        )
+        vol = _times(m.get("vol"))
+        vol_html = "量比 暂缺" if vol == "暂缺" else _text(vol)
         rows.append(
             f'<div class="mrow"><span class="tk">{_text(m["ticker"])} {badge}{_tech_chip(m.get("tech"))}</span>'
             f'<span class="small ink2">{_text(m.get("theme"))}{warn}</span>'
-            f'<span class="num r">{_pct(m.get("ret"))}</span>'
-            f'<span class="num r v4">{_text(_times(m.get("vol")))}</span></div>{intra}{own_html}'
+            f'<span class="num r">{_pct(main_ret)}{sub}</span>'
+            f'<span class="num r v4">{vol_html}</span></div>{intra}{own_html}'
         )
     if not rows:
         return ""

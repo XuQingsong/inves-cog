@@ -246,3 +246,51 @@ def test_wide_snapshots_movers_and_breadth(pages):
 def test_wide_snapshots_absent_keeps_close(pages):
     market = _get(pages, "/api/pages/brief/market").json()
     assert market["wide_asof"] is None
+
+
+def test_dgs2_close_date_label(pages):
+    html = _get(pages, "/").text
+    assert "收盘 10/" in html and "前一日" not in html.split("滚动新闻")[0].split("美债 2 年")[1][:200]
+
+
+def test_session_aware_banners():
+    from inves_cog.web.investor_html import _carry_banner
+
+    base = {"carry_from": date(2026, 10, 26), "trading_day": True, "et_now": "04:30"}
+    assert "美股未开盘" in _carry_banner(base)
+    assert "盘中" in _carry_banner({**base, "et_now": "10:00"})
+    assert "已收盘" in _carry_banner({**base, "et_now": "17:00"})
+    assert "休市" in _carry_banner({**base, "trading_day": False})
+
+
+def test_freshness_includes_date():
+    from inves_cog.web.brief import _freshness
+
+    snap = {"as_of": SEEN - timedelta(days=2), "session": "post", "last": 1, "prev_close": 1}
+    text = _freshness({"intraday": {"SPY": snap}}, CLOCK)
+    assert "-" in text  # MM-DD included when snapshot date != today
+
+
+def test_mover_snapshot_ranking(pages):
+    market = _get(pages, "/api/pages/brief/market").json()
+    movers = market["news_modules"]["movers"]
+    snapped = [m for m in movers if m.get("snap_ret") is not None]
+    assert snapped  # NVDA has a snapshot (+0.2%), close ret was -6%
+    assert "snap_asof" in snapped[0]
+
+
+def test_wide_adv20_filter(pages):
+    admin = pages["admin"]
+    admin.execute(WIDE_DDL)
+    for ticker, last, prev in (("ZZZ", 20.0, 10.0), ("BBB2", 5.0, 10.0)):
+        admin.execute(
+            "INSERT INTO ingest.wide_snapshots (ticker, as_of, last, prev_close, source, fetched_at)"
+            " VALUES (%s, %s, %s, %s, 'b065', %s)",
+            (ticker, SEEN + timedelta(minutes=40), last, prev, SEEN + timedelta(minutes=40)),
+        )
+    try:
+        market = _get(pages, "/api/pages/brief/market").json()
+        tickers = {r["ticker"] for r in market["wide_movers_up"]}
+        assert "ZZZ" in tickers and "BBB2" not in tickers  # BBB2 price < $5
+    finally:
+        admin.execute("DELETE FROM ingest.wide_snapshots WHERE source = 'b065'")

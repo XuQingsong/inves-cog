@@ -1893,12 +1893,14 @@ def page_brief_market(connection, day, clock):
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
         "freshness": _freshness(context, clock),
+        "et_now": clock.now_utc().astimezone(NY).strftime("%H:%M"),
+        "trading_day": trading_day(day),
         "today": clock.today_trade_date().isoformat(),
         "is_today": context["day"] == clock.today_trade_date(),
         "intraday": context["intraday"],
         "mstrip": _market_strip(connection, context, day),
         "sector_strip": _sector_strip(context, _themes(context, day)),
-        "news_modules": _news_views(context),
+        "news_modules": _news_views_today(context) if is_today_page else _news_views(context),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
         "wide_asof": wide_asof,
@@ -2282,12 +2284,14 @@ def _snap_ret(snap):
 def _strip_item(ticker, label, kind, snap, close_ret, day, dgs2=None):
     """One ticker-strip cell: value + signed change (bp for yields)."""
     if ticker == "DGS2" and dgs2 is not None:
+        d = dgs2["observation_date"]
         return {
             "label": label,
             "value": f"{float(dgs2['value']):.2f}%",
-            "chg": "前一日",
+            "chg": f"收盘 {d:%m/%d}",
             "dir": 0,
-            "title": f"前一日收盘 {dgs2['observation_date']}",
+            "tag": f"收盘 {d:%m/%d}",
+            "title": f"收盘 {d}",
         }
     if snap is not None:
         ret = _snap_ret(snap)
@@ -2397,14 +2401,38 @@ def _slug(sector):
 
 
 def _freshness(context, clock):
-    """'数据更新至 北京 HH:MM（美东 HH:MM）' from the newest snapshot used."""
+    """'数据更新至 北京 HH:MM（美东 HH:MM）' from the newest snapshot used;
+    include the date when the snapshot is not on today's ET date."""
     intraday = context.get("intraday") or {}
     latest = max((r["as_of"] for r in intraday.values() if r.get("as_of")), default=None)
     if latest is None:
         return None
     bj = latest.astimezone(_SHANGHAI)
     et = latest.astimezone(NY)
+    today = clock.today_trade_date() if clock is not None else et.date()
+    if et.date() != today:
+        return f"数据更新至 北京 {bj:%m-%d %H:%M}（美东 {et:%m-%d %H:%M}）"
     return f"数据更新至 北京 {bj:%H:%M}（美东 {et:%H:%M}）"
+
+
+def _news_views_today(context):
+    """Today's movers ranked by latest snapshot change; close ret as fallback."""
+    mods = _news_views(context)
+    intraday = context.get("intraday") or {}
+
+    def _sort_key(m):
+        ret = _snap_ret(intraday.get(m["ticker"]))
+        return abs(ret if ret is not None else (m.get("ret") or 0))
+
+    movers = sorted(mods.get("movers") or [], key=_sort_key, reverse=True)[:8]
+    for m in movers:
+        snap = intraday.get(m["ticker"])
+        if snap is not None and _snap_ret(snap) is not None:
+            m["snap_ret"] = _snap_ret(snap)
+            m["snap_asof"] = snap["as_of"].astimezone(NY).strftime("%H:%M")
+            m["snap_delay"] = snap.get("delay_minutes")
+            m["snap_session"] = snap.get("session")
+    return {**mods, "movers": movers}
 
 
 def _translations(connection, info_ids):
@@ -2463,12 +2491,27 @@ def _wide_movers(connection, day, is_today=False):
         )
         if rows:
             as_of = max(r["as_of"] for r in rows)
+            adv = {}
+            if _table_exists(connection, "ingest.wide_universe"):
+                for row in _rows(
+                    connection,
+                    """
+                    SELECT DISTINCT ON (ticker) ticker, adv20
+                    FROM ingest.wide_universe
+                    WHERE trade_date < %s AND included
+                    ORDER BY ticker, trade_date DESC
+                    """,
+                    (day,),
+                ):
+                    adv[row["ticker"]] = row["adv20"]
+            names = {r["ticker"] for r in rows}
             clean = [
                 row
                 for row in rows
                 if row["close"] is not None
                 and float(row["close"]) >= 5
-                and not (WARRANT_SUFFIX.match(row["ticker"]) and row["ticker"][:-1] in {r["ticker"] for r in rows})
+                and (row["ticker"] not in adv or (adv[row["ticker"]] or 0) >= 20000000)
+                and not (WARRANT_SUFFIX.match(row["ticker"]) and row["ticker"][:-1] in names)
             ]
             clean.sort(key=lambda r: r["ret"], reverse=True)
             return clean, as_of
