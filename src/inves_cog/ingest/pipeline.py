@@ -186,6 +186,8 @@ class Pipeline:
         except Exception:
             return set()
         keep = set()
+        if not isinstance(rows, (list, tuple)):
+            return keep
         for row in rows:
             item = {
                 "headline": row["headline"],

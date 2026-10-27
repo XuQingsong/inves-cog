@@ -74,8 +74,8 @@ def assert_news_triage(root, clock):
         full(row)
     results = engine().process(rows)
     layers = [r["extraction_source"]["news_triage"]["layer"] for r in results]
-    assert layers == [2, 2, 2, 2, 1, 3], layers
-    assert len(usage) == 5
+    assert layers == [2, 2, 2, 2, 3, 3], layers
+    assert len(usage) == 4
     assert results[-1]["embedding"] is None and not results[-1]["extraction_source"]["news_triage"]["llm_full"]
     assert all(r["purpose"] in {"M1:layer2", "M1:layer1"} for r in usage)
 

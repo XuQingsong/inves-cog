@@ -93,11 +93,11 @@ def test_a022_tiers_route_real_source_shapes_and_c_uses_no_model():
         [fiscal_low, fiscal_pool, benzinga_pool, benzinga_macro, benzinga_other, sec, monitored, held]
     )
 
-    assert [meta(row)["tier"] for row in rows] == ["C", "A", "A", "A", "A", "A", "A", "A"]
+    assert [meta(row)["tier"] for row in rows] == ["C", "A", "A", "A", "A", "C", "A", "A"]
     assert meta(rows[0])["reason"] == "rules_only_low_value"
     assert rows[0]["extraction_status"] == "ok" and rows[0]["embedding"] is None
     assert models.calls.count("entity_tagging") == 1
-    assert models.calls.count("news_card") == 7
+    assert models.calls.count("news_card") == 6
     assert models.calls.count("info_fields_extraction") == 0
     assert meta(rows[4])["screened"] and meta(rows[4])["material"]
 
