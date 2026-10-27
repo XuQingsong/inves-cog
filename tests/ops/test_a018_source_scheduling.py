@@ -42,6 +42,7 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
     ]
     assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *expected_tasks]
     expected = {
+        "iex_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "iex_intraday"],
         "stock_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "intraday_snapshots"],
         "macro_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "yahoo_intraday"],
         "wide_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "wide_snapshots"],

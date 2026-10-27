@@ -46,6 +46,7 @@ def due_tasks(clock, last_runs):
     due("news_prefill", after=480, before=490)
     due("news_poll", interval=10)
     due("intraday_snapshots", interval=1, after=240, before=1200, session=True)
+    due("iex_intraday", interval=1, after=240, before=1200, session=True)
     from inves_cog.ingest.intraday import yahoo_symbols
 
     if yahoo_symbols(now):
@@ -95,7 +96,12 @@ class Runtime:
                     result[name] = {"status": "not_due", "note": "M1 SEC slot is 20:45–21:15 ET"}
                     continue
                 seconds = min(seconds, (end - local).total_seconds())
-            if self.snapshot_repo is not None and name in {"intraday_snapshots", "yahoo_intraday", "wide_snapshots"}:
+            if self.snapshot_repo is not None and name in {
+                "intraday_snapshots",
+                "yahoo_intraday",
+                "wide_snapshots",
+                "iex_intraday",
+            }:
                 from inves_cog.ingest.snapshot_poll import SnapshotPoll
 
                 self.runner.timeout_seconds = 50

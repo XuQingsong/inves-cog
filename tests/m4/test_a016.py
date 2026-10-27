@@ -250,6 +250,7 @@ def test_e7_add_only_m9_program_separate_migration():
         "m9",
         "scheduler",
         "stock_snapshots",
+        "iex_snapshots",
         "macro_snapshots",
         "wide_snapshots",
         "daily_modules",

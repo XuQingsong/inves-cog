@@ -109,6 +109,7 @@ def main():
                             "intraday_snapshots",
                             "yahoo_intraday",
                             "wide_snapshots",
+                            "iex_intraday",
                         }
                     )
                     worker = (
@@ -128,7 +129,8 @@ def main():
                             time.sleep(
                                 max(0.05, 60 - clock.now_utc().second - clock.now_utc().microsecond / 1_000_000)
                                 if args.tasks
-                                and set(args.tasks) <= {"intraday_snapshots", "yahoo_intraday", "wide_snapshots"}
+                                and set(args.tasks)
+                                <= {"intraday_snapshots", "yahoo_intraday", "wide_snapshots", "iex_intraday"}
                                 else 30
                             )
                     finally:

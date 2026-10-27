@@ -173,6 +173,10 @@ def previous_closes(http, headers, tickers, day):
     raise SourceError("Previous daily pagination limit")
 
 
+def stock_tickers(pipeline):
+    return sorted(set(pipeline.stocks) | set(pipeline.repo.holding_tickers()) | ETF_TICKERS)
+
+
 def collect_intraday(pipeline, *, http=None):
     clock, repo = pipeline.clock, pipeline.repo
     day = clock.now_utc().astimezone(NY).date()
@@ -182,7 +186,7 @@ def collect_intraday(pipeline, *, http=None):
     written = 0
     try:
         maintain(pipeline)
-        tickers = sorted(set(pipeline.stocks) | set(repo.holding_tickers()) | ETF_TICKERS)
+        tickers = stock_tickers(pipeline)
         if pipeline.alpaca is None:
             raise SourceError("Alpaca not configured")
         headers = pipeline.alpaca.headers
@@ -357,4 +361,85 @@ def collect_wide(pipeline, *, http=None):
             source_success=False,
             rate_limited=getattr(exc, "status_code", None) == 429,
             note=f"{type(exc).__name__}; status={getattr(exc, 'status_code', None)}",
+        )
+
+
+def parse_iex_trades(raw, previous, tickers, clock):
+    """IEX has no feed delay; the last price-updating print can still be old.
+
+    Keep its original timestamp/session, including the previous day's last
+    print before IEX opens at 08 ET. Never relabel that observation as today.
+    """
+    trades = require_mapping(require_mapping(raw).get("trades"))
+    now, rows = clock.now_utc(), []
+    for ticker in tickers:
+        trade = trades.get(ticker)
+        if not isinstance(trade, dict) or trade.get("x") != "V" or not positive(trade.get("p")) or not trade.get("t"):
+            continue
+        try:
+            as_of = stamp(trade["t"])
+        except (ValueError, TypeError, OverflowError):
+            continue
+        session = bar_session(as_of)
+        if as_of > now or as_of < now - timedelta(days=30) or session is None:
+            continue
+        prev = previous.get(ticker)
+        rows.append(
+            dict(
+                ticker=ticker,
+                as_of=as_of,
+                session="regular" if session == "intraday" else session,
+                last=trade["p"],
+                prev_close=prev if positive(prev) else None,
+                delay_minutes=0,
+                source="Alpaca:iex",
+                fetched_at=now,
+            )
+        )
+    return rows
+
+
+def collect_iex_intraday(pipeline, *, http=None):
+    """Same authorized scope/cadence as SIP, isolated failure and source health."""
+    now, repo = pipeline.clock.now_utc(), pipeline.repo
+    day = now.astimezone(NY).date()
+    if not trading_day(day) or bar_session(now) is None:
+        return dict(processed_count=0, note="outside authorized stock session; no IEX request")
+    http = http or HTTPClient(timeout=15, retries=0)
+    written = 0
+    try:
+        maintain(pipeline)
+        tickers = stock_tickers(pipeline)
+        if pipeline.alpaca is None:
+            raise SourceError("Alpaca not configured")
+        raw = http.get(
+            "https://data.alpaca.markets/v2/stocks/trades/latest",
+            params={"symbols": ",".join(tickers), "feed": "iex"},
+            headers=pipeline.alpaca.headers,
+        )
+        previous = cached_previous(pipeline, http, pipeline.alpaca.headers, tickers, day)
+        rows = parse_iex_trades(raw, previous, tickers, pipeline.clock)
+        for row in rows:
+            repo.write("intraday_snapshots", row)
+            written += 1
+        latest = max((r["as_of"] for r in rows), default=None)
+        missing = len(tickers) - len(rows)
+        no_previous = sum(r["prev_close"] is None for r in rows)
+        age = max(((now - r["as_of"]).total_seconds() for r in rows), default=None)
+        return dict(
+            processed_count=written,
+            source_success=bool(rows),
+            status="degraded" if missing or no_previous else "ok",
+            latest_data_at=latest.isoformat() if latest else None,
+            note=f"feed=iex; feed_delay_minutes=0; IEX_equities_ET=08:00-17:00; "
+            f"missing_last_trade={missing}; missing_previous_close={no_previous}; "
+            f"max_trade_age_seconds={age}; original_trade_time_preserved=true",
+        )
+    except Exception as exc:
+        return dict(
+            processed_count=written,
+            status="degraded",
+            source_success=False,
+            rate_limited=getattr(exc, "status_code", None) == 429,
+            note=f"{type(exc).__name__}; status={getattr(exc, 'status_code', None)}; feed=iex",
         )

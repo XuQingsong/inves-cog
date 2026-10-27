@@ -51,6 +51,7 @@ serverurl=unix://{state}/supervisor.sock
             "finra",
             "fed_news",
         ],
+        "iex_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "iex_intraday"],
         "stock_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "intraday_snapshots"],
         "macro_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "yahoo_intraday"],
         "wide_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "wide_snapshots"],

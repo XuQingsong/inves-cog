@@ -286,14 +286,15 @@ def test_success_health_one_aggregate_each_fifteen_minutes():
     assert (start + timedelta(minutes=15)).isoformat() in args["note"]
 
 
-def test_dedicated_scheduler_does_not_spawn_model_enrichment(monkeypatch):
+@pytest.mark.parametrize("task", ["yahoo_intraday", "iex_intraday"])
+def test_dedicated_scheduler_does_not_spawn_model_enrichment(monkeypatch, task):
     from contextlib import nullcontext
 
     from inves_cog.ingest import cli
 
     c = FrozenClock(datetime.fromisoformat("2026-10-27T10:00:17-04:00"))
     p, proc, sleep = Mock(), Mock(), Mock(side_effect=StopIteration)
-    monkeypatch.setattr("sys.argv", ["ingest", "schedule", "--tasks", "yahoo_intraday"])
+    monkeypatch.setattr("sys.argv", ["ingest", "schedule", "--tasks", task])
     monkeypatch.setattr(cli, "SystemClock", lambda: c)
     monkeypatch.setattr(cli, "read_environment", lambda: {})
     monkeypatch.setattr(cli, "connect", lambda values: nullcontext(Mock()))
