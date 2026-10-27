@@ -195,7 +195,13 @@ class Pipeline:
                 "entities": [],
                 "extraction_source": row["extraction_source"] or {},
             }
-            if self.triage.holding(item) or self.triage.tracked(item) or self.triage._filing_relevant(item):
+            relevant = False
+            for probe in ("holding", "tracked", "_filing_relevant"):
+                fn = getattr(self.triage, probe, None)
+                if callable(fn) and fn(item):
+                    relevant = True
+                    break
+            if relevant:
                 keep.add(row["info_id"])
         return keep
 
