@@ -449,3 +449,15 @@ OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日
 ## A-025追加IEX 已收到／进行中
 
 最新main `aac8f6cd8de2994bc47e8cc2153eef60605e72ac`明确追加用户IEX要求，沿用PR90现有提交，不重启任务；原第二版无模型变更继续有效。变更：同股票/ETF范围、ET04–20每分钟额外一次批量GET `/v2/stocks/trades/latest?feed=iex`，写原表独立source=Alpaca:iex/as_of原成交/delay_minutes=0，prev_close复用SIP同日调整全市场前收缓存；主键重复跳过，不新增schema/角色、不改web/trading。IEX与SIP分开来源健康，单源非429失败不阻断另一源；429仍停止Alpaca新快照路径并报告，不擅降频。核实官方免费权限与IEX系统时段后明确哪些时段无新成交，不用当前时间伪装陈旧成交；先失败测试再实现，准确新head CI重跑。新增接口沿既有Alpaca凭据，不购套餐，不调用模型。
+
+## A-025 IEX追加进行中：真实免费接口核验/离线实现完成，新head CI待完成
+
+沿原PR90，完整新head `ebd1df21a5c844b7247df1af8884fbc7716f2bf6`；已合入main继承B066及最新任务，无自行修改web/docs。IEX先失败提交`fca7727`（真实响应夹具、10失败3通过），再实现`ebd1df2`；准确新PR CI https://github.com/XuQingsong/inves-cog/actions/runs/40490321442/job/122142329527 当前pending，不沿用旧20937bd成功结果。
+
+免费接口实际证据：2026-10-27 10:24:46.890580 UTC，本项目原Alpaca免费凭据一次GET批量SPY/NVDA/IWM、feed=iex，HTTP200；X-RateLimit-Limit200/Remaining199。真实公开响应写只读证据及测试fixture，不写业务数据，不调模型。此时ET06:24，SPY最近为昨日15:59:59，NVDA昨日16:30:59，IWM昨日16:49:51；说明无套餐延迟不是成交刚发生，不伪造今日或当前时点。最初一次工具自动审查超时未执行、随后本地脚本缺失未发请求，修正后才有上述唯一真实请求，未重复请求或绕过审查。
+
+官方核对：Alpaca https://docs.alpaca.markets/us/reference/stocklatesttrades-1 批量latest trades支持feed=iex、免费默认iex；https://docs.alpaca.markets/us/docs/market-data-faq 说明免费IEX仅单交易所，非全市场；IEX https://www.iex.io/resources/trading/trading-hours-holidays 股票盘前ET08–09:30、常规09:30–16、盘后16–17。按任务仍ET04–20每分钟轮询，时段外可能返回旧成交，保留真实as_of/session；latest接口排除不更新价格条件包括odd lots，不宣称全市场最后任意一笔成交。
+
+变更细节：追加独立iex_snapshots无enrich进程，task=iex_intraday、source_health=AlpacaIEX，和SIP相同完整scope/同一个已缓存调整全市场前收；source=Alpaca:iex、delay_minutes=0，健康另记max_trade_age_seconds区分实际陈旧。无schema/角色新增；重复成交PK DO NOTHING，IEX与SIP同时间因source不同可共存；429共用Alpaca停止标记（现含SIP/IEX/wide三路），其他源互不拖停。
+
+离线相关M1/服务配置/A016回归174 passed；额外IEX/Yahoo调度不启动enrich两参数通过，ruff/diff通过。独立临时PG实测IEX/SIP同时间独立记录、重复成交不改首次fetched_at、前收同口径通过并回滚，临时PG已停。证据测试tests/m1/test_a025_iex.py与fixtures/a025/，生产公开探测证据inves-cog-data/ops/a025-iex-public-probe-20261027.json。下一步收口准确CI并交需求方验收，不提前部署或把请求发出当业务采集成功；所有模型改动仍暂缓。
