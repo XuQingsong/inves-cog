@@ -129,7 +129,7 @@ def test_holding_form4_gets_news_card():
     llm = CountingLLM()
     triage = _engine(llm)
     item = _item("form4", "Form 4 - MSFT director sale", ("MSFT",))
-    out = _out(triage, [item])
+    _out(triage, [item])
     assert llm.calls == ["news_card"], llm.calls
 
 
