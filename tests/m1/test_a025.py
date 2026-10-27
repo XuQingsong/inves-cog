@@ -288,6 +288,7 @@ def test_success_health_one_aggregate_each_fifteen_minutes():
 
 def test_dedicated_scheduler_does_not_spawn_model_enrichment(monkeypatch):
     from contextlib import nullcontext
+
     from inves_cog.ingest import cli
 
     c = FrozenClock(datetime.fromisoformat("2026-10-27T10:00:17-04:00"))
