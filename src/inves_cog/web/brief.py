@@ -2230,14 +2230,33 @@ def _intraday(connection, day, is_today=False):
     rows = _rows(
         connection,
         """
-        SELECT DISTINCT ON (ticker) ticker, as_of, session, last, prev_close, delay_minutes
+        SELECT DISTINCT ON (ticker, source) ticker, as_of, session, last, prev_close, delay_minutes, source
         FROM ingest.intraday_snapshots
         WHERE as_of >= %s AND as_of < %s
-        ORDER BY ticker, as_of DESC
+        ORDER BY ticker, source, as_of DESC
         """,
         (start, end),
     )
-    return {row["ticker"]: dict(row) for row in rows}
+    # B-067: per ticker pick latest IEX vs latest SIP/other; IEX wins when newer.
+    out = {}
+    for row in rows:
+        row = dict(row)
+        is_iex = (row.get("source") or "") == "Alpaca:iex"
+        cur = out.get(row["ticker"])
+        if cur is None:
+            out[row["ticker"]] = {"main": row, "alt": None}
+            continue
+        newest_is_iex = (cur["main"].get("source") or "") == "Alpaca:iex"
+        if is_iex and not newest_is_iex and row["as_of"] > cur["main"]["as_of"]:
+            cur["alt"], cur["main"] = cur["main"], row
+        elif not is_iex and (newest_is_iex or row["as_of"] > cur["main"]["as_of"]):
+            if newest_is_iex:
+                cur["alt"], cur["main"] = cur["main"], row
+            else:
+                cur["main"], cur["alt"] = row, cur["main"] if cur["alt"] is None else cur["alt"]
+        elif is_iex and cur["alt"] is None:
+            cur["alt"] = row
+    return {t: {**entry["main"], "alt": entry["alt"]} for t, entry in out.items()}
 
 
 STRIP_ITEMS = [
@@ -2290,7 +2309,6 @@ def _strip_item(ticker, label, kind, snap, close_ret, day, dgs2=None):
             "value": f"{float(dgs2['value']):.2f}%",
             "chg": f"收盘 {d:%m/%d}",
             "dir": 0,
-            "tag": f"收盘 {d:%m/%d}",
             "title": f"收盘 {d}",
         }
     if snap is not None:
@@ -2300,10 +2318,31 @@ def _strip_item(ticker, label, kind, snap, close_ret, day, dgs2=None):
         asof = snap["as_of"].astimezone(NY)
         bj = snap["as_of"].astimezone(_SHANGHAI)
         sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
-        when = f"{sess} {asof:%m/%d %H:%M}" if asof.date() != day else f"{sess} {asof:%H:%M}"
-        title = (
-            f"北京 {bj:%m-%d %H:%M} · 延迟约 {snap.get('delay_minutes', 0)} 分钟 · {snap.get('source') or 'snapshot'}"
-        )
+        src = snap.get("source") or ""
+        src_label = {
+            "Alpaca:iex": "Alpaca IEX",
+            "Alpaca:delayed_sip": "Alpaca 延迟 SIP",
+            "Yahoo": "Yahoo",
+            "FRED": "FRED",
+        }.get(src, src or "snapshot")
+        if src == "Alpaca:iex":
+            when = f"IEX 实时 {asof:%H:%M:%S}"
+        elif src == "Alpaca:delayed_sip":
+            when = f"延迟 15 分 {asof:%H:%M}"
+        else:
+            when = f"{sess} {asof:%m/%d %H:%M}" if asof.date() != day else f"{sess} {asof:%H:%M}"
+        alt = snap.get("alt")
+        alt_text = ""
+        if alt is not None:
+            a_src = {
+                "Alpaca:iex": "Alpaca IEX",
+                "Alpaca:delayed_sip": "Alpaca 延迟 SIP",
+                "Yahoo": "Yahoo",
+                "FRED": "FRED",
+            }.get(alt.get("source") or "", alt.get("source") or "snapshot")
+            a_asof = alt["as_of"].astimezone(NY)
+            alt_text = f" · {a_src} {float(alt['last']):.2f} 于 {a_asof:%H:%M}"
+        title = f"北京 {bj:%m-%d %H:%M} · 延迟约 {snap.get('delay_minutes', 0)} 分钟 · {src_label}{alt_text}"
         if kind == "yield":
             bp = (float(snap["last"]) - float(snap["prev_close"])) * 100
             # yield up = risk-off (red for stocks), down = green

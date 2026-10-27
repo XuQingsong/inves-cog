@@ -1828,7 +1828,8 @@ def _ticker_strip(payload):
         '<div class="card mstrip" id="mstrip"><div class="ticker-row">'
         + "".join(cells)
         + "</div>"
-        + f'<div class="small muted" style="margin-top:4px">{note} · 盘前/盘中行情只用于看盘，不进入规则 A</div></div>'
+        + f'<div class="small muted" style="margin-top:4px">{note} · 盘前/盘中行情只用于看盘，不进入规则 A</div>'
+        + '<div class="small muted">IEX 为单一交易所实时成交，约占全市场成交 2–3%，仅供看盘，不进入规则 A</div></div>'
     )
 
 
