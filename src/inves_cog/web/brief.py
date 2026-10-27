@@ -814,6 +814,19 @@ def _beijing_text(value):
     return moment.astimezone(_SHANGHAI).strftime("%Y-%m-%d %H:%M")
 
 
+def _column_exists(connection, table, column):
+    try:
+        row = _one(
+            connection,
+            "SELECT 1 AS x FROM information_schema.columns"
+            " WHERE table_schema=%s AND table_name=%s AND column_name=%s LIMIT 1",
+            (table.split(".")[0], table.split(".")[1], column),
+        )
+    except Exception:
+        return False
+    return row is not None
+
+
 def _day_window(day):
     start = datetime.combine(day, time(4, 0), tzinfo=NY)
     return start, start + timedelta(days=1)
@@ -2280,10 +2293,13 @@ def _intraday(connection, day, is_today=False):
     start, end = _day_window(day)
     if is_today:
         start -= timedelta(days=3)
+    vol_col = (
+        "day_volume" if _column_exists(connection, "ingest.intraday_snapshots", "day_volume") else "NULL AS day_volume"
+    )
     rows = _rows(
         connection,
-        """
-        SELECT DISTINCT ON (ticker, source) ticker, as_of, session, last, prev_close, delay_minutes, source, day_volume
+        f"""
+        SELECT DISTINCT ON (ticker, source) ticker, as_of, session, last, prev_close, delay_minutes, source, {vol_col}
         FROM ingest.intraday_snapshots
         WHERE as_of >= %s AND as_of < %s
         ORDER BY ticker, source, as_of DESC
