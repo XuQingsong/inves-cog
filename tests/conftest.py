@@ -4,29 +4,21 @@ pytest_plugins = ["tests.harness.plugin"]
 
 
 # A-026: tests must never make a real LLM transport network request.
+
+
+# A-026: tests must never make a real LLM transport network request.
 @pytest.fixture(autouse=True)
 def _no_real_llm_transport(monkeypatch):
-    # Real network happens via httpx when the transport's send is not injected.
-    try:
-        import httpx
+    # A real transport (send=None) would hit the network; force a forbidden send.
+    from inves_cog.llm.transport import OpenAICompatibleTransport
 
-        _real = httpx.request
-        _real_client = httpx.Client.request
+    real_init = OpenAICompatibleTransport.__init__
 
-        def _forbid(*args, **kwargs):
-            url = args[1] if len(args) > 1 else kwargs.get("url", "")
-            if "testserver" in str(url):
-                return _real(*args, **kwargs)
-            raise AssertionError("real LLM transport request in tests is forbidden")
+    def _guarded_init(self, configuration, *, send=None):
+        real_init(self, configuration, send=send or _forbidden_send)
 
-        def _forbid_client(self, *args, **kwargs):
-            url = args[0] if args else kwargs.get("url", "")
-            if "testserver" in str(url):
-                return _real_client(self, *args, **kwargs)
-            raise AssertionError("real LLM transport request in tests is forbidden")
+    def _forbidden_send(*args, **kwargs):
+        raise AssertionError("real LLM transport request in tests is forbidden")
 
-        monkeypatch.setattr(httpx, "request", _forbid)
-        monkeypatch.setattr(httpx.Client, "request", _forbid_client)
-    except Exception:
-        pass
+    monkeypatch.setattr(OpenAICompatibleTransport, "__init__", _guarded_init)
     yield
