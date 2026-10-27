@@ -371,3 +371,7 @@ A024盘前0条（中午才部署）；regular/post已存Alpaca693/223条、Yahoo
 收到最新main `efe01928308a4bc3511cde710e65a12b451edd1a` 的A014补充四十，PR87 merge `f7a361822b94e45b91bd08d7537eb0d569aea22a`已验收，范围仅web页面。按授权快进并仅重启pages，核验/与/stocks外部状态及ES=F/^TNX/CL=F/GC=F今日快照展示；不重复迁移/模型任务，不恢复仍因账号限额暂缓的M9。最新合并规则由需求方验收后直接合并、A仍不得合并，已读并遵循；不将B065部署当作UD-A-51账号限额已解除。
 
 UD-A-51命令纠正：用户截图显示此前提供的CPUQuota=infinity被systemd拒绝；这是A给出的参数错误，不能把该命令当已生效。已核对systemd官方resource-control手册：CPUQuota置空用于清除配额。正确管理员命令为`sudo systemctl set-property user-1002.slice MemoryHigh=infinity MemoryMax=infinity CPUQuota=`，两内存参数仍infinity。已在用户对话更正，所有本地待执行恢复脚本同步替换错误参数；实际值仍须读取核验，未重复执行需密码的命令。用户既有UD-A-51授权持续有效，不再索取。
+
+## UD-A-51 管理员执行已核验，恢复M9进行中
+
+用户再次截图显示已在管理员终端成功执行正确命令（CPUQuota置空），未报错。A独立读取内核实际值已确认MemoryHigh=max、MemoryMax=max、cpu.max=max 100000，原4GiB/5GiB/1.5核限制均已解除；不是只凭截图或命令发出宣称成功。用户既有授权不重复索取，模型预算保持。沿此前已核实M9作业已结束前缀，仅恢复唯一M9，不手工补跑历史/模型；核验账号内存/PSI、页面/DB/Supervisor稳定后回报完整恢复。同时接续已收到的B065仅页面部署。
