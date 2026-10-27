@@ -2,7 +2,7 @@
 
 from datetime import date, datetime, timedelta
 
-import pytest
+
 
 from inves_cog.ingest.market import NY
 from inves_cog.web.brief import _strip_item
