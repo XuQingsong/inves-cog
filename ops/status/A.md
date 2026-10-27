@@ -419,3 +419,13 @@ PR https://github.com/XuQingsong/inves-cog/pull/90 ，head `20937bdbb8a601c40da8
 本地证据：相关M1/服务配置/A016回归159 passed；新增专项最终23 passed（不含容器PG入口）。独立临时PG:55423真实应用0008并通过重复键不覆盖、7/30天压缩、宽池两日清理、role_ingest写/role_web只读；数据回滚。ruff及diff检查通过。本机直接全套pytest缺容器环境/依赖导致大量环境失败，另发现服务列表旧断言已按授权配置改动更新并经相关回归通过，不冒称全套本机通过。正式准确headCI仍待返回。
 
 没有模型预算/非新闻处理/脚本改动，没有真实模型调用、历史补采或生产DDL/安装。下一步检查正式CI、失败则修复，交需求方验收合并后部署并采首交易日真实证据；Yahoo收益率等非持续交易，不承诺伪造15分钟新鲜报价。持续自动化保持。
+
+## A-025 第二版 已完成（代码交付；待需求方验收合并，尚未部署）
+
+PR https://github.com/XuQingsong/inves-cog/pull/90 ，完整head `20937bdbb8a601c40da8e93d22818f88209d2ba6`。该SHA的PR [phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40470763936/job/122077059496) success；同SHA分支检查 https://github.com/XuQingsong/inves-cog/actions/runs/40470738209/job/122076976760 success，正式干净容器918 passed/33 deselected，另2项CI断言通过。此前本机完整环境缺失已由正式容器CI验证收口，不遗留为代码阻塞。
+
+按第二版1–6自验：1) 股票ETF04–20每分钟批量+日缓存前收，官方Basic200/min已核对，429持久停两个Alpaca快照任务；测试test_no_http_after_actual_alpaca_limit_response。2) Yahoo白天1分钟、夜间15分钟/周末BTC例外、真实overnight及重启退避；test_schedule_each_minute_and_overnight_quarter_hour、test_future_closure_holiday_and_fall_back、test_persisted_failure_backoff_recovery_and_quarter_hour_health。3) wide交易日09:30–16每5分钟，included宽池200代码分批，独立新表；test_wide_scope_and_duplicate_insert_contract。4) 重复原始as_of跳过，15分钟健康汇总，test_success_health_one_aggregate_each_fifteen_minutes、test_minute_collections_never_overwrite_original_snapshot及真实PG重复键测试。5) 7天保分钟/其后半小时原观测/总30天、wide当日与前交易日及继承权限，test_a025_real_pg_dedup_retention_and_roles正式CI通过。6) 原日终任务/其他程序保持，新增三个独立无enrich行情worker；A018配置测试、A016程序集合及test_dedicated_scheduler_does_not_spawn_model_enrichment通过。
+
+自行实现细节已记录：利用已有source_cursors持久化轮询/前收缓存，不另建状态表；独立三个进程避免长任务阻塞；UTC半小时桶保留夏令时重叠小时；Yahoo部分失败不拖停仍有效代码，整源连续失败才退避；未获取真实延迟保证的代码如实标旧。未改任何模型策略、预算、web/trading/docs/golden，无真实模型调用/历史补采/生产DDL。A不合并PR；下一步需求方验收合并并下发部署后，安装0008和对应服务配置，仅 then 采集首交易日所需真实证据。未将代码完成说成线上行情已变为分钟级。
+
+OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日pre共Yahoo1条，原as_of08:00:36、fetched08:00:42；Alpaca04:00批次0条，两来源degraded。此时delayed SIP尚不足以返回ET04:00后的15分钟延迟成交，Yahoo四公开样例当日0，不用旧日替代或提前认作全盘前验证完成；保留ET04–09:30自然窗口结束再回报首尾。未手动补采或模型重试。
