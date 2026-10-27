@@ -726,9 +726,9 @@ def test_info_item_contract(tmp_path):
     assert pipeline.repo.rows[raw["info_id"]]["extraction_status"] == "pending"
     result = pipeline.enrich_pending()
     assert result["processed_count"] == 1 and pipeline.repo.rows[raw["info_id"]]["extraction_status"] == "ok"
-    assert pipeline.repo.collected == 1 and len(calls) == 2
+    assert pipeline.repo.collected == 1 and calls == ["news_card"]
     pipeline.info([raw])
-    assert pipeline.repo.collected == 2 and len(calls) == 2
+    assert pipeline.repo.collected == 2 and calls == ["news_card"]
 
     from inves_cog.ingest.info import InfoStore, enrich, make_item
     from inves_cog.ingest.sources import fred_observations, parse_cboe, parse_finra, website_change
@@ -849,7 +849,7 @@ def test_info_item_contract(tmp_path):
     enriched = enrich(item, llm=LLM(), embed=Embed(), entities=[], clock=frozen())
     assert len(enriched["embedding"]) == 1024 and calls[0][1]["dimensions"] == 1024
     assert calls[0][1]["model"] == "text-embedding-v3"
-    assert enriched["is_guidance"] is False and enriched["is_rating_change"] is False
+    assert enriched["is_guidance"] is None and enriched["is_rating_change"] is None
     store = InfoStore()
     assert store.put(enriched) == "inserted"
     from inves_cog.ingest.settings import read_environment, source_configuration
@@ -954,17 +954,11 @@ def test_info_fields_extraction(tmp_path):
         body="AAPL raises guidance; a broker raises its rating. Published 2026-10-28T16:00:00Z.",
         clock=frozen(),
     )
+    # A-026: info_fields_extraction removed; fields stay None, tagging still runs.
     result = enrich(item, llm=llm, embed=None, entities=[], clock=frozen())
-    assert result["is_guidance"] is True and result["guidance_direction"] == "up" and result["is_rating_change"] is True
-    assert result["published_at"] == instant("2026-10-28T16:00:00Z")
-    assert "published_at_extracted" in result["flags"] and "published_at_missing" not in result["flags"]
-    assert result["extraction_source"]["is_guidance"] == "llm"
+    assert result["is_guidance"] is None and result["guidance_direction"] is None
+    assert result["is_rating_change"] is None
     assert result["entities"] == ["apple"]
-    wrapped = dict(
-        item,
-        body="<style>" + ("irrelevant CSS " * 500) + "</style><script>ignored code</script><p>" + item["body"] + "</p>",
-    )
-    assert enrich(wrapped, llm=llm, embed=None, entities=[], clock=frozen())["is_guidance"] is True
 
 
 def test_llm_extraction_failure_degrades():
