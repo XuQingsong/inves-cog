@@ -564,6 +564,6 @@ A024公开页面交叉对照本轮有界结果：web工具四个Google Finance U
 
 自然enrich日志真实首轮：rules_only_structured=512，processed_count513，statusok，deferred/tagging_failed/embedding_failed均0；后续自然两轮累计rules_only_structured1024。旧每日预算延后元数据让纯规则积压在空闲门控中仍等待午夜，按A026要求4复用已验收纯规则方法补齐861（macro742、无关sec_8k119），不是手工模型/enrich/triage调用。业务账号短事务保护，相关公告保留；原文、原发布时间、首次可见时间等字段hash前后相同，所有旧提取源审计完整保存于0600文件`ops/a026-rules-only-backlog-audit-20261027.private.json`，SHA256 `946f4f3373c1313d62a50e342bc6b698671a0517438b9f11cfa111eb0ae69a73`；操作receipt `ops/a026-rules-only-backlog-completion-20261027.json` phasecommitted，不再重跑。
 
-最终独立核验15:52:33 UTC：pending仅sec_8k1，macro0、short_interest0、form40；唯一保留项属于原清理审计的相关公告，现有CIK/ticker映射已匹配标的/持仓。15:50曾有另3条新pending，15:52已由自然循环自行处理，没有重复人工清理或把正常在途条目误判为长期阻塞。现有相关公告保持其原retry_at=10-28 04:00 UTC；纯规则清理没有提前触发它的模型调用。新版本安装至15:50按task用量查询为空，故目前info_fields_extraction/entity_tagging/news_card均0，但只证明这段自然运行，不冒称未来午夜批次或完整自然日已通过。
+最终独立核验15:52:33 UTC：pending仅sec_8k1，macro=0、short_interest=0、form4=0；唯一保留项属于原清理审计的相关公告，现有CIK/ticker映射已匹配标的/持仓。15:50曾有另3条新pending，15:52已由自然循环自行处理，没有重复人工清理或把正常在途条目误判为长期阻塞。现有相关公告保持其原retry_at=10-28 04:00 UTC；纯规则清理没有提前触发它的模型调用。新版本安装至15:50按task用量查询为空，故目前info_fields_extraction/entity_tagging/news_card均0，但只证明这段自然运行，不冒称未来午夜批次或完整自然日已通过。
 
 部署及核验receipt：ops/a026-deploy-20261027.json、a026-initial-verification-20261027.json、a026-pending-gate-diagnosis-20261027.json；均在生产本项目data目录，不输出私有正文/持仓/凭据。后续按任务：10-28 05:00 UTC（ET01）后报10-28午夜起calls/token及news_card关联范围；10-29同口径再报并单列完整10-28，10-30美东10-29结束后收口第二个完整自然日。旧安装前调用与新版本时段分开，不手工调模型验证。A025盘中12ET/15ET、全日及隔夜观察继续，原自动化保持ACTIVE。
