@@ -560,7 +560,7 @@ def test_f8_pending_count_nav_and_buyable_cell(pages):
     assert held[9] == "持有"
     buyable = _cells(_row(stocks, "LITE"))
     assert buyable[9] == "可买"
-    assert "可买" not in held[8]
+    assert "可买" not in held[9]
 
 
 def test_f9_vix_and_holdings_clause(pages):
