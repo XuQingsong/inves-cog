@@ -64,12 +64,12 @@ def test_a024_never_fabricates_previous_day_or_future_trade():
     [
         ("2026-10-26T03:59:00-04:00", None, False),
         ("2026-10-26T04:00:00-04:00", None, True),
-        ("2026-10-26T04:29:00-04:00", 10, False),
+        ("2026-10-26T04:29:00-04:00", 10, True),
         ("2026-10-26T04:30:00-04:00", 10, True),
         ("2026-10-26T09:30:00-04:00", 10, True),
-        ("2026-10-26T15:59:00-04:00", 10, False),
+        ("2026-10-26T15:59:00-04:00", 10, True),
         ("2026-10-26T16:00:00-04:00", 10, True),
-        ("2026-10-26T16:30:00-04:00", 10, False),
+        ("2026-10-26T16:30:00-04:00", 10, True),
         ("2026-10-26T17:00:00-04:00", 10, True),
         ("2026-10-26T20:00:00-04:00", None, False),
         ("2026-10-24T10:00:00-04:00", None, False),
@@ -101,7 +101,7 @@ def test_a024_collect_scope_consistent_adjustment_and_partial_health():
     assert second.kwargs["params"]["adjustment"] == "all" and second.kwargs["params"]["asof"] == "2026-10-26"
     assert second.kwargs["params"]["start"].startswith("2026-10-23")
     assert second.kwargs["params"]["end"].startswith("2026-10-24")
-    repo.cleanup_intraday.assert_called_once_with(CLOCK.now_utc() - timedelta(days=30))
+    repo.compact_intraday.assert_called_once_with(CLOCK.now_utc())
     assert repo.write.call_args.args[0] == "intraday_snapshots"
     assert repo.write.call_args.args[1]["prev_close"] == 759.97
 

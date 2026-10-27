@@ -45,8 +45,13 @@ def due_tasks(clock, last_runs):
     due("bars_prefill", after=480, before=490, session=True)
     due("news_prefill", after=480, before=490)
     due("news_poll", interval=10)
-    due("intraday_snapshots", interval=30 if minute < 960 else 60, after=240, before=1200, session=True)
-    due("yahoo_intraday", interval=30 if minute < 960 else 60, after=240, before=1200, session=True)
+    due("intraday_snapshots", interval=1, after=240, before=1200, session=True)
+    due("iex_intraday", interval=1, after=240, before=1200, session=True)
+    from inves_cog.ingest.intraday import yahoo_symbols
+
+    if yahoo_symbols(now):
+        due("yahoo_intraday", interval=1 if trading_day(now.date()) and 240 <= minute < 1200 else 15)
+    due("wide_snapshots", interval=5, after=570, before=960, session=True)
     due("news_watchdog", interval=10, after=600, before=1200, session=True)
     due("earnings_calendar", after=360)
     due("econ_calendar", after=360)
@@ -71,8 +76,9 @@ def due_tasks(clock, last_runs):
 
 
 class Runtime:
-    def __init__(self, *, clock, health, persist_job, tasks, trade_date=None, **runner_options):
+    def __init__(self, *, clock, health, persist_job, tasks, trade_date=None, snapshot_repo=None, **runner_options):
         self.clock, self.tasks, self.trade_date = clock, tasks, trade_date
+        self.snapshot_repo = snapshot_repo
         self.runner = JobRunner(clock=clock, health=health, persist=persist_job, **runner_options)
 
     def run(self, names):
@@ -90,6 +96,30 @@ class Runtime:
                     result[name] = {"status": "not_due", "note": "M1 SEC slot is 20:45–21:15 ET"}
                     continue
                 seconds = min(seconds, (end - local).total_seconds())
+            if self.snapshot_repo is not None and name in {
+                "intraday_snapshots",
+                "yahoo_intraday",
+                "wide_snapshots",
+                "iex_intraday",
+            }:
+                from inves_cog.ingest.snapshot_poll import SnapshotPoll
+
+                self.runner.timeout_seconds = 50
+                poll = SnapshotPoll(
+                    self.snapshot_repo, self.clock, self.runner.health, lock_factory=self.snapshot_repo.snapshot_lock
+                )
+                result[name] = poll.run(
+                    name,
+                    source,
+                    lambda name=name, source=source, operation=operation: self.runner.run(
+                        name,
+                        source,
+                        operation,
+                        trade_date=self.trade_date() if self.trade_date else None,
+                        record_health=False,
+                    ),
+                )
+                continue
             self.runner.timeout_seconds = seconds
             result[name] = self.runner.run(
                 name, source, operation, trade_date=self.trade_date() if self.trade_date else None

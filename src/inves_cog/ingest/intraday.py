@@ -49,6 +49,52 @@ YAHOO_TICKERS = (
 )
 
 
+def yahoo_symbols(now):
+    local = now.astimezone(NY)
+    minute = local.hour * 60 + local.minute
+    if 240 <= minute < 1200:
+        if trading_day(local.date()):
+            return YAHOO_TICKERS
+        # Sunday futures reopen at 18 ET before Monday's trading session.
+        if local.weekday() == 6 and minute >= 1080 and trading_day(local.date() + timedelta(days=1)):
+            return YAHOO_TICKERS
+        return ()
+    reference = local.date() + timedelta(days=1) if minute >= 1200 else local.date()
+    return YAHOO_TICKERS if trading_day(reference) else ("BTC-USD",)
+
+
+def snapshot_session(as_of):
+    session = bar_session(as_of)
+    return ("regular" if session == "intraday" else session) or "overnight"
+
+
+def cached_previous(pipeline, http, headers, tickers, day):
+    # Both stock and wide polling reuse verified adjusted daily closes.
+    import hashlib
+
+    signature = hashlib.sha256(",".join(tickers).encode()).hexdigest()[:16]
+    key = "snapshot-previous:" + day.isoformat() + ":" + signature
+    previous = pipeline.repo.get_cursor(key)
+    previous = previous if isinstance(previous, dict) else {}
+    missing = sorted(set(tickers) - set(previous))
+    if missing:
+        fetched = previous_closes(http, headers, missing, day)
+        previous.update({ticker: fetched.get(ticker) for ticker in missing})
+        pipeline.repo.set_cursor(key, previous, pipeline.clock.now_utc())
+    return previous
+
+
+def maintain(pipeline):
+    now, repo = pipeline.clock.now_utc(), pipeline.repo
+    key = "snapshot-maintenance"
+    old = repo.get_cursor(key)
+    day = now.astimezone(NY).date()
+    if not isinstance(old, dict) or old.get("day") != day.isoformat():
+        repo.compact_intraday(now)
+        repo.cleanup_wide_snapshots(day, previous_session(day))
+        repo.set_cursor(key, {"day": day.isoformat()}, now)
+
+
 def positive(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value > 0
 
@@ -86,7 +132,7 @@ def parse_snapshots(data, previous, tickers, clock):
 
 
 def previous_session(day):
-    return exchange(day.year).previous_session(str(day)).date()
+    return exchange(day.year).date_to_session(str(day - timedelta(days=1)), direction="previous").date()
 
 
 def previous_closes(http, headers, tickers, day):
@@ -127,6 +173,10 @@ def previous_closes(http, headers, tickers, day):
     raise SourceError("Previous daily pagination limit")
 
 
+def stock_tickers(pipeline):
+    return sorted(set(pipeline.stocks) | set(pipeline.repo.holding_tickers()) | ETF_TICKERS)
+
+
 def collect_intraday(pipeline, *, http=None):
     clock, repo = pipeline.clock, pipeline.repo
     day = clock.now_utc().astimezone(NY).date()
@@ -135,8 +185,8 @@ def collect_intraday(pipeline, *, http=None):
     http = http or HTTPClient(timeout=15, retries=0)
     written = 0
     try:
-        repo.cleanup_intraday(clock.now_utc() - timedelta(days=30))
-        tickers = sorted(set(pipeline.stocks) | set(repo.holding_tickers()) | ETF_TICKERS)
+        maintain(pipeline)
+        tickers = stock_tickers(pipeline)
         if pipeline.alpaca is None:
             raise SourceError("Alpaca not configured")
         headers = pipeline.alpaca.headers
@@ -145,10 +195,10 @@ def collect_intraday(pipeline, *, http=None):
             params={"symbols": ",".join(tickers), "feed": FEED},
             headers=headers,
         )
-        previous = previous_closes(http, headers, tickers, day)
+        previous = cached_previous(pipeline, http, headers, tickers, day)
         rows = parse_snapshots(raw, previous, tickers, clock)
         for row in rows:
-            repo.write("intraday_snapshots", row, update=("last", "prev_close", "delay_minutes", "fetched_at"))
+            repo.write("intraday_snapshots", row)
             written += 1
         missing = len(tickers) - len(rows)
         no_previous = sum(row["prev_close"] is None for row in rows)
@@ -157,6 +207,7 @@ def collect_intraday(pipeline, *, http=None):
             processed_count=len(rows),
             status="degraded" if missing or no_previous else "ok",
             source_success=bool(rows),
+            latest_data_at=latest.isoformat() if latest else None,
             note=f"feed={FEED}; contractual_delay_minutes=15; missing_current_trade={missing}; "
             f"missing_previous_close={no_previous}; latest_data_at={latest.isoformat() if latest else 'none'}",
         )
@@ -166,6 +217,7 @@ def collect_intraday(pipeline, *, http=None):
             processed_count=written,
             status="degraded",
             source_success=False,
+            rate_limited=getattr(exc, "status_code", None) == 429,
             note=f"{type(exc).__name__}; status={getattr(exc, 'status_code', None)}; feed={FEED}",
         )
 
@@ -197,8 +249,12 @@ def parse_yahoo_snapshot(raw, ticker, clock):
             raise ValueError("Yahoo invalid quote")
         as_of = datetime.fromtimestamp(timestamp, timezone.utc)
         now = clock.now_utc()
-        session = bar_session(as_of)
-        if as_of > now or as_of.astimezone(NY).date() != now.astimezone(NY).date() or session is None:
+        session = snapshot_session(as_of)
+        overnight = snapshot_session(now) == "overnight"
+        earliest = now.astimezone(NY).replace(hour=0, minute=0, second=0, microsecond=0)
+        if overnight:
+            earliest = now - timedelta(hours=30)
+        if as_of > now or as_of < earliest:
             raise ValueError("Yahoo stale or out-of-session quote")
         previous = meta.get("chartPreviousClose")
         if not positive(previous):
@@ -221,27 +277,169 @@ def collect_yahoo_intraday(pipeline, *, http=None):
     """Independent job/source health; at most one request per symbol and slot."""
     clock, repo = pipeline.clock, pipeline.repo
     now = clock.now_utc()
-    if not trading_day(now.astimezone(NY).date()) or bar_session(now) is None:
-        return dict(processed_count=0, note="outside authorized stock session; no collection")
+    symbols = yahoo_symbols(now)
+    if not symbols:
+        return dict(processed_count=0, note="outside authorized macro session; no collection")
     http = http or HTTPClient(timeout=10, retries=0)
-    repo.cleanup_intraday(now - timedelta(days=30))
-    written, no_previous, failures = 0, 0, []
-    for ticker in YAHOO_TICKERS:
+    maintain(pipeline)
+    written, no_previous, failures, latest = 0, 0, [], None
+
+    def fetch(ticker):
         try:
             raw = http.get(
                 "https://query1.finance.yahoo.com/v8/finance/chart/" + quote(ticker, safe=""),
                 params={"interval": "1m", "range": "1d", "includePrePost": "true"},
                 headers={"User-Agent": "Mozilla/5.0"},
             )
-            row = parse_yahoo_snapshot(raw, ticker, clock)
-            repo.write("intraday_snapshots", row, update=("last", "prev_close", "delay_minutes", "fetched_at"))
+            return ticker, parse_yahoo_snapshot(raw, ticker, clock), None
+        except Exception as exc:
+            return ticker, None, f"{type(exc).__name__}:status={getattr(exc, 'status_code', None)}"
+
+    # Network waits overlap, but database writes stay on their owning thread.
+    # Thirteen bounded 10s requests cannot serialize into a 130s poll.
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=13) as executor:
+        for ticker, row, error in executor.map(fetch, symbols):
+            if error:
+                failures.append(f"{ticker}:{error}")
+                continue
+            repo.write("intraday_snapshots", row)
             written += 1
             no_previous += row["prev_close"] is None
-        except Exception as exc:
-            failures.append(f"{ticker}:{type(exc).__name__}")
+            latest = max(latest or row["as_of"], row["as_of"])
     return dict(
         processed_count=written,
         status="degraded" if failures or no_previous else "ok",
         source_success=bool(written),
+        latest_data_at=latest.isoformat() if latest else None,
         note=f"missing_previous_close={no_previous}; failures={','.join(failures) or 'none'}; yield_unit=percent",
     )
+
+
+def collect_wide(pipeline, *, http=None):
+    now = pipeline.clock.now_utc()
+    local = now.astimezone(NY)
+    minute = local.hour * 60 + local.minute
+    if not trading_day(local.date()) or not 570 <= minute < 960:
+        return dict(processed_count=0, note="outside regular session; no collection")
+    http = http or HTTPClient(timeout=10, retries=0)
+    written, missing, latest = 0, 0, None
+    try:
+        maintain(pipeline)
+        if pipeline.alpaca is None:
+            raise SourceError("Alpaca not configured")
+        tickers = sorted({r["ticker"] for r in pipeline.repo.latest_wide() if r["included"]})
+        headers = pipeline.alpaca.headers
+        for offset in range(0, len(tickers), 200):
+            batch = tickers[offset : offset + 200]
+            raw = http.get(
+                "https://data.alpaca.markets/v2/stocks/snapshots",
+                params={"symbols": ",".join(batch), "feed": FEED},
+                headers=headers,
+            )
+            previous = cached_previous(pipeline, http, headers, batch, local.date())
+            rows = parse_snapshots(raw, previous, batch, pipeline.clock)
+            missing += len(batch) - len(rows) + sum(r["prev_close"] is None for r in rows)
+            for row in rows:
+                pipeline.repo.write(
+                    "wide_snapshots", {k: v for k, v in row.items() if k not in {"session", "delay_minutes"}}
+                )
+                written += 1
+                latest = max(latest or row["as_of"], row["as_of"])
+        return dict(
+            processed_count=written,
+            source_success=bool(written) and not missing,
+            status="degraded" if missing or not tickers else "ok",
+            latest_data_at=latest.isoformat() if latest else None,
+            note=f"feed={FEED}; requested={len(tickers)}; missing_trade_or_previous={missing}",
+        )
+    except Exception as exc:
+        return dict(
+            processed_count=written,
+            status="degraded",
+            source_success=False,
+            rate_limited=getattr(exc, "status_code", None) == 429,
+            note=f"{type(exc).__name__}; status={getattr(exc, 'status_code', None)}",
+        )
+
+
+def parse_iex_trades(raw, previous, tickers, clock):
+    """IEX has no feed delay; the last price-updating print can still be old.
+
+    Keep its original timestamp/session, including the previous day's last
+    print before IEX opens at 08 ET. Never relabel that observation as today.
+    """
+    trades = require_mapping(require_mapping(raw).get("trades"))
+    now, rows = clock.now_utc(), []
+    for ticker in tickers:
+        trade = trades.get(ticker)
+        if not isinstance(trade, dict) or trade.get("x") != "V" or not positive(trade.get("p")) or not trade.get("t"):
+            continue
+        try:
+            as_of = stamp(trade["t"])
+        except (ValueError, TypeError, OverflowError):
+            continue
+        session = bar_session(as_of)
+        if as_of > now or as_of < now - timedelta(days=30) or session is None:
+            continue
+        prev = previous.get(ticker)
+        rows.append(
+            dict(
+                ticker=ticker,
+                as_of=as_of,
+                session="regular" if session == "intraday" else session,
+                last=trade["p"],
+                prev_close=prev if positive(prev) else None,
+                delay_minutes=0,
+                source="Alpaca:iex",
+                fetched_at=now,
+            )
+        )
+    return rows
+
+
+def collect_iex_intraday(pipeline, *, http=None):
+    """Same authorized scope/cadence as SIP, isolated failure and source health."""
+    now, repo = pipeline.clock.now_utc(), pipeline.repo
+    day = now.astimezone(NY).date()
+    if not trading_day(day) or bar_session(now) is None:
+        return dict(processed_count=0, note="outside authorized stock session; no IEX request")
+    http = http or HTTPClient(timeout=15, retries=0)
+    written = 0
+    try:
+        maintain(pipeline)
+        tickers = stock_tickers(pipeline)
+        if pipeline.alpaca is None:
+            raise SourceError("Alpaca not configured")
+        raw = http.get(
+            "https://data.alpaca.markets/v2/stocks/trades/latest",
+            params={"symbols": ",".join(tickers), "feed": "iex"},
+            headers=pipeline.alpaca.headers,
+        )
+        previous = cached_previous(pipeline, http, pipeline.alpaca.headers, tickers, day)
+        rows = parse_iex_trades(raw, previous, tickers, pipeline.clock)
+        for row in rows:
+            repo.write("intraday_snapshots", row)
+            written += 1
+        latest = max((r["as_of"] for r in rows), default=None)
+        missing = len(tickers) - len(rows)
+        no_previous = sum(r["prev_close"] is None for r in rows)
+        age = max(((now - r["as_of"]).total_seconds() for r in rows), default=None)
+        return dict(
+            processed_count=written,
+            source_success=bool(rows),
+            status="degraded" if missing or no_previous else "ok",
+            latest_data_at=latest.isoformat() if latest else None,
+            note=f"feed=iex; feed_delay_minutes=0; IEX_equities_ET=08:00-17:00; "
+            f"missing_last_trade={missing}; missing_previous_close={no_previous}; "
+            f"max_trade_age_seconds={age}; original_trade_time_preserved=true",
+        )
+    except Exception as exc:
+        return dict(
+            processed_count=written,
+            status="degraded",
+            source_success=False,
+            rate_limited=getattr(exc, "status_code", None) == 429,
+            note=f"{type(exc).__name__}; status={getattr(exc, 'status_code', None)}; feed=iex",
+        )

@@ -37,13 +37,15 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
         *ORIGINAL,
         *ADDED[:2],
         A023_ADDED[0],
-        "intraday_snapshots",
-        "yahoo_intraday",
         *A023_ADDED[1:],
         *ADDED[2:],
     ]
     assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *expected_tasks]
     expected = {
+        "iex_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "iex_intraday"],
+        "stock_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "intraday_snapshots"],
+        "macro_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "yahoo_intraday"],
+        "wide_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "wide_snapshots"],
         "daily_modules": ["scripts/schedule_daily_modules.py", "--tasks", "market_structure", "rule_a_scores"],
         "anomaly_daily": ["scripts/schedule_daily_modules.py", "--tasks", "anomaly_daily", "premarket_review"],
         "valuation_v1": ["scripts/schedule_daily_modules.py", "--tasks", "valuation_v1"],

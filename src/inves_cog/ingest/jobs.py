@@ -68,7 +68,7 @@ class JobRunner:
         self.params_version, self.monotonic, self.timeout_seconds = params_version, monotonic, timeout_seconds
         self.persist_start = persist_start
 
-    def run(self, task_name, source, operation, *, trade_date=None, configured=True):
+    def run(self, task_name, source, operation, *, trade_date=None, configured=True, record_health=True):
         started, timer = self.clock.now_utc(), self.monotonic()
         row = {
             "task_name": task_name,
@@ -99,29 +99,31 @@ class JobRunner:
                 raise error
             degraded = result.get("status") == "degraded"
             row.update(status="degraded" if degraded else "ok", processed_count=count)
-            self.health.record(
-                source,
-                success=result.get("source_success", True),
-                count=count,
-                latency=duration,
-                note=result.get("note"),
-                degraded=degraded,
-                confirmed_unavailable=result.get("confirmed_unavailable", False),
-            )
+            if record_health:
+                self.health.record(
+                    source,
+                    success=result.get("source_success", True),
+                    count=count,
+                    latency=duration,
+                    note=result.get("note"),
+                    degraded=degraded,
+                    confirmed_unavailable=result.get("confirmed_unavailable", False),
+                )
             return result
         except Exception as exc:
             row["status"] = "failed"
             row["processed_count"] = getattr(exc, "processed_count", 0)
             row["error_summary"] = f"{type(exc).__name__}: {exc}"
-            self.health.record(
-                source,
-                success=False,
-                count=row["processed_count"],
-                latency=self.monotonic() - timer,
-                note=row["error_summary"],
-                configured=configured,
-                confirmed_unavailable=getattr(exc, "confirmed_unavailable", False),
-            )
+            if record_health:
+                self.health.record(
+                    source,
+                    success=False,
+                    count=row["processed_count"],
+                    latency=self.monotonic() - timer,
+                    note=row["error_summary"],
+                    configured=configured,
+                    confirmed_unavailable=getattr(exc, "confirmed_unavailable", False),
+                )
             return {"status": "failed", "processed_count": row["processed_count"], "error": row["error_summary"]}
         except BaseException as exc:
             row.update(status="failed", error_summary=f"{type(exc).__name__}: interrupted")
