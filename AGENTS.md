@@ -9,6 +9,7 @@
 ## 协作
 - 线：A（Codex，交易/估值/运维部署）、B（Cursor，感知/页面）、C（设计，Figma 额度已用完）。规则见 `ops/README.md`；任务 `ops/inbox/<线>/`，验收与关单 `ops/answers/`，状态在 `agent-status` 分支 `ops/status/`。
 - 一条线同时只挂一个任务；需求方验收后在 answers 末尾写“已关单”。
+- 合并：需求方验收通过（代码复核 + 准确 head CI 通过）后直接合并，不再等用户说“合并”（用户 2026-10-26 授权），事后报告。
 - 部署：合并后在 `ops/answers/A-014.md` 追加“续十四补充N：部署 …（运维）”交给 A，A 回报后需求方线上走查。
 - 本机 `gh` 已登录，可直接推送/合并/查 CI（`export PATH=/opt/homebrew/bin:$PATH`）。
 
