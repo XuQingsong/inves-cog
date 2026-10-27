@@ -187,7 +187,8 @@ def _visible(html):
 def test_carry_over_labels_and_banner(pages):
     html = _get(pages, "/").text
     assert "沿用" in html and "收盘" in html
-    assert "美股未开盘" in html
+    # fixture clock is 10:00 ET -> intraday session banner
+    assert "盘中" in html
 
 
 def test_feed_default_10_and_grouped_ratings(pages):

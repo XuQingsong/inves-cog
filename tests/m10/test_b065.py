@@ -139,7 +139,7 @@ def test_strip_renders_and_bp(pages):
 
 def test_dgs2_prior_day_label(pages):
     html = _get(pages, "/").text
-    assert "美债 2 年" in html and "前一日" in html
+    assert "美债 2 年" in html and "收盘 10/" in html
 
 
 def test_sector_strip_uses_snapshots(pages):
@@ -210,7 +210,7 @@ def test_today_news_window_24h(pages):
 
 def test_freshness_and_banner(pages):
     html = _get(pages, "/").text
-    assert "数据更新至 北京" in html and "美股未开盘" in html
+    assert "数据更新至 北京" in html and "盘中" in html
     assert "盘中示例" not in html and 'data-m="intra"' not in html
 
 
@@ -282,7 +282,20 @@ def test_mover_snapshot_ranking(pages):
 def test_wide_adv20_filter(pages):
     admin = pages["admin"]
     admin.execute(WIDE_DDL)
-    for ticker, last, prev in (("ZZZ", 20.0, 10.0), ("BBB2", 5.0, 10.0)):
+    admin.execute(
+        """CREATE TABLE IF NOT EXISTS ingest.wide_universe (
+            ticker text NOT NULL, trade_date date NOT NULL, mktcap numeric, adv20 numeric,
+            included boolean, source text, fetched_at timestamptz,
+            PRIMARY KEY (ticker, trade_date, source)
+        )"""
+    )
+    # ZZZ liquid ($25M ADV), BBB2 illiquid ($1M ADV) -> filter keeps ZZZ only
+    admin.execute(
+        "INSERT INTO ingest.wide_universe (ticker, trade_date, mktcap, adv20, included, source, fetched_at)"
+        " VALUES ('ZZZ', %s, 1e9, 25000000, true, 'b065', %s), ('BBB2', %s, 1e9, 1000000, true, 'b065', %s)",
+        (PREV, SEEN, PREV, SEEN),
+    )
+    for ticker, last, prev in (("ZZZ", 20.0, 10.0), ("BBB2", 20.0, 10.0)):
         admin.execute(
             "INSERT INTO ingest.wide_snapshots (ticker, as_of, last, prev_close, source, fetched_at)"
             " VALUES (%s, %s, %s, %s, 'b065', %s)",
@@ -291,6 +304,7 @@ def test_wide_adv20_filter(pages):
     try:
         market = _get(pages, "/api/pages/brief/market").json()
         tickers = {r["ticker"] for r in market["wide_movers_up"]}
-        assert "ZZZ" in tickers and "BBB2" not in tickers  # BBB2 price < $5
+        assert "ZZZ" in tickers and "BBB2" not in tickers
     finally:
         admin.execute("DELETE FROM ingest.wide_snapshots WHERE source = 'b065'")
+        admin.execute("DELETE FROM ingest.wide_universe WHERE source = 'b065'")
