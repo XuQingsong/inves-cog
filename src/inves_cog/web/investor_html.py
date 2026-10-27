@@ -631,7 +631,8 @@ def _stock_row(payload, row, day):
         f"<tr {attrs}>"
         f'<td><a class="mono" href="{_symbol_href(payload, ticker)}"><b>{_text(ticker)}</b></a></td>'
         f'<td class="small">{_text(row.get("sector"))}</td>'
-        f'<td class="r">{_pct(ret)}</td>'
+        f'<td class="r">{_px_cell(row)}</td>'
+        f'<td class="r">{_pct(shown_ret)}</td>'
         f'<td class="r num {"" if vol is not None and vol >= 2 else "muted"}">{_text(_times(vol))}</td>'
         f'<td class="r num">{rsi_html}</td>'
         f'<td class="r">{_pts(row.get("price_vs_ma200"))}</td>'

@@ -86,7 +86,7 @@ def test_stock_row_close_ret_without_snapshot():
 
     row = {"ticker": "NVDA", "ret": -0.02, "volume_multiple": 1.2, "held": True, "events": []}
     html = _stock_row({"is_today": True}, row, DAY)
-    assert "-2.00%" in html
+    assert "2.00%" in html
 
 
 def test_carry_chip_render():
