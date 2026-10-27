@@ -301,3 +301,21 @@ def test_wide_adv20_filter(pages):
     finally:
         admin.execute("DELETE FROM ingest.wide_snapshots WHERE source = 'b065'")
         admin.execute("DELETE FROM ingest.wide_universe WHERE ticker IN ('ZZZ', 'BBB2')")
+
+
+def test_mover_pool_member_enters_via_snapshot(pages):
+    # MSFT is in the pool but has no close ret today -> only a snapshot can put it in movers
+    admin = pages["admin"]
+    admin.execute(
+        """INSERT INTO ingest.intraday_snapshots
+        (ticker, as_of, session, last, prev_close, delay_minutes, source, fetched_at)
+        VALUES ('MSFT', %s, 'pre', 500.0, 400.0, 15, 'b065', %s)""",
+        (SEEN + timedelta(minutes=20), SEEN + timedelta(minutes=20)),
+    )
+    try:
+        market = _get(pages, "/api/pages/brief/market").json()
+        movers = market["news_modules"]["movers"]
+        msft = [m for m in movers if m["ticker"] == "MSFT"]
+        assert msft and msft[0]["snap_ret"] is not None  # +25% snapshot move, no close ret
+    finally:
+        admin.execute("DELETE FROM ingest.intraday_snapshots WHERE ticker = 'MSFT' AND source = 'b065'")

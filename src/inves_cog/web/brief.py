@@ -2416,23 +2416,27 @@ def _freshness(context, clock):
 
 
 def _news_views_today(context):
-    """Today's movers ranked by latest snapshot change; close ret as fallback."""
-    mods = _news_views(context)
+    """Today's movers ranked by latest snapshot change over ALL members.
+
+    Snapshot ret wins, close ret as fallback; members without either are not
+    candidates. Snapshot metadata is attached for the header chip."""
     intraday = context.get("intraday") or {}
 
-    def _sort_key(m):
-        ret = _snap_ret(intraday.get(m["ticker"]))
-        return abs(ret if ret is not None else (m.get("ret") or 0))
+    def mover_key(member):
+        snap = intraday.get(member["ticker"])
+        if snap is not None and _snap_ret(snap) is not None:
+            return abs(_snap_ret(snap))
+        return abs(member["ret"]) if member["ret"] is not None else None
 
-    movers = sorted(mods.get("movers") or [], key=_sort_key, reverse=True)[:8]
-    for m in movers:
+    mods = _news_views(context, mover_key)
+    for m in mods["movers"]:
         snap = intraday.get(m["ticker"])
         if snap is not None and _snap_ret(snap) is not None:
             m["snap_ret"] = _snap_ret(snap)
             m["snap_asof"] = snap["as_of"].astimezone(NY).strftime("%H:%M")
             m["snap_delay"] = snap.get("delay_minutes")
             m["snap_session"] = snap.get("session")
-    return {**mods, "movers": movers}
+    return mods
 
 
 def _translations(connection, info_ids):
@@ -2599,8 +2603,11 @@ def _econ_module(econ):
     return out[:8]
 
 
-def _news_views(context):
-    """Market-page news modules from the ranked rules layer."""
+def _news_views(context, mover_key=None):
+    """Market-page news modules from the ranked rules layer.
+
+    mover_key(member) -> sortable change magnitude for the movers block;
+    defaults to abs(close ret)."""
     ranked = context["news_ranked"]
     tech = context["technicals"]
     grouped = context["grouped"]
@@ -2623,7 +2630,12 @@ def _news_views(context):
             close, prev = _session_closes(history, context["day"])
             if close is not None and prev not in (None, 0):
                 m["ret"] = close / prev - 1
-    top8 = sorted((m for m in members.values() if m["ret"] is not None), key=lambda m: -abs(m["ret"]))[:8]
+    if mover_key is None:
+
+        def mover_key(m):
+            return abs(m["ret"]) if m["ret"] is not None else None
+
+    top8 = sorted((m for m in members.values() if mover_key(m) is not None), key=lambda m: -mover_key(m))[:8]
     for m in top8:
         own = sorted(
             (n for n in ranked if m["ticker"] in n["rule"].primary_tickers),
