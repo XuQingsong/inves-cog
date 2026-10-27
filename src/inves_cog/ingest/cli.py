@@ -101,7 +101,15 @@ def main():
                 log_path.parent.mkdir(parents=True, exist_ok=True)
                 with log_path.open("a") as log:
                     needs_enrichment = args.tasks is None or bool(
-                        set(args.tasks) - {"bars_full", "bars_prefill", "wide_universe"}
+                        set(args.tasks)
+                        - {
+                            "bars_full",
+                            "bars_prefill",
+                            "wide_universe",
+                            "intraday_snapshots",
+                            "yahoo_intraday",
+                            "wide_snapshots",
+                        }
                     )
                     worker = (
                         subprocess.Popen(
@@ -117,7 +125,12 @@ def main():
                             output = schedule_once(pipeline, runtime, names=args.tasks)
                             if output:
                                 print(json_text(output), flush=True)
-                            time.sleep(30)
+                            time.sleep(
+                                max(0.05, 60 - clock.now_utc().second - clock.now_utc().microsecond / 1_000_000)
+                                if args.tasks
+                                and set(args.tasks) <= {"intraday_snapshots", "yahoo_intraday", "wide_snapshots"}
+                                else 30
+                            )
                     finally:
                         if worker is not None:
                             worker.terminate()

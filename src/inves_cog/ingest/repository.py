@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from datetime import date, datetime
 from pathlib import Path
 
@@ -23,6 +23,7 @@ TABLES = {
         "ticker as_of session last prev_close delay_minutes source fetched_at",
         "ticker,as_of,source",
     ),
+    "wide_snapshots": ("ticker as_of last prev_close source fetched_at", "ticker,as_of,source"),
     "bars_minute": ("ticker ts_utc open high low close volume session source", "ticker,ts_utc"),
     "bars_daily": ("ticker trade_date open high low close volume post_close adj_factor source", "ticker,trade_date"),
     "wide_universe": ("trade_date ticker mktcap adv20 included exclude_reason notes", "trade_date,ticker"),
@@ -146,12 +147,57 @@ class Repository:
             f"ON CONFLICT ({conflict}) {action}"
         )
         with self.transaction():
-            self.connection.execute(sql, values)
+            result = self.connection.execute(sql, values)
         self.processed += 1
+        return result.rowcount
+
+    @contextmanager
+    def snapshot_lock(self, task):
+        with self.transaction():
+            locked = self.connection.execute(
+                "SELECT pg_try_advisory_xact_lock(hashtext(%s)) AS locked", ("snapshot-poll:" + task,)
+            ).fetchone()["locked"]
+            yield locked
 
     def cleanup_intraday(self, before):
         with self.transaction():
             return self.connection.execute("DELETE FROM ingest.intraday_snapshots WHERE as_of<%s", (before,)).rowcount
+
+    def compact_intraday(self, now):
+        """Keep the first real observation per ET half hour after seven days."""
+        from datetime import timedelta
+
+        with self.transaction():
+            self.cleanup_intraday(now - timedelta(days=30))
+            return self.connection.execute(
+                """DELETE FROM ingest.intraday_snapshots WHERE ctid IN (
+                SELECT tid FROM (
+                  SELECT ctid AS tid, row_number() OVER (
+                    PARTITION BY ticker,source,
+                    floor(extract(epoch FROM as_of)/1800)
+                    ORDER BY as_of) AS n
+                  FROM ingest.intraday_snapshots WHERE as_of < %s
+                ) ranked WHERE n>1)""",
+                (now - timedelta(days=7),),
+            ).rowcount
+
+    def cleanup_wide_snapshots(self, day, previous):
+        from datetime import datetime, timedelta
+
+        from inves_cog.ingest.market import NY
+
+        with self.transaction():
+            return self.connection.execute(
+                """DELETE FROM ingest.wide_snapshots
+                WHERE as_of < %s OR as_of >= %s
+                  OR (as_of AT TIME ZONE 'America/New_York')::date NOT IN (%s,%s)""",
+                (
+                    datetime.combine(previous, datetime.min.time(), NY),
+                    datetime.combine(day + timedelta(days=1), datetime.min.time(), NY),
+                    day,
+                    previous,
+                ),
+            ).rowcount
 
     def replace_calendar_day(self, table, day, source, rows):
         """Atomically replace one successfully fetched date and source only."""

@@ -104,21 +104,20 @@ def test_yahoo_rejects_stale_future_mismatched_or_invalid_snapshot(mutation):
 @pytest.mark.parametrize(
     "moment,expected",
     [
-        ("2026-10-26T03:59:00-04:00", False),
+        ("2026-10-26T03:59:00-04:00", True),
         ("2026-10-26T04:00:00-04:00", True),
         ("2026-10-26T09:30:00-04:00", True),
         ("2026-10-26T16:00:00-04:00", True),
-        ("2026-10-26T20:00:00-04:00", False),
+        ("2026-10-26T20:00:00-04:00", True),
         ("2026-10-24T12:00:00-04:00", False),
         ("2026-12-25T12:00:00-05:00", False),
         ("2026-11-02T04:00:00-05:00", True),
     ],
 )
-def test_yahoo_same_stock_windows_no_overnight_or_nontrading_expansion(moment, expected):
+def test_yahoo_stock_and_overnight_windows(moment, expected):
     clock = FrozenClock(datetime.fromisoformat(moment))
     tasks = due_tasks(clock, {})
     assert ("yahoo_intraday" in tasks) == expected
-    assert ("yahoo_intraday" in tasks) == ("intraday_snapshots" in tasks)
 
 
 def test_partial_yahoo_failure_continues_other_symbols_and_degrades_own_health():
@@ -195,7 +194,7 @@ def test_all_extended_etfs_and_original_pool_holdings_union():
 def test_direct_collectors_do_not_fetch_outside_authorized_window():
     from inves_cog.ingest.intraday import collect_intraday, collect_yahoo_intraday
 
-    p = SimpleNamespace(clock=FrozenClock(datetime.fromisoformat("2026-10-26T20:01:00-04:00")), repo=Mock())
+    p = SimpleNamespace(clock=FrozenClock(datetime.fromisoformat("2026-10-24T12:01:00-04:00")), repo=Mock())
     http = Mock()
     for collect in [collect_intraday, collect_yahoo_intraday]:
         assert collect(p, http=http)["processed_count"] == 0

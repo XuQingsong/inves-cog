@@ -722,7 +722,7 @@ class Pipeline:
         return {"processed_count": len(rows)}
 
     def runtime(self):
-        from inves_cog.ingest.intraday import collect_intraday, collect_yahoo_intraday
+        from inves_cog.ingest.intraday import collect_intraday, collect_wide, collect_yahoo_intraday
         from inves_cog.ingest.market_structure import collect_issuer_profiles, collect_market_inputs
         from inves_cog.ingest.resilience import collect_calendars, collect_vix
         from inves_cog.ingest.service import check_news_gap
@@ -734,6 +734,7 @@ class Pipeline:
             "wide_universe": ("AlpacaWide", self.wide),
             "news_full": ("AlpacaNews", self.news),
             "news_poll": ("AlpacaNews", self.news),
+            "wide_snapshots": ("AlpacaWideSnapshots", lambda: collect_wide(self)),
             "intraday_snapshots": ("AlpacaIntraday", lambda: collect_intraday(self)),
             "yahoo_intraday": ("YahooIntraday", lambda: collect_yahoo_intraday(self)),
             "news_watchdog": ("Scheduler:news_watchdog", lambda: check_news_gap(self.repo, self.clock)),
@@ -775,6 +776,7 @@ class Pipeline:
 
         tasks = {name: (source, guarded(operation)) for name, (source, operation) in tasks.items()}
         return Runtime(
+            snapshot_repo=self.repo,
             trade_date=lambda: self.day,
             clock=self.clock,
             health=health,

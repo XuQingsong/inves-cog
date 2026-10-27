@@ -42,8 +42,6 @@ serverurl=unix://{state}/supervisor.sock
             "news_prefill",
             "news_full",
             "news_poll",
-            "intraday_snapshots",
-            "yahoo_intraday",
             "news_watchdog",
             "vix_daily",
             "earnings_calendar",
@@ -53,6 +51,9 @@ serverurl=unix://{state}/supervisor.sock
             "finra",
             "fed_news",
         ],
+        "stock_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "intraday_snapshots"],
+        "macro_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "yahoo_intraday"],
+        "wide_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "wide_snapshots"],
         "daily_modules": [
             str(root / "scripts/schedule_daily_modules.py"),
             "--tasks",
