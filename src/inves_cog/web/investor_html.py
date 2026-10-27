@@ -500,6 +500,7 @@ def _stocks(payload):
         for key, label, right in (
             ("t", "代码", False),
             ("theme", "主题", False),
+            ("px", "现价", True),
             ("chg", "当日", True),
             ("vol", "量比", True),
             ("rsi", "RSI", True),
@@ -569,9 +570,20 @@ def _overbought(row):
     return isinstance(tech, dict) and tech.get("rsi_state") == "超买"
 
 
+def _px_cell(row):
+    price = row.get("snap_price")
+    tag = row.get("snap_tag")
+    if price is None:
+        price = row.get("price")
+        return f"{_num(price, 2)}" if price else '<span class="muted">暂缺</span>'
+    small = f'<small class="muted">{_text(tag)}</small>' if tag else ""
+    return f"{_num(price, 2)}{small}"
+
+
 def _stock_row(payload, row, day):
     ticker = row.get("ticker") or ""
     ret = row.get("ret")
+    shown_ret = row.get("snap_ret") if (payload.get("is_today") and row.get("snap_ret") is not None) else ret
     vol = row.get("volume_multiple")
     held = bool(row.get("held"))
     buy = row.get("entry_pass") is True and not held
@@ -597,7 +609,7 @@ def _stock_row(payload, row, day):
             f'data-buy="{1 if buy else 0}"',
             f'data-move="{1 if _is_move(row) else 0}"',
             f'data-crowd="{1 if _overbought(row) else 0}"',
-            f'data-chg="{_num_attr(ret)}"',
+            f'data-chg="{_num_attr(shown_ret)}"',
             f'data-vol="{_num_attr(vol)}"',
             f'data-rsi="{_num_attr(rsi)}"',
             f'data-d200="{_num_attr(row.get("price_vs_ma200"))}"',

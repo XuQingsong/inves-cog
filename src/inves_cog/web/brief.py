@@ -969,16 +969,30 @@ def close_estimate(context, day):
     positions = context["positions"]
     if cash is None or not positions:
         return None
+    intraday = context.get("intraday") or {}
+    is_today = day == context["day"]
     equity = cash
     pnl = 0.0
+    missing = 0
     for ticker, position in positions.items():
         shares = _number(position.get("shares"))
+        snap = intraday.get(ticker) if is_today else None
         close, previous = _session_closes(context["bars"].get(ticker) or [], day)
-        if shares is None or close is None or previous is None:
+        if snap is not None and snap.get("last") is not None and snap.get("prev_close"):
+            if shares is None:
+                return None
+            equity += shares * float(snap["last"])
+            pnl += shares * (float(snap["last"]) - float(snap["prev_close"]))
+        elif shares is None or close is None or previous is None:
             return None
-        equity += shares * close
-        pnl += shares * (close - previous)
-    return {"equity": equity, "day_pnl": pnl, "label": f"按 {day.month}月{day.day}日 收盘估算"}
+        else:
+            missing += 1
+            equity += shares * close
+            pnl += shares * (close - previous)
+    label = "盘中估算，仅供看盘"
+    if missing:
+        label += f"；{missing} 只未取到快照按收盘计"
+    return {"equity": equity, "day_pnl": pnl, "label": label}
 
 
 def _book(connection, day, cutoff):
@@ -1543,6 +1557,7 @@ def _context(connection, day, clock):
         "earnings_cal": earnings,
         "econ_cal": econ,
         "intraday": intraday,
+        "elapsed_minutes": _elapsed_regular(clock) if day == clock.today_trade_date() else None,
     }, None
 
 
@@ -1632,18 +1647,32 @@ def _breadth(daily):
     return advancers, decliners
 
 
-def _member(ticker, day, bars, score, daily, held, events_for):
+def _member(ticker, day, bars, score, daily, held, events_for, snap=None, elapsed=None):
     """Volume multiple uses bars on the page day and the 20 sessions before it."""
     tech = _tech(score)
     history = bars.get(ticker) or []
     today_rows = [row for row in history if row["trade_date"] == day]
     prior_rows = [row for row in history if row["trade_date"] < day and row["volume"] is not None]
     today_volume = None if not today_rows else today_rows[-1]["volume"]
+    vol_label = None
+    # B-068: intraday volume multiple = cumulative volume / (avg20 x elapsed/390)
+    if snap is not None and snap.get("day_volume") and elapsed:
+        prior_avg = (
+            sum(prior_rows[-20:][i]["volume"] for i in range(len(prior_rows[-20:]))) / min(20, len(prior_rows))
+            if prior_rows
+            else None
+        )
+        if prior_avg:
+            today_volume = int(snap["day_volume"] / (prior_avg * elapsed / 390))
+            vol_label = "按时间折算"
     ret = None if ticker not in daily else daily[ticker]["ret"]
     if ret is None:
         close, previous = _session_closes(history, day)
         if close is not None and previous not in (None, 0):
             ret = close / previous - 1
+    snap_ret = None
+    if snap is not None and snap.get("last") and snap.get("prev_close"):
+        snap_ret = float(snap["last"]) / float(snap["prev_close"]) - 1
     return {
         "ticker": ticker,
         "ret": ret,
@@ -1653,12 +1682,25 @@ def _member(ticker, day, bars, score, daily, held, events_for):
         "drawdown252": _number(tech.get("drawdown252")),
         "dev50": _number(tech.get("dev50")),
         "price": _price(tech, today_rows or history),
+        "snap_ret": snap_ret,
+        "snap_price": float(snap["last"]) if snap is not None and snap.get("last") else None,
+        "snap_tag": _snap_tag(snap),
+        "vol_label": vol_label,
         "held": held,
         "entry_pass": None if score is None else bool(score["entry_pass"]),
         "tier": None if score is None else score.get("tier"),
         "events": events_for,
         "books": _books(score),
     }
+
+
+def _elapsed_regular(clock):
+    """Minutes into today's regular session (ET 09:30-16:00), or None."""
+    et = clock.now_utc().astimezone(NY)
+    if et.time() >= __import__("datetime").time(16, 0):
+        return 390
+    start = et.replace(hour=9, minute=30, second=0, microsecond=0)
+    return max(1, int((et - start).total_seconds() // 60)) if et > start else None
 
 
 def _themes(context, day):
@@ -1673,7 +1715,18 @@ def _themes(context, day):
         members = []
         for ticker in context["grouped"][sector]:
             score = scores.get(ticker)
-            member = _member(ticker, day, bars, score, daily, ticker in positions, membership.get(ticker, []))
+            snap = (context.get("intraday") or {}).get(ticker) if day == context["day"] else None
+            member = _member(
+                ticker,
+                day,
+                bars,
+                score,
+                daily,
+                ticker in positions,
+                membership.get(ticker, []),
+                snap=snap,
+                elapsed=context.get("elapsed_minutes"),
+            )
             matched = [item for item in news_items if ticker in item["tickers"]]
             member["news_count"] = len(matched)
             member["news"] = matched[:3]
@@ -2230,7 +2283,7 @@ def _intraday(connection, day, is_today=False):
     rows = _rows(
         connection,
         """
-        SELECT DISTINCT ON (ticker, source) ticker, as_of, session, last, prev_close, delay_minutes, source
+        SELECT DISTINCT ON (ticker, source) ticker, as_of, session, last, prev_close, delay_minutes, source, day_volume
         FROM ingest.intraday_snapshots
         WHERE as_of >= %s AND as_of < %s
         ORDER BY ticker, source, as_of DESC
@@ -2292,6 +2345,20 @@ SECTOR_ORDER = [
 ]
 
 SECTOR_ETFS = ["SMH", "SOXX", "IGV", "XLK", "XLF", "XLE", "XLV", "XLP", "XLY", "XLI", "XLU", "XLC", "XLRE", "XLB"]
+
+
+def _snap_tag(snap):
+    """'IEX 12:11:50' / '延迟 15 分 11:56' / session label (B-067 sources)."""
+    if snap is None or not snap.get("as_of"):
+        return None
+    as_of = snap["as_of"].astimezone(NY)
+    src = snap.get("source") or ""
+    if src == "Alpaca:iex":
+        return f"IEX {as_of:%H:%M:%S}"
+    if src == "Alpaca:delayed_sip":
+        return f"延迟 15 分 {as_of:%H:%M}"
+    sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
+    return f"{sess} {as_of:%H:%M}".strip()
 
 
 def _snap_ret(snap):

@@ -116,6 +116,7 @@ def parse_snapshots(data, previous, tickers, clock):
         if session is None:
             continue
         prev = previous.get(ticker)
+        daily = snapshot.get("dailyBar") if isinstance(snapshot, dict) else None
         rows.append(
             dict(
                 ticker=ticker,
@@ -125,6 +126,7 @@ def parse_snapshots(data, previous, tickers, clock):
                 prev_close=prev if positive(prev) else None,
                 delay_minutes=max(MIN_DELAY_MINUTES, math.ceil((now - as_of).total_seconds() / 60)),
                 source=SOURCE,
+                day_volume=int(daily["v"]) if isinstance(daily, dict) and positive(daily.get("v")) else None,
                 fetched_at=now,
             )
         )
