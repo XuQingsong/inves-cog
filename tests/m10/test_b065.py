@@ -282,17 +282,10 @@ def test_mover_snapshot_ranking(pages):
 def test_wide_adv20_filter(pages):
     admin = pages["admin"]
     admin.execute(WIDE_DDL)
-    admin.execute(
-        """CREATE TABLE IF NOT EXISTS ingest.wide_universe (
-            ticker text NOT NULL, trade_date date NOT NULL, mktcap numeric, adv20 numeric,
-            included boolean, source text, fetched_at timestamptz,
-            PRIMARY KEY (ticker, trade_date, source)
-        )"""
-    )
     # ZZZ liquid ($25M ADV), BBB2 illiquid ($1M ADV) -> filter keeps ZZZ only
     admin.execute(
-        "INSERT INTO ingest.wide_universe (ticker, trade_date, mktcap, adv20, included, source, fetched_at)"
-        " VALUES ('ZZZ', %s, 1e9, 25000000, true, 'b065', %s), ('BBB2', %s, 1e9, 1000000, true, 'b065', %s)",
+        "INSERT INTO ingest.wide_universe (ticker, trade_date, mktcap, adv20, included, fetched_at)"
+        " VALUES ('ZZZ', %s, 1e9, 25000000, true, %s), ('BBB2', %s, 1e9, 1000000, true, %s)",
         (PREV, SEEN, PREV, SEEN),
     )
     for ticker, last, prev in (("ZZZ", 20.0, 10.0), ("BBB2", 20.0, 10.0)):
@@ -307,4 +300,4 @@ def test_wide_adv20_filter(pages):
         assert "ZZZ" in tickers and "BBB2" not in tickers
     finally:
         admin.execute("DELETE FROM ingest.wide_snapshots WHERE source = 'b065'")
-        admin.execute("DELETE FROM ingest.wide_universe WHERE source = 'b065'")
+        admin.execute("DELETE FROM ingest.wide_universe WHERE ticker IN ('ZZZ', 'BBB2')")
