@@ -1,6 +1,6 @@
 """B-068: latest price on stocks/stock/account pages."""
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 from inves_cog.ingest.market import NY
 from inves_cog.web.brief import _snap_tag, _snap_ret

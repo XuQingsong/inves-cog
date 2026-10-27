@@ -575,9 +575,9 @@ def _px_cell(row):
     tag = row.get("snap_tag")
     if price is None:
         price = row.get("price")
-        return f"{_num(price, 2)}" if price else '<span class="muted">暂缺</span>'
+        return f"{float(price):,.2f}" if price else '<span class="muted">暂缺</span>'
     small = f'<small class="muted">{_text(tag)}</small>' if tag else ""
-    return f"{_num(price, 2)}{small}"
+    return f"{float(price):,.2f}{small}"
 
 
 def _stock_row(payload, row, day):
