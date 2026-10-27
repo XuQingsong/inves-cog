@@ -1783,7 +1783,7 @@ def _themes(context, day):
             member["valuation"] = _card_for(context, ticker, score, member["price"])
             member["tech"] = context["technicals"].get(ticker)
             members.append(member)
-        average = theme_average([row["ret"] for row in members])
+        average = theme_average([row["snap_ret"] if row.get("snap_ret") is not None else row["ret"] for row in members])
         themes.append(
             {
                 "sector": sector,
@@ -2036,6 +2036,8 @@ def page_brief_stocks(connection, day, clock):
     return {
         "page": "/stocks",
         "date": day,
+        "is_today": day == clock.today_trade_date(),
+        "freshness": _freshness(context, clock) if day == clock.today_trade_date() else None,
         "title": "我的标的",
         "oneliner": sentence,
         "headings": ["我的标的", "主题一览（按今日表现排序）", "逐只明细"],
@@ -2103,6 +2105,8 @@ def page_brief_account(connection, day, clock):
     return {
         "page": "/account",
         "date": day,
+        "is_today": day == clock.today_trade_date(),
+        "freshness": _freshness(context, clock) if day == clock.today_trade_date() else None,
         "title": "纸面账户",
         "oneliner": sentence,
         "headings": ["今天先看这些", "组合边界", "持仓与关键价位", "待成交", "处置记录", "待选股票"],
