@@ -473,3 +473,15 @@ OPS-A024盘前观察：2026-10-27 08:04:57 UTC（ET04:04）只读核验，今日
 ## A-014 补充四十二 已收到／进行中：安装A025
 
 收到main `2582cbd61f18a8372b8a64c10c934846e8999a6c`部署任务；PR90已验收merge `0f3912fa80652dc6b1542c701df2ba4c4ac4037e`在main，准确head `ebd1df21a5c844b7247df1af8884fbc7716f2bf6` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40490321442/job/122142329527) success。先核对远端工作区、receipt/表状态、监督/实际进程及运行中作业，避免重复DDL与轮询。按授权只快进该merge、安装0008，基于当前完整服务配置仅移除主scheduler两行情任务并新增四个独立行情程序；先停止旧scheduler及其唯一enrich子进程并确认退出，再启动新scheduler及四程序，保持enrich只有1个、不手动调模型。模型参数hash、其他原有任务/业务进程保持；迁移仅已批准新表/CHECK、使用既有迁移账号，不以管理员跑业务。10分钟内读真实各source最新时间/进程/Alpaca停止标记，首日长期观察不冒充已完成。
+
+## A-014 补充四十二 安装与10分钟内核验已完成（首交易日观察进行中）
+
+生产已安装验收merge `0f3912fa80652dc6b1542c701df2ba4c4ac4037e`，准确PR head `ebd1df21a5c844b7247df1af8884fbc7716f2bf6` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40490321442/job/122142329527) success。迁移0008仅执行一次，SHA256 `3deb0089b08c0326f71b91cd67f1c6f76db0a6e79cbd327f970cfd161473b7f7`；新表/CHECK和业务role_ingest写、role_web只读已实际核验，业务账号无管理员成员身份。工作区干净、模型两个配置hash前后相同。
+
+安装结束11:42:41 UTC，11:48:02 UTC（5分21秒内）独立读取真实证据：stock_snapshots PID3866080、iex_snapshots3866078、macro_snapshots3866079、wide_snapshots3866081均RUNNING且各仅1个；主scheduler3866077保留原17项其他任务，仅移除intraday_snapshots/yahoo_intraday；旧scheduler3178027及enrich3178249均已退出，新enrich仅3866087一个。其他所有业务PID保持（含pages、news_translate、M9），未手工调用模型、未改变模型参数/预算。部署前无运行中job，未中断业务提交前缀。初次状态推送TLS中断后已成功补推；初次preflight审批超时未执行，按工具允许一次重试后通过，没有绕过审批或在未知状态重跑部署。
+
+各source最新时间（均UTC，max分别汇总，不伪称同一条）：Alpaca:delayed_sip最新as_of11:32:59.758659、最新fetched_at11:48:00.903325；Alpaca:iex最新as_of昨日10-26 20:58:58.926954、首次/最新fetched11:42:42.762624（08ET前只有旧成交，重复不更新首次时间）；Yahoo最新as_of11:47:53、最新fetched11:48:00.494484。snapshot-alpaca-halted不存在。安装后实际新增行SIP292、IEX77、Yahoo70；不能把每批processed_count当新增行。11:43–11:48真实job均逐分钟完成，SIP每批76有效成交/IEX77/Yahoo10；IEX ok，SIP degraded因1代码无当日成交，Yahoo degraded因3个收益率代码尚无当日报价，不把部分缺失当全源成功。wide进程已运行，但当前ET07:48未到09:30，尚无该任务运行/行，不冒称已验证盘中宽池。
+
+公开样本：SPY SIP767.47、原成交11:32:44.225339/采集11:48:00.903325（约15分16.7秒），IEX765.225仍昨日19:59:59.950174；NVDA SIP217.23、IEX216.18仍昨日20:30:59；IWM SIP277.91、IEX276.78仍昨日20:49:51，两源前收分别对齐765.37/216/276.99。TNX最近仍昨日18:59:52/4.986%，不凑“约15分钟”达标证据；昨日旧值由B066显示并保留原时间。外部/和/stocks均200。
+
+真实receipt：生产inves-cog-data/ops/a025-deploy-20261027.json、a025-initial-verification-20261027.json，配置备份a025-supervisord-before.conf。后续只读跟进自然08ET后IEX新成交、盘前/盘中各3时点SPY/TNX和SPY/NVDA/小盘IEX年龄及价差、全天行数/429、09:30宽池首批、夜间宏观；不为证据手动补采或调用模型。安装完成与首交易日验收明确分开，自动化持续开启。
