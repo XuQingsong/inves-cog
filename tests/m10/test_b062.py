@@ -576,8 +576,10 @@ def test_g11_pages_stay_local_and_read_only(pages):
 def test_g12_forbidden_words_stay_off_the_pages(pages):
     paths = ("/", "/stocks", "/account", "/trust", "/s/AVGO", "/s/LITE")
     blob = _visible("".join(_get(pages, path).text for path in paths) + _get(pages, "/account", NEXT).text)
+    # IEX real-time label is spec-mandated (B-067); other 实时 leaks stay forbidden.
+    blob_check = blob.replace("IEX 实时", "")
     for word in ("下单", "实时", "目标价", "合理价", "N1"):
-        assert word not in blob
+        assert word not in blob_check
     assert _RULE.search(blob) is None
     assert _LOWER.findall(blob) == []
 
