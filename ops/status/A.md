@@ -549,3 +549,9 @@ A024公开页面交叉对照本轮有界结果：web工具四个Google Finance U
 收到main `1687841f1bd7ec2b41e45736a2d899b430654787`明确部署指令。目标 `dff926798ac76932b7ea110461982af6eb5f3b86` 包含A026 PR91 merge `e2340595f3f0e1c0b229e795752c687a9b3a13d5` 与B067补充PR93。准确head分别`49dc405ba20574a91d3869896f4d8d45b8f57508` [CI](https://github.com/XuQingsong/inves-cog/actions/runs/40528031606/job/122272829343)、`0f7fd294143eb9cff4019f7d822968bb177387c0` [CI](https://github.com/XuQingsong/inves-cog/actions/runs/40525380949/job/122263413965) 均success，且已合并main。将在ET10-27 23:30前安装；先读现有工作区/receipt/实际进程、运行作业、pending按kind及日志位置，停旧主scheduler连同唯一enrich、四个快照，确认退出后快进并原配置重启这些进程及pages，其余进程保持，无迁移、不改参数、不手动调模型或重复跑转换。
 
 之后只读自然enrich首轮rules_only_structured及待处理按kind结果，相关公告匹配仅核对计数，不输出私有内容/持仓。若本来无积压且enrich未自然触发，明确说未产生首轮日志而非伪造条数。部署当日旧调用单列；ET10-28 01:00后读取从10-28午夜起分task用量，之后连续一天同口径，另保留完整自然日核验，不将代码安装说成费用收敛已经由未来日验证。A025盘中12ET/15ET及全天自然观察保持。
+
+## A026部署进行中：自然首轮512；按本单要求补齐旧延后积压（纯规则、无模型）
+
+15:41:23 UTC实际首轮日志rules_only_structured=512/processed513/statusok；已有2轮累计1024（macro1018、sec_8k6）。剩余macro742、sec_8k120；按现有发行人映射/标的与持仓仅1条相关、119条未匹配。重启后模型调用0、参数保持；行情四路自然正常。旧队列retry_at=10-28 04:00 UTC（ET午夜）、reason=daily_budget；has_pending_info经pending_info过滤future retry而跳过它们，只有新条目碰巧唤醒时才推进一批，不把偶发推进当积压已清。
+
+按A026要求4“现有待处理的非相关公告、空头、宏观条目转为rules-only，审计保留”，本轮运维补齐明确授权的余量：复用已验收Repository.finish_pending_rules_only纯数据库方法（不运行triage/process/enrich、不建立模型客户端），现有业务role_ingest执行；用库内issuer_profiles/sec_filings CIK映射及当前标的/持仓确定保留公告，已有相关或holding标记保守跳过。先检查无进行中info_enrichment、当前head/唯一receipt，短事务锁定队列防止新相关公告并发插入被误转，受影响上限5000/30秒，保存0600原始提取审计副本并记录转换前后按kind数量；仅改变已批准目标的status/news_triage，保留原文、原发布时间/首次可见时间及其他审计字段，不动新闻、不补采、不调模型、不改参数/角色/代码。若相关性映射缺失或并发安全检查失败则不写，不越过范围。这里是首次补齐剩余未转换行，不重复转换已完成1024条；实际条数以执行时状态为准，首轮日志仍如实为自然512，不把人工纯规则数量冒称日志首轮。
