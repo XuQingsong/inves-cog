@@ -760,7 +760,9 @@ def _bars(connection, day, tickers):
     return grouped
 
 
-def _scores(connection, day):
+def _scores(connection, day, carry=False):
+    """Day's scores; with carry=True also fills missing tickers from each one's
+    most recent earlier score (B-068: no today score before close)."""
     rows = _rows(
         connection,
         """
@@ -770,7 +772,22 @@ def _scores(connection, day):
         """,
         (day,),
     )
-    return {row["ticker"]: row for row in rows}
+    out = {row["ticker"]: row for row in rows}
+    if carry:
+        older = _rows(
+            connection,
+            """
+            SELECT DISTINCT ON (ticker) ticker, tech, derived, quality, growth, valuation, timing,
+                   entry_pass, tier, signal_date
+            FROM trading.daily_scores
+            WHERE signal_date < %s
+            ORDER BY ticker, signal_date DESC
+            """,
+            (day,),
+        )
+        for row in older:
+            out.setdefault(row["ticker"], row)
+    return out
 
 
 def _ranges(connection, day, cutoff):
@@ -1460,7 +1477,7 @@ def _context(connection, day, clock):
     market = _one(connection, "SELECT * FROM marketstate.market WHERE trade_date = %s", (data_day,))
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
-    scores = _scores(connection, data_day)
+    scores = _scores(connection, data_day, carry=(day == clock.today_trade_date() and carry_from is not None))
     ranges = _ranges(connection, data_day, cutoff)
     ledger = _book(connection, data_day, cutoff)
     portfolio = None if ledger is None else ledger["portfolio_id"]
