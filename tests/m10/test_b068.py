@@ -1,6 +1,6 @@
 """B-068: latest price on stocks/stock/account pages."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from inves_cog.ingest.market import NY
 from inves_cog.web.brief import _snap_ret, _snap_tag
@@ -37,3 +37,26 @@ def test_snap_ret():
 
 def test_day_volume_nullable_on_non_sip():
     assert _snap(201, 199, "Alpaca:iex")["day_volume"] is None
+
+
+def test_scores_carry_signal_date():
+    # regression: trading.daily_scores has signal_date, not trade_date
+    from unittest.mock import MagicMock
+    from inves_cog.web.brief import _scores
+
+    older = {
+        "ticker": "NVDA",
+        "signal_date": DAY - timedelta(days=1),
+        "tech": {},
+        "derived": {},
+        "quality": None,
+        "growth": None,
+        "valuation": None,
+        "timing": None,
+        "entry_pass": None,
+        "tier": None,
+    }
+    conn = MagicMock()
+    conn.execute.side_effect = [MagicMock(fetchall=lambda: []), MagicMock(fetchall=lambda: [older])]
+    out = _scores(conn, DAY, carry=True)
+    assert out["NVDA"]["carried_from"] == DAY - timedelta(days=1)

@@ -495,8 +495,10 @@ def _stocks(payload):
             "</a>"
             "</td></tr>"
         )
+    carried = max((row["carried_from"] for row in flat if row.get("carried_from")), default=None)
+    carry_th = _carry_chip({"carried_from": carried})
     head = "".join(
-        f'<th class="s{" r" if right else ""}" data-sc="{key}">{label}</th>'
+        f'<th class="s{" r" if right else ""}" data-sc="{key}">{label}{carry_th if key == "rsi" else ""}</th>'
         for key, label, right in (
             ("t", "代码", False),
             ("theme", "主题", False),
@@ -1326,7 +1328,9 @@ def _stock(payload):
     elif position.get("risk_level") == "orange":
         chips += ' <span class="chip mid">▲ 下行关注</span>'
     returns = "".join(
-        f'<div><div class="small muted">{label}</div><div style="font-size:16px">{_pct(trend.get(key))}</div></div>'
+        f'<div><div class="small muted">{label}</div><div style="font-size:16px">{_pct(trend.get(key))}</div>'
+        + (f'<div class="small muted">{_text(trend[key + "_tag"])}</div>' if trend.get(key + "_tag") else "")
+        + "</div>"
         for label, key in (
             ("当日", "ret"),
             ("盘后", "post"),
@@ -1368,7 +1372,13 @@ def _stock(payload):
         + _chart(trend, position, payload)
         + f'<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:10px;gap:10px">{returns}'
         + "</div></div>"
-        + '<div class="card"><h2>位置与情绪</h2><div class="kv">'
+        + '<div class="card"><h2>位置与情绪'
+        + (
+            f' <span class="chip stale">沿用 {_text(payload["carried_from"][5:].replace("-", "/"))} 收盘</span>'
+            if payload.get("carried_from")
+            else ""
+        )
+        + '</h2><div class="kv">'
         + f'<span class="k">距 50 日线</span><span>{_pts(trend.get("dev50"))} '
         + f'<span class="small muted">（{money(trend.get("ma50"))}）</span></span>'
         + f'<span class="k">距 200 日线</span><span>{_pts(trend.get("price_vs_ma200"))} '

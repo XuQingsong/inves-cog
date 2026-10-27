@@ -786,7 +786,7 @@ def _scores(connection, day, carry=False):
             (day,),
         )
         for row in older:
-            row["carried_from"] = row["trade_date"]
+            row["carried_from"] = row["signal_date"]
             out.setdefault(row["ticker"], row)
     return out
 
@@ -1738,6 +1738,7 @@ def _member(ticker, day, bars, score, daily, held, events_for, snap=None, elapse
         "held": held,
         "entry_pass": None if score is None else bool(score["entry_pass"]),
         "tier": None if score is None else score.get("tier"),
+        "carried_from": None if score is None else score.get("carried_from"),
         "events": events_for,
         "books": _books(score),
     }

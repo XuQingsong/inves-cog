@@ -18,6 +18,7 @@ from inves_cog.web.brief import (
     _context,
     _day_window,
     _event_title,
+    _freshness,
     _holding_row,
     _member,
     _news_summary,
@@ -26,6 +27,7 @@ from inves_cog.web.brief import (
     _parse_ts,
     _reports,
     _rows,
+    _snap_ret,
     _themes,
     _visible_anomalies,
     event_reasons,
@@ -241,6 +243,33 @@ def _score_row(connection, day, symbol):
         """,
         (day, symbol),
     )
+
+
+def _latest_score_row(connection, day, symbol):
+    """B-068: today's score is written after the close; carry the latest earlier one."""
+    return _one(
+        connection,
+        """
+        SELECT signal_date, tech, derived, quality, growth, valuation, timing, red_lines, tier,
+               m32_ok, gate_pass, entry_pass, null_reason
+        FROM trading.daily_scores
+        WHERE signal_date < %s AND ticker = %s
+        ORDER BY signal_date DESC, (extractor = 'fixed') DESC, params_version DESC
+        LIMIT 1
+        """,
+        (day, symbol),
+    )
+
+
+def _snap_tag(snap):
+    moment = snap["as_of"].astimezone(NY)
+    source = snap.get("source") or ""
+    if source == "Alpaca:iex":
+        return f"IEX 实时 {moment:%H:%M:%S}"
+    if source == "Alpaca:delayed_sip":
+        return f"延迟 15 分 {moment:%H:%M}"
+    session = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
+    return f"{session} {moment:%H:%M}".strip()
 
 
 def _gate_score(row):
@@ -583,7 +612,13 @@ def page_brief_stock(connection, day, clock, symbol):
     if closed is not None:
         return closed
     bars = _bars(connection, symbol, day)
-    gate = _gate_score(_score_row(connection, day, symbol))
+    is_today = day == clock.today_trade_date()
+    raw_score = _score_row(connection, day, symbol)
+    carried_from = None
+    if raw_score is None and is_today:
+        raw_score = _latest_score_row(connection, day, symbol)
+        carried_from = None if raw_score is None else raw_score["signal_date"]
+    gate = _gate_score(raw_score)
     score_row = (
         None
         if gate is None
@@ -601,8 +636,14 @@ def page_brief_stock(connection, day, clock, symbol):
     close_row, post_row = _sessions(connection, day, symbol)
     daily = {} if close_row is None else {symbol: {"ret": _num(close_row["ret"])}}
     held = symbol in context["positions"]
-    member = _member(symbol, day, {symbol: bars}, score_row, daily, held, [])
+    snap = (context.get("intraday") or {}).get(symbol) if is_today else None
+    member = _member(
+        symbol, day, {symbol: bars}, score_row, daily, held, [], snap=snap, elapsed=context.get("elapsed_minutes")
+    )
     trend = _trend_block(bars, day, close_row, post_row, member)
+    if snap is not None and _snap_ret(snap) is not None:
+        trend["ret"] = _snap_ret(snap)
+        trend["ret_tag"] = _snap_tag(snap)
     valuation = _card_for(context, symbol, score_row, member["price"])
     # Fair and neutral prices stay off this payload.
     valuation.pop("neutral", None)
@@ -665,6 +706,8 @@ def page_brief_stock(connection, day, clock, symbol):
     return {
         "page": f"/s/{symbol}",
         "date": day,
+        "freshness": _freshness(context, clock) if is_today else None,
+        "carried_from": None if carried_from is None else carried_from.isoformat(),
         "symbol": symbol,
         "title": symbol,
         "oneliner": oneliner,
