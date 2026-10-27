@@ -1886,6 +1886,8 @@ def page_brief_market(connection, day, clock):
         "today": clock.today_trade_date().isoformat(),
         "is_today": context["day"] == clock.today_trade_date(),
         "intraday": context["intraday"],
+        "mstrip": _market_strip(connection, context, day),
+        "sector_strip": _sector_strip(context, _themes(context, day)),
         "news_modules": _news_views(context),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
@@ -2216,6 +2218,156 @@ def _intraday(connection, day):
         (start, end),
     )
     return {row["ticker"]: dict(row) for row in rows}
+
+
+STRIP_ITEMS = [
+    ("ES=F", "标普期货", "fut"),
+    ("NQ=F", "纳指期货", "fut"),
+    ("RTY=F", "罗素期货", "fut"),
+    ("YM=F", "道指期货", "fut"),
+    ("SPY", "标普", "etf"),
+    ("QQQ", "纳指", "etf"),
+    ("IWM", "罗素", "etf"),
+    ("DGS2", "美债 2 年", "yield"),
+    ("^FVX", "美债 5 年", "yield"),
+    ("^TNX", "美债 10 年", "yield"),
+    ("^TYX", "美债 30 年", "yield"),
+    ("CL=F", "WTI", "cmd"),
+    ("BZ=F", "布伦特", "cmd"),
+    ("GC=F", "黄金", "cmd"),
+    ("DX-Y.NYB", "美元指数", "cmd"),
+    ("BTC-USD", "比特币", "cmd"),
+    ("^VIX", "VIX", "fut"),
+]
+
+SECTOR_ORDER = [
+    "AI 网络与光通信",
+    "存储",
+    "半导体设备",
+    "AI 算力芯片",
+    "AI 服务器与算力云",
+    "数据中心电力与散热",
+    "网络安全",
+    "软件与平台",
+    "互联网",
+]
+
+SECTOR_ETFS = ["SMH", "SOXX", "IGV", "XLK", "XLF", "XLE", "XLV", "XLP", "XLY", "XLI", "XLU", "XLC", "XLRE", "XLB"]
+
+
+def _snap_ret(snap):
+    if snap is None or snap.get("last") is None or not snap.get("prev_close"):
+        return None
+    return float(snap["last"]) / float(snap["prev_close"]) - 1
+
+
+def _strip_item(ticker, label, kind, snap, close_ret, dgs2=None):
+    """One ticker-strip cell: value + signed change (bp for yields)."""
+    if ticker == "DGS2" and dgs2 is not None:
+        return {
+            "label": label,
+            "value": f"{float(dgs2['value']):.2f}%",
+            "chg": "前一日",
+            "dir": 0,
+            "title": f"前一日收盘 {dgs2['observation_date']}",
+        }
+    if snap is not None:
+        ret = _snap_ret(snap)
+        if ret is None:
+            return {"label": label, "value": "—", "chg": None, "dir": 0, "title": "暂缺"}
+        asof = snap["as_of"].astimezone(NY)
+        title = f"截至 {asof:%H:%M} 美东 · 延迟约 {snap.get('delay_minutes', 0)} 分钟"
+        if kind == "yield":
+            bp = (float(snap["last"]) - float(snap["prev_close"])) * 100
+            # yield up = risk-off (red for stocks), down = green
+            return {
+                "label": label,
+                "value": f"{float(snap['last']):.2f}%",
+                "chg": f"{'+' if bp >= 0 else ''}{bp:.1f} 基点",
+                "dir": -1 if bp > 0 else (1 if bp < 0 else 0),
+                "title": title + " · 收益率上升对股市偏空，显示为红",
+            }
+        return {
+            "label": label,
+            "value": f"{float(snap['last']):,.2f}",
+            "chg": f"{'+' if ret >= 0 else ''}{ret * 100:.2f}%",
+            "dir": 1 if ret > 0 else (-1 if ret < 0 else 0),
+            "title": title,
+        }
+    if close_ret is not None:
+        return {
+            "label": label,
+            "value": f"{'+' if close_ret >= 0 else ''}{close_ret * 100:.2f}%",
+            "chg": "收盘",
+            "dir": 1 if close_ret > 0 else (-1 if close_ret < 0 else 0),
+            "title": "当日收盘",
+        }
+    return {"label": label, "value": "—", "chg": None, "dir": 0, "title": "暂缺"}
+
+
+def _market_strip(connection, context, day):
+    intraday = context.get("intraday") or {}
+    close_idx = {row["group_id"]: row["ret"] for row in context.get("rotation") or [] if row["group_kind"] == "index"}
+    dgs2 = None
+    if _table_exists(connection, "ingest.macro_observations"):
+        row = _one(
+            connection,
+            "SELECT value, observation_date FROM ingest.macro_observations"
+            " WHERE series_id = 'DGS2' AND observation_date <= %s ORDER BY observation_date DESC LIMIT 1",
+            (day,),
+        )
+        dgs2 = row
+    items = []
+    last_asof = None
+    last_session = None
+    for ticker, label, kind in STRIP_ITEMS:
+        snap = intraday.get(ticker)
+        if snap and snap.get("as_of"):
+            asof = snap["as_of"].astimezone(NY)
+            if last_asof is None or asof > last_asof:
+                last_asof, last_session = asof, snap.get("session")
+        items.append(_strip_item(ticker, label, kind, snap, close_idx.get(ticker), dgs2))
+    etf_row = [_strip_item(t, t, "etf", intraday.get(t), close_idx.get(t)) for t in SECTOR_ETFS]
+    tail = None
+    if last_asof is not None:
+        label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(last_session, "")
+        tail = f"{label} · 截至 {last_asof:%H:%M} 美东"
+    return {"items": items, "etfs": etf_row, "tail": tail or "收盘"}
+
+
+def _sector_strip(context, themes):
+    intraday = context.get("intraday") or {}
+    by_name = {t["sector"]: t for t in themes or []}
+    ordered = [s for s in SECTOR_ORDER if s in by_name] + [s for s in by_name if s not in SECTOR_ORDER]
+    cards = []
+    for sector in ordered:
+        theme = by_name[sector]
+        members = theme.get("members") or []
+        rets = []
+        for m in members:
+            ret = _snap_ret(intraday.get(m["ticker"]))
+            if ret is None:
+                ret = m.get("ret")
+            if ret is not None:
+                rets.append((m["ticker"], ret))
+        average = sum(r for _, r in rets) / len(rets) if rets else None
+        leader = max(rets, key=lambda x: x[1]) if rets else None
+        laggard = min(rets, key=lambda x: x[1]) if rets else None
+        cards.append(
+            {
+                "sector": sector,
+                "slug": f"theme-{_slug(sector)}",
+                "average": average,
+                "leader": leader,
+                "laggard": laggard,
+                "held": theme.get("held_count") or 0,
+            }
+        )
+    return cards
+
+
+def _slug(sector):
+    return sector.replace(" ", "-").replace("/", "-")
 
 
 def _translations(connection, info_ids):

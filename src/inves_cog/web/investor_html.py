@@ -242,6 +242,8 @@ def _market(payload):
         + f"<h1>判断：{_text(judgment)}</h1>"
         + f'<p class="sub">{_text(_lead(payload))}</p>'
         + _carry_banner(payload)
+        + _ticker_strip(payload)
+        + _sector_strip(payload)
         + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
@@ -477,7 +479,8 @@ def _stocks(payload):
             else f"left:50%;width:{width:.1f}%;background:#A9D2BA"
         )
         theme_rows.append(
-            f'<tr class="click" data-th="{_text(sector)}"><td><b>{_text(sector)}</b></td>'
+            f'<tr class="click" id="theme-{_text(str(sector).replace(" ", "-").replace("/", "-"))}" '
+            f'data-th="{_text(sector)}"><td><b>{_text(sector)}</b></td>'
             '<td><div style="display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center">'
             '<div style="position:relative;height:12px"><div style="position:absolute;left:50%;top:-2px;bottom:-2px;'
             'border-left:1px solid var(--line)"></div>'
@@ -1812,6 +1815,53 @@ def _num_attr(value):
 
 
 # ---------- B-063 today-page news modules ----------
+
+
+def _ticker_strip(payload):
+    strip = payload.get("mstrip")
+    if not strip:
+        return ""
+    cells = []
+    for it in strip.get("items") or []:
+        cls = "up" if it["dir"] > 0 else ("down" if it["dir"] < 0 else "flat")
+        chg = f'<small class="{cls}">{_text(it["chg"])}</small>' if it.get("chg") else ""
+        cells.append(
+            f'<span class="tcell" title="{_text(it.get("title") or "")}">'
+            f"<b>{_text(it['label'])}</b> {_text(it['value'])}{chg}</span>"
+        )
+    tail = strip.get("tail")
+    note = f'<span class="small muted">{_text(tail)}</span>' if tail else ""
+    return (
+        '<div class="card mstrip" id="mstrip"><div class="ticker-row">'
+        + "".join(cells)
+        + "</div>"
+        + f'<div class="small muted" style="margin-top:4px">{note} · 盘前/盘中行情只用于看盘，不进入规则 A</div></div>'
+    )
+
+
+def _sector_strip(payload):
+    cards = payload.get("sector_strip")
+    if not cards:
+        return ""
+    cells = []
+    for c in cards:
+        avg = c.get("average")
+        cls = "up" if avg is not None and avg > 0 else ("down" if avg is not None and avg < 0 else "flat")
+        lead = c.get("leader")
+        lag = c.get("laggard")
+        detail = []
+        if lead:
+            detail.append(f"领涨 {lead[0]} {_text(_signed(lead[1] * 100, 1))}")
+        if lag:
+            detail.append(f"领跌 {lag[0]} {_text(_signed(lag[1] * 100, 1))}")
+        held = f"持仓 {c['held']}" if c.get("held") else ""
+        detail.append(held)
+        cells.append(
+            f'<a class="scell" href="/stocks#{_text(c["slug"])}"><span class="sname">{_text(c["sector"])}</span>'
+            f'<span class="num {cls}">{_pct(avg)}</span>'
+            f'<span class="small muted">{_text(" · ".join(d for d in detail if d))}</span></a>'
+        )
+    return f'<div class="card sstrip" id="sstrip"><div class="sector-grid">{"".join(cells)}</div></div>'
 
 
 def _carry_banner(payload):
