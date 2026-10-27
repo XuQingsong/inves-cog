@@ -786,11 +786,12 @@ def _scores(connection, day, carry=False):
             (day,),
         )
         for row in older:
+            row["carried_from"] = row["trade_date"]
             out.setdefault(row["ticker"], row)
     return out
 
 
-def _ranges(connection, day, cutoff):
+def _ranges(connection, day, cutoff, carry=False):
     rows = _rows(
         connection,
         """
@@ -800,7 +801,22 @@ def _ranges(connection, day, cutoff):
         """,
         (day, cutoff),
     )
-    return {row["ticker"]: row for row in rows}
+    out = {row["ticker"]: row for row in rows}
+    if carry:
+        older = _rows(
+            connection,
+            """
+            SELECT DISTINCT ON (ticker) ticker, neutral, status, payload, trade_date
+            FROM valuation_v1.ranges
+            WHERE trade_date < %s AND observed_at < %s
+            ORDER BY ticker, trade_date DESC
+            """,
+            (day, cutoff),
+        )
+        for row in older:
+            row["carried_from"] = row["trade_date"]
+            out.setdefault(row["ticker"], row)
+    return out
 
 
 def _news_seen(connection, cutoff):
@@ -1481,7 +1497,7 @@ def _context(connection, day, clock):
     anomalies = _anomalies(connection, day, cutoff)
     events = _events(connection, anomalies, cutoff)
     scores = _scores(connection, data_day, carry=(day == clock.today_trade_date() and carry_from is not None))
-    ranges = _ranges(connection, data_day, cutoff)
+    ranges = _ranges(connection, data_day, cutoff, carry=(day == clock.today_trade_date() and carry_from is not None))
     ledger = _book(connection, data_day, cutoff)
     portfolio = None if ledger is None else ledger["portfolio_id"]
     state = _state(ledger)
@@ -2571,6 +2587,8 @@ def _news_views_today(context):
         return abs(member["ret"]) if member["ret"] is not None else None
 
     mods = _news_views(context, mover_key)
+    elapsed = context.get("elapsed_minutes")
+    bars = context.get("bars") or {}
     for m in mods["movers"]:
         snap = intraday.get(m["ticker"])
         if snap is not None and _snap_ret(snap) is not None:
@@ -2578,6 +2596,12 @@ def _news_views_today(context):
             m["snap_asof"] = snap["as_of"].astimezone(NY).strftime("%H:%M")
             m["snap_delay"] = snap.get("delay_minutes")
             m["snap_session"] = snap.get("session")
+        # B-068: same time-scaled multiple as the stocks table
+        prior = [r["volume"] for r in (bars.get(m["ticker"]) or []) if r["trade_date"] < context["day"] and r["volume"]]
+        if snap is not None and snap.get("day_volume") and elapsed and prior:
+            avg = sum(prior[-20:]) / min(20, len(prior))
+            m["vol"] = int(snap["day_volume"] / (avg * min(390, elapsed) / 390))
+            m["vol_label"] = "按时间折算"
     return mods
 
 
