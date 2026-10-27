@@ -580,6 +580,11 @@ def _px_cell(row):
     return f"{float(price):,.2f}{small}"
 
 
+def _carry_chip(row):
+    d = row.get("carried_from") or (row.get("score") or {}).get("carried_from")
+    return f' <small class="chip stale">沿用 {str(d)[5:].replace("-", "/")} 收盘</small>' if d else ""
+
+
 def _stock_row(payload, row, day):
     ticker = row.get("ticker") or ""
     ret = row.get("ret")
