@@ -3,7 +3,7 @@
 from datetime import date, datetime
 
 from inves_cog.ingest.market import NY
-from inves_cog.web.brief import _snap_tag, _snap_ret
+from inves_cog.web.brief import _snap_ret, _snap_tag
 
 DAY = date(2036, 10, 26)
 NOW = datetime.combine(DAY, datetime.strptime("10:30", "%H:%M").time(), tzinfo=NY)
