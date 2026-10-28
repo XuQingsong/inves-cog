@@ -637,3 +637,11 @@ A023第二个完整美东自然日新闻补齐：ET10-27 first_seen新入库3194
 ## A-014 补充四十六 已收到／进行中：部署B068页面补充
 
 收到main `bcc822f51360e17bb598dee01af8194c9327d7ee`明确安装指令，PR95验收merge `4b47cac062719c406341ddf1b752b00ac7303cee`已在main；准确head `6c59523450e7d85c89b8545f8fe0c5f31ef3f9fc` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40638298979/job/122650299306) SUCCESS已核对。按批准范围快进并只重启pages，核验三个页面状态和暂缺数，其他进程/配置保持，无迁移或手工模型调用；午夜向量故障仍单列，不能将本次页面修复当向量修复。
+
+## A-014 补充四十六 已完成：B068页面补充已上线
+
+2026-10-28 05:48:12 UTC生产快进验收merge `4b47cac062719c406341ddf1b752b00ac7303cee`（[PR95](https://github.com/XuQingsong/inves-cog/pull/95)；准确head `6c59523450e7d85c89b8545f8fe0c5f31ef3f9fc` 的[phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/40638298979/job/122650299306)）。只重启pages，旧PID4058025已实际退出，新PID221534 RUNNING；其余Supervisor业务PID全部保持，包括主scheduler3981483、四路行情4057908/4057916/4057966/4058013、翻译3258700、M93599229等。配置字节保持，工作区干净，无迁移/数据补写/模型请求/预算变更。
+
+部署前首轮预检发现额外ops/answers/A-014.md路径，在修改代码或重启之前停止；只读核对差异后确认它仅为已批准运维答复，随main继承，继续同一安装，未跳过范围检查。没有重复已完成0009迁移。实际核验三页均HTTP200，返回HTML“暂缺”次数：首页`/`1、列表`/stocks`2、个股`/s/NVDA`5。计数为当前数据时点，不把与昨日不同时间的计数差当严格同数据比较，也不称全部缺失清零。证据本项目`ops/b068-followup-deploy-20261028.json` phaseverified。
+
+已自行决定：无新增。下一步需求方线上走查；A026午夜向量19项失败仍单列，未被页面部署修复，不手工调模型重试；08:00 UTC后A025完整隔夜及10-29/30既定用量观察保持。
