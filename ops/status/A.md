@@ -621,3 +621,15 @@ A025全天统计按10-27 08:00至10-28 00:00 UTC（ET04–20）的首次fetched_
 A023第二交易日收盘：bars_full自然00:20:43–00:29:09 ok/227109；vix_daily00:45:26–27 ok/75。ET10-27 VIX Yahoo17.5200004578（约17.52），CBOE最新仅10-26的18.39，不能将CBOE成功取回当当日新鲜；VIX3M当日CBOE19.57，Yahoo19.5699996948。日历财报表2739条，06ET自然job新增/处理2665、来源Nasdaq；宏观表128条，06ET自然job degraded/107且source_health记录SourceError statusNone，存在部分失败，不能称整批完整刷新。未来财报窗口覆盖持仓5/13、标的池29/59，仅聚合计数不输出持仓；不在未来10交易日内有财报不等于缺失。没有因此擅自启动新付费/备用调用或重复日历补跑，保留源端限制，按已授权下一自然周期观察。
 
 ET10-27截至本次20:50ET新闻新入库3147条，均extraction_status=ok；关联新闻info_id或news_triage用途的模型调用0。AlpacaNews健康ok，最新原新闻00:11:05、最近成功采集00:41:56。美东自然日尚未结束（04:00 UTC），3147不是完整24小时最终数；将在05:00 UTC后的A026用量核验一并补齐A023完整第二日新闻与调用统计。A026连续两自然日任务仍未到完成窗口，不能因本轮新闻调用0称未来费用已经验证。已自行决定：无新增；目前无需用户操作，源端限制如实保留。
+
+## OPS-A026 进行中：首个午夜窗口真实用量已核验；向量失败单列
+
+2026-10-28 05:01:11 UTC（ET01:01）只读核验，生产head `e5329528699f2c96efcb41900df5e769bfd803af`；A026已于前日15:27:52.900699安装，PR91准确head `49dc405ba20574a91d3869896f4d8d45b8f57508` 的[CI success](https://github.com/XuQingsong/inves-cog/actions/runs/40528031606/job/122272829343)沿用已验收证据。main仍`1e30f9e40db4037ad2ad4858faaa43cea96f0428`，无新任务。证据`ops/a026-midnight-usage-20261028T050111Z.json`，本轮不补采、不手工模型、不重跑清理或迁移。
+
+ET10-28 00:00至01:01：news_card19次，输入32295/输出5275=37570 token，failed0/usage_missing0；summary_oneliner1次，输入86/输出24=110 token，failed0/usage_missing0。info_fields_extraction0次/0token，entity_tagging0次/0token；其余task在该时段0。19次news_card均有info_ids、关联19条已有CIK/ticker映射的池内/持仓公告，非相关/未匹配0、无关联ID调用0；只输出计数，不输出私有发行人或持仓。当前所有kind pending0，不能把曾保留相关1条一直写成未处理。
+
+午夜自然enrich前三轮04:00:16–58 statusdegraded，processed32/32/4；计数tagging_failed0、deferred0，但embedding_failed2/15/2，合计19。后续04:01及每10分钟新结构化条目自然rules_only_structured1/statusok。已对19次公告关联结果独立核验：Form4 15、sec_8k4，extraction_status均ok，embedding错误均SourceError；安全分类未暴露429/401/403/404/402、timeout/quota/balance/budget指标，cause为空，现有存储不足以确认底层原因。news_card生成成功与向量生成失败是两件事，pending0不能冒称向量成功。证据`ops/a026-midnight-rounds-20261028.json`、`a026-midnight-embedding-summary-20261028.json`、`a026-midnight-embedding-categories-20261028.json`。已在对话直接说明影响：这19条相关公告的向量检索输入缺失，公告分析结果已保存；底层原因未知。未手工重试模型/embedding或擅改费用、来源、权限。请需求方评估是否下发限定的向量链路诊断/修复任务；A只按既有部署与自然用量观察继续，不以未知错误编造充值结论。
+
+ET10-27完整自然日分task（安装前后分列）：安装前info_fields_extraction236次/输入39744输出9931；news_card294次/输入394089输出45923，7次failed且usage_missing7，已知token和不代表未知费用为0；news_translate6次/输入6563输出4142。安装后至ET午夜仅anomaly_candidates1次/14892+2220、claim_extraction1次/2076+3076、move_card1次/34693+1317，均failed0/usage_missing0；这证明保留归因自然运行，不能把安装前236次info_fields算作新版本违规。ET10-27全天entity_tagging0；完整原始分段在receipt，不将半日安装说成完整两天用量验收。
+
+A023第二个完整美东自然日新闻补齐：ET10-27 first_seen新入库3194条，全部extraction_statusok；关联news:条目或news_triage用途的模型调用0。前一交易日2935条/新闻模型0的已核验证据沿用；两日观察要求的数据已回报，CBOE当日更新滞后、宏观日历部分失败等已知限制仍保留供需求方验收，不将“观察结束”冒称所有源完整。A026当前仅第一天首小时通过用量范围核验，第二天及两个完整自然日尚待：10-29 05:00 UTC后同口径并补齐ET10-28全日，10-30 04:00 UTC后补齐ET10-29。A025完整隔夜08:00 UTC后核验。已自行决定：无新增。
