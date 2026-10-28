@@ -2613,11 +2613,14 @@ def _news_views_today(context):
             m["snap_delay"] = snap.get("delay_minutes")
             m["snap_session"] = snap.get("session")
         # B-068: same time-scaled multiple as the stocks table
-        prior = [r["volume"] for r in (bars.get(m["ticker"]) or []) if r["trade_date"] < context["day"] and r["volume"]]
+        rows = [r for r in (bars.get(m["ticker"]) or []) if r["trade_date"] < context["day"] and r["volume"]]
+        prior = [r["volume"] for r in rows]
         if snap is not None and snap.get("day_volume") and elapsed and prior:
-            avg = sum(prior[-20:]) / min(20, len(prior))
-            m["vol"] = int(snap["day_volume"] / (avg * min(390, elapsed) / 390))
+            m["vol"] = volume_multiple(int(snap["day_volume"] / (min(390, elapsed) / 390)), prior)
             m["vol_label"] = "按时间折算"
+        elif m.get("vol") is None and len(prior) >= 2:
+            m["vol"] = volume_multiple(prior[-1], prior[:-1])
+            m["vol_label"] = f"沿用 {rows[-1]['trade_date']:%m/%d}"
     return mods
 
 

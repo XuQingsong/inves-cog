@@ -1329,7 +1329,8 @@ def _stock(payload):
     elif position.get("risk_level") == "orange":
         chips += ' <span class="chip mid">▲ 下行关注</span>'
     returns = "".join(
-        f'<div><div class="small muted">{label}</div><div style="font-size:16px">{_pct(trend.get(key))}</div>'
+        f'<div><div class="small muted">{_text(trend.get(key + "_label") or label)}</div>'
+        f'<div style="font-size:16px">{_pct(trend.get(key))}</div>'
         + (f'<div class="small muted">{_text(trend[key + "_tag"])}</div>' if trend.get(key + "_tag") else "")
         + "</div>"
         for label, key in (
@@ -1555,7 +1556,7 @@ def _chart(trend, position, payload):
     points = " ".join(f"{x_at(index):.1f},{y_at(value):.1f}" for index, value in enumerate(closes))
     svg.append(f'<polyline fill="none" stroke="#1F2A2A" stroke-width="1.8" points="{points}"/>')
     svg.append(f'<circle cx="{x_at(len(closes) - 1):.1f}" cy="{y_at(closes[-1]):.1f}" r="4" fill="#1F2A2A"/>')
-    day = _day(payload)
+    day = _as_date((payload.get("trend") or {}).get("close_date")) or _day(payload)
     end = "" if day is None else f"{day.month:02d}-{day.day:02d} "
     svg.append(
         f'<text x="{left}" y="{height - 6}" font-size="10" fill="#8A918F">约 {len(closes)} 个交易日前</text>'

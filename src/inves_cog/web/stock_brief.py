@@ -416,6 +416,7 @@ def _trend_block(bars, day, close_row, post_row, member):
     returns = {lag: session_return(closes, lag) for lag in _RETURN_LAGS}
     price = member["price"]
     return {
+        "close_date": next((row["trade_date"] for row in reversed(bars) if row["close"] is not None), None),
         "ret": None if close_row is None else _num(close_row["ret"]),
         "post": None if post_row is None else _num(post_row["ret"]),
         "ret_5": returns[5],
@@ -652,8 +653,10 @@ def page_brief_stock(connection, day, clock, symbol):
         if snap["as_of"].astimezone(NY).date() != day:
             trend["ret_label"] = "最近"
         # 盘后 row: latest post-session snapshot (may be the previous session's)
-        if snap.get("session") == "post":
-            trend["post"] = _snap_ret(snap)
+        post_day = snap["as_of"].astimezone(NY).date()
+        post_close = next((float(r["close"]) for r in bars if r["trade_date"] == post_day and r["close"]), None)
+        if snap.get("session") == "post" and post_close:
+            trend["post"] = float(snap["last"]) / post_close - 1
             trend["post_tag"] = _snap_tag(snap, day)
     valuation = _card_for(context, symbol, score_row, member["price"])
     # Fair and neutral prices stay off this payload.
