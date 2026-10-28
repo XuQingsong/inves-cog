@@ -677,3 +677,11 @@ ET04:00起真实恢复每分钟，08:00–08:06七个job均已结束，但status
 2026-10-28 10:18:12 UTC（北京18:18）只读核验，生产head `4b47cac062719c406341ddf1b752b00ac7303cee`未变，main仍`bcc822f51360e17bb598dee01af8194c9327d7ee`无新任务。证据`ops/a023-calendar-natural-20261028T101812Z.json`。美东06:00自然财报job10:00:57–10:01:20 statusok/processed2603，NasdaqEarnings健康ok、failure0，未来最晚11-10；宏观日历10:01:20–10:01:49 statusok/processed152，NasdaqEconomic健康ok、failure0，最晚11-07。昨日宏观部分失败的健康状态已恢复，不把旧失败记录当作持续当前故障，也不倒写昨日完整成功。
 
 当前表中财报Nasdaq2854行、宏观Nasdaq146行，latest fetched分别10:01:20.535739与10:01:48.264232；job processed152与表内去重146是不同统计口径，不能将152冒称最终存储行数。未手工补采、调用AlphaVantage/模型、修改代码参数/角色或重启。已自行决定：无新增；本轮审批超时后按允许一次重试完成最新控制核对，未绕过审批。下一步美债盘前当日新值在12:30 UTC（北京20:30）后只读核验；A026明日05:00 UTC用量窗口与向量开发范围等待不变。本局部源端运维限制已恢复，无需用户操作。
+
+## OPS-A025 进行中：三种美债收益率已自然取得当日盘前新值
+
+2026-10-28 12:37:37 UTC（北京20:37）按既定窗口只读核验；main仍`bcc822f51360e17bb598dee01af8194c9327d7ee`、A运行且无新任务，生产head `4b47cac062719c406341ddf1b752b00ac7303cee`。沿用A025 [PR90](https://github.com/XuQingsong/inves-cog/pull/90)准确head `ebd1df21a5c844b7247df1af8884fbc7716f2bf6` 的[CI success](https://github.com/XuQingsong/inves-cog/actions/runs/40490321442/job/122142329527)，不重新部署或测试。证据`ops/a025-yield-natural-20261028T123737Z.json`。
+
+^FVX/^TNX/^TYX最新原as_of均为今日12:21:55 UTC，首次采集12:37:00，sessionpre；此前仅有前日旧值的限制已经消除。12:36和12:37两轮自然Yahoo job均已结束、statusok/processed13；12:33–35仍degraded/10，不倒写早盘成功。新报价到首次采集约15分05秒，保留Yahoo延迟属性，不称实时。source_health仍是12:25聚合，保留degraded与三项ValueError旧note；它早于已成功的两轮，不把尚未刷新汇总当作当前三种收益率仍无新值，也不称汇总健康已经ok。
+
+未手工请求行情源、模型或补采，无参数/来源/调度/角色变更或服务重启。已自行决定：无新增。已直接通知用户恢复，本局部无需用户操作；首日其他已说明的验收限制与7/30天真实保留期仍保留。下一步沿既定窗口10-29 05:00 UTC核对A026午夜与完整ET10-28用量、10-30 04:00 UTC后补第二个完整自然日；向量开发范围仍待明确任务，费用开关保持原批准状态。不为滞后的健康汇总新增逐分钟巡检。
