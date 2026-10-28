@@ -633,3 +633,7 @@ ET10-28 00:00至01:01：news_card19次，输入32295/输出5275=37570 token，fa
 ET10-27完整自然日分task（安装前后分列）：安装前info_fields_extraction236次/输入39744输出9931；news_card294次/输入394089输出45923，7次failed且usage_missing7，已知token和不代表未知费用为0；news_translate6次/输入6563输出4142。安装后至ET午夜仅anomaly_candidates1次/14892+2220、claim_extraction1次/2076+3076、move_card1次/34693+1317，均failed0/usage_missing0；这证明保留归因自然运行，不能把安装前236次info_fields算作新版本违规。ET10-27全天entity_tagging0；完整原始分段在receipt，不将半日安装说成完整两天用量验收。
 
 A023第二个完整美东自然日新闻补齐：ET10-27 first_seen新入库3194条，全部extraction_statusok；关联news:条目或news_triage用途的模型调用0。前一交易日2935条/新闻模型0的已核验证据沿用；两日观察要求的数据已回报，CBOE当日更新滞后、宏观日历部分失败等已知限制仍保留供需求方验收，不将“观察结束”冒称所有源完整。A026当前仅第一天首小时通过用量范围核验，第二天及两个完整自然日尚待：10-29 05:00 UTC后同口径并补齐ET10-28全日，10-30 04:00 UTC后补齐ET10-29。A025完整隔夜08:00 UTC后核验。已自行决定：无新增。
+
+## A-014 补充四十六 已收到／进行中：部署B068页面补充
+
+收到main `bcc822f51360e17bb598dee01af8194c9327d7ee`明确安装指令，PR95验收merge `4b47cac062719c406341ddf1b752b00ac7303cee`已在main；准确head `6c59523450e7d85c89b8545f8fe0c5f31ef3f9fc` 的[phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40638298979/job/122650299306) SUCCESS已核对。按批准范围快进并只重启pages，核验三个页面状态和暂缺数，其他进程/配置保持，无迁移或手工模型调用；午夜向量故障仍单列，不能将本次页面修复当向量修复。
