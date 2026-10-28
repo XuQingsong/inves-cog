@@ -261,14 +261,19 @@ def _latest_score_row(connection, day, symbol):
     )
 
 
-def _snap_tag(snap):
+def _snap_tag(snap, day=None):
+    """IEX/SIP source tag; a snapshot from an earlier ET date shows its date."""
     moment = snap["as_of"].astimezone(NY)
     source = snap.get("source") or ""
+    session = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
+    if day is not None and moment.date() != day:
+        if source == "Alpaca:iex":
+            return f"IEX {moment:%m/%d %H:%M:%S}"
+        return f"{session} {moment:%m/%d %H:%M}".strip()
     if source == "Alpaca:iex":
         return f"IEX 实时 {moment:%H:%M:%S}"
     if source == "Alpaca:delayed_sip":
         return f"延迟 15 分 {moment:%H:%M}"
-    session = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
     return f"{session} {moment:%H:%M}".strip()
 
 
@@ -411,6 +416,7 @@ def _trend_block(bars, day, close_row, post_row, member):
     returns = {lag: session_return(closes, lag) for lag in _RETURN_LAGS}
     price = member["price"]
     return {
+        "close_date": next((row["trade_date"] for row in reversed(bars) if row["close"] is not None), None),
         "ret": None if close_row is None else _num(close_row["ret"]),
         "post": None if post_row is None else _num(post_row["ret"]),
         "ret_5": returns[5],
@@ -643,7 +649,15 @@ def page_brief_stock(connection, day, clock, symbol):
     trend = _trend_block(bars, day, close_row, post_row, member)
     if snap is not None and _snap_ret(snap) is not None:
         trend["ret"] = _snap_ret(snap)
-        trend["ret_tag"] = _snap_tag(snap)
+        trend["ret_tag"] = _snap_tag(snap, day)
+        if snap["as_of"].astimezone(NY).date() != day:
+            trend["ret_label"] = "最近"
+        # 盘后 row: latest post-session snapshot (may be the previous session's)
+        post_day = snap["as_of"].astimezone(NY).date()
+        post_close = next((float(r["close"]) for r in bars if r["trade_date"] == post_day and r["close"]), None)
+        if snap.get("session") == "post" and post_close:
+            trend["post"] = float(snap["last"]) / post_close - 1
+            trend["post_tag"] = _snap_tag(snap, day)
     valuation = _card_for(context, symbol, score_row, member["price"])
     # Fair and neutral prices stay off this payload.
     valuation.pop("neutral", None)

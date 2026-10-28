@@ -1704,16 +1704,17 @@ def _member(ticker, day, bars, score, daily, held, events_for, snap=None, elapse
     prior_rows = [row for row in history if row["trade_date"] < day and row["volume"] is not None]
     today_volume = None if not today_rows else today_rows[-1]["volume"]
     vol_label = None
-    # B-068: intraday volume multiple = cumulative volume / (avg20 x elapsed/390)
-    if snap is not None and snap.get("day_volume") and elapsed:
-        prior_avg = (
-            sum(prior_rows[-20:][i]["volume"] for i in range(len(prior_rows[-20:]))) / min(20, len(prior_rows))
-            if prior_rows
-            else None
-        )
-        if prior_avg:
-            today_volume = int(snap["day_volume"] / (prior_avg * elapsed / 390))
-            vol_label = "按时间折算"
+    prior_avg = sum(r["volume"] for r in prior_rows[-20:]) / min(20, len(prior_rows)) if prior_rows else None
+    # B-068: intraday multiple = cumulative vol / (avg20 x elapsed/390); before the
+    # open or without same-day volume, carry the last completed session's multiple.
+    if snap is not None and snap.get("day_volume") and elapsed and prior_avg:
+        today_volume = int(snap["day_volume"] / (prior_avg * min(390, elapsed) / 390))
+        vol_label = "按时间折算"
+    elif today_volume is None and len(prior_rows) >= 2 and prior_rows[-1].get("volume"):
+        # previous completed session's own multiple: its volume / avg of the
+        # 20 sessions before it (volume_multiple below computes the ratio).
+        today_volume = prior_rows[-1]["volume"]
+        vol_label = f"沿用 {prior_rows[-1]['trade_date']:%m/%d}"
     ret = None if ticker not in daily else daily[ticker]["ret"]
     if ret is None:
         close, previous = _session_closes(history, day)
@@ -1725,7 +1726,10 @@ def _member(ticker, day, bars, score, daily, held, events_for, snap=None, elapse
     return {
         "ticker": ticker,
         "ret": ret,
-        "volume_multiple": volume_multiple(today_volume, [row["volume"] for row in prior_rows]),
+        "volume_multiple": volume_multiple(
+            today_volume,
+            [row["volume"] for row in (prior_rows[:-1] if vol_label and "沿用" in vol_label else prior_rows)],
+        ),
         "rsi": _number(tech.get("rsi")),
         "price_vs_ma200": _number(tech.get("price_vs_ma200")),
         "drawdown252": _number(tech.get("drawdown252")),
@@ -1733,7 +1737,7 @@ def _member(ticker, day, bars, score, daily, held, events_for, snap=None, elapse
         "price": _price(tech, today_rows or history),
         "snap_ret": snap_ret,
         "snap_price": float(snap["last"]) if snap is not None and snap.get("last") else None,
-        "snap_tag": _snap_tag(snap),
+        "snap_tag": _snap_tag(snap, day),
         "vol_label": vol_label,
         "held": held,
         "entry_pass": None if score is None else bool(score["entry_pass"]),
@@ -2404,17 +2408,24 @@ SECTOR_ORDER = [
 SECTOR_ETFS = ["SMH", "SOXX", "IGV", "XLK", "XLF", "XLE", "XLV", "XLP", "XLY", "XLI", "XLU", "XLC", "XLRE", "XLB"]
 
 
-def _snap_tag(snap):
-    """'IEX 12:11:50' / '延迟 15 分 11:56' / session label (B-067 sources)."""
+def _snap_tag(snap, day=None):
+    """'IEX 12:11:50' / '延迟 15 分 11:56' / session label (B-067 sources).
+
+    A snapshot from a previous ET date shows the date and session instead of a
+    bare time, so an old post-session quote can't read as today's price."""
     if snap is None or not snap.get("as_of"):
         return None
     as_of = snap["as_of"].astimezone(NY)
     src = snap.get("source") or ""
+    sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
+    if day is not None and as_of.date() != day:
+        if src == "Alpaca:iex":
+            return f"IEX {as_of:%m/%d %H:%M:%S}"
+        return f"{sess} {as_of:%m/%d %H:%M}".strip()
     if src == "Alpaca:iex":
         return f"IEX {as_of:%H:%M:%S}"
     if src == "Alpaca:delayed_sip":
         return f"延迟 15 分 {as_of:%H:%M}"
-    sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "overnight": "隔夜"}.get(snap.get("session"), "")
     return f"{sess} {as_of:%H:%M}".strip()
 
 
@@ -2602,11 +2613,14 @@ def _news_views_today(context):
             m["snap_delay"] = snap.get("delay_minutes")
             m["snap_session"] = snap.get("session")
         # B-068: same time-scaled multiple as the stocks table
-        prior = [r["volume"] for r in (bars.get(m["ticker"]) or []) if r["trade_date"] < context["day"] and r["volume"]]
+        rows = [r for r in (bars.get(m["ticker"]) or []) if r["trade_date"] < context["day"] and r["volume"]]
+        prior = [r["volume"] for r in rows]
         if snap is not None and snap.get("day_volume") and elapsed and prior:
-            avg = sum(prior[-20:]) / min(20, len(prior))
-            m["vol"] = int(snap["day_volume"] / (avg * min(390, elapsed) / 390))
+            m["vol"] = volume_multiple(int(snap["day_volume"] / (min(390, elapsed) / 390)), prior)
             m["vol_label"] = "按时间折算"
+        elif m.get("vol") is None and len(prior) >= 2:
+            m["vol"] = volume_multiple(prior[-1], prior[:-1])
+            m["vol_label"] = f"沿用 {rows[-1]['trade_date']:%m/%d}"
     return mods
 
 
