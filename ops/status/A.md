@@ -685,3 +685,15 @@ ET04:00起真实恢复每分钟，08:00–08:06七个job均已结束，但status
 ^FVX/^TNX/^TYX最新原as_of均为今日12:21:55 UTC，首次采集12:37:00，sessionpre；此前仅有前日旧值的限制已经消除。12:36和12:37两轮自然Yahoo job均已结束、statusok/processed13；12:33–35仍degraded/10，不倒写早盘成功。新报价到首次采集约15分05秒，保留Yahoo延迟属性，不称实时。source_health仍是12:25聚合，保留degraded与三项ValueError旧note；它早于已成功的两轮，不把尚未刷新汇总当作当前三种收益率仍无新值，也不称汇总健康已经ok。
 
 未手工请求行情源、模型或补采，无参数/来源/调度/角色变更或服务重启。已自行决定：无新增。已直接通知用户恢复，本局部无需用户操作；首日其他已说明的验收限制与7/30天真实保留期仍保留。下一步沿既定窗口10-29 05:00 UTC核对A026午夜与完整ET10-28用量、10-30 04:00 UTC后补第二个完整自然日；向量开发范围仍待明确任务，费用开关保持原批准状态。不为滞后的健康汇总新增逐分钟巡检。
+
+## OPS-A026 进行中：首个完整自然日与第二个午夜窗口已核验
+
+2026-10-29 05:09:12–05:16:37 UTC（北京13:09–13:16）按既定窗口只读核验；main仍`bcc822f51360e17bb598dee01af8194c9327d7ee`、A运行且无新任务，生产head `4b47cac062719c406341ddf1b752b00ac7303cee`。A026安装时间仍10-27 15:27:52.900699 UTC，沿用[PR91](https://github.com/XuQingsong/inves-cog/pull/91)准确head `49dc405ba20574a91d3869896f4d8d45b8f57508` 的[CI success](https://github.com/XuQingsong/inves-cog/actions/runs/40528031606/job/122272829343)，不重复部署、迁移或历史清理。证据`ops/a026-midnight-usage-20261029T050912Z.json`、`ops/a026-day-scope-20261029T051032Z.json`、`ops/a026-enrich-state-20261029.json`。
+
+ET10-28完整自然日（UTC10-28 04:00至10-29 04:00）各task实际调用/输入/输出：anomaly_candidates 3/32999/4665，claim_extraction 5/10161/14942，move_card 5/156441/2093，news_card 52/84512/13669，news_translate 6/6611/4204，summary_oneliner 1/86/24；共72次、330407 token，所有记录failed0、usage_missing0。info_fields_extraction及entity_tagging均0次；新闻入库3985条、extraction_status均ok，关联news条目或news_triage用途模型调用0。news_translate的6次是保留翻译用途，与新闻分类调用0分别呈现，不称全部新闻相关模型0。52次news_card关联52条范围内sec_8k/form4，无不相关/未匹配、无空info_ids；范围依据当前池、纸面持仓和CIK映射，仅输出聚合计数。
+
+ET10-29午夜至01:10实际仅summary_oneliner 1次、130+28=158 token，failed0/usage_missing0；news_card及停用的两个task均0。当前全部kind pending0。该午夜窗口无info_enrichment job记录；CLI仅在has_pending_info时建立job，不能编造午夜已跑某批。唯一enrich实际PID3981485存在，scheduler3981483及既有Supervisor业务进程保持，结合无pending解释当前空闲，进程存活本身不作业务成功证据。
+
+完整ET10-28 enrich有165轮ok/processed2530、14轮degraded/processed406；向量开关仍false，既有向量缺失问题未修复，不能把模型调用成功、pending0或本次用量达标等同向量成功。本轮未重新请求向量、调模型、补采、改参数/来源/角色/调度或重启。首版只读脚本日期替换误指部署证据为10-28，读取阶段即失败，修正回实际10-27后完成；无业务写入或重复执行。
+
+已自行决定：无新增。本次完成首个完整日与第二个午夜窗口的自然观察，两个完整自然日仍未齐；下一步10-30 04:00 UTC（北京12:00）后核对ET10-29全日并收口连续两日用量。向量开发仍须明确任务及原费用恢复边界，不擅自开启付费。当前无需用户操作；已知向量限制已向用户明确披露，不重复要求既有授权。
