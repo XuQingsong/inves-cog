@@ -173,8 +173,6 @@ def test_live_perception_merge_across_runs_on_disposable_database():
         conn.execute("SET LOCAL ROLE role_perception")
         import scripts.schedule_live_perception as sched
 
-        sql = Path("migrations/phase1_m7_0003_news_events.sql").read_text().replace("BEGIN;", "").replace("COMMIT;", "")
-        conn.execute(sql)
         t0 = "2026-10-28T20:01:00+00:00"
         t1 = "2026-10-28T20:20:00+00:00"
         conn.execute(
