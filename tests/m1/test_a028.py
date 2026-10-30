@@ -302,7 +302,7 @@ def test_long_jobs_not_started_1510_1558():
         Ops.return_value.health_rows.return_value = []
         runs = []
         Runner = MagicMock()
-        Runner.return_value.run.side_effect = lambda name, src, fn: runs.append(name)
+        Runner.return_value.run.side_effect = lambda name, src, fn, _runs=runs: _runs.append(name)
         from unittest.mock import patch
 
         with (
@@ -312,5 +312,5 @@ def test_long_jobs_not_started_1510_1558():
             patch.object(ed, "JobRunner", Runner),
             patch.object(ed.yaml, "safe_load", return_value={"stocks": []}),
         ):
-            out = ed.scheduled(clock=clock(minute=minute), values={}, connect=lambda v: conn)
+            out = ed.scheduled(clock=clock(minute=minute), values={}, connect=lambda v, _c=conn: _c)
         assert "consensus" not in out and "earnings_consensus" not in runs, f"consensus started at 15:{minute}"
