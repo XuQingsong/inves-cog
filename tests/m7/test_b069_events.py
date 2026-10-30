@@ -219,6 +219,7 @@ def test_live_perception_merge_across_runs_on_disposable_database():
         ev = row[0]
         assert set(ev["info_ids"]) == {"n1", "n2"}
         assert ev["facts"] and ev["facts"].get("eps_actual") == 0.52
-        assert "Beats" in ev["headline"]
+        # representative headline stays the earliest item per spec merge rule
+        assert "Third-Quarter" in ev["headline"]
         cur = conn.execute("SELECT value FROM perception.live_cursors WHERE cursor_key=%s", (sched.CURSOR,)).fetchone()
         assert str(cur["value"]).startswith("2026-10-28 20:20")
