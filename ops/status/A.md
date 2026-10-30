@@ -744,3 +744,15 @@ ET10-29 enrich共165轮ok/processed2487、9轮degraded/processed295，全部ende
 ## A-014 补充四十七 已收到／进行中：部署已验收B069
 
 2026-10-30 07:33 UTC，main `21e57dcc096316390665f36e6493fa33303aa715` 新增明确安装指令。PR97已MERGED，验收head `da3d9ad4cc0d26d65f805dc7ba6dcc565fa8441f` 的[phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/41019939953/job/123944710612)与merge `1672681b85666382c39bf56159e3623d8020ab19` 已核对。变更按批准范围：先管理员仅执行phase1_m7_0003迁移，再以现有perception最小业务角色单次回填10-27至10-30，新增唯一live_perception常驻，重启anomaly_daily和pages，其余进程及8091保持。先检查生产现存表、真实进程和已提交前缀；回填设置远端期限，失败不盲目重跑。无模型、规则A、费用开关或新来源变更。完成安装与实际结果后再报告业务进度；今晚ET21:10后另核对自然异常写入。
+
+## A-014 补充四十七 进行中：B069安装、回填及首次真实增量已完成
+
+2026-10-30 07:41:31 UTC（北京15:41）生产安装验收merge `1672681b85666382c39bf56159e3623d8020ab19`，工作区干净。沿用[PR97](https://github.com/XuQingsong/inves-cog/pull/97)准确head `da3d9ad4cc0d26d65f805dc7ba6dcc565fa8441f` 的[phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/41019939953/job/123944710612)，无未合并代码。管理员仅执行 `phase1_m7_0003_news_events.sql` 一次，SHA256 `0e02b5f7c8a5a26f9a7cdabc70b5ca7c8aa9fdd5c813ca73fb7832a5b68439f1`；迁移前两表均不存在，迁移后业务perception角色具备写表权限且不是管理员成员。
+
+明确授权单次回填 `--replay 2026-10-27 2026-10-30`，远端80秒期限，返回码0，日志 `events=299 items=11518`；表从0变299行并提交游标。之后证据序列化遇datetime TypeError，阶段停在replay_verified，未启动新进程或重启旧服务；只读核实299行、已提交游标及回填PID退出后，仅修复证据保存并续接启动阶段，没有重复迁移或回填。脚本日期参数按现有实现筛first_seen UTC日期，因此事件ET日期范围实际10-26至10-30，未将这个结果误写成纯ET10-27窗口。
+
+live_perception唯一PID1816793，沿用anomaly_daily环境/目录/日志配置，仅追加新program。随后指定anomaly_daily旧774142实际退出、新1816798；pages旧221534退出、新1816826。其他所有Supervisor业务PID保持，包括scheduler3981483、四路行情4057908/4057916/4057966/4058013、M9 3599229、翻译3258700等；参数/模型任务配置hash保持。未停止8091，核验仍监听。embedding仍按原授权关闭，无任何模型/向量请求或费用开关变化。
+
+启动5分钟内首轮真实日志 `events=2 items=42`；07:42:14独立只读复核 `pass failed` 次数0、news_events仍299（增量upsert不是新增2行）、live_cursors `live_perception_events` value `2026-10-30 07:41:03.780511+00:00`、updated_at `07:41:15.987525+00:00`。首轮回填游标value `07:31:12.480157+00:00`已真实推进。HTTP `/`、`/s/INTC`均200；不把接口200或进程存活等同今晚异常识别已成功。证据 `ops/b069-deploy-20261030.json` phaseverified、`ops/b069-replay-20261030.log`、`ops/b069-verification-20261030.json`。
+
+已自行决定：无新增业务/权限范围；仅在核实已提交前缀后恢复未完成安装步骤。下一步按补充47第6条，于ET10-30 21:10后（UTC10-31 01:10，北京10-31 09:10后）核对当晚anomaly_daily实际写入的盘后异常条数/成员及post_sigma_fallback次数；当前安装阶段完成，未来自然运行尚未验证。A027 PR96仍待需求方验收合并，不借本次B069部署提前安装A027。
