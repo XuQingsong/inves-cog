@@ -760,3 +760,9 @@ live_perception唯一PID1816793，沿用anomaly_daily环境/目录/日志配置�
 ## A-027 部署运维 已收到／进行中  2026-10-30 19:47 北京
 
 收到 A-014 续十四补充四十八：PR96 已验收关单并合并 `544a78ad1c38572c0c53d132800bcf7c25fba99f`，准确 head `de4d654d3402963290bf41418b7d216d83cf2268` 的 [phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40998117996/job/123875920897) success 已重新核对。变更：快进最新 main，只重启 scheduler；无迁移、不手工触发采集或模型，其余服务含 live_perception 保持。先核对真实进程及工作区，再安装并检查自然 news_poll 间隔、AlpacaNews source_health。A-028 已收到信箱，按一次一单，在本次部署收口后领取；未来财报窗口证据独立跟踪，不占开发任务位。
+
+## A-027 已合并安装，真实运行验证进行中  2026-10-30 19:48 北京
+
+生产已快进至 `583b7f3a00e8c2b2d538f7ef00c45db193752e6f`，包含已验收 merge `544a78ad1c38572c0c53d132800bcf7c25fba99f`；[PR96](https://github.com/XuQingsong/inves-cog/pull/96) 准确 head `de4d654d3402963290bf41418b7d216d83cf2268` 的 [CI](https://github.com/XuQingsong/inves-cog/actions/runs/40998117996/job/123875920897) success。安装及独立进程对照完成，仅 scheduler 更新，其余运行服务含 live_perception 原进程保持，服务配置未改，无迁移或手工采集/模型调用。详细证据 `ops/a027-deploy-20261030.json` 保存于项目私有运行目录。
+
+安装时 AlpacaNews source_health=ok、连续失败0；近6轮新闻任务均ok、约10分钟间隔，但这些是安装前证据，未冒称新版本自然运行成功。下一步：后续唤醒核对安装后自然 news_poll 实际间隔及 source_health；下一核心公司财报日再核对分钟窗口和发布→入库延迟。未来窗口独立跟踪，不阻塞 A-028 开发；本轮不重复采集或重启。已自行决定：无。
