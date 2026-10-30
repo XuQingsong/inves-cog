@@ -17,11 +17,13 @@ def in_window(now):
     return trading_day(local.date()) and dtime(4, 0) <= local.time() <= dtime(20, 0)
 
 
-def _latest_quotes(connection, day):
+def _latest_quotes(connection, day, now=None):
     rows = connection.execute(
         """SELECT DISTINCT ON (ticker) ticker, last, prev_close, session, as_of
            FROM ingest.intraday_snapshots
+           WHERE (%s::timestamptz IS NULL OR as_of <= %s)
            ORDER BY ticker, as_of DESC""",
+        (now, now),
     ).fetchall()
     quotes = {}
     for r in rows:
@@ -89,7 +91,7 @@ def live_pass(connection, now):
     day = local.date()
     if not in_window(now):
         return {"skipped": True}
-    quotes = _latest_quotes(connection, day)
+    quotes = _latest_quotes(connection, day, now)
     sigmas = _sigmas(connection)
     baskets = connection.execute("SELECT basket_id, members, level FROM graph.baskets").fetchall()
     bsig = _basket_sigmas(connection, baskets)
