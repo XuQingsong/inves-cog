@@ -1,0 +1,111 @@
+"""B-069: incremental news-event builder. Runs every 2 minutes via supervisor;
+--replay START END rebuilds a date range. Perception DSN only; no LLM."""
+
+import argparse
+import json
+import sys
+from datetime import date, datetime, timezone
+
+import psycopg
+from psycopg.rows import dict_row
+
+sys.path.insert(0, "src")
+from inves_cog.perception.events.events import build_events  # noqa: E402
+
+CURSOR = "live_perception_events"
+
+
+def _scope(connection):
+    pool = {
+        r["ticker"]
+        for r in connection.execute(
+            "SELECT DISTINCT m->>'ticker' AS ticker FROM graph.baskets, jsonb_array_elements(members) m"
+        ).fetchall()
+    }
+    held = {
+        r["ticker"]
+        for r in connection.execute(
+            "SELECT jsonb_object_keys(coalesce(state->'positions','{}'::jsonb)) AS ticker"
+            " FROM (SELECT state FROM trading.ledger WHERE portfolio_id='paper-fixed'"
+            " ORDER BY observed_at DESC LIMIT 1) latest"
+        ).fetchall()
+    }
+    from inves_cog.perception.core_companies import core_companies
+
+    return set(pool) | set(held) | set(core_companies())
+
+
+def _items(connection, since=None, start=None, end=None):
+    sql = (
+        "SELECT info_id, headline, tickers, kind, first_seen_at"
+        " FROM ingest.info_items WHERE kind='news' AND first_seen_at IS NOT NULL"
+    )
+    args = ()
+    if since is not None:
+        sql += " AND first_seen_at > %s"
+        args += (since,)
+    elif start is not None:
+        sql += " AND first_seen_at >= %s AND first_seen_at < %s + INTERVAL '2 days'"
+        args += (start, end)
+    sql += " ORDER BY first_seen_at"
+    return connection.execute(sql, args).fetchall()
+
+
+def _persist(connection, events):
+    for ev in events:
+        connection.execute(
+            """INSERT INTO perception.news_events
+               (event_id, subject, kind, et_date, session, first_seen_at, last_seen_at,
+                info_ids, headline, facts, segment, importance, importance_parts, updated_at)
+               VALUES (%(event_id)s,%(subject)s,%(kind)s,%(et_date)s,%(session)s,
+                       %(first_seen_at)s,%(last_seen_at)s,%(info_ids)s,%(headline)s,
+                       %(facts)s,%(segment)s,%(importance)s,%(importance_parts)s,now())
+               ON CONFLICT (event_id) DO UPDATE SET
+                last_seen_at=EXCLUDED.last_seen_at,
+                info_ids=(SELECT array_agg(DISTINCT x) FROM unnest(perception.news_events.info_ids || EXCLUDED.info_ids) x),
+                updated_at=now()""",
+            {
+                **ev,
+                "facts": json.dumps(ev["facts"], default=str),
+                "importance_parts": json.dumps(ev["importance_parts"], default=str),
+            },
+        )
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--replay", nargs=2, metavar=("START", "END"))
+    ap.add_argument("--once", action="store_true")
+    ap.add_argument("--dry-run", action="store_true", help="compute in memory, print, no writes")
+    args = ap.parse_args()
+    import os
+
+    dsn = os.environ["INVES_COG_PERCEPTION_DATABASE_URL"]
+    connection = psycopg.connect(dsn, row_factory=dict_row)
+    scope = _scope(connection)
+    now = datetime.now(timezone.utc)
+    if args.replay:
+        start, end = date.fromisoformat(args.replay[0]), date.fromisoformat(args.replay[1])
+        items = _items(connection, start=start, end=end)
+    else:
+        row = connection.execute("SELECT value FROM ingest.source_cursors WHERE cursor_key=%s", (CURSOR,)).fetchone()
+        since = row["value"] if row else None
+        items = _items(connection, since=since)
+    events = build_events(items, scope, now)
+    if args.dry_run:
+        print(json.dumps(events, default=str, indent=1))
+        return
+    with connection.transaction():
+        _persist(connection, events)
+        latest = max((i["first_seen_at"] for i in items), default=None)
+        if latest:
+            connection.execute(
+                "INSERT INTO ingest.source_cursors (cursor_key,value,updated_at) VALUES (%s,%s,now())"
+                " ON CONFLICT (cursor_key) DO UPDATE SET value=EXCLUDED.value,updated_at=now()",
+                (CURSOR, latest),
+            )
+    print(f"events={len(events)} items={len(items)}")
+
+
+if __name__ == "__main__":
+    main()
