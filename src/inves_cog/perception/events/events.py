@@ -5,6 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import yaml
+
 from inves_cog.perception.core_companies import core_companies
 
 ROOT = Path(__file__).resolve().parents[4]
