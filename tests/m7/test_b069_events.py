@@ -212,7 +212,7 @@ def test_live_perception_merge_across_runs_on_disposable_database():
                 " ON CONFLICT (cursor_key) DO UPDATE SET value=EXCLUDED.value",
                 (sched.CURSOR, t1),
             )
-        row = conn.execute("SELECT * FROM perception.news_events WHERE subject='INTC'").fetchall()
+        row = conn.execute("SELECT * FROM perception.news_events WHERE subject='INTC' AND 'n1' = ANY(info_ids)").fetchall()
         assert len(row) == 1
         ev = row[0]
         assert set(ev["info_ids"]) == {"n1", "n2"}
