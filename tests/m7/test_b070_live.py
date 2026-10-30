@@ -85,3 +85,95 @@ def test_live_anomalies_upsert_and_fade_on_disposable_database():
         assert (
             conn.execute("SELECT count(*) c FROM perception.live_anomalies WHERE subject='INTC'").fetchone()["c"] == 2
         )
+
+
+def test_link_stock_picks_strong_event_and_signed_lag():
+    from unittest.mock import MagicMock
+    from datetime import date, datetime, timezone, timedelta
+    from inves_cog.perception.live.link import link_causes
+
+    day = datetime(2026, 10, 29).date()
+    fs = datetime(2026, 10, 29, 20, 5, tzinfo=timezone.utc)  # anomaly 16:05 ET
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = [
+        {"scope": "stock", "subject": "INTC", "direction": "down", "first_seen_at": fs}
+    ]
+    ev_fs = fs + timedelta(minutes=6)  # news lands 16:11 -> lag = -6
+    conn.execute.return_value.fetchone.return_value = {
+        "event_id": "INTC:guidance:2026-10-29",
+        "kind": "guidance",
+        "first_seen_at": ev_fs,
+    }
+    n = link_causes(conn, day, {"INTC"})
+    assert n == 1
+    upd = conn.execute.call_args_list[-1]
+    assert upd[0][1][2] == -6.0  # negative lag: price moved before news
+
+
+def test_session_end_bucket():
+    from datetime import datetime, timezone
+    from inves_cog.ingest.market import NY
+    from inves_cog.perception.live.link import _session_end
+
+    post = _session_end(datetime(2026, 10, 29, 20, 5, tzinfo=timezone.utc))
+    assert (post.astimezone(NY).hour, post.astimezone(NY).minute) == (20, 0)
+
+
+def test_live_link_and_reaction_on_disposable_database():
+    """Anomaly first, event lands later (+30min grace) -> linked on a later
+    pass; reaction jsonb filled from snapshots, never recomputed."""
+    import psycopg
+    from psycopg.rows import dict_row
+    from datetime import date
+
+    from tests.m8.test_attribution import _disposable_database
+    from inves_cog.perception.live.detect import apply_round
+    from inves_cog.perception.live.link import link_causes, update_reactions
+
+    host = _disposable_database()
+    day = date(2026, 10, 29)
+    t0 = "2026-10-29T20:05:00+00:00"  # anomaly 16:05 ET
+    t1 = "2026-10-29T20:11:00+00:00"  # event first_seen 16:11 ET (lag -6)
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
+        apply_round(
+            conn,
+            [{"scope": "stock", "subject": "INTC", "ret": -0.21, "z": -5.4, "direction": "down", "as_of": t0}],
+            t0,
+            day,
+            "post",
+        )
+        conn.execute(
+            "INSERT INTO perception.news_events (event_id,subject,kind,et_date,session,"
+            " first_seen_at,last_seen_at,info_ids,headline,facts,importance,importance_parts)"
+            " VALUES ('INTC:guidance:2026-10-29','INTC','guidance','2026-10-29','post',"
+            " %s,%s,'{e1}','Intel Sees Q4 Weak','{}',80,'{}')",
+            (t1, t1),
+        )
+        for px, ts in (
+            (100.0, "2026-10-29T20:00:00+00:00"),
+            (96.0, "2026-10-29T20:20:00+00:00"),
+            (92.0, "2026-10-29T21:15:00+00:00"),
+            (90.0, "2026-10-29T23:59:00+00:00"),
+        ):
+            conn.execute(
+                "INSERT INTO ingest.intraday_snapshots (ticker,as_of,session,last,prev_close,"
+                " delay_minutes,source,fetched_at) VALUES ('INTC',%s,'post',%s,%s,15,'IEX',%s)"
+                " ON CONFLICT DO NOTHING",
+                (ts, px, px * 1.05, ts),
+            )
+        conn.commit()
+        # pass 1: window end = 20:35 -> event (20:11) already inside -> linked immediately
+        n = link_causes(conn, day, {"INTC"})
+        conn.commit()
+        row = conn.execute("SELECT * FROM perception.live_anomalies WHERE subject='INTC'").fetchone()
+        assert n == 1 and row["cause_event_id"] == "INTC:guidance:2026-10-29"
+        assert row["cause_lag_minutes"] == -6.0
+        update_reactions(conn, "2026-10-29T20:30:00+00:00")
+        conn.commit()
+        ev = conn.execute(
+            "SELECT reaction FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
+        ).fetchone()
+        r = ev["reaction"]
+        assert r["base"]["px"] == 100.0
+        assert abs(r["m15"]["ret"] - (92.0 / 100.0 - 1)) < 1e-9  # first snap >= 20:26 is 21:15
+        assert r["m60"] is not None
