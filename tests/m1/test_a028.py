@@ -291,6 +291,7 @@ def test_capture_window_1550_to_1557():
 def test_long_jobs_not_started_1510_1558():
     """earnings_consensus must not start inside 15:10-15:58 (复核一)."""
     from unittest.mock import MagicMock
+
     from inves_cog.ingest import earnings_data as ed
 
     for minute in (10, 20, 50):
