@@ -170,7 +170,6 @@ def test_live_perception_merge_across_runs_on_disposable_database():
 
     host = _disposable_database()
     with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as conn:
-        conn.execute("SET LOCAL ROLE role_perception")
         import scripts.schedule_live_perception as sched
 
         t0 = "2026-10-28T20:01:00+00:00"
