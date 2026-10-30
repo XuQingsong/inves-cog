@@ -106,8 +106,7 @@ def update_reactions(connection, now):
             pub = connection.execute(
                 """SELECT min(i.published_at) AS at FROM ingest.info_items i
                    WHERE i.info_id = ANY(
-                       SELECT jsonb_array_elements_text(info_ids) FROM perception.news_events
-                       WHERE event_id=%s)""",
+                       (SELECT info_ids FROM perception.news_events WHERE event_id=%s))""",
                 (ev["event_id"],),
             ).fetchone()
             base_time, source = (pub["at"], "published_at") if pub and pub["at"] else (fs, "first_seen_at")
@@ -154,7 +153,7 @@ def update_reactions(connection, now):
                     }
                 else:
                     reaction[key] = None
-        if "session_end" not in reaction:
+        if "session_end" not in reaction and reaction.get("base") and now >= _session_end(fs):
             end_px = connection.execute(
                 """SELECT last, as_of, session FROM ingest.intraday_snapshots
                    WHERE ticker=%s AND as_of <= %s ORDER BY as_of DESC LIMIT 1""",

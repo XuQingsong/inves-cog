@@ -133,14 +133,16 @@ def apply_round(connection, hits, now, day, session):
             ),
         )
     if keep:
+        ks, ss, ds = ([k[0] for k in keep], [k[1] for k in keep], [k[2] for k in keep])
         connection.execute(
             """UPDATE perception.live_anomalies SET status='faded', updated_at=now()
                WHERE trade_date=%s AND session=%s AND status='active'
-               AND (scope, subject, direction) NOT IN
-                   (SELECT * FROM (VALUES (NULL,NULL,NULL)"""
-            + "".join(",(%s,%s,%s)" for _ in keep)
-            + ") v)",  # row-comparison tuple
-            (day, session, *(t for k in keep for t in k)),
+               AND NOT EXISTS (
+                   SELECT 1 FROM unnest(%s::text[], %s::text[], %s::text[]) k(a,b,c)
+                   WHERE k.a = perception.live_anomalies.scope
+                     AND k.b = perception.live_anomalies.subject
+                     AND k.c = perception.live_anomalies.direction)""",
+            (day, session, ks, ss, ds),
         )
     else:
         connection.execute(

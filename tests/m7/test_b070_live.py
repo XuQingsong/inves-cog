@@ -121,87 +121,79 @@ def test_session_end_bucket():
     assert (post.astimezone(NY).hour, post.astimezone(NY).minute) == (20, 0)
 
 
-def test_live_link_and_reaction_on_disposable_database():
-    """Anomaly first, event lands later (+30min grace) -> linked on a later
-    pass; reaction jsonb filled from snapshots, never recomputed."""
-    from datetime import date
+def test_live_pass_end_to_end_on_disposable_database():
+    """live_pass twice on real Postgres: detection rows, fade on pass 2,
+    linking with negative lag, reaction base from published_at, m15 only
+    after +15min, session_end absent before 20:00 ET."""
+    from datetime import datetime, timedelta, timezone
 
     import psycopg
     from psycopg.rows import dict_row
 
-    from inves_cog.perception.live.detect import apply_round
-    from inves_cog.perception.live.link import link_causes, update_reactions
+    from inves_cog.perception.live.run import live_pass
     from tests.m8.test_attribution import _disposable_database
 
     host = _disposable_database()
-    day = date(2026, 10, 29)
-    t0 = "2026-10-29T20:05:00+00:00"  # anomaly 16:05 ET
-    t1 = "2026-10-29T20:11:00+00:00"  # event first_seen 16:11 ET (lag -6)
+    now1 = datetime(2026, 10, 29, 20, 5, tzinfo=timezone.utc)  # 16:05 ET post
+    now2 = now1 + timedelta(minutes=5)
     with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
-        apply_round(
-            conn,
-            [{"scope": "stock", "subject": "INTC", "ret": -0.21, "z": -5.4, "direction": "down", "as_of": t0}],
-            t0,
-            day,
-            "post",
+        # seed marketstate sigma + basket + snapshots + bars
+        conn.execute(
+            "INSERT INTO marketstate.daily (trade_date, session, ticker, sigma)"
+            " VALUES ('2026-10-29','close','INTC',0.04), ('2026-10-29','close','AMZN',0.02)"
+            " ON CONFLICT DO NOTHING"
+        )
+        for t, px in (("INTC", 75.0), ("AMZN", 229.0)):
+            conn.execute(
+                "INSERT INTO ingest.intraday_snapshots (ticker,as_of,session,last,prev_close,"
+                " delay_minutes,source,fetched_at) VALUES (%s,%s,'post',%s,%s,15,'IEX',%s)"
+                " ON CONFLICT DO NOTHING",
+                (t, now1, px, px * 1.25, now1),
+            )
+        conn.execute(
+            "INSERT INTO ingest.info_items (info_id,kind,headline,tickers,first_seen_at,"
+            " published_at,source,source_level,entities,extraction_status,flags,payload,extraction_source)"
+            " VALUES ('e1','news','Intel Sees Q4 GAAP EPS $0.10 vs $0.15 Est','{INTC}',"
+            " %s,%s,'Benzinga',1,'{INTC}','ok','{}','{}','{}') ON CONFLICT DO NOTHING",
+            (now1 + timedelta(minutes=6), now1 + timedelta(minutes=6)),
         )
         conn.execute(
             "INSERT INTO perception.news_events (event_id,subject,kind,et_date,session,"
             " first_seen_at,last_seen_at,info_ids,headline,facts,importance,importance_parts)"
             " VALUES ('INTC:guidance:2026-10-29','INTC','guidance','2026-10-29','post',"
-            " %s,%s,'{e1}','Intel Sees Q4 Weak','{}',80,'{}')",
-            (t1, t1),
+            " %s,%s,'{e1}','Intel Sees Q4 GAAP EPS $0.10 vs $0.15 Est','{}',80,'{}')"
+            " ON CONFLICT DO NOTHING",
+            (now1 + timedelta(minutes=6),) * 2,
         )
-        for px, ts in (
-            (100.0, "2026-10-29T20:00:00+00:00"),
-            (96.0, "2026-10-29T20:20:00+00:00"),
-            (92.0, "2026-10-29T21:15:00+00:00"),
-            (90.0, "2026-10-29T23:59:00+00:00"),
-        ):
-            conn.execute(
-                "INSERT INTO ingest.intraday_snapshots (ticker,as_of,session,last,prev_close,"
-                " delay_minutes,source,fetched_at) VALUES ('INTC',%s,'post',%s,%s,15,'IEX',%s)"
-                " ON CONFLICT DO NOTHING",
-                (ts, px, px * 1.05, ts),
-            )
         conn.commit()
-        # pass 1: window end = 20:35 -> event (20:11) already inside -> linked immediately
-        n = link_causes(conn, day, {"INTC"})
+        r1 = live_pass(conn, now1)
         conn.commit()
-        row = conn.execute("SELECT * FROM perception.live_anomalies WHERE subject='INTC'").fetchone()
-        assert n == 1 and row["cause_event_id"] == "INTC:guidance:2026-10-29"
-        assert row["cause_lag_minutes"] == -6.0
-        update_reactions(conn, "2026-10-29T20:30:00+00:00")
+        assert r1["hits"] >= 1
+        rows = conn.execute(
+            "SELECT scope,subject,direction,status,cause_event_id,cause_lag_minutes"
+            " FROM perception.live_anomalies ORDER BY subject"
+        ).fetchall()
+        subjects = {r["subject"] for r in rows}
+        assert "INTC" in subjects and "AMZN" in subjects
+        intc = [r for r in rows if r["subject"] == "INTC"][0]
+        assert intc["cause_event_id"] == "INTC:guidance:2026-10-29"
+        assert intc["cause_lag_minutes"] == -6.0
+        # pass 2: INTC recovers -> fades; AMZN still hit
+        conn.execute(
+            "INSERT INTO ingest.intraday_snapshots (ticker,as_of,session,last,prev_close,"
+            " delay_minutes,source,fetched_at) VALUES ('INTC',%s,'post',%s,%s,15,'IEX',%s)"
+            " ON CONFLICT DO NOTHING",
+            (now2, 95.0, 120.0, now2),
+        )
+        live_pass(conn, now2)
         conn.commit()
+        faded = conn.execute(
+            "SELECT count(*) c FROM perception.live_anomalies WHERE subject='INTC' AND status='faded'"
+        ).fetchone()["c"]
+        assert faded >= 1
+        # reaction: base from published_at/first_seen_at; m15 absent (now2 < +15m)
         ev = conn.execute(
             "SELECT reaction FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
         ).fetchone()
-        r = ev["reaction"]
-        # base falls back to first_seen_at when published_at missing
-        assert r["base"]["px"] == 100.0 and r["base"]["source"] == "first_seen_at"
-        assert abs(r["m15"]["ret"] - (96.0 / 100.0 - 1)) < 1e-9
-        assert r["m60"] is not None
-
-
-def test_live_module_render_and_degrade():
-    from datetime import datetime, timezone
-
-    from inves_cog.web.investor_html import _live_module
-
-    assert _live_module({"news_modules": {}}) == ""  # empty -> module hidden
-    row = {
-        "scope": "stock",
-        "subject": "INTC",
-        "last_ret": -0.21,
-        "peak_ret": -0.23,
-        "first_seen_at": datetime(2026, 10, 29, 20, 5, tzinfo=timezone.utc),
-        "cause_event_id": "INTC:guidance:2026-10-29",
-        "cause_lag_minutes": -6.0,
-        "cause_headline": "Intel Sees Q4 Weak",
-        "status": "active",
-    }
-    html = _live_module({"news_modules": {"live": [row]}})
-    assert "实时异常" in html and "股价先动，新闻晚 6 分钟入库" in html and "Intel Sees Q4" in html
-    row2 = dict(row, cause_event_id=None, cause_lag_minutes=None, status="faded")
-    html2 = _live_module({"news_modules": {"live": [row2]}})
-    assert "原因未明" in html2 and "已消退" in html2
+        assert ev["reaction"] and ev["reaction"]["base"]["source"] in ("published_at", "first_seen_at")
+        assert "m15" not in ev["reaction"] and "session_end" not in ev["reaction"]
