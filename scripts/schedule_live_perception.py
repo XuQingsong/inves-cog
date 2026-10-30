@@ -3,7 +3,6 @@
 
 import argparse
 import json
-import sys
 import time
 from datetime import date, datetime, timedelta, timezone
 
@@ -79,17 +78,24 @@ def _persist(connection, events):
         )
 
 
-def main():
+def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--replay", nargs=2, metavar=("START", "END"))
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="compute in memory, print, no writes")
-    args = ap.parse_args()
+    return ap.parse_args()
+
+
+def main(args):
     from inves_cog.ingest.cli import connect
     from inves_cog.ingest.settings import read_environment
 
     values = read_environment()
-    connection = connect({**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]})
+    with connect({**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]}) as connection:
+        _pass(connection, args)
+
+
+def _pass(connection, args):
     scope = _scope(connection)
     now = datetime.now(timezone.utc)
     if args.replay:
@@ -124,12 +130,13 @@ def _run(connection, scope, items, events, args):
 
 
 if __name__ == "__main__":
-    if "--once" in sys.argv or "--replay" in sys.argv or "--dry-run" in sys.argv:
-        main()
+    cli = parse_args()
+    if cli.once or cli.replay or cli.dry_run:
+        main(cli)
     else:
         while True:
             try:
-                main()
+                main(cli)
             except Exception as exc:  # keep the loop alive; report and retry
                 print(f"pass failed: {type(exc).__name__}: {exc}", flush=True)
             time.sleep(120)
