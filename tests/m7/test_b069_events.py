@@ -165,6 +165,7 @@ def test_live_perception_merge_across_runs_on_disposable_database():
     info_ids, cursor advanced. Runs as admin: role_perception cannot INSERT
     into ingest.info_items."""
     import psycopg
+    from psycopg.rows import dict_row
 
     from tests.m8.test_attribution import _disposable_database
 
@@ -173,7 +174,7 @@ def test_live_perception_merge_across_runs_on_disposable_database():
         "entities,extraction_status,flags,payload,extraction_source"
     )
     host = _disposable_database()
-    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as conn:
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
         import scripts.schedule_live_perception as sched
 
         t0 = "2026-10-28T20:01:00+00:00"
