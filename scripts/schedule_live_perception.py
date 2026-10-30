@@ -129,14 +129,39 @@ def _run(connection, scope, items, events, args):
     print(f"events={len(events)} items={len(items)}")
 
 
+def due(last_events, last_live, now):
+    """Pure scheduling decision: events every 120 s, live every 300 s."""
+    return now - last_events >= 120, now - last_live >= 300
+
+
 if __name__ == "__main__":
     cli = parse_args()
     if cli.once or cli.replay or cli.dry_run:
         main(cli)
     else:
+        from inves_cog.ingest.cli import connect
+        from inves_cog.ingest.settings import read_environment
+        from inves_cog.perception.live.run import live_pass
+
+        last_events = 0.0
+        last_live = 0.0
         while True:
-            try:
-                main(cli)
-            except Exception as exc:  # keep the loop alive; report and retry
-                print(f"pass failed: {type(exc).__name__}: {exc}", flush=True)
-            time.sleep(120)
+            tick = time.time()
+            run_events, run_live = due(last_events, last_live, tick)
+            if run_events:
+                last_events = tick
+                try:
+                    main(cli)
+                except Exception as exc:
+                    print(f"events pass failed: {type(exc).__name__}: {exc}", flush=True)
+            if run_live:
+                last_live = tick
+                try:
+                    values = read_environment()
+                    with connect(
+                        {**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]}
+                    ) as connection:
+                        print(live_pass(connection, datetime.now(timezone.utc)), flush=True)
+                except Exception as exc:
+                    print(f"live pass failed: {type(exc).__name__}: {exc}", flush=True)
+            time.sleep(30)

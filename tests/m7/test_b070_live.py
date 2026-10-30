@@ -197,3 +197,47 @@ def test_live_pass_end_to_end_on_disposable_database():
         ).fetchone()
         assert ev["reaction"] and ev["reaction"]["base"]["source"] in ("published_at", "first_seen_at")
         assert "m15" not in ev["reaction"] and "session_end" not in ev["reaction"]
+
+
+def test_due_scheduling_decision():
+    from scripts.schedule_live_perception import due
+
+    assert due(0, 0, 400) == (True, True)
+    assert due(390, 90, 400) == (False, True)   # events 10s ago, live 310s ago
+    assert due(280, 350, 400) == (True, False)  # events 120s, live 50s
+    assert due(300, 350, 400) == (False, False)
+
+
+def test_post_session_ret_uses_session_close():
+    from unittest.mock import MagicMock
+    from datetime import date, datetime, timezone
+    from inves_cog.perception.live.run import _latest_quotes
+
+    day = date(2026, 10, 29)
+    now = datetime(2026, 10, 29, 20, 30, tzinfo=timezone.utc)
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = [
+        {"ticker": "INTC", "last": 70.0, "prev_close": 95.0, "session": "post", "as_of": now},
+        {"ticker": "AMD", "last": 90.0, "prev_close": 100.0, "session": "pre", "as_of": now},
+    ]
+    conn.execute.return_value.fetchone.return_value = {"last": 80.0}
+    quotes, skipped = _latest_quotes(conn, day, now)
+    # post: 70/80-1 = -12.5% vs session close, not 70/95-1 = -26% vs prev_close
+    assert abs(quotes["INTC"]["ret"] - (-0.125)) < 0.001 and quotes["INTC"]["basis"] == "session_close"
+    assert abs(quotes["AMD"]["ret"] - (-0.10)) < 0.001 and quotes["AMD"]["basis"] == "prev_close"
+
+
+def test_post_session_skipped_without_close():
+    from unittest.mock import MagicMock
+    from datetime import date, datetime, timezone
+    from inves_cog.perception.live.run import _latest_quotes
+
+    day = date(2026, 10, 29)
+    now = datetime(2026, 10, 29, 20, 30, tzinfo=timezone.utc)
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = [
+        {"ticker": "INTC", "last": 70.0, "prev_close": 95.0, "session": "post", "as_of": now},
+    ]
+    conn.execute.return_value.fetchone.return_value = None  # no regular snap, no bar
+    quotes, skipped = _latest_quotes(conn, day, now)
+    assert "INTC" not in quotes and skipped == 1
