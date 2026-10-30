@@ -209,8 +209,9 @@ def test_due_scheduling_decision():
 
 
 def test_post_session_ret_uses_session_close():
-    from unittest.mock import MagicMock
     from datetime import date, datetime, timezone
+    from unittest.mock import MagicMock
+
     from inves_cog.perception.live.run import _latest_quotes
 
     day = date(2026, 10, 29)
@@ -228,8 +229,9 @@ def test_post_session_ret_uses_session_close():
 
 
 def test_post_session_skipped_without_close():
-    from unittest.mock import MagicMock
     from datetime import date, datetime, timezone
+    from unittest.mock import MagicMock
+
     from inves_cog.perception.live.run import _latest_quotes
 
     day = date(2026, 10, 29)
