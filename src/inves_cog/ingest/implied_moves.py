@@ -11,7 +11,7 @@ from inves_cog.ingest.providers import stamp
 
 def capture_targets(clock, earnings, core):
     now = clock.now_utc().astimezone(NY)
-    if not trading_day(now.date()) or (now.hour, now.minute) != (15, 50):
+    if not trading_day(now.date()) or not (15, 50) <= (now.hour, now.minute) <= (15, 57):
         return []
     unique = {}
     for row in earnings:

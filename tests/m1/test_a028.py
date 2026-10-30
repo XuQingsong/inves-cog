@@ -276,3 +276,40 @@ def test_daily_scheduler_scope_health_restart_and_options_slot(monkeypatch):
     earnings_data.scheduled(clock=clock(), values={}, connect=lambda values: db)
     assert options.call_count == 1 and model_calls.call_count == 0
     assert any(c.args[0]["source"] == "AlpacaIndicative" for c in ops.write_health.call_args_list)
+
+
+def test_capture_window_1550_to_1557():
+    """First pass inside 15:50-15:57 captures; 15:58 does not (复核一 fix)."""
+    from inves_cog.ingest.implied_moves import capture_targets
+
+    rows = [{"ticker": "NVDA", "report_date": date(2026, 11, 17), "timing": "post"}]
+    assert [r["ticker"] for r in capture_targets(clock("2026-11-16", 15, 53), rows, {"NVDA"})] == ["NVDA"]
+    assert [r["ticker"] for r in capture_targets(clock("2026-11-16", 15, 57), rows, {"NVDA"})] == ["NVDA"]
+    assert capture_targets(clock("2026-11-16", 15, 58), rows, {"NVDA"}) == []
+
+
+def test_long_jobs_not_started_1510_1558():
+    """earnings_consensus must not start inside 15:10-15:58 (复核一)."""
+    from unittest.mock import MagicMock
+    from inves_cog.ingest import earnings_data as ed
+
+    for minute in (10, 20, 50):
+        conn = MagicMock()
+        conn.execute.return_value.fetchall.return_value = []
+        Ops = MagicMock()
+        Ops.return_value.last_runs.return_value = {}
+        Ops.return_value.health_rows.return_value = []
+        runs = []
+        Runner = MagicMock()
+        Runner.return_value.run.side_effect = lambda name, src, fn: runs.append(name)
+        from unittest.mock import patch
+
+        with (
+            patch.object(ed, "Operations", Ops),
+            patch.object(ed, "Fundamentals"),
+            patch.object(ed, "HealthBook"),
+            patch.object(ed, "JobRunner", Runner),
+            patch.object(ed.yaml, "safe_load", return_value={"stocks": []}),
+        ):
+            out = ed.scheduled(clock=clock(minute=minute), values={}, connect=lambda v: conn)
+        assert "consensus" not in out and "earnings_consensus" not in runs, f"consensus started at 15:{minute}"

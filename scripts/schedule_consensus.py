@@ -20,7 +20,7 @@ def main():
             # Keep bounded Alpha batches out of the 15:50 sampling slot.
             alpha = (
                 {"status": "deferred_for_options"}
-                if (15, 35) <= (local.hour, local.minute) < (15, 51)
+                if (15, 10) <= (local.hour, local.minute) < (15, 59)
                 else scheduled(clock=clock, values=values)
             )
             result = {"earnings_data": earnings, "alpha": alpha}

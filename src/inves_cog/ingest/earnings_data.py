@@ -103,11 +103,11 @@ def scheduled(*, clock, values, connect=None):
             timeout_seconds=1200,
         )
         out = {}
-        if (now.hour, now.minute) == (15, 50) and "earnings_implied_moves" not in last:
+        if (15, 50) <= (now.hour, now.minute) <= (15, 57) and "earnings_implied_moves" not in last:
             out["implied_moves"] = runner.run(
                 "earnings_implied_moves", "AlpacaIndicative", lambda: collect_moves(clock=clock, db=db, values=values)
             )
-        if now.hour >= 6 and not (15, 30) <= (now.hour, now.minute) < (15, 51) and "earnings_consensus" not in last:
+        if now.hour >= 6 and not (15, 10) <= (now.hour, now.minute) < (15, 59) and "earnings_consensus" not in last:
             tickers = target_tickers(universe, holdings, core_tickers())
             out["consensus"] = runner.run(
                 "earnings_consensus",
