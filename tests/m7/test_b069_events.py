@@ -85,7 +85,7 @@ def test_news_events_missing_table_degrades():
     from unittest.mock import MagicMock
 
     conn = MagicMock()
-    conn.execute.side_effect = Exception("relation does not exist")
+    conn.execute.return_value.fetchone.return_value = {"t": None}
     from inves_cog.web.brief import _news_events
 
     assert _news_events(conn, "2026-10-29", True) == {}
