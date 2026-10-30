@@ -62,7 +62,9 @@ def _persist(connection, events):
                        %(facts)s,%(segment)s,%(importance)s,%(importance_parts)s,now())
                ON CONFLICT (event_id) DO UPDATE SET
                 last_seen_at=EXCLUDED.last_seen_at,
-                info_ids=(SELECT array_agg(DISTINCT x) FROM unnest(perception.news_events.info_ids || EXCLUDED.info_ids) x),
+                info_ids=(
+                SELECT array_agg(DISTINCT x)
+                FROM unnest(perception.news_events.info_ids || EXCLUDED.info_ids) x),
                 updated_at=now()""",
             {
                 **ev,
