@@ -343,7 +343,7 @@ class Pipeline:
         self.repo.set_cursor("bars-report:" + self.day.isoformat(), report, self.clock.now_utc())
         return report
 
-    def news(self):
+    def news(self, *, accelerated=False):
         alpaca = self.require(self.alpaca, "Alpaca")
         previous = self.repo.get_cursor("news")
         first = (
@@ -352,7 +352,8 @@ class Pipeline:
             else self.clock.now_utc() - timedelta(days=90)
         )
         count, before = 0, dict(self.repo.counts)
-        for item in alpaca.news(first=first, last=self.clock.now_utc()):
+        options = {"max_pages": 120} if accelerated else {}
+        for item in alpaca.news(first=first, last=self.clock.now_utc(), **options):
             self.info([item])
             count += 1
             # Each durable insert moves the resumable bootstrap cursor.
@@ -769,6 +770,7 @@ class Pipeline:
         return {"processed_count": len(rows)}
 
     def runtime(self):
+        from inves_cog.ingest.earnings_news import poll_news
         from inves_cog.ingest.intraday import (
             collect_iex_intraday,
             collect_intraday,
@@ -785,7 +787,7 @@ class Pipeline:
             "bars_prefill": ("Alpaca", lambda: self.bars(prefill=True)),
             "wide_universe": ("AlpacaWide", self.wide),
             "news_full": ("AlpacaNews", self.news),
-            "news_poll": ("AlpacaNews", self.news),
+            "news_poll": ("AlpacaNews", lambda: poll_news(self)),
             "wide_snapshots": ("AlpacaWideSnapshots", lambda: collect_wide(self)),
             "iex_intraday": ("AlpacaIEX", lambda: collect_iex_intraday(self)),
             "intraday_snapshots": ("AlpacaIntraday", lambda: collect_intraday(self)),

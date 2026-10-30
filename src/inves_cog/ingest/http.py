@@ -54,7 +54,7 @@ class HTTPClient:
         self.limiter = limiter
         self.pool, self.session = pool, None
 
-    def request(self, method, url, *, params=None, headers=None, json=None, limiter=None):
+    def request(self, method, url, *, params=None, headers=None, json=None, limiter=None, retry_rate_limit=True):
         from inves_cog.ingest.deadline import remaining
 
         for attempt in range(self.retries + 1):
@@ -111,7 +111,7 @@ class HTTPClient:
                 raise
             if 200 <= response.status_code < 300:
                 return response.data
-            retryable = response.status_code == 429 or 500 <= response.status_code < 600
+            retryable = (response.status_code == 429 and retry_rate_limit) or 500 <= response.status_code < 600
             if retryable and attempt < self.retries:
                 self.sleep(min(60, 2**attempt))
                 continue

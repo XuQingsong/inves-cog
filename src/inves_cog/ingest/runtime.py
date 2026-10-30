@@ -20,7 +20,7 @@ def complete_adv20(rows, sessions):
     return sum(by_day[day]["close"] * by_day[day]["volume"] for day in sessions) / 20
 
 
-def due_tasks(clock, last_runs):
+def due_tasks(clock, last_runs, *, earnings=(), news_backoff_until=None):
     """Restarts use persisted start times; SEC never spills into M2's slot."""
     now = clock.now_utc().astimezone(NY)
     minute = now.hour * 60 + now.minute
@@ -44,7 +44,9 @@ def due_tasks(clock, last_runs):
 
     due("bars_prefill", after=480, before=490, session=True)
     due("news_prefill", after=480, before=490)
-    due("news_poll", interval=10)
+    from inves_cog.ingest.earnings_news import news_interval
+
+    due("news_poll", interval=news_interval(clock, earnings, backoff_until=news_backoff_until))
     due("intraday_snapshots", interval=1, after=240, before=1200, session=True)
     due("iex_intraday", interval=1, after=240, before=1200, session=True)
     from inves_cog.ingest.intraday import yahoo_symbols

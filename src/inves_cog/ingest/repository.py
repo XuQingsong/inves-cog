@@ -368,6 +368,12 @@ class Repository:
             else fallback
         )
 
+    def core_earnings(self, report_date):
+        return self.connection.execute(
+            "SELECT ticker,report_date,time FROM ingest.earnings_calendar WHERE report_date=%s",
+            (report_date,),
+        ).fetchall()
+
     def last_runs(self, *, trade_date=None):
         sql = "SELECT task_name,max(started_at) AS started_at FROM ingest.job_runs"
         if trade_date is not None:
