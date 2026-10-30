@@ -124,3 +124,38 @@ def test_chip_revenue_and_one_decimal():
 
     out = _facts_chip({"eps_actual": 1.89, "eps_est": 1.97, "rev_actual": 201.944, "rev_est": 202.308})
     assert "EPS 不及预期 4%" in out and "营收不及预期 0.2%" in out
+
+
+def test_window_boundary_prev_1559_excluded_1601_included():
+    """Event first_seen at prev 15:59 ET is out; 16:01 is in (SQL window
+    is [prev 16:00 ET, end)); verify the boundary objects directly."""
+    from unittest.mock import MagicMock
+    from datetime import datetime
+    from inves_cog.ingest.market import NY
+    from inves_cog.ingest.intraday import previous_session
+    from inves_cog.web.brief import _news_events
+
+    day = datetime(2026, 10, 29).date()
+    prev = previous_session(day)
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"t": "perception.news_events"}
+    conn.execute.return_value.fetchall.return_value = []
+    _news_events(conn, day, True)
+    args = conn.execute.call_args_list[-1][0][1]
+    start, end = args[0], args[1]
+    assert start == datetime(prev.year, prev.month, prev.day, 16, 0, tzinfo=NY)
+    # 15:59 excluded, 16:01 included by [start, end)
+    assert datetime(2026, 10, 28, 15, 59, tzinfo=NY) < start
+    assert datetime(2026, 10, 28, 16, 1, tzinfo=NY) >= start
+
+
+def test_upsert_merge_contract():
+    """Two-run merge: facts merge, importance raises, headline switches to
+    the higher-importance row — the SQL guarantees these; assert the upsert
+    clauses exist."""
+    from pathlib import Path
+
+    sql = Path("scripts/schedule_live_perception.py").read_text()
+    for clause in ("LEAST(", "GREATEST(", "|| COALESCE(EXCLUDED.facts",
+                   "CASE WHEN EXCLUDED.importance >="):
+        assert clause in sql

@@ -760,7 +760,7 @@ def covered_gate_reasons():
     return set(_HEALTH_REASON) | set(BLOCKING) | set(EXCLUDED) | set(_BOOK_BELOW) | set(_BOOK_MISSING)
 
 
-def _news_feed(connection, symbol, day, context):  # noqa: F811 - kept signature
+def _news_feed(connection, symbol, day, context):
     """This ticker's last-7-day news, ranked by importance then time."""
     start, end = _day_window(day)
     start = start - timedelta(days=7)

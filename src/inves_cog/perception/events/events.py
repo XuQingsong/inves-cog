@@ -42,6 +42,10 @@ _G_EPS = re.compile(r"Sees Q[1-4][^.]*EPS \$([\d.]+)[^.]*vs \$([\d.]+)B? Est", r
 _G_REV = re.compile(r"Sees (?:Q[1-4] )?(?:Adj )?Sales \$([\d.]+)B?-\$([\d.]+)B? vs \$([\d.]+)B? Est", re.I)
 
 
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
 def _names_map():
     """ticker -> set of headline terms (names + aliases), incl. monitored entities."""
     out = {}

@@ -122,10 +122,12 @@ def _run(connection, scope, items, events, args):
 
 
 if __name__ == "__main__":
-    args_ns = __import__("argparse").Namespace()
     if "--once" in sys.argv or "--replay" in sys.argv or "--dry-run" in sys.argv:
         main()
     else:
         while True:
-            main()
+            try:
+                main()
+            except Exception as exc:  # keep the loop alive; report and retry
+                print(f"pass failed: {type(exc).__name__}: {exc}", flush=True)
             time.sleep(120)

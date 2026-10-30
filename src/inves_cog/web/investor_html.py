@@ -593,6 +593,12 @@ def _bj_tz():
     return ZoneInfo("Asia/Shanghai")
 
 
+def _bj_hhmm(moment):
+    return (
+        moment.astimezone(_bj_tz()).strftime("%H:%M 北京") if hasattr(moment, "astimezone") else str(moment or "")[:16]
+    )
+
+
 def _stock_row(payload, row, day):
     ticker = row.get("ticker") or ""
     ret = row.get("ret")
@@ -2090,8 +2096,7 @@ def _movers_module(payload):
         ev_html = ""
         if ev is not None:
             chip = f'<span class="chip stale">{_text(m.get("event_chip") or "")}</span>' if m.get("event_chip") else ""
-            when = ev.get("first_seen_at") or ""
-            when = (when + timedelta(hours=8)).strftime("%H:%M 北京") if hasattr(when, "astimezone") else str(when)[:16]
+            when = _bj_hhmm(ev.get("first_seen_at"))
             shown_headline = ev.get("title_zh") or ev.get("headline") or ""
             ev_html = (
                 f'<div class="mnews"><a href="{_text(ev.get("url") or "#")}">{_text(shown_headline)}</a>'
@@ -2299,12 +2304,7 @@ def _stock_feed(payload):
         from inves_cog.web.brief import _facts_chip
 
         chip = _facts_chip(ev.get("facts") or {})
-        moment = ev.get("first_seen_at")
-        when = (
-            moment.astimezone(_bj_tz()).strftime("%H:%M 北京")
-            if hasattr(moment, "astimezone")
-            else str(moment or "")[:16]
-        )
+        when = _bj_hhmm(ev.get("first_seen_at"))
         rows = (
             f'<div class="mnews"><a href="{_text(ev.get("url") or "#")}">'
             f"{_text(ev.get('title_zh') or ev.get('headline') or '')}</a>"
