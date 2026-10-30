@@ -1,7 +1,7 @@
 """Bounded local-communication probes shared by the v3 test and evidence run."""
 
 LOCAL_COMMUNICATION_PROBES = {
-    "socketpair": """import socket
+    'socketpair': '''import socket
 def test_probe():
     left, right = socket.socketpair()
     with left, right:
@@ -11,8 +11,8 @@ def test_probe():
         right.send(b'ok')
         assert left.recv(2) == b'ok'
     print('socketpair: local send/receive passed', flush=True)
-""",
-    "asyncio": """import asyncio, threading
+''',
+    'asyncio': '''import asyncio, threading
 def test_probe():
     loop = asyncio.new_event_loop()
     ready, done = threading.Event(), threading.Event()
@@ -32,8 +32,8 @@ def test_probe():
         worker.join(5)
         assert not worker.is_alive()
         loop.close()
-""",
-    "testclient": """from fastapi import FastAPI
+''',
+    'testclient': '''from fastapi import FastAPI
 from fastapi.testclient import TestClient
 def test_probe():
     app = FastAPI()
@@ -46,5 +46,5 @@ def test_probe():
         assert response.status_code == 200
         assert response.json() == {'ok': True}
         print('TestClient: status=200 body={"ok": true}', flush=True)
-""",
+''',
 }
