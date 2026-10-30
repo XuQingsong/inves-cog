@@ -132,7 +132,7 @@ class YFinance:
                 tables = tables_from_yahoo_json(data)
                 return snapshot_from_tables(tables, ticker=ticker, clock=self.clock, fy_cy=fy_cy, fy_ny=fy_ny)
             except SourceError as exc:
-                if exc.status_code != 429:
+                if exc.status_code not in {401, 403, 429}:
                     raise
                 self.api_limited = True
         html = self.http.get(
