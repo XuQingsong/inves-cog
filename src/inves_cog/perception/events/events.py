@@ -157,7 +157,6 @@ def build_events(items, scope, et_now):
     """items: dicts with info_id/headline/tickers/first_seen_at. Returns events dict."""
     names = _names_map()
     core = core_companies()
-    STRONG = {"earnings_result", "guidance", "capex", "supply_shock", "mna", "regulatory"}
     events = {}
     for item in sorted(items, key=lambda i: i.get("first_seen_at") or ""):
         if item.get("kind") not in (None, "news"):
