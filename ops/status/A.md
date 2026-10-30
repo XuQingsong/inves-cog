@@ -740,3 +740,7 @@ ET10-29各task实际调用/输入/输出：anomaly_candidates 9/86727/9124；cla
 ET10-29 enrich共165轮ok/processed2487、9轮degraded/processed295，全部ended且unfinished0；向量开关仍false，既有向量缺失/停用记失败问题仍保留为OPS-A026-2，不能把pending0、调用成功或观察结束冒称向量恢复。未重新诊断/开启向量、补跑、改参数、来源、权限或重启。本次只完成已批准的连续两日用途/费用观察，不等同系统整体或全部数据源验收。
 
 已自行决定：无新增。下一步需求方取本收口证据验收；A027 PR96准确head CI已成功，仍待验收合并及明确安装指令，A不自行合并部署；没有新任务或可行动变化则结束本轮，原持续接单授权与a-github定时器保持。
+
+## A-014 补充四十七 已收到／进行中：部署已验收B069
+
+2026-10-30 07:33 UTC，main `21e57dcc096316390665f36e6493fa33303aa715` 新增明确安装指令。PR97已MERGED，验收head `da3d9ad4cc0d26d65f805dc7ba6dcc565fa8441f` 的[phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/41019939953/job/123944710612)与merge `1672681b85666382c39bf56159e3623d8020ab19` 已核对。变更按批准范围：先管理员仅执行phase1_m7_0003迁移，再以现有perception最小业务角色单次回填10-27至10-30，新增唯一live_perception常驻，重启anomaly_daily和pages，其余进程及8091保持。先检查生产现存表、真实进程和已提交前缀；回填设置远端期限，失败不盲目重跑。无模型、规则A、费用开关或新来源变更。完成安装与实际结果后再报告业务进度；今晚ET21:10后另核对自然异常写入。
