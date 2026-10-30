@@ -177,6 +177,31 @@ def test_live_link_and_reaction_on_disposable_database():
             "SELECT reaction FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
         ).fetchone()
         r = ev["reaction"]
-        assert r["base"]["px"] == 100.0
-        assert abs(r["m15"]["ret"] - (92.0 / 100.0 - 1)) < 1e-9  # first snap >= 20:26 is 21:15
+        # base falls back to first_seen_at when published_at missing
+        assert r["base"]["px"] == 100.0 and r["base"]["source"] == "first_seen_at"
+        assert abs(r["m15"]["ret"] - (96.0 / 100.0 - 1)) < 1e-9
         assert r["m60"] is not None
+
+
+def test_live_module_render_and_degrade():
+    from datetime import datetime, timezone
+
+    from inves_cog.web.investor_html import _live_module
+
+    assert _live_module({"news_modules": {}}) == ""  # empty -> module hidden
+    row = {
+        "scope": "stock",
+        "subject": "INTC",
+        "last_ret": -0.21,
+        "peak_ret": -0.23,
+        "first_seen_at": datetime(2026, 10, 29, 20, 5, tzinfo=timezone.utc),
+        "cause_event_id": "INTC:guidance:2026-10-29",
+        "cause_lag_minutes": -6.0,
+        "cause_headline": "Intel Sees Q4 Weak",
+        "status": "active",
+    }
+    html = _live_module({"news_modules": {"live": [row]}})
+    assert "实时异常" in html and "股价先动，新闻晚 6 分钟入库" in html and "Intel Sees Q4" in html
+    row2 = dict(row, cause_event_id=None, cause_lag_minutes=None, status="faded")
+    html2 = _live_module({"news_modules": {"live": [row2]}})
+    assert "原因未明" in html2 and "已消退" in html2

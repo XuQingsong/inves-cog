@@ -103,22 +103,55 @@ def update_reactions(connection, now):
         reaction = dict(ev.get("reaction") or {})
         fs = ev["first_seen_at"]
         if "base" not in reaction:
-            base = connection.execute(
-                """SELECT last, as_of FROM ingest.intraday_snapshots
-                   WHERE ticker=%s AND as_of < %s ORDER BY as_of DESC LIMIT 1""",
-                (ev["subject"], fs),
+            pub = connection.execute(
+                """SELECT min(i.published_at) AS at FROM ingest.info_items i
+                   WHERE i.info_id = ANY(
+                       SELECT jsonb_array_elements_text(info_ids) FROM perception.news_events
+                       WHERE event_id=%s)""",
+                (ev["event_id"],),
             ).fetchone()
-            reaction["base"] = {"px": float(base["last"]), "at": str(base["as_of"])} if base else None
+            base_time, source = (pub["at"], "published_at") if pub and pub["at"] else (fs, "first_seen_at")
+            base = connection.execute(
+                """SELECT last, as_of, prev_close FROM ingest.intraday_snapshots
+                   WHERE ticker=%s AND as_of <= %s ORDER BY as_of DESC LIMIT 1""",
+                (ev["subject"], base_time),
+            ).fetchone()
+            if base:
+                reaction["base"] = {
+                    "px": float(base["last"]),
+                    "at": str(base["as_of"]),
+                    "prev_close": float(base["prev_close"]) if base["prev_close"] else None,
+                    "source": source,
+                }
+            elif pub or fs:
+                close = connection.execute(
+                    """SELECT prev_close, close FROM ingest.bars_daily
+                       WHERE ticker=%s AND trade_date < %s::date ORDER BY trade_date DESC LIMIT 1""",
+                    (ev["subject"], base_time),
+                ).fetchone()
+                if close:
+                    px = float(close["close"] or close["prev_close"] or 0)
+                    reaction["base"] = {"px": px, "at": str(base_time), "prev_close": px, "source": "prev_close"}
+                else:
+                    reaction["base"] = None
+            else:
+                reaction["base"] = None
+        base_at = reaction["base"]["at"] if reaction.get("base") else None
         for key, minutes in (("m15", 15), ("m60", 60)):
             if key not in reaction:
                 px = connection.execute(
                     """SELECT last, as_of FROM ingest.intraday_snapshots
                        WHERE ticker=%s AND as_of >= %s ORDER BY as_of ASC LIMIT 1""",
-                    (ev["subject"], fs + timedelta(minutes=minutes)),
+                    (ev["subject"], (base_at or fs) + timedelta(minutes=minutes)),
                 ).fetchone()
                 if px and reaction.get("base"):
-                    ret = float(px["last"]) / reaction["base"]["px"] - 1
-                    reaction[key] = {"ret": ret, "at": str(px["as_of"])}
+                    last = float(px["last"])
+                    pc = reaction["base"].get("prev_close") or reaction["base"]["px"]
+                    reaction[key] = {
+                        "ret": last / reaction["base"]["px"] - 1,
+                        "ret_vs_prev_close": last / pc - 1 if pc else None,
+                        "at": str(px["as_of"]),
+                    }
                 else:
                     reaction[key] = None
         if "session_end" not in reaction:
@@ -128,8 +161,11 @@ def update_reactions(connection, now):
                 (ev["subject"], _session_end(fs)),
             ).fetchone()
             if end_px and reaction.get("base"):
+                last = float(end_px["last"])
+                pc = reaction["base"].get("prev_close") or reaction["base"]["px"]
                 reaction["session_end"] = {
-                    "ret": float(end_px["last"]) / reaction["base"]["px"] - 1,
+                    "ret": last / reaction["base"]["px"] - 1,
+                    "ret_vs_prev_close": last / pc - 1 if pc else None,
                     "at": str(end_px["as_of"]),
                 }
             else:

@@ -2086,7 +2086,10 @@ def page_brief_market(connection, day, clock):
         "intraday": context["intraday"],
         "mstrip": _market_strip(connection, context, day),
         "sector_strip": _sector_strip(context, _themes(context, day)),
-        "news_modules": _news_views_today(context) if is_today_page else _news_views(context),
+        "news_modules": {
+            **(_news_views_today(context) if is_today_page else _news_views(context)),
+            "live": _live_anomalies(connection, day, is_today_page),
+        },
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
         "wide_asof": wide_asof,
@@ -2969,6 +2972,27 @@ def _news_views(context, mover_key=None):
         "pool_leaders_down": movers_down[:5],
         "pool_leaders_up": movers_down[-5:][::-1],
     }
+
+
+def _live_anomalies(connection, day, is_today):
+    """B-070 §4: live_anomalies for the page. Active rows today; all rows
+    (incl. faded) for historical days. Missing table -> []."""
+    if connection is None:
+        return []
+    exists = connection.execute("SELECT to_regclass('perception.live_anomalies') AS t").fetchone()
+    if not exists or not exists["t"]:
+        return []
+    status = "" if not is_today else "AND a.status='active'"
+    rows = connection.execute(
+        f"""SELECT a.*, b.name AS basket_name, e.headline AS cause_headline
+            FROM perception.live_anomalies a
+            LEFT JOIN graph.baskets b ON b.basket_id = a.subject AND a.scope='basket'
+            LEFT JOIN perception.news_events e ON e.event_id = a.cause_event_id
+            WHERE a.trade_date=%s {status}
+            ORDER BY abs(COALESCE(a.peak_z,0)) DESC LIMIT 10""",
+        (day,),
+    ).fetchall()
+    return rows
 
 
 def _news_theme(item, theme_map, held):

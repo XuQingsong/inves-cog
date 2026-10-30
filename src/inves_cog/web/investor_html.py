@@ -247,6 +247,7 @@ def _market(payload):
         + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
+        + _live_module(payload)
         + _movers_module(payload)
         + _theme_news_module(payload)
         + '<div class="grid g2 sec">'
@@ -2084,6 +2085,46 @@ def _tech_chip(tech):
     )
     sig = " · " + "、".join(tech.get("signals") or []) if tech.get("signals") else ""
     return f'<span class="chip{cls}" title="技术参考，不触发交易">{_text(shape)}{_text(sig)}</span>'
+
+
+def _live_module(payload):
+    rows = (payload.get("news_modules") or {}).get("live") or []
+    if not rows:
+        return ""
+    items = []
+    for r in rows:
+        scope = {"stock": "个股", "basket": "板块", "market": "市场"}.get(r["scope"], r["scope"])
+        name = r.get("basket_name") or r["subject"]
+        cur = f"{r['last_ret'] * 100:+.1f}%" if r.get("last_ret") is not None else ""
+        peak = f"{r['peak_ret'] * 100:+.1f}%" if r.get("peak_ret") is not None else ""
+        fs = r.get("first_seen_at")
+        when = (
+            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M ET')}"
+            if hasattr(fs, "astimezone")
+            else ""
+        )
+        if r.get("cause_event_id"):
+            lag = r.get("cause_lag_minutes")
+            if lag is not None and lag < 0:
+                lag_txt = f"股价先动，新闻晚 {abs(lag):.0f} 分钟入库"
+            elif lag is not None:
+                lag_txt = f"事件后 {lag:.0f} 分钟"
+            else:
+                lag_txt = ""
+            cause = f"{_text(r.get('cause_headline') or r['cause_event_id'])} · {lag_txt}"
+        else:
+            cause = "原因未明"
+        members = ""
+        if r["scope"] == "basket" and r.get("members"):
+            parts = [f"{t} {v * 100:+.1f}%" for t, v in (r["members"] or {}).items()]
+            members = f'<div class="dim">{_text(" · ".join(parts))}</div>'
+        faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
+        items.append(
+            f'<div class="row"><span class="chip">{scope}</span> <b>{_text(name)}</b>'
+            f" <span>{cur}（峰值 {peak}）</span>{faded}"
+            f'<div class="dim">{when} · {cause}</div>{members}</div>'
+        )
+    return f'<div class="card sec" id="live"><h2>实时异常</h2>{"".join(items)}</div>'
 
 
 def _movers_module(payload):
