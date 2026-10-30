@@ -203,7 +203,7 @@ def test_due_scheduling_decision():
     from scripts.schedule_live_perception import due
 
     assert due(0, 0, 400) == (True, True)
-    assert due(390, 90, 400) == (False, True)   # events 10s ago, live 310s ago
+    assert due(390, 90, 400) == (False, True)  # events 10s ago, live 310s ago
     assert due(280, 350, 400) == (True, False)  # events 120s, live 50s
     assert due(300, 350, 400) == (False, False)
 
