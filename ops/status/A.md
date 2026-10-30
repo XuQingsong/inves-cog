@@ -766,3 +766,7 @@ live_perception唯一PID1816793，沿用anomaly_daily环境/目录/日志配置�
 生产已快进至 `583b7f3a00e8c2b2d538f7ef00c45db193752e6f`，包含已验收 merge `544a78ad1c38572c0c53d132800bcf7c25fba99f`；[PR96](https://github.com/XuQingsong/inves-cog/pull/96) 准确 head `de4d654d3402963290bf41418b7d216d83cf2268` 的 [CI](https://github.com/XuQingsong/inves-cog/actions/runs/40998117996/job/123875920897) success。安装及独立进程对照完成，仅 scheduler 更新，其余运行服务含 live_perception 原进程保持，服务配置未改，无迁移或手工采集/模型调用。详细证据 `ops/a027-deploy-20261030.json` 保存于项目私有运行目录。
 
 安装时 AlpacaNews source_health=ok、连续失败0；近6轮新闻任务均ok、约10分钟间隔，但这些是安装前证据，未冒称新版本自然运行成功。下一步：后续唤醒核对安装后自然 news_poll 实际间隔及 source_health；下一核心公司财报日再核对分钟窗口和发布→入库延迟。未来窗口独立跟踪，不阻塞 A-028 开发；本轮不重复采集或重启。已自行决定：无。
+
+## A-028 已收到／进行中  2026-10-30 19:56 北京
+
+A-027 已见需求方关单，新单 A-028 与 T1–T6 自验清单齐备。解决财报前一致预期过期、日历不足和缺少隐含波动参考数据；先只读核实停更根因，再按授权实现、先失败夹具测试后修复。变更：限定 ingest、schedule_consensus、phase1_m1_0010_implied_moves 及测试；每日一致预期范围为标的池∪持仓∪核心公司，日历至少45天，期权仅 indicative、交易日ET15:50、独立source_health。无付费源、模型、规则A或跨线改动。新表和调度安装只在需求方验收合并并下发部署后执行；首个15:50自然样例另验。已自行决定：无。
