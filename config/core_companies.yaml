@@ -1,0 +1,31 @@
+version: 2026-10-30
+companies:
+  - {ticker: MSFT, segment: hyperscaler}
+  - {ticker: GOOGL, segment: hyperscaler}
+  - {ticker: AMZN, segment: hyperscaler}
+  - {ticker: META, segment: hyperscaler}
+  - {ticker: ORCL, segment: hyperscaler}
+  - {ticker: CRWV, segment: hyperscaler}
+  - {ticker: NVDA, segment: compute}
+  - {ticker: AMD, segment: compute}
+  - {ticker: AVGO, segment: compute}
+  - {ticker: MRVL, segment: compute}
+  - {ticker: TSM, segment: foundry_equipment}
+  - {ticker: ASML, segment: foundry_equipment}
+  - {ticker: AMAT, segment: foundry_equipment}
+  - {ticker: LRCX, segment: foundry_equipment}
+  - {ticker: KLAC, segment: foundry_equipment}
+  - {ticker: MU, segment: memory}
+  - {ticker: SNDK, segment: memory}
+  - {ticker: WDC, segment: memory}
+  - {ticker: DELL, segment: server_network}
+  - {ticker: SMCI, segment: server_network}
+  - {ticker: ANET, segment: server_network}
+  - {ticker: CIEN, segment: server_network}
+  - {ticker: COHR, segment: server_network}
+  - {ticker: VRT, segment: power}
+  - {ticker: GEV, segment: power}
+  - {ticker: CEG, segment: power}
+  - {ticker: INTC, segment: cpu_pc}
+  - {ticker: ARM, segment: cpu_pc}
+  - {ticker: QCOM, segment: cpu_pc}
