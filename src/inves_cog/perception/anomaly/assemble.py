@@ -107,7 +107,9 @@ def _finish(group, snapshot, rule, version):
         "basket_ids": basket_ids,
         "tickers": tickers,
         "members": members,
-        "direction": "down" if score < 0 else "up",
+        "direction": (
+            _post_direction(members, score) if snapshot.get("session") == "post" else ("down" if score < 0 else "up")
+        ),
         "max_abs_z": abs(score),
         "data_quality": _quality(tickers, snapshot, rule),
         "universe": _universe(paths, basket_ids, tickers, snapshot),
@@ -127,6 +129,14 @@ def _universe(paths, basket_ids, tickers, snapshot):
     if pool and tickers and set(tickers).isdisjoint(pool):
         return "wide"
     return "pool"
+
+
+def _post_direction(members, score):
+    """Post-session direction follows the actual post ret of the dominant
+    member; the score alone may come from a daily path with the opposite sign."""
+    rets = [m.get("ret") for m in members if m.get("ret") is not None]
+    value = max(rets, key=abs) if rets else score
+    return "down" if (value or 0) < 0 else "up"
 
 
 def _layer(paths, basket_ids, snapshot, rule):
@@ -158,4 +168,6 @@ def _quality(tickers, snapshot, rule):
     bars = snapshot.get("bars") or {}
     if any(bars.get(ticker, {}).get("source_changed") for ticker in tickers):
         codes.append("待核验")
+    if snapshot.get("post_sigma_fallback"):
+        codes.append("post_sigma_fallback")
     return codes

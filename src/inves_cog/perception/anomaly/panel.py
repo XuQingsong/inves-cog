@@ -417,14 +417,21 @@ class PricePanel:
                     "resid_z": None if session == "post" else _number(self.basket_resid_z[identifier].iloc[index]),
                 }
             )
-            window = returns[identifier].iloc[max(0, index - 120) : index + 1]
-            history[identifier] = [None if not np.isfinite(value) else float(value) for value in window]
+            if session == "post":
+                daily_window = series.iloc[max(0, index - 120) : index + 1]
+                history[identifier] = [None if not np.isfinite(value) else float(value) for value in daily_window]
+                if history[identifier]:
+                    history[identifier][-1] = ret
+            else:
+                window = returns[identifier].iloc[max(0, index - 120) : index + 1]
+                history[identifier] = [None if not np.isfinite(value) else float(value) for value in window]
             member_returns[identifier] = self._member_returns(identifier, session, index)
         return {
             "trade_date": day.isoformat(),
             "session": session,
             "baskets": baskets,
             "basket_history": history,
+            "post_sigma_fallback": session == "post",
             "member_returns": member_returns,
             "daily": self._daily_rows(index, session),
             "daily_history": self._daily_history(index),
@@ -469,24 +476,55 @@ class PricePanel:
             return None
         return _number(self.returns[ticker].iloc[index])
 
+    def _post_resid(self, ticker, model, index):
+        """Post resid = post ret minus mean post ret of >=2 basket mates; sigma
+        is the 120-session stdev of the ticker's own post returns (>=20 valid),
+        falling back to the daily sigma with a fallback flag."""
+        series = self.post_close[ticker] / self.raw_close[ticker] - 1
+        ret = _number(series.iloc[index])
+        if ret is None:
+            return None, None, False
+        primary = self.l3_of.get(ticker)
+        peers = []
+        if primary is not None:
+            for mate in primary.get("members") or []:
+                name = mate["ticker"] if isinstance(mate, dict) else mate
+                if name == ticker or name not in self.post_close or name not in self.raw_close:
+                    continue
+                peers.append(self.post_close[name] / self.raw_close[name] - 1)
+        if len(peers) >= 2:
+            resid = ret - float(np.nanmedian([_number(peer.iloc[index]) or np.nan for peer in peers]))
+        else:
+            resid = ret
+        window = series.iloc[max(0, index - 120) : index]
+        valid = [value for value in window if np.isfinite(value)]
+        sigma = float(np.std(valid, ddof=1)) if len(valid) >= 20 else None
+        fallback = False
+        if sigma in (None, 0):
+            sigma = _number(model["sigma"].iloc[index])
+            fallback = True
+        resid_z = None if sigma in (None, 0) else resid / sigma
+        return resid, resid_z, fallback
+
     def _daily_rows(self, index, session):
         rows = []
         for ticker, model in self.stock.items():
             if session == "post":
                 ret = self._name_return(ticker, session, index)
-                resid = None
-                resid_z = None
+                resid, resid_z, fallback = self._post_resid(ticker, model, index)
             else:
+                fallback = False
                 ret = _number(self.returns[ticker].iloc[index])
                 resid = _number(model["resid"].iloc[index])
                 resid_z = _number(model["resid_z"].iloc[index])
-            if ret is None and resid_z is None:
+            if ret is None and resid_z is None and session != "post":
                 continue
             primary = self.l3_of.get(ticker)
             rows.append(
                 {
                     "ticker": ticker,
                     "ret": ret,
+                    "post_sigma_fallback": fallback if session == "post" else None,
                     "resid": resid,
                     "resid_z": resid_z,
                     "sigma": _number(model["sigma"].iloc[index]),

@@ -587,6 +587,18 @@ def _carry_chip(row):
     return f' <small class="chip stale">沿用 {str(d)[5:].replace("-", "/")} 收盘</small>' if d else ""
 
 
+def _bj_tz():
+    from zoneinfo import ZoneInfo
+
+    return ZoneInfo("Asia/Shanghai")
+
+
+def _bj_hhmm(moment):
+    return (
+        moment.astimezone(_bj_tz()).strftime("%H:%M 北京") if hasattr(moment, "astimezone") else str(moment or "")[:16]
+    )
+
+
 def _stock_row(payload, row, day):
     ticker = row.get("ticker") or ""
     ret = row.get("ret")
@@ -2080,8 +2092,20 @@ def _movers_module(payload):
     held = set(payload.get("held_tickers") or [])
     for m in mods.get("movers") or []:
         warn = '<div class="small muted">暂无相关新闻</div>' if not m.get("has_news") else ""
+        ev = m.get("event")
+        ev_html = ""
+        if ev is not None:
+            chip = f'<span class="chip stale">{_text(m.get("event_chip") or "")}</span>' if m.get("event_chip") else ""
+            when = _bj_hhmm(ev.get("first_seen_at"))
+            shown_headline = ev.get("title_zh") or ev.get("headline") or ""
+            ev_html = (
+                f'<div class="mnews"><a href="{_text(ev.get("url") or "#")}">{_text(shown_headline)}</a>'
+                f' {chip} <span class="small muted">{when}</span></div>'
+            )
         own = "".join(_news_row(n, held) for n in m.get("news") or [])
-        own_html = f'<div class="mnews">{own}</div>' if own else ""
+        if m.get("news_unconfirmed") and own:
+            own = f'<div class="small muted">相关新闻，未确认是原因</div>{own}'
+        own_html = ev_html + (f'<div class="mnews">{own}</div>' if own else "")
         badge = '<span class="chip held">持仓</span>' if m.get("held") else '<span class="chip buy">标的</span>'
         intra = _intra_line((payload.get("intraday") or {}).get(m.get("ticker")))
         snap_ret = m.get("snap_ret")
@@ -2275,6 +2299,19 @@ def _stock_feed(payload):
     feed = payload.get("news_feed") or []
     held = set(payload.get("held_tickers") or [])
     rows = "".join(_news_row(n, held) for n in feed)
+    ev = payload.get("event")
+    if ev is not None:
+        from inves_cog.web.brief import _facts_chip
+
+        chip = _facts_chip(ev.get("facts") or {})
+        when = _bj_hhmm(ev.get("first_seen_at"))
+        rows = (
+            f'<div class="mnews"><a href="{_text(ev.get("url") or "#")}">'
+            f"{_text(ev.get('title_zh') or ev.get('headline') or '')}</a>"
+            + (f' <span class="chip stale">{_text(chip)}</span>' if chip else "")
+            + f' <span class="small muted">{when}</span></div>'
+            + rows
+        )
     empty = '<div class="empty">近 7 天没有该股新闻</div>'
     return '<h3 style="margin-top:14px">新闻流（近 7 天）</h3>' + (rows or empty)
 
