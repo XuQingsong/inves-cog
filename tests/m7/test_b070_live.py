@@ -225,7 +225,27 @@ def test_post_session_ret_uses_session_close():
     quotes, skipped = _latest_quotes(conn, day, now)
     # post: 70/80-1 = -12.5% vs session close, not 70/95-1 = -26% vs prev_close
     assert abs(quotes["INTC"]["ret"] - (-0.125)) < 0.001 and quotes["INTC"]["basis"] == "session_close"
+    # a row from another session is not scored in a post pass
+    assert "AMD" not in quotes
+    regular = datetime(2026, 10, 29, 15, 0, tzinfo=timezone.utc)
+    conn.execute.return_value.fetchall.return_value = [
+        {"ticker": "AMD", "last": 90.0, "prev_close": 100.0, "session": "regular", "as_of": regular},
+    ]
+    quotes, _ = _latest_quotes(conn, day, regular)
     assert abs(quotes["AMD"]["ret"] - (-0.10)) < 0.001 and quotes["AMD"]["basis"] == "prev_close"
+
+
+def test_sigma_cache_resets_each_et_day():
+    from datetime import date
+
+    from inves_cog.perception.live import run
+
+    run._reset_caches(date(2026, 10, 29))
+    run._SIGMA_CACHE["NVDA"] = 0.02
+    run._reset_caches(date(2026, 10, 29))
+    assert run._SIGMA_CACHE.get("NVDA") == 0.02
+    run._reset_caches(date(2026, 10, 30))
+    assert "NVDA" not in run._SIGMA_CACHE
 
 
 def test_post_session_skipped_without_close():

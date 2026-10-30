@@ -23,7 +23,14 @@ def in_window(now):
     return trading_day(local.date()) and dtime(4, 0) <= local.time() <= dtime(20, 0)
 
 
+def _session_of(local):
+    return "post" if local.time() >= dtime(16, 0) else ("regular" if local.time() >= dtime(9, 30) else "pre")
+
+
 def _latest_quotes(connection, day, now=None):
+    """Only rows of the pass's own session count: at 16:00 a still-regular
+    quote must not be scored as a post-session move."""
+    session = _session_of(now.astimezone(NY))
     rows = connection.execute(
         """SELECT DISTINCT ON (ticker) ticker, last, prev_close, session, as_of
            FROM ingest.intraday_snapshots
@@ -34,7 +41,7 @@ def _latest_quotes(connection, day, now=None):
     quotes = {}
     post_no_close = 0
     for r in rows:
-        if r["last"] is None:
+        if r["last"] is None or r["session"] != session:
             continue
         if r["session"] == "post":
             base = _regular_close(connection, r["ticker"], day, now)
@@ -56,13 +63,13 @@ def _latest_quotes(connection, day, now=None):
 
 
 def _regular_close(connection, ticker, day, now):
+    from datetime import datetime
+
     row = connection.execute(
         """SELECT last FROM ingest.intraday_snapshots
-           WHERE ticker=%s AND session='regular'
-             AND as_of <= (%s AT TIME ZONE 'America/New_York')::date + interval '16:00:59'
-             AND (as_of AT TIME ZONE 'America/New_York')::date = %s::date
+           WHERE ticker=%s AND session='regular' AND as_of >= %s AND as_of <= %s
            ORDER BY as_of DESC LIMIT 1""",
-        (ticker, now, day),
+        (ticker, _day_start(day), datetime(day.year, day.month, day.day, 16, 0, 59, tzinfo=NY)),
     ).fetchone()
     if row:
         return row["last"]
@@ -77,8 +84,16 @@ _SIGMA_CACHE = {}
 _BSIGMA_CACHE = {}
 
 
+def _reset_caches(day):
+    """sigmas change only after the close batch: keep them for one ET date."""
+    if _SIGMA_CACHE.get("__day__") != day:
+        _SIGMA_CACHE.clear()
+        _BSIGMA_CACHE.clear()
+        _SIGMA_CACHE["__day__"] = day
+
+
 def _sigmas(connection):
-    if _SIGMA_CACHE:
+    if len(_SIGMA_CACHE) > 1:
         return _SIGMA_CACHE
     rows = connection.execute(
         """SELECT ticker, sigma FROM marketstate.daily WHERE session='close'
@@ -134,12 +149,13 @@ def live_pass(connection, now):
     day = local.date()
     if not in_window(now):
         return {"skipped": True}
+    _reset_caches(day)
     quotes, post_no_close = _latest_quotes(connection, day, now)
     sigmas = _sigmas(connection)
     baskets = connection.execute("SELECT basket_id, members, level FROM graph.baskets").fetchall()
     bsig = _basket_sigmas(connection, baskets)
     rule = limits()[1]
-    session = "post" if local.time() >= dtime(16, 0) else ("regular" if local.time() >= dtime(9, 30) else "pre")
+    session = _session_of(local)
     hits = (
         stock_hits(quotes, _l3_of(baskets), sigmas, rule, session)
         + basket_hits(quotes, baskets, bsig, rule)
