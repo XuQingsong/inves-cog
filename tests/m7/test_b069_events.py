@@ -64,10 +64,12 @@ def test_merge_same_subject_kind_day():
 def test_event_pick_prefers_guidance_over_preview():
     from inves_cog.web.brief import _event_for
 
-    events = {"INTC": [
-        {"kind": "preview", "importance": 45, "first_seen_at": "a", "headline": "Intel Preview"},
-        {"kind": "guidance", "importance": 100, "first_seen_at": "b", "headline": "Intel Sees Q4"},
-    ]}
+    events = {
+        "INTC": [
+            {"kind": "preview", "importance": 45, "first_seen_at": "a", "headline": "Intel Preview"},
+            {"kind": "guidance", "importance": 100, "first_seen_at": "b", "headline": "Intel Sees Q4"},
+        ]
+    }
     assert _event_for(events, "INTC")["kind"] == "guidance"
 
 
