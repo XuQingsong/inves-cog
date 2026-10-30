@@ -756,3 +756,7 @@ live_perception唯一PID1816793，沿用anomaly_daily环境/目录/日志配置�
 启动5分钟内首轮真实日志 `events=2 items=42`；07:42:14独立只读复核 `pass failed` 次数0、news_events仍299（增量upsert不是新增2行）、live_cursors `live_perception_events` value `2026-10-30 07:41:03.780511+00:00`、updated_at `07:41:15.987525+00:00`。首轮回填游标value `07:31:12.480157+00:00`已真实推进。HTTP `/`、`/s/INTC`均200；不把接口200或进程存活等同今晚异常识别已成功。证据 `ops/b069-deploy-20261030.json` phaseverified、`ops/b069-replay-20261030.log`、`ops/b069-verification-20261030.json`。
 
 已自行决定：无新增业务/权限范围；仅在核实已提交前缀后恢复未完成安装步骤。下一步按补充47第6条，于ET10-30 21:10后（UTC10-31 01:10，北京10-31 09:10后）核对当晚anomaly_daily实际写入的盘后异常条数/成员及post_sigma_fallback次数；当前安装阶段完成，未来自然运行尚未验证。A027 PR96仍待需求方验收合并，不借本次B069部署提前安装A027。
+
+## A-027 部署运维 已收到／进行中  2026-10-30 19:47 北京
+
+收到 A-014 续十四补充四十八：PR96 已验收关单并合并 `544a78ad1c38572c0c53d132800bcf7c25fba99f`，准确 head `de4d654d3402963290bf41418b7d216d83cf2268` 的 [phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/40998117996/job/123875920897) success 已重新核对。变更：快进最新 main，只重启 scheduler；无迁移、不手工触发采集或模型，其余服务含 live_perception 保持。先核对真实进程及工作区，再安装并检查自然 news_poll 间隔、AlpacaNews source_health。A-028 已收到信箱，按一次一单，在本次部署收口后领取；未来财报窗口证据独立跟踪，不占开发任务位。
