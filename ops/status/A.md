@@ -720,3 +720,11 @@ PR https://github.com/XuQingsong/inves-cog/pull/96；head `de4d654d3402963290bf4
 T6–T8已写PR中的ops/answers/A-027.md：仅3次免费indicative请求，NVDA与INTC HTTP200、200/min头；同期股票/期权ET10-29 15:59:59，最近财报后到期分别11-20/10-30、平值212.5/92，跨式粗估8.50%/8.14%。indicative报价调整且INTC IV缺失，不能冒称可成交OPRA或完整IV；首版混配盘后股票的29.80%已丢弃并在答复说明。29家eps_cq及raw当季营收均存在，但最新as_of均10-17，数据陈旧。保留8条日历与首条实际业绩新闻日期/时段一致；ASML/TSM/META更早日历历史缺失不可核验，META首入库跨日，ASML/TSM实际发布早于批准pre窗口，均如实单列，未伪造历史完整。
 
 生产只读证据：`ops/a027-coverage-20261030T032657Z.json`、`ops/a027-options-aligned-20261030T033056Z.json`（以实际文件名为准，PR答复记录读取结果的evidence字段）。无模型/向量、付费开关、生产数据写入或部署。变更已按任务范围实现news_poll调度，不新增来源/表/依赖；Alpaca新闻使用既有120/60秒限速、加密最多120页，429当日持久退回10分钟。下一步核对准确head CI；需求方验收合并与安装授权后才部署。OPS-A026-1仍04:00UTC后按既定窗口核验，不提前宣称完成。
+
+## A-027 已完成：PR已推送、准确head CI通过，待验收合并
+
+2026-10-30 03:38 UTC（北京11:38）[PR96](https://github.com/XuQingsong/inves-cog/pull/96) head `de4d654d3402963290bf41418b7d216d83cf2268` 的[phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/40998117996/job/123875920897)已独立核对headSha及conclusion。干净Docker环境966 passed/60 deselected，另2项CI断言passed；本机此前缺Docker的检查已由完整CI实际运行验证。先失败测试完整SHA `9187b5fbd43ada01c3b69b358a0389b7941b9f75` 保留，19项实际失败后实现。
+
+自验逐项：T1 `test_core_date_only_and_durable_backoff`、`test_schedule_reads_persisted_calendar_and_does_not_change_other_tasks` 验真实形态report_date/time、核心/非核心/非当日；T2 `test_window_boundaries` 验pre/post/unknown及边界，`test_dst_local_window_and_utc_persisted_start` 注入DST切换日；T3 `test_poll_rate_failure_persists_ten_minute_fallback`、`test_accelerated_news_budget_and_no_model` 验429立即退出、持久退回10分钟、source_health degraded及页预算；T4 `test_poll_calls_existing_rules_only_ingestion` 验原路径入库和计数triage零调用，其余任务集合不变；T5准确head CI成功如上；T6 NVDA/INTC免费indicative同期跨式样例附答复，明确INTC IV缺失、报价调整及非实时可成交限制；T7全部29家最新as_of、eps_cq、raw当季营收覆盖表已附，as_of均10-17陈旧；T8保留8条日历日期/时段一致，更早历史缺失、迟入库、窗口外发布均明确列出，未将不可核验称为全对。
+
+交付物ops/answers/A-027.md T1–T8回报及源码/测试均在PR。证据文件名已核对为 `ops/a027-coverage-20261030T032657Z.json`、`ops/a027-options-aligned-20261030T033056Z.json`。已自行决定：无新增接口、来源、依赖或预算；按任务实现调度，保留原rules-only新闻和所有模型/费用开关。未合并、未部署、未写生产业务数据，代码交付不等于线上分钟采集成功。下一步需求方验收、合并及下发安装，A不自动合并；OPS-A026-1仍北京时间12:00后按既定窗口收口，当前不到点，不提前重复查询或重新部署。
