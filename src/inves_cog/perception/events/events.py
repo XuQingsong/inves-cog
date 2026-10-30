@@ -176,6 +176,12 @@ def build_events(items, scope, et_now):
                 ev = events[eid]
                 ev["info_ids"].append(item["info_id"])
                 ev["last_seen_at"] = seen
+                ev["facts"].update(
+                    {k: v for k, v in facts.items() if k != "direction" or "direction" not in ev["facts"]}
+                )
+                score, parts = importance(subject, kind, ev["facts"], set(core))
+                if score > ev["importance"]:
+                    ev["importance"], ev["importance_parts"] = score, parts
             else:
                 score, parts = importance(subject, kind, facts, set(core))
                 events[eid] = {
