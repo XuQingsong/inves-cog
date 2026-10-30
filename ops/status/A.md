@@ -778,3 +778,18 @@ A-027 已见需求方关单，新单 A-028 与 T1–T6 自验清单齐备。解�
 ## A-028 进行中：根因确认，修复已推送、准确CI待结果  2026-10-30 20:25 北京
 
 根因已核实：Alpha常驻正常更新独立valuation表，fundamentals基本面表仅10-17一次m2_consensus，后续没有派发；日历只取前10个交易日。Nasdaq一次只读实查11-17实际有NVDA post，不需新来源。先失败8项提交 `fa4adb3`，实现及本地相关回归通过；已推送分支phase1/a028-earnings-data，迁移和生产调度尚未执行。详细答复在分支ops/answers/A-028.md；新表写权限及Postgres集成测试等待准确head CI，不预记通过。下一步取CI结果并修复实质失败，完成后送需求方验收。
+
+## A-028 已完成（代码与离线验收），待需求方验收合并  2026-10-30 20:30 北京
+
+[PR98](https://github.com/XuQingsong/inves-cog/pull/98)，完整head `76e9d193ae86e1d484ebf4d7a1cafa97260ec73b`，[准确head phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/41055026790/job/124060275390)。实际干净容器985 passed、80 deselected，随后CI断言2 passed；日志明确 `tests/m1/test_a028_database.py .`，不是待运行检查。先失败历史 `fa4adb3`（8 failed）保留，本地专项17通过，相关调度/新闻/基本面回归64通过（后续新增调度用例也专项通过）。工作区干净，未自动合并、未生产迁移、未重启或运行新采集。
+
+- T1：只读job_runs和源日志证明常驻Alpha每天正常写独立valuation表，而m2_consensus仅10-17一次，根因是基本面采集未调度，不是Alpha停更。新增独立每日调度、成功快照写入和失败degraded；`test_daily_estimates_uses_existing_free_page_when_json_requires_auth`覆盖现有公开页面回退。
+- T2：范围并集、当季raw金额及币种、缺失不以年度代替、captured_at PIT读取；`test_consensus_scope_and_raw_quarter_currency`、`test_consensus_snapshot_reader_has_cutoff_and_raw_fields`、`test_daily_scheduler_scope_health_restart_and_options_slot`通过。
+- T3：查询今日至+45天、保留原失败日期处理；`test_calendar_horizon_includes_45_days_and_holidays`、`test_calendar_missing_90_days_and_nasdaq_nvda_shape`通过。上线前库未来90天核心缺口20家已逐项写答复；Nasdaq真实一次请求能取NVDA11-17 post，未补写日历或新增源。
+- T4：`phase1_m1_0010_implied_moves.sql`按批准表与角色矩阵；pre/post/unknown到期日、最近行权价、交易日15:50和重复采样、缺IV、同秒股价及旧报价拒绝均通过。真实Postgres集成证明ingest写入、web只读、同日重启不重复。
+- T5：indicative固定、有限分页、200/60秒限速、429单次退出和独立AlpacaIndicative health；`test_option_pagination_http_429_and_reference_feed`、`test_unaligned_and_missing_quotes_record_degraded_health`通过；调度和采集路径模型客户端构造计数均0。
+- T6：上述准确head CI已真实完成。分支answers中提交前的“待CI”时间截面，以本条结果和PR最新CI为准，不沿用其他head。
+
+证据：PR内ops/answers/A-028.md及私有 `ops/a028-diagnosis-20261030.json`、`ops/a028-coverage-20261030.json`。已自行决定：时间对齐允许±1秒，call/put≤1秒且报价采样不旧于120秒；缺少对齐值留缺并degraded，未混时段补值；沿用既有免费Yahoo页面处理JSON鉴权/限频；Alpha任务避开15:35–15:51、新基本面任务避开15:30–15:51保证采样时隙，均未扩大模型/来源/权限。
+
+下一步：需求方验收合并并下发部署后，A执行唯一迁移及指定服务安装。之后自然更新基本面/45天日历，重新核对核心90天缺口；首个交易日15:50 implied move真实样例仍待自然运行，未冒充完成。本项代码交付不阻塞未来运维窗口；A-014补充47盘后自然异常核验仍按北京时间10-31 09:10后执行。
