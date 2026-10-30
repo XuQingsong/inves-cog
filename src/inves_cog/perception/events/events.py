@@ -17,14 +17,14 @@ KINDS = [
         "earnings_result",
         r"Q[1-4].*(EPS|Sales|Revenue).*(Beat|Miss|Inline|Estimate)|Reports .*(Quarter|Q[1-4]).*Results",
     ),
+    ("rating", r"\bUpgrade\b|\bDowngrade\b|\bMaintains\b|\bReiterates\b|Price Target"),
     ("guidance", r"\bSees\b|Guidance|Outlook|Raises |Lowers |Cuts .*(Forecast|Guidance|Outlook)"),
     ("capex", r"capex|capital expenditure"),
     ("supply_shock", r"explosion|fire|shortage|outage|halt|recall|disruption"),
     ("mna", r"acqui|merger|takeover|buyout|deal to buy"),
-    ("regulatory", r"SEC|DOJ|FTC|antitrust|export control|ban|tariff|probe|investigation"),
-    ("rating", r"Upgrade|Downgrade|Maintains|Reiterates|Price Target"),
+    ("regulatory", r"\bSEC\b|\bDOJ\b|\bFTC\b|antitrust|export control|\bban\b|tariff|probe|investigation"),
 ]
-KIND_RE = [(name, re.compile(pat, re.I if name != "preview" else 0)) for name, pat in KINDS]
+KIND_RE = [(name, re.compile(pat, re.I if name not in ("preview", "regulatory") else 0)) for name, pat in KINDS]
 TYPE_W = {
     "earnings_result": 30,
     "guidance": 30,
@@ -157,6 +157,7 @@ def build_events(items, scope, et_now):
     """items: dicts with info_id/headline/tickers/first_seen_at. Returns events dict."""
     names = _names_map()
     core = core_companies()
+    STRONG = {"earnings_result", "guidance", "capex", "supply_shock", "mna", "regulatory"}
     events = {}
     for item in sorted(items, key=lambda i: i.get("first_seen_at") or ""):
         if item.get("kind") not in (None, "news"):
