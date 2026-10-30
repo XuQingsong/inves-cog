@@ -1,7 +1,9 @@
 """B-069: news event layer."""
 
-import pytest
 from datetime import datetime, timezone
+from pathlib import Path
+
+import pytest
 
 from inves_cog.perception.events.events import (
     build_events,
@@ -129,10 +131,11 @@ def test_chip_revenue_and_one_decimal():
 
 def test_window_boundary_prev_1559_excluded_1601_included():
     """Event first_seen at prev 15:59 ET is out; 16:01 is in."""
-    from unittest.mock import MagicMock
     from datetime import datetime
-    from inves_cog.ingest.market import NY
+    from unittest.mock import MagicMock
+
     from inves_cog.ingest.intraday import previous_session
+    from inves_cog.ingest.market import NY
     from inves_cog.web.brief import _news_events
 
     day = datetime(2026, 10, 29).date()
@@ -160,8 +163,8 @@ def test_live_perception_merge_across_runs_on_disposable_database():
     """Two passes over real Postgres: first ingest a bare results headline,
     then a facts headline -> merged facts, raised importance, switched headline,
     both info_ids, cursor advanced."""
+
     import psycopg
-    import subprocess
 
     from tests.m8.test_attribution import _disposable_database
 
