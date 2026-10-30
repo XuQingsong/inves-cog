@@ -106,7 +106,7 @@ def update_reactions(connection, now):
             pub = connection.execute(
                 """SELECT min(i.published_at) AS at FROM ingest.info_items i
                    WHERE i.info_id = ANY(
-                       (SELECT info_ids FROM perception.news_events WHERE event_id=%s))""",
+                       (SELECT unnest(info_ids) FROM perception.news_events WHERE event_id=%s))""",
                 (ev["event_id"],),
             ).fetchone()
             base_time, source = (pub["at"], "published_at") if pub and pub["at"] else (fs, "first_seen_at")
@@ -136,6 +136,10 @@ def update_reactions(connection, now):
             else:
                 reaction["base"] = None
         base_at = reaction["base"]["at"] if reaction.get("base") else None
+        if isinstance(base_at, str):
+            from datetime import datetime as _dt
+
+            base_at = _dt.fromisoformat(base_at)
         for key, minutes in (("m15", 15), ("m60", 60)):
             if key not in reaction:
                 px = connection.execute(
