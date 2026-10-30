@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 from inves_cog.ingest.http import HTTPClient, SourceError
 from inves_cog.ingest.jobs import HealthBook
-from inves_cog.ingest.market import NY, exchange
+from inves_cog.ingest.market import NY
 
 HEADERS = {"User-Agent": "Mozilla/5.0", "Accept": "application/json,text/plain,*/*", "Origin": "https://www.nasdaq.com"}
 BACKFILL_FROM = date(2026, 10, 1)
@@ -180,7 +180,7 @@ def collect_vix(pipeline, *, http=None):
 
 
 def calendar_days(day):
-    return [d.date() for d in exchange(day.year).sessions_in_range(str(day), str(day + timedelta(days=25)))][:10]
+    return [day + timedelta(days=n) for n in range(46)]
 
 
 def alpha_fallback(pipeline, days, http):

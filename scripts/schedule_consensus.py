@@ -4,6 +4,8 @@ import json
 import time
 
 from inves_cog.clock import SystemClock
+from inves_cog.ingest.earnings_data import scheduled as earnings_scheduled
+from inves_cog.ingest.market import NY
 from inves_cog.ingest.settings import read_environment
 from inves_cog.valuation_v1.consensus_cli import scheduled
 
@@ -12,7 +14,16 @@ def main():
     clock = SystemClock()
     while True:
         try:
-            result = scheduled(clock=clock, values=read_environment())
+            values = read_environment()
+            earnings = earnings_scheduled(clock=clock, values=values)
+            local = clock.now_utc().astimezone(NY)
+            # Keep bounded Alpha batches out of the 15:50 sampling slot.
+            alpha = (
+                {"status": "deferred_for_options"}
+                if (15, 35) <= (local.hour, local.minute) < (15, 51)
+                else scheduled(clock=clock, values=values)
+            )
+            result = {"earnings_data": earnings, "alpha": alpha}
         except Exception as exc:
             result = {"status": "failed", "error_type": type(exc).__name__}
         print(json.dumps(result, ensure_ascii=False, default=str), flush=True)
