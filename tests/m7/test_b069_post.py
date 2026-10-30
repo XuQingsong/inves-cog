@@ -1,6 +1,5 @@
 """B-069: core config, post resid path, post direction."""
 
-from datetime import date
 
 import numpy as np
 import pandas as pd
