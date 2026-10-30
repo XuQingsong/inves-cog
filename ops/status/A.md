@@ -728,3 +728,15 @@ T6–T8已写PR中的ops/answers/A-027.md：仅3次免费indicative请求，NVDA
 自验逐项：T1 `test_core_date_only_and_durable_backoff`、`test_schedule_reads_persisted_calendar_and_does_not_change_other_tasks` 验真实形态report_date/time、核心/非核心/非当日；T2 `test_window_boundaries` 验pre/post/unknown及边界，`test_dst_local_window_and_utc_persisted_start` 注入DST切换日；T3 `test_poll_rate_failure_persists_ten_minute_fallback`、`test_accelerated_news_budget_and_no_model` 验429立即退出、持久退回10分钟、source_health degraded及页预算；T4 `test_poll_calls_existing_rules_only_ingestion` 验原路径入库和计数triage零调用，其余任务集合不变；T5准确head CI成功如上；T6 NVDA/INTC免费indicative同期跨式样例附答复，明确INTC IV缺失、报价调整及非实时可成交限制；T7全部29家最新as_of、eps_cq、raw当季营收覆盖表已附，as_of均10-17陈旧；T8保留8条日历日期/时段一致，更早历史缺失、迟入库、窗口外发布均明确列出，未将不可核验称为全对。
 
 交付物ops/answers/A-027.md T1–T8回报及源码/测试均在PR。证据文件名已核对为 `ops/a027-coverage-20261030T032657Z.json`、`ops/a027-options-aligned-20261030T033056Z.json`。已自行决定：无新增接口、来源、依赖或预算；按任务实现调度，保留原rules-only新闻和所有模型/费用开关。未合并、未部署、未写生产业务数据，代码交付不等于线上分钟采集成功。下一步需求方验收、合并及下发安装，A不自动合并；OPS-A026-1仍北京时间12:00后按既定窗口收口，当前不到点，不提前重复查询或重新部署。
+
+## OPS-A026-1 已完成：连续两个完整美东自然日用量已收口
+
+2026-10-30 04:04:26 UTC（北京12:04）到既定窗口后，只读核验ET10-29完整日，即UTC10-29 04:00至10-30 04:00，严格上界不混入新日调用。main `9ecfc7949bf3fefa5facc5813ce02a43aa2e6921`、A运行，生产head仍 `4b47cac062719c406341ddf1b752b00ac7303cee`；A026 [PR91](https://github.com/XuQingsong/inves-cog/pull/91)准确head `49dc405ba20574a91d3869896f4d8d45b8f57508` 的[CI SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/40528031606/job/122272829343)沿用，未重新部署。证据 `ops/a026-final-day-20261030T040426Z.json`。
+
+ET10-29各task实际调用/输入/输出：anomaly_candidates 9/86727/9124；claim_extraction 14/25372/24375；move_card 14/214496/7884；news_card 10/14498/2577；news_translate 6/7579/4969；summary_oneliner 1/130/28。合计54次、397759 token，全部status ok，failed0、usage_missing0。info_fields_extraction及entity_tagging均0。news_card关联10条均池内/持仓相关8-K或Form4，无范围外、未匹配或空info_ids；只输出聚合，不输出持仓。新闻first_seen入库4218条全部extraction_status ok，关联news条目/news_triage模型调用0；保留翻译6次单独呈现，不能称全部新闻相关模型0。当前所有kind pending0。
+
+与已核验ET10-28第一日（72次/330407 token、新闻3985条、news_card52条均相关、两个停用task0、新闻分类0、failed/usage_missing0）合并：两个完整日126次/728166 token，新闻8203条、分类0；非新闻news_card分别52和10次。首日证据及分类范围沿用 `ops/a026-midnight-usage-20261029T050912Z.json`、`ops/a026-day-scope-20261029T051032Z.json`，不重复请求源或模型。用量随异动归因任务增加有变化，不以总token高低替代用途收敛判断。
+
+ET10-29 enrich共165轮ok/processed2487、9轮degraded/processed295，全部ended且unfinished0；向量开关仍false，既有向量缺失/停用记失败问题仍保留为OPS-A026-2，不能把pending0、调用成功或观察结束冒称向量恢复。未重新诊断/开启向量、补跑、改参数、来源、权限或重启。本次只完成已批准的连续两日用途/费用观察，不等同系统整体或全部数据源验收。
+
+已自行决定：无新增。下一步需求方取本收口证据验收；A027 PR96准确head CI已成功，仍待验收合并及明确安装指令，A不自行合并部署；没有新任务或可行动变化则结束本轮，原持续接单授权与a-github定时器保持。
