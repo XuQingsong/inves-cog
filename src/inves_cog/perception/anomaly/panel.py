@@ -481,9 +481,10 @@ class PricePanel:
         peers = []
         if primary is not None:
             for mate in primary.get("members") or []:
-                if mate == ticker or mate not in self.post_close or mate not in self.raw_close:
+                name = mate["ticker"] if isinstance(mate, dict) else mate
+                if name == ticker or name not in self.post_close or name not in self.raw_close:
                     continue
-                peers.append(self.post_close[mate] / self.raw_close[mate] - 1)
+                peers.append(self.post_close[name] / self.raw_close[name] - 1)
         if len(peers) >= 2:
             resid = ret - float(np.nanmean([_number(peer.iloc[index]) or np.nan for peer in peers]))
         else:
