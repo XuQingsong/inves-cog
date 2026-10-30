@@ -860,6 +860,60 @@ def _column_exists(connection, table, column):
     return row is not None
 
 
+def _news_events(connection, day, is_today):
+    """perception.news_events for the cause window: previous trading day
+    16:00 ET -> page end (or now for today). Empty/missing table -> {}."""
+    try:
+        connection.execute("SELECT to_regclass('perception.news_events') AS t").fetchone()
+        if not connection.execute("SELECT to_regclass('perception.news_events') AS t").fetchone()["t"]:
+            return {}
+    except Exception:
+        return {}
+    start, end = _day_window(day)
+    start = start - timedelta(hours=12)  # prev session 16:00 ET == day 00:00 UTC window approx
+    rows = _rows(
+        connection,
+        """
+        SELECT event_id, subject, kind, et_date, first_seen_at, headline, facts, segment, importance
+        FROM perception.news_events
+        WHERE et_date >= %s - 1 AND et_date <= %s
+        """,
+        (day, day),
+    )
+    out = {}
+    for row in rows:
+        out.setdefault(row["subject"], []).append(row)
+    return out
+
+
+def _event_for(events, ticker):
+    """Best event for a ticker: importance desc, first_seen asc; preview
+    excluded when an earnings_result/guidance exists."""
+    candidates = list((events or {}).get(ticker) or [])
+    if not candidates:
+        return None
+    strong = [e for e in candidates if e["kind"] in ("earnings_result", "guidance")]
+    if strong:
+        candidates = [e for e in candidates if e["kind"] != "preview"]
+    candidates.sort(key=lambda e: (-e["importance"], str(e["first_seen_at"])))
+    return candidates[0]
+
+
+def _facts_chip(facts):
+    if not facts:
+        return ""
+    parts = []
+    s = facts.get("surprise_pct")
+    g = facts.get("guide_gap_pct")
+    if s is not None:
+        parts.append(("EPS 超预期 " if s > 0 else "EPS 不及预期 ") + f"{abs(s):.0f}%")
+    if g is not None:
+        parts.append(("指引超预期 " if g > 0 else "指引低于预期 ") + f"{abs(g):.0f}%")
+    if not parts and facts.get("rev_actual") is not None and facts.get("surprise_pct") is not None:
+        parts.append("营收超预期" if s > 0 else "营收不及预期")
+    return "；".join(parts)
+
+
 def _day_window(day):
     start = datetime.combine(day, time(4, 0), tzinfo=NY)
     return start, start + timedelta(days=1)
@@ -1606,6 +1660,7 @@ def _context(connection, day, clock):
         "earnings_cal": earnings,
         "econ_cal": econ,
         "intraday": intraday,
+        "news_events": _news_events(connection, data_day, is_today_page),
         "elapsed_minutes": _elapsed_regular(clock) if day == clock.today_trade_date() else None,
     }, None
 
@@ -2821,14 +2876,18 @@ def _news_views(context, mover_key=None):
             return abs(m["ret"]) if m["ret"] is not None else None
 
     top8 = sorted((m for m in members.values() if mover_key(m) is not None), key=lambda m: -mover_key(m))[:8]
+    events_map = context.get("news_events") or {}
     for m in top8:
+        ev = _event_for(events_map, m["ticker"])
+        m["event"] = ev
+        m["event_chip"] = _facts_chip((ev or {}).get("facts") or {})
         own = sorted(
             (n for n in ranked if m["ticker"] in n["rule"].primary_tickers),
             key=lambda n: (-n["rule"].importance, n["published"]),
         )
         m["news"] = own[:1]
-        m["has_news"] = bool(own)
-    # hot themes
+        m["has_news"] = bool(own) or ev is not None
+        m["news_unconfirmed"] = ev is None and bool(own)
     by_theme = {}
     for n in ranked:
         if n["rule"].weak_rating_only:
@@ -2840,8 +2899,30 @@ def _news_views(context, mover_key=None):
     for theme, items in sorted(by_theme.items(), key=lambda kv: (-max(i["rule"].importance for i in kv[1]), kv[0])):
         items.sort(key=lambda n: (-n["rule"].importance, n["published"]))
         pick.extend({"theme": theme, **n} for n in items[:1])
+    core = set()
+    try:
+        from inves_cog.perception.core_companies import core_companies
+
+        core = set(core_companies())
+    except Exception:
+        pass
+    events_map = context.get("news_events") or {}
+
+    def _theme_event_score(n):
+        tickers = n["rule"].primary_tickers or n["tickers"] or []
+        best = max(
+            (_event_for(events_map, t) for t in tickers), key=lambda e: e["importance"] if e else -1, default=None
+        )
+        return (best["importance"], 1 if best and best["subject"] in core else 0) if best else (-1, 0)
+
     pick.sort(
-        key=lambda n: (-n["rule"].held, -n["rule"].importance, -(n["published"].timestamp() if n["published"] else 0))
+        key=lambda n: (
+            -_theme_event_score(n)[1],
+            -_theme_event_score(n)[0],
+            -n["rule"].held,
+            -n["rule"].importance,
+            -(n["published"].timestamp() if n["published"] else 0),
+        )
     )
     from inves_cog.perception.news.rules import feed_keep, group_weak_ratings
 

@@ -2080,8 +2080,20 @@ def _movers_module(payload):
     held = set(payload.get("held_tickers") or [])
     for m in mods.get("movers") or []:
         warn = '<div class="small muted">暂无相关新闻</div>' if not m.get("has_news") else ""
+        ev = m.get("event")
+        ev_html = ""
+        if ev is not None:
+            chip = f'<span class="chip stale">{_text(m.get("event_chip") or "")}</span>' if m.get("event_chip") else ""
+            when = ev.get("first_seen_at") or ""
+            when = (when + timedelta(hours=8)).strftime("%H:%M 北京") if hasattr(when, "astimezone") else str(when)[:16]
+            ev_html = (
+                f'<div class="mnews"><a href="{_text(ev.get("url") or "#")}">{_text(ev.get("headline") or "")}</a>'
+                f' {chip} <span class="small muted">{when}</span></div>'
+            )
         own = "".join(_news_row(n, held) for n in m.get("news") or [])
-        own_html = f'<div class="mnews">{own}</div>' if own else ""
+        if m.get("news_unconfirmed") and own:
+            own = f'<div class="small muted">相关新闻，未确认是原因</div>{own}'
+        own_html = ev_html + (f'<div class="mnews">{own}</div>' if own else "")
         badge = '<span class="chip held">持仓</span>' if m.get("held") else '<span class="chip buy">标的</span>'
         intra = _intra_line((payload.get("intraday") or {}).get(m.get("ticker")))
         snap_ret = m.get("snap_ret")

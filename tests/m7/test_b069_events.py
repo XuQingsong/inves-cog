@@ -59,3 +59,31 @@ def test_merge_same_subject_kind_day():
     events = build_events(items, SCOPE, NOW)
     assert len(events) == 1 and set(events[0]["info_ids"]) == {"a", "b"}
     assert events[0]["kind"] == "guidance" and events[0]["segment"] == "cpu_pc"
+
+
+def test_event_pick_prefers_guidance_over_preview():
+    from inves_cog.web.brief import _event_for
+
+    events = {"INTC": [
+        {"kind": "preview", "importance": 45, "first_seen_at": "a", "headline": "Intel Preview"},
+        {"kind": "guidance", "importance": 100, "first_seen_at": "b", "headline": "Intel Sees Q4"},
+    ]}
+    assert _event_for(events, "INTC")["kind"] == "guidance"
+
+
+def test_facts_chip_text():
+    from inves_cog.web.brief import _facts_chip
+
+    assert "指引低于预期 42%" in _facts_chip({"guide_gap_pct": -41.9})
+    assert "EPS 不及预期 30%" in _facts_chip({"surprise_pct": -29.8})
+    assert _facts_chip({}) == ""
+
+
+def test_news_events_missing_table_degrades():
+    from unittest.mock import MagicMock
+
+    conn = MagicMock()
+    conn.execute.side_effect = Exception("relation does not exist")
+    from inves_cog.web.brief import _news_events
+
+    assert _news_events(conn, "2026-10-29", True) == {}
