@@ -160,14 +160,18 @@ def test_upsert_merge_contract():
 
 @pytest.mark.phase1_blocking
 def test_live_perception_merge_across_runs_on_disposable_database():
-    """Two passes over real Postgres: first ingest a bare results headline,
-    then a facts headline -> merged facts, raised importance, switched headline,
-    both info_ids, cursor advanced."""
-
+    """Two passes over real Postgres: bare results headline, then facts
+    headline -> merged facts, raised importance, switched headline, both
+    info_ids, cursor advanced. Runs as admin: role_perception cannot INSERT
+    into ingest.info_items."""
     import psycopg
 
     from tests.m8.test_attribution import _disposable_database
 
+    cols = (
+        "info_id,kind,headline,tickers,first_seen_at,source,source_level,"
+        "entities,extraction_status,flags,payload,extraction_source"
+    )
     host = _disposable_database()
     with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as conn:
         import scripts.schedule_live_perception as sched
@@ -175,16 +179,14 @@ def test_live_perception_merge_across_runs_on_disposable_database():
         t0 = "2026-10-28T20:01:00+00:00"
         t1 = "2026-10-28T20:20:00+00:00"
         conn.execute(
-            "INSERT INTO ingest.info_items (info_id, kind, headline, tickers, first_seen_at)"
-            " VALUES ('n1','news','Intel Reports Third-Quarter 2026 Financial Results',ARRAY['INTC'],%s)",
+            f"INSERT INTO ingest.info_items ({cols}) VALUES "
+            "('n1','news','Intel Reports Third-Quarter 2026 Financial Results',"
+            " ARRAY['INTC'],%s,'Benzinga',1,ARRAY['INTC'],'ok','{}','{}','{}')",
             (t0,),
         )
         conn.commit()
-        items = (
-            sched._items(conn, start=None, end=None)
-            or conn.execute("SELECT info_id,headline,tickers,kind,first_seen_at FROM ingest.info_items").fetchall()
-        )
         scope = {"INTC"}
+        items = conn.execute("SELECT info_id,headline,tickers,kind,first_seen_at FROM ingest.info_items").fetchall()
         events = sched.build_events(items, scope, None)
         with conn.transaction():
             sched._persist(conn, events)
@@ -193,9 +195,10 @@ def test_live_perception_merge_across_runs_on_disposable_database():
                 (sched.CURSOR, t0),
             )
         conn.execute(
-            "INSERT INTO ingest.info_items (info_id, kind, headline, tickers, first_seen_at)"
-            " VALUES ('n2','news','Intel Q3 Adj. EPS $0.52 Beats $0.40 Estimate,"
-            " Sales $16.513B Beat $16.467B Estimate',ARRAY['INTC'],%s)",
+            f"INSERT INTO ingest.info_items ({cols}) VALUES "
+            "('n2','news','Intel Q3 Adj. EPS $0.52 Beats $0.40 Estimate, "
+            " Sales $16.513B Beat $16.467B Estimate',ARRAY['INTC'],%s,"
+            "'Benzinga',1,ARRAY['INTC'],'ok','{}','{}','{}')",
             (t1,),
         )
         conn.commit()
