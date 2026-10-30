@@ -18,9 +18,15 @@ CREATE TABLE perception.news_events (
     reaction jsonb,
     updated_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE perception.live_cursors (
+    cursor_key text PRIMARY KEY,
+    value timestamptz NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE INDEX news_events_et_date ON perception.news_events (et_date);
 CREATE INDEX news_events_subject ON perception.news_events (subject, et_date);
 GRANT SELECT ON ingest.info_items TO role_perception;
 GRANT SELECT, INSERT, UPDATE, DELETE ON perception.news_events TO role_perception;
 GRANT SELECT ON perception.news_events TO role_web;
+GRANT SELECT, INSERT, UPDATE ON perception.live_cursors TO role_perception;
 COMMIT;

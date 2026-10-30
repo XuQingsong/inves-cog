@@ -1,5 +1,6 @@
 """B-069: news event layer."""
 
+import pytest
 from datetime import datetime, timezone
 
 from inves_cog.perception.events.events import (
@@ -127,13 +128,11 @@ def test_chip_revenue_and_one_decimal():
 
 
 def test_window_boundary_prev_1559_excluded_1601_included():
-    """Event first_seen at prev 15:59 ET is out; 16:01 is in (SQL window
-    is [prev 16:00 ET, end)); verify the boundary objects directly."""
-    from datetime import datetime
+    """Event first_seen at prev 15:59 ET is out; 16:01 is in."""
     from unittest.mock import MagicMock
-
-    from inves_cog.ingest.intraday import previous_session
+    from datetime import datetime
     from inves_cog.ingest.market import NY
+    from inves_cog.ingest.intraday import previous_session
     from inves_cog.web.brief import _news_events
 
     day = datetime(2026, 10, 29).date()
@@ -145,17 +144,75 @@ def test_window_boundary_prev_1559_excluded_1601_included():
     args = conn.execute.call_args_list[-1][0][1]
     start = args[0]
     assert start == datetime(prev.year, prev.month, prev.day, 16, 0, tzinfo=NY)
-    # 15:59 excluded, 16:01 included by [start, end)
     assert datetime(2026, 10, 28, 15, 59, tzinfo=NY) < start
     assert datetime(2026, 10, 28, 16, 1, tzinfo=NY) >= start
 
 
 def test_upsert_merge_contract():
-    """Two-run merge: facts merge, importance raises, headline switches to
-    the higher-importance row — the SQL guarantees these; assert the upsert
-    clauses exist."""
-    from pathlib import Path
-
+    """Two-run merge: facts merge, importance raises, headline switches."""
     sql = Path("scripts/schedule_live_perception.py").read_text()
     for clause in ("LEAST(", "GREATEST(", "|| COALESCE(EXCLUDED.facts", "CASE WHEN EXCLUDED.importance >="):
         assert clause in sql
+
+
+@pytest.mark.phase1_blocking
+def test_live_perception_merge_across_runs_on_disposable_database():
+    """Two passes over real Postgres: first ingest a bare results headline,
+    then a facts headline -> merged facts, raised importance, switched headline,
+    both info_ids, cursor advanced."""
+    import psycopg
+    import subprocess
+
+    from tests.m8.test_attribution import _disposable_database
+
+    host = _disposable_database()
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as conn:
+        conn.execute("SET LOCAL ROLE role_perception")
+        import scripts.schedule_live_perception as sched
+
+        sql = Path("migrations/phase1_m7_0003_news_events.sql").read_text().replace("BEGIN;", "").replace("COMMIT;", "")
+        conn.execute(sql)
+        t0 = "2026-10-28T20:01:00+00:00"
+        t1 = "2026-10-28T20:20:00+00:00"
+        conn.execute(
+            "INSERT INTO ingest.info_items (info_id, kind, headline, tickers, first_seen_at)"
+            " VALUES ('n1','news','Intel Reports Third-Quarter 2026 Financial Results',ARRAY['INTC'],%s)",
+            (t0,),
+        )
+        conn.commit()
+        items = (
+            sched._items(conn, start=None, end=None)
+            or conn.execute("SELECT info_id,headline,tickers,kind,first_seen_at FROM ingest.info_items").fetchall()
+        )
+        scope = {"INTC"}
+        events = sched.build_events(items, scope, None)
+        with conn.transaction():
+            sched._persist(conn, events)
+            conn.execute(
+                "INSERT INTO perception.live_cursors (cursor_key,value) VALUES (%s,%s)",
+                (sched.CURSOR, t0),
+            )
+        conn.execute(
+            "INSERT INTO ingest.info_items (info_id, kind, headline, tickers, first_seen_at)"
+            " VALUES ('n2','news','Intel Q3 Adj. EPS $0.52 Beats $0.40 Estimate,"
+            " Sales $16.513B Beat $16.467B Estimate',ARRAY['INTC'],%s)",
+            (t1,),
+        )
+        conn.commit()
+        items = conn.execute("SELECT info_id,headline,tickers,kind,first_seen_at FROM ingest.info_items").fetchall()
+        events = sched.build_events(items, scope, None)
+        with conn.transaction():
+            sched._persist(conn, events)
+            conn.execute(
+                "INSERT INTO perception.live_cursors (cursor_key,value) VALUES (%s,%s)"
+                " ON CONFLICT (cursor_key) DO UPDATE SET value=EXCLUDED.value",
+                (sched.CURSOR, t1),
+            )
+        row = conn.execute("SELECT * FROM perception.news_events WHERE subject='INTC'").fetchall()
+        assert len(row) == 1
+        ev = row[0]
+        assert set(ev["info_ids"]) == {"n1", "n2"}
+        assert ev["facts"] and ev["facts"].get("eps_actual") == 0.52
+        assert "Beats" in ev["headline"]
+        cur = conn.execute("SELECT value FROM perception.live_cursors WHERE cursor_key=%s", (sched.CURSOR,)).fetchone()
+        assert str(cur["value"]).startswith("2026-10-28 20:20")

@@ -96,10 +96,14 @@ def main():
         start, end = date.fromisoformat(args.replay[0]), date.fromisoformat(args.replay[1])
         items = _items(connection, start=start, end=end)
     else:
-        row = connection.execute("SELECT value FROM ingest.source_cursors WHERE cursor_key=%s", (CURSOR,)).fetchone()
+        row = connection.execute(
+            "SELECT value FROM perception.live_cursors WHERE cursor_key=%s", (CURSOR,)
+        ).fetchone()
         since = row["value"] if row else None
-        if since is not None and not isinstance(since, str):
-            since = since - timedelta(minutes=10)  # overlap: idempotent upsert catches late commits
+        if since is None:
+            since = datetime.now(timezone.utc) - timedelta(days=2)
+        else:
+            since = since - timedelta(minutes=10)  # overlap: upsert is idempotent
         items = _items(connection, since=since)
     events = build_events(items, scope, now)
     if args.dry_run:
@@ -114,7 +118,7 @@ def _run(connection, scope, items, events, args):
         latest = max((i["first_seen_at"] for i in items), default=None)
         if latest:
             connection.execute(
-                "INSERT INTO ingest.source_cursors (cursor_key,value,updated_at) VALUES (%s,%s,now())"
+                "INSERT INTO perception.live_cursors (cursor_key,value,updated_at) VALUES (%s,%s,now())"
                 " ON CONFLICT (cursor_key) DO UPDATE SET value=EXCLUDED.value,updated_at=now()",
                 (CURSOR, latest),
             )
