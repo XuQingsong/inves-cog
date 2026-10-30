@@ -235,14 +235,26 @@ def test_b070_sec_case_sensitive_and_rating_priority():
 
 
 def test_b070_representative_headline_is_most_facts():
-    from inves_cog.perception.events.events import build_events
     from datetime import datetime, timezone
 
+    from inves_cog.perception.events.events import build_events
+
     items = [
-        {"kind": "news", "headline": "Intel Reports Third-Quarter 2026 Financial Results",
-         "tickers": ["INTC"], "info_id": "h1", "first_seen_at": datetime(2026, 10, 28, 20, 1, tzinfo=timezone.utc)},
-        {"kind": "news", "headline": "Intel Sees Q4 Adj EPS $0.25 vs $0.43 Est; Sees Sales $15.000B-$16.000B vs $17.045B Est",
-         "tickers": ["INTC"], "info_id": "h2", "first_seen_at": datetime(2026, 10, 28, 20, 20, tzinfo=timezone.utc)},
+        {
+            "kind": "news",
+            "headline": "Intel Reports Third-Quarter 2026 Financial Results",
+            "tickers": ["INTC"],
+            "info_id": "h1",
+            "first_seen_at": datetime(2026, 10, 28, 20, 1, tzinfo=timezone.utc),
+        },
+        {
+            "kind": "news",
+            "headline": "Intel Sees Q4 Adj EPS $0.25 vs $0.43 Est; Sees Sales $15.000B-$16.000B vs $17.045B Est",
+            "tickers": ["INTC"],
+            "info_id": "h2",
+            "first_seen_at": datetime(2026, 10, 28, 20, 20, tzinfo=timezone.utc),
+        },
     ]
     ev = build_events(items, {"INTC"}, None)[0]
-    assert "Sees Q4" in ev["headline"]  # the headline with the most facts wins
+    # headline with the most facts wins
+    assert "Sees Q4" in ev["headline"]

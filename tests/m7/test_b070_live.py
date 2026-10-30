@@ -1,10 +1,15 @@
 """B-070 live detection."""
-import numpy as np
 
 from inves_cog.perception.live.detect import basket_hits, market_hits, stock_hits
 
-RULE = {"path_b_abs_ret": 0.05, "path_b_z": 2.0, "path_a_z": 2.0,
-        "path_a_same_sign": 0.5, "spy_abs": 0.02, "qqq_abs": 0.025}
+RULE = {
+    "path_b_abs_ret": 0.05,
+    "path_b_z": 2.0,
+    "path_a_z": 2.0,
+    "path_a_same_sign": 0.5,
+    "spy_abs": 0.02,
+    "qqq_abs": 0.025,
+}
 
 
 def test_stock_hit_median_baseline():
@@ -51,8 +56,8 @@ def test_live_anomalies_upsert_and_fade_on_disposable_database():
     import psycopg
     from psycopg.rows import dict_row
 
-    from tests.m8.test_attribution import _disposable_database
     from inves_cog.perception.live.detect import apply_round
+    from tests.m8.test_attribution import _disposable_database
 
     host = _disposable_database()
     now = "2026-10-29T17:00:00+00:00"
@@ -68,8 +73,15 @@ def test_live_anomalies_upsert_and_fade_on_disposable_database():
         # faded when no longer triggered
         apply_round(conn, [], "2026-10-29T17:10:00+00:00", "2026-10-29", "post")
         conn.commit()
-        assert conn.execute("SELECT status FROM perception.live_anomalies WHERE subject='INTC'").fetchone()["status"] == "faded"
+        assert (
+            conn.execute("SELECT status FROM perception.live_anomalies WHERE subject='INTC'").fetchone()["status"]
+            == "faded"
+        )
         # direction flip -> second row
-        apply_round(conn, [dict(hit, direction="up", ret=0.3, z=8.0)], "2026-10-29T17:15:00+00:00", "2026-10-29", "post")
+        apply_round(
+            conn, [dict(hit, direction="up", ret=0.3, z=8.0)], "2026-10-29T17:15:00+00:00", "2026-10-29", "post"
+        )
         conn.commit()
-        assert conn.execute("SELECT count(*) c FROM perception.live_anomalies WHERE subject='INTC'").fetchone()["c"] == 2
+        assert (
+            conn.execute("SELECT count(*) c FROM perception.live_anomalies WHERE subject='INTC'").fetchone()["c"] == 2
+        )
