@@ -4,13 +4,10 @@
 import argparse
 import json
 import sys
-from datetime import date, datetime, timezone
+import time
+from datetime import date, datetime, timedelta, timezone
 
-import psycopg
-from psycopg.rows import dict_row
-
-sys.path.insert(0, "src")
-from inves_cog.perception.events.events import build_events  # noqa: E402
+from inves_cog.perception.events.events import build_events
 
 CURSOR = "live_perception_events"
 
@@ -61,10 +58,18 @@ def _persist(connection, events):
                        %(first_seen_at)s,%(last_seen_at)s,%(info_ids)s,%(headline)s,
                        %(facts)s,%(segment)s,%(importance)s,%(importance_parts)s,now())
                ON CONFLICT (event_id) DO UPDATE SET
-                last_seen_at=EXCLUDED.last_seen_at,
-                info_ids=(
-                SELECT array_agg(DISTINCT x)
-                FROM unnest(perception.news_events.info_ids || EXCLUDED.info_ids) x),
+                first_seen_at=LEAST(perception.news_events.first_seen_at, EXCLUDED.first_seen_at),
+                last_seen_at=GREATEST(perception.news_events.last_seen_at, EXCLUDED.last_seen_at),
+                info_ids=(SELECT array_agg(DISTINCT x) FROM unnest(
+                    perception.news_events.info_ids || EXCLUDED.info_ids) x),
+                facts=perception.news_events.facts || COALESCE(EXCLUDED.facts,'{}'::jsonb),
+                importance=GREATEST(perception.news_events.importance, EXCLUDED.importance),
+                headline=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
+                              THEN EXCLUDED.headline ELSE perception.news_events.headline END,
+                importance_parts=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
+                              THEN EXCLUDED.importance_parts ELSE perception.news_events.importance_parts END,
+                segment=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
+                              THEN EXCLUDED.segment ELSE perception.news_events.segment END,
                 updated_at=now()""",
             {
                 **ev,
@@ -80,10 +85,11 @@ def main():
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="compute in memory, print, no writes")
     args = ap.parse_args()
-    import os
+    from inves_cog.ingest.cli import connect
+    from inves_cog.ingest.settings import read_environment
 
-    dsn = os.environ["INVES_COG_PERCEPTION_DATABASE_URL"]
-    connection = psycopg.connect(dsn, row_factory=dict_row)
+    values = read_environment()
+    connection = connect({**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]})
     scope = _scope(connection)
     now = datetime.now(timezone.utc)
     if args.replay:
@@ -92,11 +98,17 @@ def main():
     else:
         row = connection.execute("SELECT value FROM ingest.source_cursors WHERE cursor_key=%s", (CURSOR,)).fetchone()
         since = row["value"] if row else None
+        if since is not None and not isinstance(since, str):
+            since = since - timedelta(minutes=10)  # overlap: idempotent upsert catches late commits
         items = _items(connection, since=since)
     events = build_events(items, scope, now)
     if args.dry_run:
         print(json.dumps(events, default=str, indent=1))
         return
+    _run(connection, scope, items, events, args)
+
+
+def _run(connection, scope, items, events, args):
     with connection.transaction():
         _persist(connection, events)
         latest = max((i["first_seen_at"] for i in items), default=None)
@@ -110,4 +122,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args_ns = __import__("argparse").Namespace()
+    if "--once" in sys.argv or "--replay" in sys.argv or "--dry-run" in sys.argv:
+        main()
+    else:
+        while True:
+            main()
+            time.sleep(120)

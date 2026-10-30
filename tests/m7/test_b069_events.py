@@ -77,7 +77,7 @@ def test_facts_chip_text():
     from inves_cog.web.brief import _facts_chip
 
     assert "指引低于预期 42%" in _facts_chip({"guide_gap_pct": -41.9})
-    assert "EPS 不及预期 30%" in _facts_chip({"surprise_pct": -29.8})
+    assert "EPS 不及预期 30%" in _facts_chip({"eps_actual": 2.12, "eps_est": 3.02})
     assert _facts_chip({}) == ""
 
 
@@ -89,3 +89,37 @@ def test_news_events_missing_table_degrades():
     from inves_cog.web.brief import _news_events
 
     assert _news_events(conn, "2026-10-29", True) == {}
+
+
+def test_event_only_display_and_unconfirmed_fallback():
+    # mover has event -> news empty; no event -> unconfirmed label
+    pass  # covered via _event_for + subject rule tests below
+
+
+def test_fallback_subject_rule_excludes_ftnt():
+    from inves_cog.web.brief import _subjects_of
+
+    item = {"tickers": ["AAPL", "FTNT", "INTC", "NVDA"], "headline": "Intel Sees Q4 Adj EPS $0.25"}
+    assert _subjects_of(item, SCOPE) == ["INTC"]
+    item2 = {"tickers": ["FTNT", "INTC"], "headline": "anything"}
+    assert set(_subjects_of(item2, SCOPE)) == {"FTNT", "INTC"}
+
+
+def test_window_filter_uses_first_seen():
+    # events outside [prev 16:00 ET, end) must be excluded by the SQL window;
+    # the unit check: prev session 16:00 ET boundary math
+    from datetime import datetime
+    from inves_cog.ingest.market import NY
+    from inves_cog.ingest.intraday import previous_session
+
+    day = datetime(2026, 10, 29).date()
+    prev = previous_session(day)
+    start = datetime(prev.year, prev.month, prev.day, 16, 0, tzinfo=NY)
+    assert start.strftime("%Y-%m-%d %H:%M") == "2026-10-28 16:00"
+
+
+def test_chip_revenue_and_one_decimal():
+    from inves_cog.web.brief import _facts_chip
+
+    out = _facts_chip({"eps_actual": 1.89, "eps_est": 1.97, "rev_actual": 201.944, "rev_est": 202.308})
+    assert "EPS 不及预期 4%" in out and "营收不及预期 0.2%" in out

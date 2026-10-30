@@ -17,10 +17,12 @@ from inves_cog.web.brief import (
     _card_for,
     _context,
     _day_window,
+    _event_for,
     _event_title,
     _freshness,
     _holding_row,
     _member,
+    _news_events,
     _news_summary,
     _object,
     _one,
@@ -733,6 +735,7 @@ def page_brief_stock(connection, day, clock, symbol):
         "theme_ret": theme_ret,
         "news": news,
         "news_feed": news_feed,
+        "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
         "next_earnings": next_earnings,
         "tech": tech,
         "events": events,
@@ -757,7 +760,7 @@ def covered_gate_reasons():
     return set(_HEALTH_REASON) | set(BLOCKING) | set(EXCLUDED) | set(_BOOK_BELOW) | set(_BOOK_MISSING)
 
 
-def _news_feed(connection, symbol, day, context):
+def _news_feed(connection, symbol, day, context):  # noqa: F811 - kept signature
     """This ticker's last-7-day news, ranked by importance then time."""
     start, end = _day_window(day)
     start = start - timedelta(days=7)

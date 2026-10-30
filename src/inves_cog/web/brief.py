@@ -860,30 +860,48 @@ def _column_exists(connection, table, column):
     return row is not None
 
 
-def _news_events(connection, day, is_today):
-    """perception.news_events for the cause window: previous trading day
-    16:00 ET -> page end (or now for today). Empty/missing table -> {}."""
-    try:
-        connection.execute("SELECT to_regclass('perception.news_events') AS t").fetchone()
-        if not connection.execute("SELECT to_regclass('perception.news_events') AS t").fetchone()["t"]:
-            return {}
-    except Exception:
+def _news_events(connection, day, is_today, clock=None):
+    """Events whose first_seen falls in the cause window: previous trading
+    session 16:00 ET -> now (today) or that day's 20:00 ET (historical).
+    Missing/empty table -> {} (the role may not have the migration yet)."""
+    if not _table_exists(connection, "perception.news_events"):
         return {}
-    start, end = _day_window(day)
-    start = start - timedelta(hours=12)  # prev session 16:00 ET == day 00:00 UTC window approx
+    from inves_cog.ingest.intraday import previous_session
+
+    prev = previous_session(day)
+    start = datetime(prev.year, prev.month, prev.day, 16, 0, tzinfo=NY)
+    if is_today and clock is not None:
+        end = clock.now_utc()
+    else:
+        end = datetime(day.year, day.month, day.day, 20, 0, tzinfo=NY)
     rows = _rows(
         connection,
         """
-        SELECT event_id, subject, kind, et_date, first_seen_at, headline, facts, segment, importance
-        FROM perception.news_events
-        WHERE et_date >= %s - 1 AND et_date <= %s
+        SELECT e.event_id, e.subject, e.kind, e.et_date, e.first_seen_at,
+               e.headline, e.facts, e.segment, e.importance,
+               i.url, t.title_zh
+        FROM perception.news_events e
+        LEFT JOIN LATERAL (
+            SELECT url, info_id FROM ingest.info_items
+            WHERE info_id = ANY(e.info_ids)
+            ORDER BY (headline = e.headline) DESC, first_seen_at ASC LIMIT 1
+        ) i ON true
+        LEFT JOIN perception.news_translations t ON t.info_id = i.info_id
+        WHERE e.first_seen_at >= %s AND e.first_seen_at < %s
         """,
-        (day, day),
+        (start, end),
     )
     out = {}
     for row in rows:
         out.setdefault(row["subject"], []).append(row)
     return out
+
+
+def _subjects_of(item, scope):
+    """Reuses the B-069 subject rule for fallback news linking."""
+    from inves_cog.perception.events.events import _names_map, subjects
+
+    return subjects(item, set(scope), _names_map())
 
 
 def _event_for(events, ticker):
@@ -899,18 +917,24 @@ def _event_for(events, ticker):
     return candidates[0]
 
 
+def _fmt_pct(value):
+    return f"{abs(value):.1f}" if abs(value) < 1 else f"{abs(value):.0f}"
+
+
 def _facts_chip(facts):
+    """'EPS 不及预期 30%；营收不及预期 0.2%' / '指引低于预期 42%'."""
     if not facts:
         return ""
     parts = []
-    s = facts.get("surprise_pct")
+    if facts.get("eps_actual") is not None and facts.get("eps_est"):
+        s = 100 * (facts["eps_actual"] - facts["eps_est"]) / abs(facts["eps_est"])
+        parts.append(("EPS 超预期 " if s > 0 else "EPS 不及预期 ") + _fmt_pct(s) + "%")
+    if facts.get("rev_actual") is not None and facts.get("rev_est"):
+        s = 100 * (facts["rev_actual"] - facts["rev_est"]) / abs(facts["rev_est"])
+        parts.append(("营收超预期 " if s > 0 else "营收不及预期 ") + _fmt_pct(s) + "%")
     g = facts.get("guide_gap_pct")
-    if s is not None:
-        parts.append(("EPS 超预期 " if s > 0 else "EPS 不及预期 ") + f"{abs(s):.0f}%")
     if g is not None:
-        parts.append(("指引超预期 " if g > 0 else "指引低于预期 ") + f"{abs(g):.0f}%")
-    if not parts and facts.get("rev_actual") is not None and facts.get("surprise_pct") is not None:
-        parts.append("营收超预期" if s > 0 else "营收不及预期")
+        parts.append(("指引超预期 " if g > 0 else "指引低于预期 ") + _fmt_pct(g) + "%")
     return "；".join(parts)
 
 
@@ -1660,7 +1684,7 @@ def _context(connection, day, clock):
         "earnings_cal": earnings,
         "econ_cal": econ,
         "intraday": intraday,
-        "news_events": _news_events(connection, data_day, is_today_page),
+        "news_events": _news_events(connection, data_day, is_today_page, clock),
         "elapsed_minutes": _elapsed_regular(clock) if day == clock.today_trade_date() else None,
     }, None
 
@@ -2882,10 +2906,19 @@ def _news_views(context, mover_key=None):
         m["event"] = ev
         m["event_chip"] = _facts_chip((ev or {}).get("facts") or {})
         own = sorted(
-            (n for n in ranked if m["ticker"] in n["rule"].primary_tickers),
+            (
+                n
+                for n in ranked
+                if m["ticker"] in n["rule"].primary_tickers
+                and m["ticker"]
+                in _subjects_of(
+                    {"tickers": n.get("tickers") or [], "headline": n.get("title") or n.get("headline") or ""},
+                    held | set(members),
+                )
+            ),
             key=lambda n: (-n["rule"].importance, n["published"]),
         )
-        m["news"] = own[:1]
+        m["news"] = [] if ev is not None else own[:1]
         m["has_news"] = bool(own) or ev is not None
         m["news_unconfirmed"] = ev is None and bool(own)
     by_theme = {}
@@ -2915,10 +2948,11 @@ def _news_views(context, mover_key=None):
         )
         return (best["importance"], 1 if best and best["subject"] in core else 0) if best else (-1, 0)
 
+    scores = {id(n): _theme_event_score(n) for n in pick}
     pick.sort(
         key=lambda n: (
-            -_theme_event_score(n)[1],
-            -_theme_event_score(n)[0],
+            -scores[id(n)][1],
+            -scores[id(n)][0],
             -n["rule"].held,
             -n["rule"].importance,
             -(n["published"].timestamp() if n["published"] else 0),
