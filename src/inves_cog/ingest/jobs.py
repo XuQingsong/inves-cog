@@ -122,6 +122,7 @@ class JobRunner:
                     latency=self.monotonic() - timer,
                     note=row["error_summary"],
                     configured=configured,
+                    degraded=getattr(exc, "degraded", False),
                     confirmed_unavailable=getattr(exc, "confirmed_unavailable", False),
                 )
             return {"status": "failed", "processed_count": row["processed_count"], "error": row["error_summary"]}

@@ -86,7 +86,7 @@ class Alpaca:
             seen_tokens.add(token)
             params["page_token"] = token
 
-    def news(self, *, first, last):
+    def news(self, *, first, last, max_pages=None):
         params = {
             "start": first.isoformat(),
             "end": last.isoformat(),
@@ -95,9 +95,16 @@ class Alpaca:
             "sort": "asc",
         }
         seen_tokens = set()
+        pages = 0
         while True:
+            if max_pages is not None and pages >= max_pages:
+                raise SourceError("News per-minute page budget exhausted", status_code=429)
+            pages += 1
+            options = {"retry_rate_limit": False} if max_pages is not None else {}
             data = require_mapping(
-                self.http.get("https://data.alpaca.markets/v1beta1/news", params=dict(params), headers=self.headers)
+                self.http.get(
+                    "https://data.alpaca.markets/v1beta1/news", params=dict(params), headers=self.headers, **options
+                )
             )
             if not isinstance(data.get("news"), list):
                 raise SourceError("News list missing")
