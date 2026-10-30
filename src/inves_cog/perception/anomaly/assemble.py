@@ -168,4 +168,6 @@ def _quality(tickers, snapshot, rule):
     bars = snapshot.get("bars") or {}
     if any(bars.get(ticker, {}).get("source_changed") for ticker in tickers):
         codes.append("待核验")
+    if snapshot.get("post_sigma_fallback"):
+        codes.append("post_sigma_fallback")
     return codes

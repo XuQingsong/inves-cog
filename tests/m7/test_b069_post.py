@@ -1,6 +1,5 @@
 """B-069: core config, post resid path, post direction."""
 
-
 import numpy as np
 import pandas as pd
 
@@ -55,3 +54,28 @@ def test_post_direction_follows_post_ret():
 
     assert _post_direction([{"ret": -0.045}], 3.2) == "down"
     assert _post_direction([{"ret": 0.02}], -5.0) == "up"
+
+
+def test_post_resid_median_vs_extreme_peer():
+    """One extreme mate (INTC -23%) should not drag the peer baseline: median
+    of the OTHER mates stays near the majority, keeping resid sign aligned."""
+    from inves_cog.perception.anomaly.panel import PricePanel
+
+    panel = PricePanel.__new__(PricePanel)
+    idx = pd.date_range("2026-07-01", "2026-10-29", freq="B").date
+    raw = pd.Series(100.0, index=idx)
+    w = 1 + np.linspace(-0.02, 0.02, len(idx))
+
+    def stock(px):
+        s = raw * w
+        s.iloc[-1] = raw.iloc[-1] * px
+        return s
+
+    panel.post_close = {"INTC": stock(0.77), "ARM": stock(0.922), "QCOM": stock(0.995), "AMD": stock(0.93)}
+    panel.raw_close = {t: raw.copy() for t in panel.post_close}
+    panel.l3_of = {"ARM": {"basket_id": "cpu", "members": ["ARM", "INTC", "QCOM", "AMD"]}}
+    model = {"sigma": pd.Series(0.02, index=idx)}
+    resid, _, _ = panel._post_resid("ARM", model, len(idx) - 1)
+    # median of mates (-23%, -0.5%, -7%) = -7% -> resid = -7.8 - (-7) = -0.8%
+    assert -0.03 < resid < 0
+    # mean would give (-23-0.5-7)/3 = -10.17 -> resid +2.4% (wrong sign)

@@ -417,14 +417,21 @@ class PricePanel:
                     "resid_z": None if session == "post" else _number(self.basket_resid_z[identifier].iloc[index]),
                 }
             )
-            window = returns[identifier].iloc[max(0, index - 120) : index + 1]
-            history[identifier] = [None if not np.isfinite(value) else float(value) for value in window]
+            if session == "post":
+                daily_window = series.iloc[max(0, index - 120) : index + 1]
+                history[identifier] = [None if not np.isfinite(value) else float(value) for value in daily_window]
+                if history[identifier]:
+                    history[identifier][-1] = ret
+            else:
+                window = returns[identifier].iloc[max(0, index - 120) : index + 1]
+                history[identifier] = [None if not np.isfinite(value) else float(value) for value in window]
             member_returns[identifier] = self._member_returns(identifier, session, index)
         return {
             "trade_date": day.isoformat(),
             "session": session,
             "baskets": baskets,
             "basket_history": history,
+            "post_sigma_fallback": session == "post",
             "member_returns": member_returns,
             "daily": self._daily_rows(index, session),
             "daily_history": self._daily_history(index),
@@ -486,7 +493,7 @@ class PricePanel:
                     continue
                 peers.append(self.post_close[name] / self.raw_close[name] - 1)
         if len(peers) >= 2:
-            resid = ret - float(np.nanmean([_number(peer.iloc[index]) or np.nan for peer in peers]))
+            resid = ret - float(np.nanmedian([_number(peer.iloc[index]) or np.nan for peer in peers]))
         else:
             resid = ret
         window = series.iloc[max(0, index - 120) : index]
