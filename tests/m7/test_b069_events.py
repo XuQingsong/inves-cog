@@ -109,8 +109,9 @@ def test_window_filter_uses_first_seen():
     # events outside [prev 16:00 ET, end) must be excluded by the SQL window;
     # the unit check: prev session 16:00 ET boundary math
     from datetime import datetime
-    from inves_cog.ingest.market import NY
+
     from inves_cog.ingest.intraday import previous_session
+    from inves_cog.ingest.market import NY
 
     day = datetime(2026, 10, 29).date()
     prev = previous_session(day)
