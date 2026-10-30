@@ -27,4 +27,10 @@ CREATE TABLE perception.live_anomalies (
 CREATE INDEX live_anomalies_status ON perception.live_anomalies (trade_date, status);
 GRANT SELECT, INSERT, UPDATE, DELETE ON perception.live_anomalies TO role_perception;
 GRANT SELECT ON perception.live_anomalies TO role_web;
+-- live module reads (previously ungranted for role_perception)
+GRANT SELECT ON marketstate.daily TO role_perception;
+GRANT SELECT ON marketstate.baskets TO role_perception;
+GRANT SELECT ON ingest.intraday_snapshots TO role_perception;
+GRANT SELECT ON ingest.bars_daily TO role_perception;
+GRANT SELECT ON graph.baskets TO role_perception;
 COMMIT;
