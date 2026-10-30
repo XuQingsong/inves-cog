@@ -2,6 +2,7 @@
 
 import re
 from datetime import timedelta
+from functools import lru_cache
 from pathlib import Path
 
 import yaml
@@ -40,9 +41,6 @@ _EPS = re.compile(r"EPS \$([\d.]+) (Beats|Misses|Miss|Beat|Inline) \$([\d.]+) Es
 _SALES = re.compile(r"Sales \$([\d.]+)B? (Beat|Miss|Misses|Beats|Inline) \$([\d.]+)B? Estimate", re.I)
 _G_EPS = re.compile(r"Sees Q[1-4][^.]*EPS \$([\d.]+)[^.]*vs \$([\d.]+)B? Est", re.I)
 _G_REV = re.compile(r"Sees (?:Q[1-4] )?(?:Adj )?Sales \$([\d.]+)B?-\$([\d.]+)B? vs \$([\d.]+)B? Est", re.I)
-
-
-from functools import lru_cache
 
 
 @lru_cache(maxsize=1)

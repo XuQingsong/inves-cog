@@ -129,10 +129,11 @@ def test_chip_revenue_and_one_decimal():
 def test_window_boundary_prev_1559_excluded_1601_included():
     """Event first_seen at prev 15:59 ET is out; 16:01 is in (SQL window
     is [prev 16:00 ET, end)); verify the boundary objects directly."""
-    from unittest.mock import MagicMock
     from datetime import datetime
-    from inves_cog.ingest.market import NY
+    from unittest.mock import MagicMock
+
     from inves_cog.ingest.intraday import previous_session
+    from inves_cog.ingest.market import NY
     from inves_cog.web.brief import _news_events
 
     day = datetime(2026, 10, 29).date()
@@ -142,7 +143,7 @@ def test_window_boundary_prev_1559_excluded_1601_included():
     conn.execute.return_value.fetchall.return_value = []
     _news_events(conn, day, True)
     args = conn.execute.call_args_list[-1][0][1]
-    start, end = args[0], args[1]
+    start = args[0]
     assert start == datetime(prev.year, prev.month, prev.day, 16, 0, tzinfo=NY)
     # 15:59 excluded, 16:01 included by [start, end)
     assert datetime(2026, 10, 28, 15, 59, tzinfo=NY) < start
@@ -156,6 +157,5 @@ def test_upsert_merge_contract():
     from pathlib import Path
 
     sql = Path("scripts/schedule_live_perception.py").read_text()
-    for clause in ("LEAST(", "GREATEST(", "|| COALESCE(EXCLUDED.facts",
-                   "CASE WHEN EXCLUDED.importance >="):
+    for clause in ("LEAST(", "GREATEST(", "|| COALESCE(EXCLUDED.facts", "CASE WHEN EXCLUDED.importance >="):
         assert clause in sql
