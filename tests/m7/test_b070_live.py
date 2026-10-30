@@ -88,8 +88,9 @@ def test_live_anomalies_upsert_and_fade_on_disposable_database():
 
 
 def test_link_stock_picks_strong_event_and_signed_lag():
+    from datetime import datetime, timedelta, timezone
     from unittest.mock import MagicMock
-    from datetime import date, datetime, timezone, timedelta
+
     from inves_cog.perception.live.link import link_causes
 
     day = datetime(2026, 10, 29).date()
@@ -112,6 +113,7 @@ def test_link_stock_picks_strong_event_and_signed_lag():
 
 def test_session_end_bucket():
     from datetime import datetime, timezone
+
     from inves_cog.ingest.market import NY
     from inves_cog.perception.live.link import _session_end
 
@@ -122,13 +124,14 @@ def test_session_end_bucket():
 def test_live_link_and_reaction_on_disposable_database():
     """Anomaly first, event lands later (+30min grace) -> linked on a later
     pass; reaction jsonb filled from snapshots, never recomputed."""
-    import psycopg
-    from psycopg.rows import dict_row
     from datetime import date
 
-    from tests.m8.test_attribution import _disposable_database
+    import psycopg
+    from psycopg.rows import dict_row
+
     from inves_cog.perception.live.detect import apply_round
     from inves_cog.perception.live.link import link_causes, update_reactions
+    from tests.m8.test_attribution import _disposable_database
 
     host = _disposable_database()
     day = date(2026, 10, 29)
