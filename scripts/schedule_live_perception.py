@@ -96,9 +96,7 @@ def main():
         start, end = date.fromisoformat(args.replay[0]), date.fromisoformat(args.replay[1])
         items = _items(connection, start=start, end=end)
     else:
-        row = connection.execute(
-            "SELECT value FROM perception.live_cursors WHERE cursor_key=%s", (CURSOR,)
-        ).fetchone()
+        row = connection.execute("SELECT value FROM perception.live_cursors WHERE cursor_key=%s", (CURSOR,)).fetchone()
         since = row["value"] if row else None
         if since is None:
             since = datetime.now(timezone.utc) - timedelta(days=2)
