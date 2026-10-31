@@ -64,7 +64,8 @@ def upsert_many(connection, table, cols, rows, conflict="nothing"):
             sql += " ON CONFLICT DO NOTHING"
     else:
         sql += " ON CONFLICT DO NOTHING"
-    connection.executemany(sql, [tuple(r.get(c) for c in cols) for r in rows])
+    with connection.cursor() as cur:
+        cur.executemany(sql, [tuple(r.get(c) for c in cols) for r in rows])
     log.info("flows.%s upserted %d rows", table, len(rows))
     return len(rows)
 
