@@ -86,11 +86,17 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
         conn = _connection(values)
     try:
         hm = local.strftime("%H:%M")
-        for slot in _intra_slots(today):
-            key = f"intra:{today}:{slot}"
-            if hm >= slot and key not in state:
-                result[key] = [collect_cboe_chain(http, conn, s, raw_dir, 60, today) for s in INDEX_SYMS]
-                state[key] = True
+        # missed intraday slots can't be replayed (chain is "now") — run only the
+        # latest due slot; earlier ones are marked skipped.
+        due = [sl for sl in _intra_slots(today) if hm >= sl and f"intra:{today}:{sl}" not in state]
+        for sl in due[:-1]:
+            state[f"intra:{today}:{sl}"] = "skipped"
+        if due:
+            slot = due[-1]
+            result[f"intra:{today}:{slot}"] = [
+                collect_cboe_chain(http, conn, s, raw_dir, 60, today) for s in INDEX_SYMS
+            ]
+            state[f"intra:{today}:{slot}"] = True
         eod_key = f"eod:{today}"
         if hm >= "16:30" and eod_key not in state:
             universe = INDEX_SYMS + [t for t in _universe() if t not in INDEX_SYMS]
