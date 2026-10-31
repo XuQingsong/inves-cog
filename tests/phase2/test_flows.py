@@ -62,12 +62,9 @@ def test_parse_occ_volume():
 
 
 def test_parse_occ_oi():
-    text = ("Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total
-"
-            ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,
-"
-            '10/30/2026,"1,000","2,000","3,000","4,000","5,000","9,000","0","0","0","100","12,000",
-')
+    text = ("Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
+            ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
+            '10/30/2026,"1,000","2,000","3,000","4,000","5,000","9,000","0","0","0","100","12,000",\n')
     rows = parse_occ_oi_summary(text, date(2026, 10, 30), date(2026, 10, 30))
     assert {r["series_id"] for r in rows} >= {"occ_oi_equity_calls", "occ_oi_index_puts"}
 
