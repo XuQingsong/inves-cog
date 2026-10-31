@@ -147,7 +147,7 @@ def test_ratings_distribution_render():
 
 
 def test_key_stats_and_earnings_hist():
-    from inves_cog.web.investor_html import _key_stats, _earnings_hist_module
+    from inves_cog.web.investor_html import _earnings_hist_module, _key_stats
 
     p = {
         "analyst": {
