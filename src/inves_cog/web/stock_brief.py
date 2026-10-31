@@ -881,9 +881,16 @@ def _earnings_card(connection, symbol):
 
 
 def _chart_data(bars, limit_days=260):
-    """B-073: 1y of daily closes + markers the page renders client-side."""
+    """1y of daily OHLC + volume for the client-side lightweight chart."""
     rows = [
-        {"d": str(r["trade_date"]), "c": float(r["close"]), "v": int(r["volume"] or 0)}
+        {
+            "d": str(r["trade_date"]),
+            "o": float(r.get("open") or r["close"]),
+            "h": float(r.get("high") or r["close"]),
+            "l": float(r.get("low") or r["close"]),
+            "c": float(r["close"]),
+            "v": int(r["volume"] or 0),
+        }
         for r in bars
         if r["close"] is not None
     ]
@@ -1031,12 +1038,18 @@ def _intraday_series(connection, symbol, day):
 def _analyst_summary(connection, symbol):
     """Latest consensus raw.analyst: target prices + rating counts."""
     row = connection.execute(
-        "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
+        "SELECT eps_cq, eps_cy, pt_mean, pt_median, coverage, raw "
+        "FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
         (symbol,),
     ).fetchone()
     raw = (row or {}).get("raw") or {}
     analyst = raw.get("analyst") or {}
     return {
+        "eps_cq": row.get("eps_cq") if row else None,
+        "eps_cy": row.get("eps_cy") if row else None,
+        "pt_mean_col": row.get("pt_mean") if row else None,
+        "pt_median_col": row.get("pt_median") if row else None,
+        "coverage": row.get("coverage") if row else None,
         "pt_low": analyst.get("targetLowPrice"),
         "pt_high": analyst.get("targetHighPrice"),
         "pt_mean": analyst.get("targetMeanPrice"),
@@ -1071,6 +1084,18 @@ def _earnings_hist(connection, symbol, bars):
             (symbol, last_day),
         ).fetchall()
     }
+    # historical report dates: earnings events published right after each quarter end
+    events = {}
+    try:
+        for r in connection.execute(
+            "SELECT published_at FROM perception.news_events WHERE subject=%s AND kind='earnings_result' "
+            "ORDER BY published_at",
+            (symbol,),
+        ).fetchall():
+            ts = r["published_at"]
+            events[str(ts.astimezone(ZoneInfo("America/New_York")).date() if hasattr(ts, "astimezone") else str(ts)[:10])] = ts
+    except Exception:
+        pass
     closes = {str(r["trade_date"]): float(r["close"]) for r in bars if r["close"] is not None}
     dates = sorted(closes)
 
@@ -1091,6 +1116,14 @@ def _earnings_hist(connection, symbol, bars):
         qd = str(q.get("quarter_date") or "")
         rd = min((d for d in cal if d >= qd), default=None)
         timing = (cal.get(rd) or {}).get("time") if rd else None
+        if rd is None and events:
+            # closest earnings event within 90d after quarter end; timing by publish hour ET
+            cand = min((d for d in events if qd <= d <= str(date.fromisoformat(qd) + timedelta(days=90))), default=None)
+            if cand:
+                rd = cand
+                ts = events[cand]
+                et = ts.astimezone(ZoneInfo("America/New_York")) if hasattr(ts, "astimezone") else None
+                timing = "post" if et is None or et.hour >= 16 else "pre"
         out.append(
             {
                 "q": qd,
