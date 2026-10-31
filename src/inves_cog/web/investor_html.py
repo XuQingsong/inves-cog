@@ -240,17 +240,18 @@ def _market(payload):
     if spread is not None:
         styles += f'<span class="chip ok">板块分化 <span class="num">{float(spread):.1f}σ</span></span>'
     return (
-        _crumb(f"市场总览 / {_text(payload.get('date'))}")
-        + f"<h1>判断：{_text(judgment)}</h1>"
-        + f'<p class="sub">{_text(_lead(payload))}</p>'
+        _tape_module(payload)
+        + _crumb(f"市场总览 / {_text(payload.get('date'))}")
+        + (_state_head(payload) or f"<h1>判断：{_text(judgment)}</h1>" + f'<p class="sub">{_text(_lead(payload))}</p>')
         + _carry_banner(payload)
         + _highlights_module(payload)
+        + _market3_module(payload)
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
         + _live_module(payload)
         + _earnings_cards_module(payload)
         + _movers_module(payload)
-        + _ticker_strip(payload)
+        + ("" if payload.get("tape") else _ticker_strip(payload))
         + _sector_strip(payload)
         + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + _theme_news_module(payload)
@@ -2232,7 +2233,7 @@ def _ntags(item):
 
 def _ncodes(item, held):
     return "".join(
-        f'<span class="tick{" held" if t in held else ""}">{_text(t)}</span>'
+        f'<a class="tick{" held" if t in held else ""}" href="/s/{_text(t)}">{_text(t)}</a>'
         for t in (_nrule(item).get("primary_tickers") or [])
     )
 
@@ -2400,44 +2401,175 @@ def _live_module(payload):
     )
 
 
+def _move_tier(r):
+    mult = r.get("mult") or 0
+    t = 4 if mult >= 2 else 3 if mult >= 1.5 else 2 if mult >= 1 else 1 if mult >= 0.5 else 0
+    val = r.get("ret") if r.get("ret") is not None else r.get("chg_bp")
+    return f"t{t}{'n' if (val or 0) < 0 else 'p'}"
+
+
+def _move_text(r):
+    if r.get("ret") is not None:
+        return f"{r['ret'] * 100:+.2f}%"
+    if r.get("chg_bp") is not None:
+        return f"{r['chg_bp']:+.0f}bp"
+    return "—"
+
+
+def _tape_module(payload):
+    rows = payload.get("tape") or []
+    if not rows:
+        return ""
+    cells = []
+    for r in rows:
+        tier = _move_tier(r)
+        strong = " strong" if tier[1] == "4" else ""
+        how = f"约平时 {r['mult']:.1f} 倍" if not r.get("fallback") else "按固定档位着色（历史不足）"
+        px = f"{r['px']:,.2f}" if r.get("chg_bp") is None else f"{r['px']:.2f}%"
+        cells.append(
+            f'<a class="tape-item {tier}{strong}" href="/s/{_text(r["sym"])}" '
+            f'title="{_text(r["name"])} {px} · {_text(r.get("as_of") or "")} · {how}">'
+            f'{_text(r["name"])} <span class="num">{px}</span> <span class="num">{_move_text(r)}</span></a>'
+        )
+    strip = "".join(cells)
+    return (
+        '<div class="tape"><div class="tape-track">' + strip + '<span class="tape-gap"></span>' + strip + "</div></div>"
+    )
+
+
+def _state_head(payload):
+    st = payload.get("state") or {}
+    if not st.get("sentence"):
+        return ""
+    detail = (
+        f"平时波动（20日日收益标准差）：标普 {((st.get('spy_sig') or 0) * 100):.2f}%，"
+        f"纳指 {((st.get('qqq_sig') or 0) * 100):.2f}%；"
+        "分档：平静 <1 倍，明显波动 1–2 倍，剧烈 ≥2 倍（取标普/纳指较大者）；"
+        "方向由涨跌家数与领先板块决定；主因只取已对上事件的板块/市场异常，没有则写“原因未明”。"
+    )
+    return (
+        f'<div class="state-h band-{_text(st.get("band") or "")}">'
+        f"<h1>{_text(st.get('title') or st['sentence'])}</h1></div>"
+        f'<p class="state-d">{_text(st.get("detail") or "")}</p>'
+        f'<details class="dim small" style="margin:-6px 0 8px"><summary>依据与口径</summary>'
+        f'<p style="margin:4px 0">{_text(detail)}</p></details>'
+    )
+
+
+def _market3_module(payload):
+    m3 = payload.get("market3") or {}
+    groups = m3.get("groups") or {}
+    if not groups:
+        return ""
+    tabs = list(groups)
+    btns = "".join(
+        '<button class="rc%s" data-tab="%s" onclick="Market3.tab(this)">%s</button>'
+        % (" on" if i == 0 else "", _text(t), _text(t))
+        for i, t in enumerate(tabs)
+    )
+    panels = []
+    for i, t in enumerate(tabs):
+        hidden = "" if i == 0 else ' style="display:none"'
+        trs = "".join(
+            '<tr data-sym="%s" onclick="Market3.pick(this)"><td>%s</td><td class="num">%s</td>'
+            '<td class="num %s">%s</td></tr>'
+            % (
+                r["sym"],
+                _text(r["name"]),
+                f"{r['px']:,.2f}",
+                _move_tier(r),
+                _move_text(r),
+            )
+            for r in groups[t]
+        )
+        panels.append(
+            '<tbody class="m3tab" data-p="%s"%s>'
+            '<tr class="dim small"><th>名称</th><th>最新</th><th>涨跌</th></tr>%s</tbody>' % (_text(t), hidden, trs)
+        )
+    daily = escape(json.dumps(m3.get("daily") or {}, ensure_ascii=False), quote=True)
+    intra = escape(json.dumps(m3.get("intraday") or {}, ensure_ascii=False), quote=True)
+    first = groups[tabs[0]][0]["sym"]
+    rbtns = "".join(
+        '<button class="rc%s" onclick="Market3.range(this,\'%s\')">%s</button>' % (" on" if k == "1日" else "", k, k)
+        for k in ("1日", "5日", "1月", "6月", "1年")
+    )
+    held = set(payload.get("held_tickers") or [])
+    feed = list((payload.get("news_modules") or {}).get("feed") or [])
+
+    def rank(n):
+        rule = _nrule(n)
+        ticks = rule.get("primary_tickers") or []
+        if rule.get("held") or any(t in held for t in ticks):
+            return 0
+        if ticks:
+            return 1
+        return 2 if rule.get("macro") else 3
+
+    feed.sort(key=rank)
+    nitems = "".join(_news_row(n, held) for n in feed[:12])
+    more = "".join(_news_row(n, held) for n in feed[12:])
+    return (
+        '<script src="/lightweight-charts.js"></script><div class="card sec cat-market">'
+        f'<div class="chart-btns">{btns}</div>'
+        '<div class="grid" style="grid-template-columns:1fr 1.4fr 1fr;gap:16px">'
+        f'<div><table class="tbl" id="m3table">{"".join(panels)}</table></div>'
+        f'<div><div class="chart-btns" style="margin-bottom:6px">{rbtns}</div>'
+        f"<div id='m3chart' class='lwc' data-sym='{first}' data-daily='{daily}' data-intra='{intra}'></div>"
+        '<div class="dim small">左栏点选品种切换图；1日为当日分钟，其余为日线。</div></div>'
+        f'<div class="m3news"><h3 style="margin-top:0">滚动新闻</h3>'
+        + (nitems or '<p class="dim">暂无</p>')
+        + ('<details><summary class="dim">查看全部</summary>' + more + "</details>" if more else "")
+        + "</div></div></div>"
+    )
+
+
 def _highlights_module(payload):
-    """今日要点: top-5 cards sorted major>watch then |z|; sources are the
-    active anomalies + near-term core earnings already in the payload."""
-    live = (payload.get("news_modules") or {}).get("live") or []
-    cards_in = (payload.get("news_modules") or {}).get("earnings_cards") or []
-    picks = [r for r in live if r.get("status") == "active" and (r.get("peak_z") or 0) != 0]
-    picks.sort(key=lambda r: (0 if abs(r.get("peak_z") or 0) >= 5 else 1, -abs(r.get("peak_z") or 0)))
+    groups = payload.get("hl_groups") or []
+    state = payload.get("state") or {}
+    if not groups:
+        cards = (payload.get("news_modules") or {}).get("earnings_cards") or []
+        day = _day(payload)
+        upcoming = [
+            c
+            for c in cards
+            if c.get("stage") == "upcoming"
+            and (day is None or (_as_date(str(c.get("report_date"))) or day) <= day + timedelta(days=5))
+        ][:3]
+        for c in upcoming:
+            c["when_txt"] = "盘后" if c.get("report_time") == "post" else "盘前"
+        note = "今天市场平静，没有超出常态的异动" if state.get("band") == "平静" else "今天没有需要重点关注的异常"
+        extras = "".join(
+            f'<div class="hl-card"><span class="chip ok">催化</span> <b>{_tk(c["ticker"])}</b> '
+            f'<span class="dim">财报 {c.get("report_date")} {c.get("when_txt") or ""}</span></div>'
+            for c in upcoming
+        )
+        return f'<div class="card sec"><h2>今日要点</h2><p class="dim">{_text(note)}</p>{extras}</div>'
     items = []
-    for r in picks[:5]:
-        sev_cls, sev_label = _severity(r)
-        subj = r.get("basket_name") or r["subject"]
-        link = _tk(r["subject"]) if r["scope"] == "stock" else _text(subj)
-        peak = r.get("peak_ret")
-        px_txt = f"${r['last_px']:,.2f} " if r.get("last_px") is not None else ""
-        if r["scope"] == "basket" and r.get("members"):
-            worst = min((r["members"] or {}).items(), key=lambda kv: kv[1])
-            cause = _text(f"{len(r['members'])} 家 · 最弱 {worst[0]} {worst[1] * 100:+.1f}%")
-        else:
-            cause = _text((r.get("cause_headline") or "原因未明")[:60])
+    for g in groups:
+        who = _text(g.get("basket_name") or g["subject"])
+        link = _tk(g["subject"]) if g["scope"] == "stock" else f"<b>{who}</b>"
+        sev_cls, sev_label = _severity(g["members"][0])
+        px = f"${g['last_px']:,.2f} " if g.get("last_px") else ""
+        cls = "down" if (g.get("ret") or 0) < 0 else "up"
+        merged = ""
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
-            f'<span class="who">{link}</span>'
-            f'<div class="num {"down" if (peak or 0) < 0 else "up"}">{px_txt}{_pct(peak, 1)}</div>'
-            f'<div class="cause trunc" title="{cause}">{cause}</div></div>'
-        )
-    for c in cards_in:
-        if len(items) >= 5:
-            break
-        if c.get("stage") == "upcoming" and c.get("report_date"):
-            when = "盘后" if c.get("report_time") == "post" else "盘前" if c.get("report_time") == "pre" else ""
-            items.append(
-                f'<div class="hl-card"><span class="badge sev-watch">关注</span> '
-                f'<span class="who">{_tk(c["ticker"])}</span>'
-                f'<div class="cause">财报 {c["report_date"]} {when}</div></div>'
+            f'<span class="who">{link}{merged}</span>'
+            f'<div class="num {cls}">{px}{_pct(g.get("ret"), 1)}</div>'
+            f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div>'
+            + (
+                '<div class="small">'
+                + "、".join(
+                    f"{_text(m.get('basket_name') or m['subject'])} {_pct(m.get('peak_ret'), 1)}"
+                    for m in g["members"][1:5]
+                )
+                + "</div>"
+                if len(g["members"]) > 1
+                else ""
             )
-    if not items:
-        items.append('<div class="dim">今天没有需要重点关注的异常</div>')
-    return '<div class="card sec cat-anomaly"><h2>今日要点</h2><div class="hl-cards">' + "".join(items) + "</div></div>"
+            + "</div>"
+        )
+    return '<div class="card sec"><h2>今日要点</h2><div class="grid g2">' + "".join(items) + "</div></div>"
 
 
 def _facts_chips(facts):

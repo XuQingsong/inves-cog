@@ -426,3 +426,73 @@ var InvestorChart = (function () {
   };
 })();
 document.addEventListener("DOMContentLoaded", InvestorChart.init);
+
+// B-074 §8 3-column market block
+var Market3 = {
+  _chart: null, _candle: null, _vol: null, _sym: null, _range: "1日",
+  init: function () {
+    var el = document.getElementById("m3chart");
+    if (!el || !window.LightweightCharts) return;
+    Market3._daily = JSON.parse(el.dataset.daily || "{}");
+    Market3._intra = JSON.parse(el.dataset.intra || "{}");
+    Market3._sym = el.dataset.sym;
+    Market3._chart = LightweightCharts.createChart(el, { height: 320, layout: { attributionLogo: true } });
+    Market3._candle = Market3._chart.addSeries(LightweightCharts.CandlestickSeries);
+    Market3._vol = Market3._chart.addSeries(LightweightCharts.HistogramSeries,
+      { priceScaleId: "vol", priceFormat: { type: "volume" }, lastValueVisible: false });
+    Market3._chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } });
+    Market3._line = Market3._chart.addSeries(LightweightCharts.LineSeries, { color: "#4a7" });
+    if (!(Market3._intra[Market3._sym] || []).length) {
+      Market3._range = "1月";
+      document.querySelectorAll("#m3chart").forEach(function (el2) {
+        el2.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b.textContent === "1月"); });
+      });
+    }
+    Market3.draw();
+  },
+  draw: function () {
+    var c = Market3._chart, rows = Market3._daily[Market3._sym] || [];
+    var intra = Market3._intra[Market3._sym] || [];
+    var k = Market3._range;
+    Market3._line.setData([]);
+    if (k === "1日") {
+      Market3._candle.setData([]); Market3._vol.setData([]);
+      var seen = {}, pts = [];
+      intra.forEach(function (p) {
+        var ts = Math.floor(new Date(p.t).getTime() / 1000);
+        if (seen[ts]) return; seen[ts] = 1; pts.push({ time: ts, value: p.p });
+      });
+      pts.sort(function (a, b) { return a.time - b.time; });
+      Market3._line.setData(pts);
+    } else {
+      var n = { "5日": 5, "1月": 22, "6月": 132, "1年": 252 }[k] || rows.length;
+      var sub = rows.slice(-n);
+      Market3._candle.setData(sub.map(function (r) {
+        return { time: r.d, open: r.o, high: r.h, low: r.l, close: r.c };
+      }));
+      Market3._vol.setData(sub.map(function (r) {
+        return { time: r.d, value: r.v || 0, color: r.c >= r.o ? "rgba(38,140,90,.4)" : "rgba(196,60,60,.4)" };
+      }));
+    }
+    c.timeScale().fitContent();
+  },
+  pick: function (tr) {
+    Market3._sym = tr.dataset.sym;
+    tr.parentElement.querySelectorAll("tr").forEach(function (x) { x.style.background = ""; });
+    tr.style.background = "rgba(90,120,200,.15)";
+    Market3.draw();
+  },
+  range: function (btn, k) {
+    Market3._range = k;
+    btn.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b === btn); });
+    Market3.draw();
+  },
+  tab: function (btn) {
+    var name = btn.dataset.tab;
+    document.querySelectorAll(".m3tab").forEach(function (tb) {
+      tb.style.display = tb.dataset.p === name ? "" : "none";
+    });
+    btn.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b === btn); });
+  }
+};
+document.addEventListener("DOMContentLoaded", Market3.init);

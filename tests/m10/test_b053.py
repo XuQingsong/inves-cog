@@ -469,7 +469,8 @@ def test_v1_structure_and_detail_links(pages):
         "/account": _headings(account.text),
         "/trust": _headings(trust.text),
     }
-    assert [text for level, text in found["/"] if level == "1"][0].startswith("判断：")
+    # B-074: the homepage h1 is the market state ("剧烈 · 科技股领跌"); the old judgment is the fallback
+    assert [text for level, text in found["/"] if level == "1"][0].startswith(("判断：", "平静", "明显波动", "剧烈"))
     h2 = [text for level, text in found["/"] if level == "2"]
     assert "持仓与标的异动" in h2 and "涨跌排行榜" in h2
     funds, mood, events = h2[-3:]
