@@ -16,6 +16,7 @@
 ## 环境
 - 服务器 `claude-ubuntu`（43.166.2.31），代码 `/home/claudeuser/inves-cog`，数据 `/home/claudeuser/inves-cog-data`，网站 http://43.166.2.31:8080/
 - 生产 venv 没有 pytest，不要往里装。完整测试：服务器 `/home/claudeuser/b062-preview` 下用 docker 镜像 `inves-cog-harness-b062` 跑 `make phase1-test`；汇总行全过即可，最后的 EXIT 2 是清理 docker 网络失败，已知问题。CI 必过检查：`phase1-blocking`。
+- 页面走查必须用生产数据渲染分支代码：服务器 `/tmp/b074chk` 检出分支后运行 `/tmp/b074_start.sh`（127.0.0.1:8092，读生产只读库），本机 `ssh -f -N -L 8092:127.0.0.1:8092 claude-ubuntu`，用 `~/Library/Caches/ms-playwright/chromium-1187/chrome-mac/Chromium.app/Contents/MacOS/Chromium --headless=new --virtual-time-budget=10000 --screenshot=...` 截图。SWE-2 自报的截图多次是旧页面，需自己核对。
 - 页面截图工具：`/tmp/b062render/`（render.py + shoot.sh），原型 `docs/phase1/design/prototype/index.html`（定稿规格）。
 
 ## 规则 A 卖出规则适用范围（页面不得画不适用的线）
@@ -27,7 +28,7 @@
 ## 用户决定（2026-10-31）
 - A 线停用：所有开发与部署都交给 SWE-2（sidekick），需求方复核合并后由 SWE-2 部署、留证据于服务器 `ops/swe2-*.txt`。
 - 板块异常门槛维持平时波动的 3 倍。
-- 一期第 2 批：B-072 财报卡片已上线；B-073 页面改版已上线（`fb3927d`）；B-074 页面第二轮（TradingView 开源图表、首页判断重做、宏观行情带、机构评级变化、事件置顶）进行中；三面原因判断顺延为 B-075。
+- 一期第 2 批：B-072 财报卡片已上线；B-073 页面改版已上线（`fb3927d`）；B-074 页面第二轮已上线（个股页 `ca4d57f`、首页 `4ef67ce`）；下一单 B-075 三面原因判断。
 
 ## 当前状态（2026-10-26）
 - B-062 投资者页面改版：PR #79 已合并（`8c10f8f`），785 项测试通过；已交 A 部署（A-014 补充三十三）。待 A 回报后线上走查，通过即关单。
