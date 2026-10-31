@@ -273,3 +273,49 @@ def test_parse_cboe_pc_stable_ids():
     }
     rows = parse_cboe_pc(payload, date(2026, 10, 30), datetime(2026, 10, 30))
     assert {r["series_id"] for r in rows} == {"cboe_pc_total", "cboe_pc_index"}
+
+
+def test_ssga_newest_first():
+    """SSGA xlsx is newest-first; parser must return all rows date-sorted."""
+    import io, zipfile
+    from inves_cog.flows.collectors import parse_ssga_xlsx
+
+    sst = (
+        '<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        "<sheetData>"
+        '<row><c t="s"><v>0</v></c></row>'
+        '<row><c t="s"><v>1</v></c><c><v>770</v></c><c><v>1e9</v></c><c><v>8e11</v></c></row>'
+        '<row><c t="s"><v>2</v></c><c><v>760</v></c><c><v>1e9</v></c><c><v>8e11</v></c></row>'
+        "</sheetData></worksheet>"
+    )
+    shared = (
+        '<?xml version="1.0"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        "<si><t>Date</t></si><si><t>29-Oct-2026</t></si><si><t>28-Oct-2026</t></si></sst>"
+    )
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("xl/worksheets/sheet1.xml", sst)
+        z.writestr("xl/sharedStrings.xml", shared)
+    rows = parse_ssga_xlsx(buf.getvalue(), "SPY", datetime(2026, 10, 30))
+    assert len(rows) == 2 and rows[-1]["date"] == date(2026, 10, 29)
+
+
+def test_etf_stale_health():
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"raw_file_id": 1}
+    conn.cursor.return_value.__enter__ = MagicMock(return_value=MagicMock())
+    conn.cursor.return_value.__exit__ = MagicMock(return_value=False)
+    http = MagicMock()
+    http.request.return_value = (
+        "Date,NAV,Shares Outstanding (000),AUM\n2026-10-27,52.1,1000,1e9\n2026-10-26,51.9,1000,1e9\n"
+    )
+    import inves_cog.ingest.market as M
+
+    orig = M.trading_day
+    M.trading_day = lambda d: d.weekday() < 5
+    from inves_cog.flows.collectors import collect_etf_shares
+
+    out = collect_etf_shares(http, conn, "/tmp/x", datetime(2026, 10, 30), ["TQQQ"], today=date(2026, 10, 30))
+    M.trading_day = orig
+    health_calls = [c for c in conn.execute.call_args_list if "source_health" in c.args[0]]
+    assert any("stale:TQQQ" in str(c.args[1]) for c in health_calls)

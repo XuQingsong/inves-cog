@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 from xml.etree import ElementTree as ET
 
 from inves_cog.flows.store import UA, record_health, save_raw, upsert_many
-from inves_cog.ingest.market import NY
+from inves_cog.ingest.market import NY, trading_day
 
 log = logging.getLogger(__name__)
 INDEX_SYMS = ["_SPX", "SPY", "QQQ", "IWM", "SMH"]
@@ -371,7 +371,7 @@ def parse_ssga_xlsx(data, ticker, published_at):
                     "published_at": published_at,
                 }
             )
-    return rows[-3:]
+    return sorted(rows, key=lambda r: r["date"])
 
 
 def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=None, today=None):
@@ -403,6 +403,8 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
                 if parse == "proshares"
                 else parse_ssga_xlsx(body, t, pub)
             )
+            if rows:
+                latest_dates[t] = max(r["date"] for r in rows)
             rows = sorted(rows, key=lambda r: r["date"])[-3:]
             if connection is not None:
                 save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), body, connection)
@@ -413,9 +415,10 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
             log.warning("etf %s failed: %r", t, exc)
             out[t] = 0
     if connection is not None:
-        prev_td = today - timedelta(days=1) if today else None
-        if prev_td:
-            while prev_td.weekday() >= 5:
+        prev_td = None
+        if today:
+            prev_td = today - timedelta(days=1)
+            while not trading_day(prev_td):
                 prev_td -= timedelta(days=1)
         for issuer, tickers in (
             ("Flows:ETFShares:Direxion", [t for t in out if t in DIREXION_TICKERS]),
