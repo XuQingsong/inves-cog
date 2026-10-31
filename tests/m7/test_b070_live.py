@@ -298,12 +298,13 @@ def test_lag_text_survives_json_serialized_payload():
 def test_event_headline_facts_follow_largest_gap_part_on_disposable_database():
     """Both part orders + a two-pass upsert: largest-|gap| part owns headline
     AND facts; guide_gap_pct stays 42 (the chip value)."""
-    import psycopg
-    from psycopg.rows import dict_row
     from datetime import datetime, timedelta, timezone
 
-    from tests.m8.test_attribution import _disposable_database
+    import psycopg
+    from psycopg.rows import dict_row
+
     import scripts.schedule_live_perception as sched
+    from tests.m8.test_attribution import _disposable_database
 
     host = _disposable_database()
     t0 = datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc)
