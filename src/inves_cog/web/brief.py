@@ -2089,6 +2089,7 @@ def page_brief_market(connection, day, clock):
         "news_modules": {
             **(_news_views_today(context) if is_today_page else _news_views(context)),
             "live": _live_anomalies(connection, day, is_today_page),
+            "earnings_cards": _earnings_cards(connection, day),
         },
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
@@ -3000,3 +3001,16 @@ def _news_theme(item, theme_map, held):
     from inves_cog.perception.news.rules import theme_of
 
     return theme_of(item, theme_map, held)
+
+
+def _earnings_cards(connection, day):
+    """B-072: perception.earnings_cards for the homepage/stock page; empty on
+    missing table (degrade)."""
+    try:
+        rows = connection.execute(
+            "SELECT ticker, report_date, report_time, stage, card, missing "
+            "FROM perception.earnings_cards ORDER BY report_date"
+        ).fetchall()
+    except Exception:
+        return []
+    return [{**dict(r), "report_date": str(r["report_date"])} for r in rows]

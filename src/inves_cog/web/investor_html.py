@@ -248,6 +248,7 @@ def _market(payload):
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
         + _live_module(payload)
+        + _earnings_cards_module(payload)
         + _movers_module(payload)
         + _theme_news_module(payload)
         + '<div class="grid g2 sec">'
@@ -1409,6 +1410,7 @@ def _stock(payload):
         + f'<span class="k">下次财报</span><span>{_next_earn(payload)}</span></div>'
         + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div></div>'
         + position_html
+        + _stock_earnings_card(payload)
         + '<div class="grid g2 sec"><div class="card"><h2>新闻与事件</h2>'
         + _stock_news(payload)
         + _stock_feed(payload)
@@ -2165,6 +2167,108 @@ def _live_module(payload):
             f'<div class="dim">{when} · {cause}</div>{members}</div>'
         )
     return f'<div class="card sec" id="live"><h2>实时异常</h2>{"".join(items)}</div>'
+
+
+def _pct(v, digits=1):
+    return f"{v * 100:+.1f}%" if v is not None else ""
+
+
+def _facts_chips(facts):
+    parts = []
+    if facts.get("guide_gap_pct") is not None:
+        parts.append(f"指引{'低于' if facts['guide_gap_pct'] < 0 else '高于'}预期 {abs(facts['guide_gap_pct']):.0f}%")
+    if facts.get("surprise_pct") is not None:
+        parts.append(f"业绩{'低于' if facts['surprise_pct'] < 0 else '超出'}预期 {abs(facts['surprise_pct']):.0f}%")
+    return " ".join(f'<span class="chip">{_text(p)}</span>' for p in parts)
+
+
+def _card_lines(row):
+    card = row.get("card") or {}
+    missing = row.get("missing") or []
+    time_label = {"post": "盘后", "pre": "盘前"}.get(row.get("report_time"), "时间待定")
+    head = f"<b>{_text(row['ticker'])}</b> {row['report_date']} {time_label}"
+    if card.get("report_time") and card.get("report_time") != "unknown":
+        head += f"（北京时间 {_bj_time_for_report(row['report_date'], row['report_time'])}）"
+    lines = [head]
+    for m in missing:
+        lines.append(f'<span class="dim">缺：{_text(m)}</span>')
+    if row.get("stage") == "upcoming":
+        cons = card.get("consensus")
+        if cons:
+            bits = [
+                f"EPS {cons['eps']:.2f}" if cons.get("eps") is not None else "",
+                f"营收 {cons['rev'] / 1e9:.1f}B" if cons.get("rev") else "",
+            ]
+            lines.append(f"一致预期 {' · '.join(b for b in bits if b)}（{cons['as_of'][:10]}）")
+        imp = card.get("implied_move")
+        if imp:
+            lines.append(f"期权预期涨跌 {imp['straddle_pct'] * 100:.1f}%（{imp['note']}）")
+        hist = card.get("history") or {}
+        if hist.get("note"):
+            lines.append("历史财报后涨跌：历史不足")
+        elif hist.get("median_abs") is not None:
+            lines.append(f"历史财报后涨跌中位 {hist['median_abs'] * 100:.1f}%（{len(hist['votes'])} 次）")
+        if card.get("segment") and card.get("peers"):
+            lines.append(f'<span class="dim">同环节：{_text("、".join(card["peers"]))}</span>')
+    else:
+        for e in (card.get("events") or [])[:3]:
+            react = ""
+            r = e.get("reaction") or {}
+            if r.get("m15") and r["m15"].get("ret") is not None:
+                react = f" 15分钟 {_pct(r['m15']['ret'])}"
+            if r.get("m60") and r["m60"].get("ret") is not None:
+                react += f" · 60分钟 {_pct(r['m60']['ret'])}"
+            lines.append(
+                f'{_facts_chips(e.get("facts") or {})} {_text(e["headline"] or "")}<span class="dim">{react}</span>'
+            )
+        for a in (card.get("live_anomalies") or [])[:3]:
+            label = f"异动 {a['scope']}:{_text(a['subject'])} {_pct(a.get('peak_ret'))}（{a['status']}）"
+            lines.append(f'<span class="dim">{label}</span>')
+        if row.get("stage") == "voted" and card.get("vote_ret") is not None:
+            lines.append(f"次日投票 {_pct(card['vote_ret'])} · {_text(card.get('vs_implied') or '')}")
+            seg = card.get("segment_reaction")
+            if seg:
+                lines.append(
+                    f'<span class="dim">同环节跟随 {seg["followed"]} 家 · 未跟 {seg["not_followed"]} 家</span>'
+                )
+    return lines
+
+
+def _bj_time_for_report(report_date, report_time):
+    # post ~16:00 ET -> 次日 04:00/05:00 北京；pre ~09:30 ET -> 当日 21:30/22:30
+    return "次日 04:00–05:00" if report_time == "post" else "当日 21:30–22:30"
+
+
+def _earnings_cards_module(payload):
+    rows = (payload.get("news_modules") or {}).get("earnings_cards") or []
+    if not rows:
+        return ""
+    up = [r for r in rows if r.get("stage") == "upcoming"]
+    done = [r for r in rows if r.get("stage") != "upcoming"]
+    items = []
+    if up:
+        items.append(
+            "<h3>即将发布</h3>" + "".join('<div class="row">' + " · ".join(_card_lines(r)) + "</div>" for r in up)
+        )
+    if done:
+        items.append(
+            "<h3>已发布</h3>" + "".join('<div class="row">' + " · ".join(_card_lines(r)) + "</div>" for r in done)
+        )
+    return f'<div class="card sec" id="earnings"><h2>财报</h2>{"".join(items)}</div>'
+
+
+def _stock_earnings_card(payload):
+    row = payload.get("earnings_card")
+    if not row:
+        return ""
+    stage = {"upcoming": "财报前", "released": "已发布", "voted": "次日投票"}[row.get("stage")]
+    lines = _card_lines(row)
+    return (
+        f'<div class="card sec"><h2>财报 · {_text(row["ticker"])} {row["report_date"]}'
+        f'<span class="chip">{stage}</span></h2>'
+        + "".join(f'<div class="row">{line if "<" in line else _text(line)}</div>' for line in lines)
+        + "</div>"
+    )
 
 
 def _movers_module(payload):

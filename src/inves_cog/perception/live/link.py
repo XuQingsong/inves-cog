@@ -110,31 +110,80 @@ def update_reactions(connection, now):
                 (ev["event_id"],),
             ).fetchone()
             base_time, source = (pub["at"], "published_at") if pub and pub["at"] else (fs, "first_seen_at")
-            base = connection.execute(
-                """SELECT last, as_of, prev_close FROM ingest.intraday_snapshots
-                   WHERE ticker=%s AND as_of <= %s ORDER BY as_of DESC LIMIT 1""",
-                (ev["subject"], base_time),
-            ).fetchone()
-            if base:
-                reaction["base"] = {
-                    "px": float(base["last"]),
-                    "at": str(base["as_of"]),
-                    "prev_close": float(base["prev_close"]) if base["prev_close"] else None,
-                    "source": source,
-                }
-            elif pub or fs:
+            local = base_time.astimezone(NY) if hasattr(base_time, "astimezone") else fs.astimezone(NY)
+            if local.hour >= 16:
+                # post-session event -> base = same-day regular close
                 close = connection.execute(
-                    """SELECT prev_close, close FROM ingest.bars_daily
+                    """SELECT close FROM ingest.bars_daily
+                       WHERE ticker=%s AND trade_date=%s::date""",
+                    (ev["subject"], local.date()),
+                ).fetchone()
+                if close and close["close"]:
+                    px = float(close["close"])
+                    reaction["base"] = {
+                        "px": px,
+                        "at": str(local.date()),
+                        "prev_close": px,
+                        "source": "bars_daily",
+                        "base_kind": "session_close",
+                    }
+                    base = None
+                else:
+                    base = True  # fall through to snapshot
+            elif local.hour < 9 or (local.hour == 9 and local.minute < 30):
+                # pre-market event -> base = previous trading-day close
+                close = connection.execute(
+                    """SELECT close FROM ingest.bars_daily
                        WHERE ticker=%s AND trade_date < %s::date ORDER BY trade_date DESC LIMIT 1""",
+                    (ev["subject"], local.date()),
+                ).fetchone()
+                if close and close["close"]:
+                    px = float(close["close"])
+                    reaction["base"] = {
+                        "px": px,
+                        "at": str(local.date()),
+                        "prev_close": px,
+                        "source": "bars_daily",
+                        "base_kind": "prev_close",
+                    }
+                    base = None
+                else:
+                    base = True
+            else:
+                base = True
+            if base:
+                base = connection.execute(
+                    """SELECT last, as_of, prev_close FROM ingest.intraday_snapshots
+                       WHERE ticker=%s AND as_of <= %s ORDER BY as_of DESC LIMIT 1""",
                     (ev["subject"], base_time),
                 ).fetchone()
-                if close:
-                    px = float(close["close"] or close["prev_close"] or 0)
-                    reaction["base"] = {"px": px, "at": str(base_time), "prev_close": px, "source": "prev_close"}
+                if base:
+                    reaction["base"] = {
+                        "px": float(base["last"]),
+                        "at": str(base["as_of"]),
+                        "prev_close": float(base["prev_close"]) if base["prev_close"] else None,
+                        "source": source,
+                        "base_kind": "snapshot",
+                    }
+                elif pub or fs:
+                    close = connection.execute(
+                        """SELECT prev_close, close FROM ingest.bars_daily
+                           WHERE ticker=%s AND trade_date < %s::date ORDER BY trade_date DESC LIMIT 1""",
+                        (ev["subject"], base_time),
+                    ).fetchone()
+                    if close:
+                        px = float(close["close"] or close["prev_close"] or 0)
+                        reaction["base"] = {
+                            "px": px,
+                            "at": str(base_time),
+                            "prev_close": px,
+                            "source": "prev_close",
+                            "base_kind": "prev_close",
+                        }
+                    else:
+                        reaction["base"] = None
                 else:
                     reaction["base"] = None
-            else:
-                reaction["base"] = None
         base_at = reaction["base"]["at"] if reaction.get("base") else None
         if isinstance(base_at, str):
             from datetime import datetime as _dt

@@ -181,11 +181,17 @@ if __name__ == "__main__":
             if run_live:
                 last_live = tick
                 try:
+                    from inves_cog.perception.earnings.cards import update_cards
+
                     values = read_environment()
                     with connect(
                         {**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]}
                     ) as connection:
                         print(live_pass(connection, datetime.now(timezone.utc)), flush=True)
+                        from inves_cog.perception.core_companies import core_companies
+
+                        cards = update_cards(connection, datetime.now(timezone.utc), core_companies())
+                        print(f"earnings_cards={cards}", flush=True)
                 except Exception as exc:
                     print(f"live pass failed: {type(exc).__name__}: {exc}", flush=True)
             time.sleep(30)
