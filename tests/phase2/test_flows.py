@@ -1,0 +1,110 @@
+from datetime import date, datetime
+from unittest.mock import MagicMock
+
+from inves_cog.flows.collectors import (
+    parse_cboe_chain,
+    parse_direxion,
+    parse_occ_oi_summary,
+    parse_occ_series,
+    parse_occ_volume,
+    parse_proshares,
+    collect_cboe_chain,
+)
+from inves_cog.flows.store import save_raw
+
+
+CBOE = {
+    "data": {
+        "timestamp": "2026-10-30T15:45:00-04:00",
+        "options": [
+            {
+                "option": "QQQ  260320C00500000",
+                "bid": 1.5,
+                "ask": 1.7,
+                "iv": 0.28,
+                "open_interest": 12345,
+                "volume": 999,
+                "delta": 0.52,
+                "gamma": 0.01,
+            },
+            {
+                "option": "QQQ  261220P00450000",
+                "bid": 0.8,
+                "ask": 0.9,
+                "iv": 0.31,
+                "open_interest": 5555,
+                "volume": 100,
+            },
+        ],
+    }
+}
+
+
+def test_parse_cboe_chain():
+    rows = parse_cboe_chain(CBOE, "QQQ", 60, date(2026, 10, 30))
+    assert len(rows) == 2
+    q = rows[0]
+    assert q["underlying"] == "QQQ" and q["cp"] == "C" and q["expiry"] == date(2026, 3, 20)
+    assert q["oi"] == 12345 and q["source"] == "CBOE" and q["strike"] == 500.0
+
+
+def test_parse_occ_volume():
+    csv = (
+        "quantity,underlying,symbol,actype,porc,exchange,actdate\n"
+        "100,SPY,SPY  251031C500,C,C,1,10/30/2026\n"
+        "200,SPY,SPY  251031C500,C,C,1,10/30/2026\n"
+        "50,QQQ,QQQ  251031P400,C,P,1,10/30/2026\n"
+    )
+    rows = parse_occ_volume(csv)
+    by_key = {(r["underlying"], r["account_type"], r["cp"]): r["quantity"] for r in rows}
+    assert by_key[("SPY", "C", "C")] == 300
+    assert by_key[("QQQ", "C", "P")] == 50
+
+
+def test_parse_occ_oi():
+    text = (
+        "Account Type,Equity Calls,Equity Puts,Index Calls,Index Puts\n"
+        "All,12,345,678,1234,5678,9012\n"
+        "equity calls,1000\n"
+        "index puts,2000\n"
+    )
+    rows = parse_occ_oi_summary(text, date(2026, 10, 30), date(2026, 10, 30))
+    assert rows
+
+
+def test_parse_direxion():
+    text = "Fund: SOXL\nShares Outstanding:543210\nholdings...\n"
+    rows = parse_direxion(text, "SOXL", datetime(2026, 10, 30))
+    assert rows[0]["shares"] == 543210 and rows[0]["issuer"] == "Direxion"
+
+
+def test_parse_proshares():
+    text = "Date,NAV,Shares Outstanding (000),AUM\n2026-10-30,52.1,1000,1e9\n"
+    rows = parse_proshares(text, "TQQQ", datetime(2026, 10, 30))
+    assert rows and rows[0]["shares"] == 1_000_000 and rows[0]["nav"] == 52.1
+
+
+def test_save_raw(tmp_path):
+    class C:
+        def execute(self, sql, args):
+            return self
+
+        def fetchone(self):
+            return {"raw_file_id": 1}
+
+    out = save_raw(tmp_path, "cboe-chain", "u", "2026-10-30", b"data", C())
+    import hashlib
+
+    assert out["sha256"] == hashlib.sha256(b"data").hexdigest()
+    assert "cboe-chain/2026-10-30" in out["path"]
+
+
+def test_collect_failure_records_health(tmp_path):
+    http = MagicMock()
+    http.request.side_effect = RuntimeError("down")
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"raw_file_id": 1}
+    out = collect_cboe_chain(http, conn, "QQQ", tmp_path, today=date(2026, 10, 30))
+    assert out["rows"] == 0 and "error" in out
+    calls = [c.args[0] for c in conn.execute.call_args_list if "source_health" in c.args[0]]
+    assert calls
