@@ -2085,12 +2085,18 @@ def _close_series(connection, ticker, day, n=22):
     """Daily closes up to `day`: bars_daily when the ticker has bars (plus a
     same-day snapshot while the day's bar is not written yet), otherwise the
     last intraday snapshot of each ET date."""
-    rows = connection.execute(
-        "SELECT trade_date AS d, close AS c FROM ingest.bars_daily "
-        "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT %s",
-        (ticker, day, n),
-    ).fetchall()
+    rows = (
+        connection.execute(
+            "SELECT trade_date AS d, close AS c FROM ingest.bars_daily "
+            "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT %s",
+            (ticker, day, n),
+        ).fetchall()
+        if _table_exists(connection, "ingest.bars_daily")
+        else []
+    )
     series = [(r["d"], float(r["c"])) for r in reversed(rows) if r["c"] is not None]
+    if not _table_exists(connection, "ingest.intraday_snapshots"):
+        return series[-n:]
     snaps = connection.execute(
         "SELECT DISTINCT ON (d) d, last FROM ("
         " SELECT (as_of AT TIME ZONE 'America/New_York')::date AS d, as_of, last"
@@ -2285,14 +2291,25 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             q = _quote(connection, t, day)
             if q is not None:
                 items.append({"sym": t, "name": name, **q})
+        have = {i["sym"] for i in items}
+        for q in index_quotes or []:
+            if tab == "美股指数" and q["id"] not in have and q.get("ret") is not None:
+                cs = (index_closes or {}).get(q["id"]) or []
+                items.append(
+                    {"sym": q["id"], "name": f"{q['id']} {q['name']}", "px": cs[-1] if cs else None, "ret": q["ret"]}
+                )
         if items:
             groups[tab] = items
     daily, intraday = {}, {}
     for t in [t for rows in _MARKET3.values() for t, _ in rows]:
-        rows = connection.execute(
-            "SELECT * FROM ingest.bars_daily WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
-            (t, day),
-        ).fetchall()
+        rows = (
+            connection.execute(
+                "SELECT * FROM ingest.bars_daily WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
+                (t, day),
+            ).fetchall()
+            if _table_exists(connection, "ingest.bars_daily")
+            else []
+        )
         if rows:
             daily[t] = [
                 {
@@ -2310,12 +2327,16 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             daily[t] = [
                 {"d": str(d), "o": v, "h": v, "l": v, "c": v, "v": 0} for d, v in _close_series(connection, t, day, 260)
             ]
-        srows = connection.execute(
-            "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s"
-            " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
-            " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY as_of",
-            (t, day, day),
-        ).fetchall()
+        srows = (
+            connection.execute(
+                "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s"
+                " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
+                " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY as_of",
+                (t, day, day),
+            ).fetchall()
+            if _table_exists(connection, "ingest.intraday_snapshots")
+            else []
+        )
         if len(srows) > 1:
             intraday[t] = [{"t": r["as_of"].isoformat(), "p": float(r["last"])} for r in srows if r["last"] is not None]
     return {"groups": groups, "daily": daily, "intraday": intraday}
