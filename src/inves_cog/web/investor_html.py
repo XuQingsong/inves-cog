@@ -3181,6 +3181,7 @@ def _next_earn(payload):
         if nr.get("report_date"):
             tl = {"post": "盘后", "pre": "盘前"}.get(nr.get("time"), "")
             return _text(f"{nr['report_date']}" + (f" {tl}" if tl else ""))
-        return _miss()
+        be = (payload.get("bar_stats") or {}).get("next_earnings")
+        return _text(str(be)) if be else _miss()
     when = f"{_ETIME.get(str(e.get('time')), _text(e.get('time')))} {_md_local(e['report_date'])}"
     return f"{_text(when)} · 预期 EPS {_text(e.get('eps_forecast') or '—')}"
