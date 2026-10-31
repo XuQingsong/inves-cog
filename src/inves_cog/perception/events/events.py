@@ -18,7 +18,11 @@ KINDS = [
         r"Q[1-4].*(EPS|Sales|Revenue).*(Beat|Miss|Inline|Estimate)|Reports .*(Quarter|Q[1-4]).*Results",
     ),
     ("rating", r"\bUpgrade\b|\bDowngrade\b|\bMaintains\b|\bReiterates\b|Price Target"),
-    ("guidance", r"\bSees\b|Guidance|Outlook|Raises |Lowers |Cuts .*(Forecast|Guidance|Outlook)"),
+    (
+        "guidance",
+        r"(\bSees\b|\bGuides?\b|Raises |Lowers |Cuts ).*"
+        r"(EPS|Sales|Revenue|Margin|Capex|Forecast|Guidance|Outlook|\bEst\b)|\bGuidance\b|\bOutlook\b",
+    ),
     ("capex", r"capex|capital expenditure"),
     ("supply_shock", r"explosion|fire|shortage|outage|halt|recall|disruption"),
     ("mna", r"acqui|merger|takeover|buyout|deal to buy"),

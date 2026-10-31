@@ -125,3 +125,55 @@ def test_reaction_base_kind_post_session():
         row = conn.execute("SELECT reaction FROM perception.news_events WHERE event_id='INTC:guidance:t'").fetchone()
         assert row["reaction"]["base"]["base_kind"] == "session_close"
         assert row["reaction"]["base"]["px"] == 87.42
+
+
+def test_guidance_classifier_rejects_market_wraps():
+    from inves_cog.perception.events.events import classify
+
+    assert classify("Alphabet Posts Worst Week Since 2011, Intel Suffers as Chip Stocks Plunge") == "other"
+    assert classify("Cantor Fitzgerald Maintains Overweight on Alphabet") == "rating"
+    assert classify("Amazon Sees Best NFL Start Ever, Prime Video Ads") == "other"
+    assert classify("Intel Sees Q4 Adj EPS $0.25 vs $0.43 Est") == "guidance"
+
+
+def test_replay_rebuilds_and_clears_stale_events_on_disposable_database():
+    """--replay: rows in range are deleted and rebuilt; out-of-range untouched;
+    anomaly causes pointing at deleted ids reset to NULL."""
+    import scripts.schedule_live_perception as sched
+
+    host = _disposable_database()
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
+        conn.execute(
+            "INSERT INTO perception.news_events "
+            "(event_id,subject,kind,et_date,session,first_seen_at,last_seen_at,info_ids,"
+            " headline,facts,importance) VALUES "
+            "('INTC:guidance:2026-10-29','INTC','guidance','2026-10-29','post',"
+            " '2026-10-29 20:00:00+00','2026-10-29 20:00:00+00','{stale}','Stale h','{}',100),"
+            "('OLD:x:2026-10-01','OLD','earnings_result','2026-10-01','post',"
+            " '2026-10-01 20:00:00+00','2026-10-01 20:00:00+00','{x}','Outside','{}',50) "
+            "ON CONFLICT DO NOTHING"
+        )
+        conn.execute(
+            "INSERT INTO perception.live_anomalies "
+            "(trade_date,session,scope,subject,direction,first_seen_at,last_seen_at,"
+            " first_ret,last_ret,peak_ret,peak_z,cause_event_id) VALUES "
+            "('2026-10-29','post','stock','INTC','down','2026-10-29 20:05:00+00',"
+            " '2026-10-29 20:05:00+00',-0.1,-0.1,-0.1,-5,'INTC:guidance:2026-10-29') "
+            "ON CONFLICT DO NOTHING"
+        )
+        conn.commit()
+
+        class Args:
+            replay = ("2026-10-27", "2026-10-31")
+
+        sched._run(conn, set(), [], [], Args())
+        conn.commit()
+        gone = conn.execute(
+            "SELECT count(*) n FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
+        ).fetchone()["n"]
+        kept = conn.execute(
+            "SELECT count(*) n FROM perception.news_events WHERE event_id='OLD:x:2026-10-01'"
+        ).fetchone()["n"]
+        anom = conn.execute("SELECT cause_event_id FROM perception.live_anomalies WHERE subject='INTC'").fetchone()
+        assert gone == 0 and kept == 1
+        assert anom["cause_event_id"] is None

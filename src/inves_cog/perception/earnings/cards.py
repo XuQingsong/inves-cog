@@ -14,12 +14,6 @@ from inves_cog.ingest.market import NY
 STRONG_REPORT_KINDS = ("earnings_result", "guidance", "capex")
 
 
-def _trading_days(connection, day, back=10, forward=8):
-    rows = connection.execute("SELECT DISTINCT trade_date FROM ingest.bars_daily ORDER BY trade_date").fetchall()
-    days = [r["trade_date"] for r in rows]
-    return days
-
-
 def _next_session(connection, day):
     row = connection.execute(
         "SELECT min(trade_date) AS d FROM ingest.bars_daily WHERE trade_date > %s", (day,)
@@ -72,17 +66,6 @@ def stage_of(connection, ticker, report_date, report_time, now):
     if now >= _window_start(report_date, report_time):
         return "released"
     return "upcoming"
-
-
-def candidates(connection, today):
-    """Core-company calendar rows with report_date in [today-3 trading
-    days, today+7 calendar days]."""
-    lo = today - timedelta(days=7)  # cover 3 trading days incl. weekends
-    return connection.execute(
-        "SELECT ticker, report_date, time FROM ingest.earnings_calendar "
-        "WHERE report_date >= %s AND report_date <= %s ORDER BY report_date",
-        (lo, today + timedelta(days=7)),
-    ).fetchall()
 
 
 def _consensus(connection, ticker):
@@ -151,6 +134,12 @@ def _vote_return(connection, ticker, report_date, report_time):
 
 def _events(connection, ticker, report_date, report_time, now):
     start = _window_start(report_date, report_time)
+    # cap the window at the vote close (post -> next session 16:00 ET,
+    # pre -> report_date 16:00 ET); still-open windows use now
+    vote_day = report_date if report_time == "pre" else _next_session(connection, report_date)
+    if vote_day is not None:
+        end = datetime(vote_day.year, vote_day.month, vote_day.day, 16, 0, tzinfo=NY)
+        now = min(now, end)
     rows = connection.execute(
         "SELECT event_id, kind, headline, facts, importance, first_seen_at, reaction "
         "FROM perception.news_events WHERE subject=%s AND kind = ANY(%s) "
@@ -288,7 +277,7 @@ def build_card(connection, ticker, report_date, report_time, now, segment="", pe
                     card["vs_implied"] = "无期权参照"
                 seg = _segment_reaction(connection, ticker, segment, peers, report_date, report_time)
                 if seg:
-                    followed = sum(1 for _, r in seg["peers"] if r * vote > 0 and abs(r) >= abs(vote) / 3)
+                    followed = sum(1 for _, r in seg["peers"] if r * vote > 0 and abs(r) >= max(abs(vote) / 3, 0.01))
                     card["segment_reaction"] = {
                         "peers": seg["peers"],
                         "baskets": seg["baskets"],

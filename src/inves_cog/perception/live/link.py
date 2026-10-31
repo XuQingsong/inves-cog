@@ -89,15 +89,23 @@ def _basket_core(connection, basket_id, core):
     return sorted(t for t in members if t in core) or ["__none__"]
 
 
-def update_reactions(connection, now):
-    """§3 reaction for strong events seen in the last 24h. Filled fields
-    are never recomputed; missing data -> null."""
-    events = connection.execute(
-        """SELECT event_id, subject, first_seen_at, reaction FROM perception.news_events
-           WHERE kind = ANY(%s) AND first_seen_at >= %s - interval '24 hours'
-             AND first_seen_at <= %s""",
-        (sorted(STRONG), now, now),
-    ).fetchall()
+def update_reactions(connection, now, day_range=None):
+    """§3 reaction for strong events seen in the last 24h (or the et_date
+    range when day_range is given). Filled fields are never recomputed;
+    missing data -> null."""
+    if day_range:
+        events = connection.execute(
+            """SELECT event_id, subject, first_seen_at, reaction FROM perception.news_events
+               WHERE kind = ANY(%s) AND et_date >= %s AND et_date <= %s""",
+            (sorted(STRONG), day_range[0], day_range[1]),
+        ).fetchall()
+    else:
+        events = connection.execute(
+            """SELECT event_id, subject, first_seen_at, reaction FROM perception.news_events
+               WHERE kind = ANY(%s) AND first_seen_at >= %s - interval '24 hours'
+                 AND first_seen_at <= %s""",
+            (sorted(STRONG), now, now),
+        ).fetchall()
     written = 0
     for ev in events:
         reaction = dict(ev.get("reaction") or {})
