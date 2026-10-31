@@ -1088,12 +1088,14 @@ def _earnings_hist(connection, symbol, bars):
     events = {}
     try:
         for r in connection.execute(
-            "SELECT published_at FROM perception.news_events WHERE subject=%s AND kind='earnings_result' "
-            "ORDER BY published_at",
+            "SELECT published_at FROM perception.news_events "
+            "WHERE subject=%s AND kind='earnings_result' ORDER BY published_at",
             (symbol,),
         ).fetchall():
             ts = r["published_at"]
-            events[str(ts.astimezone(ZoneInfo("America/New_York")).date() if hasattr(ts, "astimezone") else str(ts)[:10])] = ts
+            events[
+                str(ts.astimezone(ZoneInfo("America/New_York")).date() if hasattr(ts, "astimezone") else str(ts)[:10])
+            ] = ts
     except Exception:
         pass
     closes = {str(r["trade_date"]): float(r["close"]) for r in bars if r["close"] is not None}
