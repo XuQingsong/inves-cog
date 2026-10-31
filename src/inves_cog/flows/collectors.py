@@ -155,26 +155,24 @@ def parse_occ_oi_summary(text, published_at):
 
 
 def parse_occ_series(text, underlying, published_at):
-    """Per-contract OI cross-check (tab text) → option_chain rows, source='OCC'."""
+    """OCC series-search tab text → option_chain rows (source='OCC', 2 per line).
+    Columns: root, year, month, day, strike_int, strike_dec, 'C P', call_oi, put_oi, pos_limit."""
     out = []
     for line in text.splitlines():
-        m = re.search(r"(\d{6})([CP])(\d{8})", line)
-        if not m:
+        parts = [p.strip() for p in line.split("\t")]
+        parts = [p for p in parts if p]
+        if len(parts) < 9 or not parts[1].isdigit() or parts[1] > "9999":
             continue
-        nums = [p.replace(",", "") for p in line.split("\t") if p.replace(",", "").isdigit()]
-        if not nums:
-            nums = [p.replace(",", "") for p in re.split(r"\s{2,}", line) if p.replace(",", "").isdigit()]
-        out.append(
-            {
-                "underlying": underlying,
-                "snapshot_at": published_at,
-                "expiry": datetime.strptime(m.group(1), "%y%m%d").date(),
-                "strike": float(m.group(3)) / 1000.0,
-                "cp": m.group(2),
-                "oi": int(nums[-1]) if nums else None,
-                "source": "OCC",
-            }
-        )
+        try:
+            expiry = date(int(parts[1]), int(parts[2]), int(parts[3]))
+            strike = float(parts[4]) + float(parts[5]) / 1000.0
+        except (ValueError, IndexError):
+            continue
+        for cp, oi in (("C", parts[7] if len(parts) > 7 else None), ("P", parts[8] if len(parts) > 8 else None)):
+            out.append({"underlying": underlying, "snapshot_at": published_at, "expiry": expiry,
+                        "strike": strike, "cp": cp,
+                        "oi": int(oi.replace(",", "")) if oi and oi.replace(",", "").isdigit() else None,
+                        "source": "OCC"})
     return out
 
 

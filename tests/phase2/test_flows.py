@@ -6,6 +6,7 @@ from inves_cog.flows.collectors import (
     parse_cboe_chain,
     parse_direxion,
     parse_occ_oi_summary,
+    parse_occ_series,
     parse_occ_volume,
     parse_proshares,
 )
@@ -150,3 +151,17 @@ def test_health_upsert_ok():
     record_health(conn, "Flows:X", True, 5, "note", 0.1)
     sql = conn.execute.call_args[0][0]
     assert "ON CONFLICT (source)" in sql and "consecutive_failures" in sql
+
+
+def test_parse_occ_series_fixture():
+    import pathlib
+
+    path = pathlib.Path("/tmp/probe/ss.txt")
+    text = path.read_text() if path.exists() else "NVDA  \t\t2026\t10\t30\t50\t000\tC P \t0\t50\t250000000\n"
+    rows = parse_occ_series(text, "NVDA", datetime(2026, 10, 30))
+    if path.exists():
+        assert rows, "fixture should parse"
+    assert all(r["source"] == "OCC" for r in rows)
+    calls = [r for r in rows if r["cp"] == "C"]
+    puts = [r for r in rows if r["cp"] == "P"]
+    assert calls and puts
