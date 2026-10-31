@@ -339,3 +339,14 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
     }, 60 * 1000);
   }
 })();
+
+// B-073 search box: Enter jumps to /search; /search embeds candidates inline.
+(function () {
+  var q = document.getElementById("q");
+  if (!q) return;
+  q.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && q.value.trim()) {
+      location.href = "/search?q=" + encodeURIComponent(q.value.trim());
+    }
+  });
+})();

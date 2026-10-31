@@ -620,6 +620,19 @@ def page_brief_stock(connection, day, clock, symbol):
     if closed is not None:
         return closed
     bars = _bars(connection, symbol, day)
+    if not bars:
+        return {
+            "page": f"/s/{symbol}",
+            "date": day,
+            "symbol": symbol,
+            "title": symbol,
+            "no_data": True,
+            "headings": [],
+            "label": PAPER_LABEL,
+        }
+    in_scope = symbol in context["pool"] or symbol in context["positions"]
+    if not in_scope:
+        return _untracked_page(connection, symbol, day, clock, bars)
     is_today = day == clock.today_trade_date()
     raw_score = _score_row(connection, day, symbol)
     carried_from = None
@@ -738,6 +751,11 @@ def page_brief_stock(connection, day, clock, symbol):
         "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
         "next_earnings": next_earnings,
         "earnings_card": _earnings_card(connection, symbol),
+        "price_now": _price_now(connection, symbol, day, bars, snap),
+        "chart": _chart_data(bars),
+        "earnings_marks": _earnings_marks(connection, symbol, day),
+        "anomaly_marks": _anomaly_marks(connection, symbol, day),
+        "peers": _peers_table(connection, symbol, day, _segment_map()),
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
@@ -808,6 +826,12 @@ def _next_earnings(earnings, symbol, day):
     return future[0] if future else None
 
 
+def _segment_map():
+    from inves_cog.perception.core_companies import core_companies
+
+    return core_companies()
+
+
 def _earnings_card(connection, symbol):
     """B-072: this ticker's latest earnings card row; None when absent."""
     try:
@@ -821,3 +845,118 @@ def _earnings_card(connection, symbol):
         return {**dict(row), "report_date": str(row["report_date"])}
     except Exception:
         return None
+
+
+def _chart_data(bars, limit_days=260):
+    """B-073: 1y of daily closes + markers the page renders client-side."""
+    rows = [
+        {"d": str(r["trade_date"]), "c": float(r["close"]), "v": int(r["volume"] or 0)}
+        for r in bars
+        if r["close"] is not None
+    ]
+    return rows[-limit_days:]
+
+
+def _price_now(connection, symbol, day, bars, snap):
+    """Latest quote: same-day intraday snapshot wins, else latest close."""
+    if snap and snap.get("last") is not None:
+        return {
+            "px": float(snap["last"]),
+            "at": str(snap["as_of"]),
+            "session": snap.get("session"),
+            "source": "快照",
+            "ret": _snap_ret(snap),
+        }
+    close = next((float(r["close"]) for r in reversed(bars) if r["close"] is not None), None)
+    prev = None
+    seen = [float(r["close"]) for r in bars if r["close"] is not None]
+    if len(seen) >= 2:
+        prev = seen[-2]
+    return {
+        "px": close,
+        "at": str(bars[-1]["trade_date"]) if bars else None,
+        "session": "close",
+        "source": "收盘",
+        "ret": (close / prev - 1) if close and prev else None,
+    }
+
+
+def _peers_table(connection, symbol, day, segment_map):
+    """Same-segment core companies + same L2/L3 baskets: px, today, 5d."""
+    seg = segment_map.get(symbol)
+    peers = sorted(t for t, s in segment_map.items() if s == seg and t != symbol)[:6]
+    baskets = connection.execute(
+        "SELECT basket_id, name, members FROM graph.baskets WHERE level IN ('L2','L3')"
+    ).fetchall()
+    for b in baskets:
+        names = [m["ticker"] if isinstance(m, dict) else m for m in (b["members"] or [])]
+        if symbol in names:
+            for t in names:
+                if t != symbol and t not in peers:
+                    peers.append(t)
+    peers = peers[:8]
+    out = []
+    for t in peers:
+        pb = _bars(connection, t, day)
+        closes = [float(r["close"]) for r in pb if r["close"] is not None]
+        if len(closes) >= 6:
+            out.append(
+                {"ticker": t, "px": closes[-1], "ret": closes[-1] / closes[-2] - 1, "ret5": closes[-1] / closes[-6] - 1}
+            )
+        elif len(closes) >= 2:
+            out.append({"ticker": t, "px": closes[-1], "ret": closes[-1] / closes[-2] - 1, "ret5": None})
+    return out, seg
+
+
+def _earnings_marks(connection, symbol, day):
+    rows = connection.execute(
+        "SELECT report_date, time FROM ingest.earnings_calendar WHERE ticker=%s AND report_date <= %s",
+        (symbol, day),
+    ).fetchall()
+    return [{"d": str(r["report_date"]), "t": r["time"]} for r in rows]
+
+
+def _anomaly_marks(connection, symbol, day):
+    days = []
+    try:
+        rows = connection.execute(
+            "SELECT DISTINCT trade_date FROM perception.anomalies a "
+            "WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(a.members) m "
+            "            WHERE m->>'ticker' = %s)",
+            (symbol,),
+        ).fetchall()
+        days += [str(r["trade_date"]) for r in rows]
+    except Exception:
+        pass
+    try:
+        live = connection.execute(
+            "SELECT DISTINCT trade_date FROM perception.live_anomalies WHERE subject=%s",
+            (symbol,),
+        ).fetchall()
+        days += [str(r["trade_date"]) for r in live]
+    except Exception:
+        pass
+    return sorted(set(days))
+
+
+def _untracked_page(connection, symbol, day, clock, bars):
+    """Not in pool: price + chart only, everything else states 不在监控范围."""
+    snap_row = connection.execute(
+        "SELECT last, as_of, session FROM ingest.intraday_snapshots WHERE ticker=%s ORDER BY as_of DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    snap = dict(snap_row) if snap_row else None
+    price = _price_now(connection, symbol, day, bars, snap)
+    return {
+        "page": f"/s/{symbol}",
+        "date": day,
+        "symbol": symbol,
+        "title": symbol,
+        "untracked": True,
+        "price_now": price,
+        "chart": _chart_data(bars),
+        "earnings_marks": _earnings_marks(connection, symbol, day),
+        "anomaly_marks": _anomaly_marks(connection, symbol, day),
+        "headings": [],
+        "label": PAPER_LABEL,
+    }

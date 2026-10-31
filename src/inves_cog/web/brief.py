@@ -3014,3 +3014,42 @@ def _earnings_cards(connection, day):
     except Exception:
         return []
     return [{**dict(r), "report_date": str(r["report_date"])} for r in rows]
+
+
+def page_search(connection, day, clock, q):
+    """B-073: /search — exact code or unique name redirects; else a list."""
+    context, closed = _context(connection, day, clock)
+    query = (q or "").strip()
+    cands = {}
+    try:
+        rows = connection.execute(
+            "SELECT DISTINCT ON (ticker) ticker, company FROM ingest.earnings_calendar"
+        ).fetchall()
+        for r in rows:
+            cands[r["ticker"]] = r["company"] or ""
+    except Exception:
+        pass
+    names = context.get("stocks") or set(context["pool"])
+    for t in sorted(set(context["pool"]) | set(context["positions"]) | names):
+        cands.setdefault(t, "")
+    from inves_cog.perception.core_companies import core_companies
+
+    for t in core_companies():
+        cands.setdefault(t, "")
+    ql = query.upper()
+    if ql in cands:
+        return {"page": "/search", "redirect": f"/s/{ql}", "date": day, "label": PAPER_LABEL}
+    hits = [
+        t
+        for t, n in cands.items()
+        if query and (query.casefold() in t.casefold() or query.casefold() in str(n).casefold())
+    ]
+    if len(hits) == 1:
+        return {"page": "/search", "redirect": f"/s/{hits[0]}", "date": day, "label": PAPER_LABEL}
+    return {
+        "page": "/search",
+        "date": day,
+        "q": query,
+        "results": [{"ticker": t, "name": cands[t]} for t in hits[:20]],
+        "label": PAPER_LABEL,
+    }

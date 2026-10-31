@@ -180,6 +180,17 @@ def _register_html(app, call, clock):
     def linkage_html(event_id: str, date: date | None = None):
         return show(page_linkage, date, event_id=event_id)
 
+    @app.get("/search")
+    def search_html(q: str = "", date: date | None = None):
+        from inves_cog.web.brief import page_search
+
+        payload = call(page_search, date or default_session(clock), q=q)
+        if payload.get("redirect"):
+            from fastapi.responses import RedirectResponse
+
+            return RedirectResponse(payload["redirect"])
+        return HTMLResponse(render_brief(payload))
+
     @app.get("/s/{symbol}")
     def investor_stock_html(symbol: str, date: date | None = None):
         return show_brief(page_brief_stock, date, symbol=symbol)
