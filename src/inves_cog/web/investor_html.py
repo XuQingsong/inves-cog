@@ -2419,7 +2419,10 @@ def _move_tier(r):
 
 def _move_text(r):
     if r.get("ret") is not None:
-        return _signed(float(r["ret"]) * 100, 2)
+        out = _signed(float(r["ret"]) * 100, 2)
+        if r.get("post") is not None:
+            out += f' <span class="dim small">盘后 {_signed(float(r["post"]) * 100, 2)}</span>'
+        return out
     if r.get("chg_bp") is not None:
         return f"{r['chg_bp']:+.0f}bp"
     return "—"

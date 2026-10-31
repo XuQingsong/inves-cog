@@ -2472,9 +2472,9 @@ def page_brief_market(connection, day, clock):
                 connection,
                 day,
                 index_quotes=[
-                    {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy},
-                    {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq},
-                    {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm},
+                    {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy, "post": _post_ret(context, "SPY")},
+                    {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq, "post": _post_ret(context, "QQQ")},
+                    {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm, "post": _post_ret(context, "IWM")},
                 ],
                 index_closes=idx_closes,
             ),
