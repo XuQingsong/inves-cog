@@ -74,6 +74,7 @@ def _html_page(path):
         "/paper/health",
         "/paper/ledger",
         "/review",
+        "/search",
         "/investor.js",
     }:
         return True
