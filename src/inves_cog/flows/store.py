@@ -3,8 +3,6 @@
 import gzip
 import hashlib
 import logging
-import time
-from datetime import datetime
 from pathlib import Path
 
 from inves_cog.ingest.http import HTTPClient

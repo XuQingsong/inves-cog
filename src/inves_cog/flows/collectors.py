@@ -263,7 +263,7 @@ SSGA_TICKERS = ["SPY", "XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", 
 def parse_direxion(text, ticker, published_at):
     rows = []
     reader = csv.DictReader(
-        io.StringIO("\n".join(l for l in text.splitlines() if not l.startswith("Shares Outstanding"))),
+        io.StringIO("\n".join(x for x in text.splitlines() if not x.startswith("Shares Outstanding"))),
         skipinitialspace=True,
     )
     for row in reader:
