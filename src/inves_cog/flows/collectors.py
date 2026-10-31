@@ -202,6 +202,11 @@ def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None
         else:
             rows = parse_occ_oi_summary(text, pub)
             if connection is not None and rows:
+                catalog = [{"series_id": r["series_id"], "name_zh": r["series_id"],
+                            "unit": "contracts", "frequency": "daily", "source": "OCC"}
+                           for r in rows]
+                upsert_many(connection, "series_catalog",
+                            ["series_id", "name_zh", "unit", "frequency", "source"], catalog)
                 for row in rows:
                     row["raw_file_id"] = raw["raw_file_id"]
                 upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
