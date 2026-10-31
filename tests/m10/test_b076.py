@@ -100,8 +100,12 @@ def test_next_earn_same_source():
 def test_earnings_hist_sorted_desc_and_single_card():
     from inves_cog.web.investor_html import _earnings_hist_module
 
-    rows = [{"q": "2026-02-28", "act": 1.0}, {"q": "2026-08-31", "act": 1.1},
-            {"q": "2025-11-30", "act": 0.9}, {"q": "2026-05-31", "act": 1.05}]
+    rows = [
+        {"q": "2026-02-28", "act": 1.0},
+        {"q": "2026-08-31", "act": 1.1},
+        {"q": "2025-11-30", "act": 0.9},
+        {"q": "2026-05-31", "act": 1.05},
+    ]
     html = _earnings_hist_module({"earnings_hist": rows})
     assert html.count('class="card sec"') == 1
     assert html.index("2026-08-31") < html.index("2026-05-31") < html.index("2026-02-28") < html.index("2025-11-30")
@@ -117,6 +121,5 @@ def test_segment_label_chinese():
 def test_key_stats_no_target_price():
     from inves_cog.web.investor_html import _key_stats
 
-    html = _key_stats({"analyst": {"pt_mean": 200, "pt_low": 100, "pt_high": 300},
-                       "bar_stats": {"next_earnings": "x"}})
+    html = _key_stats({"analyst": {"pt_mean": 200, "pt_low": 100, "pt_high": 300}, "bar_stats": {"next_earnings": "x"}})
     assert "目标价" not in html
