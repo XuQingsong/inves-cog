@@ -2314,9 +2314,9 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             daily[t] = [
                 {
                     "d": str(r["trade_date"]),
-                    "o": float(r["open"] or r["close"]),
-                    "h": float(r["high"] or r["close"]),
-                    "l": float(r["low"] or r["close"]),
+                    "o": float(r.get("open") or r["close"]),
+                    "h": float(r.get("high") or r["close"]),
+                    "l": float(r.get("low") or r["close"]),
                     "c": float(r["close"]),
                     "v": int(r["volume"] or 0),
                 }
