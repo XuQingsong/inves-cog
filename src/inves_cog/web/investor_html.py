@@ -2169,10 +2169,6 @@ def _live_module(payload):
     return f'<div class="card sec" id="live"><h2>实时异常</h2>{"".join(items)}</div>'
 
 
-def _pct(v, digits=1):
-    return f"{v * 100:+.1f}%" if v is not None else ""
-
-
 def _facts_chips(facts):
     parts = []
     if facts.get("guide_gap_pct") is not None:
@@ -2215,9 +2211,9 @@ def _card_lines(row):
             react = ""
             r = e.get("reaction") or {}
             if r.get("m15") and r["m15"].get("ret") is not None:
-                react = f" 15分钟 {_pct(r['m15']['ret'])}"
+                react = f" 15分钟 {_pct(r['m15']['ret'], 1)}"
             if r.get("m60") and r["m60"].get("ret") is not None:
-                react += f" · 60分钟 {_pct(r['m60']['ret'])}"
+                react += f" · 60分钟 {_pct(r['m60']['ret'], 1)}"
             lines.append(
                 f'{_facts_chips(e.get("facts") or {})} {_text(e["headline"] or "")}<span class="dim">{react}</span>'
             )
@@ -2225,7 +2221,7 @@ def _card_lines(row):
             label = f"异动 {a['scope']}:{_text(a['subject'])} {_pct(a.get('peak_ret'))}（{a['status']}）"
             lines.append(f'<span class="dim">{label}</span>')
         if row.get("stage") == "voted" and card.get("vote_ret") is not None:
-            lines.append(f"次日投票 {_pct(card['vote_ret'])} · {_text(card.get('vs_implied') or '')}")
+            lines.append(f"次日投票 {_pct(card['vote_ret'], 1)} · {_text(card.get('vs_implied') or '')}")
             seg = card.get("segment_reaction")
             if seg:
                 lines.append(

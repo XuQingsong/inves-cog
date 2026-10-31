@@ -214,7 +214,7 @@ def _segment_reaction(connection, ticker, segment, members, report_date, report_
         if b and v:
             peer_rets.append((peer, v / b - 1))
     baskets = connection.execute(
-        "SELECT basket_id, name, members FROM graph.baskets WHERE layer IN ('L2','L3')",
+        "SELECT basket_id, name, members FROM graph.baskets WHERE level IN ('L2','L3')",
     ).fetchall()
     basket_rets = []
     for b in baskets:

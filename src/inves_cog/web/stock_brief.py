@@ -816,8 +816,8 @@ def _earnings_card(connection, symbol):
             "FROM perception.earnings_cards WHERE ticker=%s ORDER BY report_date DESC LIMIT 1",
             (symbol,),
         ).fetchone()
+        if row is None:
+            return None
+        return {**dict(row), "report_date": str(row["report_date"])}
     except Exception:
         return None
-    if row is None:
-        return None
-    return {**dict(row), "report_date": str(row["report_date"])}
