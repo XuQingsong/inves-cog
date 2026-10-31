@@ -277,7 +277,9 @@ def test_parse_cboe_pc_stable_ids():
 
 def test_ssga_newest_first():
     """SSGA xlsx is newest-first; parser must return all rows date-sorted."""
-    import io, zipfile
+    import io
+    import zipfile
+
     from inves_cog.flows.collectors import parse_ssga_xlsx
 
     sst = (
@@ -315,7 +317,7 @@ def test_etf_stale_health():
     M.trading_day = lambda d: d.weekday() < 5
     from inves_cog.flows.collectors import collect_etf_shares
 
-    out = collect_etf_shares(http, conn, "/tmp/x", datetime(2026, 10, 30), ["TQQQ"], today=date(2026, 10, 30))
+    collect_etf_shares(http, conn, "/tmp/x", datetime(2026, 10, 30), ["TQQQ"], today=date(2026, 10, 30))
     M.trading_day = orig
     health_calls = [c for c in conn.execute.call_args_list if "source_health" in c.args[0]]
     assert any("stale:TQQQ" in str(c.args[1]) for c in health_calls)
