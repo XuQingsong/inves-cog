@@ -2513,6 +2513,8 @@ def _market3_module(payload):
     scope = set(payload.get("ticker_scope") or [])
 
     def keep(n):
+        if not scope:
+            return True
         rule = _nrule(n)
         ticks = set(rule.get("primary_tickers") or [])
         if ticks and not (ticks & scope) and not rule.get("macro") and not rule.get("held"):

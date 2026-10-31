@@ -941,9 +941,15 @@ def _facts_chip(facts):
 
 
 _KIND_CN = {
-    "earnings_result": "财报", "guidance": "指引", "capex": "资本开支",
-    "mna": "并购", "supply_shock": "供应", "regulatory": "监管",
-    "rating": "评级", "preview": "预告", "other": "事件",
+    "earnings_result": "财报",
+    "guidance": "指引",
+    "capex": "资本开支",
+    "mna": "并购",
+    "supply_shock": "供应",
+    "regulatory": "监管",
+    "rating": "评级",
+    "preview": "预告",
+    "other": "事件",
 }
 
 
