@@ -263,3 +263,94 @@ def test_post_session_skipped_without_close():
     conn.execute.return_value.fetchone.return_value = None  # no regular snap, no bar
     quotes, skipped = _latest_quotes(conn, day, now)
     assert "INTC" not in quotes and skipped == 1
+
+
+def test_lag_text_hours_and_previous_session():
+    from datetime import date, datetime, timezone
+
+    from inves_cog.web.investor_html import _live_module
+
+    base = {
+        "scope": "stock",
+        "subject": "INTC",
+        "last_ret": -0.31,
+        "peak_ret": -0.31,
+        "first_seen_at": datetime(2026, 10, 30, 14, 9, tzinfo=timezone.utc),
+        "cause_event_id": "INTC:guidance:2026-10-29",
+        "trade_date": date(2026, 10, 30),
+        "cause_headline": "Intel Sees Q4 Weak",
+        "status": "active",
+    }
+    # lag 1079 min, event at prev day 16:01 ET -> 约 18 小时（上一交易日盘后）
+    row = dict(base, cause_lag_minutes=1078.7, cause_first_seen=datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc))
+    html = _live_module({"news_modules": {"live": [row]}})
+    assert "事件后约 18 小时（上一交易日盘后）" in html
+    # lag 45 stays minutes
+    row = dict(base, cause_lag_minutes=45, cause_first_seen=datetime(2026, 10, 30, 13, 0, tzinfo=timezone.utc))
+    assert "事件后 45 分钟" in _live_module({"news_modules": {"live": [row]}})
+    # negative lag wording unchanged
+    row = dict(base, cause_lag_minutes=-6.0)
+    assert "股价先动，新闻晚 6 分钟入库" in _live_module({"news_modules": {"live": [row]}})
+
+
+def test_event_headline_updates_to_facts_richest_on_replay():
+    """Pre-existing GAAP headline row + replay of guidance part -> upsert
+    switches headline when EXCLUDED.importance >= existing."""
+    from datetime import datetime, timezone
+
+    import psycopg
+    from psycopg.rows import dict_row
+
+    from inves_cog.perception.events.events import build_events
+    from tests.m8.test_attribution import _disposable_database
+
+    host = _disposable_database()
+    fs = datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc)
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
+        # stale row: GAAP headline, no facts
+        conn.execute(
+            "INSERT INTO perception.news_events (event_id,subject,kind,et_date,session,"
+            " first_seen_at,last_seen_at,info_ids,headline,facts,importance,importance_parts)"
+            " VALUES ('INTC:guidance:2026-10-29','INTC','guidance','2026-10-29','post',"
+            " %s,%s,'{n1}','Intel Reports Third-Quarter 2026 Financial Results','{}',100,'{}')"
+            " ON CONFLICT DO NOTHING",
+            (fs, fs),
+        )
+        conn.commit()
+        # replay item with the facts-richest headline
+        items = [
+            {
+                "info_id": "n2",
+                "kind": "news",
+                "tickers": ["INTC"],
+                "first_seen_at": fs,
+                "headline": "Intel Sees Q4 GAAP EPS $0.10 vs $0.15 Est",
+            },
+        ]
+        events = build_events(items, {"INTC"}, None)
+        conn.execute(
+            """INSERT INTO perception.news_events
+               (event_id,subject,kind,et_date,session,first_seen_at,last_seen_at,
+                info_ids,headline,facts,segment,importance,importance_parts,updated_at)
+               VALUES (%(event_id)s,%(subject)s,%(kind)s,%(et_date)s,'post',%(first_seen_at)s,%(last_seen_at)s,
+                       %(info_ids)s,%(headline)s,%(facts)s,%(segment)s,%(importance)s,%(importance_parts)s,now())
+               ON CONFLICT (event_id) DO UPDATE SET
+                last_seen_at=GREATEST(perception.news_events.last_seen_at,EXCLUDED.last_seen_at),
+                info_ids=(SELECT array_agg(DISTINCT x) FROM unnest(
+                    perception.news_events.info_ids || EXCLUDED.info_ids) x),
+                facts=perception.news_events.facts || COALESCE(EXCLUDED.facts,'{}'::jsonb),
+                headline=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
+                              THEN EXCLUDED.headline ELSE perception.news_events.headline END,
+                importance=GREATEST(perception.news_events.importance,EXCLUDED.importance),
+                importance_parts=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
+                              THEN EXCLUDED.importance_parts ELSE perception.news_events.importance_parts END,
+                segment=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
+                              THEN EXCLUDED.segment ELSE perception.news_events.segment END,
+                updated_at=now()""",
+            events[0],
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT headline FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
+        ).fetchone()
+        assert "Sees Q4" in row["headline"]
