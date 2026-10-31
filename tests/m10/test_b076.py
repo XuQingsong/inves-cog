@@ -123,3 +123,12 @@ def test_key_stats_no_target_price():
 
     html = _key_stats({"analyst": {"pt_mean": 200, "pt_low": 100, "pt_high": 300}, "bar_stats": {"next_earnings": "x"}})
     assert "目标价" not in html
+
+
+def test_next_earn_from_next_report():
+    from inves_cog.web.investor_html import _next_earn
+
+    out = _next_earn({"next_earnings": None, "next_report": {"report_date": "2026-11-17", "time": "post"}})
+    assert "2026-11-17" in out and "盘后" in out
+    out = _next_earn({"next_earnings": None, "next_report": {"report_date": "2026-11-17", "time": "pre"}})
+    assert "盘前" in out

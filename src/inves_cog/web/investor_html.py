@@ -3177,7 +3177,10 @@ def _tech_cell(tech):
 def _next_earn(payload):
     e = payload.get("next_earnings")
     if not isinstance(e, dict):
-        be = (payload.get("bar_stats") or {}).get("next_earnings")
-        return _text(str(be)) if be else _miss()
+        nr = payload.get("next_report") or {}
+        if nr.get("report_date"):
+            tl = {"post": "盘后", "pre": "盘前"}.get(nr.get("time"), "")
+            return _text(f"{nr['report_date']}" + (f" {tl}" if tl else ""))
+        return _miss()
     when = f"{_ETIME.get(str(e.get('time')), _text(e.get('time')))} {_md_local(e['report_date'])}"
     return f"{_text(when)} · 预期 EPS {_text(e.get('eps_forecast') or '—')}"
