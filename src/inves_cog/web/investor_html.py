@@ -1665,9 +1665,14 @@ def _stock_news(payload):
             + (' <span class="chip stale">旧闻</span>' if stale else "")
             + "</li>"
         )
+    today = sum(1 for it in payload.get("news") or [] if _as_date(it.get("published_beijing")) == day)
+    listing = f'<ul class="news">{"".join(items)}</ul>' if items else '<div class="empty">截点内没有该股新闻</div>'
     return (
-        '<div class="small muted" style="margin:4px 0 8px">归因报告（假设，仅供参考）</div>' if blocks else ""
-    ) + "".join(blocks)
+        ('<div class="small muted" style="margin:4px 0 8px">归因报告（假设，仅供参考）</div>' if blocks else "")
+        + "".join(blocks)
+        + '<div class="small muted" style="margin-top:12px">当日新闻</div>'
+        + listing
+    )
 
 
 def _chart(trend, position, payload):

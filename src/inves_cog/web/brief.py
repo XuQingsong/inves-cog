@@ -2288,8 +2288,7 @@ def _market3(connection, day):
     daily, intraday = {}, {}
     for t in [t for rows in _MARKET3.values() for t, _ in rows]:
         rows = connection.execute(
-            "SELECT trade_date, open, high, low, close, volume FROM ingest.bars_daily "
-            "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
+            "SELECT * FROM ingest.bars_daily WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
             (t, day),
         ).fetchall()
         if rows:
