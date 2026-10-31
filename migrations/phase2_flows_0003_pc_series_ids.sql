@@ -10,7 +10,7 @@ ON CONFLICT (series_id) DO NOTHING;
 -- catalog rows for every other-slug already present in observations
 INSERT INTO flows.series_catalog (series_id, name_zh, unit, frequency, source)
 SELECT DISTINCT
-  'cboe_pc_other_' || lower(regexp_replace(o.series_id, '[^a-z0-9]+', '_', 'g')),
+  'cboe_pc_other_' || lower(regexp_replace(regexp_replace(o.series_id, '^cboe_pc_', ''), '[^a-z0-9]+', '_', 'g')),
   '每日看跌看涨比', 'ratio', 'daily', 'Cboe'
 FROM flows.observations o
 WHERE o.series_id LIKE 'cboe_pc_%'
@@ -28,7 +28,7 @@ UPDATE flows.observations SET series_id = 'cboe_pc_spx'    WHERE series_id IN ('
 UPDATE flows.observations SET series_id = 'cboe_pc_vix'    WHERE series_id IN ('cboe_pc_cboe_volatility_index_vix_put_call_ratio','cboe_pc_vix_put_call_ratio');
 UPDATE flows.observations SET series_id = 'cboe_pc_oex'    WHERE series_id IN ('cboe_pc_oex_put_call_ratio');
 UPDATE flows.observations o SET series_id =
-  'cboe_pc_other_' || lower(regexp_replace(o.series_id, '[^a-z0-9]+', '_', 'g'))
+  'cboe_pc_other_' || lower(regexp_replace(regexp_replace(o.series_id, '^cboe_pc_', ''), '[^a-z0-9]+', '_', 'g'))
 WHERE o.series_id LIKE 'cboe_pc_%'
   AND o.series_id NOT IN ('cboe_pc_total','cboe_pc_index','cboe_pc_equity',
                           'cboe_pc_etp','cboe_pc_spx','cboe_pc_vix','cboe_pc_oex')
