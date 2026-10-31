@@ -109,7 +109,26 @@ class YFinance:
         for name in ("earnings_estimate", "revenue_estimate", "eps_revisions", "eps_trend"):
             frame = getattr(client, "get_" + name)()
             tables[name] = frame.to_dict(orient="index") if frame is not None else {}
-        tables["analyst_price_targets"] = client.get_analyst_price_targets() or {}
+        targets = client.get_analyst_price_targets() or {}
+        tables["analyst_price_targets"] = targets
+        recs = client.get_recommendations_summary()
+        tables["analyst"] = {
+            "targetLowPrice": targets.get("low"),
+            "targetHighPrice": targets.get("high"),
+            "targetMeanPrice": targets.get("mean"),
+            "targetMedianPrice": targets.get("median"),
+            "numberOfAnalystOpinions": targets.get("numberOfAnalysts"),
+            "recommendationTrend": {"trend": recs.to_dict(orient="records") if recs is not None else []},
+        }
+        ud = client.get_upgrades_downgrades()
+        tables["upgrade_history"] = (
+            [
+                {**{str(k): v for k, v in row.items()}, "epochGradeDate": int(index.timestamp())}
+                for index, row in ud.iterrows()
+            ]
+            if ud is not None
+            else []
+        )
         frame = client.get_earnings_history()
         tables["earnings_history"] = (
             [{"quarter_date": index.date(), **row.to_dict()} for index, row in frame.iterrows()]
@@ -127,7 +146,10 @@ class YFinance:
             try:
                 data = self.http.get(
                     f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/{ticker}",
-                    params={"modules": "earningsTrend,financialData,earningsHistory"},
+                    params={
+                        "modules": "earningsTrend,financialData,earningsHistory,"
+                        "upgradeDowngradeHistory,recommendationTrend"
+                    },
                 )
                 tables = tables_from_yahoo_json(data)
                 return snapshot_from_tables(tables, ticker=ticker, clock=self.clock, fy_cy=fy_cy, fy_ny=fy_ny)
@@ -165,7 +187,13 @@ def tables_from_yahoo_json(data):
             except (ValueError, RecursionError):
                 pass
         elif isinstance(value, dict):
-            for key in ("earningsTrend", "financialData", "earningsHistory"):
+            for key in (
+                "earningsTrend",
+                "financialData",
+                "earningsHistory",
+                "upgradeDowngradeHistory",
+                "recommendationTrend",
+            ):
                 if isinstance(value.get(key), dict):
                     found[key] = raw(value[key])
             for child in value.values():
@@ -191,6 +219,19 @@ def tables_from_yahoo_json(data):
         ]:
             tables[target][period] = row.get(key, {})
     financial = found.get("financialData", {})
+    tables["analyst"] = {
+        "targetLowPrice": financial.get("targetLowPrice"),
+        "targetHighPrice": financial.get("targetHighPrice"),
+        "targetMeanPrice": financial.get("targetMeanPrice"),
+        "targetMedianPrice": financial.get("targetMedianPrice"),
+        "numberOfAnalystOpinions": financial.get("numberOfAnalystOpinions"),
+        "recommendationTrend": found.get("recommendationTrend", {}),
+        "marketCap": financial.get("marketCap"),
+        "forwardPE": financial.get("forwardPE"),
+    }
+    tables["upgrade_history"] = [
+        r for r in found.get("upgradeDowngradeHistory", {}).get("history", []) if r.get("epochGradeDate")
+    ]
     tables["analyst_price_targets"] = {
         "mean": financial.get("targetMeanPrice"),
         "median": financial.get("targetMedianPrice"),

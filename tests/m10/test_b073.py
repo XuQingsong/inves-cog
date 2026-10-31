@@ -57,7 +57,7 @@ def test_chart_svg_marks_and_ma():
     rows = [{"d": f"2026-10-{d:02d}", "c": 90 + d, "v": 1} for d in range(1, 25)]
     payload = {"chart": rows, "earnings_marks": [{"d": "2026-10-20", "t": "post"}], "anomaly_marks": ["2026-10-21"]}
     svg = _chart_svg(payload)
-    assert "polyline" in svg and "财报" in svg and "异常" in svg
+    assert "data-rows" in svg and "lightweight-charts.js" in svg
 
 
 def test_price_now_prefers_snapshot_then_close():

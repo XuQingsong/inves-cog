@@ -76,6 +76,7 @@ def _html_page(path):
         "/review",
         "/search",
         "/investor.js",
+        "/lightweight-charts.js",
     }:
         return True
     for prefix in ("/linkage/", "/s/", "/stock/", "/paper/stock/"):

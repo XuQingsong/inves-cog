@@ -351,40 +351,78 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
   });
 })();
 
-// B-073 chart range toggle
-var InvestorChart = {
-  range: function (btn, k) {
-    var svg = document.getElementById("dchart");
-    if (!svg) return;
-    var rows = JSON.parse(svg.dataset.rows || "[]");
-    var marks = JSON.parse(svg.dataset.marks || "{}");
-    var w = 1180, h = 340, n = Math.min(k, rows.length);
-    var sub = rows.slice(-n);
-    var closes = sub.map(function (r) { return r.c; });
-    var lo = Math.min.apply(null, closes), hi = Math.max.apply(null, closes), sp = hi - lo || 1;
-    var xs = sub.map(function (_, i) { return i * (w - 60) / (n - 1) + 40; });
-    var ys = sub.map(function (r) { return h - 30 - (r.c - lo) / sp * (h - 60); });
-    function ma(win) {
-      if (rows.length < win) return "";
-      var pts = [];
-      for (var i = 0; i < n; i++) {
-        var idx = rows.length - n + i, s = 0, c = 0;
-        for (var j = Math.max(0, idx - win + 1); j <= idx; j++) { s += rows[j].c; c++; }
-        pts.push(xs[i].toFixed(1) + "," + (h - 30 - (s / c - lo) / sp * (h - 60)).toFixed(1));
-      }
-      return pts.join(" ");
+// B-074 §1: lightweight-charts daily OHLC + volume + MA50/200 + markers + 当日 tab
+var InvestorChart = (function () {
+  var chart, candle, vol, ma50, ma200, markerApi, rows, marks, intraday;
+
+  function ma(win, arr) {
+    var out = [];
+    for (var i = 0; i < arr.length; i++) {
+      var s = 0, c = 0;
+      for (var j = Math.max(0, i - win + 1); j <= i; j++) { s += arr[j].c; c++; }
+      out.push({ time: arr[i].d, value: s / c });
     }
-    var out = '<text x="0" y="34" class="ax">$' + hi.toFixed(2) + '</text><text x="0" y="' + (h - 26) + '" class="ax">$' + lo.toFixed(2) + '</text>'
-      + '<text x="' + (w - 4) + '" y="' + (ys[n - 1] - 8).toFixed(1) + '" text-anchor="end" class="ax">$' + closes[n - 1].toFixed(2) + '</text>'
-      + '<polyline points="' + xs.map(function (x, i) { return x.toFixed(1) + "," + ys[i].toFixed(1); }).join(" ") + '" fill="none" stroke="var(--brand)" stroke-width="2"/>'
-      + '<polyline points="' + ma(50) + '" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
-      + '<polyline points="' + ma(200) + '" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>';
-    sub.forEach(function (r, i) {
-      var mk = marks[r.d];
-      if (mk) out += '<circle cx="' + xs[i].toFixed(1) + '" cy="' + ys[i].toFixed(1) + '" r="4" fill="' + (mk === "财报" ? "var(--tp)" : "var(--alert)") + '"><title>' + r.d + " " + mk + " $" + r.c.toFixed(2) + "</title></circle>";
-      out += '<circle class="pt" cx="' + xs[i].toFixed(1) + '" cy="' + ys[i].toFixed(1) + '" r="3" fill="transparent"><title>' + r.d + " $" + r.c.toFixed(2) + "</title></circle>";
-    });
-    svg.innerHTML = out;
-    svg.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b === btn); });
+    return out;
   }
-};
+
+  function setRange(k) {
+    if (k === "day") {
+      if (!intraday.length) return;
+      var pts = intraday.map(function (p) { return { time: Math.floor(new Date(p.t).getTime() / 1000), value: p.p }; });
+      candle.setData([]); vol.setData([]); ma50.setData([]); ma200.setData([]);
+      markerApi.setMarkers([]);
+      if (!chart._line) chart._line = chart.addSeries(LightweightCharts.LineSeries, { color: "#4a7", lineWidth: 2 });
+      chart._line.setData(pts);
+      chart.timeScale().fitContent();
+      return;
+    }
+    if (chart._line) chart._line.setData([]);
+    var sub = k > 0 ? rows.slice(-k) : rows;
+    candle.setData(sub.map(function (r) {
+      return { time: r.d, open: r.o || r.c, high: r.h || r.c, low: r.l || r.c, close: r.c };
+    }));
+    vol.setData(sub.map(function (r) {
+      return { time: r.d, value: r.v || 0, color: r.c >= (r.o || r.c) ? "rgba(38,140,90,.4)" : "rgba(196,60,60,.4)" };
+    }));
+    ma50.setData(ma(50, sub)); ma200.setData(ma(200, sub));
+    markerApi.setMarkers(sub.map(function (r) {
+      var mk = marks[r.d];
+      return mk ? { time: r.d, position: "belowBar", color: mk === "财报" ? "#2f7" : "#e55", shape: "circle", text: mk } : null;
+    }).filter(Boolean));
+    chart.timeScale().fitContent();
+  }
+
+  function init() {
+    var el = document.getElementById("dchart");
+    if (!el || !window.LightweightCharts) return;
+    rows = JSON.parse(el.dataset.rows || "[]");
+    marks = JSON.parse(el.dataset.marks || "{}");
+    intraday = JSON.parse(el.dataset.intraday || "[]");
+    if (!rows.length) return;
+    chart = LightweightCharts.createChart(el, { height: 360, layout: { attributionLogo: true },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+      rightPriceScale: { visible: true }, timeScale: { rightOffset: 4 } });
+    candle = chart.addSeries(LightweightCharts.CandlestickSeries);
+    ma50 = chart.addSeries(LightweightCharts.LineSeries, { color: "#3af", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
+    ma200 = chart.addSeries(LightweightCharts.LineSeries, { color: "#999", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
+    markerApi = LightweightCharts.createSeriesMarkers(candle, []);
+    vol = chart.addSeries(LightweightCharts.HistogramSeries, { priceScaleId: "vol", priceFormat: { type: "volume" }, lastValueVisible: false });
+    chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } });
+    chart.subscribeCrosshairMove(function (p) {
+      var lg = document.getElementById("dchart-legend");
+      if (!lg) return;
+      var d = p.seriesData ? p.seriesData.get(candle) : null;
+      lg.textContent = d ? p.time + "  开 " + d.open.toFixed(2) + " 高 " + d.high.toFixed(2) + " 低 " + d.low.toFixed(2) + " 收 " + d.close.toFixed(2) + " 涨跌 " + ((d.close / d.open - 1) * 100).toFixed(1) + "%" : "";
+    });
+    setRange(132);
+  }
+
+  return {
+    range: function (btn, k) {
+      setRange(k);
+      btn.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b === btn); });
+    },
+    init: init
+  };
+})();
+document.addEventListener("DOMContentLoaded", InvestorChart.init);

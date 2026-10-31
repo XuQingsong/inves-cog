@@ -1,6 +1,6 @@
 """A028 daily fundamentals snapshots, independent of the A020 estimate quota."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import yaml
@@ -58,6 +58,7 @@ def collect_consensus(*, clock, repository, tickers, provider):
         try:
             cy, ny = repository.annual_years(ticker, now)
             snapshot = provider.collect(ticker, fy_cy=cy, fy_ny=ny)
+            put_analyst_actions(getattr(repository, "connection", None), ticker, snapshot, today=now.date())
             repository.put_snapshot(snapshot)
             processed += 1
         except Exception as exc:
@@ -68,6 +69,56 @@ def collect_consensus(*, clock, repository, tickers, provider):
         "note": f"{len(failed)} symbols failed" if failed else None,
         "failures": failed,
     }
+
+
+def put_analyst_actions(connection, ticker, snapshot, today=None, keep_days=730):
+    """Persist upgradeDowngradeHistory (Yahoo JSON or yfinance frame keys) into
+    ingest.analyst_actions; rows older than keep_days are skipped."""
+    raw = snapshot.get("raw") or {}
+    rows = raw.pop("upgrade_history", None) or []
+    if connection is None:
+        return 0
+    cutoff = None if today is None else today - timedelta(days=keep_days)
+
+    def pick(r, *keys):
+        for k in keys:
+            if r.get(k) not in (None, ""):
+                return r[k]
+        return None
+
+    def price(v):
+        try:
+            return float(v) if v not in (None, "", 0) else None
+        except (TypeError, ValueError):
+            return None
+
+    written = 0
+    for r in rows:
+        try:
+            when = datetime.fromtimestamp(int(r["epochGradeDate"]), timezone.utc).date()
+        except (KeyError, TypeError, ValueError):
+            continue
+        firm = pick(r, "firm", "Firm")
+        if (cutoff and when < cutoff) or not firm:
+            continue
+        connection.execute(
+            "INSERT INTO ingest.analyst_actions "
+            "(ticker, action_date, firm, action, from_grade, to_grade, pt_action, prior_pt, current_pt, source) "
+            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'yahoo') ON CONFLICT DO NOTHING",
+            (
+                ticker,
+                when,
+                firm,
+                str(pick(r, "action", "Action") or "").lower(),
+                pick(r, "fromGrade", "FromGrade"),
+                pick(r, "toGrade", "ToGrade"),
+                pick(r, "priceTargetAction"),
+                price(pick(r, "priorPriceTarget")),
+                price(pick(r, "currentPriceTarget")),
+            ),
+        )
+        written += 1
+    return written
 
 
 def scheduled(*, clock, values, connect=None):

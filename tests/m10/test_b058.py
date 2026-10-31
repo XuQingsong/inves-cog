@@ -1,5 +1,6 @@
 """B-058 investor stock page: path, one-liner, trend, sentiment, news, valuation, position."""
 
+import json
 import re
 import uuid
 from datetime import date, datetime, timedelta, timezone
@@ -68,9 +69,10 @@ def _visible(html):
 
 
 def _points(svg):
-    match = re.search(r'points="([^"]*)"', svg)
+    # B-074: chart rows are embedded JSON for lightweight-charts (no inline SVG points).
+    match = re.search(r"data-rows='([^']*)'", svg)
     assert match and match.group(1)
-    return match.group(1).split()
+    return json.loads(unescape(match.group(1)))
 
 
 def _roles(admin):
@@ -557,7 +559,7 @@ def test_d3_window_returns_and_sparkline(pages):
         assert len(trend["closes"]) == min(60, len(series))
         # B-073: the page chart is the 1-year daily-close series (range toggle in JS)
         assert len(_points(html)) == len(payload["chart"]) == min(260, len(series))
-        assert html.count("<script") == 1 and 'src="/investor.js"' in html
+        assert 'src="/investor.js"' in html and 'src="/lightweight-charts.js"' in html
         assert "<script>" not in html and "http://" not in html and "https://" not in html
     nvda = _json(pages, "NVDA")["trend"]
     assert nvda["ret"] == -0.044 and nvda["post"] == 0.012

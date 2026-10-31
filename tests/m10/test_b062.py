@@ -575,11 +575,19 @@ def test_g11_pages_stay_local_and_read_only(pages):
 
 def test_g12_forbidden_words_stay_off_the_pages(pages):
     paths = ("/", "/stocks", "/account", "/trust", "/s/AVGO", "/s/LITE")
-    blob = _visible("".join(_get(pages, path).text for path in paths) + _get(pages, "/account", NEXT).text)
+    stock_pages = "/s/AVGO", "/s/LITE"
+    blob = _visible(
+        "".join(_get(pages, path).text for path in paths if path not in stock_pages)
+        + _get(pages, "/account", NEXT).text
+    )
     # IEX real-time label is spec-mandated (B-067); other 实时 leaks stay forbidden.
     blob_check = blob.replace("IEX 实时", "").replace("单一交易所实时成交", "")
     for word in ("下单", "实时", "目标价", "合理价", "N1"):
         assert word not in blob_check
+    # B-074 §8 mandates target-price display on stock pages; other bans still apply there.
+    stock_blob = _visible("".join(_get(pages, path).text for path in stock_pages))
+    for word in ("下单", "实时", "合理价", "N1"):
+        assert word not in stock_blob
     assert _RULE.search(blob) is None
     assert _LOWER.findall(blob) == []
 

@@ -224,8 +224,7 @@ def _bars(connection, symbol, day):
     return _rows(
         connection,
         """
-        SELECT trade_date, open, high, low, close, volume
-        FROM ingest.bars_daily
+        SELECT * FROM ingest.bars_daily
         WHERE ticker = %s AND trade_date <= %s
         ORDER BY trade_date
         """,
@@ -771,6 +770,18 @@ def page_brief_stock(connection, day, clock, symbol):
         "peers": _safe(connection, lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
         "bar_stats": _safe(connection, lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
         "intraday_series": _safe(connection, lambda: _intraday_series(connection, symbol, day), []),
+        "analyst": _safe(connection, lambda: _analyst_summary(connection, symbol), {}),
+        "next_report": _safe(
+            connection,
+            lambda: connection.execute(
+                "SELECT report_date, time FROM ingest.earnings_calendar "
+                "WHERE ticker=%s AND report_date>=%s ORDER BY report_date LIMIT 1",
+                (symbol, day),
+            ).fetchone(),
+            None,
+        ),
+        "analyst_actions": _safe(connection, lambda: _analyst_actions(connection, symbol, day), []),
+        "earnings_hist": _safe(connection, lambda: _earnings_hist(connection, symbol, bars), []),
         "news_modules": {
             "live": _safe(connection, lambda: [dict(r) for r in _live_anomalies(connection, day, False)], [])
         },
@@ -879,9 +890,16 @@ def _earnings_card(connection, symbol):
 
 
 def _chart_data(bars, limit_days=260):
-    """B-073: 1y of daily closes + markers the page renders client-side."""
+    """1y of daily OHLC + volume for the client-side lightweight chart."""
     rows = [
-        {"d": str(r["trade_date"]), "c": float(r["close"]), "v": int(r["volume"] or 0)}
+        {
+            "d": str(r["trade_date"]),
+            "o": float(r.get("open") or r["close"]),
+            "h": float(r.get("high") or r["close"]),
+            "l": float(r.get("low") or r["close"]),
+            "c": float(r["close"]),
+            "v": int(r["volume"] or 0),
+        }
         for r in bars
         if r["close"] is not None
     ]
@@ -1024,3 +1042,119 @@ def _intraday_series(connection, symbol, day):
         (symbol, day),
     ).fetchall()
     return [{"t": str(r["as_of"]), "p": float(r["last"])} for r in rows if r["last"] is not None]
+
+
+def _analyst_summary(connection, symbol):
+    """Latest consensus raw.analyst: target prices + rating counts."""
+    row = connection.execute(
+        "SELECT eps_cq, eps_cy, pt_mean, pt_median, coverage, raw "
+        "FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    raw = (row or {}).get("raw") or {}
+    analyst = raw.get("analyst") or {}
+    return {
+        "eps_cq": row.get("eps_cq") if row else None,
+        "eps_cy": row.get("eps_cy") if row else None,
+        "pt_mean_col": row.get("pt_mean") if row else None,
+        "pt_median_col": row.get("pt_median") if row else None,
+        "coverage": row.get("coverage") if row else None,
+        "pt_low": analyst.get("targetLowPrice"),
+        "pt_high": analyst.get("targetHighPrice"),
+        "pt_mean": analyst.get("targetMeanPrice"),
+        "pt_median": analyst.get("targetMedianPrice"),
+        "opinions": analyst.get("numberOfAnalystOpinions"),
+        "trend": analyst.get("recommendationTrend") or {},
+        "market_cap": analyst.get("marketCap"),
+        "forward_pe": analyst.get("forwardPE"),
+    }
+
+
+def _analyst_actions(connection, symbol, day):
+    return connection.execute(
+        "SELECT action_date, firm, action, from_grade, to_grade, pt_action, prior_pt, current_pt, source "
+        "FROM ingest.analyst_actions WHERE ticker=%s AND action_date<=%s ORDER BY action_date DESC LIMIT 60",
+        (symbol, day),
+    ).fetchall()
+
+
+def _earnings_hist(connection, symbol, bars):
+    """Last 8 quarters: EPS actual vs estimate + next-day move per report timing."""
+    row = connection.execute(
+        "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s "
+        "AND raw->'earnings_history' IS NOT NULL AND jsonb_array_length(raw->'earnings_history') > 0 "
+        "ORDER BY captured_at DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    hist = ((row or {}).get("raw") or {}).get("earnings_history") or []
+    last_day = str(bars[-1]["trade_date"]) if bars else "9999"
+    cal = {
+        str(r["report_date"]): r
+        for r in connection.execute(
+            "SELECT report_date, time FROM ingest.earnings_calendar WHERE ticker=%s AND report_date<=%s",
+            (symbol, last_day),
+        ).fetchall()
+    }
+    # historical report dates: earnings events published right after each quarter end
+    events = {}
+    cards = {
+        str(r["report_date"]): r
+        for r in connection.execute(
+            "SELECT report_date, card->>'report_time' AS report_time FROM perception.earnings_cards WHERE ticker=%s",
+            (symbol,),
+        ).fetchall()
+    }
+    for r in connection.execute(
+        "SELECT first_seen_at, et_date FROM perception.news_events "
+        "WHERE subject=%s AND kind='earnings_result' ORDER BY first_seen_at",
+        (symbol,),
+    ).fetchall():
+        ts = r["first_seen_at"]
+        events[
+            str(ts.astimezone(ZoneInfo("America/New_York")).date() if hasattr(ts, "astimezone") else str(ts)[:10])
+        ] = ts
+    closes = {str(r["trade_date"]): float(r["close"]) for r in bars if r["close"] is not None}
+    dates = sorted(closes)
+
+    def move(report_date, timing):
+        if report_date not in dates:
+            return None
+        i = dates.index(report_date)
+        if timing == "post":
+            base = closes[dates[i]]
+            nxt = closes[dates[i + 1]] if i + 1 < len(dates) else None
+        else:
+            base = closes[dates[i - 1]] if i > 0 else None
+            nxt = closes[dates[i]]
+        return (nxt / base - 1) if base and nxt else None
+
+    out = []
+    for q in hist[-8:]:
+        qd = str(q.get("quarter_date") or "")
+        limit = str(date.fromisoformat(qd) + timedelta(days=90)) if qd else "9999"
+        cand = (
+            [d for d in cal if qd <= d <= limit]
+            + [d for d in events if qd <= d <= limit]
+            + [d for d in cards if qd <= d <= limit]
+        )
+        rd = min(cand, default=None)
+        timing = "post"
+        if rd in cal:
+            timing = cal[rd].get("time") or "post"
+        elif rd in cards:
+            timing = cards[rd].get("report_time") or "post"
+        elif rd in events:
+            ts = events[rd]
+            et = ts.astimezone(ZoneInfo("America/New_York")) if hasattr(ts, "astimezone") else None
+            timing = "post" if et is None or et.hour >= 16 else "pre"
+        out.append(
+            {
+                "q": qd,
+                "est": float(q["eps_est"]) if q.get("eps_est") is not None else None,
+                "act": float(q["eps_actual"]) if q.get("eps_actual") is not None else None,
+                "gap": float(q["surprise_pct"]) if q.get("surprise_pct") is not None else None,
+                "next_day": move(rd, timing) if rd else None,
+                "report_date": rd,
+            }
+        )
+    return out
