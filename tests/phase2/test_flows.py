@@ -162,7 +162,7 @@ def test_parse_cboe_pc_fixture():
         ]
     }
     rows = parse_cboe_pc(payload, date(2026, 10, 30), datetime(2026, 10, 31))
-    assert {r["series_id"] for r in rows} >= {"cboe_pc_total_put_call_ratio"}
+    assert {r["series_id"] for r in rows} >= {"cboe_pc_total"}
     assert all(r["obs_date"] == date(2026, 10, 30) for r in rows)
 
 
@@ -244,3 +244,32 @@ def test_cboe_chain_requires_asof():
     p = {"data": {"options": [{"option": "QQQ261030C00500000"}]}}
     with pytest.raises(ValueError, match="asof"):
         parse_cboe_chain(p, "QQQ", None, None)
+
+
+def test_proshares_newest_first_fixture():
+    text = (
+        "Date,NAV,Shares Outstanding (000),AUM\n"
+        "2026-10-30,52.1,1000,1e9\n2026-10-29,51.9,1000,1e9\n2009-01-05,10.0,500,5e8\n"
+    )
+    rows = parse_proshares(text, "TQQQ", datetime(2026, 10, 30))
+    assert rows[-1]["date"] == date(2026, 10, 30)  # sorted, all rows returned
+
+
+def test_pc_series_id_map():
+    from inves_cog.flows.collectors import pc_series_id
+
+    assert pc_series_id("TOTAL PUT/CALL RATIO") == "cboe_pc_total"
+    assert pc_series_id("INDEX PUT/CALL RATIO") == "cboe_pc_index"
+    assert pc_series_id("SPX + SPXW PUT/CALL RATIO") == "cboe_pc_spx"
+    assert pc_series_id("CBOE VOLATILITY INDEX (VIX) PUT/CALL RATIO") == "cboe_pc_vix"
+    assert pc_series_id("SOMETHING ELSE").startswith("cboe_pc_other_")
+
+
+def test_parse_cboe_pc_stable_ids():
+    from inves_cog.flows.collectors import parse_cboe_pc
+
+    payload = {
+        "ratios": [{"name": "TOTAL PUT/CALL RATIO", "value": 0.94}, {"name": "INDEX PUT/CALL RATIO", "value": 1.23}]
+    }
+    rows = parse_cboe_pc(payload, date(2026, 10, 30), datetime(2026, 10, 30))
+    assert {r["series_id"] for r in rows} == {"cboe_pc_total", "cboe_pc_index"}

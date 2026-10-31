@@ -315,7 +315,7 @@ def parse_proshares(text, ticker, published_at):
                 "published_at": published_at,
             }
         )
-    return rows[-3:]
+    return sorted(rows, key=lambda r: r["date"])
 
 
 def _xlsx_rows(data):
@@ -374,9 +374,10 @@ def parse_ssga_xlsx(data, ticker, published_at):
     return rows[-3:]
 
 
-def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=None):
+def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=None, today=None):
     pub = published_at
     out = {}
+    latest_dates = {}
     for t in tickers or (DIREXION_TICKERS + PROSHARES_TICKERS + SSGA_TICKERS):
         if t in DIREXION_TICKERS:
             url, parse = DIREXION_URL.format(t=t), "direxion"
@@ -402,6 +403,7 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
                 if parse == "proshares"
                 else parse_ssga_xlsx(body, t, pub)
             )
+            rows = sorted(rows, key=lambda r: r["date"])[-3:]
             if connection is not None:
                 save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), body, connection)
                 if rows:
@@ -411,19 +413,25 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
             log.warning("etf %s failed: %r", t, exc)
             out[t] = 0
     if connection is not None:
+        prev_td = today - timedelta(days=1) if today else None
+        if prev_td:
+            while prev_td.weekday() >= 5:
+                prev_td -= timedelta(days=1)
         for issuer, tickers in (
             ("Flows:ETFShares:Direxion", [t for t in out if t in DIREXION_TICKERS]),
             ("Flows:ETFShares:ProShares", [t for t in out if t in PROSHARES_TICKERS]),
             ("Flows:ETFShares:SSGA", [t for t in out if t in SSGA_TICKERS]),
         ):
             failed = [t for t in tickers if out[t] == 0]
+            stale = [t for t in tickers if latest_dates.get(t) and latest_dates[t] < prev_td]
+            note = ("failed: " + ",".join(failed) if failed else "") + (" stale:" + ",".join(stale) if stale else "")
             record_health(
                 connection,
                 issuer,
-                not failed,
+                not failed and not stale,
                 pub,
                 sum(out[t] for t in tickers),
-                "failed: " + ",".join(failed) if failed else "",
+                note.strip()[:500],
             )
     return out
 
@@ -431,15 +439,44 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
 CBOE_PC_URL = "https://cdn.cboe.com/data/us/options/market_statistics/daily/{day}_daily_options"
 
 
+_PC_SERIES = {
+    "TOTAL PUT/CALL RATIO": "cboe_pc_total",
+    "INDEX PUT/CALL RATIO": "cboe_pc_index",
+    "EQUITY PUT/CALL RATIO": "cboe_pc_equity",
+    "EXCHANGE TRADED PRODUCTS PUT/CALL RATIO": "cboe_pc_etp",
+    "SPX + SPXW PUT/CALL RATIO": "cboe_pc_spx",
+    "CBOE VOLATILITY INDEX (VIX) PUT/CALL RATIO": "cboe_pc_vix",
+    "OEX PUT/CALL RATIO": "cboe_pc_oex",
+}
+_PC_NAMES_ZH = {
+    "cboe_pc_total": "全市场看跌看涨比",
+    "cboe_pc_index": "指数看跌看涨比",
+    "cboe_pc_equity": "股票看跌看涨比",
+    "cboe_pc_etp": "ETP 看跌看涨比",
+    "cboe_pc_spx": "SPX 看跌看涨比",
+    "cboe_pc_vix": "VIX 看跌看涨比",
+    "cboe_pc_oex": "OEX 看跌看涨比",
+}
+
+
+def pc_series_id(name):
+    """Map a Cboe ratios[] name to a stable series id."""
+    n = (name or "").strip().upper()
+    if n in _PC_SERIES:
+        return _PC_SERIES[n]
+    slug = re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_")
+    return f"cboe_pc_other_{slug}" if slug else None
+
+
 def parse_cboe_pc(payload, obs_date, published_at):
-    """Cboe daily market_statistics ratios[] → observations rows."""
+    """Cboe daily market_statistics ratios[] → observations rows (stable ids)."""
     out = []
     for r in (payload or {}).get("ratios") or []:
-        name = (r.get("name") or "").strip().lower().replace(" ", "_").replace("/", "_")
+        name = (r.get("name") or "").strip().upper()
+        series = pc_series_id(name)
         val = r.get("value")
-        if not name or val is None:
+        if not series or val is None:
             continue
-        series = f"cboe_pc_{re.sub(r'[^a-z0-9_]+', '', name)}"
         try:
             out.append(
                 {
@@ -470,7 +507,7 @@ def collect_cboe_pc(http, connection, day, raw_dir, published_at=None):
                 catalog = [
                     {
                         "series_id": x["series_id"],
-                        "name_zh": x["series_id"],
+                        "name_zh": _PC_NAMES_ZH.get(x["series_id"], x["series_id"]),
                         "unit": "ratio",
                         "frequency": "daily",
                         "source": "Cboe",
