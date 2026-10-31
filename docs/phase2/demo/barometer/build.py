@@ -36,6 +36,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}.red{color:#ef5a4a}.grn{
 .chips span{display:inline-block;padding:1px 8px;border-radius:10px;margin:3px 4px 0 0;font-size:11.5px;border:1px solid var(--line);color:var(--ink2)}.chips span.on{background:#8f2a24;border-color:#ef5a4a;color:#fff}
 .liq{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}.liq div{text-align:center;flex:1;font-size:12px;color:var(--ink2);padding:6px;border-radius:8px}.liq div.on{color:#fff;background:#2a2f36;box-shadow:0 0 0 1px var(--gold) inset}
 #chart{height:430px}
+.lev{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.lv2{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#0f1317}.lv2 .t{font-size:12px;color:var(--ink2)}.lv2 .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}.lv2 .s{font-size:11.5px;color:#8b877c;line-height:1.5}.lv2.hot{border-color:#8f2a24}.lv2.hot .v{color:#ef5a4a}.lv2.warm .v{color:#f29b38}.lv2.miss .v{color:#5a5650}
 .note{font-size:11.5px;color:var(--ink2);margin-top:8px;line-height:1.7}
 .foot{text-align:center;color:var(--ink2);font-size:12px;margin:22px 0 6px;font-family:"Songti SC",serif;letter-spacing:1px}
 details summary{cursor:pointer;color:var(--ink2)}
@@ -54,8 +55,9 @@ details summary{cursor:pointer;color:var(--ink2)}
  <div class="card"><h4><em>2</em>放大器：离被迫卖出多远</h4><div id="amp"></div><div style="margin-top:10px;font-size:12px;color:var(--ink2)">被迫卖出的痕迹（计入恐惧侧“去杠杆”方面）</div><div id="fp"></div></div>
  <div class="card"><h4><em>3</em>流动性与估值（背景）</h4><div class="liq" id="liq"></div><div id="bg"></div></div>
 </div>
-<div class="card" style="margin-top:16px"><h4><em>4</em>钟摆轨迹 2018 至今 <span style="font-size:12px;color:var(--ink2);font-weight:400">上：QQQ（对数）；下：两侧综合读数（0–100），红色向上为贪婪侧，绿色向下为恐惧侧。默认显示近 3 年，可拖动或缩放到 2018 年；点击任一天查看当天。</span></h4><div id="chart"></div></div>
-<div class="card" style="margin-top:16px"><h4><em>5</em>历次行情对照</h4><table id="ep"><thead><tr><th>时段</th><th>行情</th><th>摆到最远</th><th>阶段分布（天）</th></tr></thead><tbody></tbody></table></div>
+<div class="card" style="margin-top:16px"><h4><em>4</em>资金与杠杆</h4><div class="lev" id="lev"></div><div class="note" id="levn"></div></div>
+<div class="card" style="margin-top:16px"><h4><em>5</em>钟摆轨迹 2018 至今 <span style="font-size:12px;color:var(--ink2);font-weight:400">上：QQQ（对数）；下：两侧综合读数（0–100），红色向上为贪婪侧，绿色向下为恐惧侧。默认显示近 3 年，可拖动或缩放到 2018 年；点击任一天查看当天。</span></h4><div id="chart"></div></div>
+<div class="card" style="margin-top:16px"><h4><em>6</em>历次行情对照</h4><table id="ep"><thead><tr><th>时段</th><th>行情</th><th>摆到最远</th><th>阶段分布（天）</th></tr></thead><tbody></tbody></table></div>
 <div class="card" style="margin-top:16px"><details><summary>计算口径</summary><div class="note">
 <b>读数怎么来</b>：两侧各由五个方面组成，每个方面包含 3–5 个指标。每个指标按事先写定的“平常值 → 极端值”线性折算成 0–100（例如 VIX 15 记 0、45 记 100，中间按比例）；方面分 = 所含指标平均；综合读数 = 五个方面平均。没有任何单一指标能单独推高或拉低读数，也没有升降档、出清确认之类的人工规则：底层数据回到平常，读数当天就随之回落，仍在异常就继续保持。<br>
 <b>恐惧侧</b>：下跌冲击（单日跌幅相当于平时波动的倍数、5 日跌幅、距 63 日高点回撤）、恐慌情绪（VIX、VIX/VIX3M 期限、VIX 5 日涨幅）、债市信用（MOVE、10 年美债 10 日变化、高收益债相对国债）、超卖扩散（行业跌破 50 日线比例、5 日行业下跌占比、RSI 超卖）、去杠杆（动量股相对大盘、TQQQ 5 日、股债同跌、股票黄金比特币同跌、日元急升）。<br>
@@ -107,8 +109,23 @@ function drawQuad(i){const r=R[i],W=360,H=250,x0=40,y0=16,w=300,h=200,X=v=>x0+v/
  tr.forEach((t,k)=>g+=`<circle cx="${X(t.sh)}" cy="${Y(t.ac)}" r="${k===tr.length-1?6:1.8}" fill="${k===tr.length-1?'#fff':'#d6ad5f'}" opacity="${k===tr.length-1?1:0.35+0.6*k/tr.length}"/>`);
  document.getElementById('quad').innerHTML=g;
  document.getElementById('natn').innerHTML=(r.nat?`<b style="color:#e9b34a">${r.nat}</b><br>`:'')+`当天短期热度 ${f(r.sh,0)}、堆积程度 ${f(r.ac,0)}；金色轨迹为近 40 个交易日。熊市反弹落在右下：短期涨得猛，但杠杆和获利盘都不多。`;}
+
+function levCard(r){const m=r.m,a=r.asof||{},it=[];
+ const add=(t,v,s,cls)=>it.push(v==='缺'?`<div class="lv2 miss"><div class="t">${t}</div><div class="v">缺</div><div class="s">${s}</div></div>`:`<div class="lv2 ${cls||''}"><div class="t">${t}</div><div class="v">${v}</div><div class="s">${s}</div></div>`);
+ const rb=m['杠杆ETF调仓亿'];add('杠杆 ETF 收盘调仓',rb==null?'缺':`${rb>0?'买入':'卖出'} ${f(Math.abs(rb),0)} 亿美元`,'三倍/两倍多空 ETF 收盘前被迫调仓的估算额；下跌日为卖出',rb<=-60?'hot':rb<=-30?'warm':'');
+ const lf=m['杠杆ETF净申购20日%'];add('杠杆 ETF 净申购（20 日）',lf==null?'缺':`${s(lf)}%`,`占规模；指数在跌而申购增 = 散户加杠杆抄底`,lf>=8?'hot':lf>=4?'warm':'');
+ const sf=m['SPDR资金5日%'];add('SPY 与行业 SPDR 资金（5 日）',sf==null?'缺':`${s(sf,2)}%`,'占规模；负为赎回',sf<=-1.5?'hot':sf<=-0.7?'warm':'');
+ const ln=m['杠杆基金净头寸%'],l4=m['杠杆基金4周变化'];add('杠杆基金期货净头寸',ln==null?'缺':`${s(ln)}%`,`纳指+标普期货，占持仓；4 周 ${s(l4)} 个百分点 · 截至 ${a.cftc||'—'}（周报，延时 3 天）`,l4<=-8?'hot':l4<=-4?'warm':'');
+ const am=m['资管净多%'];add('资管期货净多',am==null?'缺':`${f(am)}%`,`5 年 ${f(m['资管净多分位'],0)} 分位 · 截至 ${a.cftc||'—'}`,m['资管净多分位']>=95?'hot':m['资管净多分位']>=85?'warm':'');
+ const mg=m['融资余额亿'];add('融资余额',mg==null?'缺':`${f(mg/10000,2)} 万亿`,`同比 ${s(m['融资余额同比%'])}% · 截至 ${a.margin?a.margin.slice(0,7):'—'}（月度，约滞后 3 周）`,m['融资余额同比%']>=35?'hot':m['融资余额同比%']>=20?'warm':'');
+ const so=m['SOFR-IORB基点'];add('回购利率 − 准备金利率',so==null?'缺':`${s(so,0)} 基点`,'为正说明回购市场资金偏紧',so>=10?'hot':so>=3?'warm':'');
+ const nl=m['净流动性4周%'];add('美元净流动性（4 周）',nl==null?'缺':`${s(nl)}%`,'美联储资产 − 财政部现金 − 逆回购',nl<=-3?'hot':nl<=-1.5?'warm':'');
+ const pc=m['个股看跌看涨5日'];add('个股看跌看涨（5 日均）',pc==null?'缺':f(pc,2),'Cboe 个股期权；高为避险、低为追涨',pc==null?'miss':pc>=0.8?'hot':pc<=0.45?'warm':'');
+ add('做市商 Gamma / 0DTE / 看涨墙','缺','期权全链历史需购买；生产每日采集上线后从当天起积累','miss');
+ document.getElementById('lev').innerHTML=it.join('');
+ document.getElementById('levn').innerHTML='红色：处于历史上少见的压力或堆积；橙色：偏高。周报、月报按公布日计入，不提前使用。';}
 function show(d){let i=byD[d];if(i==null){const ks=Object.keys(byD).filter(k=>k<=d);i=byD[ks[ks.length-1]];}
- const r=R[i],m=r.m,st=r.st+3,fi=lvl(r.fl),gi=lvl(r.gl);document.getElementById('day').value=r.d;drawPend(r);drawQuad(i);
+ const r=R[i],m=r.m,st=r.st+3,fi=lvl(r.fl),gi=lvl(r.gl);document.getElementById('day').value=r.d;drawPend(r);drawQuad(i);levCard(r);
  const both=fi>=2&&gi>=2;
  document.getElementById('stage').innerHTML=`<div class="n" style="color:${SC[st]}">${ST[st][0]}</div><div class="d">${r.d} · ${ST[st][1]}</div>`+(both?`<div class="warn">两侧同时发热 · 剧烈摆动</div>`:'');
  document.getElementById('fear').innerHTML=`<h3>恐惧侧 · 压力</h3><div class="k">下跌、恐慌、债市、超卖、去杠杆</div><div class="lv" style="color:${fi>=2?FC[fi]:'#cfcabd'}"><span class="num">${f(r.F,0)}<small>/100</small></span> ${TN[fi]}</div>${gauge(r.F,FB,FC,TN)}${dims(r.FD,'#2fbf71')}<div class="why" style="margin-top:8px">${whyF(r)}</div>`;

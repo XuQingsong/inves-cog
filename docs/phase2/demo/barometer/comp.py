@@ -11,6 +11,7 @@ AI=['NVDA','AMD','AVGO','MRVL','TSM','ASML','AMAT','LRCX','KLAC','MU','SNDK','WD
 ma=lambda p,n:p.rolling(n).mean()
 def sc(x,lo,hi):  # 平常值 lo → 0，极端值 hi → 100
     return ((x-lo)/(hi-lo)*100).clip(0,100)
+pct=lambda s:s.rolling(1260,min_periods=504).apply(lambda x:(x[:-1]<x[-1]).mean()*100 if not np.isnan(x[-1]) else np.nan,raw=True)
 def rsi(p,n=14):
     d=p.diff(); return 100-100/(1+d.clip(lower=0).rolling(n).mean()/(-d.clip(upper=0)).rolling(n).mean())
 M={}
@@ -40,6 +41,60 @@ for w in (20,50,200): M[f'SMH距{w}日线']=(SMH/ma(SMH,w)-1)*100
 M['SMH相对QQQ20d']=M['SMH20d']-M['QQQ_20d']
 up=(Q.pct_change()>0).astype(float); M['QQQ15日上涨天数']=up.rolling(15).sum()
 M=pd.DataFrame(M)
+
+# ---------- 资金与杠杆（按公布时点对齐到交易日） ----------
+FD='flows/'
+def onidx(s,lag_days=0):   # s: 以“数据所属日”为索引；lag_days: 公布滞后的自然日
+    s=s.dropna().sort_index(); s.index=s.index+pd.Timedelta(days=lag_days)
+    return s.reindex(idx.union(s.index)).ffill().reindex(idx)
+E=pd.read_csv(FD+'etf.csv',parse_dates=['date']).dropna(subset=['aum','nav'])
+def etf(t): return E[E.ticker==t].drop_duplicates('date').set_index('date').sort_index()
+def flow(t):   # 资金进出 = 规模变化 − 净值变化带来的规模变化（不受拆分影响）
+    d=etf(t); return (d.aum-d.aum.shift(1)*d.nav/d.nav.shift(1))
+LEV={'TQQQ':(3,Q),'UPRO':(3,S),'QLD':(2,Q),'SSO':(2,S),'USD':(2,SMH),'SQQQ':(-3,Q),'SPXU':(-3,S),'QID':(-2,Q),'SDS':(-2,S)}
+reb=0; levflow=0; levaum=0
+for t,(L,u) in LEV.items():
+    a=onidx(etf(t).aum); reb=reb+(a.shift(1)*L*(L-1)*u.pct_change()).fillna(0)
+    if L>0: levflow=levflow+onidx(flow(t)).fillna(0); levaum=levaum+a.fillna(0)
+M.loc[:,'杠杆ETF调仓亿']=reb/1e8
+M.loc[:,'杠杆ETF净申购20日%']=levflow.rolling(20).sum()/levaum.shift(20)*100
+M.loc[:,'TQQQ份额']=onidx(etf('TQQQ').aum/etf('TQQQ').nav)
+spd=['SPY','XLK','XLY','XLF','XLE','XLI','XLV','XLP','XLU','XLB','XLRE','XLC']
+sf=sum(onidx(flow(t)).fillna(0) for t in spd); sa=sum(onidx(etf(t).aum).fillna(0) for t in spd)
+M.loc[:,'SPDR资金5日%']=sf.rolling(5).sum()/sa.shift(5)*100
+C=pd.read_csv(FD+'cftc.csv'); C['d']=pd.to_datetime(C.report_date_as_yyyy_mm_dd)
+def cf(mk,col):
+    x=C[C.market_and_exchange_names.str.startswith(mk)].groupby('d')[[col,'open_interest_all']].sum()
+    return x
+nets=[];am=[]
+for mk in ['NASDAQ-100 Consolidated','S&P 500 Consolidated']:
+    x=C[C.market_and_exchange_names.str.startswith(mk)].set_index('d').sort_index()
+    for k in ['lev_money_positions_long','lev_money_positions_short','asset_mgr_positions_long','asset_mgr_positions_short','open_interest_all']: x[k]=pd.to_numeric(x[k])
+    nets.append((x.lev_money_positions_long-x.lev_money_positions_short)/x.open_interest_all*100); am.append((x.asset_mgr_positions_long-x.asset_mgr_positions_short)/x.open_interest_all*100)
+lev=sum(nets)/2; amn=sum(am)/2
+M.loc[:,'杠杆基金净头寸%']=onidx(lev,3); M.loc[:,'杠杆基金4周变化']=onidx(lev-lev.shift(4),3); M.loc[:,'资管净多%']=onidx(amn,3)
+M.loc[:,'资管净多分位']=pct(M.loc[:,'资管净多%'])
+_ld=lev.index.to_series(); ASOF={'cftc':onidx(_ld,3)}
+_mg=pd.read_excel(FD+'margin.xlsx'); _mg['d']=pd.to_datetime(_mg['Year-Month'])+pd.offsets.MonthEnd(0); ASOF['margin']=onidx(pd.Series(_mg['d'].values,index=_mg['d'].values).sort_index(),21)
+rd=lambda f:pd.read_csv(FD+f,index_col=0,parse_dates=True,na_values='.').iloc[:,0]
+ior=pd.concat([rd('IOER.csv'),rd('IORB.csv')]).sort_index(); ior=ior[~ior.index.duplicated(keep='last')]
+M.loc[:,'SOFR-IORB基点']=onidx((rd('SOFR.csv')-ior.reindex(rd('SOFR.csv').index).ffill())*100,1)
+walcl=rd('WALCL.csv'); tga=rd('WTREGEN.csv'); rrp=rd('RRPONTSYD.csv')
+nl=(walcl-tga.reindex(walcl.index).ffill()-rrp.reindex(walcl.index).ffill()*1000)   # 百万美元
+M.loc[:,'净流动性4周%']=onidx((nl/nl.shift(4)-1)*100,1)
+mg=pd.read_excel(FD+'margin.xlsx'); mg['d']=pd.to_datetime(mg['Year-Month'])+pd.offsets.MonthEnd(0)
+mg=mg.set_index('d').sort_index().iloc[:,1]
+M.loc[:,'融资余额同比%']=onidx((mg/mg.shift(12)-1)*100,21); M.loc[:,'融资余额亿']=onidx(mg/100,21)
+import json as _j
+pa=pd.read_csv(FD+'equitypc.csv',skiprows=2); pa.columns=[c.strip() for c in pa.columns]; pa=pd.Series(pd.to_numeric(pa['P/C Ratio'],errors='coerce').values,index=pd.to_datetime(pa['DATE'].str.strip(),errors='coerce'))
+pdl={}
+import glob as _g
+for l in (l for fn in _g.glob(FD+'pc_*.jsonl') for l in open(fn)):
+    r=_j.loads(l); v=r['r'].get('EQUITY PUT/CALL RATIO')
+    if v: pdl[pd.Timestamp(r['d'])]=float(v)
+pc=pd.concat([pa[pa.index<'2019-10-07'],pd.Series(pdl)]).sort_index().dropna()
+M.loc[:,'个股看跌看涨5日']=pc.reindex(idx).rolling(5,min_periods=3).mean()
+M.loc[:,'个股看跌看涨覆盖']=pc.reindex(idx).notna().astype(float)
 worst=lambda a,b_:pd.concat([a,b_],axis=1).max(axis=1)
 mean=lambda *xs:pd.concat(xs,axis=1).mean(axis=1)   # 缺数据的指标不计入
 # ---------- 恐惧侧：五个方面 ----------
@@ -53,12 +108,13 @@ F['超卖扩散']=mean(sc(M['行业破50日线'],30,100),sc(M['行业5日下跌�
 sb=pd.concat([-M.SPY10d,-M.TLT10d],axis=1).min(axis=1)          # 股债同跌：取两者跌幅较小者
 co=pd.concat([-M.SPY_5d/5,-M['黄金5d']/3,-M['比特币5d']/12],axis=1).min(axis=1)  # 股票、黄金、比特币同跌
 F['去杠杆']=mean(sc(-M['MTUM/SPY5d'],0,6),sc(-M.TQQQ5d,0,30),sc(sb,0,5),sc(co,0,1.5),sc(M['日元5d'],0,6))
+F['资金与杠杆']=mean(sc(-M['杠杆ETF调仓亿'],10,120),sc(-M['SPDR资金5日%'],0,2.5),sc(-M['杠杆基金4周变化'],0,10),sc(M['SOFR-IORB基点'],0,15),sc(-M['净流动性4周%'],0,5),sc(M['个股看跌看涨5日'],0.6,0.95))
 F=pd.DataFrame(F); FI=F.mean(axis=1)
 # ---------- 贪婪侧：五个方面 ----------
 G={}
 G['超买']=mean(sc(M.QQQ_RSI,55,85),sc(M.SMH_RSI,55,88),sc(M['QQQ距20日线'],0,8),sc(M['SMH距20日线'],0,18))
 G['连续上涨']=mean(sc(M.QQQ_20d,2,12),sc(M.SMH20d,5,35),sc(M['QQQ15日上涨天数'],8,13))
-G['多头与杠杆']=mean(sc(M.TQQQ60d,10,90),sc(M.SOXL60d,20,250),sc(-M.VIX,-18,-11))
+G['多头与杠杆']=mean(sc(M.TQQQ60d,10,90),sc(M.SOXL60d,20,250),sc(-M.VIX,-18,-11),sc(M['杠杆ETF净申购20日%'],0,25),sc(M['融资余额同比%'],10,40),sc(M['资管净多分位'],60,100),sc(-M['个股看跌看涨5日'],-0.6,-0.42))
 G['获利盘']=mean(sc(M['QQQ距200日线'],5,25),sc(M['SMH距200日线'],10,70),sc(M['AI120日涨超50%占比'],0,60))
 G['情绪普涨']=mean(sc(M['AI站上50日线'],60,100),sc(M['AI20日涨超25%占比'],0,50),sc(M['SMH相对QQQ20d'],0,20))
 G=pd.DataFrame(G); GI=G.mean(axis=1)
@@ -92,7 +148,7 @@ for d in M.loc['2018-01-01':].index:
     rows.append({'d':d.strftime('%Y-%m-%d'),'F':round(float(FI[d]),1),'G':round(float(GI[d]),1),'fl':round(float(f),2),'gl':round(float(g),2),
       'st':stage(f,g),'pc':round(float(np.clip(max(g-1,0)-max(f-1,0),-3.4,3.4)),2),'sh':round(float(SH[d]),1),'ac':round(float(AC[d]),1),'nat':nature(GI[d],SH[d],AC[d]),
       'FD':{k:(None if pd.isna(F.loc[d,k]) else round(float(F.loc[d,k]))) for k in F},'GD':{k:(None if pd.isna(G.loc[d,k]) else round(float(G.loc[d,k]))) for k in G},
-      'm':{k:(None if pd.isna(m[k]) else round(float(m[k]),2)) for k in cols}})
+      'm':{k:(None if pd.isna(m[k]) else round(float(m[k]),2)) for k in cols},'asof':{k:(None if pd.isna(v[d]) else v[d].strftime('%Y-%m-%d')) for k,v in ASOF.items()}})
 cape=pd.read_csv('shiller-pe.csv'); cape['Date']=pd.to_datetime(cape['Date']); cape=cape.set_index('Date')['Value'].astype(float).sort_index()
 cape=cape.reindex(idx.union(cape.index)).ffill().reindex(idx)
 fr=pd.read_csv('fred.csv',index_col=0,parse_dates=True)['DGS2']; fr=fr.reindex(idx.union(fr.index)).ffill().reindex(idx)
