@@ -451,9 +451,13 @@ var Market3 = {
     Market3._line.setData([]);
     if (k === "1日") {
       Market3._candle.setData([]); Market3._vol.setData([]);
-      Market3._line.setData(intra.map(function (p) {
-        return { time: Math.floor(new Date(p.t).getTime() / 1000), value: p.p };
-      }));
+      var seen = {}, pts = [];
+      intra.forEach(function (p) {
+        var ts = Math.floor(new Date(p.t).getTime() / 1000);
+        if (seen[ts]) return; seen[ts] = 1; pts.push({ time: ts, value: p.p });
+      });
+      pts.sort(function (a, b) { return a.time - b.time; });
+      Market3._line.setData(pts);
     } else {
       var n = { "5日": 5, "1月": 22, "6月": 132, "1年": 252 }[k] || rows.length;
       var sub = rows.slice(-n);

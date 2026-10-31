@@ -242,8 +242,7 @@ def _market(payload):
     return (
         _tape_module(payload)
         + _crumb(f"市场总览 / {_text(payload.get('date'))}")
-        + (_state_head(payload) or f"<h1>判断：{_text(judgment)}</h1>")
-        + f'<p class="sub">{_text(_lead(payload))}</p>'
+        + (_state_head(payload) or f"<h1>判断：{_text(judgment)}</h1>" + f'<p class="sub">{_text(_lead(payload))}</p>')
         + _carry_banner(payload)
         + _highlights_module(payload)
         + _market3_module(payload)
@@ -2449,7 +2448,8 @@ def _state_head(payload):
         "方向由涨跌家数与领先板块决定；主因只取已对上事件的板块/市场异常，没有则写“原因未明”。"
     )
     return (
-        f'<h1 class="mono">{_text(st["sentence"])}</h1>'
+        f'<h1 class="state-h band-{_text(st.get("band") or "")}">{_text(st.get("title") or st["sentence"])}</h1>'
+        f'<p class="state-d">{_text(st.get("detail") or "")}</p>'
         f'<details class="dim small" style="margin:-6px 0 8px"><summary>依据与口径</summary>'
         f'<p style="margin:4px 0">{_text(detail)}</p></details>'
     )

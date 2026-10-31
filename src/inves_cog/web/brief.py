@@ -2187,11 +2187,13 @@ def _market_state(connection, day, payload, live):
     cause_txt = ""
     if band != "平静":
         cause_txt = "；主要来自 " + "；".join(c[:60] for c in causes) if causes else "；原因未明"
-    sentence = f"{band} · {direction}：{part('纳指', qqq)}，{part('标普', spy)}{focus}{cause_txt}"
+    detail = f"{part('纳指', qqq)}，{part('标普', spy)}{focus}{cause_txt}"
     return {
         "band": band,
         "direction": direction,
-        "sentence": sentence,
+        "title": f"{band} · {direction}",
+        "detail": detail,
+        "sentence": f"{band} · {direction}：{detail}",
         "spy_sig": spy.get("sig"),
         "qqq_sig": qqq.get("sig"),
         "spy_ret": s_ret,
