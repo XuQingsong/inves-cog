@@ -108,3 +108,14 @@ def test_collect_failure_records_health(tmp_path):
     assert out["rows"] == 0 and "error" in out
     calls = [c.args[0] for c in conn.execute.call_args_list if "source_health" in c.args[0]]
     assert calls
+
+
+def test_parse_occ_oi_real_csv():
+    text = ("Daily Open Interest - October 2026\n"
+            "Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
+            ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
+            '10/30/2026,"359,968,983","266,052,729","626,021,712","22,764,890","21,558,366","44,323,256","0","0","0","402,809","670,747,777",\n')
+    rows = parse_occ_oi_summary(text, date(2026, 10, 30), date(2026, 10, 30))
+    by = {r["series_id"]: r["value"] for r in rows}
+    assert by["occ_oi_equity_calls"] == 359_968_983 and by["occ_oi_index_puts"] == 21_558_366
+    assert by["occ_oi_total"] == 670_747_777

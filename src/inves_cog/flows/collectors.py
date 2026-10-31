@@ -25,9 +25,10 @@ def parse_cboe_chain(payload, underlying, max_days=60, today=None):
     """data.options[] → option_chain rows. Option sym e.g. SPY  251219C00500000."""
     data = (payload or {}).get("data") or {}
     stamp = data.get("timestamp") or data.get("current_time")
-    if not stamp:
-        return []
-    snap = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+    snap = (
+        datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+        if stamp else (datetime.combine(today, datetime.min.time()) if today else datetime.now())
+    )
     rows = []
     pat = re.compile(r"([CP])(\d+\.?\d*)$")
     for opt in data.get("options") or []:
@@ -42,12 +43,14 @@ def parse_cboe_chain(payload, underlying, max_days=60, today=None):
             continue
         if today and (expiry - today).days > max_days:
             continue
+        if float(strike) > 10000:
+            strike = float(strike) / 1000.0
         rows.append(
             {
                 "underlying": underlying.lstrip("_"),
                 "snapshot_at": snap,
                 "expiry": expiry,
-                "strike": float(strike) / 1000.0 if float(strike) > 10000 else float(strike),
+                "strike": float(strike),
                 "cp": cp,
                 "oi": opt.get("open_interest"),
                 "volume": opt.get("volume"),
@@ -136,34 +139,21 @@ OCC_SERIES_URL = "https://marketdata.theocc.com/series-search?symbolType=U&symbo
 
 
 def parse_occ_oi_summary(text, obs_date, published_at):
-    """Monthly aggregate csv → observations rows (equity/index/debt calls/puts)."""
+    """OCC daily-open-interest csv → observations rows (equity/index/debt calls/puts)."""
     out = []
-    # locate rows by first-cell label
+    labels = {1: "occ_oi_equity_calls", 2: "occ_oi_equity_puts",
+              4: "occ_oi_index_calls", 5: "occ_oi_index_puts",
+              7: "occ_oi_debt_calls", 8: "occ_oi_debt_puts",
+              11: "occ_oi_total"}
     for row in csv.reader(io.StringIO(text)):
         cells = [c.strip() for c in row]
-        label = cells[0].lower() if cells else ""
-        for key, series in (
-            ("equity calls", "occ_oi_equity_calls"),
-            ("equity puts", "occ_oi_equity_puts"),
-            ("index calls", "occ_oi_index_calls"),
-            ("index puts", "occ_oi_index_puts"),
-            ("debt calls", "occ_oi_debt_calls"),
-            ("debt puts", "occ_oi_debt_puts"),
-        ):
-            if label.startswith(key):
-                for c in cells[1:]:
-                    v = c.replace(",", "")
-                    if v.replace(".", "").isdigit():
-                        out.append(
-                            {
-                                "series_id": series,
-                                "obs_date": obs_date,
-                                "value": float(v),
-                                "published_at": published_at,
-                                "vintage": "initial",
-                            }
-                        )
-                        break
+        if not cells or not re.match(r"\d{2}/\d{2}/\d{4}", cells[0]):
+            continue
+        obs = datetime.strptime(cells[0], "%m/%d/%Y").date()
+        for idx, series in labels.items():
+            if len(cells) > idx and cells[idx].replace(",", "").isdigit():
+                out.append({"series_id": series, "obs_date": obs, "value": float(cells[idx].replace(",", "")),
+                            "published_at": published_at, "vintage": "initial"})
     return out
 
 
