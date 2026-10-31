@@ -16,7 +16,7 @@ from inves_cog.flows.collectors import (
     collect_occ,
     collect_occ_series,
 )
-from inves_cog.flows.store import DEFAULT_RAW, polite_http
+from inves_cog.flows.store import DEFAULT_RAW, polite_http, record_health_agg
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
@@ -109,7 +109,9 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
             xkey = f"occ_xchk:{today}"
             if xkey not in state:
                 syms = XCHK_SYMS + [t for t in _universe() if t not in XCHK_SYMS]
-                result[xkey] = [collect_occ_series(http, conn, s, raw_dir, local) for s in syms]
+                res = [collect_occ_series(http, conn, s, raw_dir, local) for s in syms]
+                result[xkey] = res
+                record_health_agg(conn, "Flows:OCCSeriesXchk", res, local)
                 state[xkey] = True  # note: _SPX dropped (no series-search page)
         if not is_td:
             _save_state(state)
@@ -122,13 +124,17 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
         if cur:
             key = f"intra:{today}:{cur}"
             if key not in state:
-                result[key] = [collect_cboe_chain(http, conn, s, raw_dir, 60, today, local) for s in INDEX_SYMS]
+                res = [collect_cboe_chain(http, conn, s, raw_dir, 60, today, local) for s in INDEX_SYMS]
+                result[key] = res
+                record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
         if hm >= "16:30":
             key = f"eod:{today}"
             if key not in state:
                 universe = INDEX_SYMS + [t for t in _universe() if t not in INDEX_SYMS]
-                result[key] = [collect_cboe_chain(http, conn, s, raw_dir, None, today, local) for s in universe]
+                res = [collect_cboe_chain(http, conn, s, raw_dir, None, today, local) for s in universe]
+                result[key] = res
+                record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
         if hm >= "19:00":
             key = f"cboe_pc:{today}"

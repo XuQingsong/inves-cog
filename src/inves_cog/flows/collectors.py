@@ -33,7 +33,9 @@ def parse_cboe_chain(payload, underlying, max_days=60, today=None, asof=None):
             except ValueError:
                 pass
     if snap is None:
-        snap = datetime.combine(today or date.today(), datetime.min.time(), tzinfo=NY)
+        if today is None:
+            raise ValueError("no chain timestamp and no asof/today injected")
+        snap = datetime.combine(today, datetime.min.time(), tzinfo=NY)
     if snap.tzinfo is None:
         snap = snap.replace(tzinfo=NY)
     rows = []
@@ -98,7 +100,7 @@ OCC_VOL_URL = (
 )
 OCC_OI_URL = "https://marketdata.theocc.com/daily-open-interest?reportDate={mdy}&action=download&format=csv"
 OCC_SERIES_URL = "https://marketdata.theocc.com/series-search?symbolType=U&symbol={sym}"
-_ACT = {"C": "C", "F": "F", "M": "M", "B": "F"}
+_ACT = {"C": "C", "F": "F", "M": "M"}
 
 
 def _mdy(v):
@@ -112,16 +114,19 @@ def _mdy(v):
 
 def parse_occ_volume(text):
     out = {}
+    skipped = 0
     for row in csv.DictReader(io.StringIO(text)):
         q, und = row.get("quantity"), (row.get("underlying") or "").strip()
         cp = (row.get("porc") or "").strip()[:1].upper()
         act = _ACT.get((row.get("actype") or "").strip().upper())
         day = _mdy(row.get("actdate"))
         if not (q and und and cp and act and day):
+            skipped += 1
             continue
         key = (day, und, act, cp)
         out[key] = out.get(key, 0) + int(float(q))
-    return [{"date": k[0], "underlying": k[1], "account_type": k[2], "cp": k[3], "quantity": v} for k, v in out.items()]
+    rows = [{"date": k[0], "underlying": k[1], "account_type": k[2], "cp": k[3], "quantity": v} for k, v in out.items()]
+    return rows, skipped
 
 
 def parse_occ_oi_summary(text, published_at):
@@ -201,8 +206,9 @@ def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None
             if connection is not None
             else {"raw_file_id": None}
         )
+        skipped = 0
         if kind == "volume":
-            rows = parse_occ_volume(text)
+            rows, skipped = parse_occ_volume(text)
             if connection is not None and rows:
                 upsert_many(connection, "option_volume_occ", list(rows[0].keys()), rows)
         else:
@@ -226,12 +232,13 @@ def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None
                 upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
         lat = time.monotonic() - t0
         if connection is not None:
-            record_health(connection, src, True, len(rows), str(day), lat, pub)
+            note = str(day) + (f" skipped:{skipped}" if kind == "volume" and skipped else "")
+            record_health(connection, src, True, pub, len(rows), note, lat)
         return {"date": str(day), "rows": len(rows)}
     except Exception as exc:
         src = "Flows:OCCVolume" if kind == "volume" else "Flows:OCCOpenInterest"
         if connection is not None:
-            record_health(connection, src, False, 0, f"{day} {exc!r}")
+            record_health(connection, src, False, pub, 0, f"{day} {exc!r}")
         log.warning("occ %s %s failed: %r", kind, day, exc)
         return {"date": str(day), "rows": 0, "error": str(exc)}
 
@@ -372,12 +379,11 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
     out = {}
     for t in tickers or (DIREXION_TICKERS + PROSHARES_TICKERS + SSGA_TICKERS):
         if t in DIREXION_TICKERS:
-            url, parse, src = DIREXION_URL.format(t=t), "direxion", "Flows:ETFShares:Direxion"
+            url, parse = DIREXION_URL.format(t=t), "direxion"
         elif t in PROSHARES_TICKERS:
-            url, parse, src = PROSHARES_URL.format(t=t), "proshares", "Flows:ETFShares:ProShares"
+            url, parse = PROSHARES_URL.format(t=t), "proshares"
         else:
-            url, parse, src = SSGA_URL.format(t=t.lower()), "ssga", "Flows:ETFShares:SSGA"
-        t0 = time.monotonic()
+            url, parse = SSGA_URL.format(t=t.lower()), "ssga"
         try:
             if parse == "ssga":
                 import urllib.request
@@ -396,19 +402,29 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
                 if parse == "proshares"
                 else parse_ssga_xlsx(body, t, pub)
             )
-            lat = time.monotonic() - t0
             if connection is not None:
                 save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), body, connection)
                 if rows:
                     upsert_many(connection, "etf_daily", list(rows[0].keys()), rows, "update")
             out[t] = len(rows)
-            if connection is not None:
-                record_health(connection, src, True, len(rows), t, lat, pub)
         except Exception as exc:
             log.warning("etf %s failed: %r", t, exc)
             out[t] = 0
-            if connection is not None:
-                record_health(connection, src, False, 0, f"{t} {exc!r}", now=pub)
+    if connection is not None:
+        for issuer, tickers in (
+            ("Flows:ETFShares:Direxion", [t for t in out if t in DIREXION_TICKERS]),
+            ("Flows:ETFShares:ProShares", [t for t in out if t in PROSHARES_TICKERS]),
+            ("Flows:ETFShares:SSGA", [t for t in out if t in SSGA_TICKERS]),
+        ):
+            failed = [t for t in tickers if out[t] == 0]
+            record_health(
+                connection,
+                issuer,
+                not failed,
+                pub,
+                sum(out[t] for t in tickers),
+                "failed: " + ",".join(failed) if failed else "",
+            )
     return out
 
 
@@ -465,10 +481,10 @@ def collect_cboe_pc(http, connection, day, raw_dir, published_at=None):
                     connection, "series_catalog", ["series_id", "name_zh", "unit", "frequency", "source"], catalog
                 )
                 upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
-            record_health(connection, "Flows:CboePC", True, len(rows), str(day), lat, published_at)
+            record_health(connection, "Flows:CboePC", True, published_at, len(rows), str(day), lat)
         return {"date": str(day), "rows": len(rows)}
     except Exception as exc:
         if connection is not None:
-            record_health(connection, "Flows:CboePC", False, 0, f"{day} {exc!r}", now=published_at)
+            record_health(connection, "Flows:CboePC", False, published_at, 0, f"{day} {exc!r}")
         log.warning("cboe pc %s failed: %r", day, exc)
         return {"date": str(day), "rows": 0, "error": str(exc)}

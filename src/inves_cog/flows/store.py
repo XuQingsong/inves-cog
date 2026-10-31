@@ -69,10 +69,10 @@ def upsert_many(connection, table, cols, rows, conflict="nothing"):
     return len(rows)
 
 
-def record_health(connection, source, ok, items=0, note="", latency=0.0, now=None):
-    """Upsert ingest.source_health like phase-1 write_health (no dup key)."""
+def record_health(connection, source, ok, now, items=0, note="", latency=0.0):
+    """Upsert ingest.source_health with tz-aware timestamps (phase-1 shape).
+    `now` is the injected clock time — required. Returns False on write error."""
     try:
-        stamp = now.strftime("%Y-%m-%d %H:%M:%S") if now else ""
         connection.execute(
             "INSERT INTO ingest.source_health "
             "(source,last_success_at,last_attempt_at,status,latency_sec,items_last_run,note,consecutive_failures) "
@@ -87,8 +87,8 @@ def record_health(connection, source, ok, items=0, note="", latency=0.0, now=Non
             "ELSE ingest.source_health.last_success_at END",
             (
                 source,
-                stamp if ok else None,
-                stamp,
+                now if ok else None,
+                now,
                 "ok" if ok else "degraded",
                 latency,
                 items,
@@ -96,5 +96,15 @@ def record_health(connection, source, ok, items=0, note="", latency=0.0, now=Non
                 0 if ok else 1,
             ),
         )
+        return True
     except Exception as exc:
-        log.warning("health write failed %r", exc)
+        log.error("health write failed for %s: %r", source, exc)
+        return False
+
+
+def record_health_agg(connection, source, results, now):
+    """One health row per run: degraded with failed symbols in note if any fail."""
+    failed = [r.get("symbol") or r.get("ticker") or "?" for r in results if "error" in r]
+    items = sum(r.get("rows", 0) for r in results)
+    note = "failed: " + ",".join(str(f) for f in failed) if failed else ""
+    return record_health(connection, source, not failed, now, items, note[:500])

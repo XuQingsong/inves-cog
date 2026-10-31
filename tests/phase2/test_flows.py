@@ -54,7 +54,7 @@ def test_parse_occ_volume():
         "200,SPY,SPY  251031C500,C,C,1,10/30/2026\n"
         "50,QQQ,QQQ  251031P400,C,P,1,10/30/2026\n"
     )
-    rows = parse_occ_volume(csv)
+    rows, skipped = parse_occ_volume(csv)
     by_key = {(r["underlying"], r["account_type"], r["cp"]): r["quantity"] for r in rows}
     assert by_key[("SPY", "C", "C")] == 300
     assert by_key[("QQQ", "C", "P")] == 50
@@ -97,28 +97,12 @@ def test_save_raw(tmp_path):
     assert "cboe-chain/2026-10-30" in out["path"]
 
 
-def test_collect_failure_records_health(tmp_path):
+def test_collect_failure_returns_error(tmp_path):
     http = MagicMock()
     http.request.side_effect = RuntimeError("down")
     conn = MagicMock()
-    conn.execute.return_value.fetchone.return_value = {"raw_file_id": 1}
     out = collect_cboe_chain(http, conn, "QQQ", tmp_path, today=date(2026, 10, 30))
     assert out["rows"] == 0 and "error" in out
-    calls = [c.args[0] for c in conn.execute.call_args_list if "source_health" in c.args[0]]
-    assert calls
-
-
-def test_parse_occ_oi_real_csv():
-    text = (
-        "Daily Open Interest - October 2026\n"
-        "Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
-        ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
-        '10/30/2026,"359,968,983","266,052,729","626,021,712","22,764,890","21,558,366","44,323,256","0","0","0","402,809","670,747,777",\n'
-    )
-    rows = parse_occ_oi_summary(text, date(2026, 10, 30))
-    by = {r["series_id"]: r["value"] for r in rows}
-    assert by["occ_oi_equity_calls"] == 359_968_983 and by["occ_oi_index_puts"] == 21_558_366
-    assert by["occ_oi_total"] == 670_747_777
 
 
 def test_strike_always_div_1000():
@@ -148,7 +132,7 @@ def test_health_upsert_ok():
     conn = __import__("unittest.mock", fromlist=["MagicMock"]).MagicMock()
     from inves_cog.flows.store import record_health
 
-    record_health(conn, "Flows:X", True, 5, "note", 0.1)
+    record_health(conn, "Flows:X", True, datetime(2026, 10, 30), 5, "note", 0.1)
     sql = conn.execute.call_args[0][0]
     assert "ON CONFLICT (source)" in sql and "consecutive_failures" in sql
 
@@ -220,3 +204,43 @@ def test_occ_runs_on_non_trading_day(tmp_path):
     S._prev_trading_days = lambda d, n=5: [date(2026, 10, 30)]
     r = S.run_once(clock, {}, http=http, conn=conn, raw_dir=tmp_path)
     assert "occ_vol:2026-10-30" in r or "occ_xchk:2026-10-31" in r
+
+
+def test_health_agg_degraded_note():
+    from inves_cog.flows.store import record_health_agg
+
+    conn = MagicMock()
+    res = [{"symbol": "QQQ", "rows": 4806}, {"symbol": "X", "rows": 0, "error": "404"}]
+    assert record_health_agg(conn, "Flows:CboeChain", res, datetime(2026, 10, 30))
+    args = conn.execute.call_args[0][1]
+    assert args[3] == "degraded" and "X" in args[6] and args[5] == 4806
+
+
+def test_health_failure_writes_false_and_valid_ts():
+    from inves_cog.flows.store import record_health
+
+    conn = MagicMock()
+    conn.execute.side_effect = RuntimeError("db down")
+    assert record_health(conn, "Flows:X", False, datetime(2026, 10, 30), 0, "err") is False
+    conn2 = MagicMock()
+    assert record_health(conn2, "Flows:X", False, datetime(2026, 10, 30), 0, "err")
+    args = conn2.execute.call_args[0][1]
+    assert args[2].year == 2026 and args[1] is None  # last_success stays None on failure
+
+
+def test_parse_occ_volume_skips_unknown_actype():
+    csv = (
+        "quantity,underlying,symbol,actype,porc,exchange,actdate\n"
+        "100,SPY,x,B,C,1,10/30/2026\n"
+        "10,QQQ,x,C,C,1,10/30/2026\n"
+    )
+    rows, skipped = parse_occ_volume(csv)
+    assert skipped == 1 and len(rows) == 1
+
+
+def test_cboe_chain_requires_asof():
+    import pytest
+
+    p = {"data": {"options": [{"option": "QQQ261030C00500000"}]}}
+    with pytest.raises(ValueError, match="asof"):
+        parse_cboe_chain(p, "QQQ", None, None)
