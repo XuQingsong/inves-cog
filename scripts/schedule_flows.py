@@ -20,7 +20,6 @@ from inves_cog.flows.store import DEFAULT_RAW, polite_http
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
-INDEX_SYMS = ["_SPX", "SPY", "QQQ", "IWM", "SMH"]
 STATE = Path("/home/claudeuser/inves-cog-data/flows/schedule_state.json")
 _UNIVERSE = Path(__file__).resolve().parents[1] / "config" / "universe.yaml"
 

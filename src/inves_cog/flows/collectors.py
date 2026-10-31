@@ -13,6 +13,7 @@ from inves_cog.flows.store import UA, record_health, save_raw, upsert_many
 from inves_cog.ingest.market import NY
 
 log = logging.getLogger(__name__)
+INDEX_SYMS = ["_SPX", "SPY", "QQQ", "IWM", "SMH"]
 CBOE_URL = "https://cdn.cboe.com/api/global/delayed_quotes/options/{sym}.json"
 
 
