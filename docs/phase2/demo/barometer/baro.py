@@ -15,7 +15,10 @@ M={}  # raw metrics for explanation
 for n,p in [('QQQ',Q),('SPY',S)]:
     r=p.pct_change(); M[n+'_1d']=r*100; M[n+'_sig']=(r/r.rolling(60).std().shift(1)); M[n+'_dd63']=(p/p.rolling(63).max()-1)*100; M[n+'_5d']=p.pct_change(5)*100
 def price(n):
-    return pd.concat([lv(-M[n+'_sig'],[1.5,2.5,4,6]),lv(-M[n+'_dd63'],[3,6,10,15]),lv(-M[n+'_5d'],[2.5,4,7,10])],axis=1).max(axis=1)
+    p=Q if n=='QQQ' else S
+    near_low=(p/p.rolling(10).min()-1)<=0.03          # 仍在 10 日低点 3% 以内 = 还在承压
+    dd=lv(-M[n+'_dd63'],[3,6,10,15]); dd=dd.where(near_low,dd.clip(upper=2))   # 已企稳：回撤再深最多偏紧张
+    return pd.concat([lv(-M[n+'_sig'],[1.5,2.5,4,6]),dd,lv(-M[n+'_5d'],[2.5,4,7,10])],axis=1).max(axis=1)
 D={}
 D['股价']=pd.concat([price('QQQ'),price('SPY')],axis=1).max(axis=1)
 M['VIX']=V; M['VIX_5d']=V.pct_change(5)*100; M['VIX/VIX3M']=V/V3
@@ -38,17 +41,30 @@ FP=pd.DataFrame({'动量股踩踏':M['MTUM/SPY5d']<=-3,'杠杆ETF重挫':M['TQQQ
 def agg(Dm):
     s=np.sort(Dm.fillna(0).values,axis=1); top,sec=s[:,-1],s[:,-2]
     return pd.Series(np.where(sec>=top-1,top,top-1),index=Dm.index)
-def hyst(raw,k=3):  # 修正1：升档立即，降档需连续k天低于当前档，降到这k天原始读数的最高值
-    vals=raw.fillna(0).values; out=[]; cur=None; below=0
+def settle(raw,clear):  # 升档立即；有“出清确认”时直接降到原始读数；否则每天最多降一档
+    vals=raw.fillna(0).values; cl=clear.reindex(raw.index).fillna(False).values; out=[]
     for i,v in enumerate(vals):
-        if cur is None or v>=cur: cur=v; below=0
-        else:
-            below+=1
-            if below>=k: cur=max(vals[i-k+1:i+1]); below=0
-        out.append(cur)
+        if not out or v>=out[-1] or cl[i]: out.append(v)
+        else: out.append(max(v,out[-1]-1))
     return pd.Series(out,index=raw.index)
 rawT=agg(D); rawT=rawT.where(FP.sum(axis=1)<2,np.maximum(rawT,3))
-T=hyst(rawT)
+up=(sp.pct_change()>0).sum(axis=1)/nn
+CL=pd.DataFrame({'广度推力日':(up>=9/11)&(S.pct_change()>=0.015),'VIX自峰值回落25%':V<=V.rolling(10).max()*0.75,'VIX期限恢复正常':M['VIX/VIX3M']<0.97,'自低点反弹5%未再创新低':(Q/Q.rolling(10).min()-1>=0.05)&(Q.rolling(3).min()>Q.rolling(10).min().shift(3))})
+clearT=CL.sum(axis=1)>=2
+shockT=(S.pct_change()<=-0.03)|(V.pct_change()>=0.20)|(Q<=Q.rolling(10).min().shift(1))   # 新冲击：大跌、VIX 急升或创 10 日新低
+def settle_t(raw):
+    vals=raw.fillna(0).values; cl=clearT.reindex(raw.index).fillna(False).values; sh=shockT.reindex(raw.index).fillna(False).values
+    out=[]; aft=[]; cleared=False; vix=V.reindex(raw.index).values
+    for i,v in enumerate(vals):
+        if sh[i]: cleared=False
+        if cl[i] and not sh[i]: cleared=True
+        if cleared: d_=min(v,3 if vix[i]>=40 else 2)   # 出清后：余震期最多偏紧张（VIX≥40 时最多紧张）
+        elif not out or v>=out[-1]: d_=v
+        else: d_=max(v,out[-1]-1)
+        if cleared and v<2 : cleared=False           # 原始读数已回到正常，余震结束
+        out.append(d_); aft.append(cleared and d_>=2)
+    return pd.Series(out,index=raw.index), pd.Series(aft,index=raw.index)
+T,AFT=settle_t(rawT)
 # heat
 M['QQQ20d']=Q.pct_change(20)*100; M['SMH20d']=SMH.pct_change(20)*100; M['SMH距50日线']=(SMH/ma(SMH,50)-1)*100; M['QQQ距50日线']=(Q/ma(Q,50)-1)*100
 M['SMH_RSI']=rsi(SMH); M['QQQ_RSI']=rsi(Q)
@@ -61,7 +77,8 @@ H['普涨追涨']=pd.concat([lv(M['AI站上50日线']/100,[0.75,0.9,0.95,2]),lv(
 H['杠杆追涨']=pd.concat([lv(pct(M['SOXL20d']),[80,90,97,99.5]),lv(pct(px['TQQQ'].pct_change(20)),[80,90,97,99.5])],axis=1).max(axis=1)
 H=pd.DataFrame(H); rawH=agg(H)
 rawH=rawH.where(~((rawH>=4)&~((H['普涨追涨']>=3)&(H['杠杆追涨']>=3))),3)  # 修正3：狂热须普涨+杠杆同时到位
-Hh=hyst(rawH)
+clearH=(M['SMH20d']<=0)|(M['AI站上50日线']<=50)
+Hh=settle(rawH,clearH)
 # amplifier & background
 for n,p in [('QQQ',Q),('SPY',S)]:
     for w in (50,100,200): M[f'{n}距{w}日线']=(p/ma(p,w)-1)*100
@@ -69,6 +86,8 @@ for n,p in [('QQQ',Q),('SPY',S)]:
 cape=pd.read_csv('shiller-pe.csv'); cape['Date']=pd.to_datetime(cape['Date']); cape=cape.set_index('Date')['Value'].astype(float).sort_index()
 cape=cape.reindex(idx.union(cape.index)).ffill().reindex(idx); M['席勒PE']=cape; M['席勒PE分位']=pct(cape)
 ai_ew=(1+px[AI].pct_change(fill_method=None).mean(axis=1)).cumprod(); M['AI超额120日']=(ai_ew.pct_change(120)-S.pct_change(120))*100; M['AI超额分位']=pct(M['AI超额120日'])
+fr=pd.read_csv('fred.csv',index_col=0,parse_dates=True)['DGS2']; fr=fr.reindex(idx.union(fr.index)).ffill().reindex(idx)
+M['2Y']=fr; M['2Y_126dbp']=(fr-fr.shift(126))*100
 # hold-streak for bond (2023 note)
 bond_hi=(D['债市']>=2).astype(int); M['债市偏紧连续天']=bond_hi.groupby((bond_hi!=bond_hi.shift()).cumsum()).cumsum()*bond_hi
 M=pd.DataFrame(M)
@@ -77,9 +96,10 @@ sel=lambda x:x.loc[start:]
 rows=[]
 for d in sel(M).index:
     m=M.loc[d]
-    rows.append({'d':d.strftime('%Y-%m-%d'),'T':int(T[d]),'Tr':int(rawT[d]),'H':int(Hh[d]),'Hr':int(rawH[d]),
+    mD=np.nanmean([D.loc[d,k] for k in D]); mH=np.nanmean([H.loc[d,k] for k in H]); pc=float(np.clip(Hh[d]-T[d]+0.5*(mH/4-mD/4),-4,4))
+    rows.append({'d':d.strftime('%Y-%m-%d'),'p':round(pc,2),'T':int(T[d]),'Tr':int(rawT[d]),'H':int(Hh[d]),'Hr':int(rawH[d]),
       'D':{k:(None if pd.isna(D.loc[d,k]) else int(D.loc[d,k])) for k in D},'HD':{k:(None if pd.isna(H.loc[d,k]) else int(H.loc[d,k])) for k in H},
-      'FP':[k for k in FP if bool(FP.loc[d,k])],'m':{k:(None if pd.isna(v) else round(float(v),2)) for k,v in m.items()}})
+      'FP':[k for k in FP if bool(FP.loc[d,k])],'CL':[k for k in CL if bool(CL.loc[d,k])],'aft':bool(AFT[d]),'m':{k:(None if pd.isna(v) else round(float(v),2)) for k,v in m.items()}})
 json.dump(rows,open('baro.json','w'),ensure_ascii=False)
 o=pd.DataFrame({'T':sel(T),'H':sel(Hh)}); nm=['平静','正常波动','偏紧张','紧张','恐慌']; hm=['冷静','升温','偏热','过热','狂热']
 print('体温',o['T'].map(lambda x:nm[int(x)]).value_counts(normalize=True).round(3).to_dict())
