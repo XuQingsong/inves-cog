@@ -162,7 +162,7 @@ def test_parse_cboe_pc_fixture():
         ]
     }
     rows = parse_cboe_pc(payload, date(2026, 10, 30), datetime(2026, 10, 31))
-    assert {r["series_id"] for r in rows} >= {"cboe_pc_total_put_call_ratio"}
+    assert {r["series_id"] for r in rows} >= {"cboe_pc_total"}
     assert all(r["obs_date"] == date(2026, 10, 30) for r in rows)
 
 
@@ -244,3 +244,80 @@ def test_cboe_chain_requires_asof():
     p = {"data": {"options": [{"option": "QQQ261030C00500000"}]}}
     with pytest.raises(ValueError, match="asof"):
         parse_cboe_chain(p, "QQQ", None, None)
+
+
+def test_proshares_newest_first_fixture():
+    text = (
+        "Date,NAV,Shares Outstanding (000),AUM\n"
+        "2026-10-30,52.1,1000,1e9\n2026-10-29,51.9,1000,1e9\n2009-01-05,10.0,500,5e8\n"
+    )
+    rows = parse_proshares(text, "TQQQ", datetime(2026, 10, 30))
+    assert rows[-1]["date"] == date(2026, 10, 30)  # sorted, all rows returned
+
+
+def test_pc_series_id_map():
+    from inves_cog.flows.collectors import pc_series_id
+
+    assert pc_series_id("TOTAL PUT/CALL RATIO") == "cboe_pc_total"
+    assert pc_series_id("INDEX PUT/CALL RATIO") == "cboe_pc_index"
+    assert pc_series_id("SPX + SPXW PUT/CALL RATIO") == "cboe_pc_spx"
+    assert pc_series_id("CBOE VOLATILITY INDEX (VIX) PUT/CALL RATIO") == "cboe_pc_vix"
+    assert pc_series_id("SOMETHING ELSE").startswith("cboe_pc_other_")
+
+
+def test_parse_cboe_pc_stable_ids():
+    from inves_cog.flows.collectors import parse_cboe_pc
+
+    payload = {
+        "ratios": [{"name": "TOTAL PUT/CALL RATIO", "value": 0.94}, {"name": "INDEX PUT/CALL RATIO", "value": 1.23}]
+    }
+    rows = parse_cboe_pc(payload, date(2026, 10, 30), datetime(2026, 10, 30))
+    assert {r["series_id"] for r in rows} == {"cboe_pc_total", "cboe_pc_index"}
+
+
+def test_ssga_newest_first():
+    """SSGA xlsx is newest-first; parser must return all rows date-sorted."""
+    import io
+    import zipfile
+
+    from inves_cog.flows.collectors import parse_ssga_xlsx
+
+    sst = (
+        '<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        "<sheetData>"
+        '<row><c t="s"><v>0</v></c></row>'
+        '<row><c t="s"><v>1</v></c><c><v>770</v></c><c><v>1e9</v></c><c><v>8e11</v></c></row>'
+        '<row><c t="s"><v>2</v></c><c><v>760</v></c><c><v>1e9</v></c><c><v>8e11</v></c></row>'
+        "</sheetData></worksheet>"
+    )
+    shared = (
+        '<?xml version="1.0"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        "<si><t>Date</t></si><si><t>29-Oct-2026</t></si><si><t>28-Oct-2026</t></si></sst>"
+    )
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("xl/worksheets/sheet1.xml", sst)
+        z.writestr("xl/sharedStrings.xml", shared)
+    rows = parse_ssga_xlsx(buf.getvalue(), "SPY", datetime(2026, 10, 30))
+    assert len(rows) == 2 and rows[-1]["date"] == date(2026, 10, 29)
+
+
+def test_etf_stale_health():
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"raw_file_id": 1}
+    conn.cursor.return_value.__enter__ = MagicMock(return_value=MagicMock())
+    conn.cursor.return_value.__exit__ = MagicMock(return_value=False)
+    http = MagicMock()
+    http.request.return_value = (
+        "Date,NAV,Shares Outstanding (000),AUM\n2026-10-27,52.1,1000,1e9\n2026-10-26,51.9,1000,1e9\n"
+    )
+    import inves_cog.ingest.market as M
+
+    orig = M.trading_day
+    M.trading_day = lambda d: d.weekday() < 5
+    from inves_cog.flows.collectors import collect_etf_shares
+
+    collect_etf_shares(http, conn, "/tmp/x", datetime(2026, 10, 30), ["TQQQ"], today=date(2026, 10, 30))
+    M.trading_day = orig
+    health_calls = [c for c in conn.execute.call_args_list if "source_health" in c.args[0]]
+    assert any("stale:TQQQ" in str(c.args[1]) for c in health_calls)
