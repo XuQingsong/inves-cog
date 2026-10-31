@@ -751,11 +751,11 @@ def page_brief_stock(connection, day, clock, symbol):
         "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
         "next_earnings": next_earnings,
         "earnings_card": _earnings_card(connection, symbol),
-        "price_now": _price_now(connection, symbol, day, bars, snap),
-        "chart": _chart_data(bars),
-        "earnings_marks": _earnings_marks(connection, symbol, day),
-        "anomaly_marks": _anomaly_marks(connection, symbol, day),
-        "peers": _peers_table(connection, symbol, day, _segment_map()),
+        "price_now": _safe(lambda: _price_now(connection, symbol, day, bars, snap), {}),
+        "chart": _safe(lambda: _chart_data(bars), []),
+        "earnings_marks": _safe(lambda: _earnings_marks(connection, symbol, day), []),
+        "anomaly_marks": _safe(lambda: _anomaly_marks(connection, symbol, day), []),
+        "peers": _safe(lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
@@ -824,6 +824,13 @@ def _next_earnings(earnings, symbol, day):
         return None
     future = sorted(r for r in earnings if r["ticker"] == symbol and r["report_date"] >= day)
     return future[0] if future else None
+
+
+def _safe(fn, fallback):
+    try:
+        return fn()
+    except Exception:
+        return fallback
 
 
 def _segment_map():
