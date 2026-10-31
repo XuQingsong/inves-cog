@@ -2568,7 +2568,7 @@ def _stock_today(payload):
         )
     items = "".join(
         f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
-        f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span>'
+        f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span> '
         f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'
         f"{_text(r.get('cause_headline') or '原因未明')}</span></div>"
         for r in mine
