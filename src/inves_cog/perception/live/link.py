@@ -130,7 +130,8 @@ def update_reactions(connection, now, day_range=None):
                     px = float(close["close"])
                     reaction["base"] = {
                         "px": px,
-                        "at": str(local.date()),
+                        "at": str(base_time),
+                        "close_date": str(local.date()),
                         "prev_close": px,
                         "source": "bars_daily",
                         "base_kind": "session_close",
@@ -149,7 +150,8 @@ def update_reactions(connection, now, day_range=None):
                     px = float(close["close"])
                     reaction["base"] = {
                         "px": px,
-                        "at": str(local.date()),
+                        "at": str(base_time),
+                        "close_date": str(local.date()),
                         "prev_close": px,
                         "source": "bars_daily",
                         "base_kind": "prev_close",
