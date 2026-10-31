@@ -940,6 +940,30 @@ def _facts_chip(facts):
     return "；".join(parts)
 
 
+_KIND_CN = {
+    "earnings_result": "财报",
+    "guidance": "指引",
+    "capex": "资本开支",
+    "mna": "并购",
+    "supply_shock": "供应",
+    "regulatory": "监管",
+    "rating": "评级",
+    "preview": "预告",
+    "other": "事件",
+}
+
+
+def _cause_label(r):
+    """'INTC 指引（指引低于预期 42%）'; no facts -> 'INTC 指引'."""
+    if not r.get("cause_event_id"):
+        return ""
+    subj = r.get("cause_subject") or ""
+    kind = _KIND_CN.get(r.get("cause_kind"), "事件")
+    facts = _facts_chip(r.get("cause_facts") or {})
+    head = f"{subj} {kind}".strip()
+    return f"{head}（{facts}）" if facts else head
+
+
 def _day_window(day):
     start = datetime.combine(day, time(4, 0), tzinfo=NY)
     return start, start + timedelta(days=1)
@@ -2028,8 +2052,8 @@ _TAPE = [
     ("XLY", "可选消费"),
 ]
 _MARKET3 = {
-    "美股指数": [("SPY", "标普 500"), ("QQQ", "纳指 100"), ("IWM", "罗素 2000"), ("DIA", "道琼斯")],
-    "期货": [("ES=F", "标普期货"), ("NQ=F", "纳指期货"), ("YM=F", "道指期货"), ("RTY=F", "罗素期货")],
+    "美股指数": [("SPY", "标普 500 ETF"), ("QQQ", "纳指 100 ETF"), ("IWM", "罗素 2000 ETF"), ("DIA", "道指 ETF")],
+    "期货": [("ES=F", "ES 标普期货"), ("NQ=F", "NQ 纳指期货"), ("YM=F", "YM 道指期货"), ("RTY=F", "RTY 罗素期货")],
     "利率": [("^FVX", "5年期"), ("^TNX", "10年期"), ("^TYX", "30年期")],
     "大宗与加密": [
         ("CL=F", "WTI"),
@@ -2061,12 +2085,18 @@ def _close_series(connection, ticker, day, n=22):
     """Daily closes up to `day`: bars_daily when the ticker has bars (plus a
     same-day snapshot while the day's bar is not written yet), otherwise the
     last intraday snapshot of each ET date."""
-    rows = connection.execute(
-        "SELECT trade_date AS d, close AS c FROM ingest.bars_daily "
-        "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT %s",
-        (ticker, day, n),
-    ).fetchall()
+    rows = (
+        connection.execute(
+            "SELECT trade_date AS d, close AS c FROM ingest.bars_daily "
+            "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT %s",
+            (ticker, day, n),
+        ).fetchall()
+        if _table_exists(connection, "ingest.bars_daily")
+        else []
+    )
     series = [(r["d"], float(r["c"])) for r in reversed(rows) if r["c"] is not None]
+    if not _table_exists(connection, "ingest.intraday_snapshots"):
+        return series[-n:]
     snaps = connection.execute(
         "SELECT DISTINCT ON (d) d, last FROM ("
         " SELECT (as_of AT TIME ZONE 'America/New_York')::date AS d, as_of, last"
@@ -2168,8 +2198,8 @@ def _market_state(connection, day, payload, live):
 
     causes = []
     for r in live:
-        if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_headline"):
-            head = r["cause_headline"]
+        if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_label"):
+            head = r["cause_label"]
             if head not in causes:
                 causes.append(head)
         if len(causes) == 2:
@@ -2250,8 +2280,10 @@ def _hl_grouped(live, positions):
     return items[:4]
 
 
-def _market3(connection, day):
-    """§8 3-column block: tabbed quotes + embedded daily/intraday series."""
+def _market3(connection, day, index_quotes=None, index_closes=None):
+    """§8 3-column block: tabbed quotes + embedded daily/intraday series.
+    index_quotes/index_closes: payload fallbacks so fixture/no-snapshot days
+    still show index rows and chartable daily closes."""
     groups = {}
     for tab, rows in _MARKET3.items():
         items = []
@@ -2259,22 +2291,46 @@ def _market3(connection, day):
             q = _quote(connection, t, day)
             if q is not None:
                 items.append({"sym": t, "name": name, **q})
+        if tab == "美股指数":
+            # payload (marketstate/rotation) values are the page's canonical
+            # index moves — prefer them over bar-derived quotes so the table
+            # matches the rest of the page and fixture data.
+            iq = {q["id"]: q for q in index_quotes or [] if q.get("ret") is not None}
+            for i, item in enumerate(items):
+                if item["sym"] in iq:
+                    items[i] = {**item, "ret": iq[item["sym"]]["ret"], "post": iq[item["sym"]].get("post")}
+            have = {i["sym"] for i in items}
+            for q in iq.values():
+                if q["id"] not in have:
+                    cs = (index_closes or {}).get(q["id"]) or []
+                    items.append(
+                        {
+                            "sym": q["id"],
+                            "name": f"{q['id']} {q['name']}",
+                            "px": cs[-1] if cs else None,
+                            "ret": q["ret"],
+                            "post": q.get("post"),
+                        }
+                    )
         if items:
             groups[tab] = items
     daily, intraday = {}, {}
     for t in [t for rows in _MARKET3.values() for t, _ in rows]:
-        rows = connection.execute(
-            "SELECT trade_date, open, high, low, close, volume FROM ingest.bars_daily "
-            "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
-            (t, day),
-        ).fetchall()
+        rows = (
+            connection.execute(
+                "SELECT * FROM ingest.bars_daily WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
+                (t, day),
+            ).fetchall()
+            if _table_exists(connection, "ingest.bars_daily")
+            else []
+        )
         if rows:
             daily[t] = [
                 {
                     "d": str(r["trade_date"]),
-                    "o": float(r["open"] or r["close"]),
-                    "h": float(r["high"] or r["close"]),
-                    "l": float(r["low"] or r["close"]),
+                    "o": float(r.get("open") or r["close"]),
+                    "h": float(r.get("high") or r["close"]),
+                    "l": float(r.get("low") or r["close"]),
                     "c": float(r["close"]),
                     "v": int(r["volume"] or 0),
                 }
@@ -2285,12 +2341,16 @@ def _market3(connection, day):
             daily[t] = [
                 {"d": str(d), "o": v, "h": v, "l": v, "c": v, "v": 0} for d, v in _close_series(connection, t, day, 260)
             ]
-        srows = connection.execute(
-            "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s"
-            " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
-            " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY as_of",
-            (t, day, day),
-        ).fetchall()
+        srows = (
+            connection.execute(
+                "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s"
+                " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
+                " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY as_of",
+                (t, day, day),
+            ).fetchall()
+            if _table_exists(connection, "ingest.intraday_snapshots")
+            else []
+        )
         if len(srows) > 1:
             intraday[t] = [{"t": r["as_of"].isoformat(), "p": float(r["last"])} for r in srows if r["last"] is not None]
     return {"groups": groups, "daily": daily, "intraday": intraday}
@@ -2343,6 +2403,7 @@ def page_brief_market(connection, day, clock):
     if not down or not up:
         funds = "资金：领跌或领涨" + MISSING
     live_rows = _live_anomalies(connection, day, is_today_page)
+    idx_closes = _safe_call(lambda: _index_closes(connection, day), {})
     _state_payload = {
         "advancers": advancers,
         "decliners": decliners,
@@ -2387,6 +2448,7 @@ def page_brief_market(connection, day, clock):
             if ticker in context["daily"]
         },
         "held_tickers": sorted(context["positions"]),
+        "ticker_scope": sorted(set(context["pool"]) | set(context["positions"])),
         "events": events,
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
@@ -2406,7 +2468,19 @@ def page_brief_market(connection, day, clock):
         "tape": _safe_call(lambda: _tape_rows(connection, day), []),
         "state": _safe_call(lambda: _market_state(connection, day, _state_payload, live_rows), {}),
         "hl_groups": _safe_call(lambda: _hl_grouped(live_rows, context["positions"]), []),
-        "market3": _safe_call(lambda: _market3(connection, day), {}),
+        "market3": _safe_call(
+            lambda: _market3(
+                connection,
+                day,
+                index_quotes=[
+                    {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy, "post": _post_ret(context, "SPY")},
+                    {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq, "post": _post_ret(context, "QQQ")},
+                    {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm, "post": _post_ret(context, "IWM")},
+                ],
+                index_closes=idx_closes,
+            ),
+            {},
+        ),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
         "wide_asof": wide_asof,
@@ -3302,7 +3376,8 @@ def _live_anomalies(connection, day, is_today):
     status = "" if not is_today else "AND a.status='active'"
     rows = connection.execute(
         f"""SELECT a.*, b.name AS basket_name, e.headline AS cause_headline,
-                   e.first_seen_at AS cause_first_seen
+                   e.first_seen_at AS cause_first_seen,
+                   e.facts AS cause_facts, e.subject AS cause_subject, e.kind AS cause_kind
             FROM perception.live_anomalies a
             LEFT JOIN graph.baskets b ON b.basket_id = a.subject AND a.scope='basket'
             LEFT JOIN perception.news_events e ON e.event_id = a.cause_event_id
@@ -3325,6 +3400,8 @@ def _live_anomalies(connection, day, is_today):
                 r["last_px"] = float(px[r["subject"]]) if r["subject"] in px and px[r["subject"]] else None
     except Exception:
         pass
+    for r in rows:
+        r["cause_label"] = _cause_label(r)
     return rows
 
 

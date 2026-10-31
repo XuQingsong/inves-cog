@@ -289,3 +289,29 @@ svg.chart .ax{font:11px var(--mono);fill:var(--muted)}
 .state-h.band-剧烈{color:var(--down,#b33)}.state-h.band-明显波动{color:#b7791f}
 .state-d{margin:0 0 6px;color:var(--ink,#333);font-size:15px;line-height:1.6}
 .m3news .codes{display:none}.m3news .nrow{grid-template-columns:52px 1fr}
+
+/* B-076 #2: header must fit 1280/1024 — wrap nav, shrink datebox */
+@media (max-width:1400px){
+ .top-in{flex-wrap:wrap;gap:10px;padding:8px 20px}
+ .nav{flex-wrap:wrap}
+ .nav a{min-width:0;padding:6px 10px}
+ .datebox{text-align:left}
+ .datebox .row{flex-wrap:wrap;justify-content:flex-start}
+ .fresh{white-space:normal}
+}
+@media (max-width:1100px){
+ .brand div{display:none}
+ .nav a small{display:none}
+}
+
+/* B-076 #4: rolling news column fixed height + compact rows */
+.m3news{max-height:440px;overflow:auto}
+.m3news .nrow{display:block;padding:3px 0;border-bottom:1px dashed var(--line)}
+.m3news .nrow .tm{display:inline;color:var(--muted);font-size:11px;margin-right:6px}
+.m3news .nrow .hl{display:inline}
+.m3news .nrow .codes{display:block;padding-left:70px}
+.m3news .nrow .codes .tk{margin-right:4px}
+
+/* B-076 rework: header 今天 button single line */
+.datebox .step{white-space:nowrap}
+.top-in{overflow:hidden}
