@@ -2309,6 +2309,7 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
                             "name": f"{q['id']} {q['name']}",
                             "px": cs[-1] if cs else None,
                             "ret": q["ret"],
+                            "post": q.get("post"),
                         }
                     )
         if items:
