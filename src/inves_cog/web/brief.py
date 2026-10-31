@@ -2274,8 +2274,10 @@ def _hl_grouped(live, positions):
     return items[:4]
 
 
-def _market3(connection, day):
-    """§8 3-column block: tabbed quotes + embedded daily/intraday series."""
+def _market3(connection, day, index_quotes=None, index_closes=None):
+    """§8 3-column block: tabbed quotes + embedded daily/intraday series.
+    index_quotes/index_closes: payload fallbacks so fixture/no-snapshot days
+    still show index rows and chartable daily closes."""
     groups = {}
     for tab, rows in _MARKET3.items():
         items = []
@@ -2430,7 +2432,19 @@ def page_brief_market(connection, day, clock):
         "tape": _safe_call(lambda: _tape_rows(connection, day), []),
         "state": _safe_call(lambda: _market_state(connection, day, _state_payload, live_rows), {}),
         "hl_groups": _safe_call(lambda: _hl_grouped(live_rows, context["positions"]), []),
-        "market3": _safe_call(lambda: _market3(connection, day), {}),
+        "market3": _safe_call(
+            lambda: _market3(
+                connection,
+                day,
+                index_quotes=[
+                    {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy},
+                    {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq},
+                    {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm},
+                ],
+                index_closes=_index_closes(connection, day),
+            ),
+            {},
+        ),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
         "wide_asof": wide_asof,
