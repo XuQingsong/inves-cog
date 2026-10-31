@@ -605,6 +605,7 @@ def backfill_fred(http, connection, raw_dir, _now=None):
         except Exception as exc:
             log.warning("fred %s failed: %r", sid, exc)
             out[sid] = set()
+            continue
     return [_report(f"FRED:{t}", days) for t, days in out.items()]
 
 
@@ -618,7 +619,7 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
         text = _fetch(http, OFR_FSI_URL)
         rows = []
         for row in csv.DictReader(io.StringIO(text)):
-            day = _mdy(row.get("date") or row.get("Date"))
+            day = _mdy(row.get("Date") or row.get("date") or row.get("DATE"))
             val = row.get("OFR FSI") or row.get("fsi")
             if day and val:
                 rows.append(
