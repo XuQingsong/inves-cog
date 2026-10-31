@@ -187,11 +187,14 @@ def build_events(items, scope, et_now):
                 ev["last_seen_at"] = seen
                 new_gap = _max_gap(facts)
                 if new_gap > ev.get("_max_gap", 0.0):
+                    # winning part owns headline AND its facts; old part only
+                    # fills keys the winner lacks
                     ev["_max_gap"] = new_gap
-                    ev["headline"] = headline  # part that supplied the largest |gap| fact
-                ev["facts"].update(
-                    {k: v for k, v in facts.items() if k != "direction" or "direction" not in ev["facts"]}
-                )
+                    ev["headline"] = headline
+                    ev["facts"] = {**ev["facts"], **facts}
+                else:
+                    # loser only fills keys the winner lacks
+                    ev["facts"] = {**facts, **ev["facts"]}
                 score, parts = importance(subject, kind, ev["facts"], set(core))
                 if score > ev["importance"]:
                     ev["importance"], ev["importance_parts"] = score, parts
