@@ -220,7 +220,7 @@ def parse_cboe_pc_csv(text, kind):
         if not obs:
             continue
         val = cells[4] if len(cells) > 4 else None
-            if val:
+        if val:
                 try:
                     out.append(
                         {"series_id": f"cboe_pc_{kind}", "obs_date": obs, "value": float(val), "vintage": "backfill"}
