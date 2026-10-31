@@ -202,11 +202,19 @@ def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None
         else:
             rows = parse_occ_oi_summary(text, pub)
             if connection is not None and rows:
-                catalog = [{"series_id": r["series_id"], "name_zh": r["series_id"],
-                            "unit": "contracts", "frequency": "daily", "source": "OCC"}
-                           for r in rows]
-                upsert_many(connection, "series_catalog",
-                            ["series_id", "name_zh", "unit", "frequency", "source"], catalog)
+                catalog = [
+                    {
+                        "series_id": r["series_id"],
+                        "name_zh": r["series_id"],
+                        "unit": "contracts",
+                        "frequency": "daily",
+                        "source": "OCC",
+                    }
+                    for r in rows
+                ]
+                upsert_many(
+                    connection, "series_catalog", ["series_id", "name_zh", "unit", "frequency", "source"], catalog
+                )
                 for row in rows:
                     row["raw_file_id"] = raw["raw_file_id"]
                 upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
@@ -357,8 +365,16 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
             url, parse, src = SSGA_URL.format(t=t.lower()), "ssga", "Flows:ETFShares:SSGA"
         t0 = datetime.now()
         try:
-            r = http.request("GET", url, headers=UA)
-            body = r.encode() if isinstance(r, str) else r
+            if parse == "ssga":
+                import urllib.request
+
+                req = urllib.request.Request(url, headers=UA)
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    body = resp.read()
+                r = body
+            else:
+                r = http.request("GET", url, headers=UA)
+                body = r.encode() if isinstance(r, str) else r
             rows = (
                 parse_direxion(r if isinstance(r, str) else r.decode("utf-8", "replace"), t, pub)
                 if parse == "direxion"
