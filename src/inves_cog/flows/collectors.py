@@ -7,7 +7,7 @@ import logging
 import re
 import time
 import zipfile
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from xml.etree import ElementTree as ET
 
 from inves_cog.flows.store import UA, record_health, save_raw, upsert_many
