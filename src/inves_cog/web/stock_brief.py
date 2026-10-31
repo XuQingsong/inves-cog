@@ -1072,7 +1072,9 @@ def _analyst_actions(connection, symbol, day):
 def _earnings_hist(connection, symbol, bars):
     """Last 8 quarters: EPS actual vs estimate + next-day move per report timing."""
     row = connection.execute(
-        "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
+        "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s "
+        "AND raw->'earnings_history' IS NOT NULL AND jsonb_array_length(raw->'earnings_history') > 0 "
+        "ORDER BY captured_at DESC LIMIT 1",
         (symbol,),
     ).fetchone()
     hist = ((row or {}).get("raw") or {}).get("earnings_history") or []
@@ -1087,11 +1089,11 @@ def _earnings_hist(connection, symbol, bars):
     # historical report dates: earnings events published right after each quarter end
     events = {}
     for r in connection.execute(
-        "SELECT published_at FROM perception.news_events "
-        "WHERE subject=%s AND kind='earnings_result' ORDER BY published_at",
+        "SELECT first_seen_at, et_date FROM perception.news_events "
+        "WHERE subject=%s AND kind='earnings_result' ORDER BY first_seen_at",
         (symbol,),
     ).fetchall():
-        ts = r["published_at"]
+        ts = r["first_seen_at"]
         events[
             str(ts.astimezone(ZoneInfo("America/New_York")).date() if hasattr(ts, "astimezone") else str(ts)[:10])
         ] = ts
