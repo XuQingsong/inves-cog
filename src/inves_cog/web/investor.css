@@ -311,3 +311,7 @@ svg.chart .ax{font:11px var(--mono);fill:var(--muted)}
 .m3news .nrow .hl{display:inline}
 .m3news .nrow .codes{display:block;padding-left:70px}
 .m3news .nrow .codes .tk{margin-right:4px}
+
+/* B-076 rework: header 今天 button single line */
+.datebox .step{white-space:nowrap}
+.top-in{overflow:hidden}

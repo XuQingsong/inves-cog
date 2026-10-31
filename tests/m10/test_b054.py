@@ -425,8 +425,9 @@ def test_f1_close_session_drives_judgment(pages):
     assert market["judgment"] == "板块轮动而非全面恐慌"
     assert "判断：板块轮动而非全面恐慌" in market["oneliner"]
     assert "判断：分化" not in market["oneliner"]
-    assert "−1.18%" in html
-    assert "盘后" in html and "+0.02%" in html
+    row = next(part for part in html.split("<tr") if "−1.18%" in part)
+    assert "−1.18%" in row and "盘后" in row and "+0.02%" in row
+    assert "+0.02%" not in row.split("盘后", 1)[0]
     stocks = _get(pages, "/stocks").text
     amat = _cells(_row(stocks, "AMAT"))
     assert "−8.00%" in amat[3]

@@ -1379,6 +1379,7 @@ def _price_bar(payload):
 
 SEGMENT_LABELS = {
     "cpu_pc": "CPU 与电脑",
+    "compute": "计算链",
     "ai_accelerators": "AI 加速卡",
     "memory": "存储与内存",
     "eda_equipment": "EDA 与设备",
@@ -1521,7 +1522,7 @@ def _stock(payload):
         + "</div></div>"
         + _stock_today(payload)
         + _stock_earnings_card(payload)
-        + f'<div class="card sec"><h2>历次财报</h2>{_earnings_hist_module(payload)}</div>'
+        + _earnings_hist_module(payload)
         + position_html
         + _peers_module(payload)
         + '<div class="card sec"><h2>位置与情绪'
@@ -2717,9 +2718,6 @@ def _key_stats(payload):
     an = payload.get("analyst") or {}
     st = payload.get("bar_stats") or {}
     fy1 = (payload.get("consensus") or {}).get("fy1") or {} if isinstance(payload.get("consensus"), dict) else {}
-    pt_mean = an.get("pt_mean") or an.get("pt_mean_col")
-    opinions = an.get("opinions") or an.get("coverage")
-    pt_range = f"{an['pt_low']:,.0f}–{an['pt_high']:,.0f} · " if an.get("pt_low") and an.get("pt_high") else ""
     eps_cq = an.get("eps_cq")
     nr = payload.get("next_report")
     fpe = an.get("forward_pe") or fy1.get("forward_pe")
@@ -2736,10 +2734,6 @@ def _key_stats(payload):
             f"{nr['report_date']} {({'post': '盘后', 'pre': '盘前'}).get(nr.get('time'), '')}" if nr else "暂缺",
         ),
         ("本季一致预期 EPS", f"{float(eps_cq):.2f}" if eps_cq is not None else "暂缺"),
-        (
-            "机构目标价",
-            f"均值 ${float(pt_mean):,.2f}（{pt_range}{int(opinions) if opinions else '—'} 家）" if pt_mean else "暂缺",
-        ),
     ]
     return (
         '<div class="card sec"><div class="kv" style="grid-template-columns:repeat(4,1fr)">'
@@ -2845,7 +2839,7 @@ def _earnings_hist_module(payload):
         f"<td class='num'>{num(r.get('est'), '.2f')}</td><td class='num'>{num(r.get('act'), '.2f')}</td>"
         f"<td class='num {_tone(r.get('gap') or 0)}'>{num(r.get('gap'), '+.1f')}%</td>"
         f"<td class='num'>{_pct(r.get('next_day'), 1) if r.get('next_day') is not None else '—'}</td></tr>"
-        for r in reversed(rows)
+        for r in sorted(rows, key=lambda x: str(x.get("q") or ""), reverse=True)
     )
     return (
         '<div class="card sec"><h2>历次财报</h2>'
@@ -3183,6 +3177,7 @@ def _tech_cell(tech):
 def _next_earn(payload):
     e = payload.get("next_earnings")
     if not isinstance(e, dict):
-        return _miss()
+        be = (payload.get("bar_stats") or {}).get("next_earnings")
+        return _text(str(be)) if be else _miss()
     when = f"{_ETIME.get(str(e.get('time')), _text(e.get('time')))} {_md_local(e['report_date'])}"
     return f"{_text(when)} · 预期 EPS {_text(e.get('eps_forecast') or '—')}"
