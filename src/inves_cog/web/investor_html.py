@@ -1546,6 +1546,9 @@ def _stock(payload):
         + _stock_news(payload)
         + _earnings_hist_module(payload)
         + _stock_feed(payload)
+        + '</div><div><h3 style="margin:18px 0 8px">机构观点</h3></div><div class="grid g2">'
+        + _ratings_module(payload)
+        + _actions_module(payload)
         + '</div><div class="card"><h2>基本面与估值</h2>'
         + f'<p style="margin:0">{_text(_valuation(payload.get("valuation"), full=True))}</p>'
         + _consensus(payload.get("consensus"))
