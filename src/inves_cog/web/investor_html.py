@@ -2464,8 +2464,9 @@ def _state_head(payload):
 def _market3_module(payload):
     m3 = payload.get("market3") or {}
     groups = m3.get("groups") or {}
-    if not groups:
-        return ""
+    has_groups = bool(groups)
+    if not has_groups:
+        groups = {"": []}
     tabs = list(groups)
     btns = "".join(
         '<button class="rc%s" data-tab="%s" onclick="Market3.tab(this)">%s</button>'
@@ -2493,7 +2494,7 @@ def _market3_module(payload):
         )
     daily = escape(json.dumps(m3.get("daily") or {}, ensure_ascii=False), quote=True)
     intra = escape(json.dumps(m3.get("intraday") or {}, ensure_ascii=False), quote=True)
-    first = groups[tabs[0]][0]["sym"]
+    first = groups[tabs[0]][0]["sym"] if has_groups else ""
     rbtns = "".join(
         '<button class="rc%s" onclick="Market3.range(this,\'%s\')">%s</button>' % (" on" if k == "1日" else "", k, k)
         for k in ("1日", "5日", "1月", "6月", "1年")
