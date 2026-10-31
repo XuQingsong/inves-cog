@@ -1050,14 +1050,11 @@ def _analyst_summary(connection, symbol):
 
 
 def _analyst_actions(connection, symbol, day):
-    try:
-        return connection.execute(
-            "SELECT action_date, firm, action, from_grade, to_grade, pt_action, prior_pt, current_pt, source "
-            "FROM ingest.analyst_actions WHERE ticker=%s AND action_date<=%s ORDER BY action_date DESC LIMIT 60",
-            (symbol, day),
-        ).fetchall()
-    except Exception:
-        return []
+    return connection.execute(
+        "SELECT action_date, firm, action, from_grade, to_grade, pt_action, prior_pt, current_pt, source "
+        "FROM ingest.analyst_actions WHERE ticker=%s AND action_date<=%s ORDER BY action_date DESC LIMIT 60",
+        (symbol, day),
+    ).fetchall()
 
 
 def _earnings_hist(connection, symbol, bars):
@@ -1075,19 +1072,16 @@ def _earnings_hist(connection, symbol, bars):
         est, act = q.get("epsEstimate"), q.get("epsActual")
         out.append({"q": qd, "est": est, "act": act, "gap": (act - est) / abs(est) * 100 if est else None})
     # next-day return keyed on earnings calendar dates if available
-    try:
-        cal = connection.execute(
-            "SELECT report_date FROM ingest.earnings_calendar WHERE ticker=%s ORDER BY report_date DESC LIMIT 8",
-            (symbol,),
-        ).fetchall()
-        next_ret = {}
-        for c in cal:
-            d = str(c["report_date"])
-            i = next((k for k, x in enumerate(dates) if x >= d), None)
-            if i is not None and i + 1 < len(dates) and closes[dates[i]] and closes[dates[i + 1]]:
-                next_ret[d] = closes[dates[i + 1]] / closes[dates[i]] - 1
-        for q in out:
-            q["next_day"] = next_ret.get(q["q"]) or next_ret.get(min((d for d in next_ret if d >= q["q"]), default=""))
-    except Exception:
-        pass
+    cal = connection.execute(
+        "SELECT report_date FROM ingest.earnings_calendar WHERE ticker=%s ORDER BY report_date DESC LIMIT 8",
+        (symbol,),
+    ).fetchall()
+    next_ret = {}
+    for c in cal:
+        d = str(c["report_date"])
+        i = next((k for k, x in enumerate(dates) if x >= d), None)
+        if i is not None and i + 1 < len(dates) and closes[dates[i]] and closes[dates[i + 1]]:
+            next_ret[d] = closes[dates[i + 1]] / closes[dates[i]] - 1
+    for q in out:
+        q["next_day"] = next_ret.get(q["q"]) or next_ret.get(min((d for d in next_ret if d >= q["q"]), default=""))
     return out
