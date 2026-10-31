@@ -1446,6 +1446,17 @@ def _chart_svg(payload, width=1180, height=340):
     )
 
 
+SEGMENT_LABELS = {
+    "hyperscaler": "云厂商与 AI 云",
+    "compute": "算力芯片",
+    "foundry_equipment": "代工与设备",
+    "memory": "存储",
+    "server_network": "服务器与网络",
+    "power": "电力与散热",
+    "cpu_pc": "CPU 与 PC",
+}
+
+
 def _peers_module(payload):
     peers, seg = payload.get("peers") or ([], None)
     if not peers:
@@ -1457,7 +1468,7 @@ def _peers_module(payload):
         f"<td class='num'>{_pct(p.get('ret5'), 1) if p.get('ret5') is not None else '—'}</td></tr>"
         for p in peers
     )
-    seg_txt = f'<span class="dim">环节：{_text(seg or "—")}</span>' if seg else ""
+    seg_txt = f'<span class="dim">环节：{_text(SEGMENT_LABELS.get(seg, seg))}</span>' if seg else ""
     return (
         '<div class="card sec cat-market"><h2>同环节与同篮子 ' + seg_txt + "</h2>"
         '<table class="tbl"><tr><th>代码</th><th>现价</th><th>今日涨跌</th><th>5日涨跌</th></tr>'
@@ -1543,7 +1554,7 @@ def _stock(payload):
         + f'<p class="sub" style="margin-top:6px">{_text(payload.get("oneliner"))}</p>'
         + _price_bar(payload)
         + '<div class="card sec cat-market"><div style="display:flex;justify-content:space-between">'
-        + '<h2>走势</h2><span class="small muted">日收盘 · 均线与关键价位</span></div>'
+        + '<h2>走势与位置</h2><span class="small muted">日收盘 · 均线与关键价位</span></div>'
         + (_chart_svg(payload) or _chart(trend, position, payload))
         + f'<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:10px;gap:10px">{returns}'
         + "</div></div>"
