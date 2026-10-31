@@ -737,6 +737,7 @@ def page_brief_stock(connection, day, clock, symbol):
         "news_feed": news_feed,
         "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
         "next_earnings": next_earnings,
+        "earnings_card": _earnings_card(connection, symbol),
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
@@ -805,3 +806,18 @@ def _next_earnings(earnings, symbol, day):
         return None
     future = sorted(r for r in earnings if r["ticker"] == symbol and r["report_date"] >= day)
     return future[0] if future else None
+
+
+def _earnings_card(connection, symbol):
+    """B-072: this ticker's latest earnings card row; None when absent."""
+    try:
+        row = connection.execute(
+            "SELECT ticker, report_date, report_time, stage, card, missing "
+            "FROM perception.earnings_cards WHERE ticker=%s ORDER BY report_date DESC LIMIT 1",
+            (symbol,),
+        ).fetchone()
+        if row is None:
+            return None
+        return {**dict(row), "report_date": str(row["report_date"])}
+    except Exception:
+        return None

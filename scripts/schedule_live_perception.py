@@ -104,7 +104,12 @@ def _persist(connection, events):
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--replay", nargs=2, metavar=("START", "END"))
+    ap.add_argument(
+        "--replay", nargs=2, metavar=("START", "END"), help="rebuild events: delete et_date range, re-insert"
+    )
+    ap.add_argument(
+        "--recompute-reactions", nargs=2, metavar=("START", "END"), help="recompute reaction with current base rules"
+    )
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="compute in memory, print, no writes")
     return ap.parse_args()
@@ -140,8 +145,38 @@ def _pass(connection, args):
     _run(connection, scope, items, events, args)
 
 
+def _recompute(connection, args):
+    from inves_cog.perception.live.link import update_reactions
+
+    start, end = date.fromisoformat(args.recompute_reactions[0]), date.fromisoformat(args.recompute_reactions[1])
+    now = datetime.now(timezone.utc)
+    with connection.transaction():
+        connection.execute(
+            "UPDATE perception.news_events SET reaction='{}'::jsonb "
+            "WHERE et_date >= %s AND et_date <= %s AND reaction IS NOT NULL",
+            (start, end),
+        )
+        n = update_reactions(connection, now, day_range=(start, end))
+    print(f"recomputed={n}")
+
+
 def _run(connection, scope, items, events, args):
     with connection.transaction():
+        if args.replay:
+            # rebuild: anomalies pointing at rows we are about to delete
+            # get re-linked on the next live pass (cause set back to NULL)
+            connection.execute(
+                """UPDATE perception.live_anomalies
+                   SET cause_event_id=NULL, cause_kind=NULL, cause_lag_minutes=NULL
+                   WHERE cause_event_id IN (
+                       SELECT event_id FROM perception.news_events
+                       WHERE et_date >= %s AND et_date <= %s)""",
+                (date.fromisoformat(args.replay[0]), date.fromisoformat(args.replay[1])),
+            )
+            connection.execute(
+                "DELETE FROM perception.news_events WHERE et_date >= %s AND et_date <= %s",
+                (date.fromisoformat(args.replay[0]), date.fromisoformat(args.replay[1])),
+            )
         _persist(connection, events)
         latest = max((i["first_seen_at"] for i in items), default=None)
         if latest:
@@ -160,7 +195,7 @@ def due(last_events, last_live, now):
 
 if __name__ == "__main__":
     cli = parse_args()
-    if cli.once or cli.replay or cli.dry_run:
+    if cli.once or cli.replay or cli.dry_run or cli.recompute_reactions:
         main(cli)
     else:
         from inves_cog.ingest.cli import connect
@@ -181,11 +216,17 @@ if __name__ == "__main__":
             if run_live:
                 last_live = tick
                 try:
+                    from inves_cog.perception.earnings.cards import update_cards
+
                     values = read_environment()
                     with connect(
                         {**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]}
                     ) as connection:
                         print(live_pass(connection, datetime.now(timezone.utc)), flush=True)
+                        from inves_cog.perception.core_companies import core_companies
+
+                        cards = update_cards(connection, datetime.now(timezone.utc), core_companies())
+                        print(f"earnings_cards={cards}", flush=True)
                 except Exception as exc:
                     print(f"live pass failed: {type(exc).__name__}: {exc}", flush=True)
             time.sleep(30)
