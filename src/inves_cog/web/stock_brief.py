@@ -637,7 +637,14 @@ def page_brief_stock(connection, day, clock, symbol):
         raw_score = _latest_score_row(connection, day, symbol)
         carried_from = None if raw_score is None else raw_score["signal_date"]
     stocks = context.get("stocks") or set()
-    in_scope = symbol in context["pool"] or symbol in context["positions"] or symbol in stocks or raw_score is not None
+    in_scope = (
+        symbol in context["pool"]
+        or symbol in context["positions"]
+        or symbol in stocks
+        or raw_score is not None
+        or symbol in _segment_map()
+        or _earnings_card(connection, symbol) is not None
+    )
     if not in_scope:
         return _untracked_page(connection, symbol, day, clock, bars)
     gate = _gate_score(raw_score)
