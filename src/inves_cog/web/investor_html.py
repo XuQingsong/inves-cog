@@ -2581,11 +2581,58 @@ def _stock_earnings_card(payload):
     if not row:
         return ""
     stage = {"upcoming": "财报前", "released": "已发布", "voted": "次日投票"}[row.get("stage")]
-    lines = _card_lines(row)
+    card = row.get("card") or {}
+    tl = {"post": "盘后", "pre": "盘前"}.get(row.get("report_time"), "时间待定")
+    stats = [("发布", f"{row['report_date']} {tl}")]
+    imp = card.get("implied_move") or {}
+    imp_txt = f"{imp['straddle_pct'] * 100:.1f}%" if imp.get("straddle_pct") is not None else "无期权参照"
+    if row.get("stage") == "upcoming":
+        cons = card.get("consensus") or {}
+        stats += [
+            ("一致预期 EPS", f"{cons['eps']:.2f}" if cons.get("eps") is not None else "暂缺"),
+            ("期权预期涨跌", imp_txt),
+            (
+                "历史财报后涨跌",
+                f"中位 {card['history']['median_abs'] * 100:.1f}%"
+                if (card.get("history") or {}).get("median_abs") is not None
+                else "历史不足",
+            ),
+        ]
+    else:
+        seg = card.get("segment_reaction") or {}
+        vote = card.get("vote_ret")
+        stats += [
+            ("次日投票", _pct(vote, 1) if vote is not None else "待收盘"),
+            ("与期权预期比", _text(card.get("vs_implied") or imp_txt)),
+            ("同环节跟随", f"{seg['followed']} 家跟 · {seg['not_followed']} 家未跟" if seg else "暂缺"),
+        ]
+    stat_html = "".join(
+        f'<div><div class="small muted">{_text(k)}</div><div style="font-size:16px">'
+        f"{v if '<' in str(v) else _text(v)}</div></div>"
+        for k, v in stats
+    )
+    events = []
+    for e in (card.get("events") or [])[:4]:
+        r = e.get("reaction") or {}
+        react = " · ".join(
+            f"{label} {_pct(r[key]['ret'], 1)}"
+            for key, label in (("m15", "15 分钟"), ("m60", "60 分钟"), ("session_end", "时段末"))
+            if isinstance(r.get(key), dict) and r[key].get("ret") is not None
+        )
+        events.append(
+            f'<div class="row">{_kind_chip(e.get("kind"))} {_facts_chips(e.get("facts") or {})} '
+            f"{_text(e.get('headline') or '')}"
+            + (f'<div class="small muted">发布后反应：{react}</div>' if react else "")
+            + "</div>"
+        )
+    missing = row.get("missing") or []
+    miss_html = f'<div class="small muted">缺：{_text("、".join(missing))}</div>' if missing else ""
     return (
-        f'<div class="card sec"><h2>财报 · {_text(row["ticker"])} {row["report_date"]}'
+        f'<div class="card sec cat-earnings"><h2>财报 · {row["report_date"]} '
         f'<span class="chip">{stage}</span></h2>'
-        + "".join(f'<div class="row">{line if "<" in line else _text(line)}</div>' for line in lines)
+        f'<div class="grid" style="grid-template-columns:repeat({len(stats)},1fr);gap:10px">{stat_html}</div>'
+        + "".join(events)
+        + miss_html
         + "</div>"
     )
 

@@ -21,6 +21,7 @@ from inves_cog.web.brief import (
     _event_title,
     _freshness,
     _holding_row,
+    _live_anomalies,
     _member,
     _news_events,
     _news_summary,
@@ -770,6 +771,9 @@ def page_brief_stock(connection, day, clock, symbol):
         "peers": _safe(connection, lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
         "bar_stats": _safe(connection, lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
         "intraday_series": _safe(connection, lambda: _intraday_series(connection, symbol, day), []),
+        "news_modules": {
+            "live": _safe(connection, lambda: [dict(r) for r in _live_anomalies(connection, day, False)], [])
+        },
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
