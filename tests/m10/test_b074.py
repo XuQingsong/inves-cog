@@ -97,7 +97,7 @@ def test_put_analyst_actions_rows():
         }
     }
     c2 = C()
-    assert put_analyst_actions(c2, "INTC", snap) == 1
+    assert put_analyst_actions(c2, "INTC", snap, today=date(2026, 10, 31)) == 1
     args = c2.calls[0][1]
     assert args[2] == "Goldman Sachs" and args[3] == "down" and args[7] == 120.0 and args[8] == 80.0
     assert "upgrade_history" not in snap["raw"]

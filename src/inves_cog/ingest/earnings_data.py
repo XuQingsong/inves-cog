@@ -58,7 +58,7 @@ def collect_consensus(*, clock, repository, tickers, provider):
         try:
             cy, ny = repository.annual_years(ticker, now)
             snapshot = provider.collect(ticker, fy_cy=cy, fy_ny=ny)
-            put_analyst_actions(getattr(repository, "connection", None), ticker, snapshot)
+            put_analyst_actions(getattr(repository, "connection", None), ticker, snapshot, today=now.date())
             repository.put_snapshot(snapshot)
             processed += 1
         except Exception as exc:
@@ -71,14 +71,14 @@ def collect_consensus(*, clock, repository, tickers, provider):
     }
 
 
-def put_analyst_actions(connection, ticker, snapshot, keep_days=730):
+def put_analyst_actions(connection, ticker, snapshot, today=None, keep_days=730):
     """Persist upgradeDowngradeHistory (Yahoo JSON or yfinance frame keys) into
     ingest.analyst_actions; rows older than keep_days are skipped."""
     raw = snapshot.get("raw") or {}
     rows = raw.pop("upgrade_history", None) or []
     if connection is None:
         return 0
-    cutoff = datetime.now(timezone.utc).date() - timedelta(days=keep_days)
+    cutoff = None if today is None else today - timedelta(days=keep_days)
 
     def pick(r, *keys):
         for k in keys:
@@ -99,7 +99,7 @@ def put_analyst_actions(connection, ticker, snapshot, keep_days=730):
         except (KeyError, TypeError, ValueError):
             continue
         firm = pick(r, "firm", "Firm")
-        if when < cutoff or not firm:
+        if (cutoff and when < cutoff) or not firm:
             continue
         connection.execute(
             "INSERT INTO ingest.analyst_actions "
