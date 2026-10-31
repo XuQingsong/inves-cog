@@ -579,7 +579,12 @@ def backfill_fred(http, connection, raw_dir, _now=None):
     for sid in FRED_SERIES:
         url = FRED_API.format(sid=sid, key=key) if key else FRED_URL.format(sid=sid)
         try:
-            text = _fetch(http, url)
+            if key:
+                import urllib.request
+                req = urllib.request.Request(url, headers=UA)
+                text = urllib.request.urlopen(req, timeout=60).read().decode()
+            else:
+                text = _fetch(http, url)
             rows = []
             if key:
                 payload = text if isinstance(text, dict) else json.loads(text)
