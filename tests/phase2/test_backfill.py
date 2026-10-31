@@ -113,7 +113,6 @@ def test_cboe_pc_csv_parse():
 
 
 def test_finra_year_month_parse():
-
     # _xlsx_date fix: "2026-09" → month end
     from datetime import date as _date
     from datetime import timedelta
