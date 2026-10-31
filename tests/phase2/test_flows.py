@@ -165,3 +165,58 @@ def test_parse_occ_series_fixture():
     calls = [r for r in rows if r["cp"] == "C"]
     puts = [r for r in rows if r["cp"] == "P"]
     assert calls and puts
+
+
+def test_parse_cboe_pc_fixture():
+    from inves_cog.flows.collectors import parse_cboe_pc
+
+    payload = {
+        "ratios": [
+            {"name": "TOTAL PUT/CALL RATIO", "value": 0.94},
+            {"name": "INDEX PUT/CALL RATIO", "value": 1.23},
+            {"name": "SPX PUT/CALL RATIO", "value": 1.5},
+        ]
+    }
+    rows = parse_cboe_pc(payload, date(2026, 10, 30), datetime(2026, 10, 31))
+    assert {r["series_id"] for r in rows} >= {"cboe_pc_total_put_call_ratio"}
+    assert all(r["obs_date"] == date(2026, 10, 30) for r in rows)
+
+
+def test_intraday_window_skip(tmp_path):
+    """A slot runs only within [slot, slot+15min): at 17:45 the 16:00 slot is skipped."""
+    from unittest.mock import MagicMock
+
+    from scripts import schedule_flows as S
+
+    state_file = tmp_path / "st.json"
+    S.STATE = state_file
+    clock = MagicMock()
+    clock.now_utc.return_value = datetime(2026, 10, 30, 21, 45, tzinfo=__import__("datetime").timezone.utc)
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"c": 1}
+    http = MagicMock()
+    S._intra_slots = lambda d: ["09:45", "10:00", "16:00"]
+    import inves_cog.ingest.market as M
+
+    M.trading_day = lambda d: True
+    r = S.run_once(clock, {}, http=http, conn=conn, raw_dir=tmp_path)
+    assert not any(k.startswith("intra:") for k in r), r.keys()
+
+
+def test_occ_runs_on_non_trading_day(tmp_path):
+    from unittest.mock import MagicMock
+
+    from scripts import schedule_flows as S
+
+    S.STATE = tmp_path / "st.json"
+    clock = MagicMock()
+    clock.now_utc.return_value = datetime(2026, 10, 31, 12, 0, tzinfo=__import__("datetime").timezone.utc)
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"c": 1}
+    http = MagicMock()
+    import inves_cog.ingest.market as M
+
+    M.trading_day = lambda d: d == date(2026, 10, 30)
+    S._prev_trading_days = lambda d, n=5: [date(2026, 10, 30)]
+    r = S.run_once(clock, {}, http=http, conn=conn, raw_dir=tmp_path)
+    assert "occ_vol:2026-10-30" in r or "occ_xchk:2026-10-31" in r

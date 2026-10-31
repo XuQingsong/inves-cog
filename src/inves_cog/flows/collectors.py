@@ -5,6 +5,7 @@ import io
 import json
 import logging
 import re
+import time
 import zipfile
 from datetime import date, datetime
 from xml.etree import ElementTree as ET
@@ -70,18 +71,18 @@ def parse_cboe_chain(payload, underlying, max_days=60, today=None, asof=None):
 
 def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=None, asof=None):
     url = CBOE_URL.format(sym=symbol)
-    t0 = datetime.now()
+    t0 = time.monotonic()
     try:
         r = http.request("GET", url, headers=UA)
         payload = r if isinstance(r, dict) else json.loads(r)
         raw = r.encode() if isinstance(r, str) else json.dumps(r).encode()
         rows = parse_cboe_chain(payload, symbol, max_days, today, asof)
-        lat = (datetime.now() - t0).total_seconds()
+        lat = time.monotonic() - t0
         if connection is not None:
             save_raw(raw_dir, "cboe-chain", url, str(today), raw, connection)
             if rows:
                 upsert_many(connection, "option_chain", list(rows[0].keys()), rows)
-            record_health(connection, "Flows:CboeChain", True, len(rows), f"{symbol}", lat)
+            record_health(connection, "Flows:CboeChain", True, len(rows), f"{symbol}", lat, asof)
         return {"symbol": symbol, "rows": len(rows)}
     except Exception as exc:
         if connection is not None:
@@ -169,10 +170,17 @@ def parse_occ_series(text, underlying, published_at):
         except (ValueError, IndexError):
             continue
         for cp, oi in (("C", parts[7] if len(parts) > 7 else None), ("P", parts[8] if len(parts) > 8 else None)):
-            out.append({"underlying": underlying, "snapshot_at": published_at, "expiry": expiry,
-                        "strike": strike, "cp": cp,
-                        "oi": int(oi.replace(",", "")) if oi and oi.replace(",", "").isdigit() else None,
-                        "source": "OCC"})
+            out.append(
+                {
+                    "underlying": underlying,
+                    "snapshot_at": published_at,
+                    "expiry": expiry,
+                    "strike": strike,
+                    "cp": cp,
+                    "oi": int(oi.replace(",", "")) if oi and oi.replace(",", "").isdigit() else None,
+                    "source": "OCC",
+                }
+            )
     return out
 
 
@@ -182,11 +190,11 @@ def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None
         if kind == "volume"
         else OCC_OI_URL.format(mdy=day.strftime("%m/%d/%Y"))
     )
-    t0 = datetime.now()
+    t0 = time.monotonic()
     try:
         r = http.request("GET", url, headers=UA)
         text = r if isinstance(r, str) else r.decode("utf-8", "replace")
-        pub = published_at or datetime.now(tz=NY)
+        pub = published_at
         src = "Flows:OCCVolume" if kind == "volume" else "Flows:OCCOpenInterest"
         raw = (
             save_raw(raw_dir, f"occ-{kind}", url, str(day), r.encode() if isinstance(r, str) else r, connection)
@@ -216,9 +224,9 @@ def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None
                 for row in rows:
                     row["raw_file_id"] = raw["raw_file_id"]
                 upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
-        lat = (datetime.now() - t0).total_seconds()
+        lat = time.monotonic() - t0
         if connection is not None:
-            record_health(connection, src, True, len(rows), str(day), lat)
+            record_health(connection, src, True, len(rows), str(day), lat, pub)
         return {"date": str(day), "rows": len(rows)}
     except Exception as exc:
         src = "Flows:OCCVolume" if kind == "volume" else "Flows:OCCOpenInterest"
@@ -233,7 +241,7 @@ def collect_occ_series(http, connection, symbol, raw_dir, published_at=None):
     try:
         r = http.request("GET", url, headers=UA)
         text = r if isinstance(r, str) else r.decode("utf-8", "replace")
-        rows = parse_occ_series(text, symbol, published_at or datetime.now(tz=NY))
+        rows = parse_occ_series(text, symbol, published_at)
         if connection is not None and rows:
             upsert_many(connection, "option_chain", list(rows[0].keys()), rows)
         return {"symbol": symbol, "rows": len(rows)}
@@ -249,7 +257,7 @@ PROSHARES_URL = "https://accounts.profunds.com/etfdata/ByFund/{t}-historical_nav
 SSGA_URL = "https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/navhist-us-en-{t}.xlsx"
 DIREXION_TICKERS = ["SOXL", "SOXS", "TECL", "TECS", "TSLL"]
 PROSHARES_TICKERS = ["TQQQ", "SQQQ", "UPRO", "SPXU", "QLD", "SSO", "USD"]
-SSGA_TICKERS = ["SPY"] + [f"XL{c}" for c in "BCEFIKLPUVY"]
+SSGA_TICKERS = ["SPY", "XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY"]
 
 
 def parse_direxion(text, ticker, published_at):
@@ -360,7 +368,7 @@ def parse_ssga_xlsx(data, ticker, published_at):
 
 
 def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=None):
-    pub = published_at or datetime.now(tz=NY)
+    pub = published_at
     out = {}
     for t in tickers or (DIREXION_TICKERS + PROSHARES_TICKERS + SSGA_TICKERS):
         if t in DIREXION_TICKERS:
@@ -369,7 +377,7 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
             url, parse, src = PROSHARES_URL.format(t=t), "proshares", "Flows:ETFShares:ProShares"
         else:
             url, parse, src = SSGA_URL.format(t=t.lower()), "ssga", "Flows:ETFShares:SSGA"
-        t0 = datetime.now()
+        t0 = time.monotonic()
         try:
             if parse == "ssga":
                 import urllib.request
@@ -388,17 +396,79 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
                 if parse == "proshares"
                 else parse_ssga_xlsx(body, t, pub)
             )
-            lat = (datetime.now() - t0).total_seconds()
+            lat = time.monotonic() - t0
             if connection is not None:
                 save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), body, connection)
                 if rows:
                     upsert_many(connection, "etf_daily", list(rows[0].keys()), rows, "update")
             out[t] = len(rows)
             if connection is not None:
-                record_health(connection, src, True, len(rows), t, lat)
+                record_health(connection, src, True, len(rows), t, lat, pub)
         except Exception as exc:
             log.warning("etf %s failed: %r", t, exc)
             out[t] = 0
             if connection is not None:
-                record_health(connection, src, False, 0, f"{t} {exc!r}")
+                record_health(connection, src, False, 0, f"{t} {exc!r}", now=pub)
     return out
+
+
+CBOE_PC_URL = "https://cdn.cboe.com/data/us/options/market_statistics/daily/{day}_daily_options"
+
+
+def parse_cboe_pc(payload, obs_date, published_at):
+    """Cboe daily market_statistics ratios[] → observations rows."""
+    out = []
+    for r in (payload or {}).get("ratios") or []:
+        name = (r.get("name") or "").strip().lower().replace(" ", "_").replace("/", "_")
+        val = r.get("value")
+        if not name or val is None:
+            continue
+        series = f"cboe_pc_{re.sub(r'[^a-z0-9_]+', '', name)}"
+        try:
+            out.append(
+                {
+                    "series_id": series,
+                    "obs_date": obs_date,
+                    "value": float(val),
+                    "published_at": published_at,
+                    "vintage": "initial",
+                }
+            )
+        except (ValueError, TypeError):
+            continue
+    return out
+
+
+def collect_cboe_pc(http, connection, day, raw_dir, published_at=None):
+    url = CBOE_PC_URL.format(day=day)
+    t0 = time.monotonic()
+    try:
+        r = http.request("GET", url, headers=UA)
+        payload = r if isinstance(r, dict) else json.loads(r)
+        raw = r.encode() if isinstance(r, str) else json.dumps(r).encode()
+        rows = parse_cboe_pc(payload, day, published_at)
+        lat = time.monotonic() - t0
+        if connection is not None:
+            save_raw(raw_dir, "cboe-pc", url, str(day), raw, connection)
+            if rows:
+                catalog = [
+                    {
+                        "series_id": x["series_id"],
+                        "name_zh": x["series_id"],
+                        "unit": "ratio",
+                        "frequency": "daily",
+                        "source": "Cboe",
+                    }
+                    for x in rows
+                ]
+                upsert_many(
+                    connection, "series_catalog", ["series_id", "name_zh", "unit", "frequency", "source"], catalog
+                )
+                upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+            record_health(connection, "Flows:CboePC", True, len(rows), str(day), lat, published_at)
+        return {"date": str(day), "rows": len(rows)}
+    except Exception as exc:
+        if connection is not None:
+            record_health(connection, "Flows:CboePC", False, 0, f"{day} {exc!r}", now=published_at)
+        log.warning("cboe pc %s failed: %r", day, exc)
+        return {"date": str(day), "rows": 0, "error": str(exc)}

@@ -1,5 +1,4 @@
-"""Phase-2 flows collectors — slot-based, separate process, failure-isolated.
-State file tracks completed slots so missed windows are caught up."""
+"""Phase-2 flows collectors — slot-based, separate process, failure-isolated."""
 
 import json
 import time
@@ -12,6 +11,7 @@ from inves_cog.clock import SystemClock
 from inves_cog.flows.collectors import (
     INDEX_SYMS,
     collect_cboe_chain,
+    collect_cboe_pc,
     collect_etf_shares,
     collect_occ,
     collect_occ_series,
@@ -20,6 +20,7 @@ from inves_cog.flows.store import DEFAULT_RAW, polite_http
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
+XCHK_SYMS = ["SPY", "QQQ", "IWM", "SMH"]
 STATE = Path("/home/claudeuser/inves-cog-data/flows/schedule_state.json")
 _UNIVERSE = Path(__file__).resolve().parents[1] / "config" / "universe.yaml"
 
@@ -73,11 +74,20 @@ def _prev_trading_days(day, n=5):
     return out
 
 
+def _etf_done(connection, today):
+    try:
+        r = connection.execute(
+            "SELECT count(*) AS c FROM flows.etf_daily WHERE date=%s AND published_at::date=%s",
+            (today, today),
+        ).fetchone()
+        return bool(r and r["c"])
+    except Exception:
+        return False
+
+
 def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
     local = clock.now_utc().astimezone(NY)
     today = local.date()
-    if not trading_day(today):
-        return {"status": "skipped", "reason": "non-trading day"}
     http = http or polite_http()
     state = _load_state()
     result = {}
@@ -86,38 +96,58 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
         conn = _connection(values)
     try:
         hm = local.strftime("%H:%M")
-        # missed intraday slots can't be replayed (chain is "now") — run only the
-        # latest due slot; earlier ones are marked skipped.
-        due = [sl for sl in _intra_slots(today) if hm >= sl and f"intra:{today}:{sl}" not in state]
-        for sl in due[:-1]:
-            state[f"intra:{today}:{sl}"] = "skipped"
-        if due:
-            slot = due[-1]
-            result[f"intra:{today}:{slot}"] = [
-                collect_cboe_chain(http, conn, s, raw_dir, 60, today) for s in INDEX_SYMS
-            ]
-            state[f"intra:{today}:{slot}"] = True
-        eod_key = f"eod:{today}"
-        if hm >= "16:30" and eod_key not in state:
-            universe = INDEX_SYMS + [t for t in _universe() if t not in INDEX_SYMS]
-            result[eod_key] = [collect_cboe_chain(http, conn, s, raw_dir, None, today) for s in universe]
-            state[eod_key] = True
-        etf_key = f"etf:{today}"
-        if hm >= "17:30" and etf_key not in state:
-            result[etf_key] = collect_etf_shares(http, conn, raw_dir)
-            state[etf_key] = True
+        is_td = trading_day(today)
+        # OCC daily jobs: every day from 07:00 (historical by date → catch-up ok)
         if hm >= "07:00":
             for day in _prev_trading_days(today):
                 for kind, label in (("volume", "occ_vol"), ("oi", "occ_oi")):
                     key = f"{label}:{day}"
                     if key not in state:
-                        result[key] = collect_occ(http, conn, day, raw_dir, kind)
-                        if result[key].get("rows", 0) > 0:
+                        result[key] = collect_occ(http, conn, day, raw_dir, kind, local)
+                        if result[key].get("rows", 0) > 0 or "error" in result[key]:
                             state[key] = True
-                xkey = f"occ_xchk:{day}"
-                if xkey not in state:
-                    result[xkey] = [collect_occ_series(http, conn, s, raw_dir) for s in INDEX_SYMS]
-                    state[xkey] = True
+            xkey = f"occ_xchk:{today}"
+            if xkey not in state:
+                syms = XCHK_SYMS + [t for t in _universe() if t not in XCHK_SYMS]
+                result[xkey] = [collect_occ_series(http, conn, s, raw_dir, local) for s in syms]
+                state[xkey] = True  # note: _SPX dropped (no series-search page)
+        if not is_td:
+            _save_state(state)
+            return {"status": "ok", "at": str(local), "note": "non-trading day: occ only", **result}
+        # intraday: only the slot containing now; within [slot, slot+15min)
+        cur = None
+        for sl in _intra_slots(today):
+            if sl <= hm < (datetime.strptime(sl, "%H:%M") + timedelta(minutes=15)).strftime("%H:%M"):
+                cur = sl
+        if cur:
+            key = f"intra:{today}:{cur}"
+            if key not in state:
+                result[key] = [collect_cboe_chain(http, conn, s, raw_dir, 60, today, local) for s in INDEX_SYMS]
+                state[key] = True
+        if hm >= "16:30":
+            key = f"eod:{today}"
+            if key not in state:
+                universe = INDEX_SYMS + [t for t in _universe() if t not in INDEX_SYMS]
+                result[key] = [collect_cboe_chain(http, conn, s, raw_dir, None, today, local) for s in universe]
+                state[key] = True
+        if hm >= "19:00":
+            key = f"cboe_pc:{today}"
+            if key not in state:
+                result[key] = collect_cboe_pc(http, conn, today, raw_dir, local)
+                if result[key].get("rows", 0) > 0:
+                    state[key] = True
+        # ETF slot 22:30 → retry until file date == today; stale → degraded after 09:00 next day
+        key = f"etf:{today}"
+        if (hm >= "22:30" or (hm < "09:00" and key in state)) and key not in state:
+            result[key] = collect_etf_shares(http, conn, raw_dir, local)
+            if _etf_done(conn, today):
+                state[key] = True
+            elif hm < "09:00":
+                state[f"etf_stale:{today}"] = True
+                from inves_cog.flows.store import record_health
+
+                record_health(conn, "Flows:ETFShares", False, 0, f"files stale, latest != {today}", now=local)
+                state[key] = True
         _save_state(state)
         return {"status": "ok", "at": str(local), **result}
     finally:

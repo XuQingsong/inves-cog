@@ -4,6 +4,7 @@ import gzip
 import hashlib
 import logging
 import time
+from datetime import datetime
 from pathlib import Path
 
 from inves_cog.ingest.http import HTTPClient
@@ -70,10 +71,10 @@ def upsert_many(connection, table, cols, rows, conflict="nothing"):
     return len(rows)
 
 
-def record_health(connection, source, ok, items=0, note="", latency=0.0):
+def record_health(connection, source, ok, items=0, note="", latency=0.0, now=None):
     """Upsert ingest.source_health like phase-1 write_health (no dup key)."""
     try:
-        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        stamp = now.strftime("%Y-%m-%d %H:%M:%S") if now else ""
         connection.execute(
             "INSERT INTO ingest.source_health "
             "(source,last_success_at,last_attempt_at,status,latency_sec,items_last_run,note,consecutive_failures) "
@@ -86,7 +87,16 @@ def record_health(connection, source, ok, items=0, note="", latency=0.0):
             "ELSE ingest.source_health.consecutive_failures+1 END, "
             "last_success_at=CASE WHEN EXCLUDED.status='ok' THEN EXCLUDED.last_success_at "
             "ELSE ingest.source_health.last_success_at END",
-            (source, now if ok else None, now, "ok" if ok else "degraded", latency, items, note[:500], 0 if ok else 1),
+            (
+                source,
+                stamp if ok else None,
+                stamp,
+                "ok" if ok else "degraded",
+                latency,
+                items,
+                note[:500],
+                0 if ok else 1,
+            ),
         )
     except Exception as exc:
         log.warning("health write failed %r", exc)
