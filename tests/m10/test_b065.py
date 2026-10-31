@@ -250,7 +250,7 @@ def test_wide_snapshots_absent_keeps_close(pages):
 
 def test_dgs2_close_date_label(pages):
     html = _get(pages, "/").text
-    assert "收盘 10/" in html and "前一日" not in html.split("滚动新闻")[0].split("美债 2 年")[1][:200]
+    assert "收盘 10/" in html and "前一日" not in html.split("美债 2 年")[1][:200]
 
 
 def test_session_aware_banners():

@@ -561,8 +561,9 @@ def test_g11_pages_stay_local_and_read_only(pages):
     paths = ("/", "/stocks", "/account", "/trust", "/s/AVGO", "/s/LITE")
     blob = "".join(_get(pages, path).text for path in paths)
     assert "http://" not in blob and "https://" not in blob
-    assert blob.count("<script") == len(paths)
-    assert 'src="/investor.js"' in blob and "<script>" not in blob
+    assert blob.count('src="/investor.js"') == len(paths)
+    assert 'src="/investor.js"' in blob and 'src="/lightweight-charts.js"' in blob
+    assert "<script>" not in blob
     with TestClient(create_app(dsn=pages["dsn"], clock=CLOCK)) as client:
         script = client.get("/investor.js")
         assert script.status_code == 200

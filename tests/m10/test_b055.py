@@ -344,7 +344,7 @@ def test_w1_stock_news_count_and_preview(pages):
     # B-063: published-in-window news stays visible even when ingested after the cutoff.
     # B-062: the stock table dropped its news column; the stock page lists the news instead.
     html = _get(pages, "/s/NVDA").text
-    cell = html.split("最近新闻", 1)[1]
+    cell = html.split("当日新闻", 1)[1]
     assert "英伟达获得大单" in cell and "路透" in cell and "2036-10-22 22:00" in cell
     assert "NVDA beats" in cell and "Wire" in cell and "2036-10-23 02:30" in cell
     assert "截点后不计入" not in html and "下一交易日" not in html
