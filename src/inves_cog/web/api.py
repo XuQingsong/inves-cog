@@ -136,12 +136,17 @@ def create_app(dsn=None, clock=None):
 
 
 _INVESTOR_JS = Path(__file__).with_name("investor.js")
+_LWC_JS = Path(__file__).with_name("lightweight-charts.js")
 
 
 def _register_html(app, call, clock):
     @app.get("/investor.js")
     def investor_script():
         return Response(_INVESTOR_JS.read_text(encoding="utf-8"), media_type="text/javascript; charset=utf-8")
+
+    @app.get("/lightweight-charts.js")
+    def lwc_script():
+        return Response(_LWC_JS.read_text(encoding="utf-8"), media_type="text/javascript; charset=utf-8")
 
     def show(builder, requested, **extra):
         payload = call(builder, requested or latest_visible_session(clock), **extra)

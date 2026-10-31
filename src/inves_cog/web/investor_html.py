@@ -1376,85 +1376,43 @@ def _price_bar(payload):
     )
 
 
+SEGMENT_LABELS = {
+    "cpu_pc": "CPU 与电脑",
+    "ai_accelerators": "AI 加速卡",
+    "memory": "存储与内存",
+    "eda_equipment": "EDA 与设备",
+    "networking": "网络",
+    "software": "软件",
+}
+
+
 def _chart_svg(payload, width=1180, height=340):
     rows = payload.get("chart") or []
     if len(rows) < 2:
-        return ""
+        return '<div class="dim">没有走势数据</div>'
     marks = {m["d"]: "财报" for m in (payload.get("earnings_marks") or []) if isinstance(m, dict)}
     for d in payload.get("anomaly_marks") or []:
         marks.setdefault(d, "异常")
-    closes = [r["c"] for r in rows]
-    lo, hi = min(closes), max(closes)
-    span = hi - lo or 1
-    n = len(closes)
-    xs = [i * (width - 60) / (n - 1) + 40 for i in range(n)]
-    ys = [height - 30 - (c - lo) / span * (height - 60) for c in closes]
-    pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in zip(xs, ys, strict=True))
-
-    # MA50/MA200
-    def ma(k):
-        if n < k:
-            return ""
-        vals = [sum(closes[max(0, i - k + 1) : i + 1]) / len(closes[max(0, i - k + 1) : i + 1]) for i in range(n)]
-        return " ".join(f"{xs[i]:.1f},{height - 30 - (vals[i] - lo) / span * (height - 60):.1f}" for i in range(n))
-
-    dots = []
-    for i, r in enumerate(rows):
-        if r["d"] in marks:
-            color = "var(--tp)" if marks[r["d"]] == "财报" else "var(--alert)"
-            dots.append(
-                f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="4" fill="{color}">'
-                f"<title>{r['d']} {marks[r['d']]} ${r['c']:.2f}</title></circle>"
-            )
-    # four embedded ranges; JS toggles which slice renders
-    ranges = {"1月": 22, "3月": 66, "6月": 132, "1年": n}
-    btns = "".join(
-        f'<button class="rc" onclick="InvestorChart.range(this,{k})">{label}</button>' for label, k in ranges.items()
-    )
-    price_dots = "".join(
-        f'<circle class="pt" cx="{x:.1f}" cy="{y:.1f}" r="3" fill="transparent">'
-        f"<title>{r['d']} ${r['c']:.2f}</title></circle>"
-        for x, y, r in zip(xs, ys, rows, strict=True)
-    )
     data_json = escape(json.dumps(rows, ensure_ascii=False), quote=True)
     mark_json = escape(json.dumps(marks, ensure_ascii=False), quote=True)
     intraday = payload.get("intraday_series") or []
-    mini = ""
-    if len(intraday) > 1:
-        ps = [p["p"] for p in intraday]
-        mlo, mhi = min(ps), max(ps)
-        mspan = mhi - mlo or 1
-        mpts = " ".join(
-            f"{40 + i * 300 / (len(ps) - 1):.0f},{70 - (p - mlo) / mspan * 50:.0f}" for i, p in enumerate(ps)
-        )
-        mini = (
-            '<div style="width:360px;margin-left:auto"><div class="dim small">当日分钟</div>'
-            f'<svg viewBox="0 0 360 80" style="width:360px">'
-            f'<polyline points="{mpts}" fill="none" stroke="var(--tp)" stroke-width="1.5"/></svg></div>'
-        )
-    return (
-        f'<div class="chart-btns">{btns}</div>'
-        f"<svg class='chart' id='dchart' data-rows='{data_json}' data-marks='{mark_json}'"
-        f" viewBox='0 0 {width} {height}' style='width:100%'>"
-        f'<text x="0" y="34" class="ax">${hi:,.2f}</text><text x="0" y="{height - 26}" class="ax">${lo:,.2f}</text>'
-        f'<text x="{width - 4}" y="{ys[-1] - 8:.1f}" text-anchor="end" class="ax">${closes[-1]:,.2f}</text>'
-        f'<polyline points="{pts}" fill="none" stroke="var(--brand)" stroke-width="2"/>'
-        f'<polyline points="{ma(50)}" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
-        f'<polyline points="{ma(200)}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>'
-        f"{''.join(dots)}{price_dots}</svg>"
-        '<div class="dim small">折线为日收盘；虚线为 50 / 200 日均线；标记点为财报日与异常日，悬停看详情。</div>' + mini
+    intraday_json = escape(json.dumps(intraday, ensure_ascii=False), quote=True)
+    ranges = {"1月": 22, "3月": 66, "6月": 132, "1年": 252, "全部": 0}
+    btns = "".join(
+        f'<button class="rc{" on" if label == "6月" else ""}"'
+        f' onclick="InvestorChart.range(this,{k!r})">{label}</button>'
+        for label, k in ranges.items()
     )
-
-
-SEGMENT_LABELS = {
-    "hyperscaler": "云厂商与 AI 云",
-    "compute": "算力芯片",
-    "foundry_equipment": "代工与设备",
-    "memory": "存储",
-    "server_network": "服务器与网络",
-    "power": "电力与散热",
-    "cpu_pc": "CPU 与 PC",
-}
+    btns += '<button class="rc" onclick="InvestorChart.range(this,\'day\')">当日</button>'
+    return (
+        '<script src="/lightweight-charts.js"></script>'
+        f'<div class="chart-btns">{btns}</div>'
+        '<div id="dchart-legend" class="dim small"></div>'
+        f"<div id=\"dchart\" class=\"lwc\" data-rows='{data_json}' data-marks='{mark_json}'"
+        f" data-intraday='{intraday_json}'></div>"
+        '<div class="dim small">日 K 线 + 成交量 + 50/200 日均线；标记点为财报日与异常日；'
+        "当日页签为分钟走势。</div>"
+    )
 
 
 def _peers_module(payload):
@@ -1584,7 +1542,9 @@ def _stock(payload):
         + f'<span class="k">下次财报</span><span>{_next_earn(payload)}</span></div>'
         + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div>'
         + '<div class="grid g2 sec"><div class="card"><h2>新闻与事件</h2>'
+        + _confirmed_events(payload)
         + _stock_news(payload)
+        + _earnings_hist_module(payload)
         + _stock_feed(payload)
         + '</div><div class="card"><h2>基本面与估值</h2>'
         + f'<p style="margin:0">{_text(_valuation(payload.get("valuation"), full=True))}</p>'
@@ -1646,6 +1606,25 @@ def _stock_position(payload, position, held):
             f'<p style="margin:0">{_text(position.get("blocker") or MISSING)}</p></div>'
         )
     return f'<div class="card sec"><h2>我的仓位</h2>{_miss()}</div>'
+
+
+def _confirmed_events(payload):
+    events = payload.get("news_events") or []
+    strong = [e for e in events if (e.get("importance") or 0) >= 70]
+    if not strong:
+        return ""
+    items = "".join(
+        f'<div class="hl-card" style="border-left:4px solid var(--alert)">'
+        f"{_kind_chip(e.get('kind'))} "
+        + (
+            f'<a href="{e["url"]}" target="_blank" rel="noopener">{_text(e.get("headline") or "")}</a>'
+            if e.get("url")
+            else _text(e.get("headline") or "")
+        )
+        + f'<span class="dim"> {_text(str(e.get("published_at") or "")[:16])}</span></div>'
+        for e in strong[:5]
+    )
+    return f'<div class="sec"><h3>已确认事件</h3>{items}</div>'
 
 
 def _stock_news(payload):
@@ -2565,6 +2544,117 @@ def _earnings_cards_module(payload):
         detail = "".join(f'<div class="row">{line if "<" in line else _text(line)}</div>' for line in lines)
         parts.append(f"<details><summary>{summ} {chips}</summary>{detail}</details>")
     return '<div class="card sec cat-earnings" id="earnings"><h2>财报</h2>' + "".join(parts) + "</div>"
+
+
+def _human(v):
+    v = float(v)
+    return f"{v / 1e9:.1f}B" if v >= 1e9 else f"{v / 1e6:.1f}M" if v >= 1e6 else f"{v:,.0f}"
+
+
+def _key_stats(payload):
+    """§8 key-stats grid under the price bar."""
+    an = payload.get("analyst") or {}
+    st = payload.get("bar_stats") or {}
+    cells = [
+        ("市值", _human(an.get("market_cap")) if an.get("market_cap") else "暂缺"),
+        ("前瞻市盈率", f"{an['forward_pe']:.1f}" if an.get("forward_pe") else "暂缺"),
+        ("52周区间", f"{st['lo52']:,.2f}–{st['hi52']:,.2f}" if st.get("hi52") else "暂缺"),
+        (
+            "平均量（20日）",
+            _human(st.get("vol") / st["vol_ratio"]) if st.get("vol") and st.get("vol_ratio") else "暂缺",
+        ),
+        ("下次财报", _text(str(st.get("next_earnings") or "暂缺"))),
+        ("一致预期 EPS", _text(str(payload.get("eps_cq") or "暂缺"))),
+        (
+            "目标价均值",
+            f"{an['pt_mean']:,.2f}（{an['pt_low']:,.0f}–{an['pt_high']:,.0f} · {an.get('opinions') or '—'} 家）"
+            if an.get("pt_mean")
+            else "暂缺",
+        ),
+    ]
+    return (
+        '<div class="card sec"><div class="kv" style="grid-template-columns:repeat(4,1fr)">'
+        + "".join(f'<span class="k">{k}</span><span>{v}</span>' for k, v in cells)
+        + "</div></div>"
+    )
+
+
+def _ratings_module(payload):
+    trend = (payload.get("analyst") or {}).get("trend") or {}
+    cur = next((p for p in (trend.get("trend") or []) if p.get("period") == "0m"), {})
+    prev = next((p for p in (trend.get("trend") or []) if p.get("period") == "-1m"), {})
+    if not cur:
+        return '<div class="card sec"><h2>评级分布</h2><p class="dim">暂缺</p></div>'
+    names = [("strongBuy", "强买"), ("buy", "买"), ("hold", "持有"), ("sell", "卖"), ("strongSell", "强卖")]
+    mx = max((cur.get(k) or 0) for k, _ in names) or 1
+    rows = "".join(
+        f'<div class="row"><span style="width:42px">{lab}</span>'
+        f'<span style="display:inline-block;height:10px;width:{(cur.get(k) or 0) / mx * 200:.0f}px;'
+        'background:var(--brand)"></span>'
+        f' <b>{cur.get(k) or 0}</b> <span class="dim">上月 {prev.get(k) or 0}</span></div>'
+        for k, lab in names
+    )
+    return (
+        f'<div class="card sec"><h2>评级分布</h2>{rows}'
+        '<p class="dim small">数据源只提供机构名，不含分析师个人姓名。</p></div>'
+    )
+
+
+def _actions_module(payload):
+    rows = payload.get("analyst_actions") or []
+    if not rows:
+        return (
+            '<div class="card sec"><h2>机构评级与目标价</h2>'
+            '<p class="dim">评级调整数据尚未采集——首轮采集后这里会列出各家机构最近两次调整。</p></div>'
+        )
+    items = []
+    seen = {}
+    for r in rows:
+        key = r["firm"]
+        if seen.get(key, 0) >= 2:
+            continue
+        seen[key] = seen.get(key, 0) + 1
+        arrow = "↓" if r.get("action") in ("down", "reit") else "↑" if r.get("action") == "up" else "→"
+        cls = "down" if arrow == "↓" else "up" if arrow == "up" else ""
+        pt = ""
+        if r.get("current_pt"):
+            pt = f" · 目标价 {r.get('prior_pt') or '前值暂缺'} → {r['current_pt']}"
+        items.append(
+            f'<div class="row"><span class="dim">{r["action_date"]}</span> {r["firm"]} '
+            f'<span class="{cls}">{arrow}</span> {r.get("from_grade") or "—"} → {r.get("to_grade") or "—"}{pt}</div>'
+        )
+    ups = sum(1 for r in rows if r.get("action") == "up")
+    downs = sum(1 for r in rows if r.get("action") == "down")
+    return (
+        '<div class="card sec"><h2>机构评级与目标价'
+        f'<span class="stamp">近30天 ↑{ups} ↓{downs}</span></h2>'
+        + "".join(items[:10])
+        + (
+            f'<details><summary class="dim">更多 {len(items) - 10} 条</summary>' + "".join(items[10:]) + "</details>"
+            if len(items) > 10
+            else ""
+        )
+        + '<p class="dim small">数据源只提供机构名，不含分析师个人姓名。</p></div>'
+    )
+
+
+def _earnings_hist_module(payload):
+    rows = payload.get("earnings_hist") or []
+    if not rows:
+        return ""
+    trs = "".join(
+        f"<tr><td>{r['q']}</td><td class='num'>{r.get('est') if r.get('est') is not None else '—'}</td>"
+        f"<td class='num'>{r.get('act') if r.get('act') is not None else '—'}</td>"
+        f"<td class='num'>{(r['gap'] or 0):+.0f}%</td>"
+        f"<td class='num'>{_pct(r.get('next_day'), 1) if r.get('next_day') is not None else '—'}</td></tr>"
+        for r in reversed(rows)
+    )
+    return (
+        '<div class="card sec"><h2>历次财报</h2>'
+        '<table class="tbl"><tr><th>季度</th><th>预期 EPS</th><th>实际 EPS</th><th>超出</th><th>次日涨跌</th></tr>'
+        + trs
+        + "</table></div>"
+    )
 
 
 def _stock_today(payload):

@@ -1,6 +1,6 @@
 """A028 daily fundamentals snapshots, independent of the A020 estimate quota."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import yaml
@@ -59,6 +59,7 @@ def collect_consensus(*, clock, repository, tickers, provider):
             cy, ny = repository.annual_years(ticker, now)
             snapshot = provider.collect(ticker, fy_cy=cy, fy_ny=ny)
             repository.put_snapshot(snapshot)
+            put_analyst_actions(repository.connection, ticker, snapshot)
             processed += 1
         except Exception as exc:
             failed.append({"ticker": ticker, "error_type": type(exc).__name__})
@@ -68,6 +69,28 @@ def collect_consensus(*, clock, repository, tickers, provider):
         "note": f"{len(failed)} symbols failed" if failed else None,
         "failures": failed,
     }
+
+
+def put_analyst_actions(connection, ticker, snapshot):
+    """Persist Yahoo upgradeDowngradeHistory rows into ingest.analyst_actions."""
+    for r in (snapshot.get("raw") or {}).get("upgrade_history") or []:
+        try:
+            when = datetime.fromtimestamp(int(r["epochGradeDate"]), timezone.utc).date()
+        except (TypeError, ValueError):
+            continue
+        connection.execute(
+            "INSERT INTO ingest.analyst_actions "
+            "(ticker, action_date, firm, action, from_grade, to_grade) "
+            "VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
+            (
+                ticker,
+                when,
+                r.get("firm") or "",
+                str(r.get("action") or "").lower(),
+                r.get("fromGrade"),
+                r.get("toGrade"),
+            ),
+        )
 
 
 def scheduled(*, clock, values, connect=None):

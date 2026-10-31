@@ -127,7 +127,10 @@ class YFinance:
             try:
                 data = self.http.get(
                     f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/{ticker}",
-                    params={"modules": "earningsTrend,financialData,earningsHistory"},
+                    params={
+                        "modules": "earningsTrend,financialData,earningsHistory,"
+                        "upgradeDowngradeHistory,recommendationTrend"
+                    },
                 )
                 tables = tables_from_yahoo_json(data)
                 return snapshot_from_tables(tables, ticker=ticker, clock=self.clock, fy_cy=fy_cy, fy_ny=fy_ny)
@@ -165,7 +168,13 @@ def tables_from_yahoo_json(data):
             except (ValueError, RecursionError):
                 pass
         elif isinstance(value, dict):
-            for key in ("earningsTrend", "financialData", "earningsHistory"):
+            for key in (
+                "earningsTrend",
+                "financialData",
+                "earningsHistory",
+                "upgradeDowngradeHistory",
+                "recommendationTrend",
+            ):
                 if isinstance(value.get(key), dict):
                     found[key] = raw(value[key])
             for child in value.values():
@@ -191,6 +200,19 @@ def tables_from_yahoo_json(data):
         ]:
             tables[target][period] = row.get(key, {})
     financial = found.get("financialData", {})
+    tables["analyst"] = {
+        "targetLowPrice": financial.get("targetLowPrice"),
+        "targetHighPrice": financial.get("targetHighPrice"),
+        "targetMeanPrice": financial.get("targetMeanPrice"),
+        "targetMedianPrice": financial.get("targetMedianPrice"),
+        "numberOfAnalystOpinions": financial.get("numberOfAnalystOpinions"),
+        "recommendationTrend": found.get("recommendationTrend", {}),
+        "marketCap": financial.get("marketCap"),
+        "forwardPE": financial.get("forwardPE"),
+    }
+    tables["upgrade_history"] = [
+        r for r in found.get("upgradeDowngradeHistory", {}).get("history", []) if r.get("epochGradeDate")
+    ]
     tables["analyst_price_targets"] = {
         "mean": financial.get("targetMeanPrice"),
         "median": financial.get("targetMedianPrice"),

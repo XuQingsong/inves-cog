@@ -771,6 +771,9 @@ def page_brief_stock(connection, day, clock, symbol):
         "peers": _safe(connection, lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
         "bar_stats": _safe(connection, lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
         "intraday_series": _safe(connection, lambda: _intraday_series(connection, symbol, day), []),
+        "analyst": _safe(connection, lambda: _analyst_summary(connection, symbol), {}),
+        "analyst_actions": _safe(connection, lambda: _analyst_actions(connection, symbol, day), []),
+        "earnings_hist": _safe(connection, lambda: _earnings_hist(connection, symbol, bars), []),
         "news_modules": {
             "live": _safe(connection, lambda: [dict(r) for r in _live_anomalies(connection, day, False)], [])
         },
@@ -1024,3 +1027,67 @@ def _intraday_series(connection, symbol, day):
         (symbol, day),
     ).fetchall()
     return [{"t": str(r["as_of"]), "p": float(r["last"])} for r in rows if r["last"] is not None]
+
+
+def _analyst_summary(connection, symbol):
+    """Latest consensus raw.analyst: target prices + rating counts."""
+    row = connection.execute(
+        "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    raw = (row or {}).get("raw") or {}
+    analyst = raw.get("analyst") or {}
+    return {
+        "pt_low": analyst.get("targetLowPrice"),
+        "pt_high": analyst.get("targetHighPrice"),
+        "pt_mean": analyst.get("targetMeanPrice"),
+        "pt_median": analyst.get("targetMedianPrice"),
+        "opinions": analyst.get("numberOfAnalystOpinions"),
+        "trend": analyst.get("recommendationTrend") or {},
+        "market_cap": analyst.get("marketCap"),
+        "forward_pe": analyst.get("forwardPE"),
+    }
+
+
+def _analyst_actions(connection, symbol, day):
+    try:
+        return connection.execute(
+            "SELECT action_date, firm, action, from_grade, to_grade, pt_action, prior_pt, current_pt, source "
+            "FROM ingest.analyst_actions WHERE ticker=%s AND action_date<=%s ORDER BY action_date DESC LIMIT 60",
+            (symbol, day),
+        ).fetchall()
+    except Exception:
+        return []
+
+
+def _earnings_hist(connection, symbol, bars):
+    row = connection.execute(
+        "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    hist = ((row or {}).get("raw") or {}).get("earnings_history") or []
+    closes = {str(r["trade_date"]): r["close"] for r in bars}
+    dates = sorted(closes)
+    out = []
+    for q in hist[-8:]:
+        qd = str(q.get("quarter_date") or "")
+        # next-day move: closest bar after the quarter's report — approximate via next bar ≥ report date
+        est, act = q.get("epsEstimate"), q.get("epsActual")
+        out.append({"q": qd, "est": est, "act": act, "gap": (act - est) / abs(est) * 100 if est else None})
+    # next-day return keyed on earnings calendar dates if available
+    try:
+        cal = connection.execute(
+            "SELECT report_date FROM ingest.earnings_calendar WHERE ticker=%s ORDER BY report_date DESC LIMIT 8",
+            (symbol,),
+        ).fetchall()
+        next_ret = {}
+        for c in cal:
+            d = str(c["report_date"])
+            i = next((k for k, x in enumerate(dates) if x >= d), None)
+            if i is not None and i + 1 < len(dates) and closes[dates[i]] and closes[dates[i + 1]]:
+                next_ret[d] = closes[dates[i + 1]] / closes[dates[i]] - 1
+        for q in out:
+            q["next_day"] = next_ret.get(q["q"]) or next_ret.get(min((d for d in next_ret if d >= q["q"]), default=""))
+    except Exception:
+        pass
+    return out
