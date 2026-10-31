@@ -167,6 +167,10 @@ def test_key_stats_and_earnings_hist():
     html = _key_stats({"analyst": {"pt_mean_col": 328.95, "coverage": 51.0, "eps_cq": 2.47325}})
     assert "$328.95" in html and "51 家" in html and "2.47" in html
     hist = _earnings_hist_module(
-        {"earnings_hist": [{"q": "2026-09-30", "est": 1.0, "act": 1.1, "gap": 10.0, "next_day": None, "report_date": None}]}
+        {
+            "earnings_hist": [
+                {"q": "2026-09-30", "est": 1.0, "act": 1.1, "gap": 10.0, "next_day": None, "report_date": None}
+            ]
+        }
     )
     assert "+10.0%" in hist and "次日涨跌" in hist and "日期未知" in hist and "—" in hist
