@@ -240,17 +240,19 @@ def _market(payload):
     if spread is not None:
         styles += f'<span class="chip ok">板块分化 <span class="num">{float(spread):.1f}σ</span></span>'
     return (
-        _crumb(f"市场总览 / {_text(payload.get('date'))}")
-        + f"<h1>判断：{_text(judgment)}</h1>"
+        _tape_module(payload)
+        + _crumb(f"市场总览 / {_text(payload.get('date'))}")
+        + (_state_head(payload) or f"<h1>判断：{_text(judgment)}</h1>")
         + f'<p class="sub">{_text(_lead(payload))}</p>'
         + _carry_banner(payload)
         + _highlights_module(payload)
+        + _market3_module(payload)
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
         + _live_module(payload)
         + _earnings_cards_module(payload)
         + _movers_module(payload)
-        + _ticker_strip(payload)
+        + ("" if payload.get("tape") else _ticker_strip(payload))
         + _sector_strip(payload)
         + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + _theme_news_module(payload)
@@ -2542,156 +2544,6 @@ def _highlights_module(payload):
             f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div></div>'
         )
     return '<div class="card sec"><h2>今日要点</h2><div class="grid g2">' + "".join(items) + "</div></div>"
-
-
-def _live_module(payload):
-    rows = (payload.get("news_modules") or {}).get("live") or []
-    if not rows:
-        return ""
-    body = []
-    for r in rows:
-        scope = {"stock": "个股", "basket": "板块", "market": "市场"}.get(r["scope"], r["scope"])
-        name = r.get("basket_name") or r["subject"]
-        link = _tk(r["subject"]) if r["scope"] == "stock" else _text(name)
-        cur = r.get("last_ret")
-        peak = r.get("peak_ret")
-        cur_html = (
-            f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%</span>' if cur is not None else ""
-        )
-        px_html = f"${r['last_px']:,.2f}" if r.get("last_px") is not None else "—"
-        fs = r.get("first_seen_at")
-        when = (
-            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}"
-            if hasattr(fs, "astimezone")
-            else ""
-        )
-        sev_cls, sev_label = _severity(r)
-        faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
-        cause_html = "原因未明"
-        if r.get("cause_event_id"):
-            lag = r.get("cause_lag_minutes")
-            if lag is not None and lag < 0:
-                lag_txt = f"股价先动，新闻晚 {abs(lag):.0f} 分钟入库"
-            elif lag is not None and lag >= 120:
-                lag_txt = f"事件后约 {round(lag / 60)} 小时{_prev_session_tag(r)}"
-            elif lag is not None:
-                lag_txt = f"事件后 {lag:.0f} 分钟"
-            else:
-                lag_txt = ""
-            cause_html = (
-                f"{_kind_chip(r.get('cause_kind'))}"
-                f'<span class="trunc" title="{_text(r.get("cause_headline") or "")}">'
-                f"{_text(r.get('cause_headline') or r['cause_event_id'])}</span>"
-                f'<span class="dim"> {lag_txt}</span>'
-            )
-        members = ""
-        if r["scope"] == "basket" and r.get("members"):
-            parts = " ".join(
-                f"{_tk(t)} <span class='num'>{v * 100:+.1f}%</span>" for t, v in (r["members"] or {}).items()
-            )
-            members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
-        badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
-        body.append(
-            f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
-            f"<td class='num'>{px_html}</td>"
-            f"<td class='num'>{cur_html}</td><td class='num'>{_pct(peak, 1) if peak is not None else ''}</td>"
-            f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
-        )
-    return (
-        '<div class="card sec cat-anomaly" id="live"><h2>实时异常'
-        '<span class="stamp">' + _text(str(payload.get("et_now") or "")) + " ET</span></h2>"
-        '<table class="tbl"><tr><th>层级</th><th>对象</th><th>涨跌</th><th>峰值</th><th>首次出现</th><th>起因</th></tr>'
-        + "".join(body)
-        + "</table></div>"
-    )
-
-
-def _tape_module(payload):
-    rows = payload.get("tape") or []
-    if not rows:
-        return ""
-
-    def tier(mult):
-        return 4 if mult >= 2 else 3 if mult >= 1.5 else 2 if mult >= 1 else 1 if mult >= 0.5 else 0
-
-    cells = []
-    for r in rows:
-        mult = r.get("mult") or 0
-        if r.get("ret") is not None:
-            cls = "down" if r["ret"] < 0 else "up"
-            val = f"{r['ret'] * 100:+.2f}%"
-        else:
-            cls = "down" if (r.get("chg_bp") or 0) < 0 else "up"
-            val = f"{r['chg_bp']:+.0f}bp"
-        t = tier(mult)
-        style = f"t{t}{'n' if cls == 'down' else 'p'}"
-        bold = " font-weight:700" if t >= 3 else ""
-        cells.append(
-            f'<a class="tape-item {style}" href="/s/{r["sym"]}" title="{_text(r["name"])} · '
-            f'{_text(str(r.get("as_of") or "")[:16])} · {r.get("session") or ""}" style="{bold}">'
-            f'{_text(r["name"])} <span class="num">{val}</span></a>'
-        )
-    strip = "".join(cells)
-    return (
-        '<div class="tape"><div class="tape-track">' + strip + '<span class="tape-gap"></span>' + strip + "</div></div>"
-    )
-
-
-def _state_head(payload):
-    st = payload.get("state") or {}
-    if not st.get("sentence"):
-        return ""
-    detail = (
-        f"平时波动（20日日收益标准差）：标普 {((st.get('spy_sig') or 0) * 100):.2f}%，"
-        f"纳指 {((st.get('qqq_sig') or 0) * 100):.2f}%；"
-        "分档：平静 <1 倍，明显波动 1–2 倍，剧烈 ≥2 倍（取标普/纳指较大者）；"
-        "方向由涨跌家数与领先板块决定；主因只取已对上事件的板块/市场异常，没有则写“原因未明”。"
-    )
-    return (
-        f'<h1 class="mono">{_text(st["sentence"])}</h1>'
-        f'<details class="dim small" style="margin:-6px 0 8px"><summary>依据与口径</summary>'
-        f'<p style="margin:4px 0">{_text(detail)}</p></details>'
-    )
-
-
-def _highlights_module(payload):
-    """今日要点: top-5 cards sorted major>watch then |z|; sources are the
-    active anomalies + near-term core earnings already in the payload."""
-    live = (payload.get("news_modules") or {}).get("live") or []
-    cards_in = (payload.get("news_modules") or {}).get("earnings_cards") or []
-    picks = [r for r in live if r.get("status") == "active" and (r.get("peak_z") or 0) != 0]
-    picks.sort(key=lambda r: (0 if abs(r.get("peak_z") or 0) >= 5 else 1, -abs(r.get("peak_z") or 0)))
-    items = []
-    for r in picks[:5]:
-        sev_cls, sev_label = _severity(r)
-        subj = r.get("basket_name") or r["subject"]
-        link = _tk(r["subject"]) if r["scope"] == "stock" else _text(subj)
-        peak = r.get("peak_ret")
-        px_txt = f"${r['last_px']:,.2f} " if r.get("last_px") is not None else ""
-        if r["scope"] == "basket" and r.get("members"):
-            worst = min((r["members"] or {}).items(), key=lambda kv: kv[1])
-            cause = _text(f"{len(r['members'])} 家 · 最弱 {worst[0]} {worst[1] * 100:+.1f}%")
-        else:
-            cause = _text((r.get("cause_headline") or "原因未明")[:60])
-        items.append(
-            f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
-            f'<span class="who">{link}</span>'
-            f'<div class="num {"down" if (peak or 0) < 0 else "up"}">{px_txt}{_pct(peak, 1)}</div>'
-            f'<div class="cause trunc" title="{cause}">{cause}</div></div>'
-        )
-    for c in cards_in:
-        if len(items) >= 5:
-            break
-        if c.get("stage") == "upcoming" and c.get("report_date"):
-            when = "盘后" if c.get("report_time") == "post" else "盘前" if c.get("report_time") == "pre" else ""
-            items.append(
-                f'<div class="hl-card"><span class="badge sev-watch">关注</span> '
-                f'<span class="who">{_tk(c["ticker"])}</span>'
-                f'<div class="cause">财报 {c["report_date"]} {when}</div></div>'
-            )
-    if not items:
-        items.append('<div class="dim">今天没有需要重点关注的异常</div>')
-    return '<div class="card sec cat-anomaly"><h2>今日要点</h2><div class="hl-cards">' + "".join(items) + "</div></div>"
 
 
 def _facts_chips(facts):
