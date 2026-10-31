@@ -2486,7 +2486,7 @@ def _market3_module(payload):
             % (
                 r["sym"],
                 _text(r["name"]),
-                f"{r['px']:,.2f}",
+                (f"{r['px']:,.2f}" if r.get("px") is not None else "—"),
                 _move_tier(r),
                 _move_text(r),
             )
