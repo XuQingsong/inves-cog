@@ -1511,6 +1511,7 @@ def _stock(payload):
         + f'<h1 class="mono" style="margin:0">{_text(symbol)}</h1>{chips}</div>'
         + f'<p class="sub" style="margin-top:6px">{_text(payload.get("oneliner"))}</p>'
         + _price_bar(payload)
+        + _key_stats(payload)
         + '<div class="card sec cat-market"><div style="display:flex;justify-content:space-between">'
         + '<h2>走势与位置</h2><span class="small muted">日收盘 · 均线与关键价位</span></div>'
         + (_chart_svg(payload) or _chart(trend, position, payload))
