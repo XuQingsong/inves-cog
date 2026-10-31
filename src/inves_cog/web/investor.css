@@ -267,3 +267,7 @@ details.fold{border:1px solid var(--line2);border-radius:12px;padding:8px 14px;m
 .hl-card{background:var(--card);border:1px solid var(--line2);border-radius:12px;padding:12px 14px}
 .hl-card .who{font-size:15px;font-weight:650}
 .hl-card .cause{font-size:12px;color:var(--ink2);margin-top:4px}
+.chart-btns{display:flex;gap:6px;margin:4px 0 8px}
+.chart-btns .rc{border:1px solid var(--line,#ddd);background:#fff;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer}
+.chart-btns .rc.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+svg.chart .ax{font:11px var(--mono);fill:var(--muted)}

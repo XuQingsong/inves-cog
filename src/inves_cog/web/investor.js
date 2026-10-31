@@ -374,7 +374,9 @@ var InvestorChart = {
       }
       return pts.join(" ");
     }
-    var out = '<polyline points="' + xs.map(function (x, i) { return x.toFixed(1) + "," + ys[i].toFixed(1); }).join(" ") + '" fill="none" stroke="var(--brand)" stroke-width="2"/>'
+    var out = '<text x="0" y="34" class="ax">$' + hi.toFixed(2) + '</text><text x="0" y="' + (h - 26) + '" class="ax">$' + lo.toFixed(2) + '</text>'
+      + '<text x="' + (w - 4) + '" y="' + (ys[n - 1] - 8).toFixed(1) + '" text-anchor="end" class="ax">$' + closes[n - 1].toFixed(2) + '</text>'
+      + '<polyline points="' + xs.map(function (x, i) { return x.toFixed(1) + "," + ys[i].toFixed(1); }).join(" ") + '" fill="none" stroke="var(--brand)" stroke-width="2"/>'
       + '<polyline points="' + ma(50) + '" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
       + '<polyline points="' + ma(200) + '" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>';
     sub.forEach(function (r, i) {

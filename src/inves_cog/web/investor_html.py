@@ -1435,7 +1435,9 @@ def _chart_svg(payload, width=1180, height=340):
     return (
         f'<div class="chart-btns">{btns}</div>'
         f"<svg class='chart' id='dchart' data-rows='{data_json}' data-marks='{mark_json}'"
-        f" viewBox='0 0 {width} {height}' preserveAspectRatio='none'>"
+        f" viewBox='0 0 {width} {height}' style='width:100%'>"
+        f'<text x="0" y="34" class="ax">${hi:,.2f}</text><text x="0" y="{height - 26}" class="ax">${lo:,.2f}</text>'
+        f'<text x="{width - 4}" y="{ys[-1] - 8:.1f}" text-anchor="end" class="ax">${closes[-1]:,.2f}</text>'
         f'<polyline points="{pts}" fill="none" stroke="var(--brand)" stroke-width="2"/>'
         f'<polyline points="{ma(50)}" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
         f'<polyline points="{ma(200)}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>'
@@ -1539,12 +1541,17 @@ def _stock(payload):
         + '<div style="display:flex;gap:12px;align-items:baseline;margin-top:8px;flex-wrap:wrap">'
         + f'<h1 class="mono" style="margin:0">{_text(symbol)}</h1>{chips}</div>'
         + f'<p class="sub" style="margin-top:6px">{_text(payload.get("oneliner"))}</p>'
-        + '<div class="grid g-main sec"><div class="card"><div style="display:flex;justify-content:space-between">'
-        + '<h2>走势与位置</h2><span class="small muted">近 60 个交易日收盘；水平线为当前均线与关键价位</span></div>'
-        + _chart(trend, position, payload)
+        + _price_bar(payload)
+        + '<div class="card sec cat-market"><div style="display:flex;justify-content:space-between">'
+        + '<h2>走势</h2><span class="small muted">日收盘 · 均线与关键价位</span></div>'
+        + (_chart_svg(payload) or _chart(trend, position, payload))
         + f'<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:10px;gap:10px">{returns}'
         + "</div></div>"
-        + '<div class="card"><h2>位置与情绪'
+        + _stock_today(payload)
+        + _stock_earnings_card(payload)
+        + position_html
+        + _peers_module(payload)
+        + '<div class="card sec"><h2>位置与情绪'
         + (
             f' <span class="chip stale">沿用 {_text(payload["carried_from"][5:].replace("-", "/"))} 收盘</span>'
             if payload.get("carried_from")
@@ -1564,9 +1571,7 @@ def _stock(payload):
         + f'<span class="k">形态</span><span>{_tech_cell(payload.get("tech"))} '
         + '<span class="small muted">技术参考，不触发交易</span></span>'
         + f'<span class="k">下次财报</span><span>{_next_earn(payload)}</span></div>'
-        + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div></div>'
-        + position_html
-        + _stock_earnings_card(payload)
+        + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div>'
         + '<div class="grid g2 sec"><div class="card"><h2>新闻与事件</h2>'
         + _stock_news(payload)
         + _stock_feed(payload)
@@ -2557,7 +2562,10 @@ def _stock_today(payload):
     symbol = payload.get("symbol") or ""
     mine = [r for r in rows if r.get("subject") == symbol or (r.get("members") and symbol in r["members"])]
     if not mine:
-        return ""
+        return (
+            '<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>'
+            '<p class="dim">今天没有该股或所在板块的异常</p></div>'
+        )
     items = "".join(
         f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
         f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span>'

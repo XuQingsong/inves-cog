@@ -71,3 +71,49 @@ def test_price_now_prefers_snapshot_then_close():
     assert pn["source"] == "快照" and pn["px"] == 75.0
     pn = _price_now(None, "X", date(2026, 10, 30), bars, None)
     assert pn["source"] == "收盘" and pn["px"] == 87.0 and abs(pn["ret"] - (87 / 95 - 1)) < 1e-9
+
+
+def test_tracked_stock_page_order():
+    from inves_cog.web.investor_html import _stock
+
+    rows = [{"d": f"2026-09-{d:02d}", "c": 90 + d, "v": 1} for d in range(1, 25)]
+    payload = {
+        "page": "/s/INTC",
+        "symbol": "INTC",
+        "oneliner": "x",
+        "trend": {},
+        "position": {"kind": "other"},
+        "price_now": {"px": 75.0, "ret": -0.286, "session": "close", "at": "2026-10-30", "source": "收盘"},
+        "bar_stats": {
+            "day_hi": 90,
+            "day_lo": 74,
+            "hi52": 100,
+            "lo52": 60,
+            "pos52": 37.5,
+            "vol": 1e6,
+            "vol_ratio": 2.1,
+            "next_earnings": "2026-11-03",
+        },
+        "chart": rows,
+        "earnings_marks": [{"d": "2026-09-20", "t": "post"}],
+        "anomaly_marks": ["2026-09-21"],
+        "intraday_series": [{"t": "t", "p": 80}, {"t": "u", "p": 79}],
+        "peers": ([{"ticker": "ARM", "px": 206.0, "ret": -0.1, "ret5": -0.02}], "cpu_pc"),
+        "news_modules": {
+            "live": [
+                {
+                    "subject": "INTC",
+                    "scope": "stock",
+                    "peak_ret": -0.31,
+                    "cause_kind": "guidance",
+                    "cause_headline": "h",
+                    "status": "active",
+                }
+            ],
+            "earnings_cards": [],
+        },
+    }
+    html = _stock(payload)
+    order = ["px-big", "chart-btns", "dchart", "今天发生了什么", "同环节", "基本面与估值"]
+    pos = [html.index(k) for k in order]
+    assert pos == sorted(pos), pos
