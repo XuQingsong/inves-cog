@@ -143,7 +143,7 @@ def backfill_proshares(http, connection, raw_dir, today, _now=None):
                         "shares": int(float(sh.replace(",", ""))) * mult,
                         "aum": float(row["AUM"].replace(",", "")) if row.get("AUM") not in (None, "-", "") else None,
                         "issuer": "ProShares",
-                        "published_at": published_at,
+                        "published_at": published_at("proshares", day),
                     }
                 )
             save_raw(raw_dir, f"etf-{t.lower()}", url, str(today), text.encode(), connection)
@@ -188,7 +188,7 @@ def backfill_ssga(http, connection, raw_dir, today, _now=None):
                             if len(cells) > 3 and cells[3] not in ("-", "")
                             else None,
                             "issuer": "SSGA",
-                            "published_at": published_at,
+                            "published_at": published_at("ssga", day),
                         }
                     )
             save_raw(raw_dir, f"etf-{t.lower()}", url, str(today), data, connection)
@@ -266,6 +266,7 @@ def backfill_cboe_pc(http, connection, raw_dir, start, end, _now, pace=0.25):
     """Daily JSON 2019-10-07 → end (archive CSVs for 2006–2019 have a different
     layout and are noted in the report until that parser lands)."""
     days = {}
+    fails = 0
     d = max(start, date(2019, 10, 7))
     while d <= end:
         if trading_day(d):
@@ -301,7 +302,14 @@ def backfill_cboe_pc(http, connection, raw_dir, start, end, _now, pace=0.25):
                     upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
                 days[d] = len(rows)
             except Exception as exc:
-                log.warning("cboe pc %s failed: %r", d, exc)
+                fails += 1
+                log.warning("cboe pc %s failed (%d): %r", d, fails, exc)
+                if fails >= 5:
+                    days["__unavailable__"] = f"stopped after {fails} failures at {d}"
+                    break
+                time.sleep(min(pace * (2**fails), 30))
+            else:
+                fails = 0
             time.sleep(pace)
         d += timedelta(days=1)
     return _report("CboePC:daily", days, sum(days.values()))
@@ -330,7 +338,7 @@ def backfill_cboe_index(http, connection, raw_dir, today, _now=None):
                             "series_id": f"cboe_idx_{sym.lower()}",
                             "obs_date": day,
                             "value": float(val),
-                            "published_at": published_at,
+                            "published_at": published_at("cboe_idx", day),
                             "vintage": "backfill",
                         }
                     )
@@ -363,6 +371,7 @@ def backfill_cboe_index(http, connection, raw_dir, today, _now=None):
 
 def backfill_occ(http, connection, raw_dir, start, end, _now, pace=0.5):
     days = {}
+    fails = 0
     d = start
     while d <= end:
         if trading_day(d):
@@ -375,7 +384,14 @@ def backfill_occ(http, connection, raw_dir, start, end, _now, pace=0.5):
                     upsert_many(connection, "option_volume_occ", list(rows[0].keys()), rows)
                 days[d] = len(rows)
             except Exception as exc:
-                log.warning("occ vol %s failed: %r", d, exc)
+                fails += 1
+                log.warning("occ vol %s failed (%d): %r", d, fails, exc)
+                if fails >= 5:
+                    days["__unavailable__"] = f"stopped after {fails} failures at {d}"
+                    break
+                time.sleep(min(pace * (2**fails), 30))
+            else:
+                fails = 0
             time.sleep(pace)
         d += timedelta(days=1)
     return _report("OCC:volume", days, sum(days.values()))
@@ -572,7 +588,7 @@ def backfill_fred(http, connection, raw_dir, _now=None):
                             "series_id": f"fred_{sid.lower()}",
                             "obs_date": day,
                             "value": float(val),
-                            "published_at": published_at,
+                            "published_at": published_at_fred(sid, day),
                             "vintage": "backfill",
                         }
                     )
@@ -627,7 +643,7 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
                         "series_id": "ofr_fsi",
                         "obs_date": day,
                         "value": float(val),
-                        "published_at": published_at,
+                        "published_at": published_at("ofr_fsi", day),
                         "vintage": "backfill",
                     }
                 )
