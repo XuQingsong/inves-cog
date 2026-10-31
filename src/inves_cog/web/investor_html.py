@@ -2383,7 +2383,7 @@ def _highlights_module(payload):
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
             f'<span class="who">{link}</span>'
-            f'<div class="num {"down" if (peak or 0) < 0 else "up"}">{_pct(peak, 1)}</div>'
+            f'<div class="num {"down" if (peak or 0) < 0 else "up"}">{px_txt}{_pct(peak, 1)}</div>'
             f'<div class="cause trunc" title="{cause}">{cause}</div></div>'
         )
     for c in cards_in:
