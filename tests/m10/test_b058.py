@@ -69,9 +69,10 @@ def _visible(html):
 
 
 def _points(svg):
-    match = re.search(r'points="([^"]*)"', svg)
+    # B-074: chart rows are embedded JSON for lightweight-charts (no inline SVG points).
+    match = re.search(r"data-rows='([^']*)'", svg)
     assert match and match.group(1)
-    return match.group(1).split()
+    return json.loads(unescape(match.group(1)))
 
 
 def _roles(admin):
