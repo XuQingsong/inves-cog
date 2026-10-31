@@ -90,6 +90,15 @@ def subjects(item, scope, names):
     return [t for t in tickers if t in scope and any(term in headline for term in names.get(t, set()))]
 
 
+def _max_gap(facts):
+    gaps = [
+        abs(float(v))
+        for k, v in (facts or {}).items()
+        if k in ("guide_gap_pct", "surprise_pct", "eps_gap_pct", "rev_gap_pct") and v is not None
+    ]
+    return max(gaps) if gaps else 0.0
+
+
 def parse_facts(headline):
     """Benzinga fixed formats; unparseable fields are simply absent."""
     facts = {}
@@ -176,15 +185,23 @@ def build_events(items, scope, et_now):
                 ev = events[eid]
                 ev["info_ids"].append(item["info_id"])
                 ev["last_seen_at"] = seen
-                ev["facts"].update(
-                    {k: v for k, v in facts.items() if k != "direction" or "direction" not in ev["facts"]}
-                )
+                new_gap = _max_gap(facts)
+                if new_gap > ev.get("_max_gap", 0.0):
+                    # winning part owns headline AND its facts; old part only
+                    # fills keys the winner lacks
+                    ev["_max_gap"] = new_gap
+                    ev["headline"] = headline
+                    ev["facts"] = {**ev["facts"], **facts}
+                else:
+                    # loser only fills keys the winner lacks
+                    ev["facts"] = {**facts, **ev["facts"]}
                 score, parts = importance(subject, kind, ev["facts"], set(core))
                 if score > ev["importance"]:
                     ev["importance"], ev["importance_parts"] = score, parts
             else:
                 score, parts = importance(subject, kind, facts, set(core))
                 events[eid] = {
+                    "_max_gap": _max_gap(facts),
                     "event_id": eid,
                     "subject": subject,
                     "kind": kind,
@@ -199,4 +216,7 @@ def build_events(items, scope, et_now):
                     "importance": score,
                     "importance_parts": parts,
                 }
-    return sorted(events.values(), key=lambda e: (-e["importance"], str(e["first_seen_at"])))
+    out = sorted(events.values(), key=lambda e: (-e["importance"], str(e["first_seen_at"])))
+    for ev in out:
+        ev.pop("_max_gap", None)
+    return out

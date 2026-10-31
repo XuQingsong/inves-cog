@@ -265,7 +265,9 @@ def test_post_session_skipped_without_close():
     assert "INTC" not in quotes and skipped == 1
 
 
-def test_lag_text_hours_and_previous_session():
+def test_lag_text_survives_json_serialized_payload():
+    """Rows reach _live_module JSON-serialized; the tag must still render."""
+    import json
     from datetime import date, datetime, timezone
 
     from inves_cog.web.investor_html import _live_module
@@ -281,16 +283,68 @@ def test_lag_text_hours_and_previous_session():
         "cause_headline": "Intel Sees Q4 Weak",
         "status": "active",
     }
-    # lag 1079 min, event at prev day 16:01 ET -> 约 18 小时（上一交易日盘后）
-    row = dict(base, cause_lag_minutes=1078.7, cause_first_seen=datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc))
-    html = _live_module({"news_modules": {"live": [row]}})
+    rows = [
+        dict(base, cause_lag_minutes=1078.7, cause_first_seen=datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc)),
+        dict(base, cause_lag_minutes=45, cause_first_seen=datetime(2026, 10, 30, 13, 0, tzinfo=timezone.utc)),
+        dict(base, cause_lag_minutes=-6.0, cause_first_seen=datetime(2026, 10, 30, 14, 15, tzinfo=timezone.utc)),
+    ]
+    payload = json.loads(json.dumps({"news_modules": {"live": rows}}, default=str))
+    html = _live_module(payload)
     assert "事件后约 18 小时（上一交易日盘后）" in html
-    # lag 45 stays minutes
-    row = dict(base, cause_lag_minutes=45, cause_first_seen=datetime(2026, 10, 30, 13, 0, tzinfo=timezone.utc))
-    assert "事件后 45 分钟" in _live_module({"news_modules": {"live": [row]}})
-    # negative lag wording unchanged
-    row = dict(base, cause_lag_minutes=-6.0)
-    assert "股价先动，新闻晚 6 分钟入库" in _live_module({"news_modules": {"live": [row]}})
+    assert "事件后 45 分钟" in html
+    assert "股价先动，新闻晚 6 分钟入库" in html
+
+
+def test_event_headline_facts_follow_largest_gap_part_on_disposable_database():
+    """Both part orders + a two-pass upsert: largest-|gap| part owns headline
+    AND facts; guide_gap_pct stays 42 (the chip value)."""
+    from datetime import datetime, timedelta, timezone
+
+    import psycopg
+    from psycopg.rows import dict_row
+
+    import scripts.schedule_live_perception as sched
+    from tests.m8.test_attribution import _disposable_database
+
+    host = _disposable_database()
+    t0 = datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc)
+    adjusted = {
+        "info_id": "a1",
+        "kind": "news",
+        "tickers": ["INTC"],
+        "first_seen_at": t0,
+        "headline": "Intel Sees Q4 Adj EPS $0.25 vs $0.43 Est",
+    }
+    gaap = {
+        "info_id": "g1",
+        "kind": "news",
+        "tickers": ["INTC"],
+        "first_seen_at": t0 + timedelta(minutes=5),
+        "headline": "Intel Sees Q4 GAAP EPS $0.10 vs $0.15 Est",
+    }
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
+        for order, label in (([adjusted, gaap], "adjusted-first"), ([gaap, adjusted], "gaap-first")):
+            conn.execute("DELETE FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'")
+            conn.commit()
+            sched._persist(conn, sched.build_events(order, {"INTC"}, None))
+            conn.commit()
+            row = conn.execute(
+                "SELECT headline,facts FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
+            ).fetchone()
+            assert "Adj EPS" in row["headline"], label
+            assert row["facts"].get("guide_gap_pct") == -41.9, label
+        # two-pass: GAAP lands in a later pass -> existing must keep its facts+headline
+        conn.execute("DELETE FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'")
+        conn.commit()
+        sched._persist(conn, sched.build_events([adjusted], {"INTC"}, None))
+        conn.commit()
+        sched._persist(conn, sched.build_events([gaap], {"INTC"}, None))
+        conn.commit()
+        row = conn.execute(
+            "SELECT headline,facts FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
+        ).fetchone()
+        assert "Adj EPS" in row["headline"]
+        assert row["facts"].get("guide_gap_pct") == -41.9
 
 
 def test_event_headline_updates_to_facts_richest_on_replay():

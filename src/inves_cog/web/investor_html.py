@@ -2093,6 +2093,22 @@ def _prev_session_tag(r):
     on the same trade date."""
     ev_at = r.get("cause_first_seen")
     day = r.get("trade_date")
+    if isinstance(ev_at, str):  # payload may be JSON-serialized
+        from datetime import datetime, timezone
+
+        try:
+            ev_at = datetime.fromisoformat(ev_at.replace("Z", "+00:00"))
+            if ev_at.tzinfo is None:
+                ev_at = ev_at.replace(tzinfo=timezone.utc)
+        except ValueError:
+            ev_at = None
+    if isinstance(day, str):
+        try:
+            from datetime import date as _d
+
+            day = _d.fromisoformat(day)
+        except ValueError:
+            day = None
     if not hasattr(ev_at, "astimezone") or day is None:
         return ""
     local = ev_at.astimezone(ZoneInfo("America/New_York"))

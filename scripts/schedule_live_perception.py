@@ -61,10 +61,34 @@ def _persist(connection, events):
                 last_seen_at=GREATEST(perception.news_events.last_seen_at, EXCLUDED.last_seen_at),
                 info_ids=(SELECT array_agg(DISTINCT x) FROM unnest(
                     perception.news_events.info_ids || EXCLUDED.info_ids) x),
-                facts=perception.news_events.facts || COALESCE(EXCLUDED.facts,'{}'::jsonb),
+                facts=CASE WHEN EXCLUDED.importance > perception.news_events.importance
+                      OR (EXCLUDED.importance = perception.news_events.importance
+                          AND COALESCE(GREATEST(
+                                  abs((EXCLUDED.facts->>'guide_gap_pct')::float),
+                                  abs((EXCLUDED.facts->>'surprise_pct')::float),
+                                  abs((EXCLUDED.facts->>'eps_gap_pct')::float),
+                                  abs((EXCLUDED.facts->>'rev_gap_pct')::float)),0)
+                          >= COALESCE(GREATEST(
+                                  abs((perception.news_events.facts->>'guide_gap_pct')::float),
+                                  abs((perception.news_events.facts->>'surprise_pct')::float),
+                                  abs((perception.news_events.facts->>'eps_gap_pct')::float),
+                                  abs((perception.news_events.facts->>'rev_gap_pct')::float)),0))
+                    THEN perception.news_events.facts || COALESCE(EXCLUDED.facts,'{}'::jsonb)
+                    ELSE COALESCE(EXCLUDED.facts,'{}'::jsonb) || perception.news_events.facts END,
                 importance=GREATEST(perception.news_events.importance, EXCLUDED.importance),
-                headline=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
-                              THEN EXCLUDED.headline ELSE perception.news_events.headline END,
+                headline=CASE WHEN EXCLUDED.importance > perception.news_events.importance
+                      OR (EXCLUDED.importance = perception.news_events.importance
+                          AND COALESCE(GREATEST(
+                                  abs((EXCLUDED.facts->>'guide_gap_pct')::float),
+                                  abs((EXCLUDED.facts->>'surprise_pct')::float),
+                                  abs((EXCLUDED.facts->>'eps_gap_pct')::float),
+                                  abs((EXCLUDED.facts->>'rev_gap_pct')::float)),0)
+                          >= COALESCE(GREATEST(
+                                  abs((perception.news_events.facts->>'guide_gap_pct')::float),
+                                  abs((perception.news_events.facts->>'surprise_pct')::float),
+                                  abs((perception.news_events.facts->>'eps_gap_pct')::float),
+                                  abs((perception.news_events.facts->>'rev_gap_pct')::float)),0))
+                    THEN EXCLUDED.headline ELSE perception.news_events.headline END,
                 importance_parts=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
                               THEN EXCLUDED.importance_parts ELSE perception.news_events.importance_parts END,
                 segment=CASE WHEN EXCLUDED.importance >= perception.news_events.importance
