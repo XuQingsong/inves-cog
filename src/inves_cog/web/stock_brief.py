@@ -1088,16 +1088,13 @@ def _earnings_hist(connection, symbol, bars):
     }
     # historical report dates: earnings events published right after each quarter end
     events = {}
-    try:
-        cards = {
-            str(r["report_date"]): r
-            for r in connection.execute(
-                "SELECT report_date, report_time FROM perception.earnings_cards WHERE ticker=%s",
-                (symbol,),
-            ).fetchall()
-        }
-    except Exception:
-        cards = {}
+    cards = {
+        str(r["report_date"]): r
+        for r in connection.execute(
+            "SELECT report_date, card->>'report_time' AS report_time FROM perception.earnings_cards WHERE ticker=%s",
+            (symbol,),
+        ).fetchall()
+    }
     for r in connection.execute(
         "SELECT first_seen_at, et_date FROM perception.news_events "
         "WHERE subject=%s AND kind='earnings_result' ORDER BY first_seen_at",
