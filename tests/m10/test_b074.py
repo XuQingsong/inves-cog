@@ -158,11 +158,15 @@ def test_key_stats_and_earnings_hist():
             "pt_high": 200,
             "opinions": 40,
         },
-        "bar_stats": {"lo52": 60, "hi52": 100, "vol": 2e6, "vol_ratio": 2.0, "next_earnings": "2026-11-03"},
+        "bar_stats": {"lo52": 60, "hi52": 100, "vol": 2e6, "vol_ratio": 2.0},
+        "next_report": {"report_date": "2026-11-03", "time": "post"},
     }
     html = _key_stats(p)
-    assert "200.0B" in html and "150" in html and "40 家" in html
+    assert "200.0B" in html and "150" in html and "40 家" in html and "2026-11-03 盘后" in html
+    # column fallbacks when raw.analyst is absent
+    html = _key_stats({"analyst": {"pt_mean_col": 328.95, "coverage": 51.0, "eps_cq": 2.47325}})
+    assert "$328.95" in html and "51 家" in html and "2.47" in html
     hist = _earnings_hist_module(
-        {"earnings_hist": [{"q": "2026-09-30", "est": 1.0, "act": 1.1, "gap": 10.0, "next_day": 0.02}]}
+        {"earnings_hist": [{"q": "2026-09-30", "est": 1.0, "act": 1.1, "gap": 10.0, "next_day": None, "report_date": None}]}
     )
-    assert "+10%" in hist and "次日涨跌" in hist
+    assert "+10.0%" in hist and "次日涨跌" in hist and "日期未知" in hist and "—" in hist

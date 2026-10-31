@@ -2559,21 +2559,29 @@ def _key_stats(payload):
     """§8 key-stats grid under the price bar."""
     an = payload.get("analyst") or {}
     st = payload.get("bar_stats") or {}
+    fy1 = (payload.get("consensus") or {}).get("fy1") or {} if isinstance(payload.get("consensus"), dict) else {}
+    pt_mean = an.get("pt_mean") or an.get("pt_mean_col")
+    opinions = an.get("opinions") or an.get("coverage")
+    pt_range = f"{an['pt_low']:,.0f}–{an['pt_high']:,.0f} · " if an.get("pt_low") and an.get("pt_high") else ""
+    eps_cq = an.get("eps_cq")
+    nr = payload.get("next_report")
+    fpe = an.get("forward_pe") or fy1.get("forward_pe")
     cells = [
         ("市值", _human(an.get("market_cap")) if an.get("market_cap") else "暂缺"),
-        ("前瞻市盈率", f"{an['forward_pe']:.1f}" if an.get("forward_pe") else "暂缺"),
+        ("前瞻市盈率", f"{float(fpe):.1f}" if fpe else "暂缺"),
         ("52周区间", f"{st['lo52']:,.2f}–{st['hi52']:,.2f}" if st.get("hi52") else "暂缺"),
         (
             "平均量（20日）",
             _human(st.get("vol") / st["vol_ratio"]) if st.get("vol") and st.get("vol_ratio") else "暂缺",
         ),
-        ("下次财报", _text(str(st.get("next_earnings") or "暂缺"))),
-        ("一致预期 EPS", _text(str(payload.get("eps_cq") or "暂缺"))),
+        (
+            "下次财报",
+            f"{nr['report_date']} {({'post': '盘后', 'pre': '盘前'}).get(nr.get('time'), '')}" if nr else "暂缺",
+        ),
+        ("本季一致预期 EPS", f"{float(eps_cq):.2f}" if eps_cq is not None else "暂缺"),
         (
             "机构目标价",
-            f"均值 {an['pt_mean']:,.2f}（{an['pt_low']:,.0f}–{an['pt_high']:,.0f} · {an.get('opinions') or '—'} 家）"
-            if an.get("pt_mean")
-            else "暂缺",
+            f"均值 ${float(pt_mean):,.2f}（{pt_range}{int(opinions) if opinions else '—'} 家）" if pt_mean else "暂缺",
         ),
     ]
     return (
@@ -2648,19 +2656,22 @@ def _earnings_hist_module(payload):
     rows = payload.get("earnings_hist") or []
     if not rows:
         return ""
+
+    def num(v, fmt):
+        return format(v, fmt) if v is not None else "—"
+
     trs = "".join(
-        f"<tr><td>{r.get('report_date') or r['q']}</td>"
-        f"<td class='num'>{r.get('est') if r.get('est') is not None else '—'}</td>"
-        f"<td class='num'>{r.get('act') if r.get('act') is not None else '—'}</td>"
-        f"<td class='num'>{(r['gap'] or 0):+.0f}%</td>"
+        f"<tr><td>{_text(r['q'])}</td><td>{_text(r.get('report_date') or '日期未知')}</td>"
+        f"<td class='num'>{num(r.get('est'), '.2f')}</td><td class='num'>{num(r.get('act'), '.2f')}</td>"
+        f"<td class='num {_tone(r.get('gap') or 0)}'>{num(r.get('gap'), '+.1f')}%</td>"
         f"<td class='num'>{_pct(r.get('next_day'), 1) if r.get('next_day') is not None else '—'}</td></tr>"
         for r in reversed(rows)
     )
     return (
         '<div class="card sec"><h2>历次财报</h2>'
-        '<table class="tbl"><tr><th>季度</th><th>预期 EPS</th><th>实际 EPS</th><th>超出</th><th>次日涨跌</th></tr>'
-        + trs
-        + "</table></div>"
+        '<table class="tbl"><tr><th>财季截止</th><th>发布日</th><th>预期 EPS</th><th>实际 EPS</th>'
+        "<th>超出 / 不及</th><th>次日涨跌</th></tr>" + trs + "</table>"
+        '<div class="small muted">发布日只在财报日历或系统记录中有时显示；没有发布日时不计算次日涨跌。</div></div>'
     )
 
 

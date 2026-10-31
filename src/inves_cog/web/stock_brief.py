@@ -771,6 +771,15 @@ def page_brief_stock(connection, day, clock, symbol):
         "bar_stats": _safe(connection, lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
         "intraday_series": _safe(connection, lambda: _intraday_series(connection, symbol, day), []),
         "analyst": _safe(connection, lambda: _analyst_summary(connection, symbol), {}),
+        "next_report": _safe(
+            connection,
+            lambda: connection.execute(
+                "SELECT report_date, time FROM ingest.earnings_calendar "
+                "WHERE ticker=%s AND report_date>=%s ORDER BY report_date LIMIT 1",
+                (symbol, day),
+            ).fetchone(),
+            None,
+        ),
         "analyst_actions": _safe(connection, lambda: _analyst_actions(connection, symbol, day), []),
         "earnings_hist": _safe(connection, lambda: _earnings_hist(connection, symbol, bars), []),
         "news_modules": {
@@ -1138,13 +1147,6 @@ def _earnings_hist(connection, symbol, bars):
             ts = events[rd]
             et = ts.astimezone(ZoneInfo("America/New_York")) if hasattr(ts, "astimezone") else None
             timing = "post" if et is None or et.hour >= 16 else "pre"
-        if rd is None:
-            # proxy: largest |move| bar within 75d after quarter end (earnings-day proxy, marked ~)
-            win = [d for d in dates if qd < d <= str(date.fromisoformat(qd) + timedelta(days=75))]
-            if len(win) >= 2:
-                moves = {d: abs(closes[d] / closes[dates[dates.index(d) - 1]] - 1) for d in win[1:]}
-                rd = max(moves, key=moves.get)
-                timing = "post"
         out.append(
             {
                 "q": qd,
