@@ -267,6 +267,7 @@ def test_post_session_skipped_without_close():
 
 def test_lag_text_hours_and_previous_session():
     from datetime import date, datetime, timezone
+
     from inves_cog.web.investor_html import _live_module
 
     base = {
@@ -295,13 +296,13 @@ def test_lag_text_hours_and_previous_session():
 def test_event_headline_updates_to_facts_richest_on_replay():
     """Pre-existing GAAP headline row + replay of guidance part -> upsert
     switches headline when EXCLUDED.importance >= existing."""
-    import psycopg
-    from psycopg.rows import dict_row
     from datetime import datetime, timezone
 
-    from tests.m8.test_attribution import _disposable_database
-    import scripts.schedule_live_perception as sched
+    import psycopg
+    from psycopg.rows import dict_row
+
     from inves_cog.perception.events.events import build_events
+    from tests.m8.test_attribution import _disposable_database
 
     host = _disposable_database()
     fs = datetime(2026, 10, 29, 20, 1, tzinfo=timezone.utc)
