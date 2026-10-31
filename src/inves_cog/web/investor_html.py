@@ -2628,20 +2628,43 @@ def _actions_body(payload):
         if seen.get(key, 0) >= 2:
             continue
         seen[key] = seen.get(key, 0) + 1
-        arrow = "↓" if r.get("action") in ("down", "reit") else "↑" if r.get("action") == "up" else "→"
-        cls = "down" if arrow == "↓" else "up" if arrow == "up" else ""
+        prior, cur = r.get("prior_pt"), r.get("current_pt")
         pt = ""
-        if r.get("current_pt"):
-            pt = f" · 目标价 {r.get('prior_pt') or '前值暂缺'} → {r['current_pt']}"
-        items.append(
-            f'<div class="row"><span class="dim">{r["action_date"]}</span> {r["firm"]} '
-            f'<span class="{cls}">{arrow}</span> {r.get("from_grade") or "—"} → {r.get("to_grade") or "—"}{pt}</div>'
+        if cur:
+            cur = float(cur)
+            if prior:
+                prior = float(prior)
+                tone = "down" if cur < prior else "up" if cur > prior else ""
+                mark = "↓" if cur < prior else "↑" if cur > prior else "→"
+                pt = f' · 目标价 ${prior:,.0f} → <b class="{tone}">${cur:,.0f} {mark}</b>'
+            else:
+                pt = f" · 目标价 前值暂缺 → ${cur:,.0f}"
+        act = r.get("action")
+        grade_tone = "down" if act == "down" else "up" if act == "up" else ""
+        grade = (
+            f"{_text(r.get('from_grade'))} → {_text(r.get('to_grade'))}"
+            if r.get("from_grade") and r.get("from_grade") != r.get("to_grade")
+            else f"维持 {_text(r.get('to_grade') or '—')}"
         )
-    ups = sum(1 for r in rows if r.get("action") == "up")
-    downs = sum(1 for r in rows if r.get("action") == "down")
+        items.append(
+            f'<div class="row"><span class="dim">{r["action_date"]}</span> <b>{_text(r["firm"])}</b> '
+            f'<span class="{grade_tone}">{grade}</span>{pt}</div>'
+        )
+    newest = max((r["action_date"] for r in rows), default=None)
+    recent = [
+        r
+        for r in rows
+        if newest and (date.fromisoformat(str(newest)[:10]) - date.fromisoformat(str(r["action_date"])[:10])).days <= 30
+    ]
+    ups = sum(
+        1 for r in recent if r.get("current_pt") and r.get("prior_pt") and float(r["current_pt"]) > float(r["prior_pt"])
+    )
+    downs = sum(
+        1 for r in recent if r.get("current_pt") and r.get("prior_pt") and float(r["current_pt"]) < float(r["prior_pt"])
+    )
     return (
         '<div class="card sec"><h2>机构评级与目标价'
-        f'<span class="stamp">近30天 ↑{ups} ↓{downs}</span></h2>'
+        f'<span class="stamp">近 30 天目标价 上调 {ups} 家 · 下调 {downs} 家</span></h2>'
         + "".join(items[:10])
         + (
             f'<details><summary class="dim">更多 {len(items) - 10} 条</summary>' + "".join(items[10:]) + "</details>"

@@ -78,6 +78,29 @@ def test_put_analyst_actions_rows():
     )
     assert len(c.calls) == 2
     assert c.calls[0][1][2] == "Cantor Fitzgerald" and c.calls[0][1][3] == "up"
+    # yfinance frame keys + price targets; old rows skipped; raw is stripped
+    snap = {
+        "raw": {
+            "upgrade_history": [
+                {
+                    "Firm": "Goldman Sachs",
+                    "ToGrade": "Neutral",
+                    "FromGrade": "Buy",
+                    "Action": "down",
+                    "priceTargetAction": "Lowers",
+                    "currentPriceTarget": 80.0,
+                    "priorPriceTarget": 120.0,
+                    "epochGradeDate": 1793318400,
+                },
+                {"Firm": "Old", "Action": "main", "epochGradeDate": 946684800},
+            ]
+        }
+    }
+    c2 = C()
+    assert put_analyst_actions(c2, "INTC", snap) == 1
+    args = c2.calls[0][1]
+    assert args[2] == "Goldman Sachs" and args[3] == "down" and args[7] == 120.0 and args[8] == 80.0
+    assert "upgrade_history" not in snap["raw"]
 
 
 def test_actions_module_render():
@@ -106,7 +129,9 @@ def test_actions_module_render():
         },
     ]
     html = _actions_module({"analyst_actions": rows})
-    assert "↓" in html and "↑" in html and "前值暂缺" in html and "UBS" in html
+    assert "$120 → " in html and "$80 ↓" in html and 'class="down">$80' in html
+    assert "Buy → Neutral" in html and "前值暂缺 → $210" in html and "UBS" in html
+    assert "上调 0 家 · 下调 1 家" in html
     empty = _actions_module({"analyst_actions": []})
     assert "尚未采集" in empty
 
