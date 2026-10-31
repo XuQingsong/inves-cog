@@ -330,12 +330,20 @@ def _xlsx_rows(data):
     return out
 
 
+def _xlsx_date(v):
+    """Excel serial (1899-12-30 base) or text → date."""
+    try:
+        return date(1899, 12, 30) + __import__("datetime").timedelta(days=int(float(v)))
+    except (ValueError, TypeError):
+        return _mdy(v)
+
+
 def parse_ssga_xlsx(data, ticker, published_at):
     rows = []
     for cells in _xlsx_rows(data):
         if not cells or cells[0] in ("Date", "", None) or cells[0].startswith("NAV"):
             continue
-        day = _mdy(cells[0])
+        day = _xlsx_date(cells[0])
         if day and len(cells) >= 3:
             rows.append(
                 {
