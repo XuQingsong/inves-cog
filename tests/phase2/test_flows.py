@@ -62,14 +62,14 @@ def test_parse_occ_volume():
 
 
 def test_parse_occ_oi():
-    text = (
-        "Account Type,Equity Calls,Equity Puts,Index Calls,Index Puts\n"
-        "All,12,345,678,1234,5678,9012\n"
-        "equity calls,1000\n"
-        "index puts,2000\n"
-    )
+    text = ("Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total
+"
+            ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,
+"
+            '10/30/2026,"1,000","2,000","3,000","4,000","5,000","9,000","0","0","0","100","12,000",
+')
     rows = parse_occ_oi_summary(text, date(2026, 10, 30), date(2026, 10, 30))
-    assert rows
+    assert {r["series_id"] for r in rows} >= {"occ_oi_equity_calls", "occ_oi_index_puts"}
 
 
 def test_parse_direxion():
