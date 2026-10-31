@@ -2389,6 +2389,7 @@ def page_brief_market(connection, day, clock):
     if not down or not up:
         funds = "资金：领跌或领涨" + MISSING
     live_rows = _live_anomalies(connection, day, is_today_page)
+    idx_closes = _safe_call(lambda: _index_closes(connection, day), {})
     _state_payload = {
         "advancers": advancers,
         "decliners": decliners,
@@ -2462,7 +2463,7 @@ def page_brief_market(connection, day, clock):
                     {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq},
                     {"id": "IWM", "name": INDEX_LABELS["IWM"], "ret": iwm},
                 ],
-                index_closes=_index_closes(connection, day),
+                index_closes=idx_closes,
             ),
             {},
         ),
