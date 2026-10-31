@@ -87,6 +87,8 @@ def render_brief(payload):
         main = _trust(payload)
     elif isinstance(page, str) and page.startswith("/s/"):
         main = _stock(payload)
+    elif page == "/search":
+        main = _search_page(payload)
     else:
         main = _market(payload)
     title = payload.get("title") or "每日页面"
@@ -242,20 +244,23 @@ def _market(payload):
         + f"<h1>判断：{_text(judgment)}</h1>"
         + f'<p class="sub">{_text(_lead(payload))}</p>'
         + _carry_banner(payload)
-        + _ticker_strip(payload)
-        + _sector_strip(payload)
-        + f'<div class="grid g4 sec">{"".join(cards)}</div>'
+        + _highlights_module(payload)
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
         + _live_module(payload)
         + _earnings_cards_module(payload)
         + _movers_module(payload)
+        + _ticker_strip(payload)
+        + _sector_strip(payload)
+        + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + _theme_news_module(payload)
-        + '<div class="grid g2 sec">'
+        + '<details class="fold sec"><summary>滚动新闻与日历</summary><div class="grid g2">'
         + _feed_module(payload)
         + _calendar_module(payload)
-        + "</div>"
+        + "</div></details>"
+        + '<details class="fold"><summary>涨跌排行</summary>'
         + _leaderboards_module(payload)
+        + "</details>"
         + '<div class="grid g-main sec"><div class="card">'
         + f"<h2>{_text(headings[1])}</h2>"
         + '<div class="grid g2" style="gap:24px">'
@@ -1326,8 +1331,172 @@ def _trust(payload):
 # ---------- stock ----------
 
 
+def _price_bar(payload):
+    pn = payload.get("price_now") or {}
+    if not pn.get("px"):
+        return ""
+    px = pn["px"]
+    ret = pn.get("ret")
+    cls = "down" if (ret or 0) < 0 else "up"
+    sess = {"pre": "盘前", "regular": "盘中", "post": "盘后", "close": "收盘"}.get(pn.get("session"), "")
+    at = pn.get("at") or ""
+    if "T" in str(at):
+        from datetime import datetime as _dt
+
+        try:
+            at = (
+                _dt.fromisoformat(str(at).replace("Z", "+00:00"))
+                .astimezone(ZoneInfo("America/New_York"))
+                .strftime("%H:%M ET")
+            )
+        except ValueError:
+            pass
+    chg = ""
+    if ret is not None and pn.get("prev_close"):
+        d = px - pn["prev_close"]
+        chg = f'<span class="num {cls}" style="font-size:18px">{d:+.2f}</span>'
+    st = payload.get("bar_stats") or {}
+    extra = []
+    if st.get("day_hi"):
+        extra.append(f"今日 {st['day_lo']:,.2f}–{st['day_hi']:,.2f}")
+    if st.get("hi52"):
+        pos = f"（52周区间 {st['pos52']:.0f}% 位）" if st.get("pos52") is not None else ""
+        extra.append(f"52周 {st['lo52']:,.2f}–{st['hi52']:,.2f}{pos}")
+    if st.get("vol"):
+        vr = f" · 量比 {st['vol_ratio']:.1f}" if st.get("vol_ratio") else ""
+        extra.append(f"量 {st['vol']:,}{vr}")
+    if st.get("next_earnings"):
+        extra.append(f"下次财报 {_text(str(st['next_earnings']))}")
+    return (
+        '<div class="card sec cat-market"><div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">'
+        f'<span class="px-big">${px:,.2f}</span>{chg}'
+        f'<span class="num {cls}" style="font-size:20px">{_pct(ret, 2) if ret is not None else ""}</span>'
+        f'<span class="dim">{sess} · 截至 {_text(str(at)[:16])} · {pn.get("source") or ""}来源</span></div>'
+        f'<div class="dim" style="margin-top:6px">{" · ".join(extra)}</div></div>'
+    )
+
+
+def _chart_svg(payload, width=1180, height=340):
+    rows = payload.get("chart") or []
+    if len(rows) < 2:
+        return ""
+    marks = {m["d"]: "财报" for m in (payload.get("earnings_marks") or []) if isinstance(m, dict)}
+    for d in payload.get("anomaly_marks") or []:
+        marks.setdefault(d, "异常")
+    closes = [r["c"] for r in rows]
+    lo, hi = min(closes), max(closes)
+    span = hi - lo or 1
+    n = len(closes)
+    xs = [i * (width - 60) / (n - 1) + 40 for i in range(n)]
+    ys = [height - 30 - (c - lo) / span * (height - 60) for c in closes]
+    pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in zip(xs, ys, strict=True))
+
+    # MA50/MA200
+    def ma(k):
+        if n < k:
+            return ""
+        vals = [sum(closes[max(0, i - k + 1) : i + 1]) / len(closes[max(0, i - k + 1) : i + 1]) for i in range(n)]
+        return " ".join(f"{xs[i]:.1f},{height - 30 - (vals[i] - lo) / span * (height - 60):.1f}" for i in range(n))
+
+    dots = []
+    for i, r in enumerate(rows):
+        if r["d"] in marks:
+            color = "var(--tp)" if marks[r["d"]] == "财报" else "var(--alert)"
+            dots.append(
+                f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="4" fill="{color}">'
+                f"<title>{r['d']} {marks[r['d']]} ${r['c']:.2f}</title></circle>"
+            )
+    # four embedded ranges; JS toggles which slice renders
+    ranges = {"1月": 22, "3月": 66, "6月": 132, "1年": n}
+    btns = "".join(
+        f'<button class="rc" onclick="InvestorChart.range(this,{k})">{label}</button>' for label, k in ranges.items()
+    )
+    price_dots = "".join(
+        f'<circle class="pt" cx="{x:.1f}" cy="{y:.1f}" r="3" fill="transparent">'
+        f"<title>{r['d']} ${r['c']:.2f}</title></circle>"
+        for x, y, r in zip(xs, ys, rows, strict=True)
+    )
+    data_json = escape(json.dumps(rows, ensure_ascii=False), quote=True)
+    mark_json = escape(json.dumps(marks, ensure_ascii=False), quote=True)
+    intraday = payload.get("intraday_series") or []
+    mini = ""
+    if len(intraday) > 1:
+        ps = [p["p"] for p in intraday]
+        mlo, mhi = min(ps), max(ps)
+        mspan = mhi - mlo or 1
+        mpts = " ".join(
+            f"{40 + i * 300 / (len(ps) - 1):.0f},{70 - (p - mlo) / mspan * 50:.0f}" for i, p in enumerate(ps)
+        )
+        mini = (
+            '<div style="width:360px;margin-left:auto"><div class="dim small">当日分钟</div>'
+            f'<svg viewBox="0 0 360 80" style="width:360px">'
+            f'<polyline points="{mpts}" fill="none" stroke="var(--tp)" stroke-width="1.5"/></svg></div>'
+        )
+    return (
+        f'<div class="chart-btns">{btns}</div>'
+        f"<svg class='chart' id='dchart' data-rows='{data_json}' data-marks='{mark_json}'"
+        f" viewBox='0 0 {width} {height}' style='width:100%'>"
+        f'<text x="0" y="34" class="ax">${hi:,.2f}</text><text x="0" y="{height - 26}" class="ax">${lo:,.2f}</text>'
+        f'<text x="{width - 4}" y="{ys[-1] - 8:.1f}" text-anchor="end" class="ax">${closes[-1]:,.2f}</text>'
+        f'<polyline points="{pts}" fill="none" stroke="var(--brand)" stroke-width="2"/>'
+        f'<polyline points="{ma(50)}" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
+        f'<polyline points="{ma(200)}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>'
+        f"{''.join(dots)}{price_dots}</svg>"
+        '<div class="dim small">折线为日收盘；虚线为 50 / 200 日均线；标记点为财报日与异常日，悬停看详情。</div>' + mini
+    )
+
+
+SEGMENT_LABELS = {
+    "hyperscaler": "云厂商与 AI 云",
+    "compute": "算力芯片",
+    "foundry_equipment": "代工与设备",
+    "memory": "存储",
+    "server_network": "服务器与网络",
+    "power": "电力与散热",
+    "cpu_pc": "CPU 与 PC",
+}
+
+
+def _peers_module(payload):
+    peers, seg = payload.get("peers") or ([], None)
+    if not peers:
+        return ""
+    rows = "".join(
+        f"<tr><td>{_tk(p['ticker'])}</td>"
+        f"<td class='num'>${p['px']:,.2f}</td>"
+        f"<td class='num {'down' if (p.get('ret') or 0) < 0 else 'up'}'>{_pct(p.get('ret'), 1)}</td>"
+        f"<td class='num'>{_pct(p.get('ret5'), 1) if p.get('ret5') is not None else '—'}</td></tr>"
+        for p in peers
+    )
+    seg_txt = f'<span class="dim">环节：{_text(SEGMENT_LABELS.get(seg, seg))}</span>' if seg else ""
+    return (
+        '<div class="card sec cat-market"><h2>同环节与同篮子 ' + seg_txt + "</h2>"
+        '<table class="tbl"><tr><th>代码</th><th>现价</th><th>今日涨跌</th><th>5日涨跌</th></tr>'
+        + rows
+        + "</table></div>"
+    )
+
+
 def _stock(payload):
     symbol = payload.get("symbol") or ""
+    if payload.get("no_data"):
+        return (
+            _crumb(f"个股 / {_text(symbol)}")
+            + f"<h1>{_text(symbol)}</h1>"
+            + '<div class="card sec"><p>没有这只股票的数据。试试搜索：</p>'
+            + _search_box()
+            + "</div>"
+        )
+    if payload.get("untracked"):
+        return (
+            _crumb(f"个股 / {_text(symbol)}")
+            + f"<h1>{_text(symbol)}</h1>"
+            + _price_bar(payload)
+            + '<div class="card sec"><h2>走势图</h2>'
+            + _chart_svg(payload)
+            + "</div>"
+            + '<div class="card sec"><p>不在监控范围——这里只显示价格和走势。</p></div>'
+        )
     trend = payload.get("trend") or {}
     position = payload.get("position") or {}
     held = position.get("kind") == "held"
@@ -1383,12 +1552,17 @@ def _stock(payload):
         + '<div style="display:flex;gap:12px;align-items:baseline;margin-top:8px;flex-wrap:wrap">'
         + f'<h1 class="mono" style="margin:0">{_text(symbol)}</h1>{chips}</div>'
         + f'<p class="sub" style="margin-top:6px">{_text(payload.get("oneliner"))}</p>'
-        + '<div class="grid g-main sec"><div class="card"><div style="display:flex;justify-content:space-between">'
-        + '<h2>走势与位置</h2><span class="small muted">近 60 个交易日收盘；水平线为当前均线与关键价位</span></div>'
-        + _chart(trend, position, payload)
+        + _price_bar(payload)
+        + '<div class="card sec cat-market"><div style="display:flex;justify-content:space-between">'
+        + '<h2>走势与位置</h2><span class="small muted">日收盘 · 均线与关键价位</span></div>'
+        + (_chart_svg(payload) or _chart(trend, position, payload))
         + f'<div class="grid" style="grid-template-columns:repeat(5,1fr);margin-top:10px;gap:10px">{returns}'
         + "</div></div>"
-        + '<div class="card"><h2>位置与情绪'
+        + _stock_today(payload)
+        + _stock_earnings_card(payload)
+        + position_html
+        + _peers_module(payload)
+        + '<div class="card sec"><h2>位置与情绪'
         + (
             f' <span class="chip stale">沿用 {_text(payload["carried_from"][5:].replace("-", "/"))} 收盘</span>'
             if payload.get("carried_from")
@@ -1408,9 +1582,7 @@ def _stock(payload):
         + f'<span class="k">形态</span><span>{_tech_cell(payload.get("tech"))} '
         + '<span class="small muted">技术参考，不触发交易</span></span>'
         + f'<span class="k">下次财报</span><span>{_next_earn(payload)}</span></div>'
-        + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div></div>'
-        + position_html
-        + _stock_earnings_card(payload)
+        + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div>'
         + '<div class="grid g2 sec"><div class="card"><h2>新闻与事件</h2>'
         + _stock_news(payload)
         + _stock_feed(payload)
@@ -1640,6 +1812,49 @@ def _header(payload):
     )
 
 
+def _tk(code, cls=""):
+    """B-073: the single ticker renderer — every ticker text becomes /s/ link."""
+    if not code:
+        return ""
+    c = _text(str(code))
+    return f'<a class="tk {cls}" href="/s/{c}">{c}</a>'
+
+
+def _severity(row):
+    """B-073 §1 badge levels, derived only from existing row data:
+    major: |z|>=5 or core-company earnings gap >=20% (facts already parsed)
+    watch: any other active anomaly / near-term core earnings
+    info:  rest."""
+    z = row.get("peak_z") or row.get("last_z")
+    if z is not None and abs(z) >= 5:
+        return ("sev-major", "重大")
+    if row.get("gap") is not None and abs(row["gap"]) >= 20:
+        return ("sev-major", "重大")
+    if z is not None or row.get("status") == "active":
+        return ("sev-watch", "关注")
+    return ("sev-info", "一般")
+
+
+def _kind_chip(kind):
+    label = {
+        "earnings_result": "财报",
+        "guidance": "指引",
+        "capex": "资本开支",
+        "mna": "并购",
+        "supply_shock": "供应",
+        "regulatory": "监管",
+        "rating": "评级",
+    }.get(kind, "其他")
+    return f'<span class="chip kind-chip kind-{_text(kind or "other")}">{label}</span>'
+
+
+def _search_box():
+    return (
+        '<div class="searchbox"><input id="q" type="search" placeholder="代码 / 公司名">'
+        '<div class="searchres" id="qres"></div></div>'
+    )
+
+
 def _nav(payload):
     page = "/" if not isinstance(payload, dict) else payload.get("page") or "/"
     links = []
@@ -1647,7 +1862,7 @@ def _nav(payload):
         mark = ' class="on"' if _active(href, page) else ""
         badge = _badges(payload) if href == "/account" else ""
         links.append(f'<a href="{href}{_query(payload)}"{mark}>{_text(label)}{badge}<small>{_text(small)}</small></a>')
-    return '<nav class="nav">' + "".join(links) + "</nav>"
+    return '<nav class="nav">' + "".join(links) + _search_box() + "</nav>"
 
 
 def _badges(payload):
@@ -1676,6 +1891,20 @@ def _formula(line):
 
 
 REFRESH_META = ""
+
+
+def _search_page(payload):
+    rows = payload.get("results") or []
+    if rows:
+        body = "".join(
+            f'<div class="row">{_tk(r["ticker"])} <span class="dim">{_text(r.get("name") or "")}</span></div>'
+            for r in rows
+        )
+        title = f"搜索 “{_text(payload.get('q') or '')}”"
+    else:
+        body = f"<p>没有找到 “{_text(payload.get('q') or '')}” 相关的标的。</p>" + _search_box()
+        title = "搜索"
+    return f'<div class="card sec"><h2>{title}</h2>{body}</div>'
 
 
 def _document(title, body, refresh=False):
@@ -2130,43 +2359,102 @@ def _live_module(payload):
     rows = (payload.get("news_modules") or {}).get("live") or []
     if not rows:
         return ""
-    items = []
+    body = []
     for r in rows:
         scope = {"stock": "个股", "basket": "板块", "market": "市场"}.get(r["scope"], r["scope"])
         name = r.get("basket_name") or r["subject"]
-        cur = f"{r['last_ret'] * 100:+.1f}%" if r.get("last_ret") is not None else ""
-        peak = f"{r['peak_ret'] * 100:+.1f}%" if r.get("peak_ret") is not None else ""
+        link = _tk(r["subject"]) if r["scope"] == "stock" else _text(name)
+        cur = r.get("last_ret")
+        peak = r.get("peak_ret")
+        cur_html = (
+            f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%</span>' if cur is not None else ""
+        )
+        px_html = f"${r['last_px']:,.2f}" if r.get("last_px") is not None else "—"
         fs = r.get("first_seen_at")
         when = (
-            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M ET')}"
+            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}"
             if hasattr(fs, "astimezone")
             else ""
         )
+        sev_cls, sev_label = _severity(r)
+        faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
+        cause_html = "原因未明"
         if r.get("cause_event_id"):
             lag = r.get("cause_lag_minutes")
             if lag is not None and lag < 0:
                 lag_txt = f"股价先动，新闻晚 {abs(lag):.0f} 分钟入库"
+            elif lag is not None and lag >= 120:
+                lag_txt = f"事件后约 {round(lag / 60)} 小时{_prev_session_tag(r)}"
             elif lag is not None:
-                if lag >= 120:
-                    lag_txt = f"事件后约 {round(lag / 60)} 小时{_prev_session_tag(r)}"
-                else:
-                    lag_txt = f"事件后 {lag:.0f} 分钟"
+                lag_txt = f"事件后 {lag:.0f} 分钟"
             else:
                 lag_txt = ""
-            cause = f"{_text(r.get('cause_headline') or r['cause_event_id'])} · {lag_txt}"
-        else:
-            cause = "原因未明"
+            cause_html = (
+                f"{_kind_chip(r.get('cause_kind'))}"
+                f'<span class="trunc" title="{_text(r.get("cause_headline") or "")}">'
+                f"{_text(r.get('cause_headline') or r['cause_event_id'])}</span>"
+                f'<span class="dim"> {lag_txt}</span>'
+            )
         members = ""
         if r["scope"] == "basket" and r.get("members"):
-            parts = [f"{t} {v * 100:+.1f}%" for t, v in (r["members"] or {}).items()]
-            members = f'<div class="dim">{_text(" · ".join(parts))}</div>'
-        faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
-        items.append(
-            f'<div class="row"><span class="chip">{scope}</span> <b>{_text(name)}</b>'
-            f" <span>{cur}（峰值 {peak}）</span>{faded}"
-            f'<div class="dim">{when} · {cause}</div>{members}</div>'
+            parts = " ".join(
+                f"{_tk(t)} <span class='num'>{v * 100:+.1f}%</span>" for t, v in (r["members"] or {}).items()
+            )
+            members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
+        badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
+        body.append(
+            f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
+            f"<td class='num'>{px_html}</td>"
+            f"<td class='num'>{cur_html}</td><td class='num'>{_pct(peak, 1) if peak is not None else ''}</td>"
+            f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
         )
-    return f'<div class="card sec" id="live"><h2>实时异常</h2>{"".join(items)}</div>'
+    return (
+        '<div class="card sec cat-anomaly" id="live"><h2>实时异常'
+        '<span class="stamp">' + _text(str(payload.get("et_now") or "")) + " ET</span></h2>"
+        '<table class="tbl"><tr><th>层级</th><th>对象</th><th>涨跌</th><th>峰值</th><th>首次出现</th><th>起因</th></tr>'
+        + "".join(body)
+        + "</table></div>"
+    )
+
+
+def _highlights_module(payload):
+    """今日要点: top-5 cards sorted major>watch then |z|; sources are the
+    active anomalies + near-term core earnings already in the payload."""
+    live = (payload.get("news_modules") or {}).get("live") or []
+    cards_in = (payload.get("news_modules") or {}).get("earnings_cards") or []
+    picks = [r for r in live if r.get("status") == "active" and (r.get("peak_z") or 0) != 0]
+    picks.sort(key=lambda r: (0 if abs(r.get("peak_z") or 0) >= 5 else 1, -abs(r.get("peak_z") or 0)))
+    items = []
+    for r in picks[:5]:
+        sev_cls, sev_label = _severity(r)
+        subj = r.get("basket_name") or r["subject"]
+        link = _tk(r["subject"]) if r["scope"] == "stock" else _text(subj)
+        peak = r.get("peak_ret")
+        px_txt = f"${r['last_px']:,.2f} " if r.get("last_px") is not None else ""
+        if r["scope"] == "basket" and r.get("members"):
+            worst = min((r["members"] or {}).items(), key=lambda kv: kv[1])
+            cause = _text(f"{len(r['members'])} 家 · 最弱 {worst[0]} {worst[1] * 100:+.1f}%")
+        else:
+            cause = _text((r.get("cause_headline") or "原因未明")[:60])
+        items.append(
+            f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
+            f'<span class="who">{link}</span>'
+            f'<div class="num {"down" if (peak or 0) < 0 else "up"}">{px_txt}{_pct(peak, 1)}</div>'
+            f'<div class="cause trunc" title="{cause}">{cause}</div></div>'
+        )
+    for c in cards_in:
+        if len(items) >= 5:
+            break
+        if c.get("stage") == "upcoming" and c.get("report_date"):
+            when = "盘后" if c.get("report_time") == "post" else "盘前" if c.get("report_time") == "pre" else ""
+            items.append(
+                f'<div class="hl-card"><span class="badge sev-watch">关注</span> '
+                f'<span class="who">{_tk(c["ticker"])}</span>'
+                f'<div class="cause">财报 {c["report_date"]} {when}</div></div>'
+            )
+    if not items:
+        items.append('<div class="dim">今天没有需要重点关注的异常</div>')
+    return '<div class="card sec cat-anomaly"><h2>今日要点</h2><div class="hl-cards">' + "".join(items) + "</div></div>"
 
 
 def _facts_chips(facts):
@@ -2241,16 +2529,62 @@ def _earnings_cards_module(payload):
         return ""
     up = [r for r in rows if r.get("stage") == "upcoming"]
     done = [r for r in rows if r.get("stage") != "upcoming"]
-    items = []
+    parts = []
     if up:
-        items.append(
-            "<h3>即将发布</h3>" + "".join('<div class="row">' + " · ".join(_card_lines(r)) + "</div>" for r in up)
+        body = []
+        for r in up:
+            card = r.get("card") or {}
+            cons = card.get("consensus") or {}
+            imp = card.get("implied_move") or {}
+            cons_txt = f"EPS {cons['eps']:.2f}" if cons.get("eps") is not None else "—"
+            imp_txt = f"{imp['straddle_pct'] * 100:.1f}%" if imp.get("straddle_pct") is not None else "—"
+            tl = {"post": "盘后", "pre": "盘前"}.get(r.get("report_time"), "待定")
+            body.append(
+                f"<tr><td>{r['report_date']}</td>"
+                f"<td>{_bj_time_for_report(r['report_date'], r.get('report_time') or '')}</td>"
+                f"<td>{_tk(r['ticker'])}</td><td>{tl}</td>"
+                f"<td class='num'>{imp_txt}</td><td class='num'>{cons_txt}</td></tr>"
+            )
+        parts.append(
+            "<h3>即将发布</h3><table class='tbl'>"
+            "<tr><th>日期</th><th>北京时间</th><th>代码</th><th>时段</th><th>期权预期</th><th>一致预期</th></tr>"
+            + "".join(body)
+            + "</table>"
         )
-    if done:
-        items.append(
-            "<h3>已发布</h3>" + "".join('<div class="row">' + " · ".join(_card_lines(r)) + "</div>" for r in done)
+    for r in done:
+        card = r.get("card") or {}
+        vote = card.get("vote_ret")
+        vote_txt = f"次日投票 {_pct(vote, 1)}" if vote is not None else ""
+        chips = ""
+        for e in (card.get("events") or [])[:2]:
+            chips += _facts_chips(e.get("facts") or {})
+        seg = card.get("segment_reaction") or {}
+        follow = f"同环节跟随 {seg['followed']}/{seg['not_followed']}" if seg else ""
+        summ = " · ".join(x for x in [_tk(r["ticker"]), vote_txt, follow, _text(card.get("vs_implied") or "")] if x)
+        lines = _card_lines(r)
+        detail = "".join(f'<div class="row">{line if "<" in line else _text(line)}</div>' for line in lines)
+        parts.append(f"<details><summary>{summ} {chips}</summary>{detail}</details>")
+    return '<div class="card sec cat-earnings" id="earnings"><h2>财报</h2>' + "".join(parts) + "</div>"
+
+
+def _stock_today(payload):
+    """§4 '今天发生了什么': live anomalies for this stock and its baskets."""
+    rows = (payload.get("news_modules") or {}).get("live") or []
+    symbol = payload.get("symbol") or ""
+    mine = [r for r in rows if r.get("subject") == symbol or (r.get("members") and symbol in r["members"])]
+    if not mine:
+        return (
+            '<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>'
+            '<p class="dim">今天没有该股或所在板块的异常</p></div>'
         )
-    return f'<div class="card sec" id="earnings"><h2>财报</h2>{"".join(items)}</div>'
+    items = "".join(
+        f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
+        f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span> '
+        f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'
+        f"{_text(r.get('cause_headline') or '原因未明')}</span></div>"
+        for r in mine
+    )
+    return f'<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>{items}</div>'
 
 
 def _stock_earnings_card(payload):
@@ -2258,11 +2592,58 @@ def _stock_earnings_card(payload):
     if not row:
         return ""
     stage = {"upcoming": "财报前", "released": "已发布", "voted": "次日投票"}[row.get("stage")]
-    lines = _card_lines(row)
+    card = row.get("card") or {}
+    tl = {"post": "盘后", "pre": "盘前"}.get(row.get("report_time"), "时间待定")
+    stats = [("发布", f"{row['report_date']} {tl}")]
+    imp = card.get("implied_move") or {}
+    imp_txt = f"{imp['straddle_pct'] * 100:.1f}%" if imp.get("straddle_pct") is not None else "无期权参照"
+    if row.get("stage") == "upcoming":
+        cons = card.get("consensus") or {}
+        stats += [
+            ("一致预期 EPS", f"{cons['eps']:.2f}" if cons.get("eps") is not None else "暂缺"),
+            ("期权预期涨跌", imp_txt),
+            (
+                "历史财报后涨跌",
+                f"中位 {card['history']['median_abs'] * 100:.1f}%"
+                if (card.get("history") or {}).get("median_abs") is not None
+                else "历史不足",
+            ),
+        ]
+    else:
+        seg = card.get("segment_reaction") or {}
+        vote = card.get("vote_ret")
+        stats += [
+            ("次日投票", _pct(vote, 1) if vote is not None else "待收盘"),
+            ("与期权预期比", _text(card.get("vs_implied") or imp_txt)),
+            ("同环节跟随", f"{seg['followed']} 家跟 · {seg['not_followed']} 家未跟" if seg else "暂缺"),
+        ]
+    stat_html = "".join(
+        f'<div><div class="small muted">{_text(k)}</div><div style="font-size:16px">'
+        f"{v if '<' in str(v) else _text(v)}</div></div>"
+        for k, v in stats
+    )
+    events = []
+    for e in (card.get("events") or [])[:4]:
+        r = e.get("reaction") or {}
+        react = " · ".join(
+            f"{label} {_pct(r[key]['ret'], 1)}"
+            for key, label in (("m15", "15 分钟"), ("m60", "60 分钟"), ("session_end", "时段末"))
+            if isinstance(r.get(key), dict) and r[key].get("ret") is not None
+        )
+        events.append(
+            f'<div class="row">{_kind_chip(e.get("kind"))} {_facts_chips(e.get("facts") or {})} '
+            f"{_text(e.get('headline') or '')}"
+            + (f'<div class="small muted">发布后反应：{react}</div>' if react else "")
+            + "</div>"
+        )
+    missing = row.get("missing") or []
+    miss_html = f'<div class="small muted">缺：{_text("、".join(missing))}</div>' if missing else ""
     return (
-        f'<div class="card sec"><h2>财报 · {_text(row["ticker"])} {row["report_date"]}'
+        f'<div class="card sec cat-earnings"><h2>财报 · {row["report_date"]} '
         f'<span class="chip">{stage}</span></h2>'
-        + "".join(f'<div class="row">{line if "<" in line else _text(line)}</div>' for line in lines)
+        f'<div class="grid" style="grid-template-columns:repeat({len(stats)},1fr);gap:10px">{stat_html}</div>'
+        + "".join(events)
+        + miss_html
         + "</div>"
     )
 

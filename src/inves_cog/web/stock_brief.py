@@ -21,6 +21,7 @@ from inves_cog.web.brief import (
     _event_title,
     _freshness,
     _holding_row,
+    _live_anomalies,
     _member,
     _news_events,
     _news_summary,
@@ -223,7 +224,7 @@ def _bars(connection, symbol, day):
     return _rows(
         connection,
         """
-        SELECT trade_date, close, volume
+        SELECT trade_date, open, high, low, close, volume
         FROM ingest.bars_daily
         WHERE ticker = %s AND trade_date <= %s
         ORDER BY trade_date
@@ -626,6 +627,31 @@ def page_brief_stock(connection, day, clock, symbol):
     if raw_score is None and is_today:
         raw_score = _latest_score_row(connection, day, symbol)
         carried_from = None if raw_score is None else raw_score["signal_date"]
+    stocks = context.get("stocks") or set()
+    in_scope = (
+        symbol in context["pool"]
+        or symbol in context["positions"]
+        or symbol in stocks
+        or raw_score is not None
+        or symbol in _segment_map()
+        or _earnings_card(connection, symbol) is not None
+    )
+    if not bars:
+        if not in_scope:
+            return {
+                "page": f"/s/{symbol}",
+                "date": day,
+                "symbol": symbol,
+                "title": symbol,
+                "no_data": True,
+                "headings": [],
+                "label": PAPER_LABEL,
+            }
+        # covered ticker without bars: fall through and let the page
+        # render with its own missing-data markers
+        bars = [{"trade_date": day, "close": None, "volume": None}]
+    if not in_scope:
+        return _untracked_page(connection, symbol, day, clock, bars)
     gate = _gate_score(raw_score)
     score_row = (
         None
@@ -738,6 +764,16 @@ def page_brief_stock(connection, day, clock, symbol):
         "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
         "next_earnings": next_earnings,
         "earnings_card": _earnings_card(connection, symbol),
+        "price_now": _safe(connection, lambda: _price_now(connection, symbol, day, bars, snap), {}),
+        "chart": _safe(connection, lambda: _chart_data(bars), []),
+        "earnings_marks": _safe(connection, lambda: _earnings_marks(connection, symbol, day), []),
+        "anomaly_marks": _safe(connection, lambda: _anomaly_marks(connection, symbol, day), []),
+        "peers": _safe(connection, lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
+        "bar_stats": _safe(connection, lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
+        "intraday_series": _safe(connection, lambda: _intraday_series(connection, symbol, day), []),
+        "news_modules": {
+            "live": _safe(connection, lambda: [dict(r) for r in _live_anomalies(connection, day, False)], [])
+        },
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
@@ -808,6 +844,25 @@ def _next_earnings(earnings, symbol, day):
     return future[0] if future else None
 
 
+def _safe(connection, fn, fallback):
+    """Each optional block runs in a savepoint so one failure can't poison
+    the read-only transaction shared by the rest of the page."""
+    try:
+        with connection.transaction():
+            return fn()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("stock page optional block failed: %r", exc)
+        return fallback
+
+
+def _segment_map():
+    from inves_cog.perception.core_companies import core_companies
+
+    return core_companies()
+
+
 def _earnings_card(connection, symbol):
     """B-072: this ticker's latest earnings card row; None when absent."""
     try:
@@ -821,3 +876,151 @@ def _earnings_card(connection, symbol):
         return {**dict(row), "report_date": str(row["report_date"])}
     except Exception:
         return None
+
+
+def _chart_data(bars, limit_days=260):
+    """B-073: 1y of daily closes + markers the page renders client-side."""
+    rows = [
+        {"d": str(r["trade_date"]), "c": float(r["close"]), "v": int(r["volume"] or 0)}
+        for r in bars
+        if r["close"] is not None
+    ]
+    return rows[-limit_days:]
+
+
+def _price_now(connection, symbol, day, bars, snap):
+    """Latest quote: same-day intraday snapshot wins, else latest close."""
+    if snap and snap.get("last") is not None:
+        return {
+            "px": float(snap["last"]),
+            "at": str(snap["as_of"]),
+            "session": snap.get("session"),
+            "source": "快照",
+            "ret": _snap_ret(snap),
+        }
+    close = next((float(r["close"]) for r in reversed(bars) if r["close"] is not None), None)
+    prev = None
+    seen = [float(r["close"]) for r in bars if r["close"] is not None]
+    if len(seen) >= 2:
+        prev = seen[-2]
+    return {
+        "px": close,
+        "at": str(bars[-1]["trade_date"]) if bars else None,
+        "session": "close",
+        "source": "收盘",
+        "ret": (close / prev - 1) if close and prev else None,
+    }
+
+
+def _peers_table(connection, symbol, day, segment_map):
+    """Same-segment core companies + same L2/L3 baskets: px, today, 5d."""
+    seg = segment_map.get(symbol)
+    peers = sorted(t for t, s in segment_map.items() if s == seg and t != symbol)[:6]
+    baskets = connection.execute(
+        "SELECT basket_id, name, members FROM graph.baskets WHERE level IN ('L2','L3')"
+    ).fetchall()
+    for b in baskets:
+        names = [m["ticker"] if isinstance(m, dict) else m for m in (b["members"] or [])]
+        if symbol in names:
+            for t in names:
+                if t != symbol and t not in peers:
+                    peers.append(t)
+    peers = peers[:8]
+    out = []
+    for t in peers:
+        pb = _bars(connection, t, day)
+        closes = [float(r["close"]) for r in pb if r["close"] is not None]
+        if len(closes) >= 6:
+            out.append(
+                {"ticker": t, "px": closes[-1], "ret": closes[-1] / closes[-2] - 1, "ret5": closes[-1] / closes[-6] - 1}
+            )
+        elif len(closes) >= 2:
+            out.append({"ticker": t, "px": closes[-1], "ret": closes[-1] / closes[-2] - 1, "ret5": None})
+    return out, seg
+
+
+def _earnings_marks(connection, symbol, day):
+    rows = connection.execute(
+        "SELECT report_date, time FROM ingest.earnings_calendar WHERE ticker=%s AND report_date <= %s",
+        (symbol, day),
+    ).fetchall()
+    return [{"d": str(r["report_date"]), "t": r["time"]} for r in rows]
+
+
+def _anomaly_marks(connection, symbol, day):
+    days = []
+    try:
+        rows = connection.execute(
+            "SELECT DISTINCT trade_date FROM perception.anomalies a "
+            "WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(a.members) m "
+            "            WHERE m->>'ticker' = %s)",
+            (symbol,),
+        ).fetchall()
+        days += [str(r["trade_date"]) for r in rows]
+    except Exception:
+        pass
+    try:
+        live = connection.execute(
+            "SELECT DISTINCT trade_date FROM perception.live_anomalies WHERE subject=%s",
+            (symbol,),
+        ).fetchall()
+        days += [str(r["trade_date"]) for r in live]
+    except Exception:
+        pass
+    return sorted(set(days))
+
+
+def _untracked_page(connection, symbol, day, clock, bars):
+    """Not in pool: price + chart only, everything else states 不在监控范围."""
+    snap_row = connection.execute(
+        "SELECT last, as_of, session FROM ingest.intraday_snapshots WHERE ticker=%s ORDER BY as_of DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    snap = dict(snap_row) if snap_row else None
+    price = _price_now(connection, symbol, day, bars, snap)
+    return {
+        "page": f"/s/{symbol}",
+        "date": day,
+        "symbol": symbol,
+        "title": symbol,
+        "untracked": True,
+        "price_now": price,
+        "chart": _chart_data(bars),
+        "earnings_marks": _earnings_marks(connection, symbol, day),
+        "anomaly_marks": _anomaly_marks(connection, symbol, day),
+        "headings": [],
+        "label": PAPER_LABEL,
+    }
+
+
+def _bar_stats(connection, symbol, day, bars, next_earnings):
+    """Day hi/lo, 52w hi/lo + position, volume ratio, next earnings."""
+    closes = [float(r["close"]) for r in bars if r["close"] is not None]
+    if not closes:
+        return {}
+    last = closes[-1]
+    w52 = closes[-260:]
+    hi52, lo52 = max(w52), min(w52)
+    today = bars[-1]
+    vols = [int(r["volume"] or 0) for r in bars[-21:-1] if r["volume"]]
+    avg = sum(vols) / len(vols) if vols else None
+    vr = int(today["volume"] or 0) / avg if avg else None
+    pos = (last - lo52) / (hi52 - lo52) * 100 if hi52 > lo52 else None
+    return {
+        "day_hi": float(today["high"]) if today.get("high") else last,
+        "day_lo": float(today["low"]) if today.get("low") else last,
+        "hi52": hi52,
+        "lo52": lo52,
+        "pos52": pos,
+        "vol": int(today["volume"] or 0),
+        "vol_ratio": vr,
+        "next_earnings": next_earnings,
+    }
+
+
+def _intraday_series(connection, symbol, day):
+    rows = connection.execute(
+        "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s AND as_of >= %s::date ORDER BY as_of",
+        (symbol, day),
+    ).fetchall()
+    return [{"t": str(r["as_of"]), "p": float(r["last"])} for r in rows if r["last"] is not None]
