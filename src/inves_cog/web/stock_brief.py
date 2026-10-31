@@ -1057,30 +1057,48 @@ def _analyst_actions(connection, symbol, day):
 
 
 def _earnings_hist(connection, symbol, bars):
+    """Last 8 quarters: EPS actual vs estimate + next-day move per report timing."""
     row = connection.execute(
         "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
         (symbol,),
     ).fetchone()
     hist = ((row or {}).get("raw") or {}).get("earnings_history") or []
-    closes = {str(r["trade_date"]): r["close"] for r in bars}
+    last_day = str(bars[-1]["trade_date"]) if bars else "9999"
+    cal = {
+        str(r["report_date"]): r
+        for r in connection.execute(
+            "SELECT report_date, time FROM ingest.earnings_calendar WHERE ticker=%s AND report_date<=%s",
+            (symbol, last_day),
+        ).fetchall()
+    }
+    closes = {str(r["trade_date"]): float(r["close"]) for r in bars if r["close"] is not None}
     dates = sorted(closes)
+
+    def move(report_date, timing):
+        if report_date not in dates:
+            return None
+        i = dates.index(report_date)
+        if timing == "post":
+            base = closes[dates[i]]
+            nxt = closes[dates[i + 1]] if i + 1 < len(dates) else None
+        else:
+            base = closes[dates[i - 1]] if i > 0 else None
+            nxt = closes[dates[i]]
+        return (nxt / base - 1) if base and nxt else None
+
     out = []
     for q in hist[-8:]:
         qd = str(q.get("quarter_date") or "")
-        # next-day move: closest bar after the quarter's report — approximate via next bar ≥ report date
-        est, act = q.get("epsEstimate"), q.get("epsActual")
-        out.append({"q": qd, "est": est, "act": act, "gap": (act - est) / abs(est) * 100 if est else None})
-    # next-day return keyed on earnings calendar dates if available
-    cal = connection.execute(
-        "SELECT report_date FROM ingest.earnings_calendar WHERE ticker=%s ORDER BY report_date DESC LIMIT 8",
-        (symbol,),
-    ).fetchall()
-    next_ret = {}
-    for c in cal:
-        d = str(c["report_date"])
-        i = next((k for k, x in enumerate(dates) if x >= d), None)
-        if i is not None and i + 1 < len(dates) and closes[dates[i]] and closes[dates[i + 1]]:
-            next_ret[d] = closes[dates[i + 1]] / closes[dates[i]] - 1
-    for q in out:
-        q["next_day"] = next_ret.get(q["q"]) or next_ret.get(min((d for d in next_ret if d >= q["q"]), default=""))
+        rd = min((d for d in cal if d >= qd), default=None)
+        timing = (cal.get(rd) or {}).get("time") if rd else None
+        out.append(
+            {
+                "q": qd,
+                "est": float(q["eps_est"]) if q.get("eps_est") is not None else None,
+                "act": float(q["eps_actual"]) if q.get("eps_actual") is not None else None,
+                "gap": float(q["surprise_pct"]) if q.get("surprise_pct") is not None else None,
+                "next_day": move(rd, timing) if rd else None,
+                "report_date": rd,
+            }
+        )
     return out

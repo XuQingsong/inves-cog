@@ -2569,8 +2569,8 @@ def _key_stats(payload):
         ("下次财报", _text(str(st.get("next_earnings") or "暂缺"))),
         ("一致预期 EPS", _text(str(payload.get("eps_cq") or "暂缺"))),
         (
-            "目标价均值",
-            f"{an['pt_mean']:,.2f}（{an['pt_low']:,.0f}–{an['pt_high']:,.0f} · {an.get('opinions') or '—'} 家）"
+            "机构目标价",
+            f"均值 {an['pt_mean']:,.2f}（{an['pt_low']:,.0f}–{an['pt_high']:,.0f} · {an.get('opinions') or '—'} 家）"
             if an.get("pt_mean")
             else "暂缺",
         ),
@@ -2583,6 +2583,10 @@ def _key_stats(payload):
 
 
 def _ratings_module(payload):
+    return f'<div class="card sec"><h2>评级分布</h2>{_ratings_body(payload)}</div>'
+
+
+def _ratings_body(payload):
     trend = (payload.get("analyst") or {}).get("trend") or {}
     cur = next((p for p in (trend.get("trend") or []) if p.get("period") == "0m"), {})
     prev = next((p for p in (trend.get("trend") or []) if p.get("period") == "-1m"), {})
@@ -2597,19 +2601,17 @@ def _ratings_module(payload):
         f' <b>{cur.get(k) or 0}</b> <span class="dim">上月 {prev.get(k) or 0}</span></div>'
         for k, lab in names
     )
-    return (
-        f'<div class="card sec"><h2>评级分布</h2>{rows}'
-        '<p class="dim small">数据源只提供机构名，不含分析师个人姓名。</p></div>'
-    )
+    return rows + '<p class="dim small">数据源只提供机构名，不含分析师个人姓名。</p>'
 
 
 def _actions_module(payload):
+    return f'<div class="card sec"><h2>机构评级与目标价</h2>{_actions_body(payload)}</div>'
+
+
+def _actions_body(payload):
     rows = payload.get("analyst_actions") or []
     if not rows:
-        return (
-            '<div class="card sec"><h2>机构评级与目标价</h2>'
-            '<p class="dim">评级调整数据尚未采集——首轮采集后这里会列出各家机构最近两次调整。</p></div>'
-        )
+        return '<p class="dim">评级调整数据尚未采集——首轮采集后这里会列出各家机构最近两次调整。</p>'
     items = []
     seen = {}
     for r in rows:
@@ -2646,7 +2648,8 @@ def _earnings_hist_module(payload):
     if not rows:
         return ""
     trs = "".join(
-        f"<tr><td>{r['q']}</td><td class='num'>{r.get('est') if r.get('est') is not None else '—'}</td>"
+        f"<tr><td>{r.get('report_date') or r['q']}</td>"
+        f"<td class='num'>{r.get('est') if r.get('est') is not None else '—'}</td>"
         f"<td class='num'>{r.get('act') if r.get('act') is not None else '—'}</td>"
         f"<td class='num'>{(r['gap'] or 0):+.0f}%</td>"
         f"<td class='num'>{_pct(r.get('next_day'), 1) if r.get('next_day') is not None else '—'}</td></tr>"

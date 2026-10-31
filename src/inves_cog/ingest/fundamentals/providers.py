@@ -109,7 +109,26 @@ class YFinance:
         for name in ("earnings_estimate", "revenue_estimate", "eps_revisions", "eps_trend"):
             frame = getattr(client, "get_" + name)()
             tables[name] = frame.to_dict(orient="index") if frame is not None else {}
-        tables["analyst_price_targets"] = client.get_analyst_price_targets() or {}
+        targets = client.get_analyst_price_targets() or {}
+        tables["analyst_price_targets"] = targets
+        recs = client.get_recommendations_summary()
+        tables["analyst"] = {
+            "targetLowPrice": targets.get("low"),
+            "targetHighPrice": targets.get("high"),
+            "targetMeanPrice": targets.get("mean"),
+            "targetMedianPrice": targets.get("median"),
+            "numberOfAnalystOpinions": targets.get("numberOfAnalysts"),
+            "recommendationTrend": {"trend": recs.to_dict(orient="records") if recs is not None else []},
+        }
+        ud = client.get_upgrades_downgrades()
+        tables["upgrade_history"] = (
+            [
+                {**{str(k): v for k, v in row.items()}, "epochGradeDate": int(index.timestamp())}
+                for index, row in ud.iterrows()
+            ]
+            if ud is not None
+            else []
+        )
         frame = client.get_earnings_history()
         tables["earnings_history"] = (
             [{"quarter_date": index.date(), **row.to_dict()} for index, row in frame.iterrows()]
