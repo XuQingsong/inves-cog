@@ -630,7 +630,8 @@ def page_brief_stock(connection, day, clock, symbol):
             "headings": [],
             "label": PAPER_LABEL,
         }
-    in_scope = symbol in context["pool"] or symbol in context["positions"]
+    stocks = context.get("stocks") or set()
+    in_scope = symbol in context["pool"] or symbol in context["positions"] or symbol in stocks
     if not in_scope:
         return _untracked_page(connection, symbol, day, clock, bars)
     is_today = day == clock.today_trade_date()
