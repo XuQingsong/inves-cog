@@ -572,33 +572,40 @@ def _fred_rows(text, sid, pub_fn):
 
 
 def backfill_fred(http, connection, raw_dir, _now=None):
+    import os
+
+    key = os.environ.get("FRED_API_KEY")
     out = {}
     for sid in FRED_SERIES:
-        url = FRED_URL.format(sid=sid)
+        url = FRED_API.format(sid=sid, key=key) if key else FRED_URL.format(sid=sid)
         try:
             text = _fetch(http, url)
             rows = []
-            reader = csv.DictReader(io.StringIO(text))
-            for row in reader:
-                day = _mdy(row.get("observation_date") or row.get("DATE"))
-                val = row.get(sid)
-                if day and val not in (None, ".", ""):
-                    rows.append(
-                        {
-                            "series_id": f"fred_{sid.lower()}",
-                            "obs_date": day,
-                            "value": float(val),
-                            "published_at": published_at_fred(sid, day),
-                            "vintage": "backfill",
-                        }
-                    )
+            if key:
+                payload = text if isinstance(text, dict) else json.loads(text)
+                recs = payload.get("observations", [])
+                for o in recs:
+                    day = _mdy(o.get("date") or "")
+                    val = o.get("value")
+                    if day and val not in (None, ".", ""):
+                        rows.append(
+                            {
+                                "series_id": f"fred_{sid.lower()}",
+                                "obs_date": day,
+                                "value": float(val),
+                                "published_at": published_at_fred(sid, day),
+                                "vintage": "backfill",
+                            }
+                        )
+            else:
+                rows = _fred_rows(text, sid, published_at_fred)
             if connection is not None and rows:
                 save_raw(
                     raw_dir,
                     f"fred-{sid.lower()}",
                     url,
                     str(_now.date() if hasattr(_now, "date") else _now),
-                    text.encode(),
+                    (text.encode() if isinstance(text, str) else json.dumps(text).encode()),
                     connection,
                 )
                 upsert_many(
@@ -610,7 +617,7 @@ def backfill_fred(http, connection, raw_dir, _now=None):
                             "series_id": f"fred_{sid.lower()}",
                             "name_zh": sid,
                             "unit": "usd|pct",
-                            "frequency": "daily",
+                            "frequency": FRED_FREQ.get(sid, "daily"),
                             "source": "FRED",
                         }
                     ],
@@ -621,7 +628,6 @@ def backfill_fred(http, connection, raw_dir, _now=None):
         except Exception as exc:
             log.warning("fred %s failed: %r", sid, exc)
             out[sid] = set()
-            continue
     return [_report(f"FRED:{t}", days) for t, days in out.items()]
 
 
