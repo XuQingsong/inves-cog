@@ -5,53 +5,55 @@ import io
 import json
 import logging
 import re
-from datetime import datetime
+import zipfile
+from datetime import date, datetime
+from xml.etree import ElementTree as ET
 
-from inves_cog.flows.store import record_health, save_raw, upsert_many
+from inves_cog.flows.store import UA, record_health, save_raw, upsert_many
+from inves_cog.ingest.market import NY
 
 log = logging.getLogger(__name__)
-UA = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-}
-
-
-# ---------- a. Cboe delayed option chains ----------
-
 CBOE_URL = "https://cdn.cboe.com/api/global/delayed_quotes/options/{sym}.json"
 
 
-def parse_cboe_chain(payload, underlying, max_days=60, today=None):
-    """data.options[] → option_chain rows. Option sym e.g. SPY  251219C00500000."""
+def parse_cboe_chain(payload, underlying, max_days=60, today=None, asof=None):
+    """data.options[] → option_chain rows. Strikes are 8-digit OSI ÷1000.
+    max_days=None keeps the full chain (EOD)."""
     data = (payload or {}).get("data") or {}
-    stamp = data.get("timestamp") or data.get("current_time")
-    snap = (
-        datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
-        if stamp else (datetime.combine(today, datetime.min.time()) if today else datetime.now())
-    )
+    stamp = payload.get("timestamp") or data.get("timestamp") or data.get("current_time")
+    snap = asof
+    if stamp:
+        try:
+            snap = datetime.strptime(str(stamp), "%Y-%m-%d %H:%M:%S").replace(tzinfo=NY)
+        except ValueError:
+            try:
+                snap = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+            except ValueError:
+                pass
+    if snap is None:
+        snap = datetime.combine(today or date.today(), datetime.min.time(), tzinfo=NY)
+    if snap.tzinfo is None:
+        snap = snap.replace(tzinfo=NY)
     rows = []
-    pat = re.compile(r"([CP])(\d+\.?\d*)$")
+    und = underlying.lstrip("_")
     for opt in data.get("options") or []:
         sym = opt.get("option", "")
         m = re.search(r"(\d{6})([CP])([\d.]+)$", sym)
         if not m:
             continue
-        ymd, cp, strike = m.group(1), m.group(2), m.group(3)
         try:
-            expiry = datetime.strptime(ymd, "%y%m%d").date()
+            expiry = datetime.strptime(m.group(1), "%y%m%d").date()
         except ValueError:
             continue
-        if today and (expiry - today).days > max_days:
+        if max_days is not None and today and (expiry - today).days > max_days:
             continue
-        if float(strike) > 10000:
-            strike = float(strike) / 1000.0
         rows.append(
             {
-                "underlying": underlying.lstrip("_"),
+                "underlying": und,
                 "snapshot_at": snap,
                 "expiry": expiry,
-                "strike": float(strike),
-                "cp": cp,
+                "strike": float(m.group(3)) / 1000.0,
+                "cp": m.group(2),
                 "oi": opt.get("open_interest"),
                 "volume": opt.get("volume"),
                 "iv": opt.get("iv"),
@@ -65,46 +67,54 @@ def parse_cboe_chain(payload, underlying, max_days=60, today=None):
     return rows
 
 
-def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=None):
+def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=None, asof=None):
     url = CBOE_URL.format(sym=symbol)
+    t0 = datetime.now()
     try:
         r = http.request("GET", url, headers=UA)
         payload = r if isinstance(r, dict) else json.loads(r)
         raw = r.encode() if isinstance(r, str) else json.dumps(r).encode()
-        rows = parse_cboe_chain(payload, symbol, max_days, today)
+        rows = parse_cboe_chain(payload, symbol, max_days, today, asof)
+        lat = (datetime.now() - t0).total_seconds()
         if connection is not None:
             save_raw(raw_dir, "cboe-chain", url, str(today), raw, connection)
-            n = upsert_many(connection, "option_chain", list(rows[0].keys()) if rows else [], rows)
-            record_health(connection, "Flows:CboeChain", "ok", f"{symbol} {n}")
+            if rows:
+                upsert_many(connection, "option_chain", list(rows[0].keys()), rows)
+            record_health(connection, "Flows:CboeChain", True, len(rows), f"{symbol}", lat)
         return {"symbol": symbol, "rows": len(rows)}
     except Exception as exc:
         if connection is not None:
-            record_health(connection, "Flows:CboeChain", "failed", f"{symbol} {exc!r}")
+            record_health(connection, "Flows:CboeChain", False, 0, f"{symbol} {exc!r}")
         log.warning("cboe chain %s failed: %r", symbol, exc)
         return {"symbol": symbol, "rows": 0, "error": str(exc)}
 
-
-# ---------- b. OCC daily volume ----------
 
 OCC_VOL_URL = (
     "https://marketdata.theocc.com/volume-query?reportDate={ymd}"
     "&format=csv&volumeQueryType=O&symbolType=ALL&symbol="
     "&reportType=D&accountType=ALL&productKind=ALL&porc=BOTH"
 )
-
+OCC_OI_URL = "https://marketdata.theocc.com/daily-open-interest?reportDate={mdy}&action=download&format=csv"
+OCC_SERIES_URL = "https://marketdata.theocc.com/series-search?symbolType=U&symbol={sym}"
 _ACT = {"C": "C", "F": "F", "M": "M", "B": "F"}
 
 
+def _mdy(v):
+    for fmt in ("%m/%d/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(str(v).strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
 def parse_occ_volume(text):
-    """Aggregate OCC daily volume csv → (date, underlying, account_type, cp, quantity)."""
     out = {}
-    reader = csv.DictReader(io.StringIO(text))
-    for row in reader:
-        q = row.get("quantity")
-        und = (row.get("underlying") or "").strip()
+    for row in csv.DictReader(io.StringIO(text)):
+        q, und = row.get("quantity"), (row.get("underlying") or "").strip()
         cp = (row.get("porc") or "").strip()[:1].upper()
         act = _ACT.get((row.get("actype") or "").strip().upper())
-        day = (row.get("actdate") or "").strip()
+        day = _mdy(row.get("actdate"))
         if not (q and und and cp and act and day):
             continue
         key = (day, und, act, cp)
@@ -112,39 +122,18 @@ def parse_occ_volume(text):
     return [{"date": k[0], "underlying": k[1], "account_type": k[2], "cp": k[3], "quantity": v} for k, v in out.items()]
 
 
-def collect_occ_volume(http, connection, day, raw_dir):
-    url = OCC_VOL_URL.format(ymd=day.strftime("%Y%m%d"))
-    try:
-        r = http.request("GET", url, headers=UA)
-        text = r if isinstance(r, str) else r.decode("utf-8", "replace")
-        raw = r.encode() if isinstance(r, str) else r
-        rows = parse_occ_volume(text)
-        if connection is not None:
-            save_raw(raw_dir, "occ-volume", url, str(day), raw, connection)
-            if rows:
-                upsert_many(connection, "option_volume_occ", list(rows[0].keys()), rows)
-        record_health(connection, "Flows:OCCVolume", "ok", f"{day} {len(rows)}") if connection is not None else None
-        return {"date": str(day), "rows": len(rows)}
-    except Exception as exc:
-        if connection is not None:
-            record_health(connection, "Flows:OCCVolume", "failed", f"{day} {exc!r}")
-        log.warning("occ volume %s failed: %r", day, exc)
-        return {"date": str(day), "rows": 0, "error": str(exc)}
-
-
-# ---------- c. OCC OI summary + per-contract cross-check ----------
-
-OCC_OI_URL = "https://marketdata.theocc.com/daily-open-interest?reportDate={mdy}&action=download&format=csv"
-OCC_SERIES_URL = "https://marketdata.theocc.com/series-search?symbolType=U&symbol={sym}"
-
-
-def parse_occ_oi_summary(text, obs_date, published_at):
-    """OCC daily-open-interest csv → observations rows (equity/index/debt calls/puts)."""
+def parse_occ_oi_summary(text, published_at):
+    """Date,Equity C/P/T,Index C/P/T,Debt C/P/T,Futures T,OCC T → observations."""
     out = []
-    labels = {1: "occ_oi_equity_calls", 2: "occ_oi_equity_puts",
-              4: "occ_oi_index_calls", 5: "occ_oi_index_puts",
-              7: "occ_oi_debt_calls", 8: "occ_oi_debt_puts",
-              11: "occ_oi_total"}
+    labels = {
+        1: "occ_oi_equity_calls",
+        2: "occ_oi_equity_puts",
+        4: "occ_oi_index_calls",
+        5: "occ_oi_index_puts",
+        7: "occ_oi_debt_calls",
+        8: "occ_oi_debt_puts",
+        11: "occ_oi_total",
+    }
     for row in csv.reader(io.StringIO(text)):
         cells = [c.strip() for c in row]
         if not cells or not re.match(r"\d{2}/\d{2}/\d{4}", cells[0]):
@@ -152,79 +141,123 @@ def parse_occ_oi_summary(text, obs_date, published_at):
         obs = datetime.strptime(cells[0], "%m/%d/%Y").date()
         for idx, series in labels.items():
             if len(cells) > idx and cells[idx].replace(",", "").isdigit():
-                out.append({"series_id": series, "obs_date": obs, "value": float(cells[idx].replace(",", "")),
-                            "published_at": published_at, "vintage": "initial"})
+                out.append(
+                    {
+                        "series_id": series,
+                        "obs_date": obs,
+                        "value": float(cells[idx].replace(",", "")),
+                        "published_at": published_at,
+                        "vintage": "initial",
+                    }
+                )
     return out
 
 
-def collect_occ_oi(http, connection, day, raw_dir, published_at=None):
-    url = OCC_OI_URL.format(mdy=day.strftime("%m/%d/%Y"))
-    try:
-        r = http.request("GET", url, headers=UA)
-        text = r if isinstance(r, str) else r.decode("utf-8", "replace")
-        raw = r.encode() if isinstance(r, str) else r
-        rows = parse_occ_oi_summary(text, day, published_at or day)
-        if connection is not None:
-            save_raw(raw_dir, "occ-oi", url, str(day), raw, connection)
-            if rows:
-                upsert_many(connection, "observations", list(rows[0].keys()), rows)
-        return {"date": str(day), "rows": len(rows)}
-    except Exception as exc:
-        log.warning("occ oi %s failed: %r", day, exc)
-        return {"date": str(day), "rows": 0, "error": str(exc)}
-
-
-def parse_occ_series(text, underlying):
-    """Per-contract OI cross-check tab text → option_chain rows with source='OCC'."""
+def parse_occ_series(text, underlying, published_at):
+    """Per-contract OI cross-check (tab text) → option_chain rows, source='OCC'."""
     out = []
     for line in text.splitlines():
-        parts = re.split(r"\t|,|\s{2,}", line.strip())
-        if len(parts) < 2 or not parts[0]:
-            continue
-        m = re.search(r"(\d{6})([CP])([\d.]+)", line)
+        m = re.search(r"(\d{6})([CP])(\d{8})", line)
         if not m:
             continue
-        nums = [p for p in parts if p.replace(",", "").isdigit()]
+        nums = [p.replace(",", "") for p in line.split("\t") if p.replace(",", "").isdigit()]
         if not nums:
-            continue
+            nums = [p.replace(",", "") for p in re.split(r"\s{2,}", line) if p.replace(",", "").isdigit()]
         out.append(
             {
                 "underlying": underlying,
-                "snapshot_at": datetime.now(),
+                "snapshot_at": published_at,
                 "expiry": datetime.strptime(m.group(1), "%y%m%d").date(),
-                "strike": float(m.group(3)),
+                "strike": float(m.group(3)) / 1000.0,
                 "cp": m.group(2),
-                "oi": int(nums[-1].replace(",", "")),
+                "oi": int(nums[-1]) if nums else None,
                 "source": "OCC",
             }
         )
     return out
 
 
-# ---------- d. ETF shares ----------
+def collect_occ(http, connection, day, raw_dir, kind="volume", published_at=None, raw_id_link=None):
+    url = (
+        OCC_VOL_URL.format(ymd=day.strftime("%Y%m%d"))
+        if kind == "volume"
+        else OCC_OI_URL.format(mdy=day.strftime("%m/%d/%Y"))
+    )
+    t0 = datetime.now()
+    try:
+        r = http.request("GET", url, headers=UA)
+        text = r if isinstance(r, str) else r.decode("utf-8", "replace")
+        pub = published_at or datetime.now(tz=NY)
+        src = "Flows:OCCVolume" if kind == "volume" else "Flows:OCCOpenInterest"
+        raw = (
+            save_raw(raw_dir, f"occ-{kind}", url, str(day), r.encode() if isinstance(r, str) else r, connection)
+            if connection is not None
+            else {"raw_file_id": None}
+        )
+        if kind == "volume":
+            rows = parse_occ_volume(text)
+            if connection is not None and rows:
+                upsert_many(connection, "option_volume_occ", list(rows[0].keys()), rows)
+        else:
+            rows = parse_occ_oi_summary(text, pub)
+            if connection is not None and rows:
+                for row in rows:
+                    row["raw_file_id"] = raw["raw_file_id"]
+                upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+        lat = (datetime.now() - t0).total_seconds()
+        if connection is not None:
+            record_health(connection, src, True, len(rows), str(day), lat)
+        return {"date": str(day), "rows": len(rows)}
+    except Exception as exc:
+        src = "Flows:OCCVolume" if kind == "volume" else "Flows:OCCOpenInterest"
+        if connection is not None:
+            record_health(connection, src, False, 0, f"{day} {exc!r}")
+        log.warning("occ %s %s failed: %r", kind, day, exc)
+        return {"date": str(day), "rows": 0, "error": str(exc)}
+
+
+def collect_occ_series(http, connection, symbol, raw_dir, published_at=None):
+    url = OCC_SERIES_URL.format(sym=symbol)
+    try:
+        r = http.request("GET", url, headers=UA)
+        text = r if isinstance(r, str) else r.decode("utf-8", "replace")
+        rows = parse_occ_series(text, symbol, published_at or datetime.now(tz=NY))
+        if connection is not None and rows:
+            upsert_many(connection, "option_chain", list(rows[0].keys()), rows)
+        return {"symbol": symbol, "rows": len(rows)}
+    except Exception as exc:
+        log.warning("occ series %s failed: %r", symbol, exc)
+        return {"symbol": symbol, "rows": 0, "error": str(exc)}
+
+
+# ---------- ETF shares ----------
 
 DIREXION_URL = "https://www.direxion.com/holdings/{t}.csv"
 PROSHARES_URL = "https://accounts.profunds.com/etfdata/ByFund/{t}-historical_nav.csv"
 SSGA_URL = "https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/navhist-us-en-{t}.xlsx"
-
 DIREXION_TICKERS = ["SOXL", "SOXS", "TECL", "TECS", "TSLL"]
 PROSHARES_TICKERS = ["TQQQ", "SQQQ", "UPRO", "SPXU", "QLD", "SSO", "USD"]
 SSGA_TICKERS = ["SPY"] + [f"XL{c}" for c in "BCEFIKLPUVY"]
 
-_SH0 = re.compile(r"Shares Outstanding")
-
 
 def parse_direxion(text, ticker, published_at):
-    """Direxion holdings csv — header line 'Shares Outstanding:N'."""
     rows = []
+    reader = csv.DictReader(
+        io.StringIO("\n".join(l for l in text.splitlines() if not l.startswith("Shares Outstanding"))),
+        skipinitialspace=True,
+    )
+    for row in reader:
+        day = _mdy(row.get("TradeDate") or row.get("Trade Date") or row.get("Date"))
+        if day:
+            break
     for line in text.splitlines():
-        if _SH0.search(line):
+        if "Shares Outstanding" in line:
             num = re.sub(r"[^\d]", "", line.split(":")[-1])
             if num:
                 rows.append(
                     {
                         "ticker": ticker,
-                        "date": published_at,
+                        "date": day or published_at.date(),
                         "shares": int(num),
                         "issuer": "Direxion",
                         "published_at": published_at,
@@ -235,49 +268,109 @@ def parse_direxion(text, ticker, published_at):
 
 
 def parse_proshares(text, ticker, published_at):
-    """ProShares historical_nav csv — 'Shares Outstanding (000)', AUM."""
     rows = []
     reader = csv.DictReader(io.StringIO(text))
+    header = reader.fieldnames or []
+    mult = 1000 if any("(000)" in h for h in header) else 1
     for row in reader:
         sh = row.get("Shares Outstanding (000)") or row.get("Shares Outstanding")
-        nav = row.get("NAV")
-        day = row.get("Date") or row.get("Trade Date")
-        aum = row.get("AUM") or row.get("Total Net Assets")
+        day = _mdy(row.get("Date") or row.get("Trade Date"))
         if not (day and sh):
-            continue
-        try:
-            shares = int(float(sh.replace(",", ""))) * (1000 if "(000)" in str(row.keys()) else 1)
-        except (ValueError, AttributeError):
             continue
         rows.append(
             {
                 "ticker": ticker,
                 "date": day,
-                "nav": float(nav) if nav else None,
-                "shares": shares,
-                "aum": float(aum.replace(",", "")) if aum else None,
+                "nav": float(row["NAV"]) if row.get("NAV") and row["NAV"] != "-" else None,
+                "shares": int(float(sh.replace(",", ""))) * mult,
+                "aum": float(row["AUM"].replace(",", "")) if row.get("AUM") and row["AUM"] != "-" else None,
                 "issuer": "ProShares",
                 "published_at": published_at,
             }
         )
-    return rows[-3:] if len(rows) > 3 else rows
+    return rows[-3:]
+
+
+def _xlsx_rows(data):
+    """Shared-strings + first-sheet rows → list of lists."""
+    ns = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        shared = []
+        if "xl/sharedStrings.xml" in z.namelist():
+            root = ET.fromstring(z.read("xl/sharedStrings.xml"))
+            for si in root.findall("m:si", ns):
+                shared.append(
+                    "".join(
+                        t.text or "" for t in si.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
+                    )
+                )
+        sheet = z.read(z.namelist()[z.namelist().index([n for n in z.namelist() if "sheet" in n][0])])
+    out = []
+    for row in ET.fromstring(sheet).iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}row"):
+        cells = []
+        for c in row.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}c"):
+            v = c.find("m:v", ns)
+            val = v.text if v is not None else ""
+            if c.get("t") == "s" and val.isdigit():
+                val = shared[int(val)]
+            cells.append(val)
+        out.append(cells)
+    return out
+
+
+def parse_ssga_xlsx(data, ticker, published_at):
+    rows = []
+    for cells in _xlsx_rows(data):
+        if not cells or cells[0] in ("Date", "", None) or cells[0].startswith("NAV"):
+            continue
+        day = _mdy(cells[0])
+        if day and len(cells) >= 3:
+            rows.append(
+                {
+                    "ticker": ticker,
+                    "date": day,
+                    "nav": float(cells[1]) if cells[1] not in ("-", "") else None,
+                    "shares": int(float(cells[2].replace(",", ""))) if cells[2] not in ("-", "") else None,
+                    "aum": float(cells[3].replace(",", "")) if len(cells) > 3 and cells[3] not in ("-", "") else None,
+                    "issuer": "SSGA",
+                    "published_at": published_at,
+                }
+            )
+    return rows[-3:]
 
 
 def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=None):
-    pub = published_at or datetime.now()
+    pub = published_at or datetime.now(tz=NY)
     out = {}
-    for t in tickers or (DIREXION_TICKERS + PROSHARES_TICKERS):
-        url = DIREXION_URL.format(t=t) if t in DIREXION_TICKERS else PROSHARES_URL.format(t=t)
+    for t in tickers or (DIREXION_TICKERS + PROSHARES_TICKERS + SSGA_TICKERS):
+        if t in DIREXION_TICKERS:
+            url, parse, src = DIREXION_URL.format(t=t), "direxion", "Flows:ETFShares:Direxion"
+        elif t in PROSHARES_TICKERS:
+            url, parse, src = PROSHARES_URL.format(t=t), "proshares", "Flows:ETFShares:ProShares"
+        else:
+            url, parse, src = SSGA_URL.format(t=t.lower()), "ssga", "Flows:ETFShares:SSGA"
+        t0 = datetime.now()
         try:
             r = http.request("GET", url, headers=UA)
-            text = r if isinstance(r, str) else r.decode("utf-8", "replace")
-            raw = r.encode() if isinstance(r, str) else r
-            rows = parse_direxion(text, t, pub) if t in DIREXION_TICKERS else parse_proshares(text, t, pub)
-            if connection is not None and rows:
-                save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), raw, connection)
-                upsert_many(connection, "etf_daily", list(rows[0].keys()), rows)
+            body = r.encode() if isinstance(r, str) else r
+            rows = (
+                parse_direxion(r if isinstance(r, str) else r.decode("utf-8", "replace"), t, pub)
+                if parse == "direxion"
+                else parse_proshares(r if isinstance(r, str) else r.decode("utf-8", "replace"), t, pub)
+                if parse == "proshares"
+                else parse_ssga_xlsx(body, t, pub)
+            )
+            lat = (datetime.now() - t0).total_seconds()
+            if connection is not None:
+                save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), body, connection)
+                if rows:
+                    upsert_many(connection, "etf_daily", list(rows[0].keys()), rows, "update")
             out[t] = len(rows)
+            if connection is not None:
+                record_health(connection, src, True, len(rows), t, lat)
         except Exception as exc:
             log.warning("etf %s failed: %r", t, exc)
             out[t] = 0
+            if connection is not None:
+                record_health(connection, src, False, 0, f"{t} {exc!r}")
     return out

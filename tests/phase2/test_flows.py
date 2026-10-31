@@ -2,16 +2,14 @@ from datetime import date, datetime
 from unittest.mock import MagicMock
 
 from inves_cog.flows.collectors import (
+    collect_cboe_chain,
     parse_cboe_chain,
     parse_direxion,
     parse_occ_oi_summary,
-    parse_occ_series,
     parse_occ_volume,
     parse_proshares,
-    collect_cboe_chain,
 )
 from inves_cog.flows.store import save_raw
-
 
 CBOE = {
     "data": {
@@ -62,10 +60,12 @@ def test_parse_occ_volume():
 
 
 def test_parse_occ_oi():
-    text = ("Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
-            ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
-            '10/30/2026,"1,000","2,000","3,000","4,000","5,000","9,000","0","0","0","100","12,000",\n')
-    rows = parse_occ_oi_summary(text, date(2026, 10, 30), date(2026, 10, 30))
+    text = (
+        "Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
+        ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
+        '10/30/2026,"1,000","2,000","3,000","4,000","5,000","9,000","0","0","0","100","12,000",\n'
+    )
+    rows = parse_occ_oi_summary(text, date(2026, 10, 30))
     assert {r["series_id"] for r in rows} >= {"occ_oi_equity_calls", "occ_oi_index_puts"}
 
 
@@ -108,11 +108,45 @@ def test_collect_failure_records_health(tmp_path):
 
 
 def test_parse_occ_oi_real_csv():
-    text = ("Daily Open Interest - October 2026\n"
-            "Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
-            ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
-            '10/30/2026,"359,968,983","266,052,729","626,021,712","22,764,890","21,558,366","44,323,256","0","0","0","402,809","670,747,777",\n')
-    rows = parse_occ_oi_summary(text, date(2026, 10, 30), date(2026, 10, 30))
+    text = (
+        "Daily Open Interest - October 2026\n"
+        "Date,Equity,,,Index/Other,,,Debt,,,Futures,OCC Total\n"
+        ",Calls,Puts,Total,Calls,Puts,Total,Calls,Puts,Total,Total,\n"
+        '10/30/2026,"359,968,983","266,052,729","626,021,712","22,764,890","21,558,366","44,323,256","0","0","0","402,809","670,747,777",\n'
+    )
+    rows = parse_occ_oi_summary(text, date(2026, 10, 30))
     by = {r["series_id"]: r["value"] for r in rows}
     assert by["occ_oi_equity_calls"] == 359_968_983 and by["occ_oi_index_puts"] == 21_558_366
     assert by["occ_oi_total"] == 670_747_777
+
+
+def test_strike_always_div_1000():
+    p = {
+        "data": {"options": [{"option": "QQQ261030C00005000", "bid": 0.1, "ask": 0.2}]},
+        "timestamp": "2026-10-30 15:45:00",
+    }
+    rows = parse_cboe_chain(p, "QQQ", None, date(2026, 10, 30))
+    assert rows[0]["strike"] == 5.0
+
+
+def test_eod_keeps_full_chain():
+    p = {"data": {"options": [{"option": "QQQ261030C00500000"}, {"option": "QQQ271217C00500000"}]}}
+    assert len(parse_cboe_chain(p, "QQQ", None, date(2026, 10, 30))) == 2
+    assert len(parse_cboe_chain(p, "QQQ", 60, date(2026, 10, 30))) == 1
+
+
+def test_top_level_timestamp_ny():
+    from inves_cog.ingest.market import NY
+
+    p = {"data": {"options": [{"option": "QQQ261030C00500000"}]}, "timestamp": "2026-10-30 15:45:00"}
+    snap = parse_cboe_chain(p, "QQQ", None, date(2026, 10, 30))[0]["snapshot_at"]
+    assert snap.tzinfo is not None and snap.tzinfo == NY and snap.hour == 15
+
+
+def test_health_upsert_ok():
+    conn = __import__("unittest.mock", fromlist=["MagicMock"]).MagicMock()
+    from inves_cog.flows.store import record_health
+
+    record_health(conn, "Flows:X", True, 5, "note", 0.1)
+    sql = conn.execute.call_args[0][0]
+    assert "ON CONFLICT (source)" in sql and "consecutive_failures" in sql

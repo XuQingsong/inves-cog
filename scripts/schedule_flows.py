@@ -1,69 +1,123 @@
-"""Phase-2 flows collectors — separate process, holiday-aware. Failures isolated from phase-1."""
+"""Phase-2 flows collectors — slot-based, separate process, failure-isolated.
+State file tracks completed slots so missed windows are caught up."""
 
 import json
 import time
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
+from pathlib import Path
+
+import yaml
 
 from inves_cog.clock import SystemClock
 from inves_cog.flows.collectors import (
-    CBOE_URL,
-    DIREXION_TICKERS,
-    PROSHARES_TICKERS,
+    INDEX_SYMS,
     collect_cboe_chain,
-    collect_occ_oi,
-    collect_occ_volume,
     collect_etf_shares,
+    collect_occ,
+    collect_occ_series,
 )
 from inves_cog.flows.store import DEFAULT_RAW, polite_http
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
 INDEX_SYMS = ["_SPX", "SPY", "QQQ", "IWM", "SMH"]
-INTRA_TIMES = [(h, m) for h in range(9, 16) for m in (45, 15, 30)]  # 09:45..16:00 grid
+STATE = Path("/home/claudeuser/inves-cog-data/flows/schedule_state.json")
+_UNIVERSE = Path(__file__).resolve().parents[1] / "config" / "universe.yaml"
+
+
+def _universe():
+    try:
+        loaded = yaml.safe_load(_UNIVERSE.read_text())
+        return [r["ticker"] for r in loaded.get("stocks", loaded if isinstance(loaded, list) else [])]
+    except Exception:
+        return []
+
+
+def _dsn(values):
+    return values.get("Database", {}).get("INVES_COG_DATABASE_URL") or values.get("INVES_COG_DATABASE_URL")
 
 
 def _connection(values):
     import psycopg
     from psycopg.rows import dict_row
 
-    return psycopg.connect(values.ingest_dsn, row_factory=dict_row, autocommit=True)
+    return psycopg.connect(_dsn(values), row_factory=dict_row, autocommit=True)
 
 
-def _universe(connection):
-    return [
-        r["ticker"] for r in connection.execute("SELECT DISTINCT ticker FROM marketstate.daily").fetchall()
-    ] or INDEX_SYMS
-
-
-def _intra_slot(now):
-    h, m = now.hour, now.minute
-    return (9, 45) <= (h, m) < (16, 0) and m in (0, 15, 30, 45)
-
-
-def run_once(clock, values):
-    local = clock.now_utc().astimezone(NY)
-    if not trading_day(local.date()):
-        return {"status": "skipped", "reason": "non-trading day"}
-    http = polite_http()
-    conn = _connection(values)
-    h, m = local.hour, local.minute
-    result = {}
+def _load_state():
     try:
-        if _intra_slot(local):
-            result["cboe"] = [collect_cboe_chain(http, conn, s, DEFAULT_RAW, 60, local.date()) for s in INDEX_SYMS]
-        if (h, m) == (16, 30):
-            result["cboe_eod"] = [
-                collect_cboe_chain(http, conn, s, DEFAULT_RAW, 0, local.date()) for s in _universe(conn)
-            ]
-        if (h, m) == (17, 30):
-            result["etf"] = collect_etf_shares(http, conn, DEFAULT_RAW, datetime.now())
-        if (h, m) == (7, 0):
-            prev = local.date() - timedelta(days=1)
-            result["occ_vol"] = collect_occ_volume(http, conn, prev, DEFAULT_RAW)
-            result["occ_oi"] = collect_occ_oi(http, conn, prev, DEFAULT_RAW)
+        return json.loads(STATE.read_text())
+    except Exception:
+        return {}
+
+
+def _save_state(state):
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(json.dumps(state))
+
+
+def _intra_slots(day):
+    out, t = [], datetime.combine(day, datetime.strptime("09:45", "%H:%M").time(), tzinfo=NY)
+    end = datetime.combine(day, datetime.strptime("16:00", "%H:%M").time(), tzinfo=NY)
+    while t <= end:
+        out.append(t.strftime("%H:%M"))
+        t += timedelta(minutes=15)
+    return out
+
+
+def _prev_trading_days(day, n=5):
+    out, d = [], day - timedelta(days=1)
+    while len(out) < n:
+        if trading_day(d):
+            out.append(d)
+        d -= timedelta(days=1)
+    return out
+
+
+def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
+    local = clock.now_utc().astimezone(NY)
+    today = local.date()
+    if not trading_day(today):
+        return {"status": "skipped", "reason": "non-trading day"}
+    http = http or polite_http()
+    state = _load_state()
+    result = {}
+    own = conn is None
+    if conn is None:
+        conn = _connection(values)
+    try:
+        hm = local.strftime("%H:%M")
+        for slot in _intra_slots(today):
+            key = f"intra:{today}:{slot}"
+            if hm >= slot and key not in state:
+                result[key] = [collect_cboe_chain(http, conn, s, raw_dir, 60, today) for s in INDEX_SYMS]
+                state[key] = True
+        eod_key = f"eod:{today}"
+        if hm >= "16:30" and eod_key not in state:
+            universe = INDEX_SYMS + [t for t in _universe() if t not in INDEX_SYMS]
+            result[eod_key] = [collect_cboe_chain(http, conn, s, raw_dir, None, today) for s in universe]
+            state[eod_key] = True
+        etf_key = f"etf:{today}"
+        if hm >= "17:30" and etf_key not in state:
+            result[etf_key] = collect_etf_shares(http, conn, raw_dir)
+            state[etf_key] = True
+        if hm >= "07:00":
+            for day in _prev_trading_days(today):
+                for kind, label in (("volume", "occ_vol"), ("oi", "occ_oi")):
+                    key = f"{label}:{day}"
+                    if key not in state:
+                        result[key] = collect_occ(http, conn, day, raw_dir, kind)
+                        if result[key].get("rows", 0) > 0:
+                            state[key] = True
+                xkey = f"occ_xchk:{day}"
+                if xkey not in state:
+                    result[xkey] = [collect_occ_series(http, conn, s, raw_dir) for s in INDEX_SYMS]
+                    state[xkey] = True
+        _save_state(state)
         return {"status": "ok", "at": str(local), **result}
     finally:
-        conn.close()
+        if own:
+            conn.close()
 
 
 def main():
