@@ -283,3 +283,5 @@ svg.chart .ax{font:11px var(--mono);fill:var(--muted)}
 .tape-item.t1n{background:rgba(196,60,60,.08)}.tape-item.t2n{background:rgba(196,60,60,.16)}
 .tape-item.t3n{background:rgba(196,60,60,.26)}.tape-item.t4n{background:rgba(196,60,60,.38)}
 .tape-gap{display:inline-block;width:40px}
+.tape-item.strong{font-weight:700;outline:1px solid currentColor}
+.m3news .nrow{font-size:13px}

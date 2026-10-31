@@ -2057,58 +2057,65 @@ _MARKET3 = {
 _YIELDS = {"^FVX", "^TNX", "^TYX"}
 
 
-def _sigma20(connection, day, ticker):
-    """20-day stdev of daily close-to-close returns from bars_daily."""
+def _close_series(connection, ticker, day, n=22):
+    """Daily closes up to `day`: bars_daily when the ticker has bars (plus a
+    same-day snapshot while the day's bar is not written yet), otherwise the
+    last intraday snapshot of each ET date."""
     rows = connection.execute(
-        "SELECT trade_date, close FROM ingest.bars_daily "
-        "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 21",
-        (ticker, day),
+        "SELECT trade_date AS d, close AS c FROM ingest.bars_daily "
+        "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT %s",
+        (ticker, day, n),
     ).fetchall()
-    closes = [float(r["close"]) for r in reversed(rows) if r["close"] is not None]
-    if len(closes) < 11:
+    series = [(r["d"], float(r["c"])) for r in reversed(rows) if r["c"] is not None]
+    snaps = connection.execute(
+        "SELECT DISTINCT ON (d) d, last FROM ("
+        " SELECT (as_of AT TIME ZONE 'America/New_York')::date AS d, as_of, last"
+        " FROM ingest.intraday_snapshots WHERE ticker=%s"
+        " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York'"
+        " AND as_of >= (%s::date - 40)::timestamp AT TIME ZONE 'America/New_York') x"
+        " WHERE last IS NOT NULL ORDER BY d DESC, as_of DESC",
+        (ticker, day, day),
+    ).fetchall()
+    snap_series = [(r["d"], float(r["last"])) for r in reversed(snaps)]
+    if series:
+        if series[-1][0] < day and snap_series and snap_series[-1][0] == day:
+            series.append(snap_series[-1])
+        return series[-n:]
+    return snap_series[-n:]
+
+
+def _quote(connection, ticker, day):
+    """Latest value for `day`, change vs the previous session, and the size of
+    that change relative to the prior 20 sessions (σ multiple)."""
+    series = _close_series(connection, ticker, day)
+    if len(series) < 2:
         return None
-    rets = [closes[i] / closes[i - 1] - 1 for i in range(1, len(closes))]
-    return statistics.stdev(rets)
-
-
-def _snap_rows(connection, tickers):
-    rows = connection.execute(
-        "SELECT DISTINCT ON (ticker) ticker, last, as_of, session FROM ingest.intraday_snapshots "
-        "WHERE ticker = ANY(%s) ORDER BY ticker, as_of DESC",
-        (list(tickers),),
-    ).fetchall()
-    return {r["ticker"]: r for r in rows}
-
-
-def _prev_snap(connection, ticker, as_of):
-    r = connection.execute(
-        "SELECT last FROM ingest.intraday_snapshots WHERE ticker=%s AND as_of<%s ORDER BY as_of DESC LIMIT 1",
-        (ticker, as_of),
-    ).fetchone()
-    return float(r["last"]) if r and r["last"] is not None else None
-
-
-def _feed_rel(items, clock):
-    """Rolling news titles with relative ET times for the right column."""
-    now = clock.now_utc().astimezone(NY)
-    out = []
-    for it in items[:30]:
-        ts = it.get("published") or it.get("published_at") or it.get("as_of")
-        rel = ""
-        if ts:
-            if hasattr(ts, "astimezone"):
-                mins = max(0, int((now - ts.astimezone(NY)).total_seconds() / 60))
-            else:
-                try:
-                    t = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
-                    mins = max(0, int((now - t.astimezone(NY)).total_seconds() / 60))
-                except ValueError:
-                    mins = None
-            if mins is not None:
-                rel = "刚刚" if mins < 1 else f"{mins} 分钟前" if mins < 60 else f"{mins // 60} 小时前"
-        title = it.get("title") or it.get("headline") or it.get("title_zh") or ""
-        out.append({"rel": rel, "title": title, "url": it.get("url")})
-    return [n for n in out if n["title"]]
+    (d1, last), (_, prev) = series[-1], series[-2]
+    values = [v for _, v in series]
+    if ticker in _YIELDS:
+        diffs = [(values[i] - values[i - 1]) * 100 for i in range(1, len(values) - 1)]
+        chg = (last - prev) * 100
+        sig = statistics.stdev(diffs) if len(diffs) >= 10 else None
+        return {
+            "px": last,
+            "ret": None,
+            "chg_bp": chg,
+            "sig": sig,
+            "mult": abs(chg) / sig if sig else abs(chg) / 7,
+            "as_of": str(d1),
+            "fallback": sig is None,
+        }
+    rets = [values[i] / values[i - 1] - 1 for i in range(1, len(values) - 1)]
+    ret = last / prev - 1
+    sig = statistics.stdev(rets) if len(rets) >= 10 else None
+    return {
+        "px": last,
+        "ret": ret,
+        "sig": sig,
+        "mult": abs(ret) / sig if sig else abs(ret) / 0.01,
+        "as_of": str(d1),
+        "fallback": sig is None,
+    }
 
 
 def _safe_call(fn, fallback):
@@ -2122,145 +2129,119 @@ def _safe_call(fn, fallback):
 
 
 def _tape_rows(connection, day):
-    snaps = _snap_rows(connection, [t for t, _ in _TAPE])
     out = []
     for ticker, name in _TAPE:
-        s = snaps.get(ticker)
-        if not s or s["last"] is None:
-            continue
-        last = float(s["last"])
-        prev = _prev_snap(connection, ticker, s["as_of"])
-        if not prev:
-            continue
-        if ticker in _YIELDS:
-            chg = (last - prev) * 100
-            sig = _sigma20(connection, day, ticker)
-            mult = abs(chg / 100) / sig if sig else abs(chg) / 7
-            out.append(
-                {
-                    "sym": ticker,
-                    "name": name,
-                    "px": last,
-                    "chg_bp": chg,
-                    "ret": None,
-                    "mult": mult,
-                    "session": s.get("session"),
-                    "as_of": str(s["as_of"]),
-                }
-            )
-        else:
-            ret = last / prev - 1
-            sig = _sigma20(connection, day, ticker)
-            mult = abs(ret) / sig if sig else abs(ret) / 0.01
-            out.append(
-                {
-                    "sym": ticker,
-                    "name": name,
-                    "px": last,
-                    "ret": ret,
-                    "mult": mult,
-                    "session": s.get("session"),
-                    "as_of": str(s["as_of"]),
-                }
-            )
+        q = _quote(connection, ticker, day)
+        if q is not None:
+            out.append({"sym": ticker, "name": name, **q})
     return out
 
 
 def _market_state(connection, day, payload, live):
-    """§2: band by SPY/QQQ ret vs own 20d σ, direction label, cause from linked anomalies."""
-    snaps = _snap_rows(connection, ["SPY", "QQQ"])
-    spy_ret = qqq_ret = spy_sig = qqq_sig = None
-    max_mult = 0
-    for t in ("SPY", "QQQ"):
-        s = snaps.get(t)
-        if not s or s["last"] is None:
-            continue
-        last, prev = float(s["last"]), _prev_snap(connection, t, s["as_of"])
-        if not prev:
-            continue
-        ret = last / prev - 1
-        sig = _sigma20(connection, day, t)
-        if t == "SPY":
-            spy_ret, spy_sig = ret, sig
-        else:
-            qqq_ret, qqq_sig = ret, sig
-        if sig:
-            max_mult = max(max_mult, abs(ret) / sig)
+    """§2: band by SPY/QQQ day return vs own prior-20-session σ; direction from
+    sign, breadth and the SPY/QQQ gap; cause only from linked market/basket anomalies."""
+    quotes = {t: _quote(connection, t, day) for t in ("SPY", "QQQ")}
+    spy, qqq = quotes["SPY"] or {}, quotes["QQQ"] or {}
+    mults = [q["mult"] for q in (spy, qqq) if q.get("sig")]
+    max_mult = max(mults) if mults else 0
     band = "平静" if max_mult < 1 else "明显波动" if max_mult < 2 else "剧烈"
     up, dn = payload.get("advancers"), payload.get("decliners")
-    if max_mult < 1:
+    s_ret, q_ret = spy.get("ret"), qqq.get("ret")
+    if band == "平静":
         direction = "窄幅整理"
-    elif spy_ret is not None and spy_ret < 0:
-        if qqq_ret is not None and qqq_ret < spy_ret - 0.005:
-            direction = "科技股领跌"
-        elif up is not None and dn is not None and dn > up * 2:
-            direction = "普跌"
-        else:
-            direction = "普跌"
+    elif s_ret is not None and s_ret < 0:
+        direction = "科技股领跌" if q_ret is not None and q_ret < s_ret - 0.005 else "普跌"
+    elif s_ret is not None:
+        direction = "科技股领涨" if q_ret is not None and q_ret > s_ret + 0.005 else "普涨"
     else:
-        direction = "普涨" if (up or 0) > (dn or 0) else "轮动"
+        direction = "方向暂缺"
+    if up is not None and dn is not None and band != "平静":
+        if s_ret is not None and s_ret < 0 and up > dn:
+            direction += "，但多数股上涨"
+        elif s_ret is not None and s_ret > 0 and dn > up:
+            direction += "，但多数股下跌"
+
+    def part(label, q):
+        if q.get("ret") is None or not q.get("sig"):
+            return f"{label}数据暂缺"
+        return f"{label} {q['ret'] * 100:+.1f}%（约平时 {q['mult']:.1f} 倍）"
+
     causes = []
     for r in live:
         if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_headline"):
-            causes.append(r["cause_headline"])
-            if len(causes) == 2:
-                break
-    basis = (
-        f"纳指 {qqq_ret * 100:+.1f}%（约平时 {abs(qqq_ret) / qqq_sig:.1f} 倍）"
-        if qqq_ret is not None and qqq_sig
-        else "纳指数据暂缺"
-    ) + (
-        f"，标普 {spy_ret * 100:+.1f}%（约平时 {abs(spy_ret) / spy_sig:.1f} 倍）"
-        if spy_ret is not None and spy_sig
-        else "，标普数据暂缺"
-    )
-    cause_txt = (
-        "；主要来自 " + "、".join(causes) if causes and band != "平静" else ("；原因未明" if band != "平静" else "")
-    )
-    sentence = f"{band} · {direction}：{basis}{cause_txt}"
+            head = r["cause_headline"]
+            if head not in causes:
+                causes.append(head)
+        if len(causes) == 2:
+            break
+    lead = payload.get("leaders_down") or []
+    lag = payload.get("leaders_up") or []
+    focus = ""
+    if band != "平静" and s_ret is not None:
+        names = lead if s_ret < 0 else lag
+        other = lag if s_ret < 0 else lead
+        if names:
+            focus += f"；{'跌' if s_ret < 0 else '涨'}幅集中在{'、'.join(n['name'] for n in names[:2])}"
+        if other:
+            focus += f"；{'、'.join(n['name'] for n in other[:2])}逆势{'上涨' if s_ret < 0 else '下跌'}"
+    cause_txt = ""
+    if band != "平静":
+        cause_txt = "；主要来自 " + "；".join(c[:60] for c in causes) if causes else "；原因未明"
+    sentence = f"{band} · {direction}：{part('纳指', qqq)}，{part('标普', spy)}{focus}{cause_txt}"
     return {
         "band": band,
         "direction": direction,
         "sentence": sentence,
-        "basis": basis,
-        "spy_sig": spy_sig,
-        "qqq_sig": qqq_sig,
-        "spy_ret": spy_ret,
-        "qqq_ret": qqq_ret,
+        "spy_sig": spy.get("sig"),
+        "qqq_sig": qqq.get("sig"),
+        "spy_ret": s_ret,
+        "qqq_ret": q_ret,
     }
 
 
 def _hl_grouped(live, positions):
-    """§2 highlights: merge by cause_event_id, order market>holdings>core-chain>single, max 4."""
+    """§2 highlights: one card per cause (cause_event_id, else subject); the card
+    ranks by its most important member scope (market > holdings > basket > stock);
+    active before faded; max 4."""
     groups = {}
     for r in live:
         key = r.get("cause_event_id") or f"subj:{r['subject']}"
         groups.setdefault(key, []).append(r)
     held = set(positions or [])
+    scope_order = {"market": 0, "basket": 1, "stock": 2}
     items = []
-    for _key, rows in groups.items():
-        rows.sort(key=lambda r: -abs(r.get("peak_z") or 0))
+    for rows in groups.values():
+        rows.sort(key=lambda r: (scope_order.get(r["scope"], 3), -abs(r.get("peak_z") or 0)))
         top = rows[0]
-        scope_rank = {"market": 0, "basket": 1, "stock": 2}.get(top["scope"], 3)
-        held_rank = 0 if (top["subject"] in held or any(m in held for m in (top.get("members") or {}))) else 1
-        why = {
-            "market": "大盘层面异常",
-            "basket": "持仓板块" if held_rank == 0 else "核心链条板块",
-            "stock": "持仓个股" if top["subject"] in held else "单股异常",
-        }[top["scope"]]
+        touches_held = any(r["subject"] in held or any(m in held for m in (r.get("members") or {})) for r in rows)
+        active = any(r.get("status") == "active" for r in rows)
+        best_scope = min(scope_order.get(r["scope"], 3) for r in rows)
+        if best_scope == 0:
+            why = "大盘层面异常"
+        elif touches_held:
+            why = "涉及持仓"
+        elif best_scope == 1:
+            why = "核心链条板块"
+        else:
+            why = "单股异常"
+        lead = max(rows, key=lambda r: abs(r.get("peak_z") or 0))
         items.append(
             {
-                "scope": top["scope"],
-                "subject": top["subject"],
-                "basket_name": top.get("basket_name"),
-                "ret": top.get("peak_ret"),
-                "last_px": top.get("last_px"),
+                "scope": lead["scope"],
+                "subject": lead["subject"],
+                "basket_name": lead.get("basket_name"),
+                "ret": lead.get("peak_ret"),
+                "last_px": lead.get("last_px"),
                 "why": why,
                 "cause": top.get("cause_headline"),
                 "kind": top.get("cause_kind"),
-                "peak_z": top.get("peak_z"),
-                "members": rows,
-                "rank": (scope_rank, held_rank, -abs(top.get("peak_z") or 0)),
+                "peak_z": lead.get("peak_z"),
+                "members": sorted(rows, key=lambda r: -abs(r.get("peak_z") or 0)),
+                "rank": (
+                    0 if active else 1,
+                    best_scope if best_scope == 0 else (1 if touches_held else 1 + best_scope),
+                    -abs(lead.get("peak_z") or 0),
+                ),
             }
         )
     items.sort(key=lambda x: x["rank"])
@@ -2269,24 +2250,17 @@ def _hl_grouped(live, positions):
 
 def _market3(connection, day):
     """§8 3-column block: tabbed quotes + embedded daily/intraday series."""
-    all_syms = [t for rows in _MARKET3.values() for t, _ in rows]
-    snaps = _snap_rows(connection, all_syms)
     groups = {}
     for tab, rows in _MARKET3.items():
         items = []
         for t, name in rows:
-            s = snaps.get(t)
-            if not s or s["last"] is None:
-                continue
-            last = float(s["last"])
-            prev = _prev_snap(connection, t, s["as_of"])
-            ret = (last / prev - 1) if prev else None
-            items.append({"sym": t, "name": name, "px": last, "ret": ret})
+            q = _quote(connection, t, day)
+            if q is not None:
+                items.append({"sym": t, "name": name, **q})
         if items:
             groups[tab] = items
-    daily = {}
-    intraday = {}
-    for t in all_syms:
+    daily, intraday = {}, {}
+    for t in [t for rows in _MARKET3.values() for t, _ in rows]:
         rows = connection.execute(
             "SELECT trade_date, open, high, low, close, volume FROM ingest.bars_daily "
             "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
@@ -2305,12 +2279,18 @@ def _market3(connection, day):
                 for r in reversed(rows)
                 if r["close"] is not None
             ]
+        else:
+            daily[t] = [
+                {"d": str(d), "o": v, "h": v, "l": v, "c": v, "v": 0} for d, v in _close_series(connection, t, day, 260)
+            ]
         srows = connection.execute(
-            "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s AND as_of >= %s::date ORDER BY as_of",
-            (t, day),
+            "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s"
+            " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
+            " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY as_of",
+            (t, day, day),
         ).fetchall()
         if len(srows) > 1:
-            intraday[t] = [{"t": str(r["as_of"]), "p": float(r["last"])} for r in srows if r["last"] is not None]
+            intraday[t] = [{"t": r["as_of"].isoformat(), "p": float(r["last"])} for r in srows if r["last"] is not None]
     return {"groups": groups, "daily": daily, "intraday": intraday}
 
 
@@ -2425,7 +2405,6 @@ def page_brief_market(connection, day, clock):
         "state": _safe_call(lambda: _market_state(connection, day, _state_payload, live_rows), {}),
         "hl_groups": _safe_call(lambda: _hl_grouped(live_rows, context["positions"]), []),
         "market3": _safe_call(lambda: _market3(connection, day), {}),
-        "feed_rel": _feed_rel(context.get("feed") or context.get("news_ranked") or [], clock),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
         "wide_asof": wide_asof,

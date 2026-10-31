@@ -2402,30 +2402,35 @@ def _live_module(payload):
     )
 
 
+def _move_tier(r):
+    mult = r.get("mult") or 0
+    t = 4 if mult >= 2 else 3 if mult >= 1.5 else 2 if mult >= 1 else 1 if mult >= 0.5 else 0
+    val = r.get("ret") if r.get("ret") is not None else r.get("chg_bp")
+    return f"t{t}{'n' if (val or 0) < 0 else 'p'}"
+
+
+def _move_text(r):
+    if r.get("ret") is not None:
+        return f"{r['ret'] * 100:+.2f}%"
+    if r.get("chg_bp") is not None:
+        return f"{r['chg_bp']:+.0f}bp"
+    return "—"
+
+
 def _tape_module(payload):
     rows = payload.get("tape") or []
     if not rows:
         return ""
-
-    def tier(mult):
-        return 4 if mult >= 2 else 3 if mult >= 1.5 else 2 if mult >= 1 else 1 if mult >= 0.5 else 0
-
     cells = []
     for r in rows:
-        mult = r.get("mult") or 0
-        if r.get("ret") is not None:
-            cls = "down" if r["ret"] < 0 else "up"
-            val = f"{r['ret'] * 100:+.2f}%"
-        else:
-            cls = "down" if (r.get("chg_bp") or 0) < 0 else "up"
-            val = f"{r['chg_bp']:+.0f}bp"
-        t = tier(mult)
-        style = f"t{t}{'n' if cls == 'down' else 'p'}"
-        bold = " font-weight:700" if t >= 3 else ""
+        tier = _move_tier(r)
+        strong = " strong" if tier[1] == "4" else ""
+        how = f"约平时 {r['mult']:.1f} 倍" if not r.get("fallback") else "按固定档位着色（历史不足）"
+        px = f"{r['px']:,.2f}" if r.get("chg_bp") is None else f"{r['px']:.2f}%"
         cells.append(
-            f'<a class="tape-item {style}" href="/s/{r["sym"]}" title="{_text(r["name"])} · '
-            f'{_text(str(r.get("as_of") or "")[:16])} · {r.get("session") or ""}" style="{bold}">'
-            f'{_text(r["name"])} <span class="num">{val}</span></a>'
+            f'<a class="tape-item {tier}{strong}" href="/s/{_text(r["sym"])}" '
+            f'title="{_text(r["name"])} {px} · {_text(r.get("as_of") or "")} · {how}">'
+            f'{_text(r["name"])} <span class="num">{px}</span> <span class="num">{_move_text(r)}</span></a>'
         )
     strip = "".join(cells)
     return (
@@ -2471,8 +2476,8 @@ def _market3_module(payload):
                 r["sym"],
                 _text(r["name"]),
                 f"{r['px']:,.2f}",
-                "down" if (r.get("ret") or 0) < 0 else "up",
-                _pct(r.get("ret"), 2),
+                _move_tier(r),
+                _move_text(r),
             )
             for r in groups[t]
         )
@@ -2487,27 +2492,19 @@ def _market3_module(payload):
         '<button class="rc%s" onclick="Market3.range(this,\'%s\')">%s</button>' % (" on" if k == "1日" else "", k, k)
         for k in ("1日", "5日", "1月", "6月", "1年")
     )
-    news = payload.get("feed_rel") or []
-
-    def _nitem(n):
-        title = _text(n.get("title") or "")
-        link = '<a href="%s" target="_blank" rel="noopener">%s</a>' % (n["url"], title) if n.get("url") else title
-        return '<div class="row"><span class="dim small" style="min-width:64px">%s</span>%s</div>' % (
-            _text(n.get("rel") or ""),
-            link,
-        )
-
-    nitems = "".join(_nitem(n) for n in news[:14])
-    more = "".join(_nitem(n) for n in news[14:])
+    held = set(payload.get("held_tickers") or [])
+    feed = (payload.get("news_modules") or {}).get("feed") or []
+    nitems = "".join(_news_row(n, held) for n in feed[:12])
+    more = "".join(_news_row(n, held) for n in feed[12:])
     return (
-        '<div class="card sec">'
+        '<script src="/lightweight-charts.js"></script><div class="card sec cat-market">'
         f'<div class="chart-btns">{btns}</div>'
         '<div class="grid" style="grid-template-columns:1fr 1.4fr 1fr;gap:16px">'
         f'<div><table class="tbl" id="m3table">{"".join(panels)}</table></div>'
         f'<div><div class="chart-btns" style="margin-bottom:6px">{rbtns}</div>'
         f"<div id='m3chart' class='lwc' data-sym='{first}' data-daily='{daily}' data-intra='{intra}'></div>"
         '<div class="dim small">左栏点选品种切换图；1日为当日分钟，其余为日线。</div></div>'
-        f'<div><h3 style="margin-top:0">滚动新闻</h3>'
+        f'<div class="m3news"><h3 style="margin-top:0">滚动新闻</h3>'
         + (nitems or '<p class="dim">暂无</p>')
         + ('<details><summary class="dim">查看全部</summary>' + more + "</details>" if more else "")
         + "</div></div></div>"
@@ -2536,12 +2533,23 @@ def _highlights_module(payload):
         sev_cls, sev_label = _severity(g["members"][0])
         px = f"${g['last_px']:,.2f} " if g.get("last_px") else ""
         cls = "down" if (g.get("ret") or 0) < 0 else "up"
-        merged = f"（含 {len(g['members'])} 项）" if len(g["members"]) > 1 else ""
+        merged = ""
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
             f'<span class="who">{link}{merged}</span>'
             f'<div class="num {cls}">{px}{_pct(g.get("ret"), 1)}</div>'
-            f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div></div>'
+            f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div>'
+            + (
+                '<div class="small">'
+                + "、".join(
+                    f"{_text(m.get('basket_name') or m['subject'])} {_pct(m.get('peak_ret'), 1)}"
+                    for m in g["members"][1:5]
+                )
+                + "</div>"
+                if len(g["members"]) > 1
+                else ""
+            )
+            + "</div>"
         )
     return '<div class="card sec"><h2>今日要点</h2><div class="grid g2">' + "".join(items) + "</div></div>"
 
