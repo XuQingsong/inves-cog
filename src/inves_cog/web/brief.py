@@ -2984,7 +2984,8 @@ def _live_anomalies(connection, day, is_today):
         return []
     status = "" if not is_today else "AND a.status='active'"
     rows = connection.execute(
-        f"""SELECT a.*, b.name AS basket_name, e.headline AS cause_headline
+        f"""SELECT a.*, b.name AS basket_name, e.headline AS cause_headline,
+                   e.first_seen_at AS cause_first_seen
             FROM perception.live_anomalies a
             LEFT JOIN graph.baskets b ON b.basket_id = a.subject AND a.scope='basket'
             LEFT JOIN perception.news_events e ON e.event_id = a.cause_event_id

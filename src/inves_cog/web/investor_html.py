@@ -2087,6 +2087,27 @@ def _tech_chip(tech):
     return f'<span class="chip{cls}" title="技术参考，不触发交易">{_text(shape)}{_text(sig)}</span>'
 
 
+def _prev_session_tag(r):
+    """'（上一交易日盘后）' when the event landed 16:00-20:00 ET of the
+    previous trading day; '（上一交易日）' otherwise. '' when the event is
+    on the same trade date."""
+    ev_at = r.get("cause_first_seen")
+    day = r.get("trade_date")
+    if not hasattr(ev_at, "astimezone") or day is None:
+        return ""
+    local = ev_at.astimezone(ZoneInfo("America/New_York"))
+    if getattr(day, "date", None) and callable(day.date):
+        day = day.date()
+    if local.date() == day:
+        return ""
+    prev = local
+    return (
+        "（上一交易日盘后）"
+        if (prev.hour, prev.minute) >= (16, 0) and (prev.hour, prev.minute) < (20, 0)
+        else "（上一交易日）"
+    )
+
+
 def _live_module(payload):
     rows = (payload.get("news_modules") or {}).get("live") or []
     if not rows:
@@ -2108,7 +2129,10 @@ def _live_module(payload):
             if lag is not None and lag < 0:
                 lag_txt = f"股价先动，新闻晚 {abs(lag):.0f} 分钟入库"
             elif lag is not None:
-                lag_txt = f"事件后 {lag:.0f} 分钟"
+                if lag >= 120:
+                    lag_txt = f"事件后约 {round(lag / 60)} 小时{_prev_session_tag(r)}"
+                else:
+                    lag_txt = f"事件后 {lag:.0f} 分钟"
             else:
                 lag_txt = ""
             cause = f"{_text(r.get('cause_headline') or r['cause_event_id'])} · {lag_txt}"
