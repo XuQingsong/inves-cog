@@ -224,8 +224,7 @@ def _bars(connection, symbol, day):
     return _rows(
         connection,
         """
-        SELECT trade_date, open, high, low, close, volume
-        FROM ingest.bars_daily
+        SELECT * FROM ingest.bars_daily
         WHERE ticker = %s AND trade_date <= %s
         ORDER BY trade_date
         """,

@@ -59,7 +59,7 @@ def collect_consensus(*, clock, repository, tickers, provider):
             cy, ny = repository.annual_years(ticker, now)
             snapshot = provider.collect(ticker, fy_cy=cy, fy_ny=ny)
             repository.put_snapshot(snapshot)
-            put_analyst_actions(repository.connection, ticker, snapshot)
+            put_analyst_actions(getattr(repository, "connection", None), ticker, snapshot)
             processed += 1
         except Exception as exc:
             failed.append({"ticker": ticker, "error_type": type(exc).__name__})
