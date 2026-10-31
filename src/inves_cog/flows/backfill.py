@@ -221,16 +221,16 @@ def parse_cboe_pc_csv(text, kind):
             continue
         val = cells[4] if len(cells) > 4 else None
         if val:
-                try:
-                    out.append(
-                        {"series_id": f"cboe_pc_{kind}", "obs_date": obs, "value": float(val), "vintage": "backfill"}
-                    )
-                except ValueError:
-                    pass
+            try:
+                out.append(
+                    {"series_id": f"cboe_pc_{kind}", "obs_date": obs, "value": float(val), "vintage": "backfill"}
+                )
+            except ValueError:
+                pass
     return out
 
 
-def backfill_cboe_pc_csv(http, connection, raw_dir, published_at_fn):
+def backfill_cboe_pc_csv(http, connection, raw_dir, published_at_fn, today=None):
     """Archive CSVs 2006–2019-10 → same series ids as the daily JSON."""
     out = {}
     for kind, name in CBOE_PC_CSV.items():
@@ -239,7 +239,7 @@ def backfill_cboe_pc_csv(http, connection, raw_dir, published_at_fn):
             text = _fetch(http, url)
             rows = parse_cboe_pc_csv(text, kind)
             if connection is not None and rows:
-                save_raw(raw_dir, f"cboe-pc-{name}", url, str(date.today()), text.encode(), connection)
+                save_raw(raw_dir, f"cboe-pc-{name}", url, str(today), text.encode(), connection)
                 catalog = [
                     {
                         "series_id": f"cboe_pc_{kind}",
@@ -470,7 +470,7 @@ def backfill_cftc(http, connection, raw_dir, start, end, _now=None):
 FINRA_MARGIN_URL = "https://www.finra.org/sites/default/files/2021-03/margin-statistics.xlsx"
 
 
-def backfill_finra_margin(http, connection, raw_dir, published_at):
+def backfill_finra_margin(http, connection, raw_dir, _now=None):
     try:
         import urllib.request
 
@@ -500,7 +500,14 @@ def backfill_finra_margin(http, connection, raw_dir, published_at):
                         }
                     )
         if connection is not None and rows:
-            save_raw(raw_dir, "finra-margin", FINRA_MARGIN_URL, str(date.today()), data, connection)
+            save_raw(
+                raw_dir,
+                "finra-margin",
+                FINRA_MARGIN_URL,
+                str(_now.date() if hasattr(_now, "date") else _now),
+                data,
+                connection,
+            )
             upsert_many(
                 connection,
                 "series_catalog",
@@ -570,7 +577,14 @@ def backfill_fred(http, connection, raw_dir, _now=None):
                         }
                     )
             if connection is not None and rows:
-                save_raw(raw_dir, f"fred-{sid.lower()}", url, str(date.today()), text.encode(), connection)
+                save_raw(
+                    raw_dir,
+                    f"fred-{sid.lower()}",
+                    url,
+                    str(_now.date() if hasattr(_now, "date") else _now),
+                    text.encode(),
+                    connection,
+                )
                 upsert_many(
                     connection,
                     "series_catalog",
@@ -617,7 +631,14 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
                     }
                 )
         if connection is not None and rows:
-            save_raw(raw_dir, "ofr-fsi", OFR_FSI_URL, str(date.today()), text.encode(), connection)
+            save_raw(
+                raw_dir,
+                "ofr-fsi",
+                OFR_FSI_URL,
+                str(_now.date() if hasattr(_now, "date") else _now),
+                text.encode(),
+                connection,
+            )
             upsert_many(
                 connection,
                 "series_catalog",
