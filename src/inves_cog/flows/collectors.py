@@ -66,8 +66,9 @@ def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=Non
     url = CBOE_URL.format(sym=symbol)
     try:
         r = http.request("GET", url, headers=UA)
-        raw = r.content if hasattr(r, "content") else r.read()
-        rows = parse_cboe_chain(json.loads(raw), symbol, max_days, today)
+        payload = r if isinstance(r, dict) else json.loads(r)
+        raw = r.encode() if isinstance(r, str) else json.dumps(r).encode()
+        rows = parse_cboe_chain(payload, symbol, max_days, today)
         if connection is not None:
             save_raw(raw_dir, "cboe-chain", url, str(today), raw, connection)
             n = upsert_many(connection, "option_chain", list(rows[0].keys()) if rows else [], rows)
@@ -112,8 +113,9 @@ def collect_occ_volume(http, connection, day, raw_dir):
     url = OCC_VOL_URL.format(ymd=day.strftime("%Y%m%d"))
     try:
         r = http.request("GET", url, headers=UA)
-        raw = r.content if hasattr(r, "content") else r.read()
-        rows = parse_occ_volume(raw.decode("utf-8", "replace"))
+        text = r if isinstance(r, str) else r.decode("utf-8", "replace")
+        raw = r.encode() if isinstance(r, str) else r
+        rows = parse_occ_volume(text)
         if connection is not None:
             save_raw(raw_dir, "occ-volume", url, str(day), raw, connection)
             if rows:
@@ -169,8 +171,9 @@ def collect_occ_oi(http, connection, day, raw_dir, published_at=None):
     url = OCC_OI_URL.format(mdy=day.strftime("%m/%d/%Y"))
     try:
         r = http.request("GET", url, headers=UA)
-        raw = r.content if hasattr(r, "content") else r.read()
-        rows = parse_occ_oi_summary(raw.decode("utf-8", "replace"), day, published_at or day)
+        text = r if isinstance(r, str) else r.decode("utf-8", "replace")
+        raw = r.encode() if isinstance(r, str) else r
+        rows = parse_occ_oi_summary(text, day, published_at or day)
         if connection is not None:
             save_raw(raw_dir, "occ-oi", url, str(day), raw, connection)
             if rows:
@@ -277,8 +280,8 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
         url = DIREXION_URL.format(t=t) if t in DIREXION_TICKERS else PROSHARES_URL.format(t=t)
         try:
             r = http.request("GET", url, headers=UA)
-            raw = r.content if hasattr(r, "content") else r.read()
-            text = raw.decode("utf-8", "replace")
+            text = r if isinstance(r, str) else r.decode("utf-8", "replace")
+            raw = r.encode() if isinstance(r, str) else r
             rows = parse_direxion(text, t, pub) if t in DIREXION_TICKERS else parse_proshares(text, t, pub)
             if connection is not None and rows:
                 save_raw(raw_dir, f"etf-{t.lower()}", url, str(pub.date()), raw, connection)
