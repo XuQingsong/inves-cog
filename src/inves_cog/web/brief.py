@@ -2298,7 +2298,7 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             iq = {q["id"]: q for q in index_quotes or [] if q.get("ret") is not None}
             for i, item in enumerate(items):
                 if item["sym"] in iq:
-                    items[i] = {**item, "ret": iq[item["sym"]]["ret"]}
+                    items[i] = {**item, "ret": iq[item["sym"]]["ret"], "post": iq[item["sym"]].get("post")}
             have = {i["sym"] for i in items}
             for q in iq.values():
                 if q["id"] not in have:
