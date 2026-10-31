@@ -113,10 +113,10 @@ def test_cboe_pc_csv_parse():
 
 
 def test_finra_year_month_parse():
-    from inves_cog.flows.backfill import published_at
 
     # _xlsx_date fix: "2026-09" → month end
-    from datetime import date as _date, timedelta
+    from datetime import date as _date
+    from datetime import timedelta
 
     y, mo = map(int, "2026-09".split("-"))
     m = _date(y, mo + 1 if mo < 12 else 1, 1) - timedelta(days=1)

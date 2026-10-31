@@ -16,8 +16,6 @@ from inves_cog.flows.collectors import (
     _mdy,
     parse_cboe_pc,
     parse_occ_volume,
-    parse_proshares,
-    parse_ssga_xlsx,
 )
 from inves_cog.flows.store import UA, save_raw, upsert_many
 from inves_cog.ingest.market import NY, trading_day
@@ -221,7 +219,7 @@ def parse_cboe_pc_csv(text, kind):
         obs = _mdy(cells[0])
         if not obs:
             continue
-        for label, val in (("pc", cells[4] if len(cells) > 4 else None),):
+        val = cells[4] if len(cells) > 4 else None
             if val:
                 try:
                     out.append(
