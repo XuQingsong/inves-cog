@@ -442,6 +442,12 @@ var Market3 = {
       { priceScaleId: "vol", priceFormat: { type: "volume" }, lastValueVisible: false });
     Market3._chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.85, bottom: 0 } });
     Market3._line = Market3._chart.addSeries(LightweightCharts.LineSeries, { color: "#4a7" });
+    if (!(Market3._intra[Market3._sym] || []).length) {
+      Market3._range = "1月";
+      document.querySelectorAll("#m3chart").forEach(function (el2) {
+        el2.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b.textContent === "1月"); });
+      });
+    }
     Market3.draw();
   },
   draw: function () {

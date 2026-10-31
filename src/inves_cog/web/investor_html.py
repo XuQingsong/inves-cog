@@ -2233,7 +2233,7 @@ def _ntags(item):
 
 def _ncodes(item, held):
     return "".join(
-        f'<span class="tick{" held" if t in held else ""}">{_text(t)}</span>'
+        f'<a class="tick{" held" if t in held else ""}" href="/s/{_text(t)}">{_text(t)}</a>'
         for t in (_nrule(item).get("primary_tickers") or [])
     )
 
@@ -2493,7 +2493,18 @@ def _market3_module(payload):
         for k in ("1日", "5日", "1月", "6月", "1年")
     )
     held = set(payload.get("held_tickers") or [])
-    feed = (payload.get("news_modules") or {}).get("feed") or []
+    feed = list((payload.get("news_modules") or {}).get("feed") or [])
+
+    def rank(n):
+        rule = _nrule(n)
+        ticks = rule.get("primary_tickers") or []
+        if rule.get("held") or any(t in held for t in ticks):
+            return 0
+        if ticks:
+            return 1
+        return 2 if rule.get("macro") else 3
+
+    feed.sort(key=rank)
     nitems = "".join(_news_row(n, held) for n in feed[:12])
     more = "".join(_news_row(n, held) for n in feed[12:])
     return (
@@ -2516,7 +2527,13 @@ def _highlights_module(payload):
     state = payload.get("state") or {}
     if not groups:
         cards = (payload.get("news_modules") or {}).get("earnings_cards") or []
-        upcoming = [c for c in cards if c.get("stage") == "upcoming"][:3]
+        day = _day(payload)
+        upcoming = [
+            c
+            for c in cards
+            if c.get("stage") == "upcoming"
+            and (day is None or (_as_date(str(c.get("report_date"))) or day) <= day + timedelta(days=5))
+        ][:3]
         for c in upcoming:
             c["when_txt"] = "盘后" if c.get("report_time") == "post" else "盘前"
         note = "今天市场平静，没有超出常态的异动" if state.get("band") == "平静" else "今天没有需要重点关注的异常"
