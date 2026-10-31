@@ -101,7 +101,7 @@ _ACT = {"C": "C", "F": "F", "M": "M", "B": "F"}
 
 
 def _mdy(v):
-    for fmt in ("%m/%d/%Y", "%Y-%m-%d"):
+    for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%d-%b-%Y"):
         try:
             return datetime.strptime(str(v).strip(), fmt).date()
         except ValueError:
