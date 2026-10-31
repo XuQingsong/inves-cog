@@ -499,19 +499,21 @@ def backfill_finra_margin(http, connection, raw_dir, _now=None):
             if len(cells) < 4 or not cells[0]:
                 continue
             m = _xlsx_date(cells[0])
+            if m is None and re.match(r"^\d{4}-\d{2}$", str(cells[0] or "")):
+                y, mo = map(int, str(cells[0]).split("-"))
+                m = date(y, mo + 1, 1) - timedelta(days=1) if mo < 12 else date(y, 12, 31)
             if m:
                 for name, idx in (("margin_debit", 1), ("cash_accounts", 2), ("margin_free_credit", 3)):
                     try:
                         val = float(str(cells[idx]).replace(",", ""))
                     except (ValueError, IndexError):
                         continue
-                    pub = m.replace(day=28) + timedelta(days=22)
                     rows.append(
                         {
                             "series_id": f"finra_margin_{name}",
                             "obs_date": m,
                             "value": val,
-                            "published_at": pub,
+                            "published_at": published_at("finra_margin", m),
                             "vintage": "backfill",
                         }
                     )
