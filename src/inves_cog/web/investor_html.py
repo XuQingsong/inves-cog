@@ -2419,7 +2419,7 @@ def _move_tier(r):
 
 def _move_text(r):
     if r.get("ret") is not None:
-        return f"{r['ret'] * 100:+.2f}%"
+        return _signed(float(r["ret"]) * 100, 2)
     if r.get("chg_bp") is not None:
         return f"{r['chg_bp']:+.0f}bp"
     return "—"
