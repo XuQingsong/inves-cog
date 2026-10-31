@@ -763,13 +763,13 @@ def page_brief_stock(connection, day, clock, symbol):
         "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
         "next_earnings": next_earnings,
         "earnings_card": _earnings_card(connection, symbol),
-        "price_now": _safe(lambda: _price_now(connection, symbol, day, bars, snap), {}),
-        "chart": _safe(lambda: _chart_data(bars), []),
-        "earnings_marks": _safe(lambda: _earnings_marks(connection, symbol, day), []),
-        "anomaly_marks": _safe(lambda: _anomaly_marks(connection, symbol, day), []),
-        "peers": _safe(lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
-        "bar_stats": _safe(lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
-        "intraday_series": _safe(lambda: _intraday_series(connection, symbol, day), []),
+        "price_now": _safe(connection, lambda: _price_now(connection, symbol, day, bars, snap), {}),
+        "chart": _safe(connection, lambda: _chart_data(bars), []),
+        "earnings_marks": _safe(connection, lambda: _earnings_marks(connection, symbol, day), []),
+        "anomaly_marks": _safe(connection, lambda: _anomaly_marks(connection, symbol, day), []),
+        "peers": _safe(connection, lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
+        "bar_stats": _safe(connection, lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
+        "intraday_series": _safe(connection, lambda: _intraday_series(connection, symbol, day), []),
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
@@ -840,10 +840,16 @@ def _next_earnings(earnings, symbol, day):
     return future[0] if future else None
 
 
-def _safe(fn, fallback):
+def _safe(connection, fn, fallback):
+    """Each optional block runs in a savepoint so one failure can't poison
+    the read-only transaction shared by the rest of the page."""
     try:
-        return fn()
-    except Exception:
+        with connection.transaction():
+            return fn()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("stock page optional block failed: %r", exc)
         return fallback
 
 
