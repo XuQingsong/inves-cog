@@ -195,7 +195,14 @@ def due(last_events, last_live, now):
 
 if __name__ == "__main__":
     cli = parse_args()
-    if cli.once or cli.replay or cli.dry_run or cli.recompute_reactions:
+    if cli.recompute_reactions:
+        from inves_cog.ingest.cli import connect
+        from inves_cog.ingest.settings import read_environment
+
+        values = read_environment()
+        with connect({**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]}) as connection:
+            _recompute(connection, cli)
+    elif cli.once or cli.replay or cli.dry_run:
         main(cli)
     else:
         from inves_cog.ingest.cli import connect
