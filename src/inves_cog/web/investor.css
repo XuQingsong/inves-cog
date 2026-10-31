@@ -285,7 +285,7 @@ svg.chart .ax{font:11px var(--mono);fill:var(--muted)}
 .tape-gap{display:inline-block;width:40px}
 .tape-item.strong{font-weight:700;outline:1px solid currentColor}
 .m3news .nrow{font-size:13px}
-.state-h{margin:4px 0 2px;font-size:26px}
+.state-h h1{margin:4px 0 2px;font-size:26px;color:inherit}
 .state-h.band-剧烈{color:var(--down,#b33)}.state-h.band-明显波动{color:#b7791f}
 .state-d{margin:0 0 6px;color:var(--ink,#333);font-size:15px;line-height:1.6}
 .m3news .codes{display:none}.m3news .nrow{grid-template-columns:52px 1fr}
