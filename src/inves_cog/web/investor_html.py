@@ -1351,11 +1351,28 @@ def _price_bar(payload):
             )
         except ValueError:
             pass
+    chg = ""
+    if ret is not None and pn.get("prev_close"):
+        d = px - pn["prev_close"]
+        chg = f'<span class="num {cls}" style="font-size:18px">{d:+.2f}</span>'
+    st = payload.get("bar_stats") or {}
+    extra = []
+    if st.get("day_hi"):
+        extra.append(f"今日 {st['day_lo']:,.2f}–{st['day_hi']:,.2f}")
+    if st.get("hi52"):
+        pos = f"（52周区间 {st['pos52']:.0f}% 位）" if st.get("pos52") is not None else ""
+        extra.append(f"52周 {st['lo52']:,.2f}–{st['hi52']:,.2f}{pos}")
+    if st.get("vol"):
+        vr = f" · 量比 {st['vol_ratio']:.1f}" if st.get("vol_ratio") else ""
+        extra.append(f"量 {st['vol']:,}{vr}")
+    if st.get("next_earnings"):
+        extra.append(f"下次财报 {_text(str(st['next_earnings']))}")
     return (
         '<div class="card sec cat-market"><div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">'
-        f'<span class="px-big">${px:,.2f}</span>'
+        f'<span class="px-big">${px:,.2f}</span>{chg}'
         f'<span class="num {cls}" style="font-size:20px">{_pct(ret, 2) if ret is not None else ""}</span>'
-        f'<span class="dim">{sess} · 截至 {_text(str(at)[:16])} · {pn.get("source") or ""}来源</span></div></div>'
+        f'<span class="dim">{sess} · 截至 {_text(str(at)[:16])} · {pn.get("source") or ""}来源</span></div>'
+        f'<div class="dim" style="margin-top:6px">{" · ".join(extra)}</div></div>'
     )
 
 
@@ -1389,18 +1406,41 @@ def _chart_svg(payload, width=1180, height=340):
                 f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="4" fill="{color}">'
                 f"<title>{r['d']} {marks[r['d']]} ${r['c']:.2f}</title></circle>"
             )
+    # four embedded ranges; JS toggles which slice renders
+    ranges = {"1月": 22, "3月": 66, "6月": 132, "1年": n}
+    btns = "".join(
+        f'<button class="rc" onclick="InvestorChart.range(this,{k})">{label}</button>' for label, k in ranges.items()
+    )
     price_dots = "".join(
         f'<circle class="pt" cx="{x:.1f}" cy="{y:.1f}" r="3" fill="transparent">'
         f"<title>{r['d']} ${r['c']:.2f}</title></circle>"
         for x, y, r in zip(xs, ys, rows, strict=True)
     )
+    data_json = escape(json.dumps(rows, ensure_ascii=False), quote=True)
+    mark_json = escape(json.dumps(marks, ensure_ascii=False), quote=True)
+    intraday = payload.get("intraday_series") or []
+    mini = ""
+    if len(intraday) > 1:
+        ps = [p["p"] for p in intraday]
+        mlo, mhi = min(ps), max(ps)
+        mspan = mhi - mlo or 1
+        mpts = " ".join(
+            f"{40 + i * 300 / (len(ps) - 1):.0f},{70 - (p - mlo) / mspan * 50:.0f}" for i, p in enumerate(ps)
+        )
+        mini = (
+            '<div style="width:360px;margin-left:auto"><div class="dim small">当日分钟</div>'
+            f'<svg viewBox="0 0 360 80" style="width:360px">'
+            f'<polyline points="{mpts}" fill="none" stroke="var(--tp)" stroke-width="1.5"/></svg></div>'
+        )
     return (
-        f'<svg class="chart" viewBox="0 0 {width} {height}" preserveAspectRatio="none">'
+        f'<div class="chart-btns">{btns}</div>'
+        f"<svg class='chart' id='dchart' data-rows='{data_json}' data-marks='{mark_json}'"
+        f" viewBox='0 0 {width} {height}' preserveAspectRatio='none'>"
         f'<polyline points="{pts}" fill="none" stroke="var(--brand)" stroke-width="2"/>'
         f'<polyline points="{ma(50)}" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
         f'<polyline points="{ma(200)}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>'
         f"{''.join(dots)}{price_dots}</svg>"
-        '<div class="dim small">折线为日收盘；虚线为 50 / 200 日均线；标记点为财报日与异常日，悬停看详情。</div>'
+        '<div class="dim small">折线为日收盘；虚线为 50 / 200 日均线；标记点为财报日与异常日，悬停看详情。</div>' + mini
     )
 
 
@@ -2509,6 +2549,22 @@ def _earnings_cards_module(payload):
         detail = "".join(f'<div class="row">{line if "<" in line else _text(line)}</div>' for line in lines)
         parts.append(f"<details><summary>{summ} {chips}</summary>{detail}</details>")
     return '<div class="card sec cat-earnings" id="earnings"><h2>财报</h2>' + "".join(parts) + "</div>"
+
+
+def _stock_today(payload):
+    """§4 '今天发生了什么': live anomalies for this stock and its baskets."""
+    rows = (payload.get("news_modules") or {}).get("live") or []
+    symbol = payload.get("symbol") or ""
+    mine = [r for r in rows if r.get("subject") == symbol or (r.get("members") and symbol in r["members"])]
+    if not mine:
+        return ""
+    items = "".join(
+        f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
+        f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span>'
+        f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">{_text(r.get("cause_headline") or "原因未明")}</span></div>'
+        for r in mine
+    )
+    return f'<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>{items}</div>'
 
 
 def _stock_earnings_card(payload):

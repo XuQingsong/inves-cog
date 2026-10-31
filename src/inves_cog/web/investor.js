@@ -350,3 +350,39 @@ if (typeof module !== "undefined") module.exports = { ruler: ruler, textW: textW
     }
   });
 })();
+
+// B-073 chart range toggle
+var InvestorChart = {
+  range: function (btn, k) {
+    var svg = document.getElementById("dchart");
+    if (!svg) return;
+    var rows = JSON.parse(svg.dataset.rows || "[]");
+    var marks = JSON.parse(svg.dataset.marks || "{}");
+    var w = 1180, h = 340, n = Math.min(k, rows.length);
+    var sub = rows.slice(-n);
+    var closes = sub.map(function (r) { return r.c; });
+    var lo = Math.min.apply(null, closes), hi = Math.max.apply(null, closes), sp = hi - lo || 1;
+    var xs = sub.map(function (_, i) { return i * (w - 60) / (n - 1) + 40; });
+    var ys = sub.map(function (r) { return h - 30 - (r.c - lo) / sp * (h - 60); });
+    function ma(win) {
+      if (rows.length < win) return "";
+      var pts = [];
+      for (var i = 0; i < n; i++) {
+        var idx = rows.length - n + i, s = 0, c = 0;
+        for (var j = Math.max(0, idx - win + 1); j <= idx; j++) { s += rows[j].c; c++; }
+        pts.push(xs[i].toFixed(1) + "," + (h - 30 - (s / c - lo) / sp * (h - 60)).toFixed(1));
+      }
+      return pts.join(" ");
+    }
+    var out = '<polyline points="' + xs.map(function (x, i) { return x.toFixed(1) + "," + ys[i].toFixed(1); }).join(" ") + '" fill="none" stroke="var(--brand)" stroke-width="2"/>'
+      + '<polyline points="' + ma(50) + '" fill="none" stroke="var(--tp)" stroke-width="1" stroke-dasharray="4 3"/>'
+      + '<polyline points="' + ma(200) + '" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>';
+    sub.forEach(function (r, i) {
+      var mk = marks[r.d];
+      if (mk) out += '<circle cx="' + xs[i].toFixed(1) + '" cy="' + ys[i].toFixed(1) + '" r="4" fill="' + (mk === "财报" ? "var(--tp)" : "var(--alert)") + '"><title>' + r.d + " " + mk + " $" + r.c.toFixed(2) + "</title></circle>";
+      out += '<circle class="pt" cx="' + xs[i].toFixed(1) + '" cy="' + ys[i].toFixed(1) + '" r="3" fill="transparent"><title>' + r.d + " $" + r.c.toFixed(2) + "</title></circle>";
+    });
+    svg.innerHTML = out;
+    svg.parentElement.querySelectorAll(".rc").forEach(function (b) { b.classList.toggle("on", b === btn); });
+  }
+};

@@ -223,7 +223,7 @@ def _bars(connection, symbol, day):
     return _rows(
         connection,
         """
-        SELECT trade_date, close, volume
+        SELECT trade_date, open, high, low, close, volume
         FROM ingest.bars_daily
         WHERE ticker = %s AND trade_date <= %s
         ORDER BY trade_date
@@ -768,6 +768,8 @@ def page_brief_stock(connection, day, clock, symbol):
         "earnings_marks": _safe(lambda: _earnings_marks(connection, symbol, day), []),
         "anomaly_marks": _safe(lambda: _anomaly_marks(connection, symbol, day), []),
         "peers": _safe(lambda: _peers_table(connection, symbol, day, _segment_map()), ([], None)),
+        "bar_stats": _safe(lambda: _bar_stats(connection, symbol, day, bars, next_earnings), {}),
+        "intraday_series": _safe(lambda: _intraday_series(connection, symbol, day), []),
         "tech": tech,
         "events": events,
         "books": None if gate is None else gate["books"],
@@ -979,3 +981,36 @@ def _untracked_page(connection, symbol, day, clock, bars):
         "headings": [],
         "label": PAPER_LABEL,
     }
+
+
+def _bar_stats(connection, symbol, day, bars, next_earnings):
+    """Day hi/lo, 52w hi/lo + position, volume ratio, next earnings."""
+    closes = [float(r["close"]) for r in bars if r["close"] is not None]
+    if not closes:
+        return {}
+    last = closes[-1]
+    w52 = closes[-260:]
+    hi52, lo52 = max(w52), min(w52)
+    today = bars[-1]
+    vols = [int(r["volume"] or 0) for r in bars[-21:-1] if r["volume"]]
+    avg = sum(vols) / len(vols) if vols else None
+    vr = int(today["volume"] or 0) / avg if avg else None
+    pos = (last - lo52) / (hi52 - lo52) * 100 if hi52 > lo52 else None
+    return {
+        "day_hi": float(today["high"]) if today.get("high") else last,
+        "day_lo": float(today["low"]) if today.get("low") else last,
+        "hi52": hi52,
+        "lo52": lo52,
+        "pos52": pos,
+        "vol": int(today["volume"] or 0),
+        "vol_ratio": vr,
+        "next_earnings": next_earnings,
+    }
+
+
+def _intraday_series(connection, symbol, day):
+    rows = connection.execute(
+        "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s AND as_of >= %s::date ORDER BY as_of",
+        (symbol, day),
+    ).fetchall()
+    return [{"t": str(r["as_of"]), "p": float(r["last"])} for r in rows if r["last"] is not None]
