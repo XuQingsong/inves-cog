@@ -1088,6 +1088,16 @@ def _earnings_hist(connection, symbol, bars):
     }
     # historical report dates: earnings events published right after each quarter end
     events = {}
+    try:
+        cards = {
+            str(r["report_date"]): r
+            for r in connection.execute(
+                "SELECT report_date, report_time FROM perception.earnings_cards WHERE ticker=%s",
+                (symbol,),
+            ).fetchall()
+        }
+    except Exception:
+        cards = {}
     for r in connection.execute(
         "SELECT first_seen_at, et_date FROM perception.news_events "
         "WHERE subject=%s AND kind='earnings_result' ORDER BY first_seen_at",
@@ -1115,16 +1125,29 @@ def _earnings_hist(connection, symbol, bars):
     out = []
     for q in hist[-8:]:
         qd = str(q.get("quarter_date") or "")
-        rd = min((d for d in cal if d >= qd), default=None)
-        timing = (cal.get(rd) or {}).get("time") if rd else None
-        if rd is None and events:
-            # closest earnings event within 90d after quarter end; timing by publish hour ET
-            cand = min((d for d in events if qd <= d <= str(date.fromisoformat(qd) + timedelta(days=90))), default=None)
-            if cand:
-                rd = cand
-                ts = events[cand]
-                et = ts.astimezone(ZoneInfo("America/New_York")) if hasattr(ts, "astimezone") else None
-                timing = "post" if et is None or et.hour >= 16 else "pre"
+        limit = str(date.fromisoformat(qd) + timedelta(days=90)) if qd else "9999"
+        cand = (
+            [d for d in cal if qd <= d <= limit]
+            + [d for d in events if qd <= d <= limit]
+            + [d for d in cards if qd <= d <= limit]
+        )
+        rd = min(cand, default=None)
+        timing = "post"
+        if rd in cal:
+            timing = cal[rd].get("time") or "post"
+        elif rd in cards:
+            timing = cards[rd].get("report_time") or "post"
+        elif rd in events:
+            ts = events[rd]
+            et = ts.astimezone(ZoneInfo("America/New_York")) if hasattr(ts, "astimezone") else None
+            timing = "post" if et is None or et.hour >= 16 else "pre"
+        if rd is None:
+            # proxy: largest |move| bar within 75d after quarter end (earnings-day proxy, marked ~)
+            win = [d for d in dates if qd < d <= str(date.fromisoformat(qd) + timedelta(days=75))]
+            if len(win) >= 2:
+                moves = {d: abs(closes[d] / closes[dates[dates.index(d) - 1]] - 1) for d in win[1:]}
+                rd = max(moves, key=moves.get)
+                timing = "post"
         out.append(
             {
                 "q": qd,
