@@ -39,6 +39,7 @@ def main():
     if args.job in ("ssga", "all"):
         reports += backfill.backfill_ssga(http, conn, DEFAULT_RAW, today, now)
     if args.job in ("cboe_pc", "all"):
+        reports += backfill.backfill_cboe_pc_csv(http, conn, DEFAULT_RAW, backfill.published_at)
         reports.append(backfill.backfill_cboe_pc(http, conn, DEFAULT_RAW, start, end, now))
     if args.job in ("cboe_idx", "all"):
         reports += backfill.backfill_cboe_idx(http, conn, DEFAULT_RAW, today, now)
