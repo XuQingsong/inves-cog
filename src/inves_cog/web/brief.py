@@ -2994,6 +2994,21 @@ def _live_anomalies(connection, day, is_today):
             ORDER BY abs(COALESCE(a.peak_z,0)) DESC LIMIT 10""",
         (day,),
     ).fetchall()
+    try:
+        tickers = [r["subject"] for r in rows if r["scope"] == "stock"]
+        if tickers:
+            px = {
+                r["ticker"]: r["last"]
+                for r in connection.execute(
+                    "SELECT DISTINCT ON (ticker) ticker, last FROM ingest.intraday_snapshots "
+                    "WHERE ticker = ANY(%s) ORDER BY ticker, as_of DESC",
+                    (tickers,),
+                ).fetchall()
+            }
+            for r in rows:
+                r["last_px"] = float(px[r["subject"]]) if r["subject"] in px and px[r["subject"]] else None
+    except Exception:
+        pass
     return rows
 
 

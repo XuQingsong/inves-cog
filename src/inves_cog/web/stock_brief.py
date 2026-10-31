@@ -620,16 +620,6 @@ def page_brief_stock(connection, day, clock, symbol):
     if closed is not None:
         return closed
     bars = _bars(connection, symbol, day)
-    if not bars:
-        return {
-            "page": f"/s/{symbol}",
-            "date": day,
-            "symbol": symbol,
-            "title": symbol,
-            "no_data": True,
-            "headings": [],
-            "label": PAPER_LABEL,
-        }
     is_today = day == clock.today_trade_date()
     raw_score = _score_row(connection, day, symbol)
     carried_from = None
@@ -645,6 +635,20 @@ def page_brief_stock(connection, day, clock, symbol):
         or symbol in _segment_map()
         or _earnings_card(connection, symbol) is not None
     )
+    if not bars:
+        if not in_scope:
+            return {
+                "page": f"/s/{symbol}",
+                "date": day,
+                "symbol": symbol,
+                "title": symbol,
+                "no_data": True,
+                "headings": [],
+                "label": PAPER_LABEL,
+            }
+        # covered ticker without bars: fall through and let the page
+        # render with its own missing-data markers
+        bars = [{"trade_date": day, "close": None, "volume": None}]
     if not in_scope:
         return _untracked_page(connection, symbol, day, clock, bars)
     gate = _gate_score(raw_score)

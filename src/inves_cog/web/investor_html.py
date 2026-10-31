@@ -244,15 +244,15 @@ def _market(payload):
         + f"<h1>判断：{_text(judgment)}</h1>"
         + f'<p class="sub">{_text(_lead(payload))}</p>'
         + _carry_banner(payload)
-        + _ticker_strip(payload)
-        + _sector_strip(payload)
-        + f'<div class="grid g4 sec">{"".join(cards)}</div>'
+        + _highlights_module(payload)
         + '<div class="card sec" style="border-left:4px solid var(--brand)"><h3>对我意味着什么</h3>'
         + f'<p style="margin:0">{_text(implication)}。{risk}</p></div>'
-        + _highlights_module(payload)
         + _live_module(payload)
         + _earnings_cards_module(payload)
         + _movers_module(payload)
+        + _ticker_strip(payload)
+        + _sector_strip(payload)
+        + f'<div class="grid g4 sec">{"".join(cards)}</div>'
         + _theme_news_module(payload)
         + '<details class="fold sec"><summary>滚动新闻与日历</summary><div class="grid g2">'
         + _feed_module(payload)
@@ -2313,6 +2313,7 @@ def _live_module(payload):
         cur_html = (
             f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%</span>' if cur is not None else ""
         )
+        px_html = f"${r['last_px']:,.2f}" if r.get("last_px") is not None else "—"
         fs = r.get("first_seen_at")
         when = (
             f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}"
@@ -2346,9 +2347,10 @@ def _live_module(payload):
             members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
         badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
         body.append(
-            f"<tr><td>{scope}</td><td>{link} {badge}{faded}</td>"
+            f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
+            f"<td class='num'>{px_html}</td>"
             f"<td class='num'>{cur_html}</td><td class='num'>{_pct(peak, 1) if peak is not None else ''}</td>"
-            f"<td>{when}</td><td>{cause_html}{members}</td></tr>"
+            f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
         )
     return (
         '<div class="card sec cat-anomaly" id="live"><h2>实时异常'
@@ -2372,7 +2374,12 @@ def _highlights_module(payload):
         subj = r.get("basket_name") or r["subject"]
         link = _tk(r["subject"]) if r["scope"] == "stock" else _text(subj)
         peak = r.get("peak_ret")
-        cause = _text((r.get("cause_headline") or "原因未明")[:60])
+        px_txt = f"${r['last_px']:,.2f} " if r.get("last_px") is not None else ""
+        if r["scope"] == "basket" and r.get("members"):
+            worst = min((r["members"] or {}).items(), key=lambda kv: kv[1])
+            cause = _text(f"{len(r['members'])} 家 · 最弱 {worst[0]} {worst[1] * 100:+.1f}%")
+        else:
+            cause = _text((r.get("cause_headline") or "原因未明")[:60])
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
             f'<span class="who">{link}</span>'
