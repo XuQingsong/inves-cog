@@ -940,6 +940,24 @@ def _facts_chip(facts):
     return "；".join(parts)
 
 
+_KIND_CN = {
+    "earnings_result": "财报", "guidance": "指引", "capex": "资本开支",
+    "mna": "并购", "supply_shock": "供应", "regulatory": "监管",
+    "rating": "评级", "preview": "预告", "other": "事件",
+}
+
+
+def _cause_label(r):
+    """'INTC 指引（指引低于预期 42%）'; no facts -> 'INTC 指引'."""
+    if not r.get("cause_event_id"):
+        return ""
+    subj = r.get("cause_subject") or ""
+    kind = _KIND_CN.get(r.get("cause_kind"), "事件")
+    facts = _facts_chip(r.get("cause_facts") or {})
+    head = f"{subj} {kind}".strip()
+    return f"{head}（{facts}）" if facts else head
+
+
 def _day_window(day):
     start = datetime.combine(day, time(4, 0), tzinfo=NY)
     return start, start + timedelta(days=1)
@@ -2028,8 +2046,8 @@ _TAPE = [
     ("XLY", "可选消费"),
 ]
 _MARKET3 = {
-    "美股指数": [("SPY", "标普 500"), ("QQQ", "纳指 100"), ("IWM", "罗素 2000"), ("DIA", "道琼斯")],
-    "期货": [("ES=F", "标普期货"), ("NQ=F", "纳指期货"), ("YM=F", "道指期货"), ("RTY=F", "罗素期货")],
+    "美股指数": [("SPY", "标普 500 ETF"), ("QQQ", "纳指 100 ETF"), ("IWM", "罗素 2000 ETF"), ("DIA", "道指 ETF")],
+    "期货": [("ES=F", "ES 标普期货"), ("NQ=F", "NQ 纳指期货"), ("YM=F", "YM 道指期货"), ("RTY=F", "RTY 罗素期货")],
     "利率": [("^FVX", "5年期"), ("^TNX", "10年期"), ("^TYX", "30年期")],
     "大宗与加密": [
         ("CL=F", "WTI"),
@@ -2168,8 +2186,8 @@ def _market_state(connection, day, payload, live):
 
     causes = []
     for r in live:
-        if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_headline"):
-            head = r["cause_headline"]
+        if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_label"):
+            head = r["cause_label"]
             if head not in causes:
                 causes.append(head)
         if len(causes) == 2:
@@ -2387,6 +2405,7 @@ def page_brief_market(connection, day, clock):
             if ticker in context["daily"]
         },
         "held_tickers": sorted(context["positions"]),
+        "ticker_scope": sorted(set(context["pool"]) | set(context["positions"])),
         "events": events,
         "news_fresh": context["fresh"],
         "carry_from": context["carry_from"],
@@ -3302,7 +3321,8 @@ def _live_anomalies(connection, day, is_today):
     status = "" if not is_today else "AND a.status='active'"
     rows = connection.execute(
         f"""SELECT a.*, b.name AS basket_name, e.headline AS cause_headline,
-                   e.first_seen_at AS cause_first_seen
+                   e.first_seen_at AS cause_first_seen,
+                   e.facts AS cause_facts, e.subject AS cause_subject, e.kind AS cause_kind
             FROM perception.live_anomalies a
             LEFT JOIN graph.baskets b ON b.basket_id = a.subject AND a.scope='basket'
             LEFT JOIN perception.news_events e ON e.event_id = a.cause_event_id
@@ -3325,6 +3345,8 @@ def _live_anomalies(connection, day, is_today):
                 r["last_px"] = float(px[r["subject"]]) if r["subject"] in px and px[r["subject"]] else None
     except Exception:
         pass
+    for r in rows:
+        r["cause_label"] = _cause_label(r)
     return rows
 
 

@@ -19,7 +19,7 @@ def test_market_state_band_classification(monkeypatch):
         monkeypatch.setattr(brief, "_close_series", lambda c, t, d, n=22: _series(data[t]))
 
     payload = {"advancers": 100, "decliners": 400, "leaders_down": [{"name": "CPU"}], "leaders_up": [{"name": "能源"}]}
-    live = [{"scope": "basket", "cause_event_id": "e1", "cause_headline": "INTC 指引"}]
+    live = [{"scope": "basket", "cause_event_id": "e1", "cause_headline": "INTC 指引", "cause_label": "INTC 指引"}]
     fake(-0.018, -0.035)
     st = brief._market_state(None, date(2026, 10, 30), payload, live)
     assert st["band"] == "剧烈" and "科技股领跌" in st["sentence"] and "INTC 指引" in st["sentence"]

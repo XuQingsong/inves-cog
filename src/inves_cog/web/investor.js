@@ -436,7 +436,14 @@ var Market3 = {
     Market3._daily = JSON.parse(el.dataset.daily || "{}");
     Market3._intra = JSON.parse(el.dataset.intra || "{}");
     Market3._sym = el.dataset.sym;
-    Market3._chart = LightweightCharts.createChart(el, { height: 320, layout: { attributionLogo: true } });
+    Market3._chart = LightweightCharts.createChart(el, {
+      height: 320, layout: { attributionLogo: true },
+      timeScale: { timeVisible: true, secondsVisible: false,
+                   tickMarkFormatter: function (t) {
+                     return new Date(t * 1000).toLocaleString("en-US",
+                       { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", hour12: false });
+                   } }
+    });
     Market3._candle = Market3._chart.addSeries(LightweightCharts.CandlestickSeries);
     Market3._vol = Market3._chart.addSeries(LightweightCharts.HistogramSeries,
       { priceScaleId: "vol", priceFormat: { type: "volume" }, lastValueVisible: false });

@@ -761,6 +761,27 @@ def page_brief_stock(connection, day, clock, symbol):
         "news": news,
         "news_feed": news_feed,
         "event": _event_for(_news_events(connection, day, day == clock.today_trade_date(), clock), symbol),
+        "news_events": _safe(
+            connection,
+            lambda: connection.execute(
+                """
+                SELECT e.event_id, e.subject, e.kind, e.first_seen_at AS published_at,
+                       e.headline, e.facts, e.importance, i.url, t.title_zh
+                FROM perception.news_events e
+                LEFT JOIN LATERAL (
+                    SELECT url, info_id FROM ingest.info_items
+                    WHERE info_id = ANY(e.info_ids)
+                    ORDER BY (headline = e.headline) DESC, first_seen_at ASC LIMIT 1
+                ) i ON true
+                LEFT JOIN perception.news_translations t ON t.info_id = i.info_id
+                WHERE e.subject = %s AND e.importance >= 70
+                  AND e.first_seen_at >= %s::date - INTERVAL '7 days'
+                ORDER BY e.importance DESC, e.first_seen_at DESC LIMIT 5
+                """,
+                (symbol, day),
+            ).fetchall(),
+            [],
+        ),
         "next_earnings": next_earnings,
         "earnings_card": _earnings_card(connection, symbol),
         "price_now": _safe(connection, lambda: _price_now(connection, symbol, day, bars, snap), {}),
