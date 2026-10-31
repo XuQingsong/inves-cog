@@ -1,6 +1,8 @@
 """Investor brief pages. Simple derived values live only in this module."""
 
 import re
+import statistics
+import sys
 from datetime import date, datetime, time, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
@@ -1995,6 +1997,323 @@ def _candidate_row(stock, valuation):
     }
 
 
+# ---- B-074 §2/§3/§8 homepage: market state, tape, 3-column block ----
+
+_TAPE = [
+    ("ES=F", "标普期货"),
+    ("NQ=F", "纳指期货"),
+    ("YM=F", "道指期货"),
+    ("RTY=F", "罗素期货"),
+    ("^VIX", "VIX"),
+    ("^FVX", "5年期"),
+    ("^TNX", "10年期"),
+    ("^TYX", "30年期"),
+    ("DX-Y.NYB", "美元指数"),
+    ("CL=F", "WTI"),
+    ("BZ=F", "布油"),
+    ("GC=F", "黄金"),
+    ("BTC-USD", "比特币"),
+    ("SMH", "半导体"),
+    ("SOXX", "半导体 ETF"),
+    ("XLB", "材料"),
+    ("XLC", "通信"),
+    ("XLE", "能源"),
+    ("XLF", "金融"),
+    ("XLI", "工业"),
+    ("XLK", "科技"),
+    ("XLP", "必需消费"),
+    ("XLRE", "地产"),
+    ("XLU", "公用"),
+    ("XLV", "医疗"),
+    ("XLY", "可选消费"),
+]
+_MARKET3 = {
+    "美股指数": [("SPY", "标普 500"), ("QQQ", "纳指 100"), ("IWM", "罗素 2000"), ("DIA", "道琼斯")],
+    "期货": [("ES=F", "标普期货"), ("NQ=F", "纳指期货"), ("YM=F", "道指期货"), ("RTY=F", "罗素期货")],
+    "利率": [("^FVX", "5年期"), ("^TNX", "10年期"), ("^TYX", "30年期")],
+    "大宗与加密": [
+        ("CL=F", "WTI"),
+        ("BZ=F", "布油"),
+        ("GC=F", "黄金"),
+        ("BTC-USD", "比特币"),
+        ("DX-Y.NYB", "美元指数"),
+    ],
+    "行业": [
+        ("XLB", "材料"),
+        ("XLC", "通信"),
+        ("XLE", "能源"),
+        ("XLF", "金融"),
+        ("XLI", "工业"),
+        ("XLK", "科技"),
+        ("XLP", "必需消费"),
+        ("XLRE", "地产"),
+        ("XLU", "公用"),
+        ("XLV", "医疗"),
+        ("XLY", "可选消费"),
+        ("SMH", "半导体"),
+        ("SOXX", "半导体 ETF"),
+    ],
+}
+_YIELDS = {"^FVX", "^TNX", "^TYX"}
+
+
+def _sigma20(connection, day, ticker):
+    """20-day stdev of daily close-to-close returns from bars_daily."""
+    rows = connection.execute(
+        "SELECT trade_date, close FROM ingest.bars_daily "
+        "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 21",
+        (ticker, day),
+    ).fetchall()
+    closes = [float(r["close"]) for r in reversed(rows) if r["close"] is not None]
+    if len(closes) < 11:
+        return None
+    rets = [closes[i] / closes[i - 1] - 1 for i in range(1, len(closes))]
+    return statistics.stdev(rets)
+
+
+def _snap_rows(connection, tickers):
+    rows = connection.execute(
+        "SELECT DISTINCT ON (ticker) ticker, last, as_of, session FROM ingest.intraday_snapshots "
+        "WHERE ticker = ANY(%s) ORDER BY ticker, as_of DESC",
+        (list(tickers),),
+    ).fetchall()
+    return {r["ticker"]: r for r in rows}
+
+
+def _prev_snap(connection, ticker, as_of):
+    r = connection.execute(
+        "SELECT last FROM ingest.intraday_snapshots WHERE ticker=%s AND as_of<%s ORDER BY as_of DESC LIMIT 1",
+        (ticker, as_of),
+    ).fetchone()
+    return float(r["last"]) if r and r["last"] is not None else None
+
+
+def _feed_rel(items, clock):
+    """Rolling news titles with relative ET times for the right column."""
+    now = clock.now_utc().astimezone(NY)
+    out = []
+    for it in items[:30]:
+        ts = it.get("published") or it.get("published_at") or it.get("as_of")
+        rel = ""
+        if ts:
+            if hasattr(ts, "astimezone"):
+                mins = max(0, int((now - ts.astimezone(NY)).total_seconds() / 60))
+            else:
+                try:
+                    t = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+                    mins = max(0, int((now - t.astimezone(NY)).total_seconds() / 60))
+                except ValueError:
+                    mins = None
+            if mins is not None:
+                rel = "刚刚" if mins < 1 else f"{mins} 分钟前" if mins < 60 else f"{mins // 60} 小时前"
+        title = it.get("title") or it.get("headline") or it.get("title_zh") or ""
+        out.append({"rel": rel, "title": title, "url": it.get("url")})
+    return [n for n in out if n["title"]]
+
+
+def _safe_call(fn, fallback):
+    try:
+        return fn()
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).warning("homepage optional block failed: %r", sys.exc_info()[1])
+        return fallback
+
+
+def _tape_rows(connection, day):
+    snaps = _snap_rows(connection, [t for t, _ in _TAPE])
+    out = []
+    for ticker, name in _TAPE:
+        s = snaps.get(ticker)
+        if not s or s["last"] is None:
+            continue
+        last = float(s["last"])
+        prev = _prev_snap(connection, ticker, s["as_of"])
+        if not prev:
+            continue
+        if ticker in _YIELDS:
+            chg = (last - prev) * 100
+            sig = _sigma20(connection, day, ticker)
+            mult = abs(chg / 100) / sig if sig else abs(chg) / 7
+            out.append(
+                {
+                    "sym": ticker,
+                    "name": name,
+                    "px": last,
+                    "chg_bp": chg,
+                    "ret": None,
+                    "mult": mult,
+                    "session": s.get("session"),
+                    "as_of": str(s["as_of"]),
+                }
+            )
+        else:
+            ret = last / prev - 1
+            sig = _sigma20(connection, day, ticker)
+            mult = abs(ret) / sig if sig else abs(ret) / 0.01
+            out.append(
+                {
+                    "sym": ticker,
+                    "name": name,
+                    "px": last,
+                    "ret": ret,
+                    "mult": mult,
+                    "session": s.get("session"),
+                    "as_of": str(s["as_of"]),
+                }
+            )
+    return out
+
+
+def _market_state(connection, day, payload, live):
+    """§2: band by SPY/QQQ ret vs own 20d σ, direction label, cause from linked anomalies."""
+    snaps = _snap_rows(connection, ["SPY", "QQQ"])
+    spy_ret = qqq_ret = spy_sig = qqq_sig = None
+    max_mult = 0
+    for t in ("SPY", "QQQ"):
+        s = snaps.get(t)
+        if not s or s["last"] is None:
+            continue
+        last, prev = float(s["last"]), _prev_snap(connection, t, s["as_of"])
+        if not prev:
+            continue
+        ret = last / prev - 1
+        sig = _sigma20(connection, day, t)
+        if t == "SPY":
+            spy_ret, spy_sig = ret, sig
+        else:
+            qqq_ret, qqq_sig = ret, sig
+        if sig:
+            max_mult = max(max_mult, abs(ret) / sig)
+    band = "平静" if max_mult < 1 else "明显波动" if max_mult < 2 else "剧烈"
+    up, dn = payload.get("advancers"), payload.get("decliners")
+    if max_mult < 1:
+        direction = "窄幅整理"
+    elif spy_ret is not None and spy_ret < 0:
+        if qqq_ret is not None and qqq_ret < spy_ret - 0.005:
+            direction = "科技股领跌"
+        elif up is not None and dn is not None and dn > up * 2:
+            direction = "普跌"
+        else:
+            direction = "普跌"
+    else:
+        direction = "普涨" if (up or 0) > (dn or 0) else "轮动"
+    causes = []
+    for r in live:
+        if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_headline"):
+            causes.append(r["cause_headline"])
+            if len(causes) == 2:
+                break
+    basis = (
+        f"纳指 {qqq_ret * 100:+.1f}%（约平时 {abs(qqq_ret) / qqq_sig:.1f} 倍）"
+        if qqq_ret is not None and qqq_sig
+        else "纳指数据暂缺"
+    ) + (
+        f"，标普 {spy_ret * 100:+.1f}%（约平时 {abs(spy_ret) / spy_sig:.1f} 倍）"
+        if spy_ret is not None and spy_sig
+        else "，标普数据暂缺"
+    )
+    cause_txt = (
+        "；主要来自 " + "、".join(causes) if causes and band != "平静" else ("；原因未明" if band != "平静" else "")
+    )
+    sentence = f"{band} · {direction}：{basis}{cause_txt}"
+    return {
+        "band": band,
+        "direction": direction,
+        "sentence": sentence,
+        "basis": basis,
+        "spy_sig": spy_sig,
+        "qqq_sig": qqq_sig,
+        "spy_ret": spy_ret,
+        "qqq_ret": qqq_ret,
+    }
+
+
+def _hl_grouped(live, positions):
+    """§2 highlights: merge by cause_event_id, order market>holdings>core-chain>single, max 4."""
+    groups = {}
+    for r in live:
+        key = r.get("cause_event_id") or f"subj:{r['subject']}"
+        groups.setdefault(key, []).append(r)
+    held = set(positions or [])
+    items = []
+    for _key, rows in groups.items():
+        rows.sort(key=lambda r: -abs(r.get("peak_z") or 0))
+        top = rows[0]
+        scope_rank = {"market": 0, "basket": 1, "stock": 2}.get(top["scope"], 3)
+        held_rank = 0 if (top["subject"] in held or any(m in held for m in (top.get("members") or {}))) else 1
+        why = {
+            "market": "大盘层面异常",
+            "basket": "持仓板块" if held_rank == 0 else "核心链条板块",
+            "stock": "持仓个股" if top["subject"] in held else "单股异常",
+        }[top["scope"]]
+        items.append(
+            {
+                "scope": top["scope"],
+                "subject": top["subject"],
+                "basket_name": top.get("basket_name"),
+                "ret": top.get("peak_ret"),
+                "last_px": top.get("last_px"),
+                "why": why,
+                "cause": top.get("cause_headline"),
+                "kind": top.get("cause_kind"),
+                "peak_z": top.get("peak_z"),
+                "members": rows,
+                "rank": (scope_rank, held_rank, -abs(top.get("peak_z") or 0)),
+            }
+        )
+    items.sort(key=lambda x: x["rank"])
+    return items[:4]
+
+
+def _market3(connection, day):
+    """§8 3-column block: tabbed quotes + embedded daily/intraday series."""
+    all_syms = [t for rows in _MARKET3.values() for t, _ in rows]
+    snaps = _snap_rows(connection, all_syms)
+    groups = {}
+    for tab, rows in _MARKET3.items():
+        items = []
+        for t, name in rows:
+            s = snaps.get(t)
+            if not s or s["last"] is None:
+                continue
+            last = float(s["last"])
+            prev = _prev_snap(connection, t, s["as_of"])
+            ret = (last / prev - 1) if prev else None
+            items.append({"sym": t, "name": name, "px": last, "ret": ret})
+        if items:
+            groups[tab] = items
+    daily = {}
+    intraday = {}
+    for t in all_syms:
+        rows = connection.execute(
+            "SELECT trade_date, open, high, low, close, volume FROM ingest.bars_daily "
+            "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
+            (t, day),
+        ).fetchall()
+        if rows:
+            daily[t] = [
+                {
+                    "d": str(r["trade_date"]),
+                    "o": float(r["open"] or r["close"]),
+                    "h": float(r["high"] or r["close"]),
+                    "l": float(r["low"] or r["close"]),
+                    "c": float(r["close"]),
+                    "v": int(r["volume"] or 0),
+                }
+                for r in reversed(rows)
+                if r["close"] is not None
+            ]
+        srows = connection.execute(
+            "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s AND as_of >= %s::date ORDER BY as_of",
+            (t, day),
+        ).fetchall()
+        if len(srows) > 1:
+            intraday[t] = [{"t": str(r["as_of"]), "p": float(r["last"])} for r in srows if r["last"] is not None]
+    return {"groups": groups, "daily": daily, "intraday": intraday}
+
+
 def page_brief_market(connection, day, clock):
     context, closed = _context(connection, day, clock)
     if closed is not None:
@@ -2041,6 +2360,17 @@ def page_brief_market(connection, day, clock):
     funds = f"资金：{fallen}领跌，{risen}领涨"
     if not down or not up:
         funds = "资金：领跌或领涨" + MISSING
+    live_rows = _live_anomalies(connection, day, is_today_page)
+    _state_payload = {
+        "advancers": advancers,
+        "decliners": decliners,
+        "leaders_down": down,
+        "leaders_up": up,
+        "indexes": [
+            {"id": "SPY", "name": INDEX_LABELS["SPY"], "ret": spy},
+            {"id": "QQQ", "name": INDEX_LABELS["QQQ"], "ret": qqq},
+        ],
+    }
     return {
         "page": "/",
         "date": day,
@@ -2088,9 +2418,14 @@ def page_brief_market(connection, day, clock):
         "sector_strip": _sector_strip(context, _themes(context, day)),
         "news_modules": {
             **(_news_views_today(context) if is_today_page else _news_views(context)),
-            "live": _live_anomalies(connection, day, is_today_page),
+            "live": live_rows,
             "earnings_cards": _earnings_cards(connection, day),
         },
+        "tape": _safe_call(lambda: _tape_rows(connection, day), []),
+        "state": _safe_call(lambda: _market_state(connection, day, _state_payload, live_rows), {}),
+        "hl_groups": _safe_call(lambda: _hl_grouped(live_rows, context["positions"]), []),
+        "market3": _safe_call(lambda: _market3(connection, day), {}),
+        "feed_rel": _feed_rel(context.get("feed") or context.get("news_ranked") or [], clock),
         "wide_movers_up": _wm["up"],
         "wide_movers_down": _wm["down"],
         "wide_asof": wide_asof,
