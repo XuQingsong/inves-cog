@@ -1,5 +1,6 @@
 """B-058 investor stock page: path, one-liner, trend, sentiment, news, valuation, position."""
 
+import json
 import re
 import uuid
 from datetime import date, datetime, timedelta, timezone
