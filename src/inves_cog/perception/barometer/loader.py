@@ -9,6 +9,8 @@ from datetime import date, timedelta
 
 import pandas as pd
 
+from inves_cog.perception.barometer.compute import SPDR_FLOW
+
 log = logging.getLogger(__name__)
 
 BARS_TICKERS = ["SPY", "QQQ", "SMH", "MTUM"]
