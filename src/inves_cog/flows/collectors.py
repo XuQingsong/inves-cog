@@ -340,6 +340,12 @@ def _xlsx_rows(data):
             val = v.text if v is not None else ""
             if c.get("t") == "s" and val.isdigit():
                 val = shared[int(val)]
+            elif c.get("t") == "inlineStr":
+                is_el = c.find("m:is", ns)
+                if is_el is not None:
+                    val = "".join(
+                        t.text or "" for t in is_el.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
+                    )
             cells.append(val)
         out.append(cells)
     return out
