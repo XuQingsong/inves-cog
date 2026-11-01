@@ -129,7 +129,6 @@ def test_report_rows_vs_dates():
 
 def test_ofr_components():
     """All 9 OFR FSI columns become separate series."""
-    from inves_cog.flows.backfill import backfill_ofr
 
     text = (
         "Date,OFR FSI,Credit,Equity valuation,Safe assets,Funding,"
@@ -167,7 +166,6 @@ def test_ofr_components():
 
 def test_cli_cftc_start():
     """--start flows through to the cftc call (regression: was hardcoded 2010)."""
-    import subprocess
 
     src = open("scripts/backfill_flows.py").read()
     assert "backfill.backfill_cftc(http, conn, DEFAULT_RAW, start, end, now)" in src
