@@ -80,7 +80,7 @@ class ExecutionEngine:
         order["order_id"] = hashlib.sha256(raw.encode()).hexdigest()
         validate_order(order)
         order["kind"] = self.order_kind(order)
-        if (self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20")) and action == "buy":
+        if (self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20")) and action.startswith("buy"):
             hist = self.history.get(ticker) or []
             anchor = hist[-1] if hist else (values.get("price") or 0)
             if self.flags.get("pullback_entry_ma20") and len(hist) >= 20:
@@ -120,7 +120,7 @@ class ExecutionEngine:
         if self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20"):
             still = []
             for order in available:
-                if order["action"] != "buy" or "limit" not in order:
+                if not order["action"].startswith("buy") or "limit" not in order:
                     still.append(order)
                     continue
                 bar = (day_bars or {}).get(order["ticker"], {})
