@@ -2460,10 +2460,17 @@ def _state_head(payload):
         "分档：平静 <1 倍，明显波动 1–2 倍，剧烈 ≥2 倍（取标普/纳指较大者）；"
         "方向由涨跌家数与领先板块决定；主因只取已对上事件的板块/市场异常，没有则写“原因未明”。"
     )
+    baro = st.get("barometer")
+    link = (
+        ' <a class="state-d" href="/barometer" style="color:#d9b265">晴雨表</a>'
+        if baro else "")
+    band_cls = f"band-{_text(st.get('band') or '')}" if not baro else "band-baro"
+    asof = f"（截至 {_text(str(baro['date']))}）" if baro else ""
     return (
-        f'<div class="state-h band-{_text(st.get("band") or "")}">'
+        f'<div class="state-h {band_cls}">'
         f"<h1>{_text(st.get('title') or st['sentence'])}</h1></div>"
-        f'<p class="state-d">{_text(st.get("detail") or "")}</p>'
+        f'<p class="state-d">{_text(st.get("detail") or "")}'
+        f"{link}{asof}</p>"
         f'<details class="dim small" style="margin:-6px 0 8px"><summary>依据与口径</summary>'
         f'<p style="margin:4px 0">{_text(detail)}</p></details>'
     )

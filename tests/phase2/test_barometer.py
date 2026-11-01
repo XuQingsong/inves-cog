@@ -49,3 +49,21 @@ def test_page_rules_no_banned_words():
     html = render_page([_row(row)])
     for banned in ("下单", "目标价", "实时", "dev50", "M9"):
         assert banned not in html
+
+
+def test_no_noqa_leak_in_rendered_html():
+    """Rendered /barometer must not contain Python noqa comments (JS syntax)."""
+    from datetime import date
+
+    from inves_cog.web.barometer import _row, render_page
+
+    row = {"date": date(2026, 10, 30), "fear": 10.0, "greed": 5.0,
+           "fear_level": 1.0, "greed_level": 0.5, "stage": "理性",
+           "pendulum": 0.0, "short_heat": 5.0, "accumulation": 10.0,
+           "nature": "", "dims": {"fear": {}, "greed": {}},
+           "inputs": {}, "missing": []}
+    html = render_page([_row(row)])
+    assert "noqa" not in html
+    assert "# " not in html.split("<script", 1)[-1]  # no Python comment tokens in script
+    assert 'svg id="pend"' in html
+    assert "const R=[{" in html
