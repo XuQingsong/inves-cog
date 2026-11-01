@@ -9,6 +9,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
+from inves_cog.ingest.market import NY
 from inves_cog.perception.barometer.compute import SPDR_FLOW
 
 log = logging.getLogger(__name__)
@@ -76,7 +77,7 @@ def flows_inputs(conn, idx, closes):
             "SELECT obs_date AS d, value, published_at AS p FROM flows.observations "
             "WHERE series_id=%s ORDER BY published_at", (sid,)).fetchall()
         # series keyed by the PUBLICATION date (PIT): value visible from published_at
-        return pd.Series({pd.Timestamp(r["p"]).normalize(): float(r["value"])
+        return pd.Series({pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): float(r["value"])
                           for r in rows if r["value"] is not None}).groupby(level=0).last()
 
     out = {}
@@ -131,7 +132,7 @@ def flows_inputs(conn, idx, closes):
             pct = (r["long"] - r["short"]) / r["open_interest"] * 100
             tgt = nets if r["trader_class"] == "lev_money" else am if r["trader_class"] == "asset_mgr" else None
             if tgt is not None:
-                tgt.setdefault(mk, {})[pd.Timestamp(r["p"]).normalize()] = pct
+                tgt.setdefault(mk, {})[pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None)] = pct
     mks = sorted(nets)
     if mks:
         parts_n = [pd.Series(nets[m]) for m in mks if m in nets]
@@ -156,7 +157,7 @@ def flows_inputs(conn, idx, closes):
     out["2Y_126dbp"] = onidx(_series(conn, "ingest.macro_observations", "DGS2", date(2100, 1, 1)).diff(126) * 100)
     out["席勒PE"] = onidx(obs("shiller_pe"))
     out["_fund_asof"] = {"cftc": pd.Series(
-        {pd.Timestamp(r["p"]).normalize(): r["d"] for r in rows if r["market"].split(" - ")[0].startswith(("NASDAQ-100 Consolidated", "S&P 500 Consolidated"))})}
+        {pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): r["d"] for r in rows if r["market"].split(" - ")[0].startswith(("NASDAQ-100 Consolidated", "S&P 500 Consolidated"))})}
     return out
 
 
