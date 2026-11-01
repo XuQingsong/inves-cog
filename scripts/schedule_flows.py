@@ -2,7 +2,7 @@
 
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -88,36 +88,56 @@ def _etf_done(connection, today):
 def _barometer(conn, today, hm, cur, local, state):
     """Official 16:45+ reading (once today's bars land ~20:20) + intraday slots.
 
-    Official: run only when today's bars for the core symbols exist; mark done
-    only when a barometer_daily row was actually written. If still absent by
-    the next loop past 09:00 the health row goes degraded.
+    Official: runs only when the day's bars exist for the core symbols; marks
+    done only when a barometer_daily row was actually written. A day whose
+    bars never land stays in `baro_pending:` and is retried on every loop;
+    past 09:00 ET the next day it records degraded health (that date, not
+    today) and clears. record_health(connection, source, ok, now, items, note).
     """
-    from inves_cog.flows.collectors import record_health
+    from inves_cog.flows.store import record_health
     from inves_cog.perception.barometer.run import persist, run_intraday, run_range
 
     out = {}
-    if hm >= "16:45" or state.get(f"baro_pending:{today}"):
-        key = f"baro:{today}"
-        if key not in state:
-            rows = conn.execute(
-                "SELECT count(*) AS c FROM ingest.bars_daily WHERE trade_date=%s AND ticker = ANY(%s)",
-                (today, ["SPY", "QQQ", "SMH"] + list(INDEX_SYMS)),
-            ).fetchone()
-            if rows["c"] >= 3:
-                recs = run_range(conn, today, today)
-                written = [r for r in recs if r["date"].date() == today]
-                persist(conn, written)
-                if written:
-                    record_health(conn, "Flows:Barometer", "ok", f"fear={written[-1]['fear']}", local)
-                    out[key] = {"fear": written[-1]["fear"]}
-                    state[key] = True
-                    state.pop(f"baro_pending:{today}", None)
-            elif local.hour >= 9 and local.date() > today:
-                record_health(conn, "Flows:Barometer", "degraded", "bars_daily missing for the day", local)
+
+    def _try_day(day):
+        key = f"baro:{day}"
+        if key in state:
+            return
+        rows = conn.execute(
+            "SELECT count(*) AS c FROM ingest.bars_daily WHERE trade_date=%s AND ticker = ANY(%s)",
+            (day, ["SPY", "QQQ", "SMH"] + list(INDEX_SYMS)),
+        ).fetchone()
+        if rows["c"] >= 3:
+            recs = run_range(conn, day, day)
+            written = [r for r in recs if r["date"].date() == day]
+            persist(conn, written)
+            if written:
+                record_health(
+                    conn, "Flows:Barometer", True, local, items=len(written), note=f"fear={written[-1]['fear']}"
+                )
+                out[key] = {"fear": written[-1]["fear"]}
                 state[key] = True
-            else:
-                state[f"baro_pending:{today}"] = True
-    elif cur:
+                state.pop(f"baro_pending:{day}", None)
+                return
+        # bars missing: degraded once the day after is past 09:00 ET
+        overdue = (local.date() > day and local.hour >= 9) or (local.date() - day).days > 1
+        if overdue:
+            record_health(conn, "Flows:Barometer", False, local, items=0, note=f"bars_daily missing for {day}")
+            state[key] = "degraded"
+            state.pop(f"baro_pending:{day}", None)
+        else:
+            state[f"baro_pending:{day}"] = True
+
+    if hm >= "16:45" or f"baro_pending:{today}" in state:
+        _try_day(today)
+    # retry every still-pending past trading day
+    for key in [k for k in state if k.startswith("baro_pending:")]:
+        day = date.fromisoformat(key.split(":", 1)[1])
+        if day != today and trading_day(day):
+            _try_day(day)
+        elif day != today:
+            state.pop(key, None)
+    if cur and f"baro:{today}" not in state:
         key = f"baro_intra:{today}:{cur}"
         if key not in state:
             rec = run_intraday(conn, local)
