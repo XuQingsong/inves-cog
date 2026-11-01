@@ -103,10 +103,16 @@ def indicators(px, flows):
     up = (Q.pct_change() > 0).astype(float)
     M["QQQ15日上涨天数"] = up.rolling(15).sum()
     for k, v in flows.items():
-        M[k] = v
+        if not k.startswith("_"):
+            M[k] = v
     M = pd.DataFrame(M)
-    missing = {t: (~M[t].notna()).tolist() for t in px if t not in M.columns}
-    return M, missing
+    if "资管净多%" in M:
+        M["资管净多分位"] = _pct_rank(M["资管净多%"])
+    ai_cols = [t for t in ai if t in px]
+    if ai_cols:
+        ew = (1 + px[ai_cols].pct_change(fill_method=None).mean(axis=1)).cumprod()
+        M["AI超额120日"] = (ew.pct_change(120) - S.pct_change(120)) * 100
+    return M
 
 
 def dimensions(M):
@@ -164,8 +170,11 @@ def compute_day(M, F, G, day):
     gl = float(np.interp(GI.fillna(0)[day], GREED_LEVELS, [0, 1, 2, 3, 4, 5]))
     SH = G[["超买", "连续上涨", "情绪普涨"]].mean(axis=1)
     AC = G[["多头与杠杆", "获利盘"]].mean(axis=1)
+    reb = _mean(sc(FI.rolling(20).max(), 20, 60),
+                sc(M["QQQ距半年低点"].where(M.QQQ_dd250 < -8), 3, 15), 100 - G["获利盘"])
     return {
         "date": day, "fear": round(float(FI[day]), 1), "greed": round(float(GI[day]), 1),
+        "rebound": round(float(reb[day]), 1),
         "fear_level": round(fl, 2), "greed_level": round(gl, 2),
         "stage": stage(fl, gl),
         "pendulum": round(float(np.clip(max(gl - 1, 0) - max(fl - 1, 0), -3.4, 3.4)), 2),
