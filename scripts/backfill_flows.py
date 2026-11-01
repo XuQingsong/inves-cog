@@ -39,14 +39,14 @@ def main():
     if args.job in ("ssga", "all"):
         reports += backfill.backfill_ssga(http, conn, DEFAULT_RAW, today, now)
     if args.job in ("cboe_pc", "all"):
-        reports += backfill.backfill_cboe_pc_csv(http, conn, DEFAULT_RAW, backfill.published_at)
+        reports += backfill.backfill_cboe_pc_csv(http, conn, DEFAULT_RAW, backfill.published_at, today)
         reports.append(backfill.backfill_cboe_pc(http, conn, DEFAULT_RAW, start, end, now))
     if args.job in ("cboe_idx", "all"):
         reports += backfill.backfill_cboe_idx(http, conn, DEFAULT_RAW, today, now)
     if args.job in ("occ", "all"):
         reports.append(backfill.backfill_occ(http, conn, DEFAULT_RAW, end - timedelta(days=730), end, now))
     if args.job in ("cftc", "all"):
-        reports.append(backfill.backfill_cftc(http, conn, DEFAULT_RAW, date(2010, 1, 1), end, now))
+        reports.append(backfill.backfill_cftc(http, conn, DEFAULT_RAW, start, end, now))
     if args.job in ("finra", "all"):
         reports.append(backfill.backfill_finra_margin(http, conn, DEFAULT_RAW, now))
     if args.job in ("fred", "all"):
