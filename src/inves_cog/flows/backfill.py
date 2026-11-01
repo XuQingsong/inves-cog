@@ -496,7 +496,7 @@ def backfill_finra_margin(http, connection, raw_dir, _now=None):
 
         rows = []
         for cells in _xlsx_rows(data):
-            if len(cells) < 4 or not cells[0]:
+            if len(cells) < 2 or not cells[0]:
                 continue
             m = _xlsx_date(cells[0])
             if m is None and re.match(r"^\d{4}-\d{2}$", str(cells[0] or "")):
