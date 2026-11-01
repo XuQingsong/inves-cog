@@ -165,6 +165,17 @@ class ExecutionEngine:
                 else settlement.buy(self, order, day, price, equity, execution_scores or {})
             )
             if detail:
+                if (
+                    selling
+                    and self.flags.get("cooldown_recover")
+                    and order["ticker"] not in self.positions
+                ):
+                    label = order.get("label", "")
+                    if any(k in label for k in ("破位", "止损", "减仓")) and "基本面" not in label:
+                        hist = self.history.get(order["ticker"]) or []
+                        line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
+                        self.cooldown[order["ticker"]] = {
+                            "until": self.index + 10, "line": line, "closes_above": 0}
                 fills.append(
                     {
                         **order,
@@ -212,6 +223,20 @@ class ExecutionEngine:
                 continue
             position["tier_now"] = score.get("tier") or position["tier_now"]
             order = sell_signal(position, score, index=self.index, panic=self.panic)
+            if self.flags.get("sell_confirm") and order and "破位" in order.get("label", ""):
+                h = self.history.get(ticker) or []
+                atr = 0.0
+                if len(h) >= 15:
+                    diffs = [abs(h[i] - h[i - 1]) for i in range(-14, 0)]
+                    atr = sum(diffs) / len(diffs)
+                line = sum(h[-50:]) / 50 if len(h) >= 50 else (h[-1] if h else 0)
+                below2 = len(h) >= 2 and h[-1] < line and h[-2] < line
+                big_break = atr > 0 and (line - h[-1]) > atr
+                if not (below2 or big_break):
+                    order = None
+                elif not position.get("_confirm_half_done"):
+                    order["fraction"] = min(order.get("fraction", 1.0), 0.5)
+                    position["_confirm_half_done"] = True
             if order:
                 self.queue(
                     ticker,
@@ -225,6 +250,24 @@ class ExecutionEngine:
             tier: sum(p["shares"] * prices[t] for t, p in self.positions.items() if p["tier_now"] == tier)
             for tier in TIERS
         }
+        if self.flags.get("cooldown_recover"):
+            hist_map = self.history or {}
+            for t in [t for t in self.cooldown]:
+                cd = self.cooldown[t]
+                h = hist_map.get(t) or []
+                if self.index <= cd["until"]:
+                    if t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                elif h and h[-1] is not None and h[-1] > cd["line"]:
+                    cd["closes_above"] += 1
+                    if cd["closes_above"] < 3 and t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                else:
+                    cd["closes_above"] = 0
+                    if t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                if cd["closes_above"] >= 3:
+                    del self.cooldown[t]
         if self.index > self.swan_until:
             allowed = {t: s for t, s in scores.items() if self.mode == "replay_v18" or s.get("tradable", True)}
             buys.core_adds(self, allowed, values, equity, sold)
