@@ -2462,8 +2462,7 @@ def _state_head(payload):
     )
     baro = st.get("barometer")
     link = (
-        f' · <a class="state-d" href="/barometer" style="color:#d9b265">晴雨表</a>'
-        f'（截至 {_text(str(baro["date"]))}）'
+        f' · <a class="state-d" href="/barometer" style="color:#d9b265">晴雨表</a>（截至 {_text(str(baro["date"]))}）'
         if baro
         else ""
     )
