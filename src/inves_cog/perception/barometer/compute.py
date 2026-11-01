@@ -5,16 +5,47 @@ each indicator scales linearly normal→extreme to 0–100; a dimension is the
 mean of its indicators (missing excluded + listed); the composite is the
 mean of dimensions. No triggers, no step rules.
 """
+
 import numpy as np
 import pandas as pd
 
 SECTORS = ["XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY"]
-AI_CHAIN = ["NVDA", "AMD", "AVGO", "MRVL", "TSM", "ASML", "AMAT", "LRCX", "KLAC", "MU",
-            "SNDK", "WDC", "DELL", "SMCI", "ANET", "CIEN", "COHR", "VRT", "GEV", "CEG",
-            "INTC", "ARM", "QCOM"]
-LEVERED = {"TQQQ": (3, "QQQ"), "UPRO": (3, "SPY"), "QLD": (2, "QQQ"), "SSO": (2, "SPY"),
-           "USD": (2, "SMH"), "SQQQ": (-3, "QQQ"), "SPXU": (-3, "SPY"),
-           "QID": (-2, "QQQ"), "SDS": (-2, "SPY")}
+AI_CHAIN = [
+    "NVDA",
+    "AMD",
+    "AVGO",
+    "MRVL",
+    "TSM",
+    "ASML",
+    "AMAT",
+    "LRCX",
+    "KLAC",
+    "MU",
+    "SNDK",
+    "WDC",
+    "DELL",
+    "SMCI",
+    "ANET",
+    "CIEN",
+    "COHR",
+    "VRT",
+    "GEV",
+    "CEG",
+    "INTC",
+    "ARM",
+    "QCOM",
+]
+LEVERED = {
+    "TQQQ": (3, "QQQ"),
+    "UPRO": (3, "SPY"),
+    "QLD": (2, "QQQ"),
+    "SSO": (2, "SPY"),
+    "USD": (2, "SMH"),
+    "SQQQ": (-3, "QQQ"),
+    "SPXU": (-3, "SPY"),
+    "QID": (-2, "QQQ"),
+    "SDS": (-2, "SPY"),
+}
 SPDR_FLOW = ["SPY", "XLK", "XLY", "XLF", "XLE", "XLI", "XLV", "XLP", "XLU", "XLB", "XLRE", "XLC"]
 
 FEAR_LEVELS = [0, 7, 15, 30, 45, 100]
@@ -41,7 +72,8 @@ def _worst(a, b):
 
 def _pct_rank(s, window=1260, minp=504):
     return s.rolling(window, min_periods=minp).apply(
-        lambda x: (x[:-1] < x[-1]).mean() * 100 if not np.isnan(x[-1]) else np.nan, raw=True)
+        lambda x: (x[:-1] < x[-1]).mean() * 100 if not np.isnan(x[-1]) else np.nan, raw=True
+    )
 
 
 def indicators(px, flows):
@@ -122,12 +154,27 @@ DIM_INPUTS = {
         "债市信用": ["MOVE", "10Y_10dbp", "HYG-IEF_10d"],
         "超卖扩散": ["行业破50日线", "行业5日下跌占比", "QQQ_RSI"],
         "去杠杆": ["MTUM/SPY5d", "TQQQ5d", "SPY10d", "TLT10d", "QQQ_5d", "黄金5d", "比特币5d", "日元5d"],
-        "资金与杠杆": ["杠杆ETF调仓亿", "SPDR资金5日%", "杠杆基金4周变化", "SOFR-IORB基点", "净流动性4周%", "个股看跌看涨5日"],
+        "资金与杠杆": [
+            "杠杆ETF调仓亿",
+            "SPDR资金5日%",
+            "杠杆基金4周变化",
+            "SOFR-IORB基点",
+            "净流动性4周%",
+            "个股看跌看涨5日",
+        ],
     },
     "greed": {
         "超买": ["QQQ_RSI", "SMH_RSI", "QQQ距20日线", "SMH距20日线"],
         "连续上涨": ["QQQ_20d", "SMH20d", "QQQ15日上涨天数"],
-        "多头与杠杆": ["TQQQ60d", "SOXL60d", "VIX", "杠杆ETF净申购20日%", "融资余额同比%", "资管净多分位", "个股看跌看涨5日"],
+        "多头与杠杆": [
+            "TQQQ60d",
+            "SOXL60d",
+            "VIX",
+            "杠杆ETF净申购20日%",
+            "融资余额同比%",
+            "资管净多分位",
+            "个股看跌看涨5日",
+        ],
         "获利盘": ["QQQ距200日线", "SMH距200日线", "AI120日涨超50%占比"],
         "情绪普涨": ["AI站上50日线", "AI20日涨超25%占比", "SMH相对QQQ20d"],
     },
@@ -140,26 +187,42 @@ def dimensions(M):
     F["下跌冲击"] = _mean(
         _worst(sc(-M.QQQ_sig, 1, 5), sc(-M.SPY_sig, 1, 5)),
         _worst(sc(-M.QQQ_5d, 1, 10), sc(-M.SPY_5d, 1, 8)),
-        _worst(sc(-M.QQQ_dd63, 3, 20), sc(-M.SPY_dd63, 3, 15)))
+        _worst(sc(-M.QQQ_dd63, 3, 20), sc(-M.SPY_dd63, 3, 15)),
+    )
     F["恐慌情绪"] = _mean(sc(M.VIX, 15, 45), sc(M["VIX/VIX3M"], 0.85, 1.15), sc(M.VIX_5d, 0, 80))
     F["债市信用"] = _mean(sc(M.MOVE, 80, 160), sc(M["10Y_10dbp"].abs(), 10, 60), sc(-M["HYG-IEF_10d"], 0, 6))
     F["超卖扩散"] = _mean(sc(M["行业破50日线"], 30, 100), sc(M["行业5日下跌占比"], 50, 85), sc(50 - M.QQQ_RSI, 5, 30))
     sb = pd.concat([-M.SPY10d, -M.TLT10d], axis=1).min(axis=1)
     co = pd.concat([-M.QQQ_5d / 5, -M["黄金5d"] / 3, -M["比特币5d"] / 12], axis=1).min(axis=1)
-    F["去杠杆"] = _mean(sc(-M["MTUM/SPY5d"], 0, 6), sc(-M.TQQQ5d, 0, 30), sc(sb, 0, 5), sc(co, 0, 1.5), sc(M["日元5d"], 0, 6))
+    F["去杠杆"] = _mean(
+        sc(-M["MTUM/SPY5d"], 0, 6), sc(-M.TQQQ5d, 0, 30), sc(sb, 0, 5), sc(co, 0, 1.5), sc(M["日元5d"], 0, 6)
+    )
     F["资金与杠杆"] = _mean(
-        sc(-M["杠杆ETF调仓亿"], 10, 120), sc(-M["SPDR资金5日%"], 0, 2.5),
-        sc(-M["杠杆基金4周变化"], 0, 10), sc(M["SOFR-IORB基点"], 0, 15),
-        sc(-M["净流动性4周%"], 0, 5), sc(M["个股看跌看涨5日"], 0.6, 0.95))
+        sc(-M["杠杆ETF调仓亿"], 10, 120),
+        sc(-M["SPDR资金5日%"], 0, 2.5),
+        sc(-M["杠杆基金4周变化"], 0, 10),
+        sc(M["SOFR-IORB基点"], 0, 15),
+        sc(-M["净流动性4周%"], 0, 5),
+        sc(M["个股看跌看涨5日"], 0.6, 0.95),
+    )
     G = {}
-    G["超买"] = _mean(sc(M.QQQ_RSI, 55, 85), sc(M.SMH_RSI, 55, 88), sc(M["QQQ距20日线"], 0, 8), sc(M["SMH距20日线"], 0, 18))
+    G["超买"] = _mean(
+        sc(M.QQQ_RSI, 55, 85), sc(M.SMH_RSI, 55, 88), sc(M["QQQ距20日线"], 0, 8), sc(M["SMH距20日线"], 0, 18)
+    )
     G["连续上涨"] = _mean(sc(M.QQQ_20d, 2, 12), sc(M.SMH20d, 5, 35), sc(M["QQQ15日上涨天数"], 8, 13))
     G["多头与杠杆"] = _mean(
-        sc(M.TQQQ60d, 10, 90), sc(M.SOXL60d, 20, 250), sc(-M.VIX, -18, -11),
-        sc(M["杠杆ETF净申购20日%"], 0, 25), sc(M["融资余额同比%"], 10, 40),
-        sc(M["资管净多分位"], 60, 100), sc(-M["个股看跌看涨5日"], -0.6, -0.42))
+        sc(M.TQQQ60d, 10, 90),
+        sc(M.SOXL60d, 20, 250),
+        sc(-M.VIX, -18, -11),
+        sc(M["杠杆ETF净申购20日%"], 0, 25),
+        sc(M["融资余额同比%"], 10, 40),
+        sc(M["资管净多分位"], 60, 100),
+        sc(-M["个股看跌看涨5日"], -0.6, -0.42),
+    )
     G["获利盘"] = _mean(sc(M["QQQ距200日线"], 5, 25), sc(M["SMH距200日线"], 10, 70), sc(M["AI120日涨超50%占比"], 0, 60))
-    G["情绪普涨"] = _mean(sc(M["AI站上50日线"], 60, 100), sc(M["AI20日涨超25%占比"], 0, 50), sc(M["SMH相对QQQ20d"], 0, 20))
+    G["情绪普涨"] = _mean(
+        sc(M["AI站上50日线"], 60, 100), sc(M["AI20日涨超25%占比"], 0, 50), sc(M["SMH相对QQQ20d"], 0, 20)
+    )
     return pd.DataFrame(F), pd.DataFrame(G)
 
 
@@ -189,23 +252,35 @@ def compute_day(M, F, G, day):
     gl = float(np.interp(GI.fillna(0)[day], GREED_LEVELS, [0, 1, 2, 3, 4, 5]))
     SH = G[["超买", "连续上涨", "情绪普涨"]].mean(axis=1)
     AC = G[["多头与杠杆", "获利盘"]].mean(axis=1)
-    reb = _mean(sc(FI.rolling(20).max(), 20, 60),
-                sc(M["QQQ距半年低点"].where(M.QQQ_dd250 < -8), 3, 15), 100 - G["获利盘"])
+    reb = _mean(
+        sc(FI.rolling(20).max(), 20, 60), sc(M["QQQ距半年低点"].where(M.QQQ_dd250 < -8), 3, 15), 100 - G["获利盘"]
+    )
     missing = [
-        ind for side in DIM_INPUTS.values() for inds in side.values() for ind in inds
+        ind
+        for side in DIM_INPUTS.values()
+        for inds in side.values()
+        for ind in inds
         if ind in M.columns and (day not in M.index or pd.isna(M.loc[day, ind]))
     ]
-    inputs = {k: (None if pd.isna(M.loc[day, k]) else round(float(M.loc[day, k]), 4))
-              for k in M.columns if day in M.index}
+    inputs = {
+        k: (None if pd.isna(M.loc[day, k]) else round(float(M.loc[day, k]), 4)) for k in M.columns if day in M.index
+    }
     return {
-        "date": day, "fear": round(float(FI[day]), 1), "greed": round(float(GI[day]), 1),
+        "date": day,
+        "fear": round(float(FI[day]), 1),
+        "greed": round(float(GI[day]), 1),
         "rebound": round(float(reb[day]), 1),
-        "missing": sorted(set(missing)), "inputs": inputs,
-        "fear_level": round(fl, 2), "greed_level": round(gl, 2),
+        "missing": sorted(set(missing)),
+        "inputs": inputs,
+        "fear_level": round(fl, 2),
+        "greed_level": round(gl, 2),
         "stage": stage(fl, gl),
         "pendulum": round(float(np.clip(max(gl - 1, 0) - max(fl - 1, 0), -3.4, 3.4)), 2),
-        "short_heat": round(float(SH[day]), 1), "accumulation": round(float(AC[day]), 1),
+        "short_heat": round(float(SH[day]), 1),
+        "accumulation": round(float(AC[day]), 1),
         "nature": nature(GI[day], SH[day], AC[day]),
-        "dims": {"fear": {k: (None if pd.isna(F.loc[day, k]) else round(float(F.loc[day, k]))) for k in F},
-                 "greed": {k: (None if pd.isna(G.loc[day, k]) else round(float(G.loc[day, k]))) for k in G}},
+        "dims": {
+            "fear": {k: (None if pd.isna(F.loc[day, k]) else round(float(F.loc[day, k]))) for k in F},
+            "greed": {k: (None if pd.isna(G.loc[day, k]) else round(float(G.loc[day, k]))) for k in G},
+        },
     }

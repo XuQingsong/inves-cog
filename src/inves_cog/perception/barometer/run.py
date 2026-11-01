@@ -1,4 +1,5 @@
 """Run the barometer for one day or a range — used by backfill and the scheduler."""
+
 import json
 import logging
 import subprocess
@@ -11,8 +12,9 @@ log = logging.getLogger(__name__)
 
 def _rev():
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
-                              capture_output=True, text=True, timeout=10).stdout.strip()
+        return subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, timeout=10
+        ).stdout.strip()
     except Exception:
         return "unknown"
 
@@ -28,10 +30,36 @@ def run_range(conn, start, end):
     return [compute_day(M, F, G, d) for d in days]
 
 
-def persist(conn, records):
+def persist(conn, records, table="flows.barometer_daily", ts=None):
     rev = _rev()
     with conn.cursor() as c:
         for r in records:
+            if ts is not None:
+                c.execute(
+                    "INSERT INTO flows.barometer_intraday (ts,asof,fear,greed,fear_level,greed_level,"
+                    "stage,pendulum,short_heat,accumulation,nature,dims,inputs,missing,code_rev) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+                    "ON CONFLICT (ts) DO UPDATE SET fear=EXCLUDED.fear,greed=EXCLUDED.greed,"
+                    "dims=EXCLUDED.dims,inputs=EXCLUDED.inputs,code_rev=EXCLUDED.code_rev",
+                    (
+                        ts,
+                        r["asof"] if "asof" in r else r["date"],
+                        r["fear"],
+                        r["greed"],
+                        r["fear_level"],
+                        r["greed_level"],
+                        STAGES[r["stage"] + 3] if isinstance(r["stage"], int) else r["stage"],
+                        r["pendulum"],
+                        r["short_heat"],
+                        r["accumulation"],
+                        r["nature"],
+                        json.dumps(r["dims"], default=str),
+                        json.dumps(r.get("inputs", {}), default=str),
+                        json.dumps(r.get("missing", []), default=str),
+                        rev,
+                    ),
+                )
+                continue
             c.execute(
                 "INSERT INTO flows.barometer_daily (date,asof,fear,greed,fear_level,greed_level,"
                 "stage,pendulum,short_heat,accumulation,nature,dims,inputs,missing,code_rev) "
@@ -43,9 +71,21 @@ def persist(conn, records):
                 "accumulation=EXCLUDED.accumulation,nature=EXCLUDED.nature,"
                 "dims=EXCLUDED.dims,inputs=EXCLUDED.inputs,missing=EXCLUDED.missing,"
                 "code_rev=EXCLUDED.code_rev",
-                (r["date"], r["asof"] if "asof" in r else r["date"], r["fear"], r["greed"],
-                 r["fear_level"], r["greed_level"],
-                 STAGES[r["stage"] + 3] if isinstance(r["stage"], int) else r["stage"],
-                 r["pendulum"], r["short_heat"], r["accumulation"], r["nature"],
-                 json.dumps(r["dims"], default=str), json.dumps(r.get("inputs", {}), default=str),
-                 json.dumps(r.get("missing", []), default=str), rev))
+                (
+                    r["date"],
+                    r["asof"] if "asof" in r else r["date"],
+                    r["fear"],
+                    r["greed"],
+                    r["fear_level"],
+                    r["greed_level"],
+                    STAGES[r["stage"] + 3] if isinstance(r["stage"], int) else r["stage"],
+                    r["pendulum"],
+                    r["short_heat"],
+                    r["accumulation"],
+                    r["nature"],
+                    json.dumps(r["dims"], default=str),
+                    json.dumps(r.get("inputs", {}), default=str),
+                    json.dumps(r.get("missing", []), default=str),
+                    rev,
+                ),
+            )

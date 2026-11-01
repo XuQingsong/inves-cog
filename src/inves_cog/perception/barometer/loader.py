@@ -4,6 +4,7 @@ bars_daily is canonical where covered (SPY/QQQ/SMH/sectors/AI chain/MTUM);
 yahoo_px_* observations fill the rest (TQQQ/SOXL/GLD/HYG/IEF/TLT/JPY=X/BTC/^MOVE).
 PIT: every value is the latest with published_at <= asof for flows inputs.
 """
+
 import logging
 from datetime import date, timedelta
 
@@ -16,23 +17,56 @@ log = logging.getLogger(__name__)
 
 BARS_TICKERS = ["SPY", "QQQ", "SMH", "MTUM"]
 SECTORS = ["XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY"]
-AI_CHAIN = ["NVDA", "AMD", "AVGO", "MRVL", "TSM", "ASML", "AMAT", "LRCX", "KLAC", "MU",
-            "SNDK", "WDC", "DELL", "SMCI", "ANET", "CIEN", "COHR", "VRT", "GEV", "CEG",
-            "INTC", "ARM", "QCOM"]
-YAHOO = {"TQQQ": "yahoo_px_tqqq", "SOXL": "yahoo_px_soxl", "GLD": "yahoo_px_gld",
-         "HYG": "yahoo_px_hyg", "IEF": "yahoo_px_ief", "TLT": "yahoo_px_tlt",
-         "JPY=X": "yahoo_px_jpyx", "BTC-USD": "yahoo_px_btcusd", "MOVE": "yahoo_px_move"}
+AI_CHAIN = [
+    "NVDA",
+    "AMD",
+    "AVGO",
+    "MRVL",
+    "TSM",
+    "ASML",
+    "AMAT",
+    "LRCX",
+    "KLAC",
+    "MU",
+    "SNDK",
+    "WDC",
+    "DELL",
+    "SMCI",
+    "ANET",
+    "CIEN",
+    "COHR",
+    "VRT",
+    "GEV",
+    "CEG",
+    "INTC",
+    "ARM",
+    "QCOM",
+]
+YAHOO = {
+    "TQQQ": "yahoo_px_tqqq",
+    "SOXL": "yahoo_px_soxl",
+    "GLD": "yahoo_px_gld",
+    "HYG": "yahoo_px_hyg",
+    "IEF": "yahoo_px_ief",
+    "TLT": "yahoo_px_tlt",
+    "JPY=X": "yahoo_px_jpyx",
+    "BTC-USD": "yahoo_px_btcusd",
+    "MOVE": "yahoo_px_move",
+}
 # VIX/VIX3M/10Y live in macro/flows series
-MACRO = {"VIX": ("ingest.macro_observations", "VIX_CBOE"),
-         "VIX3M": ("ingest.macro_observations", "VIX3M_CBOE"),
-         "TNX": ("flows.observations", "yahoo_px_tnx")}
+MACRO = {
+    "VIX": ("ingest.macro_observations", "VIX_CBOE"),
+    "VIX3M": ("ingest.macro_observations", "VIX3M_CBOE"),
+    "TNX": ("flows.observations", "yahoo_px_tnx"),
+}
 
 
 def _series(conn, table, series_id, end):
     date_col = "observation_date" if "macro_observations" in table else "obs_date"
     rows = conn.execute(
-        f"SELECT {date_col} AS d, value FROM {table} WHERE series_id=%s AND {date_col} <= %s "
-        "ORDER BY 1", (series_id, end)).fetchall()
+        f"SELECT {date_col} AS d, value FROM {table} WHERE series_id=%s AND {date_col} <= %s ORDER BY 1",
+        (series_id, end),
+    ).fetchall()
     return pd.Series({pd.Timestamp(r["d"]): float(r["value"]) for r in rows if r["value"] is not None})
 
 
@@ -43,7 +77,8 @@ def price_frame(conn, end, start=None):
     rows = conn.execute(
         "SELECT ticker, trade_date AS d, close*adj_factor AS c FROM ingest.bars_daily "
         "WHERE ticker = ANY(%s) AND trade_date <= %s ORDER BY 1,2",
-        (tickers, end)).fetchall()
+        (tickers, end),
+    ).fetchall()
     per = {}
     for r in rows:
         per.setdefault(r["ticker"], []).append((pd.Timestamp(r["d"]), float(r["c"])))
@@ -68,6 +103,7 @@ def flows_inputs(conn, idx, closes):
     Ported 1:1 from comp.py: onidx aligns each series to trading days by its
     published_at date (data date + publication lag already applied).
     """
+
     def onidx(s):
         s = s.dropna().sort_index()
         return s.reindex(idx.union(s.index)).ffill().reindex(idx)
@@ -75,19 +111,32 @@ def flows_inputs(conn, idx, closes):
     def obs(sid, pit_col="published_at"):
         rows = conn.execute(
             "SELECT obs_date AS d, value, published_at AS p FROM flows.observations "
-            "WHERE series_id=%s ORDER BY published_at", (sid,)).fetchall()
+            "WHERE series_id=%s ORDER BY published_at",
+            (sid,),
+        ).fetchall()
         # series keyed by the PUBLICATION date (PIT): value visible from published_at
-        return pd.Series({pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): float(r["value"])
-                          for r in rows if r["value"] is not None}).groupby(level=0).last()
+        return (
+            pd.Series(
+                {
+                    pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): float(r["value"])
+                    for r in rows
+                    if r["value"] is not None
+                }
+            )
+            .groupby(level=0)
+            .last()
+        )
 
     out = {}
     # --- levered ETF rebalance + net subscription + SPDR flows (same math as comp.py) ---
     etf = conn.execute(
         "SELECT ticker, date AS d, COALESCE(aum, shares*nav) AS aum, nav FROM flows.etf_daily "
-        "WHERE nav IS NOT NULL AND COALESCE(aum, shares*nav) IS NOT NULL ORDER BY 1,2").fetchall()
+        "WHERE nav IS NOT NULL AND COALESCE(aum, shares*nav) IS NOT NULL ORDER BY 1,2"
+    ).fetchall()
     E = {}
     for r in etf:
         E.setdefault(r["ticker"], []).append(r)
+
     def etf_df(t):
         d = pd.DataFrame(E.get(t, [])).set_index("d").sort_index() if E.get(t) else None
         if d is None or d.empty:
@@ -99,9 +148,17 @@ def flows_inputs(conn, idx, closes):
         d = etf_df(t)
         return (d.aum - d.aum.shift(1) * d.nav / d.nav.shift(1)) if d is not None else pd.Series(dtype=float)
 
-    LEV = {"TQQQ": (3, "QQQ"), "UPRO": (3, "SPY"), "QLD": (2, "QQQ"), "SSO": (2, "SPY"),
-           "USD": (2, "SMH"), "SQQQ": (-3, "QQQ"), "SPXU": (-3, "SPY"),
-           "QID": (-2, "QQQ"), "SDS": (-2, "SPY")}
+    LEV = {
+        "TQQQ": (3, "QQQ"),
+        "UPRO": (3, "SPY"),
+        "QLD": (2, "QQQ"),
+        "SSO": (2, "SPY"),
+        "USD": (2, "SMH"),
+        "SQQQ": (-3, "QQQ"),
+        "SPXU": (-3, "SPY"),
+        "QID": (-2, "QQQ"),
+        "SDS": (-2, "SPY"),
+    }
     # underlying returns come from the price frame; caller passes closes via M later —
     # here we return the per-ticker series pieces; runner assembles.
     reb = levflow = levaum = None
@@ -114,7 +171,9 @@ def flows_inputs(conn, idx, closes):
             levflow = f if levflow is None else levflow + f
             levaum = a.fillna(0) if levaum is None else levaum + a.fillna(0)
     out["杠杆ETF调仓亿"] = (reb / 1e8) if reb is not None else pd.Series(dtype=float)
-    out["杠杆ETF净申购20日%"] = (levflow.rolling(20).sum() / levaum.shift(20) * 100) if levaum is not None else pd.Series(dtype=float)
+    out["杠杆ETF净申购20日%"] = (
+        (levflow.rolling(20).sum() / levaum.shift(20) * 100) if levaum is not None else pd.Series(dtype=float)
+    )
     spf = [onidx(flow(t)).fillna(0) for t in SPDR_FLOW if etf_df(t) is not None]
     spa = [onidx(etf_df(t).aum).fillna(0) for t in SPDR_FLOW if etf_df(t) is not None]
     if spf:
@@ -122,7 +181,8 @@ def flows_inputs(conn, idx, closes):
     # --- CFTC lev/am net % (pivoted trader_class rows; PIT by release_at) ---
     rows = conn.execute(
         "SELECT market, trader_class, report_date AS d, long, short, open_interest, "
-        "release_at AS p FROM flows.cftc_positions ORDER BY release_at").fetchall()
+        "release_at AS p FROM flows.cftc_positions ORDER BY release_at"
+    ).fetchall()
     nets, am = {}, {}
     for r in rows:
         mk = r["market"].split(" - ")[0]
@@ -156,8 +216,13 @@ def flows_inputs(conn, idx, closes):
     out["个股看跌看涨5日"] = obs("cboe_pc_equity").reindex(idx).rolling(5, min_periods=3).mean()
     out["2Y_126dbp"] = onidx(_series(conn, "ingest.macro_observations", "DGS2", date(2100, 1, 1)).diff(126) * 100)
     out["席勒PE"] = onidx(obs("shiller_pe"))
-    out["_fund_asof"] = {"cftc": pd.Series(
-        {pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): r["d"] for r in rows if r["market"].split(" - ")[0].startswith(("NASDAQ-100 Consolidated", "S&P 500 Consolidated"))})}
+    out["_fund_asof"] = {
+        "cftc": pd.Series(
+            {
+                pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): r["d"]
+                for r in rows
+                if r["market"].split(" - ")[0].startswith(("NASDAQ-100 Consolidated", "S&P 500 Consolidated"))
+            }
+        )
+    }
     return out
-
-

@@ -136,6 +136,27 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
+        # barometer: official reading 16:45+; intraday 15-min slots reuse the gate above
+        if hm >= "16:45":
+            key = f"baro:{today}"
+            if key not in state:
+                from inves_cog.perception.barometer.run import persist as baro_persist
+                from inves_cog.perception.barometer.run import run_range
+
+                recs = run_range(conn, today, today)
+                baro_persist(conn, recs)
+                result[key] = {"days": len(recs), "fear": recs[-1]["fear"] if recs else None}
+                state[key] = True
+        elif cur:
+            key = f"baro_intra:{today}:{cur}"
+            if key not in state:
+                from inves_cog.perception.barometer.run import persist as baro_persist
+                from inves_cog.perception.barometer.run import run_range
+
+                recs = run_range(conn, today, today)
+                baro_persist(conn, recs, table="flows.barometer_intraday", ts=local)
+                result[key] = {"days": len(recs)}
+                state[key] = True
         if hm >= "19:00":
             key = f"cboe_pc:{today}"
             if key not in state:
