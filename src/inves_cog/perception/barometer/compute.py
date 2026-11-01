@@ -115,6 +115,25 @@ def indicators(px, flows):
     return M
 
 
+DIM_INPUTS = {
+    "fear": {
+        "下跌冲击": ["QQQ_sig", "SPY_sig", "QQQ_5d", "SPY_5d", "QQQ_dd63", "SPY_dd63"],
+        "恐慌情绪": ["VIX", "VIX/VIX3M", "VIX_5d"],
+        "债市信用": ["MOVE", "10Y_10dbp", "HYG-IEF_10d"],
+        "超卖扩散": ["行业破50日线", "行业5日下跌占比", "QQQ_RSI"],
+        "去杠杆": ["MTUM/SPY5d", "TQQQ5d", "SPY10d", "TLT10d", "QQQ_5d", "黄金5d", "比特币5d", "日元5d"],
+        "资金与杠杆": ["杠杆ETF调仓亿", "SPDR资金5日%", "杠杆基金4周变化", "SOFR-IORB基点", "净流动性4周%", "个股看跌看涨5日"],
+    },
+    "greed": {
+        "超买": ["QQQ_RSI", "SMH_RSI", "QQQ距20日线", "SMH距20日线"],
+        "连续上涨": ["QQQ_20d", "SMH20d", "QQQ15日上涨天数"],
+        "多头与杠杆": ["TQQQ60d", "SOXL60d", "VIX", "杠杆ETF净申购20日%", "融资余额同比%", "资管净多分位", "个股看跌看涨5日"],
+        "获利盘": ["QQQ距200日线", "SMH距200日线", "AI120日涨超50%占比"],
+        "情绪普涨": ["AI站上50日线", "AI20日涨超25%占比", "SMH相对QQQ20d"],
+    },
+}
+
+
 def dimensions(M):
     """Fear/greed dimension frames — exact comp.py formulas."""
     F = {}
@@ -172,9 +191,16 @@ def compute_day(M, F, G, day):
     AC = G[["多头与杠杆", "获利盘"]].mean(axis=1)
     reb = _mean(sc(FI.rolling(20).max(), 20, 60),
                 sc(M["QQQ距半年低点"].where(M.QQQ_dd250 < -8), 3, 15), 100 - G["获利盘"])
+    missing = [
+        ind for side in DIM_INPUTS.values() for inds in side.values() for ind in inds
+        if ind in M.columns and (day not in M.index or pd.isna(M.loc[day, ind]))
+    ]
+    inputs = {k: (None if pd.isna(M.loc[day, k]) else round(float(M.loc[day, k]), 4))
+              for k in M.columns if day in M.index}
     return {
         "date": day, "fear": round(float(FI[day]), 1), "greed": round(float(GI[day]), 1),
         "rebound": round(float(reb[day]), 1),
+        "missing": sorted(set(missing)), "inputs": inputs,
         "fear_level": round(fl, 2), "greed_level": round(gl, 2),
         "stage": stage(fl, gl),
         "pendulum": round(float(np.clip(max(gl - 1, 0) - max(fl - 1, 0), -3.4, 3.4)), 2),
