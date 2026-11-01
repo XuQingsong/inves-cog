@@ -197,7 +197,7 @@ details{margin-top:28px;color:var(--ink2);font-size:12px}details summary{cursor:
 """
 _PAGE = (
     _PAGE_HEAD
-    + r"""<div class="sec"><h2>为什么在这里 <small>点击钟摆下方的光弧切换方面</small></h2><div class="drawer" id="drawer"></div></div>
+    + r"""<main><div class="sec"><h2>为什么在这里 <small>点击钟摆下方的光弧切换方面</small></h2><div class="drawer" id="drawer"></div></div>
  <div class="sec grid2">
   <div><h2>杠杆压力仓 <small>各层杠杆处在自身历史的什么位置（0–100 分位）</small></h2><div class="tanks" id="tanks"></div></div>
   <div class="trig"><h2>离被迫卖出还有多远</h2><div id="trig"></div></div>
