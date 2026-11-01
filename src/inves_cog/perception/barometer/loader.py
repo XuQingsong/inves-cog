@@ -22,7 +22,7 @@ YAHOO = {"TQQQ": "yahoo_px_tqqq", "SOXL": "yahoo_px_soxl", "GLD": "yahoo_px_gld"
 # VIX/VIX3M/10Y live in macro/flows series
 MACRO = {"VIX": ("ingest.macro_observations", "VIX_CBOE"),
          "VIX3M": ("ingest.macro_observations", "VIX3M_CBOE"),
-         "TNX": ("flows.observations", "fred_dgs10")}
+         "TNX": ("flows.observations", "yahoo_px_tnx")}
 
 
 def _series(conn, table, series_id, end):
