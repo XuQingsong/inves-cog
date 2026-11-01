@@ -39,7 +39,7 @@ def run_backtest(connection, spec, *, write=True):
         else BacktestLoader.universe(spec["universe"], PARAMS["replay_tickers"])
     )
     start, end = spec["start"], spec["end"]
-    initial = spec.get("initial_cash", 100000)
+    initial = spec.get("initial_cash") or PARAMS["initial_cash"]
     mode, extractor = spec.get("mode", "paper"), spec.get("extractor", "fixed")
     # tickers enter on their first bar date (IPO); bars loader already covers it
     prices, signals = {}, {}
