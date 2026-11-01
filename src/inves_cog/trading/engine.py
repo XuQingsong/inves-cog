@@ -135,6 +135,7 @@ class ExecutionEngine:
                 equity0 = self.equity(opening)
                 if equity0 is not None:
                     detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
+                    self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
                     if detail:
                         self.trades.append(
                             {
@@ -153,6 +154,7 @@ class ExecutionEngine:
             # expire stale limit orders after 10 sessions
             for order in [o for o in self.limit_orders.values() if o["expiry_index"] < self.index]:
                 self.record_terminal(order["order"], "expired", "限价单 10 日未成交")
+                self.flags_counts["pullback_expired"] = self.flags_counts.get("pullback_expired", 0) + 1
             available = still
         if not available:
             if self.mode == "paper":
