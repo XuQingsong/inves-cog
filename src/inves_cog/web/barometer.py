@@ -7,6 +7,22 @@ from datetime import time as _time
 STAGES = ["绝望", "悲观", "谨慎", "理性", "乐观", "兴奋", "狂热"]
 
 
+FEAR_ORDER = ["下跌冲击", "恐慌情绪", "债市信用", "超卖扩散", "去杠杆", "资金与杠杆"]
+GREED_ORDER = ["超买", "连续上涨", "多头与杠杆", "获利盘", "情绪普涨"]
+
+
+def _ordered(dims, order):
+    return {k: dims[k] for k in order if k in dims} | {k: v for k, v in dims.items() if k not in order}
+
+
+def _asof_date(connection_hint, raw):
+    if raw is None:
+        return ""
+    if hasattr(raw, "strftime"):
+        return raw.strftime("%Y-%m-%d")
+    return str(raw)
+
+
 def _row(d):
     """barometer_daily row → the prototype record shape."""
     stage = d.get("stage")
