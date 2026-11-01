@@ -61,8 +61,25 @@ def run_backtest(connection, spec, *, write=True):
     engine = ExecutionEngine(
         clock=clock, initial_cash=initial, mode=mode, portfolio_id=f"bt-{spec.get('label', 'run')}"
     )
+    flags = spec.get("flags") or {}
+    flag_counts = {}
+    locked = {}
+    if flags.get("tier_lock"):
+        import yaml
+
+        locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
     for day in days:
         daily = {t: signals[t][day] for t in tickers if day in signals[t]}
+        if flags.get("tier_lock"):
+            for t, sc in daily.items():
+                if t in locked:
+                    sc["tier"] = locked[t]
+        if flags.get("chase_block"):
+            for t, sc in daily.items():
+                hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
+                if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > 0.08:
+                    sc["entry_pass"] = False
+                    flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
@@ -100,6 +117,7 @@ def run_backtest(connection, spec, *, write=True):
     )
     metrics["trade_hash"] = trade_hash(engine.trades)
     metrics["survivorship_bias"] = spec.get("universe") == "config"
+    metrics["flags_counts"] = flag_counts
     result = {
         "spec": spec,
         "metrics": metrics,
