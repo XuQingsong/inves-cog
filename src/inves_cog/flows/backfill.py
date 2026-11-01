@@ -765,7 +765,7 @@ def backfill_shiller_pe(http, connection, raw_dir, _now=None):
         req = urllib.request.Request(SHILLER_URL, headers=UA)
         html = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
         rows = []
-        for m in re.finditer(r'<td>(\w{3} \d{1,2}, \d{4})</td>\s*<td[^>]*>[^0-9<]*([\d.]+)\s*</td>', html):
+        for m in re.finditer(r'<td>(\w{3} \d{1,2}, \d{4})</td>\s*<td[^>]*>\s*(?:&#x2002;)?\s*([\d.]+)\s*</td>', html):
             try:
                 d = datetime.strptime(m.group(1), "%b %d, %Y").date()
                 rows.append({"series_id": "shiller_pe", "obs_date": d,
