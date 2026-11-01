@@ -1,8 +1,7 @@
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import MagicMock
 
 import pytest
-from datetime import timedelta
 
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
 
@@ -138,7 +137,6 @@ def test_pe_continuous_across_split():
 
 def test_scores_identical_when_adj_factor_1():
     """adj_factor=1 days produce byte-identical tech rows as before (raw==adj)."""
-    import pandas as pd
     from inves_cog.trading.scoring.technical import technical_series
 
     bars = [

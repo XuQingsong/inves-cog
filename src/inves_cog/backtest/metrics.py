@@ -64,6 +64,8 @@ def equity_metrics(curve, trades, initial_cash, bench=None):
         "buys": len(buys),
         "sells": closed,
         "turnover_x": turnover,
+        "turnover_annual_x": turnover * 365.25 / days,
+        "avg_invested_pct": avg_invested,
         "win_rate": wins / closed if closed else None,
         "avg_holding_days": (sum(holds) / len(holds)) if holds else None,
         "exposure_pct": exposure,
