@@ -583,6 +583,7 @@ def backfill_fred(http, connection, raw_dir, _now=None):
         try:
             if key:
                 import urllib.request
+
                 req = urllib.request.Request(url, headers=UA)
                 text = urllib.request.urlopen(req, timeout=60).read().decode()
             else:
