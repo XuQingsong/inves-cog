@@ -183,3 +183,40 @@ def test_arc_order_and_script_intact():
         assert ident in html
     for banned in ("下单", "目标价", "实时"):
         assert banned not in html
+
+
+def test_homepage_state_block():
+    """Rendered homepage state block = barometer sentence + linked 晴雨表, no old text."""
+    from inves_cog.web.investor_html import _state_head
+
+    payload = {
+        "state": {
+            "band": "平静",
+            "title": "谨慎 · 恐惧 19 / 贪婪 4",
+            "detail": "纳指 −3.5%（平时 3.4 倍），距高点 −9.1%；杠杆 ETF 收盘被迫卖出 107 亿美元。",
+            "sentence": "谨慎 · 恐惧 19 / 贪婪 4：纳指 −3.5%…",
+            "barometer": {"date": "2026-10-30", "stage": "谨慎", "fear": 19, "greed": 4},
+        }
+    }
+    html = _state_head(payload)
+    assert "杠杆 ETF 收盘被迫卖出 107 亿美元" in html
+    assert 'href="/barometer"' in html
+    assert "详见 /barometer" not in html
+    assert "约平时" not in html.split("state-d", 1)[1].split("</p>", 1)[0]
+
+
+def test_baro_sentence():
+    from inves_cog.web.barometer import baro_sentence
+
+    sent = baro_sentence(
+        {"下跌冲击": 60, "资金与杠杆": 40},
+        {},
+        {"QQQ_1d": -3.5, "QQQ_sig": 3.4, "QQQ_dd63": -9.1, "杠杆ETF调仓亿": -107, "QQQ距200日线": 1.6},
+        3.0,
+        1.0,
+    )
+    assert "纳指 −3.5%（平时 3.4 倍）" in sent and "距高点 −9.1%" in sent
+    assert "杠杆 ETF 收盘被迫卖出 107 亿美元" in sent
+    assert "纳指距 200 日线仅 1.6%" in sent
+    neutral = baro_sentence({}, {}, {"__fear": 20, "__greed": 15}, 1.0, 1.0)
+    assert "两侧读数都在正常范围" in neutral

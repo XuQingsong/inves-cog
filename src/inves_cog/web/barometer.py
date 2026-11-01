@@ -121,6 +121,54 @@ def sentence(rec):
     return "；".join(parts) + ("。" if parts else "")
 
 
+def baro_sentence(dims_fear, dims_greed, inputs, fear_level, greed_level):
+    """One-sentence conclusion — mirrors the page's JS sentence().
+
+    Top-2 dims (score >=20) of the dominant side (level >=2), then the
+    200-day-line amplifier. Plain text; falls back to the neutral line.
+    """
+    m = inputs or {}
+    fi, gi = min(int(fear_level or 0), 4), min(int(greed_level or 0), 4)
+    side = "F" if fi >= 2 and fi >= gi else "G" if gi >= 2 else None
+    if not side:
+        return (
+            f"两侧读数都在正常范围：恐惧 {(inputs.get('__fear') or 0):.0f}、贪婪 {(inputs.get('__greed') or 0):.0f}。"
+        )
+    dims = (dims_fear or {}) if side == "F" else (dims_greed or {})
+
+    def _f(v, d=1):
+        return "—" if v is None else f"{v:.{d}f}"
+
+    def _s(v, d=1):
+        if v is None:
+            return "—"
+        sign = "+" if v > 0 else "−" if v < 0 else ""
+        return sign + f"{abs(v):.{d}f}"
+
+    phrases = {
+        "下跌冲击": f"纳指 {_s(m.get('QQQ_1d'))}%（平时 {_f(abs(m.get('QQQ_sig') or 0))} 倍），距高点 {_s(m.get('QQQ_dd63'))}%",
+        "恐慌情绪": f"VIX {_f(m.get('VIX'))}" + ("，期限倒挂" if (m.get("VIX/VIX3M") or 0) > 1 else ""),
+        "债市信用": f"10 年美债 10 日 {_s(m.get('10Y_10dbp'), 0)} 基点，MOVE {_f(m.get('MOVE'), 0)}",
+        "超卖扩散": f"{_f(m.get('行业破50日线'), 0)}% 行业跌破 50 日线",
+        "去杠杆": f"动量股 5 日 {_s(m.get('MTUM/SPY5d'))}%，TQQQ {_s(m.get('TQQQ5d'), 0)}%",
+        "资金与杠杆": f"杠杆 ETF 收盘被迫{'卖出' if (m.get('杠杆ETF调仓亿') or 0) < 0 else '买入'} {_f(abs(m.get('杠杆ETF调仓亿') or 0), 0)} 亿美元",
+        "超买": f"半导体 RSI {_f(m.get('SMH_RSI'), 0)}",
+        "连续上涨": f"半导体 20 日 {_s(m.get('SMH20d'))}%",
+        "多头与杠杆": f"融资余额同比 {_s(m.get('融资余额同比%'))}%，杠杆 ETF 20 日净申购 {_s(m.get('杠杆ETF净申购20日%'))}%",
+        "获利盘": f"半导体距 200 日线 {_s(m.get('SMH距200日线'))}%",
+        "情绪普涨": f"AI 链 {_f(m.get('AI站上50日线'), 0)}% 站上 50 日线",
+    }
+    top = sorted(dims.items(), key=lambda kv: -(kv[1] or 0))[:2]
+    parts = [phrases[k] for k, v in top if (v or 0) >= 20 and k in phrases]
+    q = m.get("QQQ距200日线")
+    if q is not None:
+        if q < 0:
+            parts.append(f"纳指已跌破 200 日线（{_s(q)}%）")
+        elif q < 5:
+            parts.append(f"纳指距 200 日线仅 {_f(q)}%")
+    return ("；".join(parts) + "。") if parts else ""
+
+
 def api_payload(connection, clock):
     rec, label = today_record(connection, clock)
     out = {"today": rec, "label": label, "history": history(connection)}
