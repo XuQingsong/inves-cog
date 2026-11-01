@@ -47,7 +47,7 @@ def split_suspect(derived, fields):
 
 
 def build_books(fields, tech):
-    derived = derivatives(fields, tech.get("price", fields.get("price")))
+    derived = derivatives(fields, tech["raw_price"] if "raw_price" in tech else tech.get("price", fields.get("price")))
     # Muse aacea04 code/screen_asof_2026_01_01.py L154–182: consume M2's FCF/NI and EPS
     # growth unchanged; extraction belongs to M2, while current-price fields take precedence.
     raw = {**fields, **derived}

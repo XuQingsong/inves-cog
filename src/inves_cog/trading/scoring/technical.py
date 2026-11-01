@@ -23,6 +23,7 @@ def technical_series(bars):
     output = pd.DataFrame(
         {
             "price": close,
+            "raw_price": frame["close"],
             "open": opening,
             # Muse aacea04 code/paper_trade_2026.py L95–101: 20/63/126 are shifts, not row counts.
             "price_vs_ma200": (close / ma200 - 1) * 100,
