@@ -648,19 +648,33 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
     try:
         text = _fetch(http, OFR_FSI_URL)
         rows = []
+        comps = {
+            "OFR FSI": "ofr_fsi",
+            "Credit": "ofr_fsi_credit",
+            "Equity valuation": "ofr_fsi_equity_val",
+            "Safe assets": "ofr_fsi_safe_assets",
+            "Funding": "ofr_fsi_funding",
+            "Volatility": "ofr_fsi_volatility",
+            "United States": "ofr_fsi_us",
+            "Other advanced economies": "ofr_fsi_oae",
+            "Emerging markets": "ofr_fsi_em",
+        }
         for row in csv.DictReader(io.StringIO(text)):
             day = _mdy(row.get("Date") or row.get("date") or row.get("DATE"))
-            val = row.get("OFR FSI") or row.get("fsi")
-            if day and val:
-                rows.append(
-                    {
-                        "series_id": "ofr_fsi",
-                        "obs_date": day,
-                        "value": float(val),
-                        "published_at": published_at("ofr_fsi", day),
-                        "vintage": "backfill",
-                    }
-                )
+            if not day:
+                continue
+            for label, series in comps.items():
+                val = row.get(label)
+                if val not in (None, ""):
+                    rows.append(
+                        {
+                            "series_id": series,
+                            "obs_date": day,
+                            "value": float(val),
+                            "published_at": published_at("ofr_fsi", day),
+                            "vintage": "backfill",
+                        }
+                    )
         if connection is not None and rows:
             save_raw(
                 raw_dir,
@@ -675,13 +689,8 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
                 "series_catalog",
                 ["series_id", "name_zh", "unit", "frequency", "source"],
                 [
-                    {
-                        "series_id": "ofr_fsi",
-                        "name_zh": "OFR FSI",
-                        "unit": "index",
-                        "frequency": "daily",
-                        "source": "OFR",
-                    }
+                    {"series_id": v, "name_zh": k, "unit": "index", "frequency": "daily", "source": "OFR"}
+                    for k, v in comps.items()
                 ],
             )
             upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
