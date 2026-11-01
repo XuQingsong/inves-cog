@@ -117,13 +117,13 @@ def run_backtest(connection, spec, *, write=True):
         },
     }
     if write:
-        run_id = _persist(connection, spec, result)
+        run_id = _persist(connection, spec, result, clock)
         result["run_id"] = run_id
     return result
 
 
-def _persist(connection, spec, result):
-    now = datetime.now(timezone.utc)
+def _persist(connection, spec, result, clock):
+    now = clock.now_utc()
     cur = connection.execute(
         "INSERT INTO backtest.runs (label, spec, code_rev, started_at, finished_at, status, metrics) "
         "VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING run_id",
