@@ -64,11 +64,11 @@ class BacktestLoader:
     def vix(self, end):
         """ingest.macro_observations VIX_CBOE → {date: close}."""
         rows = self.connection.execute(
-            "SELECT obs_date, value FROM ingest.macro_observations "
+            "SELECT observation_date, value FROM ingest.macro_observations "
             "WHERE series_id=%s AND obs_date <= %s ORDER BY obs_date",
-            ("VIX_CBOE", end),
+            ("VIXCLS", end),
         ).fetchall()
-        return {r["obs_date"]: float(r["value"]) for r in rows}
+        return {r["observation_date"]: float(r["value"]) for r in rows}
 
     # ---------- universe ----------
 
