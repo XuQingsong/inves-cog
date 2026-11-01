@@ -65,7 +65,7 @@ class BacktestLoader:
         """ingest.macro_observations VIX_CBOE → {date: close}."""
         rows = self.connection.execute(
             "SELECT observation_date, value FROM ingest.macro_observations "
-            "WHERE series_id=%s AND obs_date <= %s ORDER BY obs_date",
+            "WHERE series_id=%s AND observation_date <= %s ORDER BY observation_date",
             ("VIXCLS", end),
         ).fetchall()
         return {r["observation_date"]: float(r["value"]) for r in rows}
