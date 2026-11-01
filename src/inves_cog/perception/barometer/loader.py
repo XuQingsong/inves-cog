@@ -82,8 +82,8 @@ def flows_inputs(conn, idx, closes):
     out = {}
     # --- levered ETF rebalance + net subscription + SPDR flows (same math as comp.py) ---
     etf = conn.execute(
-        "SELECT ticker, date AS d, aum, nav FROM flows.etf_daily "
-        "WHERE aum IS NOT NULL AND nav IS NOT NULL ORDER BY 1,2").fetchall()
+        "SELECT ticker, date AS d, COALESCE(aum, shares*nav) AS aum, nav FROM flows.etf_daily "
+        "WHERE nav IS NOT NULL AND COALESCE(aum, shares*nav) IS NOT NULL ORDER BY 1,2").fetchall()
     E = {}
     for r in etf:
         E.setdefault(r["ticker"], []).append(r)
