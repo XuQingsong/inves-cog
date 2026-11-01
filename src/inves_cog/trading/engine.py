@@ -16,7 +16,10 @@ from inves_cog.trading.execution.state import PARAMS, RULE_A, TIERS
 
 
 class ExecutionEngine:
-    def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed"):
+    def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed", flags=None):
+        self.flags = flags or {}
+        self.cooldown = {}   # ticker -> {until, line, closes_above}
+        self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
         self.clock, self.mode, self.portfolio_id = clock, mode, portfolio_id
@@ -77,6 +80,19 @@ class ExecutionEngine:
         order["order_id"] = hashlib.sha256(raw.encode()).hexdigest()
         validate_order(order)
         order["kind"] = self.order_kind(order)
+        if (self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20")) and action == "buy":
+            hist = self.history.get(ticker) or []
+            anchor = hist[-1] if hist else (values.get("price") or 0)
+            if self.flags.get("pullback_entry_ma20") and len(hist) >= 20:
+                ma20 = sum(hist[-20:]) / 20
+                order["limit"] = min(anchor, max(ma20, 0.95 * anchor))
+            else:
+                order["limit"] = anchor
+            order["anchor"] = anchor
+            self.limit_orders[order["order_id"]] = {
+                "ticker": ticker, "limit": order["limit"],
+                "expiry_index": self.index + 10, "order": order,
+            }
         self.pending.append(order)
 
     def record_terminal(self, order, status, reason):
@@ -96,10 +112,37 @@ class ExecutionEngine:
         )
         return terminal
 
-    def fill(self, day, opening, execution_scores=None, *, delayed=False):
+    def fill(self, day, opening, execution_scores=None, *, delayed=False, day_bars=None):
         if day in self.settled_dates:
             return []
         available = [o for o in self.pending if o["trade_date"] == day and o["signal_date"] < day]
+        # pullback_entry: convert eligible market buys into anchored limit orders
+        if self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20"):
+            still = []
+            for order in available:
+                if order["action"] != "buy" or "limit" not in order:
+                    still.append(order)
+                    continue
+                bar = (day_bars or {}).get(order["ticker"], {})
+                lo, op = bar.get("low"), bar.get("open")
+                if lo is None or op is None or lo > order["limit"]:
+                    # not touched today — stays pending until expiry
+                    continue
+                fill_px = min(op, order["limit"])
+                equity0 = self.equity(opening)
+                if equity0 is not None:
+                    detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
+                    if detail:
+                        self.trades.append({**order, **detail, "side": "buy", "fill_price": fill_px,
+                                            "notional": detail["qty"] * fill_px, "status": "filled",
+                                            "execution_note": "回调限价成交"})
+                        if self.mode == "paper":
+                            self.record_terminal(self.trades[-1], "filled", "回调限价成交")
+                continue
+            # expire stale limit orders after 10 sessions
+            for order in [o for o in self.limit_orders.values() if o["expiry_index"] < self.index]:
+                self.record_terminal(order["order"], "expired", "限价单 10 日未成交")
+            available = still
         if not available:
             if self.mode == "paper":
                 self.settled_dates.add(day)
