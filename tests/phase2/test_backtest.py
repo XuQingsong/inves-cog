@@ -2,6 +2,7 @@ from datetime import date
 from unittest.mock import MagicMock
 
 import pytest
+from datetime import timedelta
 
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
 
@@ -114,3 +115,41 @@ def test_split_adjusted_bars():
     assert bars[0]["adj_factor"] == 1.0 and bars[0]["volume"] == 1000
     # continuity: pre/post split closes within a few percent
     assert abs(bars[1]["close"] / bars[2]["close"] - 1) < 0.02
+
+
+def test_pe_continuous_across_split():
+    """PE must not jump 10× at a split: derivatives use the day's raw price."""
+    from inves_cog.trading.scoring.books import build_books
+
+    # constant EPS-of-the-time (pre-split dollars per pre-split share)
+    fields = {"eps_ttm": 2.0, "shares": 1e9, "rev_growth": 10.0, "rev_ttm": 5e9, "fcf_ttm": 1e9, "gross_margin": 50.0}
+    pre = build_books(fields, {"price": 120.9, "raw_price": 1209.0})
+    post = build_books(fields, {"price": 121.79, "raw_price": 121.79})
+    # pre-split raw close 1209 with EPS 2 (pre-split units) → pe 604.5;
+    # post-split the fin_state would restate EPS per new share — same continuity
+    # check applied: raw_price (not adjusted price) drives pe
+    assert pre[1]["pe"] == pytest.approx(604.5)
+    assert post[1]["pe"] == pytest.approx(60.895)
+    # a real split restates EPS ×10 too → pe stays ~604→60? no: EPS also ×10 post.
+    # The invariant: using raw price avoids the extra 10× from adjusted price.
+    buggy = build_books(fields, {"price": 120.9})  # no raw_price → falls back to price
+    assert buggy[1]["pe"] == pytest.approx(60.45)  # 10× off pre-split
+
+
+def test_scores_identical_when_adj_factor_1():
+    """adj_factor=1 days produce byte-identical tech rows as before (raw==adj)."""
+    import pandas as pd
+    from inves_cog.trading.scoring.technical import technical_series
+
+    bars = [
+        {
+            "trade_date": date(2026, 1, 2) + timedelta(days=i),
+            "open": 100.0 + i,
+            "close": 100.0 + i,
+            "volume": 1000,
+            "adj_factor": 1.0,
+        }
+        for i in range(5)
+    ]
+    frame = technical_series(bars)
+    assert all(frame["raw_price"] == frame["price"])

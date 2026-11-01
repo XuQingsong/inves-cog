@@ -10,7 +10,9 @@ def equity_metrics(curve, trades, initial_cash, bench=None):
 
     Definitions:
     - exposure_pct: share of days with invested capital (equity - cash > 0).
+    - avg_invested_pct: mean(invested value / equity) across the curve.
     - turnover_x: sum |traded notional| / starting equity (not annualized).
+    - turnover_annual_x: turnover_x annualized over the curve length.
     - win_rate: sell trades whose fill beat the matching open buy's fill.
     - avg_holding_days: mean days between a buy and its matched sell (FIFO)."""
     if not curve:
@@ -50,6 +52,8 @@ def equity_metrics(curve, trades, initial_cash, bench=None):
         else:
             open_pos.setdefault(tk, []).append(t)
     exposure = sum(1 for r in curve if r["equity"] - r["cash"] > 0) / max(len(curve), 1) * 100
+    invested = [max(r["equity"] - r["cash"], 0) / r["equity"] for r in curve if r["equity"]]
+    avg_invested = 100 * sum(invested) / len(invested) if invested else None
     turnover = sum(abs(float(t.get("notional") or 0)) for t in trades) / max(first, 1)
     out = {
         "return_pct": total,

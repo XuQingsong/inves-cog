@@ -37,8 +37,28 @@ class BacktestLoader:
 
     # ---------- bars ----------
 
+    def bars_raw(self, ticker, end=None):
+        """ingest.bars_daily in production shape: RAW prices + real adj_factor
+        (score_history applies adj_factor itself, same as production)."""
+        rows = self.connection.execute(
+            "SELECT trade_date, open, close, volume, adj_factor "
+            "FROM ingest.bars_daily WHERE ticker=%s AND trade_date <= %s "
+            "ORDER BY trade_date",
+            (ticker, end or date(9999, 12, 31)),
+        ).fetchall()
+        return [
+            {
+                "trade_date": r["trade_date"],
+                "open": float(r["open"]) if r["open"] is not None else None,
+                "close": float(r["close"]) if r["close"] is not None else None,
+                "volume": int(r["volume"]) if r["volume"] is not None else None,
+                "adj_factor": float(r["adj_factor"]) if r.get("adj_factor") else 1.0,
+            }
+            for r in rows
+        ]
+
     def bars(self, ticker, start=None, end=None):
-        """ingest.bars_daily rows like the golden price_rows shape."""
+        """Split-adjusted series for the ENGINE (fills/marks/history/benchmarks)."""
         rows = self.connection.execute(
             "SELECT trade_date, open, close, volume, adj_factor "
             "FROM ingest.bars_daily WHERE ticker=%s AND trade_date <= %s "
