@@ -18,7 +18,7 @@ from inves_cog.trading.execution.state import PARAMS, RULE_A, TIERS
 class ExecutionEngine:
     def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed", flags=None):
         self.flags = flags or {}
-        self.cooldown = {}   # ticker -> {until, line, closes_above}
+        self.cooldown = {}  # ticker -> {until, line, closes_above}
         self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
@@ -90,8 +90,10 @@ class ExecutionEngine:
                 order["limit"] = anchor
             order["anchor"] = anchor
             self.limit_orders[order["order_id"]] = {
-                "ticker": ticker, "limit": order["limit"],
-                "expiry_index": self.index + 10, "order": order,
+                "ticker": ticker,
+                "limit": order["limit"],
+                "expiry_index": self.index + 10,
+                "order": order,
             }
         self.pending.append(order)
 
@@ -133,9 +135,17 @@ class ExecutionEngine:
                 if equity0 is not None:
                     detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
                     if detail:
-                        self.trades.append({**order, **detail, "side": "buy", "fill_price": fill_px,
-                                            "notional": detail["qty"] * fill_px, "status": "filled",
-                                            "execution_note": "回调限价成交"})
+                        self.trades.append(
+                            {
+                                **order,
+                                **detail,
+                                "side": "buy",
+                                "fill_price": fill_px,
+                                "notional": detail["qty"] * fill_px,
+                                "status": "filled",
+                                "execution_note": "回调限价成交",
+                            }
+                        )
                         if self.mode == "paper":
                             self.record_terminal(self.trades[-1], "filled", "回调限价成交")
                 continue
@@ -165,17 +175,12 @@ class ExecutionEngine:
                 else settlement.buy(self, order, day, price, equity, execution_scores or {})
             )
             if detail:
-                if (
-                    selling
-                    and self.flags.get("cooldown_recover")
-                    and order["ticker"] not in self.positions
-                ):
+                if selling and self.flags.get("cooldown_recover") and order["ticker"] not in self.positions:
                     label = order.get("label", "")
                     if any(k in label for k in ("破位", "止损", "减仓")) and "基本面" not in label:
                         hist = self.history.get(order["ticker"]) or []
                         line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
-                        self.cooldown[order["ticker"]] = {
-                            "until": self.index + 10, "line": line, "closes_above": 0}
+                        self.cooldown[order["ticker"]] = {"until": self.index + 10, "line": line, "closes_above": 0}
                 fills.append(
                     {
                         **order,

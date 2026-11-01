@@ -104,9 +104,30 @@ def test_split_adjusted_bars():
 
     conn = MagicMock()
     conn.execute.return_value.fetchall.return_value = [
-        {"trade_date": date(2024, 6, 6), "open": 1200.0, "low": 1190.0, "close": 1208.88, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 7), "open": 1210.0, "low": 1200.0, "close": 1209.0, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 10), "open": 121.0, "low": 119.0, "close": 121.79, "volume": 1000, "adj_factor": 1.0},
+        {
+            "trade_date": date(2024, 6, 6),
+            "open": 1200.0,
+            "low": 1190.0,
+            "close": 1208.88,
+            "volume": 100,
+            "adj_factor": 0.1,
+        },
+        {
+            "trade_date": date(2024, 6, 7),
+            "open": 1210.0,
+            "low": 1200.0,
+            "close": 1209.0,
+            "volume": 100,
+            "adj_factor": 0.1,
+        },
+        {
+            "trade_date": date(2024, 6, 10),
+            "open": 121.0,
+            "low": 119.0,
+            "close": 121.79,
+            "volume": 1000,
+            "adj_factor": 1.0,
+        },
     ]
     bars = BacktestLoader(conn).bars("NVDA")
     assert bars[0]["close"] == pytest.approx(120.888)
@@ -166,7 +187,7 @@ def test_flags_default_off_and_tier_lock():
 def test_chase_block_gate():
     """5d return >8% → entry_pass forced False; <=8% untouched."""
     # the gate expression used in run_backtest's flag block
-    hist_up = [100.0, 101, 102, 103, 104, 109.0]   # +9% over 5 days
+    hist_up = [100.0, 101, 102, 103, 104, 109.0]  # +9% over 5 days
     hist_flat = [100.0, 100.5, 100.2, 100.4, 100.3, 100.6]
     for hist, expect_block in ((hist_up, True), (hist_flat, False)):
         blocked = len(hist) >= 6 and (hist[-1] / hist[-6] - 1) > 0.08

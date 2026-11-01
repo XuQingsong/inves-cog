@@ -59,7 +59,10 @@ def run_backtest(connection, spec, *, write=True):
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     engine = ExecutionEngine(
-        clock=clock, initial_cash=initial, mode=mode, portfolio_id=f"bt-{spec.get('label', 'run')}",
+        clock=clock,
+        initial_cash=initial,
+        mode=mode,
+        portfolio_id=f"bt-{spec.get('label', 'run')}",
         flags=spec.get("flags") or {},
     )
     flags = spec.get("flags") or {}
@@ -95,7 +98,8 @@ def run_backtest(connection, spec, *, write=True):
             daily,
             day_bars={
                 t: {"open": r[day]["open"], "low": r[day]["low"], "close": r[day]["close"]}
-                for t, r in prices.items() if day in r
+                for t, r in prices.items()
+                if day in r
             },
         )
         spy = [prices["SPY"][d]["close"] for d in sorted(prices["SPY"]) if d <= day]
