@@ -712,7 +712,7 @@ def _yahoo_close(sym, start, end, http=None):
 
     p1, p2 = int(datetime(start.year, 1, 1).timestamp()), int(datetime.now().timestamp())
     url = YAHOO_CHART.format(sym=urllib.request.quote(sym), p1=p1, p2=p2)
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
+    req = urllib.request.Request(url, headers=UA)
     for attempt in (1, 2):
         try:
             data = json.loads(urllib.request.urlopen(req, timeout=60).read())
@@ -726,7 +726,7 @@ def _yahoo_close(sym, start, end, http=None):
     adj = (res.get("indicators", {}).get("adjclose") or [{}])[0].get("adjclose") or []
     import datetime as _dt
     return {_dt.datetime.fromtimestamp(t, tz=NY).date(): c
-            for t, c in zip(ts, adj) if c is not None}
+            for t, c in zip(ts, adj, strict=False) if c is not None}
 
 
 def backfill_yahoo_px(http, connection, raw_dir, start, end, _now=None):

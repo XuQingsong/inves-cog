@@ -85,7 +85,10 @@ def indicators(px, flows):
     S, Q, V, V3, SMH = px["SPY"], px["QQQ"], px["VIX"], px["VIX3M"], px["SMH"]
     sect = [t for t in SECTORS if t in px]
     ai = [t for t in AI_CHAIN if t in px]
-    ma = lambda p, n: p.rolling(n).mean()
+
+    def ma(p, n):
+        return p.rolling(n).mean()
+
     M = {}
     for n, p in [("QQQ", Q), ("SPY", S)]:
         r = p.pct_change()

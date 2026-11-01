@@ -6,7 +6,7 @@ PIT: every value is the latest with published_at <= asof for flows inputs.
 """
 
 import logging
-from datetime import date, timedelta
+from datetime import date
 
 import pandas as pd
 

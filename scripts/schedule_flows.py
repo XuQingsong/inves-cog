@@ -85,7 +85,29 @@ def _etf_done(connection, today):
         return False
 
 
-def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):
+def _barometer(conn, today, hm, cur, local, state):
+    """16:45+ official daily reading; 15-min intraday slots otherwise."""
+    from inves_cog.perception.barometer.run import persist, run_range
+
+    out = {}
+    if hm >= "16:45":
+        key = f"baro:{today}"
+        if key not in state:
+            recs = run_range(conn, today, today)
+            persist(conn, recs)
+            out[key] = {"days": len(recs), "fear": recs[-1]["fear"] if recs else None}
+            state[key] = True
+    elif cur:
+        key = f"baro_intra:{today}:{cur}"
+        if key not in state:
+            recs = run_range(conn, today, today)
+            persist(conn, recs, table="flows.barometer_intraday", ts=local)
+            out[key] = {"days": len(recs)}
+            state[key] = True
+    return out
+
+
+def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa: C901
     local = clock.now_utc().astimezone(NY)
     today = local.date()
     http = http or polite_http()
