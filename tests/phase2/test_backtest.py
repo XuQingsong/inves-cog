@@ -178,7 +178,6 @@ def test_flags_default_off_and_tier_lock():
     """Flags default off; tier_lock overrides score tier; chase_block counts."""
     import yaml
 
-
     locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
     assert len(locked) == 59 and locked["MU"] == "attack" and locked["NVDA"] == "normal"
     assert locked["XOM"] == "defense"
