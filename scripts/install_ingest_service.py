@@ -79,9 +79,14 @@ serverurl=unix://{state}/supervisor.sock
         "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
         "news_translate": [str(root / "scripts/schedule_translate.py")],
         "flows": [str(root / "scripts/schedule_flows.py")],
+        "pages": [str(root / "scripts/serve_pages.py")],
+        "review": [str(root / "scripts/schedule_review.py")],
+        "live_perception": [str(root / "scripts/schedule_live_perception.py")],
     }
+    retries = {"pages": 3, "review": 3}
     for name, arguments in programs.items():
         restart = "unexpected" if name == "embedding" else "true"
+        startretries = retries.get(name, 100000)
         text += f"""
 [program:{name}]
 command={shlex.join([str(python), "-u", *arguments])}
@@ -89,7 +94,7 @@ directory={root}
 autostart=true
 autorestart={restart}
 startsecs=3
-startretries=100000
+startretries={startretries}
 stopasgroup=true
 killasgroup=true
 stopwaitsecs=15

@@ -40,10 +40,10 @@ def _row(d):
         "sh": d["short_heat"],
         "ac": d["accumulation"],
         "nat": d.get("nature") or "",
-        "FD": dims.get("fear") or {},
-        "GD": dims.get("greed") or {},
+        "FD": _ordered(dims.get("fear") or {}, FEAR_ORDER),
+        "GD": _ordered(dims.get("greed") or {}, GREED_ORDER),
         "m": inp,
-        "asof": inp.get("_asof") or {},
+        "asof": {"cftc": inp.get("asof_cftc") or "", "margin": (inp.get("asof_margin") or "")[:7]},
         "missing": d.get("missing") or [],
     }
 
