@@ -86,23 +86,43 @@ def _etf_done(connection, today):
 
 
 def _barometer(conn, today, hm, cur, local, state):
-    """16:45+ official daily reading; 15-min intraday slots otherwise."""
-    from inves_cog.perception.barometer.run import persist, run_range
+    """Official 16:45+ reading (once today's bars land ~20:20) + intraday slots.
+
+    Official: run only when today's bars for the core symbols exist; mark done
+    only when a barometer_daily row was actually written. If still absent by
+    the next loop past 09:00 the health row goes degraded.
+    """
+    from inves_cog.flows.collectors import record_health
+    from inves_cog.perception.barometer.run import persist, run_intraday, run_range
 
     out = {}
-    if hm >= "16:45":
+    if hm >= "16:45" or state.get(f"baro_pending:{today}"):
         key = f"baro:{today}"
         if key not in state:
-            recs = run_range(conn, today, today)
-            persist(conn, recs)
-            out[key] = {"days": len(recs), "fear": recs[-1]["fear"] if recs else None}
-            state[key] = True
+            rows = conn.execute(
+                "SELECT count(*) AS c FROM ingest.bars_daily WHERE trade_date=%s AND ticker = ANY(%s)",
+                (today, ["SPY", "QQQ", "SMH"] + list(INDEX_SYMS)),
+            ).fetchone()
+            if rows["c"] >= 3:
+                recs = run_range(conn, today, today)
+                written = [r for r in recs if r["date"].date() == today]
+                persist(conn, written)
+                if written:
+                    record_health(conn, "Flows:Barometer", "ok", f"fear={written[-1]['fear']}", local)
+                    out[key] = {"fear": written[-1]["fear"]}
+                    state[key] = True
+                    state.pop(f"baro_pending:{today}", None)
+            elif local.hour >= 9 and local.date() > today:
+                record_health(conn, "Flows:Barometer", "degraded", "bars_daily missing for the day", local)
+                state[key] = True
+            else:
+                state[f"baro_pending:{today}"] = True
     elif cur:
         key = f"baro_intra:{today}:{cur}"
         if key not in state:
-            recs = run_range(conn, today, today)
-            persist(conn, recs, table="flows.barometer_intraday", ts=local)
-            out[key] = {"days": len(recs)}
+            rec = run_intraday(conn, local)
+            persist(conn, [rec], table="flows.barometer_intraday", ts=local)
+            out[key] = {"fear": rec["fear"], "missing": len(rec["missing"])}
             state[key] = True
     return out
 
@@ -157,27 +177,6 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 res = [collect_cboe_chain(http, conn, s, raw_dir, None, today, local) for s in universe]
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
-                state[key] = True
-        # barometer: official reading 16:45+; intraday 15-min slots reuse the gate above
-        if hm >= "16:45":
-            key = f"baro:{today}"
-            if key not in state:
-                from inves_cog.perception.barometer.run import persist as baro_persist
-                from inves_cog.perception.barometer.run import run_range
-
-                recs = run_range(conn, today, today)
-                baro_persist(conn, recs)
-                result[key] = {"days": len(recs), "fear": recs[-1]["fear"] if recs else None}
-                state[key] = True
-        elif cur:
-            key = f"baro_intra:{today}:{cur}"
-            if key not in state:
-                from inves_cog.perception.barometer.run import persist as baro_persist
-                from inves_cog.perception.barometer.run import run_range
-
-                recs = run_range(conn, today, today)
-                baro_persist(conn, recs, table="flows.barometer_intraday", ts=local)
-                result[key] = {"days": len(recs)}
                 state[key] = True
         if hm >= "19:00":
             key = f"cboe_pc:{today}"

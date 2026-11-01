@@ -702,7 +702,9 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
 
 # ---------- P2-M1: barometer missing price/macro history ----------
 
-YAHOO_CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{sym}?period1={p1}&period2={p2}&interval=1d&events=div%2Csplit"
+YAHOO_CHART = (
+    "https://query1.finance.yahoo.com/v8/finance/chart/{sym}?period1={p1}&period2={p2}&interval=1d&events=div%2Csplit"
+)
 BARO_YAHOO = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT", "JPY=X", "BTC-USD", "^MOVE", "^TNX"]
 
 
@@ -710,7 +712,7 @@ def _yahoo_close(sym, start, end, http=None):
     """Yahoo chart API → {date: adj_close}. Retries once on 429."""
     import urllib.request
 
-    p1, p2 = int(datetime(start.year, 1, 1).timestamp()), int(datetime.now().timestamp())
+    p1, p2 = int(datetime(start.year, 1, 1).timestamp()), int(datetime.combine(end, datetime.max.time()).timestamp())
     url = YAHOO_CHART.format(sym=urllib.request.quote(sym), p1=p1, p2=p2)
     req = urllib.request.Request(url, headers=UA)
     for attempt in (1, 2):
@@ -725,8 +727,8 @@ def _yahoo_close(sym, start, end, http=None):
     ts = res.get("timestamp") or []
     adj = (res.get("indicators", {}).get("adjclose") or [{}])[0].get("adjclose") or []
     import datetime as _dt
-    return {_dt.datetime.fromtimestamp(t, tz=NY).date(): c
-            for t, c in zip(ts, adj, strict=False) if c is not None}
+
+    return {_dt.datetime.fromtimestamp(t, tz=NY).date(): c for t, c in zip(ts, adj, strict=False) if c is not None}
 
 
 def backfill_yahoo_px(http, connection, raw_dir, start, end, _now=None):
@@ -737,15 +739,24 @@ def backfill_yahoo_px(http, connection, raw_dir, start, end, _now=None):
         series = "yahoo_px_" + re.sub(r"[^a-z0-9]+", "", sym.lower())
         try:
             closes = _yahoo_close(sym, start, end)
-            rows = [{"series_id": series, "obs_date": d,
-                     "value": float(v), "published_at": published_at("cboe_idx", d),
-                     "vintage": "backfill"}
-                    for d, v in closes.items() if d >= start]
+            rows = [
+                {
+                    "series_id": series,
+                    "obs_date": d,
+                    "value": float(v),
+                    "published_at": published_at("cboe_idx", d),
+                    "vintage": "backfill",
+                }
+                for d, v in closes.items()
+                if d >= start
+            ]
             if connection is not None and rows:
-                upsert_many(connection, "series_catalog",
-                            ["series_id", "name_zh", "unit", "frequency", "source"],
-                            [{"series_id": series, "name_zh": sym, "unit": "usd",
-                              "frequency": "daily", "source": "Yahoo"}])
+                upsert_many(
+                    connection,
+                    "series_catalog",
+                    ["series_id", "name_zh", "unit", "frequency", "source"],
+                    [{"series_id": series, "name_zh": sym, "unit": "usd", "frequency": "daily", "source": "Yahoo"}],
+                )
                 upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
             reports.append(_report(f"YahooPx:{sym}", {r["obs_date"]: 1 for r in rows}, len(rows)))
             time.sleep(1.0)
@@ -761,27 +772,48 @@ SHILLER_URL = "https://www.multpl.com/shiller-pe/table/by-month"
 def backfill_shiller_pe(http, connection, raw_dir, _now=None):
     """multpl.com shiller-pe monthly table → series shiller_pe."""
     import urllib.request
+
     try:
         req = urllib.request.Request(SHILLER_URL, headers=UA)
         html = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
         rows = []
-        for m in re.finditer(r'<td>(\w{3} \d{1,2}, \d{4})</td>\s*<td[^>]*>\s*(?:&#x2002;)?\s*([\d.]+)\s*</td>', html):
+        for m in re.finditer(r"<td>(\w{3} \d{1,2}, \d{4})</td>\s*<td[^>]*>\s*(?:&#x2002;)?\s*([\d.]+)\s*</td>", html):
             try:
                 d = datetime.strptime(m.group(1), "%b %d, %Y").date()
-                rows.append({"series_id": "shiller_pe", "obs_date": d,
-                             "value": float(m.group(2)),
-                             "published_at": published_at("finra_margin", d),
-                             "vintage": "backfill"})
+                rows.append(
+                    {
+                        "series_id": "shiller_pe",
+                        "obs_date": d,
+                        "value": float(m.group(2)),
+                        "published_at": published_at("finra_margin", d),
+                        "vintage": "backfill",
+                    }
+                )
             except ValueError:
                 continue
         if connection is not None and rows:
-            save_raw(raw_dir, "shiller-pe", SHILLER_URL,
-                     str(_now.date() if hasattr(_now, "date") else date(2026, 1, 1)),
-                     html.encode(), connection)
-            upsert_many(connection, "series_catalog",
-                        ["series_id", "name_zh", "unit", "frequency", "source"],
-                        [{"series_id": "shiller_pe", "name_zh": "席勒市盈率",
-                          "unit": "ratio", "frequency": "monthly", "source": "multpl"}])
+            save_raw(
+                raw_dir,
+                "shiller-pe",
+                SHILLER_URL,
+                str(_now.date() if hasattr(_now, "date") else date(2026, 1, 1)),
+                html.encode(),
+                connection,
+            )
+            upsert_many(
+                connection,
+                "series_catalog",
+                ["series_id", "name_zh", "unit", "frequency", "source"],
+                [
+                    {
+                        "series_id": "shiller_pe",
+                        "name_zh": "席勒市盈率",
+                        "unit": "ratio",
+                        "frequency": "monthly",
+                        "source": "multpl",
+                    }
+                ],
+            )
             upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
         return _report("ShillerPE", {r["obs_date"]: 1 for r in rows}, len(rows))
     except Exception as exc:
@@ -793,6 +825,7 @@ def backfill_dgs10(http, connection, raw_dir, _now=None):
     """FRED DGS10 → series fred_dgs10 (same API path as other FRED)."""
     import os
     import urllib.request
+
     key = os.environ.get("FRED_API_KEY")
     try:
         if key:
@@ -802,15 +835,32 @@ def backfill_dgs10(http, connection, raw_dir, _now=None):
             recs = payload.get("observations", [])
         else:
             return _report("FRED:DGS10", set())
-        rows = [{"series_id": "fred_dgs10", "obs_date": _mdy(o["date"]),
-                 "value": float(o["value"]), "published_at": published_at_fred("sofr", _mdy(o["date"])),
-                 "vintage": "backfill"}
-                for o in recs if _mdy(o.get("date")) and o.get("value") not in (None, ".")]
+        rows = [
+            {
+                "series_id": "fred_dgs10",
+                "obs_date": _mdy(o["date"]),
+                "value": float(o["value"]),
+                "published_at": published_at_fred("sofr", _mdy(o["date"])),
+                "vintage": "backfill",
+            }
+            for o in recs
+            if _mdy(o.get("date")) and o.get("value") not in (None, ".")
+        ]
         if connection is not None and rows:
-            upsert_many(connection, "series_catalog",
-                        ["series_id", "name_zh", "unit", "frequency", "source"],
-                        [{"series_id": "fred_dgs10", "name_zh": "DGS10", "unit": "pct",
-                          "frequency": "daily", "source": "FRED"}])
+            upsert_many(
+                connection,
+                "series_catalog",
+                ["series_id", "name_zh", "unit", "frequency", "source"],
+                [
+                    {
+                        "series_id": "fred_dgs10",
+                        "name_zh": "DGS10",
+                        "unit": "pct",
+                        "frequency": "daily",
+                        "source": "FRED",
+                    }
+                ],
+            )
             upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
         return _report("FRED:DGS10", {r["obs_date"]: 1 for r in rows}, len(rows))
     except Exception as exc:

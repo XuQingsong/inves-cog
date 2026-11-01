@@ -1,4 +1,5 @@
 """P2-M1: backfill flows.barometer_daily over a range."""
+
 import argparse
 import os
 from datetime import date
@@ -17,5 +18,11 @@ conn = psycopg.connect(os.environ["INVES_COG_DATABASE_URL"], row_factory=dict_ro
 recs = run_range(conn, a.start, a.end)
 if not a.dry:
     persist(conn, recs)
-print({"days": len(recs), "first": str(recs[0]["date"].date()), "last": str(recs[-1]["date"].date()),
-       "sample": {k: recs[-1][k] for k in ("fear", "greed", "nature")}})
+print(
+    {
+        "days": len(recs),
+        "first": str(recs[0]["date"].date()),
+        "last": str(recs[-1]["date"].date()),
+        "sample": {k: recs[-1][k] for k in ("fear", "greed", "nature")},
+    }
+)
