@@ -193,6 +193,7 @@ _PAGE = (
 </main>
 <script>
 const R=__R__;
+const TN=['平静','正常波动','偏紧张','紧张','恐慌'],HN=['冷静','升温','偏热','过热','狂热'];
 const ST=['绝望','悲观','谨慎','理性','乐观','兴奋','狂热'],SC=['#2fbf71','#5ccf5a','#a6d84a','#e9c43b','#f29b38','#ef6a32','#e23a3a'];
 const f=(v,d=1)=>v==null?'—':(+v).toFixed(d), s=(v,d=1)=>v==null?'—':(v>0?'+':v<0?'−':'')+Math.abs(+v).toFixed(d);
 const lvl=x=>Math.min(Math.floor(x),4);

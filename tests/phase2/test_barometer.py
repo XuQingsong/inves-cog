@@ -67,3 +67,21 @@ def test_no_noqa_leak_in_rendered_html():
     assert "# " not in html.split("<script", 1)[-1]  # no Python comment tokens in script
     assert 'svg id="pend"' in html
     assert "const R=[{" in html
+
+
+def test_script_identifiers_defined():
+    """All JS identifiers the page needs must be defined in the inline script."""
+    from datetime import date
+
+    from inves_cog.web.barometer import _row, render_page
+
+    row = {"date": date(2026, 10, 30), "fear": 10.0, "greed": 5.0,
+           "fear_level": 1.0, "greed_level": 0.5, "stage": "理性",
+           "pendulum": 0.0, "short_heat": 5.0, "accumulation": 10.0,
+           "nature": "", "dims": {"fear": {}, "greed": {}},
+           "inputs": {}, "missing": []}
+    html = render_page([_row(row)])
+    for ident in ("TN", "HN", "ST", "SC", "DIM", "FMT", "PH", "RING"):
+        assert f"const {ident}=" in html or f"{ident}=" in html
+    for ident in ("const P=", "const L="):
+        assert ident in html
