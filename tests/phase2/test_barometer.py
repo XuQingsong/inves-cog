@@ -131,12 +131,21 @@ def test_api_shape_and_missing():
 
     from inves_cog.web.barometer import _row, render_page
 
-    row = {"date": _d(2026, 10, 30), "fear": 18.9, "greed": 4.0,
-           "fear_level": 1.5, "greed_level": 0.3, "stage": "谨慎",
-           "pendulum": -0.5, "short_heat": 10.0, "accumulation": 20.0,
-           "nature": "", "dims": {"fear": {"去杠杆": 30}, "greed": {}},
-           "inputs": {"VIX": 18.2, "asof_cftc": "2026-10-27",
-                      "asof_margin": "2026-09-30"}, "missing": ["MOVE"]}
+    row = {
+        "date": _d(2026, 10, 30),
+        "fear": 18.9,
+        "greed": 4.0,
+        "fear_level": 1.5,
+        "greed_level": 0.3,
+        "stage": "谨慎",
+        "pendulum": -0.5,
+        "short_heat": 10.0,
+        "accumulation": 20.0,
+        "nature": "",
+        "dims": {"fear": {"去杠杆": 30}, "greed": {}},
+        "inputs": {"VIX": 18.2, "asof_cftc": "2026-10-27", "asof_margin": "2026-09-30"},
+        "missing": ["MOVE"],
+    }
     rec = _row(row)
     assert rec["missing"] == ["MOVE"] and rec["asof"]["cftc"] == "2026-10-27"
     assert list(rec["FD"]) == list({"去杠杆": 30})  # ordered output
@@ -151,18 +160,26 @@ def test_arc_order_and_script_intact():
 
     assert FEAR_ORDER == ["下跌冲击", "恐慌情绪", "债市信用", "超卖扩散", "去杠杆", "资金与杠杆"]
     assert GREED_ORDER == ["超买", "连续上涨", "多头与杠杆", "获利盘", "情绪普涨"]
-    row = {"date": _d(2026, 10, 30), "fear": 10.0, "greed": 5.0, "fear_level": 1.0,
-           "greed_level": 0.5, "stage": "理性", "pendulum": 0.0, "short_heat": 5.0,
-           "accumulation": 10.0, "nature": "",
-           "dims": {"fear": {"资金与杠杆": 40, "下跌冲击": 10},
-                    "greed": {"情绪普涨": 20, "超买": 15}},
-           "inputs": {}, "missing": []}
+    row = {
+        "date": _d(2026, 10, 30),
+        "fear": 10.0,
+        "greed": 5.0,
+        "fear_level": 1.0,
+        "greed_level": 0.5,
+        "stage": "理性",
+        "pendulum": 0.0,
+        "short_heat": 5.0,
+        "accumulation": 10.0,
+        "nature": "",
+        "dims": {"fear": {"资金与杠杆": 40, "下跌冲击": 10}, "greed": {"情绪普涨": 20, "超买": 15}},
+        "inputs": {},
+        "missing": [],
+    }
     rec = _row(row)
     assert list(rec["FD"]) == ["下跌冲击", "资金与杠杆"]
     assert list(rec["GD"]) == ["超买", "情绪普涨"]
     html = render_page([rec])
-    for ident in ("const TN=", "const ST=", "const DIM=", "const P=", "RING=[",
-                  'svg id="pend"', "const R=[{"):
+    for ident in ("const TN=", "const ST=", "const DIM=", "const P=", "RING=[", 'svg id="pend"', "const R=[{"):
         assert ident in html
     for banned in ("下单", "目标价", "实时"):
         assert banned not in html

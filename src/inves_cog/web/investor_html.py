@@ -2461,9 +2461,7 @@ def _state_head(payload):
         "方向由涨跌家数与领先板块决定；主因只取已对上事件的板块/市场异常，没有则写“原因未明”。"
     )
     baro = st.get("barometer")
-    link = (
-        ' <a class="state-d" href="/barometer" style="color:#d9b265">晴雨表</a>'
-        if baro else "")
+    link = ' <a class="state-d" href="/barometer" style="color:#d9b265">晴雨表</a>' if baro else ""
     band_cls = f"band-{_text(st.get('band') or '')}" if not baro else "band-baro"
     asof = f"（截至 {_text(str(baro['date']))}）" if baro else ""
     return (
