@@ -125,3 +125,50 @@ def test_finra_year_month_parse():
 def test_report_rows_vs_dates():
     r = _report("X", {date(2026, 10, 30): 100, date(2026, 10, 29): 50})
     assert r["dates"] == 2 and r["rows"] == 150
+
+
+def test_ofr_components():
+    """All 9 OFR FSI columns become separate series."""
+    from inves_cog.flows.backfill import backfill_ofr
+
+    text = (
+        "Date,OFR FSI,Credit,Equity valuation,Safe assets,Funding,"
+        "Volatility,United States,Other advanced economies,Emerging markets\n"
+        "2026-10-30,2.0,0.5,0.1,0.2,0.3,0.4,1.0,0.5,0.3\n"
+    )
+    http = MagicMock()
+    http.request.return_value = text
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = {"raw_file_id": 1}
+    conn.cursor.return_value.__enter__ = MagicMock(return_value=MagicMock())
+    conn.cursor.return_value.__exit__ = MagicMock(return_value=False)
+    captured = []
+    import inves_cog.flows.backfill as B
+
+    orig = B.upsert_many
+    B.upsert_many = lambda c, t, cols, rows, conf="nothing": captured.extend(rows) or len(rows)
+    from datetime import datetime as dt
+
+    B.backfill_ofr(http, conn, "/tmp/x", dt(2026, 10, 31))
+    B.upsert_many = orig
+    series = {r["series_id"] for r in captured if "series_id" in r and "obs_date" in r}
+    assert {
+        "ofr_fsi",
+        "ofr_fsi_credit",
+        "ofr_fsi_equity_val",
+        "ofr_fsi_safe_assets",
+        "ofr_fsi_funding",
+        "ofr_fsi_volatility",
+        "ofr_fsi_us",
+        "ofr_fsi_oae",
+        "ofr_fsi_em",
+    } <= series
+
+
+def test_cli_cftc_start():
+    """--start flows through to the cftc call (regression: was hardcoded 2010)."""
+    import subprocess
+
+    src = open("scripts/backfill_flows.py").read()
+    assert "backfill.backfill_cftc(http, conn, DEFAULT_RAW, start, end, now)" in src
+    assert "backfill.backfill_cboe_pc_csv(http, conn, DEFAULT_RAW, backfill.published_at, today)" in src
