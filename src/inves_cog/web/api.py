@@ -67,6 +67,19 @@ def create_app(dsn=None, clock=None):
     def market(date: date):
         return call(page_market, date)
 
+    @app.get("/api/pages/barometer")
+    def barometer_api():
+        from inves_cog.web.barometer import api_payload
+
+        return call(lambda c, d, cl: api_payload(c, cl), None)
+
+    @app.get("/barometer")
+    def barometer_page():
+        from inves_cog.web.barometer import api_payload, render_page
+
+        payload = call(lambda c, d, cl: api_payload(c, cl), None)
+        return HTMLResponse(render_page(payload["history"]))
+
     @app.get("/api/pages/linkage/{event_id}")
     def linkage(event_id: str, date: date):
         return call(page_linkage, date, event_id=event_id)

@@ -266,7 +266,13 @@ def compute_day(M, F, G, day):
         if ind in M.columns and (day not in M.index or pd.isna(M.loc[day, ind]))
     ]
     inputs = {
-        k: (None if pd.isna(M.loc[day, k]) else round(float(M.loc[day, k]), 4)) for k in M.columns if day in M.index
+        k: (
+            None
+            if pd.isna(M.loc[day, k])
+            else (M.loc[day, k] if isinstance(M.loc[day, k], str) else round(float(M.loc[day, k]), 4))
+        )
+        for k in M.columns
+        if day in M.index
     }
     return {
         "date": day,

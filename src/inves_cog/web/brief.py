@@ -2218,6 +2218,38 @@ def _market_state(connection, day, payload, live):
     if band != "平静":
         cause_txt = "；主要来自 " + "；".join(c[:60] for c in causes) if causes else "；原因未明"
     detail = f"{part('纳指', qqq)}，{part('标普', spy)}{focus}{cause_txt}"
+    # P2-M2: the barometer conclusion is THE market statement on the homepage.
+    try:
+        row = connection.execute(
+            "SELECT date, fear, greed, fear_level, greed_level, stage, nature, dims, inputs "
+            "FROM flows.barometer_daily ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+    except Exception:
+        row = None
+    if row:
+        stage = row["stage"] or "理性"
+        headline = f"{stage} · 恐惧 {row['fear']:.0f} / 贪婪 {row['greed']:.0f}"
+        from inves_cog.web.barometer import baro_sentence
+
+        dims, inp = row["dims"] or {}, row["inputs"] or {}
+        inp = {**inp, "__fear": row["fear"], "__greed": row["greed"]}
+        nat = row["nature"] or ""
+        sent = baro_sentence(
+            dims.get("fear") or {}, dims.get("greed") or {}, inp, row["fear_level"], row["greed_level"]
+        )
+        detail_out = (f"{nat.split('：')[0]} · " if nat else "") + (sent or detail)
+        return {
+            "band": band,
+            "direction": direction,
+            "title": headline,
+            "detail": detail_out,
+            "sentence": f"{headline}：{detail_out}",
+            "barometer": {"date": str(row["date"]), "stage": stage, "fear": row["fear"], "greed": row["greed"]},
+            "spy_sig": spy.get("sig"),
+            "qqq_sig": qqq.get("sig"),
+            "spy_ret": s_ret,
+            "qqq_ret": q_ret,
+        }
     return {
         "band": band,
         "direction": direction,

@@ -225,4 +225,26 @@ def flows_inputs(conn, idx, closes):
             }
         )
     }
+    # visible 截至 dates for the page: CFTC report date + FINRA margin month,
+    # aligned by publication day (same PIT rule as every other input)
+    out["asof_cftc"] = onidx(
+        pd.Series(
+            {
+                pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): str(r["d"])
+                for r in rows
+                if r["market"].split(" - ")[0].startswith(("NASDAQ-100 Consolidated", "S&P 500 Consolidated"))
+            }
+        )
+    )
+    out["asof_margin"] = onidx(
+        pd.Series(
+            {
+                pd.Timestamp(r["p"]).tz_convert(NY).normalize().tz_localize(None): str(r["d"])
+                for r in conn.execute(
+                    "SELECT obs_date AS d, published_at AS p FROM flows.observations "
+                    "WHERE series_id='finra_margin_margin_debit' ORDER BY published_at"
+                ).fetchall()
+            }
+        )
+    )
     return out
