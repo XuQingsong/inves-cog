@@ -83,5 +83,4 @@ def test_script_identifiers_defined():
     html = render_page([_row(row)])
     for ident in ("TN", "HN", "ST", "SC", "DIM", "FMT", "PH", "RING"):
         assert f"const {ident}=" in html or f"{ident}=" in html
-    for ident in ("const P=", "const L="):
-        assert ident in html
+    assert "P=[640" in html and "L=330" in html and "RING=[" in html
