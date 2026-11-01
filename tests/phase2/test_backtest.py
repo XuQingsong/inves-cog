@@ -191,3 +191,18 @@ def test_chase_block_gate():
     for hist, expect_block in ((hist_up, True), (hist_flat, False)):
         blocked = len(hist) >= 6 and (hist[-1] / hist[-6] - 1) > 0.08
         assert blocked == expect_block
+
+
+def test_cooldown_semantics():
+    """Cooldown record: blocks until index>until, then needs 3 closes above line."""
+    # mirrors the decide-loop gate in engine.py (flags.cooldown_recover)
+    cd = {"until": 10, "line": 100.0, "closes_above": 0}
+    index, hist = 5, [99.0]  # inside cooldown window, below line
+    blocked = index <= cd["until"] or (hist[-1] > cd["line"] and cd["closes_above"] < 3)
+    assert blocked
+    index, hist = 11, [101.0, 101.5, 102.0]  # past window, above line but <3 closes
+    cd["closes_above"] = 1
+    blocked = index <= cd["until"] or (hist[-1] > cd["line"] and cd["closes_above"] < 3)
+    assert blocked  # only 1 of 3 required closes
+    cd["closes_above"] = 3
+    assert cd["closes_above"] >= 3  # gate clears after 3

@@ -19,6 +19,7 @@ class ExecutionEngine:
     def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed", flags=None):
         self.flags = flags or {}
         self.cooldown = {}  # ticker -> {until, line, closes_above}
+        self.flags_counts = {}
         self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
@@ -181,6 +182,7 @@ class ExecutionEngine:
                         hist = self.history.get(order["ticker"]) or []
                         line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
                         self.cooldown[order["ticker"]] = {"until": self.index + 10, "line": line, "closes_above": 0}
+                        self.flags_counts["cooldown_armed"] = self.flags_counts.get("cooldown_armed", 0) + 1
                 fills.append(
                     {
                         **order,
@@ -261,8 +263,9 @@ class ExecutionEngine:
                 cd = self.cooldown[t]
                 h = hist_map.get(t) or []
                 if self.index <= cd["until"]:
-                    if t in scores:
+                    if t in scores and scores[t].get("entry_pass"):
                         scores[t] = dict(scores[t], entry_pass=False)
+                        self.flags_counts["cooldown_blocked"] = self.flags_counts.get("cooldown_blocked", 0) + 1
                 elif h and h[-1] is not None and h[-1] > cd["line"]:
                     cd["closes_above"] += 1
                     if cd["closes_above"] < 3 and t in scores:

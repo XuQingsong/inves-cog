@@ -130,6 +130,7 @@ def run_backtest(connection, spec, *, write=True):
     )
     metrics["trade_hash"] = trade_hash(engine.trades)
     metrics["survivorship_bias"] = spec.get("universe") == "config"
+    flag_counts.update(getattr(engine, "flags_counts", {}))
     metrics["flags_counts"] = flag_counts
     result = {
         "spec": spec,
