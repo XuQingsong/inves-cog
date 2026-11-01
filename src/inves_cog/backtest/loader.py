@@ -68,7 +68,7 @@ class BacktestLoader:
             "WHERE series_id=%s AND observation_date <= %s ORDER BY observation_date",
             ("VIXCLS", end),
         ).fetchall()
-        return {r["observation_date"]: float(r["value"]) for r in rows}
+        return {r["observation_date"]: float(r["value"]) for r in rows if r["value"] is not None}
 
     # ---------- universe ----------
 
