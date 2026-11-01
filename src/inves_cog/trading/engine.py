@@ -16,7 +16,11 @@ from inves_cog.trading.execution.state import PARAMS, RULE_A, TIERS
 
 
 class ExecutionEngine:
-    def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed"):
+    def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed", flags=None):
+        self.flags = flags or {}
+        self.cooldown = {}  # ticker -> {until, line, closes_above}
+        self.flags_counts = {}
+        self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
         self.clock, self.mode, self.portfolio_id = clock, mode, portfolio_id
@@ -77,6 +81,21 @@ class ExecutionEngine:
         order["order_id"] = hashlib.sha256(raw.encode()).hexdigest()
         validate_order(order)
         order["kind"] = self.order_kind(order)
+        if (self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20")) and action.startswith("buy"):
+            hist = self.history.get(ticker) or []
+            anchor = hist[-1] if hist else (values.get("price") or 0)
+            if self.flags.get("pullback_entry_ma20") and len(hist) >= 20:
+                ma20 = sum(hist[-20:]) / 20
+                order["limit"] = min(anchor, max(ma20, 0.95 * anchor))
+            else:
+                order["limit"] = anchor
+            order["anchor"] = anchor
+            self.limit_orders[order["order_id"]] = {
+                "ticker": ticker,
+                "limit": order["limit"],
+                "expiry_index": self.index + 10,
+                "order": order,
+            }
         self.pending.append(order)
 
     def record_terminal(self, order, status, reason):
@@ -96,10 +115,47 @@ class ExecutionEngine:
         )
         return terminal
 
-    def fill(self, day, opening, execution_scores=None, *, delayed=False):
+    def fill(self, day, opening, execution_scores=None, *, delayed=False, day_bars=None):
         if day in self.settled_dates:
             return []
         available = [o for o in self.pending if o["trade_date"] == day and o["signal_date"] < day]
+        # pullback_entry: convert eligible market buys into anchored limit orders
+        if self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20"):
+            still = []
+            for order in available:
+                if not order["action"].startswith("buy") or "limit" not in order:
+                    still.append(order)
+                    continue
+                bar = (day_bars or {}).get(order["ticker"], {})
+                lo, op = bar.get("low"), bar.get("open")
+                if lo is None or op is None or lo > order["limit"]:
+                    # not touched today — stays pending until expiry
+                    continue
+                fill_px = min(op, order["limit"])
+                equity0 = self.equity(opening)
+                if equity0 is not None:
+                    detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
+                    self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
+                    if detail:
+                        self.trades.append(
+                            {
+                                **order,
+                                **detail,
+                                "side": "buy",
+                                "fill_price": fill_px,
+                                "notional": detail["qty"] * fill_px,
+                                "status": "filled",
+                                "execution_note": "回调限价成交",
+                            }
+                        )
+                        if self.mode == "paper":
+                            self.record_terminal(self.trades[-1], "filled", "回调限价成交")
+                continue
+            # expire stale limit orders after 10 sessions
+            for order in [o for o in self.limit_orders.values() if o["expiry_index"] < self.index]:
+                self.record_terminal(order["order"], "expired", "限价单 10 日未成交")
+                self.flags_counts["pullback_expired"] = self.flags_counts.get("pullback_expired", 0) + 1
+            available = still
         if not available:
             if self.mode == "paper":
                 self.settled_dates.add(day)
@@ -122,6 +178,13 @@ class ExecutionEngine:
                 else settlement.buy(self, order, day, price, equity, execution_scores or {})
             )
             if detail:
+                if selling and self.flags.get("cooldown_recover") and order["ticker"] not in self.positions:
+                    label = order.get("label", "")
+                    if any(k in label for k in ("破位", "止损", "减仓")) and "基本面" not in label:
+                        hist = self.history.get(order["ticker"]) or []
+                        line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
+                        self.cooldown[order["ticker"]] = {"until": self.index + 10, "line": line, "closes_above": 0}
+                        self.flags_counts["cooldown_armed"] = self.flags_counts.get("cooldown_armed", 0) + 1
                 fills.append(
                     {
                         **order,
@@ -169,6 +232,20 @@ class ExecutionEngine:
                 continue
             position["tier_now"] = score.get("tier") or position["tier_now"]
             order = sell_signal(position, score, index=self.index, panic=self.panic)
+            if self.flags.get("sell_confirm") and order and "破位" in order.get("label", ""):
+                h = self.history.get(ticker) or []
+                atr = 0.0
+                if len(h) >= 15:
+                    diffs = [abs(h[i] - h[i - 1]) for i in range(-14, 0)]
+                    atr = sum(diffs) / len(diffs)
+                line = sum(h[-50:]) / 50 if len(h) >= 50 else (h[-1] if h else 0)
+                below2 = len(h) >= 2 and h[-1] < line and h[-2] < line
+                big_break = atr > 0 and (line - h[-1]) > atr
+                if not (below2 or big_break):
+                    order = None
+                elif not position.get("_confirm_half_done"):
+                    order["fraction"] = min(order.get("fraction", 1.0), 0.5)
+                    position["_confirm_half_done"] = True
             if order:
                 self.queue(
                     ticker,
@@ -182,6 +259,25 @@ class ExecutionEngine:
             tier: sum(p["shares"] * prices[t] for t, p in self.positions.items() if p["tier_now"] == tier)
             for tier in TIERS
         }
+        if self.flags.get("cooldown_recover"):
+            hist_map = self.history or {}
+            for t in [t for t in self.cooldown]:
+                cd = self.cooldown[t]
+                h = hist_map.get(t) or []
+                if self.index <= cd["until"]:
+                    if t in scores and scores[t].get("entry_pass"):
+                        scores[t] = dict(scores[t], entry_pass=False)
+                        self.flags_counts["cooldown_blocked"] = self.flags_counts.get("cooldown_blocked", 0) + 1
+                elif h and h[-1] is not None and h[-1] > cd["line"]:
+                    cd["closes_above"] += 1
+                    if cd["closes_above"] < 3 and t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                else:
+                    cd["closes_above"] = 0
+                    if t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                if cd["closes_above"] >= 3:
+                    del self.cooldown[t]
         if self.index > self.swan_until:
             allowed = {t: s for t, s in scores.items() if self.mode == "replay_v18" or s.get("tradable", True)}
             buys.core_adds(self, allowed, values, equity, sold)

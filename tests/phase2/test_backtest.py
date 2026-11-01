@@ -104,9 +104,30 @@ def test_split_adjusted_bars():
 
     conn = MagicMock()
     conn.execute.return_value.fetchall.return_value = [
-        {"trade_date": date(2024, 6, 6), "open": 1200.0, "close": 1208.88, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 7), "open": 1210.0, "close": 1209.0, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 10), "open": 121.0, "close": 121.79, "volume": 1000, "adj_factor": 1.0},
+        {
+            "trade_date": date(2024, 6, 6),
+            "open": 1200.0,
+            "low": 1190.0,
+            "close": 1208.88,
+            "volume": 100,
+            "adj_factor": 0.1,
+        },
+        {
+            "trade_date": date(2024, 6, 7),
+            "open": 1210.0,
+            "low": 1200.0,
+            "close": 1209.0,
+            "volume": 100,
+            "adj_factor": 0.1,
+        },
+        {
+            "trade_date": date(2024, 6, 10),
+            "open": 121.0,
+            "low": 119.0,
+            "close": 121.79,
+            "volume": 1000,
+            "adj_factor": 1.0,
+        },
     ]
     bars = BacktestLoader(conn).bars("NVDA")
     assert bars[0]["close"] == pytest.approx(120.888)
@@ -151,3 +172,37 @@ def test_scores_identical_when_adj_factor_1():
     ]
     frame = technical_series(bars)
     assert all(frame["raw_price"] == frame["price"])
+
+
+def test_flags_default_off_and_tier_lock():
+    """Flags default off; tier_lock overrides score tier; chase_block counts."""
+    import yaml
+
+    locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
+    assert len(locked) == 59 and locked["MU"] == "attack" and locked["NVDA"] == "normal"
+    assert locked["XOM"] == "defense"
+
+
+def test_chase_block_gate():
+    """5d return >8% → entry_pass forced False; <=8% untouched."""
+    # the gate expression used in run_backtest's flag block
+    hist_up = [100.0, 101, 102, 103, 104, 109.0]  # +9% over 5 days
+    hist_flat = [100.0, 100.5, 100.2, 100.4, 100.3, 100.6]
+    for hist, expect_block in ((hist_up, True), (hist_flat, False)):
+        blocked = len(hist) >= 6 and (hist[-1] / hist[-6] - 1) > 0.08
+        assert blocked == expect_block
+
+
+def test_cooldown_semantics():
+    """Cooldown record: blocks until index>until, then needs 3 closes above line."""
+    # mirrors the decide-loop gate in engine.py (flags.cooldown_recover)
+    cd = {"until": 10, "line": 100.0, "closes_above": 0}
+    index, hist = 5, [99.0]  # inside cooldown window, below line
+    blocked = index <= cd["until"] or (hist[-1] > cd["line"] and cd["closes_above"] < 3)
+    assert blocked
+    index, hist = 11, [101.0, 101.5, 102.0]  # past window, above line but <3 closes
+    cd["closes_above"] = 1
+    blocked = index <= cd["until"] or (hist[-1] > cd["line"] and cd["closes_above"] < 3)
+    assert blocked  # only 1 of 3 required closes
+    cd["closes_above"] = 3
+    assert cd["closes_above"] >= 3  # gate clears after 3

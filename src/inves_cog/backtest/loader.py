@@ -41,7 +41,7 @@ class BacktestLoader:
         """ingest.bars_daily in production shape: RAW prices + real adj_factor
         (score_history applies adj_factor itself, same as production)."""
         rows = self.connection.execute(
-            "SELECT trade_date, open, close, volume, adj_factor "
+            "SELECT trade_date, open, low, close, volume, adj_factor "
             "FROM ingest.bars_daily WHERE ticker=%s AND trade_date <= %s "
             "ORDER BY trade_date",
             (ticker, end or date(9999, 12, 31)),
@@ -50,6 +50,7 @@ class BacktestLoader:
             {
                 "trade_date": r["trade_date"],
                 "open": float(r["open"]) if r["open"] is not None else None,
+                "low": float(r["low"]) if r["low"] is not None else None,
                 "close": float(r["close"]) if r["close"] is not None else None,
                 "volume": int(r["volume"]) if r["volume"] is not None else None,
                 "adj_factor": float(r["adj_factor"]) if r.get("adj_factor") else 1.0,
@@ -60,7 +61,7 @@ class BacktestLoader:
     def bars(self, ticker, start=None, end=None):
         """Split-adjusted series for the ENGINE (fills/marks/history/benchmarks)."""
         rows = self.connection.execute(
-            "SELECT trade_date, open, close, volume, adj_factor "
+            "SELECT trade_date, open, low, close, volume, adj_factor "
             "FROM ingest.bars_daily WHERE ticker=%s AND trade_date <= %s "
             "ORDER BY trade_date",
             (ticker, end or date(9999, 12, 31)),
@@ -74,6 +75,7 @@ class BacktestLoader:
                     # one split-adjusted series: engine/scoring see adjusted prices
                     # with adj_factor=1 so technical.py's own adjustment is a no-op
                     "open": float(r["open"]) * factor if r["open"] is not None else None,
+                    "low": float(r["low"]) * factor if r["low"] is not None else None,
                     "close": float(r["close"]) * factor if r["close"] is not None else None,
                     "volume": int(r["volume"] / factor) if r["volume"] is not None else None,
                     "adj_factor": 1.0,

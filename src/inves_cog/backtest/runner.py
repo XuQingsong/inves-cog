@@ -59,10 +59,31 @@ def run_backtest(connection, spec, *, write=True):
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     engine = ExecutionEngine(
-        clock=clock, initial_cash=initial, mode=mode, portfolio_id=f"bt-{spec.get('label', 'run')}"
+        clock=clock,
+        initial_cash=initial,
+        mode=mode,
+        portfolio_id=f"bt-{spec.get('label', 'run')}",
+        flags=spec.get("flags") or {},
     )
+    flags = spec.get("flags") or {}
+    flag_counts = {}
+    locked = {}
+    if flags.get("tier_lock"):
+        import yaml
+
+        locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
     for day in days:
         daily = {t: signals[t][day] for t in tickers if day in signals[t]}
+        if flags.get("tier_lock"):
+            for t, sc in daily.items():
+                if t in locked:
+                    sc["tier"] = locked[t]
+        if flags.get("chase_block"):
+            for t, sc in daily.items():
+                hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
+                if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > 0.08:
+                    sc["entry_pass"] = False
+                    flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
@@ -71,7 +92,16 @@ def run_backtest(connection, spec, *, write=True):
         closing = {
             t: prices[t][day]["close"] * (prices[t][day].get("adj_factor") or 1.0) for t in prices if day in prices[t]
         }
-        engine.fill(day, opening, daily)
+        engine.fill(
+            day,
+            opening,
+            daily,
+            day_bars={
+                t: {"open": r[day]["open"], "low": r[day]["low"], "close": r[day]["close"]}
+                for t, r in prices.items()
+                if day in r
+            },
+        )
         spy = [prices["SPY"][d]["close"] for d in sorted(prices["SPY"]) if d <= day]
         returns = (
             100 * (spy[-1] / spy[-2] - 1) if len(spy) >= 2 else None,
@@ -100,6 +130,8 @@ def run_backtest(connection, spec, *, write=True):
     )
     metrics["trade_hash"] = trade_hash(engine.trades)
     metrics["survivorship_bias"] = spec.get("universe") == "config"
+    flag_counts.update(getattr(engine, "flags_counts", {}))
+    metrics["flags_counts"] = flag_counts
     result = {
         "spec": spec,
         "metrics": metrics,
