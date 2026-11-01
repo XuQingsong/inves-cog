@@ -2470,7 +2470,7 @@ def _state_head(payload):
         f'<div class="state-h {band_cls}">'
         f"<h1>{_text(st.get('title') or st['sentence'])}</h1></div>"
         f'<p class="state-d">{_text(st.get("detail") or "")}'
-        f"{link}{asof}</p>"
+        f"{link}</p>"
         f'<details class="dim small" style="margin:-6px 0 8px"><summary>依据与口径</summary>'
         f'<p style="margin:4px 0">{_text(detail)}</p></details>'
     )
