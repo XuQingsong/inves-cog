@@ -77,10 +77,7 @@ def run_backtest(connection, spec, *, write=True):
             100 * (spy[-1] / spy[-2] - 1) if len(spy) >= 2 else None,
             100 * (spy[-1] / spy[-6] - 1) if len(spy) >= 6 else None,
         )
-        history = {
-            t: [r["close"] * (r.get("adj_factor") or 1.0) for d, r in sorted(rows.items()) if d <= day]
-            for t, rows in prices.items()
-        }
+        history = {t: [r["close"] for d, r in sorted(rows.items()) if d <= day] for t, rows in prices.items()}
         engine.decide(
             day,
             daily,
@@ -147,8 +144,29 @@ def _persist(connection, spec, result, clock):
                 for t in result["trades"]
             ],
         )
+        high, dd_rows = None, []
+        for r in result["curve"]:
+            high = r["equity"] if high is None else max(high, r["equity"])
+            dd_rows.append((run_id, r["day"], r["equity"], r["cash"], 100 * (r["equity"] / high - 1)))
         c.executemany(
             "INSERT INTO backtest.equity_curve (run_id,date,equity,cash,drawdown) VALUES (%s,%s,%s,%s,%s)",
-            [(run_id, r["day"], r["equity"], r["cash"], 0) for r in result["curve"]],
+            dd_rows,
         )
+        c.executemany(
+            "INSERT INTO backtest.skips (run_id,date,ticker,reason) VALUES (%s,%s,%s,%s)",
+            [
+                (
+                    run_id,
+                    sk.get("trade_date") or sk.get("signal_date"),
+                    sk["ticker"],
+                    str(sk.get("reason_zh") or sk.get("reason") or ""),
+                )
+                for sk in result.get("skips", [])
+            ],
+        )
+        for day, marks in (result.get("positions_eod") or {}).items():
+            c.executemany(
+                "INSERT INTO backtest.positions_eod (run_id,date,ticker,qty,price) VALUES (%s,%s,%s,%s,%s)",
+                [(run_id, day, t, m["qty"], m.get("price")) for t, m in marks.items()],
+            )
     return run_id

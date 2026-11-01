@@ -6,7 +6,13 @@ from collections import defaultdict
 
 
 def equity_metrics(curve, trades, initial_cash, bench=None):
-    """curve: [{date, equity, cash}] sorted; trades: [{trade_date,ticker,label,qty,price}]."""
+    """curve: [{date, equity, cash}] sorted; trades: [{trade_date,ticker,label,qty,price}].
+
+    Definitions:
+    - exposure_pct: share of days with invested capital (equity - cash > 0).
+    - turnover_x: sum |traded notional| / starting equity (not annualized).
+    - win_rate: sell trades whose fill beat the matching open buy's fill.
+    - avg_holding_days: mean days between a buy and its matched sell (FIFO)."""
     if not curve:
         return {}
     first, last = curve[0]["equity"], curve[-1]["equity"]

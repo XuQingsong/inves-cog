@@ -47,16 +47,16 @@ class BacktestLoader:
         ).fetchall()
         out = []
         for r in rows:
-            if start and r["trade_date"] < start:
-                # keep history for MA windows: score_history needs full bars pre-start
-                pass
+            factor = float(r["adj_factor"]) if r.get("adj_factor") else 1.0
             out.append(
                 {
                     "trade_date": r["trade_date"],
-                    "open": float(r["open"]) if r["open"] is not None else None,
-                    "close": float(r["close"]) if r["close"] is not None else None,
-                    "volume": int(r["volume"]) if r["volume"] is not None else None,
-                    "adj_factor": float(r["adj_factor"]) if r.get("adj_factor") else 1.0,
+                    # one split-adjusted series: engine/scoring see adjusted prices
+                    # with adj_factor=1 so technical.py's own adjustment is a no-op
+                    "open": float(r["open"]) * factor if r["open"] is not None else None,
+                    "close": float(r["close"]) * factor if r["close"] is not None else None,
+                    "volume": int(r["volume"] / factor) if r["volume"] is not None else None,
+                    "adj_factor": 1.0,
                 }
             )
         return out
