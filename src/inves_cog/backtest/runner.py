@@ -93,7 +93,10 @@ def run_backtest(connection, spec, *, write=True):
             day,
             opening,
             daily,
-            day_bars={t: {"open": r["open"], "low": r["low"], "close": r["close"]} for t, r in prices.items() if day in r},
+            day_bars={
+                t: {"open": r[day]["open"], "low": r[day]["low"], "close": r[day]["close"]}
+                for t, r in prices.items() if day in r
+            },
         )
         spy = [prices["SPY"][d]["close"] for d in sorted(prices["SPY"]) if d <= day]
         returns = (

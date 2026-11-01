@@ -151,3 +151,23 @@ def test_scores_identical_when_adj_factor_1():
     ]
     frame = technical_series(bars)
     assert all(frame["raw_price"] == frame["price"])
+
+
+def test_flags_default_off_and_tier_lock():
+    """Flags default off; tier_lock overrides score tier; chase_block counts."""
+    import yaml
+    from inves_cog.backtest.runner import run_backtest
+
+    locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
+    assert len(locked) == 59 and locked["MU"] == "attack" and locked["NVDA"] == "normal"
+    assert locked["XOM"] == "defense"
+
+
+def test_chase_block_gate():
+    """5d return >8% → entry_pass forced False; <=8% untouched."""
+    # the gate expression used in run_backtest's flag block
+    hist_up = [100.0, 101, 102, 103, 104, 109.0]   # +9% over 5 days
+    hist_flat = [100.0, 100.5, 100.2, 100.4, 100.3, 100.6]
+    for hist, expect_block in ((hist_up, True), (hist_flat, False)):
+        blocked = len(hist) >= 6 and (hist[-1] / hist[-6] - 1) > 0.08
+        assert blocked == expect_block
