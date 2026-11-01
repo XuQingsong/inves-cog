@@ -22,7 +22,7 @@ def main():
     p.add_argument("--end", type=date.fromisoformat, required=True)
     p.add_argument("--mode", default="paper")
     p.add_argument("--extractor", default="fixed")
-    p.add_argument("--initial-cash", type=float, default=100000)
+    p.add_argument("--initial-cash", type=float, default=None)
     p.add_argument("--no-write", action="store_true")
     args = p.parse_args()
 
