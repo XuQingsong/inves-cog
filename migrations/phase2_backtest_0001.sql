@@ -48,6 +48,7 @@ CREATE TABLE backtest.skips (
     reason text NOT NULL
 );
 
+GRANT USAGE ON SCHEMA backtest TO role_web, role_perception, role_valuation, role_ingest;
 GRANT SELECT ON ALL TABLES IN SCHEMA backtest TO role_web, role_perception, role_valuation;
 GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA backtest TO role_ingest;
 ALTER DEFAULT PRIVILEGES IN SCHEMA backtest GRANT SELECT ON TABLES TO role_web, role_perception, role_valuation;
