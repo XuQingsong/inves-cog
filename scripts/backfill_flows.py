@@ -1,6 +1,6 @@
 """P2-D2: one-off history backfill. Idempotent; prints coverage reports.
 Usage: backfill_flows.py <job> [--start YYYY-MM-DD] [--end YYYY-MM-DD]
-Jobs: proshares ssga cboe_pc cboe_idx occ cftc finra fred ofr all"""
+Jobs: proshares ssga cboe_pc cboe_idx occ cftc finra fred ofr yahoo_px dgs10 shiller all"""
 
 import argparse
 import json
@@ -51,6 +51,12 @@ def main():
         reports.append(backfill.backfill_finra_margin(http, conn, DEFAULT_RAW, now))
     if args.job in ("fred", "all"):
         reports += backfill.backfill_fred(http, conn, DEFAULT_RAW, now)
+    if args.job in ("yahoo_px", "all"):
+        reports += backfill.backfill_yahoo_px(http, conn, DEFAULT_RAW, start, end)
+    if args.job in ("dgs10", "all"):
+        reports += backfill.backfill_dgs10(http, conn, DEFAULT_RAW)
+    if args.job in ("shiller", "all"):
+        reports += backfill.backfill_shiller_pe(http, conn, DEFAULT_RAW)
     if args.job in ("ofr", "all"):
         reports.append(backfill.backfill_ofr(http, conn, DEFAULT_RAW, now))
     print(json.dumps(reports, ensure_ascii=False, default=str))
