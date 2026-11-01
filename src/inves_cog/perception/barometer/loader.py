@@ -59,7 +59,7 @@ def price_frame(conn, end, start=None):
     return px
 
 
-def flows_inputs(conn, idx):
+def flows_inputs(conn, idx, closes):
     """flows.* money/leverage inputs, PIT-aligned to the trading calendar (idx).
 
     Ported 1:1 from comp.py: onidx aligns each series to trading days by its
@@ -101,9 +101,21 @@ def flows_inputs(conn, idx):
            "QID": (-2, "QQQ"), "SDS": (-2, "SPY")}
     # underlying returns come from the price frame; caller passes closes via M later —
     # here we return the per-ticker series pieces; runner assembles.
-    out["_etf"] = {"etf": E, "flow": {t: flow(t) for t in set(list(LEV) + SPDR_FLOW)},
-                   "aum": {t: (etf_df(t).aum if etf_df(t) is not None else pd.Series(dtype=float))
-                           for t in set(list(LEV) + SPDR_FLOW)}}
+    reb = levflow = levaum = None
+    for t, (L, u) in LEV.items():
+        a = onidx(etf_df(t).aum) if etf_df(t) is not None else pd.Series(dtype=float)
+        piece = (a.shift(1) * L * (L - 1) * closes[u].pct_change()).fillna(0)
+        reb = piece if reb is None else reb + piece
+        if L > 0:
+            f = onidx(flow(t)).fillna(0)
+            levflow = f if levflow is None else levflow + f
+            levaum = a.fillna(0) if levaum is None else levaum + a.fillna(0)
+    out["杠杆ETF调仓亿"] = (reb / 1e8) if reb is not None else pd.Series(dtype=float)
+    out["杠杆ETF净申购20日%"] = (levflow.rolling(20).sum() / levaum.shift(20) * 100) if levaum is not None else pd.Series(dtype=float)
+    spf = [onidx(flow(t)).fillna(0) for t in SPDR_FLOW if etf_df(t) is not None]
+    spa = [onidx(etf_df(t).aum).fillna(0) for t in SPDR_FLOW if etf_df(t) is not None]
+    if spf:
+        out["SPDR资金5日%"] = sum(spf).rolling(5).sum() / sum(spa).shift(5) * 100
     # --- CFTC lev/am net % (pivoted trader_class rows; PIT by release_at) ---
     rows = conn.execute(
         "SELECT market, trader_class, report_date AS d, long, short, open_interest, "
@@ -140,6 +152,9 @@ def flows_inputs(conn, idx):
     out["融资余额亿"] = onidx(mg / 100)
     out["个股看跌看涨5日"] = obs("cboe_pc_equity").reindex(idx).rolling(5, min_periods=3).mean()
     out["2Y_126dbp"] = onidx(_series(conn, "ingest.macro_observations", "DGS2", date(2100, 1, 1)).diff(126) * 100)
+    out["席勒PE"] = onidx(obs("shiller_pe"))
+    out["_fund_asof"] = {"cftc": pd.Series(
+        {pd.Timestamp(r["p"]).normalize(): r["d"] for r in rows if r["market"].split(" - ")[0].startswith(("NASDAQ-100 Consolidated", "S&P 500 Consolidated"))})}
     return out
 
 
