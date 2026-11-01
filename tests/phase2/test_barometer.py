@@ -67,6 +67,7 @@ def test_intraday_provisional_missing(monkeypatch):
     from unittest.mock import MagicMock
 
     import pandas as pd
+
     from inves_cog.perception.barometer import run
 
     conn = MagicMock()
