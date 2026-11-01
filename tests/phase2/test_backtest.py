@@ -104,9 +104,9 @@ def test_split_adjusted_bars():
 
     conn = MagicMock()
     conn.execute.return_value.fetchall.return_value = [
-        {"trade_date": date(2024, 6, 6), "open": 1200.0, "close": 1208.88, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 7), "open": 1210.0, "close": 1209.0, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 10), "open": 121.0, "close": 121.79, "volume": 1000, "adj_factor": 1.0},
+        {"trade_date": date(2024, 6, 6), "open": 1200.0, "low": 1190.0, "close": 1208.88, "volume": 100, "adj_factor": 0.1},
+        {"trade_date": date(2024, 6, 7), "open": 1210.0, "low": 1200.0, "close": 1209.0, "volume": 100, "adj_factor": 0.1},
+        {"trade_date": date(2024, 6, 10), "open": 121.0, "low": 119.0, "close": 121.79, "volume": 1000, "adj_factor": 1.0},
     ]
     bars = BacktestLoader(conn).bars("NVDA")
     assert bars[0]["close"] == pytest.approx(120.888)
