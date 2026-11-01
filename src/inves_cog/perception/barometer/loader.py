@@ -150,7 +150,7 @@ def flows_inputs(conn, idx, closes):
     wal, tga, rrp = obs("fred_walcl"), obs("fred_wtregen"), obs("fred_rrpontsyd")
     nl = wal - tga.reindex(wal.index).ffill() - rrp.reindex(wal.index).ffill() * 1000
     out["净流动性4周%"] = onidx((nl / nl.shift(4) - 1) * 100)
-    mg = obs("finra_margin_debit")
+    mg = obs("finra_margin_margin_debit")
     out["融资余额同比%"] = onidx((mg / mg.shift(12) - 1) * 100)
     out["融资余额亿"] = onidx(mg / 100)
     out["个股看跌看涨5日"] = obs("cboe_pc_equity").reindex(idx).rolling(5, min_periods=3).mean()
