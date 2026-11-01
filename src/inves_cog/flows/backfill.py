@@ -703,7 +703,7 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
 # ---------- P2-M1: barometer missing price/macro history ----------
 
 YAHOO_CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{sym}?period1={p1}&period2={p2}&interval=1d&events=div%2Csplit"
-BARO_YAHOO = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT", "JPY=X", "BTC-USD", "^MOVE"]
+BARO_YAHOO = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT", "JPY=X", "BTC-USD", "^MOVE", "^TNX"]
 
 
 def _yahoo_close(sym, start, end, http=None):
@@ -765,7 +765,7 @@ def backfill_shiller_pe(http, connection, raw_dir, _now=None):
         req = urllib.request.Request(SHILLER_URL, headers=UA)
         html = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
         rows = []
-        for m in re.finditer(r'<td>(\w{3} \d{1,2}, \d{4})</td>\s*<td[^>]*>([\d.]+)</td>', html):
+        for m in re.finditer(r'<td>(\w{3} \d{1,2}, \d{4})</td>\s*<td[^>]*>[^0-9<]*([\d.]+)\s*</td>', html):
             try:
                 d = datetime.strptime(m.group(1), "%b %d, %Y").date()
                 rows.append({"series_id": "shiller_pe", "obs_date": d,
