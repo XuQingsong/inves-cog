@@ -79,11 +79,17 @@ def run_backtest(connection, spec, *, write=True):
                 if t in locked:
                     sc["tier"] = locked[t]
         if flags.get("chase_block"):
+            prev_blocked = getattr(run_backtest, "_chase_prev", {})
+            now_blocked = set()
             for t, sc in daily.items():
                 hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
                 if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > 0.08:
                     sc["entry_pass"] = False
+                    now_blocked.add(t)
                     flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
+                    if t not in prev_blocked:  # distinct would-be order = start of a blocked streak
+                        flag_counts["chase_orders"] = flag_counts.get("chase_orders", 0) + 1
+            run_backtest._chase_prev = now_blocked
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
