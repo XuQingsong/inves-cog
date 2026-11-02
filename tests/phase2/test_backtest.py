@@ -151,3 +151,30 @@ def test_scores_identical_when_adj_factor_1():
     ]
     frame = technical_series(bars)
     assert all(frame["raw_price"] == frame["price"])
+
+
+def test_cboe_health_args_not_scrambled():
+    """collect_cboe_chain's record_health call must pass (now, items, note, latency)
+    in order — a float in `now` raises 'float' object is not subscriptable in prod."""
+    import inspect
+    from inves_cog.flows import collectors
+
+    src = inspect.getsource(collectors.collect_cboe_chain)
+    # the success call must pass a datetime (asof/today) as `now`, not len(rows)
+    assert 'record_health(connection, "Flows:CboeChain", True, asof' in src or \
+           'record_health(connection, "Flows:CboeChain", True, local' in src or \
+           'record_health(connection, "Flows:CboeChain", True, today' in src
+    assert 'record_health(connection, "Flows:CboeChain", True, len(' not in src
+
+
+def test_barometer_called_in_run_once():
+    """_barometer must actually be invoked in run_once — 0 intraday rows else."""
+    import inspect, importlib.util, sys, os
+    spec = importlib.util.spec_from_file_location(
+        "schedule_flows",
+        os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py"))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["schedule_flows"] = mod
+    spec.loader.exec_module(mod)
+    src = inspect.getsource(mod.run_once)
+    assert "_barometer(" in src
