@@ -83,7 +83,7 @@ def run_backtest(connection, spec, *, write=True):
             now_blocked = set()
             for t, sc in daily.items():
                 hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
-                if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > 0.08:
+                if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > flags.get("chase_threshold", 0.08):
                     sc["entry_pass"] = False
                     now_blocked.add(t)
                     flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
