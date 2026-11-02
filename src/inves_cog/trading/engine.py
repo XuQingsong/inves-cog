@@ -181,7 +181,11 @@ class ExecutionEngine:
             if detail:
                 if selling and self.flags.get("cooldown_recover"):
                     label = order.get("label", "")
-                    if any(k in label for k in ("破位", "止损", "警戒", "减仓")) and "基本面" not in label and "止盈" not in label:
+                    if (
+                        any(k in label for k in ("破位", "止损", "警戒", "减仓"))
+                        and "基本面" not in label
+                        and "止盈" not in label
+                    ):
                         hist = self.history.get(order["ticker"]) or []
                         line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
                         self.cooldown[order["ticker"]] = {"until": self.index + 10, "line": line, "closes_above": 0}

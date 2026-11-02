@@ -197,9 +197,17 @@ def test_cooldown_semantics():
     """Any price-based sell arms cooldown (partial included); take-profit does not;
     gate blocks until index>until then needs 3 consecutive closes above the line."""
     # arm rule (fill-time check in engine.py)
-    for label, arms in (("破位减仓", True), ("警戒减仓", True), ("止损", True),
-                        ("波段卖出", False), ("基本面清仓", False), ("回撤刹车减仓", True)):
-        armed = any(k in label for k in ("破位", "止损", "警戒", "减仓")) and "基本面" not in label and "止盈" not in label
+    for label, arms in (
+        ("破位减仓", True),
+        ("警戒减仓", True),
+        ("止损", True),
+        ("波段卖出", False),
+        ("基本面清仓", False),
+        ("回撤刹车减仓", True),
+    ):
+        armed = (
+            any(k in label for k in ("破位", "止损", "警戒", "减仓")) and "基本面" not in label and "止盈" not in label
+        )
         assert armed == arms, label
     cd = {"until": 10, "line": 100.0, "closes_above": 0}
     blocked = 5 <= cd["until"]
