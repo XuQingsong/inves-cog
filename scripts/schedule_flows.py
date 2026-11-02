@@ -17,11 +17,11 @@ from inves_cog.flows.collectors import (
     collect_occ,
     collect_occ_series,
 )
-from inves_cog.flows.store import log = logging.getLogger(__name__)
-DEFAULT_RAW, polite_http, record_health_agg
+from inves_cog.flows.store import DEFAULT_RAW, polite_http, record_health, record_health_agg
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
+log = logging.getLogger(__name__)
 XCHK_SYMS = ["SPY", "QQQ", "IWM", "SMH"]
 STATE = Path("/home/claudeuser/inves-cog-data/flows/schedule_state.json")
 _UNIVERSE = Path(__file__).resolve().parents[1] / "config" / "universe.yaml"
