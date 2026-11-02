@@ -219,8 +219,6 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 state[key] = True
             elif hm < "09:00":
                 state[f"etf_stale:{today}"] = True
-                from inves_cog.flows.store import record_health
-
                 record_health(conn, "Flows:ETFShares", False, 0, f"files stale, latest != {today}", now=local)
                 state[key] = True
         _save_state(state)
