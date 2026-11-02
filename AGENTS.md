@@ -40,3 +40,4 @@
 - 部署禁止 `supervisorctl update`；只 `reread` 后 `add`/`restart` 指定程序；证据须列出部署前后全部程序清单（当前 22 个）。2026-11-01 因重生成配置漏掉 pages/review/live_perception，网站停机约 7 小时。
 - 页面截图前先在同一台机器 curl 确认 200；截完必须打开图片确认内容（SWE-2 多次交回报错页/空页）。晴雨表截图用 `/barometer?static`。
 - 二期状态：数据采集（flows）、历史回补、回测框架、晴雨表计算与页面（/barometer，首页市场结论）均已上线（main 682e0b6）。下一步：v19 对照回测与影子运行；OCC 恢复后补跑 `job=occ`。
+- 2026-11-02 事故：在生产服务器上 4 进程并行跑 168 次回测，8 GB 内存被耗尽，服务器卡死，只能在控制台重启（网站停机）。规则：生产服务器上的回测只能 1 个进程、`nice -n 19`、内存上限 2 GB（`systemd-run --user --scope -p MemoryMax=2G` 或 `ulimit -v`），且只在美股收盘后运行；大批量回测应移到独立机器。
