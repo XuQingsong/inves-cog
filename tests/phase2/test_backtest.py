@@ -156,7 +156,7 @@ def test_scores_identical_when_adj_factor_1():
 def test_cboe_health_args_behavioral():
     """Behavioral: stub http + recording conn; assert record_health gets an aware
     datetime `now`, int items, str note — not the scrambled positional args."""
-    import inspect, importlib
+    import importlib
     from inves_cog.flows import collectors
     from datetime import datetime, timezone
 

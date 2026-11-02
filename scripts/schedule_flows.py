@@ -5,6 +5,7 @@ import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+import logging
 import yaml
 
 from inves_cog.clock import SystemClock
@@ -16,7 +17,8 @@ from inves_cog.flows.collectors import (
     collect_occ,
     collect_occ_series,
 )
-from inves_cog.flows.store import DEFAULT_RAW, polite_http, record_health_agg
+from inves_cog.flows.store import log = logging.getLogger(__name__)
+DEFAULT_RAW, polite_http, record_health_agg
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
