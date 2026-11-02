@@ -85,13 +85,24 @@ def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=Non
             if rows:
                 upsert_many(connection, "option_chain", list(rows[0].keys()), rows)
             record_health(
-                connection, "Flows:CboeChain", True, asof or datetime.now(timezone.utc), len(rows), symbol, lat
+                connection,
+                "Flows:CboeChain",
+                True,
+                asof or datetime.combine(today, datetime.min.time(), timezone.utc),
+                len(rows),
+                symbol,
+                lat
             )
         return {"symbol": symbol, "rows": len(rows)}
     except Exception as exc:
         if connection is not None:
             record_health(
-                connection, "Flows:CboeChain", False, asof or datetime.now(timezone.utc), 0, f"{symbol} {exc!r}"
+                connection,
+                "Flows:CboeChain",
+                False,
+                asof or datetime.combine(today, datetime.min.time(), timezone.utc),
+                0,
+                f"{symbol} {exc!r}"
             )
         log.warning("cboe chain %s failed: %r", symbol, exc)
         return {"symbol": symbol, "rows": 0, "error": str(exc)}
