@@ -133,6 +133,7 @@ def run_backtest(connection, spec, *, write=True):
     flag_counts.update(getattr(engine, "flags_counts", {}))
     metrics["flags_counts"] = flag_counts
     result = {
+        "flag_diag": getattr(engine, "flag_diag", {}),
         "spec": spec,
         "metrics": metrics,
         "trades": copy.deepcopy(engine.trades),
