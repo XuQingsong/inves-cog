@@ -35,6 +35,24 @@ class BacktestLoader:
             raise ValueError(f"PIT violation: {ticker} state filed {filed} used for {as_of_date}")
         return state
 
+    def states_for(self, ticker, extractor="fixed", end=None):
+        """All PIT fin_state rows for a ticker (rule_tiers/gap evaluations)."""
+        rows = [s for s in getattr(self.fundamentals, "_store", {}).states
+                if s.ticker == ticker and s.extractor == extractor]
+        if not rows:
+            rows = self.fundamentals.read_shared_filings(ticker)
+        if end:
+            rows = [s for s in rows if getattr(s, "filed", None) and s.filed <= end]
+        return rows
+
+    def filings(self, ticker, start=None, end=None):
+        """SEC filing (filed, form) rows for cause classification."""
+        rows = self.fundamentals.read_shared_filings(ticker)
+        return [f for f in rows
+                if getattr(f, "filed", None)
+                and (start is None or f.filed >= start)
+                and (end is None or f.filed <= end)]
+
     # ---------- bars ----------
 
     def bars_raw(self, ticker, end=None):

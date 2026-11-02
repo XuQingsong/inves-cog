@@ -81,12 +81,49 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
         import yaml
 
         locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
+    rule_tier_map, gap_map, valuation_rows = {}, {}, []
+    if flags.get("rule_tiers") or flags.get("gap_judgment") or spec.get("valuation_output"):
+        from .rule_tiers import tier_history
+        from .gap_judgment import gap_events
+        from .valuation import valuation_inputs
+
+        spy = prices.get("SPY", {})
+        for t in tickers:
+            states = loader.states_for(t, end=end)
+            if flags.get("rule_tiers"):
+                rule_tier_map[t] = {h["date"]: h["tier"] for h in tier_history(t, prices.get(t, {}), spy, states)}
+            if flags.get("gap_judgment"):
+                filings = [{"filed": getattr(f, "filed", None), "form": getattr(f, "form", None)}
+                           for f in loader.filings(t)]
+                gap_map[t] = gap_events(t, prices.get(t, {}), filings, states,
+                                        lambda tt, dd: valuation_inputs(tt, dd, prices.get(tt, {}), states),
+                                        start, end)
+            if spec.get("valuation_output"):
+                for d in sorted({d for rows in signals.get(t, {}).items() for d in [rows[0]]}):
+                    valuation_rows.append(valuation_inputs(t, d, prices.get(t, {}), states))
     for day in days:
         daily = {t: signals[t][day] for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
             for t, sc in daily.items():
                 if t in locked:
                     sc["tier"] = locked[t]
+        if rule_tier_map:
+            for t, sc in daily.items():
+                past = [d for d in rule_tier_map.get(t, {}) if d <= day]
+                if past:
+                    sc["tier"] = rule_tier_map[t][max(past)]
+        if gap_map:
+            for t, sc in daily.items():
+                ev = gap_map.get(t, {}).get(day)
+                if ev and sc.get("entry_pass"):
+                    d = ev["decision"]
+                    if d == "block":
+                        sc["entry_pass"] = False
+                        flag_counts["gap_block_" + ev["cause"]] = flag_counts.get("gap_block_" + ev["cause"], 0) + 1
+                    elif d == "pullback":
+                        flag_counts["gap_pullback"] = flag_counts.get("gap_pullback", 0) + 1
+                    else:
+                        flag_counts["gap_allow"] = flag_counts.get("gap_allow", 0) + 1
         if flags.get("chase_block"):
             prev_blocked = getattr(run_backtest, "_chase_prev", {})
             now_blocked = set()

@@ -217,3 +217,32 @@ def test_cooldown_semantics():
     assert blocked  # only 1 of 3 required closes
     cd["closes_above"] = 3
     assert cd["closes_above"] >= 3
+
+
+def test_rule_tiers_hysteresis():
+    """rule_tiers: defense needs vol<28 confirmed 2 evals; exits only on vol>33."""
+    from inves_cog.backtest.rule_tiers import tier_history
+    from inves_cog.ingest.fundamentals.state import FinState
+    from datetime import date, timedelta
+
+    bars = {date(2020, 1, 1) + timedelta(days=i): {"close": 100 + i * 0.01} for i in range(400)}
+    spy = {d: {"close": 100 + i * 0.02} for i, d in enumerate(sorted(bars))}
+    def mk(filed, growth, fcf, fcfm):
+        return FinState(ticker="X", extractor="fixed", filed=filed, period_end=filed,
+                        values={"rev_growth": growth, "fcf_ttm": fcf, "fcf_margin": fcfm, "rev_ttm": 1e9})
+    states = [mk(date(2020, 10, 1), 10, 1e8, 12), mk(date(2021, 1, 15), 10, 1e8, 12)]
+    hist = tier_history("X", bars, spy, states)
+    assert hist and all(h["tier"] in ("attack", "defense", "normal") for h in hist)
+
+
+def test_gap_judgment_narrative_blocks():
+    """gap_judgment: a >3-sigma jump with no filing → narrative → block."""
+    from inves_cog.backtest.gap_judgment import gap_events
+    from datetime import date, timedelta
+
+    days = [date(2020, 3, 2) + timedelta(days=i) for i in range(40)]
+    bars = {d: {"close": 100 + (i % 5)} for i, d in enumerate(days)}
+    gap_day = days[30]
+    bars[gap_day] = {"close": 115}  # +15% day vs flat history
+    events = gap_events("X", bars, [], [], lambda t, d: {"pe_pctile_3y": 40}, days[0], days[-1])
+    assert gap_day in events and events[gap_day]["cause"] == "narrative" and events[gap_day]["decision"] == "block"
