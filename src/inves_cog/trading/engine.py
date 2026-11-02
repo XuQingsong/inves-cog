@@ -135,8 +135,9 @@ class ExecutionEngine:
                 equity0 = self.equity(opening)
                 if equity0 is not None:
                     detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
-                    self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
                     if detail:
+                        self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
+                        self.limit_orders.pop(order.get("order_id"), None)
                         self.trades.append(
                             {
                                 **order,
@@ -152,8 +153,8 @@ class ExecutionEngine:
                             self.record_terminal(self.trades[-1], "filled", "回调限价成交")
                 continue
             # expire stale limit orders after 10 sessions
-            for order in [o for o in self.limit_orders.values() if o["expiry_index"] < self.index]:
-                self.record_terminal(order["order"], "expired", "限价单 10 日未成交")
+            for oid in [oid for oid, o in self.limit_orders.items() if o["expiry_index"] < self.index]:
+                self.record_terminal(self.limit_orders.pop(oid)["order"], "expired", "限价单 10 日未成交")
                 self.flags_counts["pullback_expired"] = self.flags_counts.get("pullback_expired", 0) + 1
             available = still
         if not available:
@@ -178,9 +179,9 @@ class ExecutionEngine:
                 else settlement.buy(self, order, day, price, equity, execution_scores or {})
             )
             if detail:
-                if selling and self.flags.get("cooldown_recover") and order["ticker"] not in self.positions:
+                if selling and self.flags.get("cooldown_recover"):
                     label = order.get("label", "")
-                    if any(k in label for k in ("破位", "止损", "减仓")) and "基本面" not in label:
+                    if any(k in label for k in ("破位", "止损", "警戒", "减仓")) and "基本面" not in label and "止盈" not in label:
                         hist = self.history.get(order["ticker"]) or []
                         line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
                         self.cooldown[order["ticker"]] = {"until": self.index + 10, "line": line, "closes_above": 0}
