@@ -156,9 +156,9 @@ def test_scores_identical_when_adj_factor_1():
 def test_cboe_health_args_behavioral():
     """Behavioral: stub http + recording conn; assert record_health gets an aware
     datetime `now`, int items, str note — not the scrambled positional args."""
-    import importlib
-    from inves_cog.flows import collectors
     from datetime import datetime, timezone
+
+    from inves_cog.flows import collectors
 
     calls = []
 
@@ -190,9 +190,11 @@ def test_cboe_health_args_behavioral():
 
 def test_barometer_called_in_run_once_behavioral():
     """run_once at 10:00 ET on a trading day → run_intraday+persist into barometer_intraday."""
-    import importlib.util, sys, os
+    import importlib.util
+    import os
+    import sys
+    from datetime import datetime, timezone
     from unittest.mock import MagicMock
-    from datetime import datetime, timezone, date as _date
 
     spec = importlib.util.spec_from_file_location(
         "schedule_flows", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py")
@@ -221,7 +223,7 @@ def test_barometer_called_in_run_once_behavioral():
     import inves_cog.perception.barometer.run as bmod
 
     orig_run, orig_persist = bmod.run_intraday, bmod.persist
-    bmod.run_intraday = lambda c, l: {"fear": 1, "missing": []}
+    bmod.run_intraday = lambda c, _l: {"fear": 1, "missing": []}
     bmod.persist = lambda c, recs, table=None, ts=None: persisted.append((table, recs))
     try:
         mod.run_once(clock, {}, conn=conn)

@@ -1,11 +1,11 @@
 """Phase-2 flows collectors — slot-based, separate process, failure-isolated."""
 
 import json
+import logging
 import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-import logging
 import yaml
 
 from inves_cog.clock import SystemClock
