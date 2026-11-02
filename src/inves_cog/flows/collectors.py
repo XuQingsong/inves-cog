@@ -7,7 +7,7 @@ import logging
 import re
 import time
 import zipfile
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from xml.etree import ElementTree as ET
 
 from inves_cog.flows.store import UA, record_health, save_raw, upsert_many
@@ -84,11 +84,26 @@ def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=Non
             save_raw(raw_dir, "cboe-chain", url, str(today), raw, connection)
             if rows:
                 upsert_many(connection, "option_chain", list(rows[0].keys()), rows)
-            record_health(connection, "Flows:CboeChain", True, len(rows), f"{symbol}", lat, asof)
+            record_health(
+                connection,
+                "Flows:CboeChain",
+                True,
+                asof or datetime.combine(today, datetime.min.time(), timezone.utc),
+                len(rows),
+                symbol,
+                lat,
+            )
         return {"symbol": symbol, "rows": len(rows)}
     except Exception as exc:
         if connection is not None:
-            record_health(connection, "Flows:CboeChain", False, 0, f"{symbol} {exc!r}")
+            record_health(
+                connection,
+                "Flows:CboeChain",
+                False,
+                asof or datetime.combine(today, datetime.min.time(), timezone.utc),
+                0,
+                f"{symbol} {exc!r}",
+            )
         log.warning("cboe chain %s failed: %r", symbol, exc)
         return {"symbol": symbol, "rows": 0, "error": str(exc)}
 

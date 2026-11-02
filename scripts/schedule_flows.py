@@ -1,6 +1,7 @@
 """Phase-2 flows collectors — slot-based, separate process, failure-isolated."""
 
 import json
+import logging
 import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -16,10 +17,11 @@ from inves_cog.flows.collectors import (
     collect_occ,
     collect_occ_series,
 )
-from inves_cog.flows.store import DEFAULT_RAW, polite_http, record_health_agg
+from inves_cog.flows.store import DEFAULT_RAW, polite_http, record_health, record_health_agg
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.ingest.settings import read_environment
 
+log = logging.getLogger(__name__)
 XCHK_SYMS = ["SPY", "QQQ", "IWM", "SMH"]
 STATE = Path("/home/claudeuser/inves-cog-data/flows/schedule_state.json")
 _UNIVERSE = Path(__file__).resolve().parents[1] / "config" / "universe.yaml"
@@ -190,6 +192,11 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
+        try:
+            result.update(_barometer(conn, today, hm, cur, local, state))
+        except Exception as exc:
+            log.error("barometer failed: %r", exc)
+            record_health(conn, "Flows:Barometer", False, local, 0, f"{exc!r}")
         if hm >= "16:30":
             key = f"eod:{today}"
             if key not in state:
@@ -212,8 +219,6 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 state[key] = True
             elif hm < "09:00":
                 state[f"etf_stale:{today}"] = True
-                from inves_cog.flows.store import record_health
-
                 record_health(conn, "Flows:ETFShares", False, 0, f"files stale, latest != {today}", now=local)
                 state[key] = True
         _save_state(state)

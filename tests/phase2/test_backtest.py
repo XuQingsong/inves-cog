@@ -151,3 +151,82 @@ def test_scores_identical_when_adj_factor_1():
     ]
     frame = technical_series(bars)
     assert all(frame["raw_price"] == frame["price"])
+
+
+def test_cboe_health_args_behavioral():
+    """Behavioral: stub http + recording conn; assert record_health gets an aware
+    datetime `now`, int items, str note — not the scrambled positional args."""
+    from datetime import datetime, timezone
+
+    from inves_cog.flows import collectors
+
+    calls = []
+
+    class FakeConn:
+        def execute(self, *a, **kw):
+            return None
+
+    class FakeHTTP:
+        def request(self, *a, **kw):
+            return {"data": []}
+
+    orig_parse = collectors.parse_cboe_chain
+    orig_health = collectors.record_health
+    collectors.record_health = lambda *a, **k: calls.append(a)
+    collectors.parse_cboe_chain = lambda *a, **k: [{"x": 1}, {"x": 2}]
+    try:
+        collectors.collect_cboe_chain(FakeHTTP(), FakeConn(), "SPY", "/tmp", 60, None, datetime.now(timezone.utc))
+    except Exception:
+        pass
+    finally:
+        collectors.record_health = orig_health
+        collectors.parse_cboe_chain = orig_parse
+    assert calls, "record_health not called"
+    conn, src, ok, now, items, note, *rest = calls[0]
+    assert isinstance(now, datetime) and now.tzinfo is not None, f"now not aware datetime: {now!r}"
+    assert isinstance(items, int), f"items not int: {items!r}"
+    assert isinstance(note, str), f"note not str: {note!r}"
+
+
+def test_barometer_called_in_run_once_behavioral():
+    """run_once at 10:00 ET on a trading day → run_intraday+persist into barometer_intraday."""
+    import importlib.util
+    import os
+    import sys
+    from datetime import datetime, timezone
+    from unittest.mock import MagicMock
+
+    spec = importlib.util.spec_from_file_location(
+        "schedule_flows", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["schedule_flows"] = mod
+    spec.loader.exec_module(mod)
+    clock = MagicMock()
+    clock.now_utc.return_value = datetime(2026, 11, 2, 15, 0, tzinfo=timezone.utc)
+    conn = MagicMock()
+    persisted = []
+    mod._load_state = lambda: {}
+    mod._save_state = lambda s: None
+    mod.trading_day = lambda d: True
+    mod._intra_slots = lambda d: ["09:45", "10:00", "10:15"]
+    mod.polite_http = lambda: MagicMock()
+    mod.collect_cboe_chain = lambda *a, **k: {"symbol": "x", "rows": 1}
+    mod.collect_occ = lambda *a, **k: {"rows": 0}
+    mod.collect_occ_series = lambda *a, **k: {"symbol": "x", "rows": 1}
+    mod.collect_cboe_pc = lambda *a, **k: {"rows": 0}
+    mod.collect_etf_shares = lambda *a, **k: {"rows": 0}
+    mod._etf_done = lambda c, d: True
+    mod._universe = lambda: []
+    mod.record_health_agg = lambda *a, **k: None
+    mod.record_health = lambda *a, **k: None
+    import inves_cog.perception.barometer.run as bmod
+
+    orig_run, orig_persist = bmod.run_intraday, bmod.persist
+    bmod.run_intraday = lambda c, _l: {"fear": 1, "missing": []}
+    bmod.persist = lambda c, recs, table=None, ts=None: persisted.append((table, recs))
+    try:
+        mod.run_once(clock, {}, conn=conn)
+    finally:
+        bmod.run_intraday, bmod.persist = orig_run, orig_persist
+    assert any("barometer_intraday" in str(t) for t in persisted), f"persist not called: {persisted}"
