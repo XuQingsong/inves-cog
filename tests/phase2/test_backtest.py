@@ -194,15 +194,18 @@ def test_chase_block_gate():
 
 
 def test_cooldown_semantics():
-    """Cooldown record: blocks until index>until, then needs 3 closes above line."""
-    # mirrors the decide-loop gate in engine.py (flags.cooldown_recover)
+    """Any price-based sell arms cooldown (partial included); take-profit does not;
+    gate blocks until index>until then needs 3 consecutive closes above the line."""
+    # arm rule (fill-time check in engine.py)
+    for label, arms in (("破位减仓", True), ("警戒减仓", True), ("止损", True),
+                        ("波段卖出", False), ("基本面清仓", False), ("回撤刹车减仓", True)):
+        armed = any(k in label for k in ("破位", "止损", "警戒", "减仓")) and "基本面" not in label and "止盈" not in label
+        assert armed == arms, label
     cd = {"until": 10, "line": 100.0, "closes_above": 0}
-    index, hist = 5, [99.0]  # inside cooldown window, below line
-    blocked = index <= cd["until"] or (hist[-1] > cd["line"] and cd["closes_above"] < 3)
+    blocked = 5 <= cd["until"]
     assert blocked
-    index, hist = 11, [101.0, 101.5, 102.0]  # past window, above line but <3 closes
     cd["closes_above"] = 1
-    blocked = index <= cd["until"] or (hist[-1] > cd["line"] and cd["closes_above"] < 3)
+    blocked = 11 <= cd["until"] or (102.0 > cd["line"] and cd["closes_above"] < 3)
     assert blocked  # only 1 of 3 required closes
     cd["closes_above"] = 3
-    assert cd["closes_above"] >= 3  # gate clears after 3
+    assert cd["closes_above"] >= 3
