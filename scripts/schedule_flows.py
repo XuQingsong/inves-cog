@@ -190,7 +190,11 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
-        result.update(_barometer(conn, today, hm, cur, local, state))
+        try:
+            result.update(_barometer(conn, today, hm, cur, local, state))
+        except Exception as exc:
+            log.error("barometer failed: %r", exc)
+            record_health(conn, "Flows:Barometer", False, local, 0, f"{exc!r}")
         if hm >= "16:30":
             key = f"eod:{today}"
             if key not in state:
