@@ -26,12 +26,8 @@ def _code_rev():
         return "unknown"
 
 
-def run_backtest(connection, spec, *, write=True):
-    """spec: {universe, start, end, initial_cash, mode, extractor, params_path, label}.
-
-    Engine stays in memory — persist_orders is never called; writes go only to
-    the backtest schema (when write=True).
-    """
+def prepare_inputs(connection, spec):
+    """Load prices/signals/vix once — reused across replays and rolling starts."""
     loader = BacktestLoader(connection)
     tickers = (
         spec["universe"]
@@ -39,9 +35,7 @@ def run_backtest(connection, spec, *, write=True):
         else BacktestLoader.universe(spec["universe"], PARAMS["replay_tickers"])
     )
     start, end = spec["start"], spec["end"]
-    initial = spec.get("initial_cash") or PARAMS["initial_cash"]
-    mode, extractor = spec.get("mode", "paper"), spec.get("extractor", "fixed")
-    # tickers enter on their first bar date (IPO); bars loader already covers it
+    extractor = spec.get("extractor", "fixed")
     prices, signals = {}, {}
     for t in tickers + ["SPY", "QQQ"]:
         prices[t] = {r["trade_date"]: r for r in loader.bars(t, end=end)}
@@ -56,6 +50,21 @@ def run_backtest(connection, spec, *, write=True):
         )
         signals[t] = enrich(snaps, loader.state_asof, t, extractor)
     vix = loader.vix(end)
+    return {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
+
+
+def run_backtest(connection, spec, *, write=True, prepared=None):
+    """spec: {universe, start, end, initial_cash, mode, extractor, params_path, label}.
+
+    Engine stays in memory — persist_orders is never called; writes go only to
+    the backtest schema (when write=True). `prepared` reuses prepare_inputs() output.
+    """
+    pre = prepared or prepare_inputs(connection, spec)
+    loader, tickers = pre["loader"], pre["tickers"]
+    prices, signals, vix = pre["prices"], pre["signals"], pre["vix"]
+    start, end = spec["start"], spec["end"]
+    initial = spec.get("initial_cash") or PARAMS["initial_cash"]
+    mode = spec.get("mode", "paper")
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     engine = ExecutionEngine(
