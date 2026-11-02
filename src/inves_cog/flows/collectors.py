@@ -91,7 +91,7 @@ def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=Non
                 asof or datetime.combine(today, datetime.min.time(), timezone.utc),
                 len(rows),
                 symbol,
-                lat
+                lat,
             )
         return {"symbol": symbol, "rows": len(rows)}
     except Exception as exc:
@@ -102,7 +102,7 @@ def collect_cboe_chain(http, connection, symbol, raw_dir, max_days=60, today=Non
                 False,
                 asof or datetime.combine(today, datetime.min.time(), timezone.utc),
                 0,
-                f"{symbol} {exc!r}"
+                f"{symbol} {exc!r}",
             )
         log.warning("cboe chain %s failed: %r", symbol, exc)
         return {"symbol": symbol, "rows": 0, "error": str(exc)}
