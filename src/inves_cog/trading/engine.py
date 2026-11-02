@@ -20,6 +20,7 @@ class ExecutionEngine:
         self.flags = flags or {}
         self.cooldown = {}  # ticker -> {until, line, closes_above}
         self.flags_counts = {}
+        self.flag_diag = {"fills": [], "expired": []}
         self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
@@ -138,6 +139,9 @@ class ExecutionEngine:
                     if detail:
                         self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
                         self.limit_orders.pop(order.get("order_id"), None)
+                        self.flag_diag["fills"].append(
+                            {"ticker": order["ticker"], "day": str(day), "fill": fill_px,
+                             "open": op, "anchor": order.get("anchor"), "action": order["action"]})
                         self.trades.append(
                             {
                                 **order,
@@ -154,8 +158,12 @@ class ExecutionEngine:
                 continue
             # expire stale limit orders after 10 sessions
             for oid in [oid for oid, o in self.limit_orders.items() if o["expiry_index"] < self.index]:
-                self.record_terminal(self.limit_orders.pop(oid)["order"], "expired", "限价单 10 日未成交")
+                exp = self.limit_orders.pop(oid)
+                self.record_terminal(exp["order"], "expired", "限价单 10 日未成交")
                 self.flags_counts["pullback_expired"] = self.flags_counts.get("pullback_expired", 0) + 1
+                self.flag_diag["expired"].append(
+                    {"ticker": exp["ticker"], "limit": exp["limit"], "anchor": exp["order"].get("anchor"),
+                     "signal": str(exp["order"].get("signal_date"))})
             available = still
         if not available:
             if self.mode == "paper":
