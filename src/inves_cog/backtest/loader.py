@@ -47,11 +47,11 @@ class BacktestLoader:
 
     def filings(self, ticker, start=None, end=None):
         """SEC filing (filed, form) rows for cause classification."""
-        rows = self.fundamentals.read_shared_filings(ticker)
-        return [f for f in rows
-                if getattr(f, "filed", None)
-                and (start is None or f.filed >= start)
-                and (end is None or f.filed <= end)]
+        cur = self.connection.execute(
+            "SELECT filing_date AS filed, form FROM ingest.sec_filings WHERE ticker=%s AND filing_date<=%s ORDER BY filing_date",
+            (ticker, end or date(2100, 1, 1)),
+        )
+        return [f for f in cur.fetchall() if start is None or f["filed"] >= start]
 
     # ---------- bars ----------
 

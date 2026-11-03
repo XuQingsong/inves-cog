@@ -5,7 +5,7 @@ from pathlib import Path
 import json
 import logging
 import subprocess
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
@@ -96,7 +96,8 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
             if flags.get("rule_tiers"):
                 rule_tier_map[t] = {h["date"]: h["tier"] for h in tier_history(t, prices.get(t, {}), spy, states)}
             if flags.get("gap_judgment") or flags.get("chase_v2"):
-                filings = [{"filed": getattr(f, "filed", None), "form": getattr(f, "form", None)}
+                filings = [{"filed": f["filed"] if isinstance(f, dict) else getattr(f, "filed", None),
+                            "form": f["form"] if isinstance(f, dict) else getattr(f, "form", None)}
                            for f in loader.filings(t)]
                 gap_map[t] = gap_events(t, prices.get(t, {}), filings, states,
                                         lambda tt, dd: valuation_inputs(tt, dd, prices.get(tt, {}), states),
@@ -104,6 +105,29 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
             if spec.get("valuation_output"):
                 for d in sorted({d for rows in signals.get(t, {}).items() for d in [rows[0]]}):
                     valuation_rows.append(valuation_inputs(t, d, prices.get(t, {}), states))
+    chase_upgrades = {}
+    if flags.get("chase_v2"):
+        from .chase_v2 import chase_trigger
+        from .gap_judgment import _st
+        for t in tickers:
+            bars = prices.get(t, {})
+            fil_rows = loader.filings(t)
+            for day in sorted(signals.get(t, {})):
+                if not chase_trigger(bars, day):
+                    continue
+                for f in fil_rows:
+                    fd = f["filed"] if isinstance(f, dict) else getattr(f, "filed", None)
+                    fo = f["form"] if isinstance(f, dict) else getattr(f, "form", None)
+                    if fd and day < fd <= day + timedelta(days=45) and fo in ("10-Q", "10-K"):
+                        st_f = _st(states_map.get(t, []), fd)
+                        confirmed = bool(st_f and (st_f.values.get("rev_accel_pp") or 0) > 0 and
+                                         ((st_f.values.get("gross_margin_change_pp") or 0) > 0 or
+                                          (st_f.values.get("fcf_margin") or 0) > 0))
+                        val = valuation_inputs(t, fd, bars, states_map.get(t, []))
+                        chase_upgrades.setdefault(t, {})[fd] = {"confirmed": confirmed,
+                                                                "pe_pct": val.get("pe_pctile_3y")}
+                        break
+    engine.chase_upgrades = chase_upgrades
     prev_blocked = set()
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
