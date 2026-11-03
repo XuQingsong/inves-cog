@@ -21,6 +21,8 @@ class ExecutionEngine:
         self.cooldown = {}  # ticker -> {until, line, closes_above}
         self.flags_counts = {}
         self.flag_diag = {"fills": [], "expired": []}
+        self.chase_pending = {}  # ticker -> {cat, frac, stop, deadline, anchor, filled}
+        self.chase_lots = {}  # ticker -> {"qty":, "stop":} for gap-fill stop
         self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
@@ -135,7 +137,14 @@ class ExecutionEngine:
                 fill_px = min(op, order["limit"])
                 equity0 = self.equity(opening)
                 if equity0 is not None:
+                    cv = self.chase_pending.get(order["ticker"])
+                    if cv and not order.get("_chase_topup"):
+                        order = {**order, "amount": (order.get("amount") or 0) * cv["frac"]}
+                        order["qty"] = int((order["amount"] or 0) / fill_px) if order.get("amount") else order.get("qty")
                     detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
+                    if cv and detail:
+                        cv["filled"] = cv.get("filled", 0) + detail["qty"]
+                        self.chase_lots[order["ticker"]] = {"qty": detail["qty"], "stop": cv["stop"]}
                     if detail:
                         self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
                         self.limit_orders.pop(order.get("order_id"), None)
@@ -291,6 +300,22 @@ class ExecutionEngine:
                         scores[t] = dict(scores[t], entry_pass=False)
                 if cd["closes_above"] >= 3:
                     del self.cooldown[t]
+        if self.flags.get("chase_v2"):
+            from inves_cog.backtest.chase_v2 import tranche
+            for t, sc in scores.items():
+                if sc.get("chase_v2") and sc.get("entry_pass"):
+                    cv = sc["chase_v2"]
+                    self.chase_pending[t] = {"cat": cv["category"], "frac": cv["frac"],
+                                             "stop": cv["stop"], "anchor": cv["stop"],
+                                             "deadline": self.index + {"reasonable": 10, "stretched": 20,
+                                                                      "insufficient": 5, "narrative": 10}[cv["category"]],
+                                             "filled": 0}
+            # chase-tranche stop: close < pre-gap close -> sell chase lots
+            for t, lot in list(self.chase_lots.items()):
+                if prices.get(t) and prices[t] < lot["stop"]:
+                    self.queue(t, "sell_frac", "chase_stop", "gap-fill stop", fraction=1.0, shares=lot["qty"])
+                    del self.chase_lots[t]
+                    self.flags_counts["chase_stop"] = self.flags_counts.get("chase_stop", 0) + 1
         if self.index > self.swan_until:
             allowed = {t: s for t, s in scores.items() if self.mode == "replay_v18" or s.get("tradable", True)}
             buys.core_adds(self, allowed, values, equity, sold)
