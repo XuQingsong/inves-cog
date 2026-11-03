@@ -1,6 +1,7 @@
 """run_backtest — generalizes execution/replay.run_frozen onto the prod DB loader."""
 
 import copy
+from pathlib import Path
 import json
 import logging
 import subprocess
@@ -80,7 +81,8 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
     if flags.get("tier_lock"):
         import yaml
 
-        locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
+        cfg = Path(__file__).resolve().parents[3] / "config" / "v19_tiers.yaml"
+        locked = yaml.safe_load(open(cfg))["tiers"]
     rule_tier_map, gap_map, valuation_rows = {}, {}, []
     if flags.get("rule_tiers") or flags.get("gap_judgment") or spec.get("valuation_output"):
         from .rule_tiers import tier_history
@@ -101,8 +103,9 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
             if spec.get("valuation_output"):
                 for d in sorted({d for rows in signals.get(t, {}).items() for d in [rows[0]]}):
                     valuation_rows.append(valuation_inputs(t, d, prices.get(t, {}), states))
+    prev_blocked = set()
     for day in days:
-        daily = {t: signals[t][day] for t in tickers if day in signals[t]}
+        daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
             for t, sc in daily.items():
                 if t in locked:
@@ -125,7 +128,6 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                     else:
                         flag_counts["gap_allow"] = flag_counts.get("gap_allow", 0) + 1
         if flags.get("chase_block"):
-            prev_blocked = getattr(run_backtest, "_chase_prev", {})
             now_blocked = set()
             for t, sc in daily.items():
                 hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
@@ -135,7 +137,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                     flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
                     if t not in prev_blocked:  # distinct would-be order = start of a blocked streak
                         flag_counts["chase_orders"] = flag_counts.get("chase_orders", 0) + 1
-            run_backtest._chase_prev = now_blocked
+            prev_blocked = now_blocked
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:

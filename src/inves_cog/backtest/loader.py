@@ -37,13 +37,13 @@ class BacktestLoader:
 
     def states_for(self, ticker, extractor="fixed", end=None):
         """All PIT fin_state rows for a ticker (rule_tiers/gap evaluations)."""
-        rows = [s for s in getattr(self.fundamentals, "_store", {}).states
-                if s.ticker == ticker and s.extractor == extractor]
-        if not rows:
-            rows = self.fundamentals.read_shared_filings(ticker)
-        if end:
-            rows = [s for s in rows if getattr(s, "filed", None) and s.filed <= end]
-        return rows
+        from inves_cog.ingest.fundamentals.repository import state_from_row
+
+        cur = self.connection.execute(
+            "SELECT * FROM fundamentals.fin_state WHERE ticker=%s AND extractor=%s AND filed<=%s ORDER BY filed",
+            (ticker, extractor, end or date(2100, 1, 1)),
+        )
+        return [state_from_row(r) for r in cur.fetchall()]
 
     def filings(self, ticker, start=None, end=None):
         """SEC filing (filed, form) rows for cause classification."""
