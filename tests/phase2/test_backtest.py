@@ -235,9 +235,11 @@ def test_barometer_called_in_run_once_behavioral():
 def test_etf_stale_health_no_kwarg_collision():
     """The ETF stale path must not pass `now` both positionally and as a kwarg —
     that raises 'multiple values for argument now' → run_once dies with TypeError."""
-    import importlib.util, sys, os
-    from unittest.mock import MagicMock
+    import importlib.util
+    import os
+    import sys
     from datetime import datetime, timezone
+    from unittest.mock import MagicMock
 
     spec = importlib.util.spec_from_file_location(
         "schedule_flows", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py")
