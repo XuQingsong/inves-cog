@@ -246,3 +246,24 @@ def test_gap_judgment_narrative_blocks():
     bars[gap_day] = {"close": 115}  # +15% day vs flat history
     events = gap_events("X", bars, [], [], lambda t, d: {"pe_pctile_3y": 40}, days[0], days[-1])
     assert gap_day in events and events[gap_day]["cause"] == "narrative" and events[gap_day]["decision"] == "block"
+
+
+def test_gap_valuation_real_finstate():
+    """valuation_inputs + gap_events must read FinState.values, not flat attrs —
+    the prepared path feeds real FinState objects (no .net_debt attribute)."""
+    from inves_cog.backtest.valuation import valuation_inputs
+    from inves_cog.backtest.gap_judgment import gap_events
+    from inves_cog.ingest.fundamentals.state import FinState
+    from datetime import date, timedelta
+
+    days = [date(2020, 3, 2) + timedelta(days=i) for i in range(40)]
+    bars = {d: {"close": 100 + i} for i, d in enumerate(days)}
+    bars[days[30]] = {"close": bars[days[29]]["close"] * 1.2}
+    st = FinState(ticker="X", extractor="fixed", filed=days[0], period_end=days[0],
+                  values={"rev_accel_pp": 5, "gross_margin_change_pp": 1, "fcf_margin": 10,
+                          "shares": 1e6, "rev_ttm": 1e9, "ni_ttm": 1e8, "op_margin_ttm": 15,
+                          "net_debt": 5e7, "fcf_ttm": 9e7, "eps_ttm": 5})
+    val = valuation_inputs("X", days[30], bars, [st])
+    assert not val.get("missing") and val["ev_ebit"] is not None
+    events = gap_events("X", bars, [], [st], lambda t, d: val, days[0], days[-1])
+    assert events

@@ -45,7 +45,7 @@ def valuation_inputs(ticker, day, price_hist, states):
         "pe_trailing": round(pe, 1) if pe else None,
         "pe_pctile_3y": round(pe_pct, 1) if pe_pct is not None else None,
         "fcf_ni_divergence": round((v.get("fcf_ttm") or 0) - ni),
-        "net_debt_yoy": round((v.get("net_debt") or 0) - (prev.net_debt or 0)) if prev else None,
-        "shares_yoy": round(100 * ((v.get("shares") or 0) / prev.shares - 1), 2) if prev and prev.shares else None,
+        "net_debt_yoy": round((v.get("net_debt") or 0) - (pv.get("net_debt") or 0)) if prev else None,
+        "shares_yoy": round(100 * ((v.get("shares") or 0) / pv.get("shares") - 1), 2) if prev and pv.get("shares") else None,
         "rev_accel_pp": v.get("rev_accel_pp"),
     }
