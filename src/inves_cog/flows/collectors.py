@@ -447,7 +447,7 @@ def collect_etf_shares(http, connection, raw_dir, published_at=None, tickers=Non
             ("Flows:ETFShares:SSGA", [t for t in out if t in SSGA_TICKERS]),
         ):
             failed = [t for t in tickers if out[t] == 0]
-            stale = [t for t in tickers if latest_dates.get(t) and latest_dates[t] < prev_td]
+            stale = [t for t in tickers if prev_td and latest_dates.get(t) and latest_dates[t] < prev_td]
             note = ("failed: " + ",".join(failed) if failed else "") + (" stale:" + ",".join(stale) if stale else "")
             record_health(
                 connection,
