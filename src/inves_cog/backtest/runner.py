@@ -84,17 +84,18 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
         cfg = Path(__file__).resolve().parents[3] / "config" / "v19_tiers.yaml"
         locked = yaml.safe_load(open(cfg))["tiers"]
     rule_tier_map, gap_map, valuation_rows = {}, {}, []
-    if flags.get("rule_tiers") or flags.get("gap_judgment") or spec.get("valuation_output"):
+    states_map = {}
+    if flags.get("rule_tiers") or flags.get("gap_judgment") or flags.get("chase_v2") or spec.get("valuation_output"):
         from .rule_tiers import tier_history
         from .gap_judgment import gap_events
         from .valuation import valuation_inputs
 
         spy = prices.get("SPY", {})
         for t in tickers:
-            states = loader.states_for(t, end=end)
+            states = states_map[t] = loader.states_for(t, end=end)
             if flags.get("rule_tiers"):
                 rule_tier_map[t] = {h["date"]: h["tier"] for h in tier_history(t, prices.get(t, {}), spy, states)}
-            if flags.get("gap_judgment"):
+            if flags.get("gap_judgment") or flags.get("chase_v2"):
                 filings = [{"filed": getattr(f, "filed", None), "form": getattr(f, "form", None)}
                            for f in loader.filings(t)]
                 gap_map[t] = gap_events(t, prices.get(t, {}), filings, states,
@@ -117,16 +118,18 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                     sc["tier"] = rule_tier_map[t][max(past)]
         if flags.get("chase_v2"):
             from .chase_v2 import chase_trigger, category, tranche
+            from .valuation import valuation_inputs
             for t, sc in daily.items():
                 tr = chase_trigger(prices.get(t, {}), day)
                 if tr and sc.get("entry_pass"):
-                    cat = category(gap_map.get(t, {}).get(day) if gap_map else None, {})
+                    st = states_map.get(t, [])
+                    val = valuation_inputs(t, day, prices.get(t, {}), st) if st else {}
+                    cat = category(gap_map.get(t, {}).get(day) if gap_map else None, val)
                     sc["chase_v2"] = {"category": cat, "frac": tranche(cat), "stop": tr[1],
                                       "anchor": prices.get(t, {}).get(day, {}).get("close"),
-                                      "gap_mid": (tr[1] + prices.get(t, {}).get(day, {}).get("open", tr[1])) / 2,
-                                      "amount": sc.get("amount")}
+                                      "gap_mid": (tr[1] + prices.get(t, {}).get(day, {}).get("open", tr[1])) / 2}
                     flag_counts["chase_v2_" + cat] = flag_counts.get("chase_v2_" + cat, 0) + 1
-        if gap_map:
+        if gap_map and flags.get("gap_judgment"):
             for t, sc in daily.items():
                 ev = gap_map.get(t, {}).get(day)
                 if ev and sc.get("entry_pass"):

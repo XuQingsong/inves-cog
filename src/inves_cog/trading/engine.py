@@ -139,11 +139,11 @@ class ExecutionEngine:
                 if equity0 is not None:
                     cv = self.chase_pending.get(order["ticker"])
                     if cv and not order.get("_chase_topup"):
-                        order = {**order, "amount": (order.get("amount") or 0) * cv["frac"]}
-                        order["qty"] = int((order["amount"] or 0) / fill_px) if order.get("amount") else order.get("qty")
+                        order = {**order, "fraction": (order.get("fraction") or 0) * cv["frac"]}
+                        cv["planned_fraction"] = order["fraction"] / cv["frac"] if cv["frac"] else 0
                     detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
                     if cv and detail:
-                        cv["filled"] = cv.get("filled", 0) + detail["qty"]
+                        cv["filled_amount"] = cv.get("filled_amount", 0) + detail["qty"] * fill_px
                         self.chase_lots[order["ticker"]] = {"qty": detail["qty"], "stop": cv["stop"]}
                     if detail:
                         self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
@@ -314,7 +314,7 @@ class ExecutionEngine:
                         "first": self.index, "planned_amount": cv.get("amount") or 0, "filled_amount": 0.0,
                         "deadline": self.index + {"reasonable": 10, "stretched": 20,
                                                   "insufficient": 5, "narrative": 10}[cat],
-                        "signal_day": day, "topped": False, "closes_since": 0, "held_gap": True}
+                        "signal_day": day, "tier": sc.get("tier"), "topped": False, "closes_since": 0, "held_gap": True}
             # top-up evaluation: per-category conditions, deadline/expiry
             for t, cv in list(self.chase_pending.items()):
                 hist = hist_of.get(t) or []
@@ -344,7 +344,8 @@ class ExecutionEngine:
                         done = cv["held_gap"]
                 if done and not cv["topped"] and cv["frac"] > 0:
                     amt = (cv["planned_amount"] - cv["filled_amount"]) if cv["planned_amount"] else None
-                    self.queue(t, "buy_core", "chase_topup", "chase topup", amount=amt, _chase_topup=True)
+                    pf = cv.get("planned_fraction") or 0
+                    self.queue(t, "buy_to", "M-63", "追高补仓", fraction=max(0.0, pf * (1 - cv["frac"])), tier=cv.get("tier") or "normal", _chase_topup=True)
                     cv["topped"] = True
                     self.flags_counts["chase_topup"] = self.flags_counts.get("chase_topup", 0) + 1
                 if self.index >= cv["deadline"] or cv["topped"]:
@@ -352,7 +353,7 @@ class ExecutionEngine:
             # chase-tranche stop: close < pre-gap close -> sell ONLY chase lots
             for t, lot in list(self.chase_lots.items()):
                 if prices.get(t) and prices[t] < lot["stop"]:
-                    self.queue(t, "sell_frac", "chase_stop", "gap-fill stop", fraction=1.0, shares=lot["qty"])
+                    self.queue(t, "sell_frac", "M-64", "缺口回补止损", fraction=1.0, shares=lot["qty"])
                     del self.chase_lots[t]
                     self.flags_counts["chase_stop"] = self.flags_counts.get("chase_stop", 0) + 1
         if self.index > self.swan_until:
