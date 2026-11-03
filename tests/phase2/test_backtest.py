@@ -267,3 +267,18 @@ def test_gap_valuation_real_finstate():
     assert not val.get("missing") and val["ev_ebit"] is not None
     events = gap_events("X", bars, [], [st], lambda t, d: val, days[0], days[-1])
     assert events
+
+
+def test_chase_v2_trigger_and_sizing():
+    """chase_v2: trigger on 2x-vol 5d or 3x-vol 1d; tranche by category."""
+    from inves_cog.backtest.chase_v2 import chase_trigger, category, tranche
+    from datetime import date, timedelta
+    days = [date(2020, 3, 2) + timedelta(days=i) for i in range(80)]
+    bars = {d: {"close": 100 + i * 0.05} for i, d in enumerate(days)}
+    for d in days[-5:]:
+        bars[d] = {"close": bars[d]["close"] * 1.05}  # ~25% run-up
+    tr = chase_trigger(bars, days[-1])
+    assert tr and tr[0]
+    assert tranche("reasonable") == 0.5 and tranche("narrative") == 0.0
+    assert category({"cause": "narrative"}, {}) == "narrative"
+    assert category({"cause": "earnings", "confirmed": True}, {"pe_pctile_3y": 30}) == "reasonable"

@@ -115,6 +115,14 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                 past = [d for d in rule_tier_map.get(t, {}) if d <= day]
                 if past:
                     sc["tier"] = rule_tier_map[t][max(past)]
+        if flags.get("chase_v2"):
+            from .chase_v2 import chase_trigger, category, tranche
+            for t, sc in daily.items():
+                tr = chase_trigger(prices.get(t, {}), day)
+                if tr and sc.get("entry_pass"):
+                    cat = category(gap_map.get(t, {}).get(day) if gap_map else None, {})
+                    sc["chase_v2"] = {"category": cat, "frac": tranche(cat), "stop": tr[1]}
+                    flag_counts["chase_v2_" + cat] = flag_counts.get("chase_v2_" + cat, 0) + 1
         if gap_map:
             for t, sc in daily.items():
                 ev = gap_map.get(t, {}).get(day)
