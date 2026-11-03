@@ -230,3 +230,37 @@ def test_barometer_called_in_run_once_behavioral():
     finally:
         bmod.run_intraday, bmod.persist = orig_run, orig_persist
     assert any("barometer_intraday" in str(t) for t in persisted), f"persist not called: {persisted}"
+
+
+def test_etf_stale_health_no_kwarg_collision():
+    """The ETF stale path must not pass `now` both positionally and as a kwarg —
+    that raises 'multiple values for argument now' → run_once dies with TypeError."""
+    import importlib.util
+    import os
+    import sys
+    from datetime import datetime, timezone
+    from unittest.mock import MagicMock
+
+    spec = importlib.util.spec_from_file_location(
+        "schedule_flows", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["schedule_flows"] = mod
+    spec.loader.exec_module(mod)
+    clock = MagicMock()
+    clock.now_utc.return_value = datetime(2026, 11, 3, 5, 0, tzinfo=timezone.utc)
+    conn = MagicMock()
+    mod._load_state = lambda: {}
+    mod._save_state = lambda s: None
+    mod.trading_day = lambda d: False  # non-trading → hits the etf-stale path if keyed
+    mod.polite_http = lambda: MagicMock()
+    mod.collect_occ = lambda *a, **k: {"rows": 0}
+    mod.collect_occ_series = lambda *a, **k: {"symbol": "x", "rows": 1}
+    mod.collect_etf_shares = lambda *a, **k: {"rows": 0}
+    mod._etf_done = lambda c, d: False  # not done → stale branch fires
+    mod._universe = lambda: []
+    mod.record_health_agg = lambda *a, **k: None
+    mod.record_health = lambda *a, **k: a  # return the call args
+    # run at 08:00 with stale key pre-set → hits record_health without kwarg collision
+    result = mod.run_once(clock, {}, conn=conn)
+    assert result["status"] == "ok"  # no TypeError abort
