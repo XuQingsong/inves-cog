@@ -238,12 +238,18 @@ def test_etf_stale_health_no_kwarg_collision():
     import importlib.util, sys, os
     from unittest.mock import MagicMock
     from datetime import datetime, timezone
+
     spec = importlib.util.spec_from_file_location(
-        "schedule_flows", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py"))
-    mod = importlib.util.module_from_spec(spec); sys.modules["schedule_flows"] = mod; spec.loader.exec_module(mod)
-    clock = MagicMock(); clock.now_utc.return_value = datetime(2026, 11, 3, 5, 0, tzinfo=timezone.utc)
+        "schedule_flows", os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "schedule_flows.py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["schedule_flows"] = mod
+    spec.loader.exec_module(mod)
+    clock = MagicMock()
+    clock.now_utc.return_value = datetime(2026, 11, 3, 5, 0, tzinfo=timezone.utc)
     conn = MagicMock()
-    mod._load_state = lambda: {}; mod._save_state = lambda s: None
+    mod._load_state = lambda: {}
+    mod._save_state = lambda s: None
     mod.trading_day = lambda d: False  # non-trading → hits the etf-stale path if keyed
     mod.polite_http = lambda: MagicMock()
     mod.collect_occ = lambda *a, **k: {"rows": 0}
