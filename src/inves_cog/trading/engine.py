@@ -301,42 +301,55 @@ class ExecutionEngine:
                 if cd["closes_above"] >= 3:
                     del self.cooldown[t]
         if self.flags.get("chase_v2"):
-            from inves_cog.backtest.chase_v2 import tranche
+            hist_of = (history or {})
             for t, sc in scores.items():
-                if sc.get("chase_v2") and sc.get("entry_pass"):
+                if sc.get("chase_v2") and sc.get("entry_pass") and t not in self.chase_pending and t not in self.chase_lots:
                     cv = sc["chase_v2"]
-                    self.chase_pending[t] = {"cat": cv["category"], "frac": cv["frac"],
-                                             "stop": cv["stop"], "anchor": cv["stop"],
-                                             "deadline": self.index + {"reasonable": 10, "stretched": 20,
-                                                                      "insufficient": 5, "narrative": 10}[cv["category"]],
-                                             "filled": 0}
-            # top-up evaluation: conditions per category, deadline/expiry
+                    cat = cv["category"]
+                    if cat == "narrative":
+                        sc["entry_pass"] = False  # first tranche 0 — no buy today
+                    self.chase_pending[t] = {
+                        "cat": cat, "frac": cv["frac"], "stop": cv["stop"],
+                        "anchor": cv.get("anchor") or cv["stop"], "gap_mid": cv.get("gap_mid") or cv["stop"],
+                        "first": self.index, "planned_amount": cv.get("amount") or 0, "filled_amount": 0.0,
+                        "deadline": self.index + {"reasonable": 10, "stretched": 20,
+                                                  "insufficient": 5, "narrative": 10}[cat],
+                        "signal_day": day, "topped": False, "closes_since": 0, "held_gap": True}
+            # top-up evaluation: per-category conditions, deadline/expiry
             for t, cv in list(self.chase_pending.items()):
-                hist = (history or {}).get(t) or []
+                hist = hist_of.get(t) or []
                 close = hist[-1] if hist else None
                 if close is None:
                     continue
+                age = self.index - cv["first"]
+                cv["closes_since"] += 1
+                if close < cv["stop"]:
+                    cv["held_gap"] = False
+                ma20 = sum(hist[-20:]) / 20 if len(hist) >= 20 else None
                 done = False
-                if cv["cat"] == "reasonable" and self.index - cv.get("first", self.index) >= 5:
-                    done = close >= cv["stop"] or (len(hist) >= 20 and close >= sum(hist[-20:]) / 20)
+                if cv["cat"] == "reasonable" and age >= 5:
+                    held = cv["held_gap"] and cv["closes_since"] >= 5
+                    touched = ma20 is not None and close >= ma20
+                    done = held or touched
                 elif cv["cat"] == "stretched":
-                    done = close <= cv["anchor"] or (len(hist) >= 20 and close <= sum(hist[-20:]) / 20)
+                    low = (hist_of.get(t) or [{}])[-1] if hist else None
+                    done = close <= cv["anchor"] or (ma20 is not None and close <= ma20)
                 elif cv["cat"] == "insufficient":
-                    done = self.index - cv.get("first", self.index) >= 5 and close >= cv["stop"]
+                    done = age >= 5 and cv["held_gap"]
                 elif cv["cat"] == "narrative":
-                    if self.index - cv.get("first", self.index) >= 10:
-                        cv["cat"] = "insufficient"  # re-class after 10 sessions if gap held
-                        cv["frac"] = 1 / 3
+                    if age >= 10 and cv["held_gap"]:
+                        cv["cat"] = "insufficient"; cv["frac"] = 1 / 3
+                        cv["planned_amount"] = cv.get("planned_amount") or 0
                         cv["deadline"] = self.index + 5
-                        done = close >= cv["stop"]
-                if done and not cv.get("topped"):
-                    self.queue(t, "buy_core", "chase_topup", "chase topup", amount=cv.get("amount") or 0,
-                               _chase_topup=True)
+                        done = cv["held_gap"]
+                if done and not cv["topped"] and cv["frac"] > 0:
+                    amt = (cv["planned_amount"] - cv["filled_amount"]) if cv["planned_amount"] else None
+                    self.queue(t, "buy_core", "chase_topup", "chase topup", amount=amt, _chase_topup=True)
                     cv["topped"] = True
                     self.flags_counts["chase_topup"] = self.flags_counts.get("chase_topup", 0) + 1
-                if self.index > cv["deadline"] or cv.get("topped"):
+                if self.index >= cv["deadline"] or cv["topped"]:
                     del self.chase_pending[t]
-            # chase-tranche stop: close < pre-gap close -> sell chase lots
+            # chase-tranche stop: close < pre-gap close -> sell ONLY chase lots
             for t, lot in list(self.chase_lots.items()):
                 if prices.get(t) and prices[t] < lot["stop"]:
                     self.queue(t, "sell_frac", "chase_stop", "gap-fill stop", fraction=1.0, shares=lot["qty"])

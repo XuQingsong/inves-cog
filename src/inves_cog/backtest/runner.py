@@ -121,7 +121,10 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                 tr = chase_trigger(prices.get(t, {}), day)
                 if tr and sc.get("entry_pass"):
                     cat = category(gap_map.get(t, {}).get(day) if gap_map else None, {})
-                    sc["chase_v2"] = {"category": cat, "frac": tranche(cat), "stop": tr[1]}
+                    sc["chase_v2"] = {"category": cat, "frac": tranche(cat), "stop": tr[1],
+                                      "anchor": prices.get(t, {}).get(day, {}).get("close"),
+                                      "gap_mid": (tr[1] + prices.get(t, {}).get(day, {}).get("open", tr[1])) / 2,
+                                      "amount": sc.get("amount")}
                     flag_counts["chase_v2_" + cat] = flag_counts.get("chase_v2_" + cat, 0) + 1
         if gap_map:
             for t, sc in daily.items():
