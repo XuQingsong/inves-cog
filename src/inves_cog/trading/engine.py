@@ -310,6 +310,32 @@ class ExecutionEngine:
                                              "deadline": self.index + {"reasonable": 10, "stretched": 20,
                                                                       "insufficient": 5, "narrative": 10}[cv["category"]],
                                              "filled": 0}
+            # top-up evaluation: conditions per category, deadline/expiry
+            for t, cv in list(self.chase_pending.items()):
+                hist = (history or {}).get(t) or []
+                close = hist[-1] if hist else None
+                if close is None:
+                    continue
+                done = False
+                if cv["cat"] == "reasonable" and self.index - cv.get("first", self.index) >= 5:
+                    done = close >= cv["stop"] or (len(hist) >= 20 and close >= sum(hist[-20:]) / 20)
+                elif cv["cat"] == "stretched":
+                    done = close <= cv["anchor"] or (len(hist) >= 20 and close <= sum(hist[-20:]) / 20)
+                elif cv["cat"] == "insufficient":
+                    done = self.index - cv.get("first", self.index) >= 5 and close >= cv["stop"]
+                elif cv["cat"] == "narrative":
+                    if self.index - cv.get("first", self.index) >= 10:
+                        cv["cat"] = "insufficient"  # re-class after 10 sessions if gap held
+                        cv["frac"] = 1 / 3
+                        cv["deadline"] = self.index + 5
+                        done = close >= cv["stop"]
+                if done and not cv.get("topped"):
+                    self.queue(t, "buy_core", "chase_topup", "chase topup", amount=cv.get("amount") or 0,
+                               _chase_topup=True)
+                    cv["topped"] = True
+                    self.flags_counts["chase_topup"] = self.flags_counts.get("chase_topup", 0) + 1
+                if self.index > cv["deadline"] or cv.get("topped"):
+                    del self.chase_pending[t]
             # chase-tranche stop: close < pre-gap close -> sell chase lots
             for t, lot in list(self.chase_lots.items()):
                 if prices.get(t) and prices[t] < lot["stop"]:
