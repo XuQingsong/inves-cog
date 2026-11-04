@@ -813,3 +813,5 @@ A-029 进行中：本地 62 只个案已完成 base/F1/F3/F4/F5/veto（193/185/2
 A-029 进行中：已推送基于 p2-v1 的[草稿 PR121](https://github.com/XuQingsong/inves-cog/pull/121)，head `01fae25d45a3fb0032a1bbfff56a15752fc52e04`，[对应 phase1-blocking](https://github.com/XuQingsong/inves-cog/actions/runs/41862892734/job/126689319942) 已排队，尚无结果。先失败测试后实现按实际成交与交易所交易日核对短持有，专项 15 通过。部分滚动评估尚无结果文件，完整组合仍待晴雨表授权窗口。草稿用于提前运行 CI，尚未送最终验收。
 
 A-029 进行中（2026-11-05 北京）：Mac 28 起点部分滚动已实际完成，五组结果 `/private/tmp/a029-rolling-partial.json`。收益差中位数（百分点）F1 +0.391、F3 0、F4 −5.656、F5 −8.118、veto +65.598；收益胜出占比 57.1%、39.3%、35.7%、39.3%、75.0%。这是固定池回放，非完整组合结论。逐笔部分评估已单进程启动，尚无结果。PR121 同一 head 的 phase1-blocking 仍排队。F2 与组合继续等生产只读窗口，F6 缺口待解决。
+
+A-029 进行中：五组逐笔结果 `/private/tmp/a029-signals-partial.json`，每组 259 笔基线买入。当前匹配用同标的、同信号日成交，缺配对包含仓位路径差异，不能直接归为规则否决。veto 同日匹配 117、缺配对 142，后者 20/60 日收益中位 +1.9%/+7.5%。F6 本地 SEC 缓存离线复算四个日期证实 V 仍缺 EPS TTM/增速、SNDK 仍缺第四季度与 EPS 增速。证据 `/private/tmp/a029-financial-probe.json`，未改本地或生产表。下一步检查原始事实可用性及修复可行范围，F2 仍等授权窗。PR121 对应 CI 仍排队。
