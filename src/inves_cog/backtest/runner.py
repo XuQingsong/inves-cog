@@ -10,6 +10,7 @@ from pathlib import Path
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
+from inves_cog.backtest.policies import BacktestEngine
 from inves_cog.clock import FrozenClock
 from inves_cog.trading.engine import ExecutionEngine
 from inves_cog.trading.execution.signals import enrich
@@ -69,7 +70,8 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     mode = spec.get("mode", "paper")
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
-    engine = ExecutionEngine(
+    engine_type = BacktestEngine if (spec.get("flags") or {}).get("buy_consistency") else ExecutionEngine
+    engine = engine_type(
         clock=clock,
         initial_cash=initial,
         mode=mode,

@@ -1,4 +1,5 @@
 """A029 regression tests for optional execution policies."""
+
 from datetime import datetime, timezone
 
 import pytest
