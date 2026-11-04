@@ -80,3 +80,22 @@ def test_a029_ceiling_gate_uses_strictly_previous_friday_and_preserves_other_gat
     apply_ceiling_gate(score, panel, [prior, today], "NVDA", today)
     assert not score["entry_pass"]
     assert not apply_ceiling_gate(score, panel, [prior, today], "OUTSIDE", today)
+
+
+@pytest.mark.parametrize(
+    "below_days, depth_atr, fear, quality, expected",
+    [(1, 0.5, 0, 80, None), (2, 0.5, 0, 80, 0.5), (1, 1.1, 0, 80, 0.5),
+     (1, 0.5, 3, 80, 0.8), (1, 0.5, 0, 70, 0.8)],
+)
+def test_a029_breakdown_confirmation(below_days, depth_atr, fear, quality, expected):
+    subject = engine({"breakdown_confirm": True})
+    subject.positions["NVDA"] = new_position(
+        shares=5, price=100, tier="normal", index=0, state_version="",
+        entry_books={"quality": 80, "growth": 80},
+    )
+    subject.scores = {"NVDA": {
+        "tier": "normal", "books": {"quality": quality, "growth": 80},
+        "breakdown_below_days": below_days, "breakdown_depth_atr": depth_atr, "fear_level": fear,
+    }}
+    subject.queue("NVDA", "sell_frac", "M-55", "破位减仓", fraction=0.8)
+    assert (subject.pending[0]["fraction"] if subject.pending else None) == expected
