@@ -32,7 +32,10 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     """
     global _G_PREPARED
     starts = starts or quarter_starts()
-    _G_PREPARED = prepare_inputs(connection, {**spec, "start": min(starts)})
+    _G_PREPARED = prepare_inputs(
+        connection,
+        {**spec, "start": min(starts), "load_fear_levels": any(f.get("breakdown_confirm") for f in variants.values())},
+    )
     jobs = []
     for st in starts:
         jobs.append({**spec, "start": st, "label": f"base-{st}", "flags": {}})

@@ -10,7 +10,7 @@ from pathlib import Path
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
-from inves_cog.backtest.policies import BacktestEngine, apply_ceiling_gate
+from inves_cog.backtest.policies import BacktestEngine, apply_ceiling_gate, breakdown_depth_atr
 from inves_cog.clock import FrozenClock
 from inves_cog.trading.engine import ExecutionEngine
 from inves_cog.trading.execution.signals import enrich
@@ -53,7 +53,15 @@ def prepare_inputs(connection, spec):
         )
         signals[t] = enrich(snaps, loader.state_asof, t, extractor)
     vix = loader.vix(end)
-    return {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
+    prepared = {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
+    if spec.get("load_fear_levels") or (spec.get("flags") or {}).get("breakdown_confirm"):
+        rows = connection.execute(
+            "SELECT date, fear_level FROM flows.barometer_daily WHERE date BETWEEN %s AND %s "
+            "AND asof < ((date + 1)::timestamp AT TIME ZONE 'America/New_York')",
+            (start, end),
+        ).fetchall()
+        prepared["fear_levels"] = {row["date"]: row["fear_level"] for row in rows}
+    return prepared
 
 
 def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
@@ -71,7 +79,11 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     flags = spec.get("flags") or {}
-    engine_type = BacktestEngine if any(flags.get(k) for k in ("buy_consistency", "watch_promote")) else ExecutionEngine
+    engine_type = (
+        BacktestEngine
+        if any(flags.get(k) for k in ("buy_consistency", "watch_promote", "breakdown_confirm"))
+        else ExecutionEngine
+    )
     engine = engine_type(
         clock=clock,
         initial_cash=initial,
@@ -164,6 +176,10 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     engine.chase_upgrades = chase_upgrades
     prev_blocked = set()
     ceiling_streaks = {}
+    fear_levels = pre.get("fear_levels", {})
+    if flags.get("breakdown_confirm") and "fear_levels" not in pre:
+        raise ValueError("F2 requires the local PIT market-risk input in prepared data")
+    bar_dates = {t: sorted(rows) for t, rows in prices.items()} if flags.get("breakdown_confirm") else {}
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
@@ -245,6 +261,17 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                         "quintile": overval_quintile(qmap, qdays, t, day),
                         "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
                     }
+                )
+        if flags.get("breakdown_confirm"):
+            for ticker, score in daily.items():
+                bars = prices.get(ticker, {})
+                index = bisect.bisect_right(bar_dates.get(ticker, ()), day)
+                recent = [bars[d] for d in bar_dates.get(ticker, ())[max(0, index - 15) : index]]
+                tech = score.get("tech") or {}
+                score["fear_level"] = fear_levels.get(day)
+                score["breakdown_below_days"] = score.get("consec_below200", 0)
+                score["breakdown_depth_atr"] = breakdown_depth_atr(
+                    recent, tech.get("price"), tech.get("price_vs_ma200")
                 )
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():

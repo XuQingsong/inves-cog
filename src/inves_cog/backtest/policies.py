@@ -41,6 +41,37 @@ class BacktestEngine(ExecutionEngine):
             )
             self.flags_counts["watch_promoted"] = self.flags_counts.get("watch_promoted", 0) + 1
 
+    def fill(self, day, opening, execution_scores=None, **kwargs):
+        previously_held = set(self.positions)
+        fills = super().fill(day, opening, execution_scores, **kwargs)
+        if self.flags.get("breakdown_confirm"):
+            for fill in fills:
+                ticker = fill["ticker"]
+                if fill.get("rule_ids") == ["M-55"] and ticker in self.positions:
+                    self.positions[ticker]["breakdown_half_done"] = True
+            for ticker in self.positions.keys() - previously_held:
+                score = self.scores.get(ticker) or {}
+                self.positions[ticker]["entry_books"] = dict(score.get("books") or {})
+        return fills
+
+    def restore_sell_stage(self, ticker, position):
+        old_stage = getattr(self, "_stages_before_decision", {}).get(ticker)
+        if old_stage is not None:
+            position["stage"] = old_stage
+
+    def confirm_breakdown(self, ticker, values):
+        position = self.positions[ticker]
+        score = self.scores[ticker]
+        if fundamentals_weakened(position, score) or (score.get("fear_level") or 0) >= 3:
+            return values
+        if score.get("breakdown_below_days", 0) < 2 and (score.get("breakdown_depth_atr") or 0) <= 1:
+            self.restore_sell_stage(ticker, position)
+            self.flags_counts["breakdown_delayed"] = self.flags_counts.get("breakdown_delayed", 0) + 1
+            return None
+        if not position.get("breakdown_half_done"):
+            return {**values, "fraction": 0.5, "breakdown_first_half": True}
+        return values
+
     def queue(self, ticker, action, rule, label, **values):
         if self.flags.get("buy_consistency"):
             position = self.positions.get(ticker)
@@ -56,11 +87,13 @@ class BacktestEngine(ExecutionEngine):
                 red_exit = rule == "M-50" and FUNDAMENTAL_RED_LINES.intersection((score or {}).get("red_lines", []))
                 if rule != "M-51" and not red_exit:
                     if rule in {"M-55", "M-56"}:
-                        old_stage = getattr(self, "_stages_before_decision", {}).get(ticker)
-                        if old_stage is not None:
-                            position["stage"] = old_stage
+                        self.restore_sell_stage(ticker, position)
                     self.flags_counts["minimum_hold_blocked"] = self.flags_counts.get("minimum_hold_blocked", 0) + 1
                     return None
+        if rule == "M-55" and self.flags.get("breakdown_confirm"):
+            values = self.confirm_breakdown(ticker, values)
+            if values is None:
+                return None
         return super().queue(ticker, action, rule, label, **values)
 
 
@@ -85,3 +118,35 @@ def apply_ceiling_gate(score, panel, fridays, ticker, day):
     score["gate_pass"] = gate
     score["entry_pass"] = gate and bool(score.get("m32_ok")) and not EXCLUDED.intersection(score.get("red_lines", ()))
     return True
+
+
+def fundamentals_weakened(position, score):
+    if (FUNDAMENTAL_RED_LINES | {"流动性偏紧"}).intersection(score.get("red_lines", ())):
+        return True
+    thresholds = PARAMS["sell"]
+    tier = position["tier_now"]
+    entry = position.get("entry_books", {})
+    for book in ("quality", "growth"):
+        value = score["books"].get(book)
+        if value is None:
+            continue
+        if value <= thresholds[f"death_{book}"][tier] + 5:
+            return True
+        original = entry.get(book)
+        if original is not None and original - value >= 10:
+            return True
+    return False
+
+
+def breakdown_depth_atr(rows, close, deviation):
+    """Distance below MA200 in units of 14-session mean true range."""
+    if len(rows) != 15 or close is None or deviation is None or not -100 < deviation < 0:
+        return None
+    ranges = []
+    for previous, current in zip(rows[:-1], rows[1:], strict=True):
+        high, low, prior = current.get("high"), current.get("low"), previous.get("close")
+        if None in (high, low, prior):
+            return None
+        ranges.append(max(high - low, abs(high - prior), abs(low - prior)))
+    atr = sum(ranges) / 14
+    return (close / (1 + deviation / 100) - close) / atr if atr > 0 else None
