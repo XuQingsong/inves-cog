@@ -23,7 +23,6 @@ def build_panel(conn, tickers, prices, states_map, spy):
     out = []
     fridays_list = [f for f in fridays(date(2018, 1, 5), date(2026, 10, 30))]
     spy_close = {d: r["close"] for d, r in spy.items()}
-    spy_sorted = sorted(spy_close)
     for t in tickers:
         bars = prices.get(t, {})
         states = states_map.get(t, [])
