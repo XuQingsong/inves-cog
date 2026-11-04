@@ -32,3 +32,25 @@ def test_a029_minimum_hold_blocks_price_exit_but_keeps_disaster():
     subject.queue("NVDA", "sell_frac", "M-55", "破位减仓", fraction=0.5)
     subject.queue("NVDA", "sell_all", "M-51", "灾难止损")
     assert [order["rule_ids"] for order in subject.pending] == [["M-51"]]
+
+
+@pytest.mark.parametrize("gate_pass", [True, False])
+def test_a029_watch_promotion_precedes_swing_exit(monkeypatch, gate_pass):
+    from inves_cog.trading.engine import ExecutionEngine
+    from inves_cog.trading.execution.sells import swing_exit
+
+    subject = engine({"watch_promote": True})
+    subject.positions["NVDA"] = new_position(
+        shares=5, price=100, tier="attack", index=0, state_version="", swing_only=True, swing_shares=5
+    )
+    score = {"tier": "attack", "gate_pass": gate_pass, "tech": {"price": 125, "vol20": 1, "dev50": 100}}
+
+    def evaluate_exit(engine, day, scores, **kwargs):
+        return swing_exit(engine.positions["NVDA"], scores["NVDA"]["tech"])
+
+    monkeypatch.setattr(ExecutionEngine, "decide", evaluate_exit)
+    order = subject.decide(subject.signal_date, {"NVDA": score}, prices={"NVDA": 125})
+    position = subject.positions["NVDA"]
+    assert position["swing_only"] is (not gate_pass)
+    assert position["swing_shares"] == (0 if gate_pass else 5)
+    assert (order is None) is gate_pass
