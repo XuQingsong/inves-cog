@@ -58,6 +58,7 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "rdd": m.get("return_over_maxdd"),
                     "base_ret": base["return_pct"],
                     "base_dd": base["max_drawdown_pct"],
+                    "base_rdd": base.get("return_over_maxdd"),
                     "beats": m["return_pct"] > base["return_pct"],
                 }
             )
@@ -70,16 +71,28 @@ def _distribution(rows):
         rs = [r for r in rows if r["variant"] == name]
         ret_diffs = [r["ret"] - r["base_ret"] for r in rs]
         dd_diffs = [r["dd"] - r["base_dd"] for r in rs]
+        rdd_diffs = [r["rdd"] - r["base_rdd"] for r in rs if r["rdd"] is not None and r["base_rdd"] is not None]
         out[name] = {
             "n_starts": len(rs),
             "beats_baseline_pct": round(100 * sum(r["beats"] for r in rs) / len(rs), 1),
-            "ret_diff_median": round(statistics.median(ret_diffs), 1),
-            "ret_diff_q25": round(sorted(ret_diffs)[len(ret_diffs) // 4], 1),
-            "ret_diff_q75": round(sorted(ret_diffs)[3 * len(ret_diffs) // 4], 1),
-            "dd_diff_median": round(statistics.median(dd_diffs), 1),
+            **_quantiles("ret_diff", ret_diffs),
+            **_quantiles("dd_diff", dd_diffs),
+            **_quantiles("rdd_diff", rdd_diffs),
             "rows": rs,
         }
     return out
+
+
+def _quantiles(prefix, values):
+    if len(values) >= 2:
+        q25, _, q75 = statistics.quantiles(values, n=4, method="inclusive")
+    else:
+        q25 = q75 = values[0] if values else None
+    return {
+        prefix + "_median": statistics.median(values) if values else None,
+        prefix + "_q25": q25,
+        prefix + "_q75": q75,
+    }
 
 
 def signal_level_eval(connection, spec, variants, *, lookahead=(20, 60), prepared=None):
