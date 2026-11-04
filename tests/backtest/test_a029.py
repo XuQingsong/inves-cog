@@ -54,3 +54,29 @@ def test_a029_watch_promotion_precedes_swing_exit(monkeypatch, gate_pass):
     assert position["swing_only"] is (not gate_pass)
     assert position["swing_shares"] == (0 if gate_pass else 5)
     assert (order is None) is gate_pass
+
+
+def test_a029_ceiling_gate_uses_strictly_previous_friday_and_preserves_other_gates():
+    from datetime import date
+
+    from inves_cog.backtest.policies import apply_ceiling_gate
+
+    prior, today = date(2026, 10, 23), date(2026, 10, 30)
+    panel = {
+        prior: {"m8": {"NVDA": 10, "A": 20, "B": 30, "C": 40, "D": 50}},
+        today: {"m8": {"NVDA": 50, "A": 20, "B": 30, "C": 40, "D": 10}},
+    }
+    score = {
+        "tier": "normal",
+        "books": {"quality": 100, "growth": 100, "valuation": 0, "timing": 100},
+        "red_lines": [],
+        "m32_ok": True,
+        "entry_pass": False,
+        "gate_pass": False,
+    }
+    assert apply_ceiling_gate(score, panel, [prior, today], "NVDA", today)
+    assert score["entry_pass"]
+    score["books"]["quality"] = 0
+    apply_ceiling_gate(score, panel, [prior, today], "NVDA", today)
+    assert not score["entry_pass"]
+    assert not apply_ceiling_gate(score, panel, [prior, today], "OUTSIDE", today)
