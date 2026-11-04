@@ -81,7 +81,9 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     flags = spec.get("flags") or {}
     engine_type = (
         BacktestEngine
-        if any(flags.get(k) for k in ("buy_consistency", "watch_promote", "breakdown_confirm"))
+        if any(
+            flags.get(k) for k in ("buy_consistency", "watch_promote", "breakdown_confirm", "reentry_after_price_exit")
+        )
         else ExecutionEngine
     )
     engine = engine_type(

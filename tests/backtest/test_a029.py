@@ -110,14 +110,20 @@ def test_a029_breakdown_confirmation(below_days, depth_atr, fear, quality, expec
     assert (subject.pending[0]["fraction"] if subject.pending else None) == expected
 
 
-@pytest.mark.parametrize("closes,quality,veto,expected", [(2, 90, False, False), (3, 90, False, True),
-                                                          (3, 70, False, False), (3, 90, True, False)])
+@pytest.mark.parametrize(
+    "closes,quality,veto,expected",
+    [(2, 90, False, False), (3, 90, False, True), (3, 70, False, False), (3, 90, True, False)],
+)
 def test_a029_price_reentry_only_replaces_valuation_gate(closes, quality, veto, expected):
     from inves_cog.backtest.policies import allow_price_reentry
 
     score = {
-        "tier": "normal", "books": {"quality": quality, "growth": 90, "valuation": 0, "timing": 90},
-        "red_lines": [], "m32_ok": True, "entry_pass": False, "overval_veto": veto,
+        "tier": "normal",
+        "books": {"quality": quality, "growth": 90, "valuation": 0, "timing": 90},
+        "red_lines": [],
+        "m32_ok": True,
+        "entry_pass": False,
+        "overval_veto": veto,
     }
     previous = {"tier_now": "normal", "entry_books": {"quality": 90, "growth": 90}}
     assert allow_price_reentry(score, previous, closes) is expected

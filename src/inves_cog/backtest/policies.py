@@ -11,11 +11,27 @@ FUNDAMENTAL_RED_LINES = {"现金流为负且营收下滑", "营收与EPS同时�
 
 
 class BacktestEngine(ExecutionEngine):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.price_exit_recovery = {}
+
     def decide(self, day, scores, **kwargs):
         self._stages_before_decision = {ticker: position["stage"] for ticker, position in self.positions.items()}
         if self.flags.get("watch_promote"):
             self.promote_watch_positions(scores, kwargs["prices"])
+        if self.flags.get("reentry_after_price_exit"):
+            scores = self.apply_reentry(scores)
         return super().decide(day, scores, **kwargs)
+
+    def apply_reentry(self, scores):
+        adjusted = dict(scores)
+        for ticker, recovery in self.price_exit_recovery.items():
+            score = dict(scores.get(ticker) or {})
+            above = (score.get("tech", {}).get("price_vs_ma200") or 0) > 0
+            recovery["closes"] = recovery["closes"] + 1 if above else 0
+            if allow_price_reentry(score, recovery["position"], recovery["closes"]):
+                adjusted[ticker] = score
+        return adjusted
 
     def promote_watch_positions(self, scores, prices):
         equity = self.equity(prices)
@@ -42,14 +58,28 @@ class BacktestEngine(ExecutionEngine):
             self.flags_counts["watch_promoted"] = self.flags_counts.get("watch_promoted", 0) + 1
 
     def fill(self, day, opening, execution_scores=None, **kwargs):
-        previously_held = set(self.positions)
+        previously_held = dict(self.positions)
         fills = super().fill(day, opening, execution_scores, **kwargs)
         if self.flags.get("breakdown_confirm"):
             for fill in fills:
                 ticker = fill["ticker"]
                 if fill.get("rule_ids") == ["M-55"] and ticker in self.positions:
                     self.positions[ticker]["breakdown_half_done"] = True
-            for ticker in self.positions.keys() - previously_held:
+        if self.flags.get("reentry_after_price_exit"):
+            for fill in fills:
+                ticker = fill["ticker"]
+                if fill["side"] == "buy":
+                    self.price_exit_recovery.pop(ticker, None)
+                elif ticker not in self.positions and ticker in previously_held:
+                    self.price_exit_recovery.pop(ticker, None)
+                    price_rules = {"M-51", "M-52", "M-55", "M-64"}
+                    if fill.get("exit_kind") == "price" or price_rules.intersection(fill["rule_ids"]):
+                        previous = previously_held[ticker]
+                        score = self.scores.get(ticker) or {}
+                        if score.get("books") and not fundamentals_weakened(previous, score):
+                            self.price_exit_recovery[ticker] = {"position": previous, "closes": 0}
+        if self.flags.get("breakdown_confirm") or self.flags.get("reentry_after_price_exit"):
+            for ticker in self.positions.keys() - previously_held.keys():
                 score = self.scores.get(ticker) or {}
                 self.positions[ticker]["entry_books"] = dict(score.get("books") or {})
         return fills
@@ -73,6 +103,11 @@ class BacktestEngine(ExecutionEngine):
         return values
 
     def queue(self, ticker, action, rule, label, **values):
+        score = self.scores.get(ticker) or {}
+        if action.startswith("buy") and score.get("overval_veto"):
+            return None
+        if action == "buy_to" and score.get("price_reentry"):
+            values["price_reentry"] = True
         if self.flags.get("buy_consistency"):
             position = self.positions.get(ticker)
             score = self.scores.get(ticker)
@@ -110,13 +145,37 @@ def apply_ceiling_gate(score, panel, fridays, ticker, day):
         ranked = sorted(values.values())
         # Include ties at the boundary in the overextended group.
         week["ceiling_gate_cutoff"] = ranked[len(ranked) - (len(ranked) + 4) // 5]
-    gate = values[ticker] < week["ceiling_gate_cutoff"] and all(
+    score["ceiling_gate_overextended"] = values[ticker] >= week["ceiling_gate_cutoff"]
+    gate = not score["ceiling_gate_overextended"] and nonvaluation_gate(score)
+    score["gate_pass"] = gate
+    score["entry_pass"] = gate and bool(score.get("m32_ok")) and not EXCLUDED.intersection(score.get("red_lines", ()))
+    return True
+
+
+def nonvaluation_gate(score):
+    return all(
         score["books"].get(key) is not None and score["books"][key] >= threshold
         for key, threshold in zip(BOOK_KEYS, ENTRY[score["tier"]], strict=True)
         if key != "valuation"
     )
-    score["gate_pass"] = gate
-    score["entry_pass"] = gate and bool(score.get("m32_ok")) and not EXCLUDED.intersection(score.get("red_lines", ()))
+
+
+def allow_price_reentry(score, previous, closes):
+    if (
+        closes < 3
+        or score.get("tier") not in ENTRY
+        or score.get("entry_pass")
+        or score.get("overval_veto")
+        or score.get("ceiling_gate_overextended")
+        or score.get("tradable") is False
+        or not score.get("m32_ok")
+        or EXCLUDED.intersection(score.get("red_lines", ()))
+        or not nonvaluation_gate(score)
+        or fundamentals_weakened(previous, score)
+        or death({"tier_now": score["tier"]}, score)
+    ):
+        return False
+    score.update(entry_pass=True, price_reentry=True)
     return True
 
 
