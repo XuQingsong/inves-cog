@@ -1,8 +1,11 @@
 """Opt-in policies for the in-memory backtest engine."""
 
+from bisect import bisect_left
+
 from inves_cog.trading.engine import ExecutionEngine
 from inves_cog.trading.execution.sells import death
 from inves_cog.trading.execution.state import PARAMS, TIERS
+from inves_cog.trading.scoring.rules import BOOK_KEYS, ENTRY, EXCLUDED
 
 FUNDAMENTAL_RED_LINES = {"现金流为负且营收下滑", "营收与EPS同时明显下滑"}
 
@@ -59,3 +62,26 @@ class BacktestEngine(ExecutionEngine):
                     self.flags_counts["minimum_hold_blocked"] = self.flags_counts.get("minimum_hold_blocked", 0) + 1
                     return None
         return super().queue(ticker, action, rule, label, **values)
+
+
+def apply_ceiling_gate(score, panel, fridays, ticker, day):
+    """Replace the valuation gate using the latest strictly earlier Friday."""
+    index = bisect_left(fridays, day) - 1
+    if index < 0 or score.get("tier") not in ENTRY:
+        return False
+    week = panel[fridays[index]]
+    values = week["m8"]
+    if ticker not in values:
+        return False
+    if "ceiling_gate_cutoff" not in week:
+        ranked = sorted(values.values())
+        # Include ties at the boundary in the overextended group.
+        week["ceiling_gate_cutoff"] = ranked[len(ranked) - (len(ranked) + 4) // 5]
+    gate = values[ticker] < week["ceiling_gate_cutoff"] and all(
+        score["books"].get(key) is not None and score["books"][key] >= threshold
+        for key, threshold in zip(BOOK_KEYS, ENTRY[score["tier"]], strict=True)
+        if key != "valuation"
+    )
+    score["gate_pass"] = gate
+    score["entry_pass"] = gate and bool(score.get("m32_ok")) and not EXCLUDED.intersection(score.get("red_lines", ()))
+    return True

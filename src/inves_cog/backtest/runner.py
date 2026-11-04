@@ -10,7 +10,7 @@ from pathlib import Path
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
-from inves_cog.backtest.policies import BacktestEngine
+from inves_cog.backtest.policies import BacktestEngine, apply_ceiling_gate
 from inves_cog.clock import FrozenClock
 from inves_cog.trading.engine import ExecutionEngine
 from inves_cog.trading.execution.signals import enrich
@@ -82,14 +82,17 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     flag_counts = {}
     veto_events = []
     overval = None
-    if flags.get("overval_veto"):
+    if flags.get("overval_veto") or flags.get("ceiling_gate"):
         from .overval import load_quintiles
         from .overval import quintile_at as overval_quintile
         from .overval import vetoed as overval_vetoed
 
         panel_path = spec.get("overval_panel") or str(Path.home() / "inves-cog-bt" / "valuation" / "panel_sp500.csv")
         financials = set(spec.get("overval_financials") or ())
-        overval = load_quintiles(panel_path, financials=financials)
+        panel, panel_days = load_quintiles(panel_path, financials=financials)
+        if flags.get("overval_veto"):
+            overval = panel, panel_days
+        ceiling_fridays = [day for day in panel_days if day.weekday() == 4]
     locked = {}
     if flags.get("tier_lock"):
         import yaml
@@ -160,6 +163,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                         break
     engine.chase_upgrades = chase_upgrades
     prev_blocked = set()
+    ceiling_streaks = {}
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
@@ -171,6 +175,12 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                 past = [d for d in rule_tier_map.get(t, {}) if d <= day]
                 if past:
                     sc["tier"] = rule_tier_map[t][max(past)]
+        if flags.get("ceiling_gate"):
+            ceiling_streaks = {ticker: ceiling_streaks.get(ticker, 0) for ticker in daily}
+            for ticker, score in daily.items():
+                apply_ceiling_gate(score, panel, ceiling_fridays, ticker, day)
+                ceiling_streaks[ticker] = ceiling_streaks[ticker] + 1 if score.get("entry_pass") else 0
+                score["consec_pass"] = ceiling_streaks[ticker]
         if flags.get("chase_v2"):
             from .chase_v2 import category, chase_trigger, tranche
             from .valuation import valuation_inputs
