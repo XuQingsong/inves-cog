@@ -6,6 +6,8 @@ from inves_cog.valuation.ceiling import cap_multiplier, implied_m
 
 CYCLICAL = {"MU", "WDC", "STX", "SNDK", "SKHY", "XOM", "CVX", "AMAT", "LRCX", "KLAC", "ASML"}
 FINANCIAL = {"JPM", "V", "MA"}
+# shares stored in local-listing units; ADR price needs ratio-adjusted share count
+ADR_RATIO = {"TSM": 5}  # 1 ADR = 5 ordinary shares
 FWD_WEEKS = (13, 26, 52, 104, 156)
 
 
@@ -45,10 +47,11 @@ def build_panel(conn, tickers, prices, states_map, spy):
             else:
                 nopat = 0
             e_next = nopat * (1 + max(-0.2, min(0.5, (v.get("rev_growth") or 0) / 100)))
+            shares = (v.get("shares") or 0) / ADR_RATIO.get(t, 1)
             if t in FINANCIAL:
-                ev = close * (v.get("shares") or 0)  # market cap, net debt meaningless for banks
+                ev = close * shares  # market cap, net debt meaningless for banks
             else:
-                ev = close * (v.get("shares") or 0) + (v.get("net_debt") or 0)
+                ev = close * shares + (v.get("net_debt") or 0)
             mult = ev / e_next if e_next > 0 else None
             row = {
                 "ticker": t,
