@@ -65,6 +65,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--panel", type=Path, required=True)
     parser.add_argument("--sectors", type=Path, required=True)
+    parser.add_argument("--visa-repair", nargs=2, metavar=("COMPANYFACTS", "XBRL_CACHE"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--mode", choices=("rolling", "signals", "case"), required=True)
     parser.add_argument("--without-market-input", action="store_true", help="Partial evidence only. Omit F2 and combo.")
@@ -84,6 +85,7 @@ def main():
         "extractor": "fixed",
         "mode": "paper",
         "load_fear_levels": not args.without_market_input,
+        "visa_repair": args.visa_repair,
         "overval_panel": str(args.panel),
         "overval_financials": financials,
     }

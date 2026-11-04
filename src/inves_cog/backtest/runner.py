@@ -40,18 +40,29 @@ def prepare_inputs(connection, spec):
     start, end = spec["start"], spec["end"]
     extractor = spec.get("extractor", "fixed")
     prices, signals = {}, {}
+    state_lookup = loader.state_asof
+    if spec.get("visa_repair") and "V" in tickers:
+        from .tier_repair import repaired_state, visa_reconstruction
+
+        companyfacts, cache_dir = spec["visa_repair"]
+        candidates = visa_reconstruction(loader.fundamentals, companyfacts, cache_dir, end=end)
+
+        def state_lookup(ticker, day, extractor):
+            original = loader.state_asof(ticker, day, extractor)
+            return repaired_state(original, candidates, day) if ticker == "V" and extractor == "fixed" else original
+
     for t in tickers + ["SPY", "QQQ"]:
         prices[t] = {r["trade_date"]: r for r in loader.bars(t, end=end)}
     for t in tickers:
         snaps = score_history(
             t,
             loader.bars(t, end=end),
-            state_asof=loader.state_asof,
+            state_asof=state_lookup,
             extractor=extractor,
             start=start,
             end=end,
         )
-        signals[t] = enrich(snaps, loader.state_asof, t, extractor)
+        signals[t] = enrich(snaps, state_lookup, t, extractor)
     vix = loader.vix(end)
     prepared = {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
     if spec.get("load_fear_levels") or (spec.get("flags") or {}).get("breakdown_confirm"):
