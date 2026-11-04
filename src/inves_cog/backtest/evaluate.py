@@ -4,6 +4,8 @@ import multiprocessing
 import statistics
 from datetime import date
 
+from inves_cog.ingest.market import next_trading_day
+
 from .runner import prepare_inputs, run_backtest
 
 _G_PREPARED = None
@@ -21,7 +23,21 @@ def quarter_starts(begin=date(2018, 1, 1), end=date(2024, 12, 31)):
 
 
 def _one_replay(spec):
-    return run_backtest(None, spec, write=False, prepared=_G_PREPARED)["metrics"]
+    result = run_backtest(None, spec, write=False, prepared=_G_PREPARED)
+    return {**result["metrics"], "short_hold_sales": short_hold_sales(result["trades"])}
+
+
+def short_hold_sales(trades):
+    """Count sells on the same or next exchange session after a buy in the same name."""
+    until = {}
+    count = 0
+    for trade in trades:
+        ticker, day = trade["ticker"], trade["trade_date"]
+        if trade["side"] == "buy":
+            until[ticker] = next_trading_day(day)
+        elif trade["side"] == "sell" and ticker in until and day <= until[ticker]:
+            count += 1
+    return count
 
 
 def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
@@ -60,6 +76,7 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "base_dd": base["max_drawdown_pct"],
                     "base_rdd": base.get("return_over_maxdd"),
                     "beats": m["return_pct"] > base["return_pct"],
+                    "short_hold_sales": m["short_hold_sales"],
                 }
             )
     return _distribution(rows)
@@ -74,6 +91,7 @@ def _distribution(rows):
         rdd_diffs = [r["rdd"] - r["base_rdd"] for r in rs if r["rdd"] is not None and r["base_rdd"] is not None]
         out[name] = {
             "n_starts": len(rs),
+            "short_hold_sales_total": sum(r["short_hold_sales"] for r in rs),
             "beats_baseline_pct": round(100 * sum(r["beats"] for r in rs) / len(rs), 1),
             **_quantiles("ret_diff", ret_diffs),
             **_quantiles("dd_diff", dd_diffs),
