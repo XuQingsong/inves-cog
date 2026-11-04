@@ -36,8 +36,9 @@ def build_panel(conn, tickers, prices, states_map, spy):
                 continue
             v = st.values
             rev_ttm = v.get("rev_ttm") or 0
-            nopat = (v.get("op_margin_ttm") or 0) * rev_ttm * 0.82
-            e_next = nopat * (1 + max(-0.2, min(0.5, v.get("rev_growth") or 0)))
+            # fin_state stores percents as numbers (33.3 = 33.3%)
+            nopat = ((v.get("op_margin_ttm") or 0) / 100) * rev_ttm * 0.82
+            e_next = nopat * (1 + max(-0.2, min(0.5, (v.get("rev_growth") or 0) / 100)))
             ev = close * (v.get("shares") or 0) + (v.get("net_debt") or 0)
             mult = ev / e_next if e_next > 0 else None
             row = {
