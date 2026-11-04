@@ -1,10 +1,11 @@
 """run_backtest — generalizes execution/replay.run_frozen onto the prod DB loader."""
 
 import copy
+from pathlib import Path
 import json
 import logging
 import subprocess
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
@@ -26,12 +27,8 @@ def _code_rev():
         return "unknown"
 
 
-def run_backtest(connection, spec, *, write=True):
-    """spec: {universe, start, end, initial_cash, mode, extractor, params_path, label}.
-
-    Engine stays in memory — persist_orders is never called; writes go only to
-    the backtest schema (when write=True).
-    """
+def prepare_inputs(connection, spec):
+    """Load prices/signals/vix once — reused across replays and rolling starts."""
     loader = BacktestLoader(connection)
     tickers = (
         spec["universe"]
@@ -39,9 +36,7 @@ def run_backtest(connection, spec, *, write=True):
         else BacktestLoader.universe(spec["universe"], PARAMS["replay_tickers"])
     )
     start, end = spec["start"], spec["end"]
-    initial = spec.get("initial_cash") or PARAMS["initial_cash"]
-    mode, extractor = spec.get("mode", "paper"), spec.get("extractor", "fixed")
-    # tickers enter on their first bar date (IPO); bars loader already covers it
+    extractor = spec.get("extractor", "fixed")
     prices, signals = {}, {}
     for t in tickers + ["SPY", "QQQ"]:
         prices[t] = {r["trade_date"]: r for r in loader.bars(t, end=end)}
@@ -56,13 +51,131 @@ def run_backtest(connection, spec, *, write=True):
         )
         signals[t] = enrich(snaps, loader.state_asof, t, extractor)
     vix = loader.vix(end)
+    return {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
+
+
+def run_backtest(connection, spec, *, write=True, prepared=None):
+    """spec: {universe, start, end, initial_cash, mode, extractor, params_path, label}.
+
+    Engine stays in memory — persist_orders is never called; writes go only to
+    the backtest schema (when write=True). `prepared` reuses prepare_inputs() output.
+    """
+    pre = prepared or prepare_inputs(connection, spec)
+    loader, tickers = pre["loader"], pre["tickers"]
+    prices, signals, vix = pre["prices"], pre["signals"], pre["vix"]
+    start, end = spec["start"], spec["end"]
+    initial = spec.get("initial_cash") or PARAMS["initial_cash"]
+    mode = spec.get("mode", "paper")
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     engine = ExecutionEngine(
-        clock=clock, initial_cash=initial, mode=mode, portfolio_id=f"bt-{spec.get('label', 'run')}"
+        clock=clock,
+        initial_cash=initial,
+        mode=mode,
+        portfolio_id=f"bt-{spec.get('label', 'run')}",
+        flags=spec.get("flags") or {},
     )
+    flags = spec.get("flags") or {}
+    flag_counts = {}
+    locked = {}
+    if flags.get("tier_lock"):
+        import yaml
+
+        cfg = Path(__file__).resolve().parents[3] / "config" / "v19_tiers.yaml"
+        locked = yaml.safe_load(open(cfg))["tiers"]
+    rule_tier_map, gap_map, valuation_rows = {}, {}, []
+    states_map = {}
+    if flags.get("rule_tiers") or flags.get("gap_judgment") or flags.get("chase_v2") or spec.get("valuation_output"):
+        from .rule_tiers import tier_history
+        from .gap_judgment import gap_events
+        from .valuation import valuation_inputs
+
+        spy = prices.get("SPY", {})
+        for t in tickers:
+            states = states_map[t] = loader.states_for(t, end=end)
+            if flags.get("rule_tiers"):
+                rule_tier_map[t] = {h["date"]: h["tier"] for h in tier_history(t, prices.get(t, {}), spy, states)}
+            if flags.get("gap_judgment") or flags.get("chase_v2"):
+                filings = [{"filed": f["filed"] if isinstance(f, dict) else getattr(f, "filed", None),
+                            "form": f["form"] if isinstance(f, dict) else getattr(f, "form", None)}
+                           for f in loader.filings(t)]
+                gap_map[t] = gap_events(t, prices.get(t, {}), filings, states,
+                                        lambda tt, dd: valuation_inputs(tt, dd, prices.get(tt, {}), states),
+                                        start, end)
+            if spec.get("valuation_output"):
+                for d in sorted({d for rows in signals.get(t, {}).items() for d in [rows[0]]}):
+                    valuation_rows.append(valuation_inputs(t, d, prices.get(t, {}), states))
+    chase_upgrades = {}
+    if flags.get("chase_v2"):
+        from .chase_v2 import chase_trigger
+        from .gap_judgment import _st
+        for t in tickers:
+            bars = prices.get(t, {})
+            fil_rows = loader.filings(t)
+            for day in sorted(signals.get(t, {})):
+                if not chase_trigger(bars, day):
+                    continue
+                for f in fil_rows:
+                    fd = f["filed"] if isinstance(f, dict) else getattr(f, "filed", None)
+                    fo = f["form"] if isinstance(f, dict) else getattr(f, "form", None)
+                    if fd and day < fd <= day + timedelta(days=45) and fo in ("10-Q", "10-K"):
+                        st_f = _st(states_map.get(t, []), fd)
+                        confirmed = bool(st_f and (st_f.values.get("rev_accel_pp") or 0) > 0 and
+                                         ((st_f.values.get("gross_margin_change_pp") or 0) > 0 or
+                                          (st_f.values.get("fcf_margin") or 0) > 0))
+                        val = valuation_inputs(t, fd, bars, states_map.get(t, []))
+                        chase_upgrades.setdefault(t, {})[fd] = {"confirmed": confirmed,
+                                                                "pe_pct": val.get("pe_pctile_3y")}
+                        break
+    engine.chase_upgrades = chase_upgrades
+    prev_blocked = set()
     for day in days:
-        daily = {t: signals[t][day] for t in tickers if day in signals[t]}
+        daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
+        if flags.get("tier_lock"):
+            for t, sc in daily.items():
+                if t in locked:
+                    sc["tier"] = locked[t]
+        if rule_tier_map:
+            for t, sc in daily.items():
+                past = [d for d in rule_tier_map.get(t, {}) if d <= day]
+                if past:
+                    sc["tier"] = rule_tier_map[t][max(past)]
+        if flags.get("chase_v2"):
+            from .chase_v2 import chase_trigger, category, tranche
+            from .valuation import valuation_inputs
+            for t, sc in daily.items():
+                tr = chase_trigger(prices.get(t, {}), day)
+                if tr and sc.get("entry_pass"):
+                    st = states_map.get(t, [])
+                    val = valuation_inputs(t, day, prices.get(t, {}), st) if st else {}
+                    cat = category(gap_map.get(t, {}).get(day) if gap_map else None, val)
+                    sc["chase_v2"] = {"category": cat, "frac": tranche(cat), "stop": tr[1],
+                                      "anchor": prices.get(t, {}).get(day, {}).get("close"),
+                                      "gap_mid": (tr[1] + prices.get(t, {}).get(day, {}).get("open", tr[1])) / 2}
+                    flag_counts["chase_v2_" + cat] = flag_counts.get("chase_v2_" + cat, 0) + 1
+        if gap_map and flags.get("gap_judgment"):
+            for t, sc in daily.items():
+                ev = gap_map.get(t, {}).get(day)
+                if ev and sc.get("entry_pass"):
+                    d = ev["decision"]
+                    if d == "block":
+                        sc["entry_pass"] = False
+                        flag_counts["gap_block_" + ev["cause"]] = flag_counts.get("gap_block_" + ev["cause"], 0) + 1
+                    elif d == "pullback":
+                        flag_counts["gap_pullback"] = flag_counts.get("gap_pullback", 0) + 1
+                    else:
+                        flag_counts["gap_allow"] = flag_counts.get("gap_allow", 0) + 1
+        if flags.get("chase_block"):
+            now_blocked = set()
+            for t, sc in daily.items():
+                hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
+                if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > flags.get("chase_threshold", 0.08):
+                    sc["entry_pass"] = False
+                    now_blocked.add(t)
+                    flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
+                    if t not in prev_blocked:  # distinct would-be order = start of a blocked streak
+                        flag_counts["chase_orders"] = flag_counts.get("chase_orders", 0) + 1
+            prev_blocked = now_blocked
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
@@ -71,7 +184,16 @@ def run_backtest(connection, spec, *, write=True):
         closing = {
             t: prices[t][day]["close"] * (prices[t][day].get("adj_factor") or 1.0) for t in prices if day in prices[t]
         }
-        engine.fill(day, opening, daily)
+        engine.fill(
+            day,
+            opening,
+            daily,
+            day_bars={
+                t: {"open": r[day]["open"], "low": r[day]["low"], "close": r[day]["close"]}
+                for t, r in prices.items()
+                if day in r
+            },
+        )
         spy = [prices["SPY"][d]["close"] for d in sorted(prices["SPY"]) if d <= day]
         returns = (
             100 * (spy[-1] / spy[-2] - 1) if len(spy) >= 2 else None,
@@ -100,7 +222,10 @@ def run_backtest(connection, spec, *, write=True):
     )
     metrics["trade_hash"] = trade_hash(engine.trades)
     metrics["survivorship_bias"] = spec.get("universe") == "config"
+    flag_counts.update(getattr(engine, "flags_counts", {}))
+    metrics["flags_counts"] = flag_counts
     result = {
+        "flag_diag": getattr(engine, "flag_diag", {}),
         "spec": spec,
         "metrics": metrics,
         "trades": copy.deepcopy(engine.trades),

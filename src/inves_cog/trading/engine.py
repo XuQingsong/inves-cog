@@ -16,7 +16,15 @@ from inves_cog.trading.execution.state import PARAMS, RULE_A, TIERS
 
 
 class ExecutionEngine:
-    def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed"):
+    def __init__(self, *, clock, initial_cash=None, mode="paper", portfolio_id="paper-fixed", flags=None):
+        self.flags = flags or {}
+        self.cooldown = {}  # ticker -> {until, line, closes_above}
+        self.flags_counts = {}
+        self.flag_diag = {"fills": [], "expired": []}
+        self.chase_pending = {}  # ticker -> {cat, frac, stop, deadline, anchor, filled}
+        self.chase_lots = {}  # ticker -> {"qty":, "stop":} for gap-fill stop
+        self.chase_upgrades = {}  # ticker -> {filing_day: {"confirmed":, "pe_pct":}} set by runner
+        self.limit_orders = {}  # order_id -> {ticker, limit, expiry_index, order}
         if mode not in {"paper", "replay_v18"}:
             raise ValueError("Only approved rule A execution modes")
         self.clock, self.mode, self.portfolio_id = clock, mode, portfolio_id
@@ -77,6 +85,21 @@ class ExecutionEngine:
         order["order_id"] = hashlib.sha256(raw.encode()).hexdigest()
         validate_order(order)
         order["kind"] = self.order_kind(order)
+        if (self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20")) and action.startswith("buy"):
+            hist = self.history.get(ticker) or []
+            anchor = hist[-1] if hist else (values.get("price") or 0)
+            if self.flags.get("pullback_entry_ma20") and len(hist) >= 20:
+                ma20 = sum(hist[-20:]) / 20
+                order["limit"] = min(anchor, max(ma20, 0.95 * anchor))
+            else:
+                order["limit"] = anchor
+            order["anchor"] = anchor
+            self.limit_orders[order["order_id"]] = {
+                "ticker": ticker,
+                "limit": order["limit"],
+                "expiry_index": self.index + 10,
+                "order": order,
+            }
         self.pending.append(order)
 
     def record_terminal(self, order, status, reason):
@@ -96,10 +119,68 @@ class ExecutionEngine:
         )
         return terminal
 
-    def fill(self, day, opening, execution_scores=None, *, delayed=False):
+    def fill(self, day, opening, execution_scores=None, *, delayed=False, day_bars=None):
         if day in self.settled_dates:
             return []
         available = [o for o in self.pending if o["trade_date"] == day and o["signal_date"] < day]
+        # pullback_entry: convert eligible market buys into anchored limit orders
+        if self.flags.get("pullback_entry") or self.flags.get("pullback_entry_ma20"):
+            still = []
+            for order in available:
+                if not order["action"].startswith("buy") or "limit" not in order:
+                    still.append(order)
+                    continue
+                bar = (day_bars or {}).get(order["ticker"], {})
+                lo, op = bar.get("low"), bar.get("open")
+                if lo is None or op is None or lo > order["limit"]:
+                    # not touched today — stays pending until expiry
+                    continue
+                fill_px = min(op, order["limit"])
+                equity0 = self.equity(opening)
+                if equity0 is not None:
+                    cv = self.chase_pending.get(order["ticker"])
+                    if cv and not order.get("_chase_topup"):
+                        order = {**order, "fraction": (order.get("fraction") or 0) * cv["frac"]}
+                        cv["planned_fraction"] = order["fraction"] / cv["frac"] if cv["frac"] else 0
+                    detail = settlement.buy(self, order, day, fill_px, equity0, execution_scores or {})
+                    if cv and detail:
+                        cv["filled_amount"] = cv.get("filled_amount", 0) + detail["qty"] * fill_px
+                        self.chase_lots[order["ticker"]] = {"qty": detail["qty"], "stop": cv["stop"]}
+                    elif order.get("_chase_topup") and detail:
+                        lot = self.chase_lots.get(order["ticker"])
+                        if lot:
+                            lot["qty"] += detail["qty"]
+                        else:
+                            self.chase_lots[order["ticker"]] = {"qty": detail["qty"], "stop": order.get("stop") or 0}
+                    if detail:
+                        self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
+                        self.limit_orders.pop(order.get("order_id"), None)
+                        self.flag_diag["fills"].append(
+                            {"ticker": order["ticker"], "day": str(day), "fill": fill_px,
+                             "open": op, "anchor": order.get("anchor"), "action": order["action"]})
+                        self.trades.append(
+                            {
+                                **order,
+                                **detail,
+                                "side": "buy",
+                                "fill_price": fill_px,
+                                "notional": detail["qty"] * fill_px,
+                                "status": "filled",
+                                "execution_note": "回调限价成交",
+                            }
+                        )
+                        if self.mode == "paper":
+                            self.record_terminal(self.trades[-1], "filled", "回调限价成交")
+                continue
+            # expire stale limit orders after 10 sessions
+            for oid in [oid for oid, o in self.limit_orders.items() if o["expiry_index"] < self.index]:
+                exp = self.limit_orders.pop(oid)
+                self.record_terminal(exp["order"], "expired", "限价单 10 日未成交")
+                self.flags_counts["pullback_expired"] = self.flags_counts.get("pullback_expired", 0) + 1
+                self.flag_diag["expired"].append(
+                    {"ticker": exp["ticker"], "limit": exp["limit"], "anchor": exp["order"].get("anchor"),
+                     "signal": str(exp["order"].get("signal_date"))})
+            available = still
         if not available:
             if self.mode == "paper":
                 self.settled_dates.add(day)
@@ -116,12 +197,39 @@ class ExecutionEngine:
                 self.skip(order["ticker"], "M-35", "N8", "缺少实际开盘价，未成交")
                 continue
             selling = order["action"].startswith("sell")
+            if not selling:
+                cv = self.chase_pending.get(order["ticker"])
+                if cv and not order.get("_chase_topup"):
+                    order = {**order, "fraction": (order.get("fraction") or 0) * cv["frac"]}
+                    cv["planned_fraction"] = order["fraction"] / cv["frac"] if cv["frac"] else 0
             detail = (
                 settlement.sell(self, order, day, price)
                 if selling
                 else settlement.buy(self, order, day, price, equity, execution_scores or {})
             )
+            if not selling and detail:
+                cv2 = self.chase_pending.get(order["ticker"])
+                if cv2 and not order.get("_chase_topup"):
+                    cv2["filled_amount"] = cv2.get("filled_amount", 0) + detail["qty"] * price
+                    self.chase_lots[order["ticker"]] = {"qty": detail["qty"], "stop": cv2["stop"]}
+                elif order.get("_chase_topup"):
+                    lot = self.chase_lots.get(order["ticker"])
+                    if lot:
+                        lot["qty"] += detail["qty"]
+                    else:
+                        self.chase_lots[order["ticker"]] = {"qty": detail["qty"], "stop": order.get("stop") or 0}
             if detail:
+                if selling and self.flags.get("cooldown_recover"):
+                    label = order.get("label", "")
+                    if (
+                        any(k in label for k in ("破位", "止损", "警戒", "减仓"))
+                        and "基本面" not in label
+                        and "止盈" not in label
+                    ):
+                        hist = self.history.get(order["ticker"]) or []
+                        line = sum(hist[-50:]) / 50 if len(hist) >= 50 else (hist[-1] if hist else 0)
+                        self.cooldown[order["ticker"]] = {"until": self.index + 10, "line": line, "closes_above": 0}
+                        self.flags_counts["cooldown_armed"] = self.flags_counts.get("cooldown_armed", 0) + 1
                 fills.append(
                     {
                         **order,
@@ -169,6 +277,20 @@ class ExecutionEngine:
                 continue
             position["tier_now"] = score.get("tier") or position["tier_now"]
             order = sell_signal(position, score, index=self.index, panic=self.panic)
+            if self.flags.get("sell_confirm") and order and "破位" in order.get("label", ""):
+                h = self.history.get(ticker) or []
+                atr = 0.0
+                if len(h) >= 15:
+                    diffs = [abs(h[i] - h[i - 1]) for i in range(-14, 0)]
+                    atr = sum(diffs) / len(diffs)
+                line = sum(h[-50:]) / 50 if len(h) >= 50 else (h[-1] if h else 0)
+                below2 = len(h) >= 2 and h[-1] < line and h[-2] < line
+                big_break = atr > 0 and (line - h[-1]) > atr
+                if not (below2 or big_break):
+                    order = None
+                elif not position.get("_confirm_half_done"):
+                    order["fraction"] = min(order.get("fraction", 1.0), 0.5)
+                    position["_confirm_half_done"] = True
             if order:
                 self.queue(
                     ticker,
@@ -182,6 +304,90 @@ class ExecutionEngine:
             tier: sum(p["shares"] * prices[t] for t, p in self.positions.items() if p["tier_now"] == tier)
             for tier in TIERS
         }
+        if self.flags.get("cooldown_recover"):
+            hist_map = self.history or {}
+            for t in [t for t in self.cooldown]:
+                cd = self.cooldown[t]
+                h = hist_map.get(t) or []
+                if self.index <= cd["until"]:
+                    if t in scores and scores[t].get("entry_pass"):
+                        scores[t] = dict(scores[t], entry_pass=False)
+                        self.flags_counts["cooldown_blocked"] = self.flags_counts.get("cooldown_blocked", 0) + 1
+                elif h and h[-1] is not None and h[-1] > cd["line"]:
+                    cd["closes_above"] += 1
+                    if cd["closes_above"] < 3 and t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                else:
+                    cd["closes_above"] = 0
+                    if t in scores:
+                        scores[t] = dict(scores[t], entry_pass=False)
+                if cd["closes_above"] >= 3:
+                    del self.cooldown[t]
+        if self.flags.get("chase_v2"):
+            hist_of = (history or {})
+            for t, sc in scores.items():
+                if sc.get("chase_v2") and sc.get("entry_pass") and t not in self.chase_pending and t not in self.chase_lots:
+                    cv = sc["chase_v2"]
+                    cat = cv["category"]
+                    if cat == "narrative":
+                        sc["entry_pass"] = False  # first tranche 0 — no buy today
+                    self.chase_pending[t] = {
+                        "cat": cat, "frac": cv["frac"], "stop": cv["stop"],
+                        "anchor": cv.get("anchor") or cv["stop"], "gap_mid": cv.get("gap_mid") or cv["stop"],
+                        "first": self.index, "planned_amount": cv.get("amount") or 0, "filled_amount": 0.0,
+                        "deadline": self.index + {"reasonable": 10, "stretched": 20,
+                                                  "insufficient": 5, "narrative": 10}[cat],
+                        "signal_day": day, "tier": sc.get("tier"), "topped": False, "closes_since": 0, "held_gap": True}
+            # top-up evaluation: per-category conditions, deadline/expiry
+            for t, cv in list(self.chase_pending.items()):
+                hist = hist_of.get(t) or []
+                close = hist[-1] if hist else None
+                if close is None:
+                    continue
+                # upgrade: a 10-Q/10-K filed after the signal day re-confirms the cause (PIT — fd<=day)
+                for fd, up in sorted((self.chase_upgrades.get(t) or {}).items()):
+                    if cv["signal_day"] < fd <= day and not cv.get("upgraded"):
+                        if up["confirmed"]:
+                            cv["cat"] = "reasonable" if (up["pe_pct"] is not None and up["pe_pct"] <= 50) else "stretched"
+                            cv["frac"] = {"reasonable": 0.5, "stretched": 1 / 3}[cv["cat"]]
+                            cv["deadline"] = self.index + {"reasonable": 10, "stretched": 20}[cv["cat"]]
+                            cv["upgraded"] = True
+                            self.flags_counts["chase_upgrade"] = self.flags_counts.get("chase_upgrade", 0) + 1
+                age = self.index - cv["first"]
+                cv["closes_since"] += 1
+                if close < cv["stop"]:
+                    cv["held_gap"] = False
+                ma20 = sum(hist[-20:]) / 20 if len(hist) >= 20 else None
+                done = False
+                if cv["cat"] == "reasonable" and age >= 5:
+                    held = cv["held_gap"] and cv["closes_since"] >= 5
+                    touched = ma20 is not None and close >= ma20
+                    done = held or touched
+                elif cv["cat"] == "stretched":
+                    low = (hist_of.get(t) or [{}])[-1] if hist else None
+                    done = close <= cv["anchor"] or (ma20 is not None and close <= ma20)
+                elif cv["cat"] == "insufficient":
+                    done = age >= 5 and cv["held_gap"]
+                elif cv["cat"] == "narrative":
+                    if age >= 10 and cv["held_gap"]:
+                        cv["cat"] = "insufficient"; cv["frac"] = 1 / 3
+                        cv["planned_amount"] = cv.get("planned_amount") or 0
+                        cv["deadline"] = self.index + 5
+                        done = cv["held_gap"]
+                if done and not cv["topped"] and cv["frac"] > 0:
+                    amt = (cv["planned_amount"] - cv["filled_amount"]) if cv["planned_amount"] else None
+                    pf = cv.get("planned_fraction") or 0
+                    self.queue(t, "buy_to", "M-63", "追高补仓", fraction=max(0.0, pf * (1 - cv["frac"])), tier=cv.get("tier") or "normal", stop=cv["stop"], _chase_topup=True)
+                    cv["topped"] = True
+                    self.flags_counts["chase_topup"] = self.flags_counts.get("chase_topup", 0) + 1
+                if self.index >= cv["deadline"] or cv["topped"]:
+                    del self.chase_pending[t]
+            # chase-tranche stop: close < pre-gap close -> sell ONLY chase lots
+            for t, lot in list(self.chase_lots.items()):
+                if prices.get(t) and prices[t] < lot["stop"]:
+                    self.queue(t, "sell_frac", "M-64", "缺口回补止损", fraction=1.0, shares=lot["qty"])
+                    del self.chase_lots[t]
+                    self.flags_counts["chase_stop"] = self.flags_counts.get("chase_stop", 0) + 1
         if self.index > self.swan_until:
             allowed = {t: s for t, s in scores.items() if self.mode == "replay_v18" or s.get("tradable", True)}
             buys.core_adds(self, allowed, values, equity, sold)
