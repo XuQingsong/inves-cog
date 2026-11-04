@@ -128,3 +128,20 @@ def test_a029_price_reentry_only_replaces_valuation_gate(closes, quality, veto, 
     previous = {"tier_now": "normal", "entry_books": {"quality": 90, "growth": 90}}
     assert allow_price_reentry(score, previous, closes) is expected
     assert score["entry_pass"] is expected
+
+
+def test_a029_short_hold_audit_uses_exchange_sessions():
+    from datetime import date
+
+    from inves_cog.backtest.evaluate import short_hold_sales
+
+    def fill(ticker, side, day):
+        return {"ticker": ticker, "side": side, "trade_date": date.fromisoformat(day)}
+
+    trades = [
+        fill("AAPL", "buy", "2026-10-30"),
+        fill("MSFT", "buy", "2026-10-30"),
+        fill("AAPL", "sell", "2026-11-02"),
+        fill("MSFT", "sell", "2026-11-03"),
+    ]
+    assert short_hold_sales(trades) == 1
