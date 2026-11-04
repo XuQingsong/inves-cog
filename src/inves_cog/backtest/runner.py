@@ -2,11 +2,11 @@
 
 import bisect
 import copy
-from pathlib import Path
 import json
 import logging
 import subprocess
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
@@ -55,7 +55,7 @@ def prepare_inputs(connection, spec):
     return {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
 
 
-def run_backtest(connection, spec, *, write=True, prepared=None):
+def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     """spec: {universe, start, end, initial_cash, mode, extractor, params_path, label}.
 
     Engine stays in memory — persist_orders is never called; writes go only to
@@ -81,11 +81,11 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
     veto_events = []
     overval = None
     if flags.get("overval_veto"):
-        from .overval import load_quintiles, quintile_at as overval_quintile, vetoed as overval_vetoed
+        from .overval import load_quintiles
+        from .overval import quintile_at as overval_quintile
+        from .overval import vetoed as overval_vetoed
 
-        panel_path = spec.get("overval_panel") or str(
-            Path.home() / "inves-cog-bt" / "valuation" / "panel_sp500.csv"
-        )
+        panel_path = spec.get("overval_panel") or str(Path.home() / "inves-cog-bt" / "valuation" / "panel_sp500.csv")
         financials = set(spec.get("overval_financials") or ())
         overval = load_quintiles(panel_path, financials=financials)
     locked = {}
@@ -97,8 +97,8 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
     rule_tier_map, gap_map, valuation_rows = {}, {}, []
     states_map = {}
     if flags.get("rule_tiers") or flags.get("gap_judgment") or flags.get("chase_v2") or spec.get("valuation_output"):
-        from .rule_tiers import tier_history
         from .gap_judgment import gap_events
+        from .rule_tiers import tier_history
         from .valuation import valuation_inputs
 
         spy = prices.get("SPY", {})
@@ -107,12 +107,22 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
             if flags.get("rule_tiers"):
                 rule_tier_map[t] = {h["date"]: h["tier"] for h in tier_history(t, prices.get(t, {}), spy, states)}
             if flags.get("gap_judgment") or flags.get("chase_v2"):
-                filings = [{"filed": f["filed"] if isinstance(f, dict) else getattr(f, "filed", None),
-                            "form": f["form"] if isinstance(f, dict) else getattr(f, "form", None)}
-                           for f in loader.filings(t)]
-                gap_map[t] = gap_events(t, prices.get(t, {}), filings, states,
-                                        lambda tt, dd: valuation_inputs(tt, dd, prices.get(tt, {}), states),
-                                        start, end)
+                filings = [
+                    {
+                        "filed": f["filed"] if isinstance(f, dict) else getattr(f, "filed", None),
+                        "form": f["form"] if isinstance(f, dict) else getattr(f, "form", None),
+                    }
+                    for f in loader.filings(t)
+                ]
+                gap_map[t] = gap_events(
+                    t,
+                    prices.get(t, {}),
+                    filings,
+                    states,
+                    lambda tt, dd, states=states: valuation_inputs(tt, dd, prices.get(tt, {}), states),
+                    start,
+                    end,
+                )
             if spec.get("valuation_output"):
                 for d in sorted({d for rows in signals.get(t, {}).items() for d in [rows[0]]}):
                     valuation_rows.append(valuation_inputs(t, d, prices.get(t, {}), states))
@@ -120,6 +130,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
     if flags.get("chase_v2"):
         from .chase_v2 import chase_trigger
         from .gap_judgment import _st
+
         for t in tickers:
             bars = prices.get(t, {})
             fil_rows = loader.filings(t)
@@ -131,12 +142,19 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                     fo = f["form"] if isinstance(f, dict) else getattr(f, "form", None)
                     if fd and day < fd <= day + timedelta(days=45) and fo in ("10-Q", "10-K"):
                         st_f = _st(states_map.get(t, []), fd)
-                        confirmed = bool(st_f and (st_f.values.get("rev_accel_pp") or 0) > 0 and
-                                         ((st_f.values.get("gross_margin_change_pp") or 0) > 0 or
-                                          (st_f.values.get("fcf_margin") or 0) > 0))
+                        confirmed = bool(
+                            st_f
+                            and (st_f.values.get("rev_accel_pp") or 0) > 0
+                            and (
+                                (st_f.values.get("gross_margin_change_pp") or 0) > 0
+                                or (st_f.values.get("fcf_margin") or 0) > 0
+                            )
+                        )
                         val = valuation_inputs(t, fd, bars, states_map.get(t, []))
-                        chase_upgrades.setdefault(t, {})[fd] = {"confirmed": confirmed,
-                                                                "pe_pct": val.get("pe_pctile_3y")}
+                        chase_upgrades.setdefault(t, {})[fd] = {
+                            "confirmed": confirmed,
+                            "pe_pct": val.get("pe_pctile_3y"),
+                        }
                         break
     engine.chase_upgrades = chase_upgrades
     prev_blocked = set()
@@ -152,17 +170,22 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                 if past:
                     sc["tier"] = rule_tier_map[t][max(past)]
         if flags.get("chase_v2"):
-            from .chase_v2 import chase_trigger, category, tranche
+            from .chase_v2 import category, chase_trigger, tranche
             from .valuation import valuation_inputs
+
             for t, sc in daily.items():
                 tr = chase_trigger(prices.get(t, {}), day)
                 if tr and sc.get("entry_pass"):
                     st = states_map.get(t, [])
                     val = valuation_inputs(t, day, prices.get(t, {}), st) if st else {}
                     cat = category(gap_map.get(t, {}).get(day) if gap_map else None, val)
-                    sc["chase_v2"] = {"category": cat, "frac": tranche(cat), "stop": tr[1],
-                                      "anchor": prices.get(t, {}).get(day, {}).get("close"),
-                                      "gap_mid": (tr[1] + prices.get(t, {}).get(day, {}).get("open", tr[1])) / 2}
+                    sc["chase_v2"] = {
+                        "category": cat,
+                        "frac": tranche(cat),
+                        "stop": tr[1],
+                        "anchor": prices.get(t, {}).get(day, {}).get("close"),
+                        "gap_mid": (tr[1] + prices.get(t, {}).get(day, {}).get("open", tr[1])) / 2,
+                    }
                     flag_counts["chase_v2_" + cat] = flag_counts.get("chase_v2_" + cat, 0) + 1
         if gap_map and flags.get("gap_judgment"):
             for t, sc in daily.items():
@@ -180,7 +203,11 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
             now_blocked = set()
             for t, sc in daily.items():
                 hist = [r["close"] for d, r in sorted(prices[t].items()) if d <= day]
-                if len(hist) >= 6 and sc.get("entry_pass") and (hist[-1] / hist[-6] - 1) > flags.get("chase_threshold", 0.08):
+                if (
+                    len(hist) >= 6
+                    and sc.get("entry_pass")
+                    and (hist[-1] / hist[-6] - 1) > flags.get("chase_threshold", 0.08)
+                ):
                     sc["entry_pass"] = False
                     now_blocked.add(t)
                     flag_counts["chase_block"] = flag_counts.get("chase_block", 0) + 1
@@ -195,9 +222,13 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                     flag_counts["overval_veto"] = flag_counts.get("overval_veto", 0) + 1
                     fidx = bisect.bisect_right(qdays, day) - 1
                     veto_events.append(
-                        {"ticker": t, "date": day, "price": prices.get(t, {}).get(day, {}).get("close"),
-                         "quintile": overval_quintile(qmap, qdays, t, day),
-                         "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None}
+                        {
+                            "ticker": t,
+                            "date": day,
+                            "price": prices.get(t, {}).get(day, {}).get("close"),
+                            "quintile": overval_quintile(qmap, qdays, t, day),
+                            "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
+                        }
                     )
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():

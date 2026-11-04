@@ -1,10 +1,17 @@
-import psycopg, json, os, sys, csv, statistics
-from psycopg.rows import dict_row
+import bisect
+import csv
+import json
+import os
+import random
+import sys
 from datetime import date, timedelta
 
+import psycopg
+from psycopg.rows import dict_row
+
 sys.path.insert(0, "src")
-from inves_cog.valuation.panel import build_panel, fridays, CYCLICAL, FINANCIAL, FWD_WEEKS
 from inves_cog.ingest.fundamentals.repository import state_from_row
+from inves_cog.valuation.panel import FWD_WEEKS, build_panel
 
 conn = psycopg.connect("postgresql://xuqingsong@localhost:5432/inves_cog_bt", row_factory=dict_row, autocommit=True)
 tl = json.load(open("/tmp/sp500_timeline.json"))
@@ -58,7 +65,6 @@ def is_member(t, d):
 panel = [r for r in panel if is_member(r["ticker"], r["date"])]
 OUT = os.path.expanduser("~/inves-cog-bt/valuation")
 os.makedirs(OUT, exist_ok=True)
-import bisect
 
 spy_adj = {d: r["close"] * (r["adj_factor"] or 1) for d, r in prices.get("SPY", {}).items()}
 spy_days = sorted(spy_adj)
@@ -124,8 +130,6 @@ for year in range(2018, 2027):
         "leaver_pct": round(100 * len(leaver_e) / max(1, len(leavers_y)), 1) if leavers_y else None,
     }
 # sanity: 10 random incl 3 leavers + MA
-import random
-
 random.seed(7)
 leavers_rows = [r for r in panel if r["ticker"] in exits]
 sample = (

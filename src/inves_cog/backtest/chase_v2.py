@@ -15,7 +15,7 @@ def vol60(bars, day):
     days = sorted(d for d in bars if d <= day)[-61:]
     if len(days) < 30:
         return None
-    rets = [bars[d2]["close"] / bars[d1]["close"] - 1 for d1, d2 in zip(days, days[1:])]
+    rets = [bars[d2]["close"] / bars[d1]["close"] - 1 for d1, d2 in zip(days, days[1:], strict=False)]
     return statistics.stdev(rets) if len(rets) > 5 else None
 
 
@@ -29,7 +29,7 @@ def chase_trigger(bars, day):
         return None
     r5 = bars[day]["close"] / bars[days[-6]]["close"] - 1
     r1 = bars[day]["close"] / bars[days[-2]]["close"] - 1
-    if r5 >= 2 * v * (5 ** 0.5) or r1 >= 3 * v:
+    if r5 >= 2 * v * (5**0.5) or r1 >= 3 * v:
         return True, bars[days[-2]]["close"]
     return None
 

@@ -119,7 +119,7 @@ class ExecutionEngine:
         )
         return terminal
 
-    def fill(self, day, opening, execution_scores=None, *, delayed=False, day_bars=None):
+    def fill(self, day, opening, execution_scores=None, *, delayed=False, day_bars=None):  # noqa: C901
         if day in self.settled_dates:
             return []
         available = [o for o in self.pending if o["trade_date"] == day and o["signal_date"] < day]
@@ -156,8 +156,15 @@ class ExecutionEngine:
                         self.flags_counts["pullback_filled"] = self.flags_counts.get("pullback_filled", 0) + 1
                         self.limit_orders.pop(order.get("order_id"), None)
                         self.flag_diag["fills"].append(
-                            {"ticker": order["ticker"], "day": str(day), "fill": fill_px,
-                             "open": op, "anchor": order.get("anchor"), "action": order["action"]})
+                            {
+                                "ticker": order["ticker"],
+                                "day": str(day),
+                                "fill": fill_px,
+                                "open": op,
+                                "anchor": order.get("anchor"),
+                                "action": order["action"],
+                            }
+                        )
                         self.trades.append(
                             {
                                 **order,
@@ -178,8 +185,13 @@ class ExecutionEngine:
                 self.record_terminal(exp["order"], "expired", "限价单 10 日未成交")
                 self.flags_counts["pullback_expired"] = self.flags_counts.get("pullback_expired", 0) + 1
                 self.flag_diag["expired"].append(
-                    {"ticker": exp["ticker"], "limit": exp["limit"], "anchor": exp["order"].get("anchor"),
-                     "signal": str(exp["order"].get("signal_date"))})
+                    {
+                        "ticker": exp["ticker"],
+                        "limit": exp["limit"],
+                        "anchor": exp["order"].get("anchor"),
+                        "signal": str(exp["order"].get("signal_date")),
+                    }
+                )
             available = still
         if not available:
             if self.mode == "paper":
@@ -252,7 +264,7 @@ class ExecutionEngine:
             self.settled_dates.add(day)
         return fills
 
-    def decide(self, day, scores, *, prices, history=None, spy_returns=(None, None), vix=None, vix_history=()):
+    def decide(self, day, scores, *, prices, history=None, spy_returns=(None, None), vix=None, vix_history=()):  # noqa: C901
         self.signal_date, self.scores, self.skips, self.cancels = day, scores, [], []
         self.last_prices = dict(prices)
         if history is not None:
@@ -324,20 +336,35 @@ class ExecutionEngine:
                 if cd["closes_above"] >= 3:
                     del self.cooldown[t]
         if self.flags.get("chase_v2"):
-            hist_of = (history or {})
+            hist_of = history or {}
             for t, sc in scores.items():
-                if sc.get("chase_v2") and sc.get("entry_pass") and t not in self.chase_pending and t not in self.chase_lots:
+                if (
+                    sc.get("chase_v2")
+                    and sc.get("entry_pass")
+                    and t not in self.chase_pending
+                    and t not in self.chase_lots
+                ):
                     cv = sc["chase_v2"]
                     cat = cv["category"]
                     if cat == "narrative":
                         sc["entry_pass"] = False  # first tranche 0 — no buy today
                     self.chase_pending[t] = {
-                        "cat": cat, "frac": cv["frac"], "stop": cv["stop"],
-                        "anchor": cv.get("anchor") or cv["stop"], "gap_mid": cv.get("gap_mid") or cv["stop"],
-                        "first": self.index, "planned_amount": cv.get("amount") or 0, "filled_amount": 0.0,
-                        "deadline": self.index + {"reasonable": 10, "stretched": 20,
-                                                  "insufficient": 5, "narrative": 10}[cat],
-                        "signal_day": day, "tier": sc.get("tier"), "topped": False, "closes_since": 0, "held_gap": True}
+                        "cat": cat,
+                        "frac": cv["frac"],
+                        "stop": cv["stop"],
+                        "anchor": cv.get("anchor") or cv["stop"],
+                        "gap_mid": cv.get("gap_mid") or cv["stop"],
+                        "first": self.index,
+                        "planned_amount": cv.get("amount") or 0,
+                        "filled_amount": 0.0,
+                        "deadline": self.index
+                        + {"reasonable": 10, "stretched": 20, "insufficient": 5, "narrative": 10}[cat],
+                        "signal_day": day,
+                        "tier": sc.get("tier"),
+                        "topped": False,
+                        "closes_since": 0,
+                        "held_gap": True,
+                    }
             # top-up evaluation: per-category conditions, deadline/expiry
             for t, cv in list(self.chase_pending.items()):
                 hist = hist_of.get(t) or []
@@ -348,7 +375,9 @@ class ExecutionEngine:
                 for fd, up in sorted((self.chase_upgrades.get(t) or {}).items()):
                     if cv["signal_day"] < fd <= day and not cv.get("upgraded"):
                         if up["confirmed"]:
-                            cv["cat"] = "reasonable" if (up["pe_pct"] is not None and up["pe_pct"] <= 50) else "stretched"
+                            cv["cat"] = (
+                                "reasonable" if (up["pe_pct"] is not None and up["pe_pct"] <= 50) else "stretched"
+                            )
                             cv["frac"] = {"reasonable": 0.5, "stretched": 1 / 3}[cv["cat"]]
                             cv["deadline"] = self.index + {"reasonable": 10, "stretched": 20}[cv["cat"]]
                             cv["upgraded"] = True
@@ -364,20 +393,28 @@ class ExecutionEngine:
                     touched = ma20 is not None and close >= ma20
                     done = held or touched
                 elif cv["cat"] == "stretched":
-                    low = (hist_of.get(t) or [{}])[-1] if hist else None
                     done = close <= cv["anchor"] or (ma20 is not None and close <= ma20)
                 elif cv["cat"] == "insufficient":
                     done = age >= 5 and cv["held_gap"]
                 elif cv["cat"] == "narrative":
                     if age >= 10 and cv["held_gap"]:
-                        cv["cat"] = "insufficient"; cv["frac"] = 1 / 3
+                        cv["cat"] = "insufficient"
+                        cv["frac"] = 1 / 3
                         cv["planned_amount"] = cv.get("planned_amount") or 0
                         cv["deadline"] = self.index + 5
                         done = cv["held_gap"]
                 if done and not cv["topped"] and cv["frac"] > 0:
-                    amt = (cv["planned_amount"] - cv["filled_amount"]) if cv["planned_amount"] else None
                     pf = cv.get("planned_fraction") or 0
-                    self.queue(t, "buy_to", "M-63", "追高补仓", fraction=max(0.0, pf * (1 - cv["frac"])), tier=cv.get("tier") or "normal", stop=cv["stop"], _chase_topup=True)
+                    self.queue(
+                        t,
+                        "buy_to",
+                        "M-63",
+                        "追高补仓",
+                        fraction=max(0.0, pf * (1 - cv["frac"])),
+                        tier=cv.get("tier") or "normal",
+                        stop=cv["stop"],
+                        _chase_topup=True,
+                    )
                     cv["topped"] = True
                     self.flags_counts["chase_topup"] = self.flags_counts.get("chase_topup", 0) + 1
                 if self.index >= cv["deadline"] or cv["topped"]:

@@ -9,6 +9,7 @@ exit vol>33. Output: per-ticker tier history (date, tier, driving metrics).
 import statistics
 from datetime import timedelta
 
+
 def _asof(states, day):
     rows = [s for s in states if s.filed <= day]
     return max(rows, key=lambda s: s.filed) if rows else None
@@ -19,10 +20,10 @@ def _risk_metrics(bars, spy, day):
     closes = [(d, r["close"]) for d, r in sorted(bars.items()) if day - timedelta(days=365) <= d <= day]
     if len(closes) < 60:
         return None
-    rets = [c2 / c1 - 1 for (_, c1), (_, c2) in zip(closes, closes[1:])]
-    vol = statistics.stdev(rets) * (252 ** 0.5) * 100 if len(rets) > 2 else None
+    rets = [c2 / c1 - 1 for (_, c1), (_, c2) in zip(closes, closes[1:], strict=False)]
+    vol = statistics.stdev(rets) * (252**0.5) * 100 if len(rets) > 2 else None
     spy_c = [spy[d]["close"] for d, _ in closes if d in spy]
-    srets = [s2 / s1 - 1 for s1, s2 in zip(spy_c, spy_c[1:])]
+    srets = [s2 / s1 - 1 for s1, s2 in zip(spy_c, spy_c[1:], strict=False)]
     beta = None
     if len(srets) == len(rets) and len(rets) > 2 and statistics.stdev(srets):
         cov = statistics.covariance(rets, srets)
@@ -31,7 +32,11 @@ def _risk_metrics(bars, spy, day):
     for _, c in closes:
         peak = max(peak, c)
         maxdd = min(maxdd, 100 * (c / peak - 1))
-    return {"vol252": round(vol, 1) if vol else None, "beta": round(beta, 2) if beta else None, "maxdd_1y": round(maxdd, 1)}
+    return {
+        "vol252": round(vol, 1) if vol else None,
+        "beta": round(beta, 2) if beta else None,
+        "maxdd_1y": round(maxdd, 1),
+    }
 
 
 def _eval_tier(st, risk, prev_tier):
@@ -41,11 +46,28 @@ def _eval_tier(st, risk, prev_tier):
     growth = v.get("rev_growth") or 0
     fcf_pos = v.get("fcf_pos_quarters")
     vol, beta = risk["vol252"], risk["beta"] or 1.0
-    attack = growth >= 30 or (v.get("fcf_ttm") or 0) < 0 or (fcf_pos is not None and fcf_pos < 6) or (vol >= 45 and growth >= 15)
+    attack = (
+        growth >= 30
+        or (v.get("fcf_ttm") or 0) < 0
+        or (fcf_pos is not None and fcf_pos < 6)
+        or (vol >= 45 and growth >= 15)
+    )
     defense_entry, defense_exit = vol < 28, vol > 33
-    defense = (defense_entry or (prev_tier == "defense" and not defense_exit)) and beta < 0.9 and (fcf_pos is None or fcf_pos >= 8) and (v.get("fcf_margin") or 0) >= 8 and growth < 30
+    defense = (
+        (defense_entry or (prev_tier == "defense" and not defense_exit))
+        and beta < 0.9
+        and (fcf_pos is None or fcf_pos >= 8)
+        and (v.get("fcf_margin") or 0) >= 8
+        and growth < 30
+    )
     tier = "attack" if attack else ("defense" if defense else "normal")
-    return tier, {"vol252": vol, "beta": beta, "rev_growth": growth, "fcf_margin": v.get("fcf_margin"), "fcf_pos": fcf_pos}
+    return tier, {
+        "vol252": vol,
+        "beta": beta,
+        "rev_growth": growth,
+        "fcf_margin": v.get("fcf_margin"),
+        "fcf_pos": fcf_pos,
+    }
 
 
 def tier_history(ticker, bars, spy, states):

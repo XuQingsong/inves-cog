@@ -6,7 +6,6 @@ import csv
 import json
 import os
 import sys
-from collections import defaultdict
 from datetime import date
 
 import psycopg

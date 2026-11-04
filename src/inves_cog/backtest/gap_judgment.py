@@ -10,12 +10,11 @@ after the gap day, never on the gap day itself.
 """
 
 import statistics
-from datetime import timedelta
 
 
 def _rets(bars, days):
     cs = [bars[d]["close"] for d in days if d in bars]
-    return [c2 / c1 - 1 for c1, c2 in zip(cs, cs[1:])]
+    return [c2 / c1 - 1 for c1, c2 in zip(cs, cs[1:], strict=False)]
 
 
 def gap_events(ticker, bars, filings, states, val_fn, start, end):
@@ -39,11 +38,12 @@ def gap_events(ticker, bars, filings, states, val_fn, start, end):
             continue
         prev = all_days[i - 1]
         fil = [f for f in filings if prev <= f["filed"] <= day]
-        cause = "earnings" if any(f["form"] in ("10-Q", "10-K", "8-K") for f in fil) else (
-            "material" if fil else "narrative"
+        cause = (
+            "earnings"
+            if any(f["form"] in ("10-Q", "10-K", "8-K") for f in fil)
+            else ("material" if fil else "narrative")
         )
         st_now = _st(states, day)
-        st_prev = _st(states, day - timedelta(days=120))
         confirmed = bool(
             cause != "narrative"
             and st_now
@@ -59,8 +59,13 @@ def gap_events(ticker, bars, filings, states, val_fn, start, end):
             decision = "allow" if (pe_pct is not None and pe_pct <= 50) else "pullback"
         else:
             decision = "pullback"
-        out[day] = {"trigger": "1d" if trig1 else "3d", "cause": cause, "confirmed": confirmed,
-                    "pe_pct": pe_pct, "decision": decision}
+        out[day] = {
+            "trigger": "1d" if trig1 else "3d",
+            "cause": cause,
+            "confirmed": confirmed,
+            "pe_pct": pe_pct,
+            "decision": decision,
+        }
     # active window: a gap decision gates buys for 10 sessions after the trigger day
     return out
 

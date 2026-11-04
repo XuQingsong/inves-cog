@@ -285,6 +285,8 @@ def test_etf_stale_health_no_kwarg_collision():
     # run at 08:00 with stale key pre-set → hits record_health without kwarg collision
     result = mod.run_once(clock, {}, conn=conn)
     assert result["status"] == "ok"  # no TypeError abort
+
+
 def test_flags_default_off_and_tier_lock():
     """Flags default off; tier_lock overrides score tier; chase_block counts."""
     import yaml
@@ -332,15 +334,23 @@ def test_cooldown_semantics():
 
 def test_rule_tiers_hysteresis():
     """rule_tiers: defense needs vol<28 confirmed 2 evals; exits only on vol>33."""
+    from datetime import date, timedelta
+
     from inves_cog.backtest.rule_tiers import tier_history
     from inves_cog.ingest.fundamentals.state import FinState
-    from datetime import date, timedelta
 
     bars = {date(2020, 1, 1) + timedelta(days=i): {"close": 100 + i * 0.01} for i in range(400)}
     spy = {d: {"close": 100 + i * 0.02} for i, d in enumerate(sorted(bars))}
+
     def mk(filed, growth, fcf, fcfm):
-        return FinState(ticker="X", extractor="fixed", filed=filed, period_end=filed,
-                        values={"rev_growth": growth, "fcf_ttm": fcf, "fcf_margin": fcfm, "rev_ttm": 1e9})
+        return FinState(
+            ticker="X",
+            extractor="fixed",
+            filed=filed,
+            period_end=filed,
+            values={"rev_growth": growth, "fcf_ttm": fcf, "fcf_margin": fcfm, "rev_ttm": 1e9},
+        )
+
     states = [mk(date(2020, 10, 1), 10, 1e8, 12), mk(date(2021, 1, 15), 10, 1e8, 12)]
     hist = tier_history("X", bars, spy, states)
     assert hist and all(h["tier"] in ("attack", "defense", "normal") for h in hist)
@@ -348,8 +358,9 @@ def test_rule_tiers_hysteresis():
 
 def test_gap_judgment_narrative_blocks():
     """gap_judgment: a >3-sigma jump with no filing → narrative → block."""
-    from inves_cog.backtest.gap_judgment import gap_events
     from datetime import date, timedelta
+
+    from inves_cog.backtest.gap_judgment import gap_events
 
     days = [date(2020, 3, 2) + timedelta(days=i) for i in range(40)]
     bars = {d: {"close": 100 + (i % 5)} for i, d in enumerate(days)}
@@ -362,18 +373,33 @@ def test_gap_judgment_narrative_blocks():
 def test_gap_valuation_real_finstate():
     """valuation_inputs + gap_events must read FinState.values, not flat attrs —
     the prepared path feeds real FinState objects (no .net_debt attribute)."""
-    from inves_cog.backtest.valuation import valuation_inputs
-    from inves_cog.backtest.gap_judgment import gap_events
-    from inves_cog.ingest.fundamentals.state import FinState
     from datetime import date, timedelta
+
+    from inves_cog.backtest.gap_judgment import gap_events
+    from inves_cog.backtest.valuation import valuation_inputs
+    from inves_cog.ingest.fundamentals.state import FinState
 
     days = [date(2020, 3, 2) + timedelta(days=i) for i in range(40)]
     bars = {d: {"close": 100 + i} for i, d in enumerate(days)}
     bars[days[30]] = {"close": bars[days[29]]["close"] * 1.2}
-    st = FinState(ticker="X", extractor="fixed", filed=days[0], period_end=days[0],
-                  values={"rev_accel_pp": 5, "gross_margin_change_pp": 1, "fcf_margin": 10,
-                          "shares": 1e6, "rev_ttm": 1e9, "ni_ttm": 1e8, "op_margin_ttm": 15,
-                          "net_debt": 5e7, "fcf_ttm": 9e7, "eps_ttm": 5})
+    st = FinState(
+        ticker="X",
+        extractor="fixed",
+        filed=days[0],
+        period_end=days[0],
+        values={
+            "rev_accel_pp": 5,
+            "gross_margin_change_pp": 1,
+            "fcf_margin": 10,
+            "shares": 1e6,
+            "rev_ttm": 1e9,
+            "ni_ttm": 1e8,
+            "op_margin_ttm": 15,
+            "net_debt": 5e7,
+            "fcf_ttm": 9e7,
+            "eps_ttm": 5,
+        },
+    )
     val = valuation_inputs("X", days[30], bars, [st])
     assert not val.get("missing") and val["ev_ebit"] is not None
     events = gap_events("X", bars, [], [st], lambda t, d: val, days[0], days[-1])
@@ -382,8 +408,10 @@ def test_gap_valuation_real_finstate():
 
 def test_chase_v2_trigger_and_sizing():
     """chase_v2: trigger on 2x-vol 5d or 3x-vol 1d; tranche by category."""
-    from inves_cog.backtest.chase_v2 import chase_trigger, category, tranche
     from datetime import date, timedelta
+
+    from inves_cog.backtest.chase_v2 import category, chase_trigger, tranche
+
     days = [date(2020, 3, 2) + timedelta(days=i) for i in range(80)]
     bars = {d: {"close": 100 + i * 0.05} for i, d in enumerate(days)}
     for d in days[-5:]:
@@ -399,6 +427,7 @@ def test_overval_veto_quintile(tmp_path):
     """load_quintiles computes the top-quintile threshold; vetoed() blocks only
     top-quintile tickers on the latest Friday <= decision day."""
     import csv
+
     from inves_cog.backtest.overval import load_quintiles, quintile_at, vetoed
 
     p = tmp_path / "panel.csv"
