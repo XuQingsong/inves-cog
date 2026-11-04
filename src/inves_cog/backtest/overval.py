@@ -4,6 +4,7 @@ Cross-section per Friday: tickers with m8 present, ev > 0, non-financial.
 A member is vetoed on decision day D when its m8 on the latest Friday <= D is
 in the top quintile (>= 80th percentile) of that Friday's cross-section.
 """
+
 import csv
 from bisect import bisect_right
 from datetime import date
