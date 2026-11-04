@@ -393,3 +393,23 @@ def test_chase_v2_trigger_and_sizing():
     assert tranche("reasonable") == 0.5 and tranche("narrative") == 0.0
     assert category({"cause": "narrative"}, {}) == "narrative"
     assert category({"cause": "earnings", "confirmed": True}, {"pe_pctile_3y": 30}) == "reasonable"
+
+
+def test_overval_veto_quintile(tmp_path):
+    """load_quintiles computes the top-quintile threshold; vetoed() blocks only
+    top-quintile tickers on the latest Friday <= decision day."""
+    import csv
+    from inves_cog.backtest.overval import load_quintiles, quintile_at, vetoed
+
+    p = tmp_path / "panel.csv"
+    with open(p, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["ticker", "date", "m8", "ev"])
+        for i, t in enumerate(["A", "B", "C", "D", "E"]):
+            w.writerow([t, "2024-01-05", i + 1, 1e9])
+    qmap, qdays = load_quintiles(p, financials=set())
+    # m8 values 1..5 -> 80th pct = 4 -> E(5) vetoed, A(1) not
+    assert vetoed(qmap, qdays, "E", __import__("datetime").date(2024, 1, 8))
+    assert not vetoed(qmap, qdays, "A", __import__("datetime").date(2024, 1, 8))
+    assert quintile_at(qmap, qdays, "E", __import__("datetime").date(2024, 1, 8)) == 5
+    assert not vetoed(qmap, qdays, "ZZZ", __import__("datetime").date(2024, 1, 8))  # not in panel -> no veto

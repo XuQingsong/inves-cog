@@ -1,5 +1,6 @@
 """run_backtest — generalizes execution/replay.run_frozen onto the prod DB loader."""
 
+import bisect
 import copy
 from pathlib import Path
 import json
@@ -77,6 +78,16 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
     )
     flags = spec.get("flags") or {}
     flag_counts = {}
+    veto_events = []
+    overval = None
+    if flags.get("overval_veto"):
+        from .overval import load_quintiles, quintile_at as overval_quintile, vetoed as overval_vetoed
+
+        panel_path = spec.get("overval_panel") or str(
+            Path.home() / "inves-cog-bt" / "valuation" / "panel_sp500.csv"
+        )
+        financials = set(spec.get("overval_financials") or ())
+        overval = load_quintiles(panel_path, financials=financials)
     locked = {}
     if flags.get("tier_lock"):
         import yaml
@@ -176,6 +187,18 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
                     if t not in prev_blocked:  # distinct would-be order = start of a blocked streak
                         flag_counts["chase_orders"] = flag_counts.get("chase_orders", 0) + 1
             prev_blocked = now_blocked
+        if overval is not None:
+            qmap, qdays = overval
+            for t, sc in daily.items():
+                if sc.get("entry_pass") and overval_vetoed(qmap, qdays, t, day):
+                    sc["entry_pass"] = False
+                    flag_counts["overval_veto"] = flag_counts.get("overval_veto", 0) + 1
+                    fidx = bisect.bisect_right(qdays, day) - 1
+                    veto_events.append(
+                        {"ticker": t, "date": day, "price": prices.get(t, {}).get(day, {}).get("close"),
+                         "quintile": overval_quintile(qmap, qdays, t, day),
+                         "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None}
+                    )
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
@@ -229,6 +252,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):
         "spec": spec,
         "metrics": metrics,
         "trades": copy.deepcopy(engine.trades),
+        "veto_events": veto_events,
         "curve": engine.curve,
         "positions": engine.positions,
         "audit": {
