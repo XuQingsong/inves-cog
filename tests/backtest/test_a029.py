@@ -145,3 +145,21 @@ def test_a029_short_hold_audit_uses_exchange_sessions():
         fill("MSFT", "sell", "2026-11-03"),
     ]
     assert short_hold_sales(trades) == 1
+
+
+def test_a029_repaired_state_cannot_replace_newer_or_healthy_state():
+    from datetime import date
+    from types import SimpleNamespace
+
+    from inves_cog.backtest.tier_repair import repaired_state
+
+    def row(day, codes):
+        return SimpleNamespace(filed=date.fromisoformat(day), health_codes=codes)
+
+    original = row("2025-04-30", ["core_field_missing"])
+    healthy = row("2025-04-30", ["ok"])
+    later = row("2025-05-01", ["ok"])
+    assert repaired_state(original, [healthy, later], date(2025, 4, 30)) is healthy
+    assert repaired_state(original, [later], date(2025, 4, 30)) is original
+    assert repaired_state(later, [healthy], date(2025, 5, 2)) is later
+    assert repaired_state(healthy, [row("2025-04-30", ["ni_tag_fallback"])], date(2025, 5, 2)) is healthy
