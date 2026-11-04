@@ -2,7 +2,7 @@
 
 from datetime import date, timedelta
 
-from inves_cog.valuation.ceiling import implied_m, cap_multiplier
+from inves_cog.valuation.ceiling import cap_multiplier, implied_m
 
 CYCLICAL = {"MU", "WDC", "STX", "SNDK", "SKHY", "XOM", "CVX", "AMAT", "LRCX", "KLAC", "ASML"}
 FWD_WEEKS = (13, 26, 52, 104, 156)

@@ -1,4 +1,4 @@
-from inves_cog.valuation.ceiling import dyn_pe, implied_m, cap_multiplier
+from inves_cog.valuation.ceiling import cap_multiplier, dyn_pe, implied_m
 
 
 def test_dyn_pe_book_values():
