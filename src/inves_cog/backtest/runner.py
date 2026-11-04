@@ -217,19 +217,23 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
         if overval is not None:
             qmap, qdays = overval
             for t, sc in daily.items():
-                if sc.get("entry_pass") and overval_vetoed(qmap, qdays, t, day):
-                    sc["entry_pass"] = False
-                    flag_counts["overval_veto"] = flag_counts.get("overval_veto", 0) + 1
-                    fidx = bisect.bisect_right(qdays, day) - 1
-                    veto_events.append(
-                        {
-                            "ticker": t,
-                            "date": day,
-                            "price": prices.get(t, {}).get(day, {}).get("close"),
-                            "quintile": overval_quintile(qmap, qdays, t, day),
-                            "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
-                        }
-                    )
+                if not overval_vetoed(qmap, qdays, t, day):
+                    continue
+                sc["overval_veto"] = True  # blocks swing/watch buys in the engine too
+                if not sc.get("entry_pass"):
+                    continue
+                sc["entry_pass"] = False
+                flag_counts["overval_veto"] = flag_counts.get("overval_veto", 0) + 1
+                fidx = bisect.bisect_right(qdays, day) - 1
+                veto_events.append(
+                    {
+                        "ticker": t,
+                        "date": day,
+                        "price": prices.get(t, {}).get(day, {}).get("close"),
+                        "quintile": overval_quintile(qmap, qdays, t, day),
+                        "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
+                    }
+                )
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:

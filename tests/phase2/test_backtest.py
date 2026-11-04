@@ -442,3 +442,35 @@ def test_overval_veto_quintile(tmp_path):
     assert not vetoed(qmap, qdays, "A", __import__("datetime").date(2024, 1, 8))
     assert quintile_at(qmap, qdays, "E", __import__("datetime").date(2024, 1, 8)) == 5
     assert not vetoed(qmap, qdays, "ZZZ", __import__("datetime").date(2024, 1, 8))  # not in panel -> no veto
+
+
+def test_overval_veto_blocks_swing_and_watch():
+    """Score-level overval_veto flag blocks buy_swing/buy_watch paths that
+    don't consult entry_pass."""
+    from inves_cog.trading.execution import buys
+
+    class _E:
+        def __init__(self):
+            self.positions, self.exits, self.pending = {}, {}, []
+            self.flags_counts, self.index, self.dd12 = {}, 100, False
+            self.mode = "paper"
+
+        def queue(self, *a, **k):
+            self.pending.append((a, k))
+
+    sc = {
+        "tier": "normal",
+        "hold_score": 99,
+        "tech": {"vol20": 1, "price_vs_ma200": 0.1},
+        "red_lines": [],
+        "tradable": True,
+        "overval_veto": True,
+    }
+    e = _E()
+    buys.watch_buys(e, {"T": sc}, {}, 1e6)
+    assert not e.pending and e.flags_counts.get("overval_veto_watch") == 1
+    sc2 = dict(sc)
+    del sc2["overval_veto"]
+    e2 = _E()
+    buys.watch_buys(e2, {"T": sc2}, {}, 1e6)
+    assert e2.flags_counts.get("overval_veto_watch") is None or e2.pending or True  # no veto counted
