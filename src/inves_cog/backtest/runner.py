@@ -70,7 +70,8 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     mode = spec.get("mode", "paper")
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
-    engine_type = BacktestEngine if (spec.get("flags") or {}).get("buy_consistency") else ExecutionEngine
+    flags = spec.get("flags") or {}
+    engine_type = BacktestEngine if any(flags.get(k) for k in ("buy_consistency", "watch_promote")) else ExecutionEngine
     engine = engine_type(
         clock=clock,
         initial_cash=initial,
@@ -78,7 +79,6 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
         portfolio_id=f"bt-{spec.get('label', 'run')}",
         flags=spec.get("flags") or {},
     )
-    flags = spec.get("flags") or {}
     flag_counts = {}
     veto_events = []
     overval = None
