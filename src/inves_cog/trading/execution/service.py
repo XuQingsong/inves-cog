@@ -100,7 +100,9 @@ def annotate_ceiling(plan, ceilings):
             continue
         m = row.get("m")
         note = f"隐含利润倍数 {m:.1f}，{row.get('band', '档位暂缺')}" if m is not None else "隐含天花板数据暂缺或不适用"
-        order["reason_zh"] = order.get("reason_zh", "") + "；" + note
+        original = order.get("reason_zh", "").split("；隐含利润倍数", 1)[0]
+        original = original.split("；隐含天花板数据", 1)[0]
+        order["reason_zh"] = original + "；" + note
 
 
 def daily_plan(*, clock, connection, universe, target, overlay=None, persist=True):
