@@ -40,6 +40,16 @@ def short_hold_sales(trades):
     return count
 
 
+def fear_coverage(replay_days, fear_levels, start, end):
+    days = {day for day in replay_days if start <= day <= end}
+    covered = sum(fear_levels.get(day) is not None for day in days)
+    return {
+        "covered_days": covered,
+        "replay_days": len(days),
+        "coverage_pct": 100 * covered / len(days) if days else 0,
+    }
+
+
 def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     """For each quarter start, run baseline + each variant; report the distribution.
 
@@ -59,6 +69,8 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     ctx = multiprocessing.get_context("fork")
     with ctx.Pool(max(1, min(workers, 4))) as pool:
         results = pool.map(_one_replay, jobs)
+    replay_days = {day for prices in _G_PREPARED["prices"].values() for day in prices}
+    fear_levels = _G_PREPARED.get("fear_levels", {})
     i = 0
     rows = []
     for st in starts:
@@ -77,6 +89,8 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "base_rdd": base.get("return_over_maxdd"),
                     "beats": m["return_pct"] > base["return_pct"],
                     "short_hold_sales": m["short_hold_sales"],
+                    "fear_coverage": fear_coverage(replay_days, fear_levels, st, spec["end"])
+                    if variants[name].get("breakdown_confirm") else None,
                 }
             )
     return _distribution(rows)

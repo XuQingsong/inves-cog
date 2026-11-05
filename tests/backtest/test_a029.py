@@ -166,6 +166,8 @@ def test_a029_repaired_state_cannot_replace_newer_or_healthy_state():
 
 
 def test_fear_coverage_counts_available_replay_days_from_each_start():
+    from datetime import date
+
     from inves_cog.backtest.evaluate import fear_coverage
 
     first, second, third = (date(2024, 1, day) for day in (2, 3, 4))
