@@ -1,0 +1,21 @@
+[
+  {
+    "ticker": "GOOGL",
+    "company_eps_rows": 127,
+    "last_filed": "2026-07-23"
+  },
+  {
+    "ticker": "META",
+    "company_eps_rows": 189,
+    "last_filed": "2026-07-30"
+  },
+  {
+    "ticker": "BRK.B",
+    "status": "cache_missing"
+  },
+  {
+    "ticker": "V",
+    "company_eps_rows": 0,
+    "last_filed": null
+  }
+]

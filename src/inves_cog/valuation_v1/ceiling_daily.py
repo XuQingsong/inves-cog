@@ -24,7 +24,7 @@ def calculate_ceiling(data, *, day, kind, tier, bands, asof=None):
         m_r_minus_1=None,
         m_r_plus_1=None,
         fcf_m=None,
-        quality="高",
+        quality="低",
         band="不适用",
         band_rule=bands["version"],
         missing=missing,
@@ -35,7 +35,7 @@ def calculate_ceiling(data, *, day, kind, tier, bands, asof=None):
         implied_terminal_profit=None,
     )
     row["evidence"] = {
-        k: data.get(k) for k in ("rev_growth", "rev_accel_pp", "gross_margin", "roic", "financial_filed")
+        k: data.get(k) for k in ("rev_growth", "rev_accel_pp", "gross_margin", "roic", "financial_filed", "fy2_eps")
     }
     if str(bands["calibration_date"]) > str(day):
         missing.append("band_calibration_not_visible")
@@ -76,18 +76,28 @@ def calculate_ceiling(data, *, day, kind, tier, bands, asof=None):
         row["evidence"]["profit_basis"] = "normalized_TTM_revenue_growth_proxy"
         missing.append("FY1_consensus")
     row["next_profit"] = profit
+    margins = [v for v in data.get("annual_gross_margins", []) if finite(v) is not None]
+    row["evidence"]["gross_margin_trend_pp"] = margins[-1] - margins[-2] if len(margins) > 1 else None
+    for name in ("roic", "fy2_eps", "gross_margin_trend_pp"):
+        if row["evidence"].get(name) is None:
+            missing.append(name)
     m = implied_m(ev / profit, r) if profit > 0 else None
     if ni <= 0 or nopat <= 0 or profit <= 0 or m is None or m > 40:
         row.update(method="loss", r=0.10, implied_terminal_profit=ev / cap_multiplier(10, 0.10))
         row["evidence"].update(terminal_profit_5y=ev / cap_multiplier(5, 0.10), method_reason="亏损或隐含倍数超过40")
         return row
     row.update(m=m, m_r_minus_1=implied_m(ev / profit, r - 0.01), m_r_plus_1=implied_m(ev / profit, r + 0.01))
+    fy2 = finite(data.get("fy2_eps"))
+    row["evidence"]["fy2_coverage"] = (
+        fy2 * data["diluted_shares"] / (nopat * m) if fy2 is not None and nopat > 0 else None
+    )
     fcf = finite(data.get("fcf_ttm"))
     if fcf is None:
         missing.append("fcf_ttm")
         row["quality"] = "低"
     else:
         ratio = fcf / ni if ni > 0 else None
+        row["quality"] = "高" if ratio is not None and ratio >= 0.5 else "低"
         row["evidence"]["fcf_net_profit_ratio"] = ratio
         if ratio is not None and ratio < 0.5:
             row["quality"] = "低"

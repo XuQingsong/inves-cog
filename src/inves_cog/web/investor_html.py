@@ -146,6 +146,9 @@ def _valuation(view, full=False):
         bits.append("市盈率不适用（盈利过低）")
     elif view.get("pe") is not None:
         bits.append(f"市盈率 {half_up(float(view['pe']), 1):.1f}")
+    low, mid, high = view.get("pe_p25"), view.get("pe_p50"), view.get("pe_p75")
+    if low is not None and low == mid == high:
+        bits.append("历史样本不足")
     if view.get("implied_growth") is not None:
         bits.append(f"隐含增速 {half_up(float(view['implied_growth']), 1):.1f}%")
     elif view.get("implied_reason"):

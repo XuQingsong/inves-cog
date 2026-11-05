@@ -31,7 +31,7 @@ def test_class_eps_only_fills_missing_company_periods_with_source_marker():
     missing = extract_state({"facts": {}}, ticker="V", as_of=date(2026, 3, 1), instance_facts=dimensional)
     assert missing.values["eps_ttm"] == 8
     components = missing.field_sources["eps_ttm"]["components"]
-    assert all(r.get("origin") == "instance_class_eps_fallback" for r in components)
+    assert all(r.get("eps_fallback") == "class_a_missing_company_period" for r in components)
     old = extract_state({"facts": {}}, ticker="V", as_of=date(2026, 1, 1), instance_facts=dimensional)
     assert old.values["eps_ttm"] is None
 

@@ -120,6 +120,7 @@ def ceiling_for_row(row, source, ticker, price, as_of, cutoff):
     if forecast and not settings().get("listed_units", {}).get(ticker):
         if forecast.get("fy_cy") and str(forecast["fy_cy"])[:10] >= str(as_of):
             ceiling_input["fy1_eps"] = forecast.get("eps_cy")
+            ceiling_input["fy2_eps"] = forecast.get("eps_ny")
     tier = source.get("tiers", {}).get(ticker)
     return calculate_ceiling(
         ceiling_input, day=as_of, kind=row.get("type"), tier=tier, bands=band_settings(), asof=cutoff

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS valuation_v1.ceiling_daily (
  PRIMARY KEY(ticker,trade_date),
  CHECK(method='growth' OR band='不适用')
 );
-REVOKE ALL ON valuation_v1.ceiling_daily FROM PUBLIC;
+REVOKE ALL ON valuation_v1.ceiling_daily FROM PUBLIC,role_ingest,role_trading,role_marketstate,role_valuation,role_perception,role_overlay,role_shadow,role_web;
 GRANT SELECT,INSERT,UPDATE ON valuation_v1.ceiling_daily TO role_valuation;
 GRANT USAGE ON SCHEMA valuation_v1 TO role_web,role_trading;
 GRANT SELECT ON valuation_v1.ceiling_daily TO role_web,role_trading;

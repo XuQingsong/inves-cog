@@ -109,7 +109,7 @@ def class_eps_fallback(base, extra, as_of):
             if row.get("dimensions"):
                 if (row.get("start"), row.get("end")) in covered:
                     continue
-                row["origin"] = "instance_class_eps_fallback"
+                row["eps_fallback"] = "class_a_missing_company_period"
             accepted.append(row)
         extra_units[unit] = accepted
     return result

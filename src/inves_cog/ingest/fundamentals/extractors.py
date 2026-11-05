@@ -166,6 +166,7 @@ def source(row):
             "original_value",
             "original_unit",
             "origin",
+            "eps_fallback",
             "d9_only",
             "dimensions",
             "split_adjustment",

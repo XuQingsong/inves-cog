@@ -1,8 +1,11 @@
 """Presentation of stored reverse-valuation results; never recompute a decision."""
 
 MISSING_LABELS = {
-    "rule_a_tier": "风险层级（暂用8%折现率）",
+    "rule_a_tier": "风险层级",
     "FY1_consensus": "下一财年一致预期",
+    "roic": "投入资本回报率",
+    "fy2_eps": "后一年一致预期",
+    "gross_margin_trend_pp": "毛利率趋势",
     "rev_growth": "营收增速",
     "fcf_ttm": "自由现金流",
     "net_debt": "净负债",
@@ -50,10 +53,15 @@ def ceiling_text(row, *, full=False):
             ("rev_accel_pp", "增速加速度"),
             ("gross_margin", "毛利率"),
             ("roic", "投入资本回报率"),
+            ("gross_margin_trend_pp", "毛利率变化"),
         ):
             value = proof.get(key)
             if value is not None:
                 bits.append(f"{label} {value:.1f}%")
+        if proof.get("fy2_coverage") is not None:
+            bits.append(f"后一年预期对终局利润覆盖 {proof['fy2_coverage']:.0%}")
+        if proof.get("fcf_net_profit_ratio") is not None:
+            bits.append(f"自由现金流/净利润 {proof['fcf_net_profit_ratio']:.2f}")
         if row.get("missing"):
             bits.append("缺失：" + "、".join(MISSING_LABELS.get(k, "相关披露") for k in row["missing"]))
     return "；".join(bits)
