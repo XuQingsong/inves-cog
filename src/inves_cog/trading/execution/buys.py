@@ -114,6 +114,9 @@ def core_swings(engine, scores, values, equity, sold):
         score = scores.get(ticker)
         if not score or score.get("tier") not in TIERS or ticker in sold or score.get("fund_bad"):
             continue
+        if score.get("overval_veto"):
+            engine.flags_counts["overval_veto_swing"] = engine.flags_counts.get("overval_veto_swing", 0) + 1
+            continue
         if not score.get("hold_ok") or position["stage"] > 0 or position["swing_count"] >= W["max_lots"]:
             continue
         if engine.index - position["last_swing_index"] < W["interval"] or engine.dd12 and score["tier"] != "defense":
@@ -175,8 +178,11 @@ def watch_buys(engine, scores, values, equity):
         if (
             ticker in engine.positions
             or (not score.get("tradable", True) and not legacy_watch)
+            or score.get("overval_veto")
             or not watch_eligible(score)
         ):
+            if score.get("overval_veto"):
+                engine.flags_counts["overval_veto_watch"] = engine.flags_counts.get("overval_veto_watch", 0) + 1
             continue
         if (
             count >= W["watch_slots"]

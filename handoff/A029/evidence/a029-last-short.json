@@ -1,0 +1,130 @@
+[
+  {
+    "buy": {
+      "ticker": "VRT",
+      "action": "buy_swing",
+      "label": "\u6ce2\u6bb5\u4e70\u5165",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 \u6ce2\u6bb5\u4e70\u5165",
+      "signal_date": "2025-02-21",
+      "trade_date": "2025-02-24",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 32240.565075589075,
+      "order_id": "264a113bffb9d9b29422c1068e1d72bac68bf8aff5e71e111aee7a51bd4a5161",
+      "kind": "swing_buy",
+      "qty": 332,
+      "cost": 32.204,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 332,
+      "side": "buy",
+      "fill_price": 97.0,
+      "notional": 32204.0,
+      "status": "filled"
+    },
+    "sell": {
+      "ticker": "VRT",
+      "action": "sell_all",
+      "label": "\u5168\u90e8\u5356\u51fa",
+      "rule_ids": [
+        "M-51"
+      ],
+      "reason_zh": "M-51 \u5168\u90e8\u5356\u51fa",
+      "signal_date": "2025-02-24",
+      "trade_date": "2025-02-25",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "exit_kind": "price",
+      "order_id": "64bd3f68c9fbb8942845fa9a4c2bcb39c43039b4f50d6d3b7e278277c72fbd2a",
+      "kind": "exit",
+      "qty": 1663,
+      "cost": 148.007,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 89.0,
+      "notional": 148007.0,
+      "status": "filled"
+    },
+    "signal": {
+      "signal_date": "2025-02-24",
+      "ticker": "VRT",
+      "extractor": "fixed",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tech": {
+        "price": 91.02,
+        "raw_price": 91.02,
+        "open": 97.0,
+        "price_vs_ma200": -11.875975747013756,
+        "ma50_vs_ma200": 16.743322562296537,
+        "ma200_slope20": 2.4913781170135207,
+        "mom3": -35.41932737335036,
+        "mom6": 16.707270162841393,
+        "rsi": 30.172730613744946,
+        "dev50": -24.514719712588672,
+        "vol_ratio": 1.5513921541589926,
+        "up_share": 39.70449467336093,
+        "vol20": 123.78743722512023,
+        "vol60": 83.86257867605636,
+        "drawdown252": -40.69971985145613
+      },
+      "derived": {
+        "pe": 71.109375,
+        "peg": 4.248980171513146,
+        "mktcap": 34658193382.619995,
+        "ps": 4.325893479944581,
+        "fcf_yield": 3.3247549498002473
+      },
+      "books": {
+        "quality": 81.9,
+        "growth": 69.9,
+        "valuation": 33.1,
+        "timing": 47.8
+      },
+      "timing_subitems": {
+        "trend": 64.27002021082187,
+        "momentum": 38.01218104885242,
+        "volume": 51.3088862930261,
+        "position": 40.11515374249663,
+        "risk": 19.737605055703952
+      },
+      "timing_missing": {
+        "trend": {},
+        "momentum": {},
+        "volume": {},
+        "position": {},
+        "risk": {}
+      },
+      "missing_fields": [],
+      "rank_score": 59.8,
+      "red_lines": [],
+      "tier": "attack",
+      "tier_changed_on": "2025-02-18",
+      "certainty": "low",
+      "certainty_points": 1,
+      "hold_score": 87,
+      "hold_ok": true,
+      "fund_bad": false,
+      "runway_ok": true,
+      "m31_adjusted_valuation": null,
+      "m32_ok": true,
+      "gate_pass": false,
+      "entry_pass": false,
+      "consec_pass": 0,
+      "tradable": true,
+      "null_reason": null,
+      "health_codes": [
+        "gross_margin_derived"
+      ],
+      "consec_below200": 2,
+      "consec_tim35": 0,
+      "consec_tim30": 0,
+      "state_version": "2025-02-18",
+      "rev_growth": 16.735633523720715,
+      "rev_accel_pp": 6.796487137676799
+    }
+  }
+]

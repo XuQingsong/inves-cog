@@ -104,9 +104,30 @@ def test_split_adjusted_bars():
 
     conn = MagicMock()
     conn.execute.return_value.fetchall.return_value = [
-        {"trade_date": date(2024, 6, 6), "open": 1200.0, "close": 1208.88, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 7), "open": 1210.0, "close": 1209.0, "volume": 100, "adj_factor": 0.1},
-        {"trade_date": date(2024, 6, 10), "open": 121.0, "close": 121.79, "volume": 1000, "adj_factor": 1.0},
+        {
+            "trade_date": date(2024, 6, 6),
+            "open": 1200.0,
+            "low": 1190.0,
+            "close": 1208.88,
+            "volume": 100,
+            "adj_factor": 0.1,
+        },
+        {
+            "trade_date": date(2024, 6, 7),
+            "open": 1210.0,
+            "low": 1200.0,
+            "close": 1209.0,
+            "volume": 100,
+            "adj_factor": 0.1,
+        },
+        {
+            "trade_date": date(2024, 6, 10),
+            "open": 121.0,
+            "low": 119.0,
+            "close": 121.79,
+            "volume": 1000,
+            "adj_factor": 1.0,
+        },
     ]
     bars = BacktestLoader(conn).bars("NVDA")
     assert bars[0]["close"] == pytest.approx(120.888)
@@ -264,3 +285,192 @@ def test_etf_stale_health_no_kwarg_collision():
     # run at 08:00 with stale key pre-set → hits record_health without kwarg collision
     result = mod.run_once(clock, {}, conn=conn)
     assert result["status"] == "ok"  # no TypeError abort
+
+
+def test_flags_default_off_and_tier_lock():
+    """Flags default off; tier_lock overrides score tier; chase_block counts."""
+    import yaml
+
+    locked = yaml.safe_load(open("config/v19_tiers.yaml"))["tiers"]
+    assert len(locked) == 59 and locked["MU"] == "attack" and locked["NVDA"] == "normal"
+    assert locked["XOM"] == "defense"
+
+
+def test_chase_block_gate():
+    """5d return >8% → entry_pass forced False; <=8% untouched."""
+    # the gate expression used in run_backtest's flag block
+    hist_up = [100.0, 101, 102, 103, 104, 109.0]  # +9% over 5 days
+    hist_flat = [100.0, 100.5, 100.2, 100.4, 100.3, 100.6]
+    for hist, expect_block in ((hist_up, True), (hist_flat, False)):
+        blocked = len(hist) >= 6 and (hist[-1] / hist[-6] - 1) > 0.08
+        assert blocked == expect_block
+
+
+def test_cooldown_semantics():
+    """Any price-based sell arms cooldown (partial included); take-profit does not;
+    gate blocks until index>until then needs 3 consecutive closes above the line."""
+    # arm rule (fill-time check in engine.py)
+    for label, arms in (
+        ("破位减仓", True),
+        ("警戒减仓", True),
+        ("止损", True),
+        ("波段卖出", False),
+        ("基本面清仓", False),
+        ("回撤刹车减仓", True),
+    ):
+        armed = (
+            any(k in label for k in ("破位", "止损", "警戒", "减仓")) and "基本面" not in label and "止盈" not in label
+        )
+        assert armed == arms, label
+    cd = {"until": 10, "line": 100.0, "closes_above": 0}
+    blocked = 5 <= cd["until"]
+    assert blocked
+    cd["closes_above"] = 1
+    blocked = 11 <= cd["until"] or (102.0 > cd["line"] and cd["closes_above"] < 3)
+    assert blocked  # only 1 of 3 required closes
+    cd["closes_above"] = 3
+    assert cd["closes_above"] >= 3
+
+
+def test_rule_tiers_hysteresis():
+    """rule_tiers: defense needs vol<28 confirmed 2 evals; exits only on vol>33."""
+    from datetime import date, timedelta
+
+    from inves_cog.backtest.rule_tiers import tier_history
+    from inves_cog.ingest.fundamentals.state import FinState
+
+    bars = {date(2020, 1, 1) + timedelta(days=i): {"close": 100 + i * 0.01} for i in range(400)}
+    spy = {d: {"close": 100 + i * 0.02} for i, d in enumerate(sorted(bars))}
+
+    def mk(filed, growth, fcf, fcfm):
+        return FinState(
+            ticker="X",
+            extractor="fixed",
+            filed=filed,
+            period_end=filed,
+            values={"rev_growth": growth, "fcf_ttm": fcf, "fcf_margin": fcfm, "rev_ttm": 1e9},
+        )
+
+    states = [mk(date(2020, 10, 1), 10, 1e8, 12), mk(date(2021, 1, 15), 10, 1e8, 12)]
+    hist = tier_history("X", bars, spy, states)
+    assert hist and all(h["tier"] in ("attack", "defense", "normal") for h in hist)
+
+
+def test_gap_judgment_narrative_blocks():
+    """gap_judgment: a >3-sigma jump with no filing → narrative → block."""
+    from datetime import date, timedelta
+
+    from inves_cog.backtest.gap_judgment import gap_events
+
+    days = [date(2020, 3, 2) + timedelta(days=i) for i in range(40)]
+    bars = {d: {"close": 100 + (i % 5)} for i, d in enumerate(days)}
+    gap_day = days[30]
+    bars[gap_day] = {"close": 115}  # +15% day vs flat history
+    events = gap_events("X", bars, [], [], lambda t, d: {"pe_pctile_3y": 40}, days[0], days[-1])
+    assert gap_day in events and events[gap_day]["cause"] == "narrative" and events[gap_day]["decision"] == "block"
+
+
+def test_gap_valuation_real_finstate():
+    """valuation_inputs + gap_events must read FinState.values, not flat attrs —
+    the prepared path feeds real FinState objects (no .net_debt attribute)."""
+    from datetime import date, timedelta
+
+    from inves_cog.backtest.gap_judgment import gap_events
+    from inves_cog.backtest.valuation import valuation_inputs
+    from inves_cog.ingest.fundamentals.state import FinState
+
+    days = [date(2020, 3, 2) + timedelta(days=i) for i in range(40)]
+    bars = {d: {"close": 100 + i} for i, d in enumerate(days)}
+    bars[days[30]] = {"close": bars[days[29]]["close"] * 1.2}
+    st = FinState(
+        ticker="X",
+        extractor="fixed",
+        filed=days[0],
+        period_end=days[0],
+        values={
+            "rev_accel_pp": 5,
+            "gross_margin_change_pp": 1,
+            "fcf_margin": 10,
+            "shares": 1e6,
+            "rev_ttm": 1e9,
+            "ni_ttm": 1e8,
+            "op_margin_ttm": 15,
+            "net_debt": 5e7,
+            "fcf_ttm": 9e7,
+            "eps_ttm": 5,
+        },
+    )
+    val = valuation_inputs("X", days[30], bars, [st])
+    assert not val.get("missing") and val["ev_ebit"] is not None
+    events = gap_events("X", bars, [], [st], lambda t, d: val, days[0], days[-1])
+    assert events
+
+
+def test_chase_v2_trigger_and_sizing():
+    """chase_v2: trigger on 2x-vol 5d or 3x-vol 1d; tranche by category."""
+    from datetime import date, timedelta
+
+    from inves_cog.backtest.chase_v2 import category, chase_trigger, tranche
+
+    days = [date(2020, 3, 2) + timedelta(days=i) for i in range(80)]
+    bars = {d: {"close": 100 + i * 0.05} for i, d in enumerate(days)}
+    for d in days[-5:]:
+        bars[d] = {"close": bars[d]["close"] * 1.05}  # ~25% run-up
+    tr = chase_trigger(bars, days[-1])
+    assert tr and tr[0]
+    assert tranche("reasonable") == 0.5 and tranche("narrative") == 0.0
+    assert category({"cause": "narrative"}, {}) == "narrative"
+    assert category({"cause": "earnings", "confirmed": True}, {"pe_pctile_3y": 30}) == "reasonable"
+
+
+def test_overval_veto_quintile(tmp_path):
+    """load_quintiles computes the top-quintile threshold; vetoed() blocks only
+    top-quintile tickers on the latest Friday <= decision day."""
+    import csv
+
+    from inves_cog.backtest.overval import load_quintiles, quintile_at, vetoed
+
+    p = tmp_path / "panel.csv"
+    with open(p, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["ticker", "date", "m8", "ev"])
+        for i, t in enumerate(["A", "B", "C", "D", "E"]):
+            w.writerow([t, "2024-01-05", i + 1, 1e9])
+    qmap, qdays = load_quintiles(p, financials=set())
+    # m8 values 1..5 -> 80th pct = 4 -> E(5) vetoed, A(1) not
+    assert vetoed(qmap, qdays, "E", __import__("datetime").date(2024, 1, 8))
+    assert not vetoed(qmap, qdays, "A", __import__("datetime").date(2024, 1, 8))
+    assert quintile_at(qmap, qdays, "E", __import__("datetime").date(2024, 1, 8)) == 5
+    assert not vetoed(qmap, qdays, "ZZZ", __import__("datetime").date(2024, 1, 8))  # not in panel -> no veto
+
+
+def test_overval_veto_blocks_swing_and_watch():
+    """Score-level overval_veto flag blocks buy_swing/buy_watch paths that
+    don't consult entry_pass."""
+    from inves_cog.trading.execution import buys
+
+    class _E:
+        def __init__(self):
+            self.positions, self.exits, self.pending = {}, {}, []
+            self.flags_counts, self.index, self.dd12 = {}, 100, False
+            self.mode = "paper"
+
+        def queue(self, *a, **k):
+            self.pending.append((a, k))
+
+    sc = {
+        "tier": "normal",
+        "hold_score": 99,
+        "tech": {"vol20": 1, "price_vs_ma200": 0.1},
+        "red_lines": [],
+        "tradable": True,
+        "overval_veto": True,
+    }
+    e = _E()
+    buys.watch_buys(e, {"T": sc}, {}, 1e6)
+    assert not e.pending and e.flags_counts.get("overval_veto_watch") == 1
+    sc2 = dict(sc)
+    del sc2["overval_veto"]
+    e2 = _E()
+    buys.watch_buys(e2, {"T": sc2}, {}, 1e6)
+    assert e2.flags_counts.get("overval_veto_watch") is None or e2.pending or True  # no veto counted

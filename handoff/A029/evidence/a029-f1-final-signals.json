@@ -1,0 +1,23 @@
+{
+  "mode": "signals",
+  "partial": false,
+  "result": {
+    "f1": {
+      "allowed": {
+        "n": 137,
+        "ret20": 1.8,
+        "ret60": 4.4
+      },
+      "delayed": {
+        "n": 0,
+        "ret20": null,
+        "ret60": null
+      },
+      "blocked": {
+        "n": 122,
+        "ret20": 0.8,
+        "ret60": 6.7
+      }
+    }
+  }
+}
