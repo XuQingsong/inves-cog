@@ -84,3 +84,10 @@ def test_price_bar_formats_earnings_date_without_exposing_source_dictionary():
     text = _price_bar(payload)
     assert "2026-11-17" in text and "盘后" in text
     assert "eps_forecast" not in text and "report_date" not in text
+
+
+def test_inapplicable_method_still_displays_its_discount_rate():
+    from inves_cog.web.ceiling import ceiling_text
+
+    for method in ['cyclical','loss']:
+        assert '10%' in ceiling_text({'method':method,'r':.10},full=True)
