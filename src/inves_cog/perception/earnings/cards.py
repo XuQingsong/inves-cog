@@ -26,9 +26,12 @@ def _session_days(connection, lo, hi):
 
 
 def _next_session(connection, day, sessions=None):
-    if sessions is not None:
+    # bisect is only safe strictly inside the cached range — history lookups can
+    # ask for days before sessions[0] or after sessions[-1]; those fall back to SQL
+    if sessions and sessions[0] < day < sessions[-1]:
         i = bisect.bisect_right(sessions, day)
-        return sessions[i] if i < len(sessions) else None
+        if i < len(sessions):
+            return sessions[i]
     row = connection.execute(
         "SELECT min(trade_date) AS d FROM ingest.bars_daily WHERE trade_date > %s", (day,)
     ).fetchone()
@@ -36,9 +39,10 @@ def _next_session(connection, day, sessions=None):
 
 
 def _prev_session(connection, day, sessions=None):
-    if sessions is not None:
+    if sessions and sessions[0] < day < sessions[-1]:
         i = bisect.bisect_left(sessions, day) - 1
-        return sessions[i] if i >= 0 else None
+        if i >= 0:
+            return sessions[i]
     row = connection.execute(
         "SELECT max(trade_date) AS d FROM ingest.bars_daily WHERE trade_date < %s", (day,)
     ).fetchone()
