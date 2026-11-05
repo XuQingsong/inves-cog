@@ -198,7 +198,8 @@ def test_feed_default_10_and_grouped_ratings(pages):
     grouped = [n for n in feed if n.get("grouped")]
     assert len(grouped) == 1 and grouped[0]["group_count"] == 2
     html = _get(pages, "/").text
-    assert "家机构调整目标价" in html
+    assert "家机构观点更新" in html
+    assert "家机构调整目标价" not in html
     assert "展开剩余" in html or len(feed) <= 10
 
 

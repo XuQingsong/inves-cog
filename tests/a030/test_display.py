@@ -89,5 +89,5 @@ def test_price_bar_formats_earnings_date_without_exposing_source_dictionary():
 def test_inapplicable_method_still_displays_its_discount_rate():
     from inves_cog.web.ceiling import ceiling_text
 
-    for method in ['cyclical','loss']:
-        assert '10%' in ceiling_text({'method':method,'r':.10},full=True)
+    for method in ["cyclical", "loss"]:
+        assert "10%" in ceiling_text({"method": method, "r": 0.10}, full=True)

@@ -30,6 +30,8 @@ def ceiling_text(row, *, full=False):
     bits = []
     if reason:
         bits.append("隐含天花板档位不适用（" + reason + "）")
+        if r is not None:
+            bits.append(f"折现率 {r:.0%}")
         profit = row.get("implied_terminal_profit")
         if profit is not None:
             bits.append(f"现价隐含十年后终局年利润约 {profit / 1e8:.2f} 亿美元")
