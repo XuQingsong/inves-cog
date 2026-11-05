@@ -6,7 +6,7 @@ import psycopg
 import pytest
 from psycopg.rows import dict_row
 
-from inves_cog.perception.earnings.cards import build_card, update_cards
+from inves_cog.perception.earnings.cards import _session_days, build_card, update_cards
 from tests.m8.test_attribution import _disposable_database
 
 NY = "America/New_York"
@@ -177,3 +177,59 @@ def test_replay_rebuilds_and_clears_stale_events_on_disposable_database():
         anom = conn.execute("SELECT cause_event_id FROM perception.live_anomalies WHERE subject='INTC'").fetchone()
         assert gone == 0 and kept == 1
         assert anom["cause_event_id"] is None
+
+
+def test_update_cards_single_calendar_query():
+    """Regression for the 2026-11-05 I/O stall: update_cards must issue the
+    session-calendar query once per call, not once per card."""
+    with _disposable_database() as dsn:
+        conn = psycopg.connect(dsn, row_factory=dict_row, autocommit=True)
+        _seed(conn)
+
+        class CountingConn:
+            def __init__(self, inner):
+                self._inner, self.queries = inner, []
+
+            def execute(self, sql, params=None):
+                if "min(trade_date)" in sql or "max(trade_date)" in sql or "DISTINCT trade_date" in sql:
+                    self.queries.append(sql.strip()[:60])
+                return self._inner.execute(sql, params)
+
+        c = CountingConn(conn)
+        now = datetime(2026, 11, 3, 12, 0, tzinfo=timezone.utc)
+        update_cards(c, now, {"INTC": "x", "AMD": "y", "ARM": "z"})
+        # in-window cards use the cached range; out-of-range history may fall back
+        minmax = [q for q in c.queries if "min(" in q or "max(" in q]
+        hist_rows = conn.execute(
+            "SELECT count(*) FROM ingest.earnings_calendar WHERE report_date < %s",
+            (date(2026, 10, 26),),
+        ).fetchone()[0]
+        assert len(minmax) <= hist_rows * 2, f"per-card session queries still firing: {minmax}"
+        distinct = [q for q in c.queries if "DISTINCT trade_date" in q]
+        assert len(distinct) == 1
+
+
+def test_sessions_cache_equivalence_with_old_history():
+    """Out-of-range history must fall back to SQL: build_card with a cached
+    session range returns identical (stage, card, missing) to build_card
+    without it, for both pre and post report_time."""
+    with _disposable_database() as dsn:
+        conn = psycopg.connect(dsn, row_factory=dict_row, autocommit=True)
+        _seed(conn)
+        conn.execute(
+            "INSERT INTO ingest.earnings_calendar (ticker, report_date, time) VALUES "
+            "('INTC','2026-08-03','post') ON CONFLICT DO NOTHING"
+        )
+        conn.execute(
+            "INSERT INTO ingest.bars_daily (ticker, trade_date, close) VALUES "
+            "('INTC','2026-07-31',100.00),('INTC','2026-08-03',110.00) ON CONFLICT DO NOTHING"
+        )
+        conn.commit()
+        sessions = _session_days(conn, date(2026, 10, 20), date(2026, 11, 30))
+        now = datetime(2026, 10, 31, 12, 0, tzinfo=timezone.utc)
+        for rt in ("pre", "post"):
+            a = build_card(conn, "INTC", date(2026, 10, 29), rt, now, segment="cpu_pc", peers=["ARM", "QCOM"])
+            b = build_card(
+                conn, "INTC", date(2026, 10, 29), rt, now, segment="cpu_pc", peers=["ARM", "QCOM"], sessions=sessions
+            )
+            assert a == b, f"equivalence broken for report_time={rt}"
