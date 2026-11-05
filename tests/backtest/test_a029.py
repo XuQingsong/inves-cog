@@ -175,3 +175,17 @@ def test_fear_coverage_counts_available_replay_days_from_each_start():
         "covered_days": 1, "replay_days": 3, "coverage_pct": 100 / 3,
     }
     assert fear_coverage({first, second, third}, {first: 0}, second, third)["coverage_pct"] == 0
+
+
+def test_a029_minimum_hold_restarts_after_add_on_fill(monkeypatch):
+    from inves_cog.trading.engine import ExecutionEngine
+
+    subject = engine({"buy_consistency": True})
+    subject.positions["NVDA"] = new_position(shares=5, price=100, tier="attack", index=0, state_version="")
+    subject.index = 12
+    monkeypatch.setattr(ExecutionEngine, "fill", lambda *args, **kwargs: [{"ticker": "NVDA", "side": "buy"}])
+    subject.fill(subject.signal_date, {})
+    subject.index = 13
+    subject.queue("NVDA", "sell_frac", "M-55", "破位减仓", fraction=0.5)
+    subject.queue("NVDA", "sell_all", "M-51", "灾难止损")
+    assert [order["rule_ids"] for order in subject.pending] == [["M-51"]]
