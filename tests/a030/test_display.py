@@ -32,3 +32,12 @@ def test_cyclical_and_loss_are_explicitly_inapplicable():
 
 
 pytestmark = pytest.mark.phase1_blocking
+
+
+def test_stock_page_explanation_no_longer_promotes_historical_pe_percentiles():
+    from inves_cog.web.investor_html import render_brief
+
+    html = render_brief({"page": "/s/NVDA", "symbol": "NVDA", "date": "2026-11-04",
+                         "trend": {}, "position": {}, "valuation": {"ceiling": {"method": "growth", "m": 3.2, "r": .08, "band": "偏高"}}})
+    assert "历史分位" not in html
+    assert "隐含" in html
