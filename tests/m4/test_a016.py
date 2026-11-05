@@ -197,6 +197,9 @@ def test_e3_e6_actual_plan_unchanged_except_completeness(monkeypatch):
         def insider_events(self, day):
             return {}
 
+        def ceiling_notes(self, day, cutoff):
+            return {}
+
     monkeypatch.setattr(service, "Repository", Repository)
     baseline = service.prepare(ExecutionEngine(clock=c), NEXT, inputs, universe)
     result = service.daily_plan(clock=c, connection=None, universe=universe, target=NEXT, persist=False)

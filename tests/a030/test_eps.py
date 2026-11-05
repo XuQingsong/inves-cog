@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from inves_cog.ingest.fundamentals.extractors import extract_state
 
 
@@ -32,3 +34,6 @@ def test_class_eps_only_fills_missing_company_periods_with_source_marker():
     assert all(r.get("origin") == "instance_class_eps_fallback" for r in components)
     old = extract_state({"facts": {}}, ticker="V", as_of=date(2026, 1, 1), instance_facts=dimensional)
     assert old.values["eps_ttm"] is None
+
+
+pytestmark = pytest.mark.phase1_blocking
