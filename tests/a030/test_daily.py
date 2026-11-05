@@ -10,17 +10,27 @@ DAY = date(2026, 10, 30)
 
 
 def inputs(**updates):
-    return dict(ticker="TEST", price=30, diluted_shares=100, net_debt=100,
-                ni_ttm=200, rev_ttm=1000, op_margin_ttm=20, rev_growth=10,
-                fcf_ttm=50, financial_filed="2026-09-01", **updates)
+    return dict(
+        ticker="TEST",
+        price=30,
+        diluted_shares=100,
+        net_debt=100,
+        ni_ttm=200,
+        rev_ttm=1000,
+        op_margin_ttm=20,
+        rev_growth=10,
+        fcf_ttm=50,
+        financial_filed="2026-09-01",
+        **updates,
+    )
 
 
 def test_ev_normalized_profit_cash_quality_and_rate_sensitivity():
     row = calculate_ceiling(inputs(), day=DAY, kind="稳定", tier="防守", bands=BANDS)
-    assert row["r"] == .07
+    assert row["r"] == 0.07
     assert row["ev"] == 3100
-    assert row["next_profit"] == pytest.approx(200 * .82 * 1.1)
-    assert dyn_pe(row["m"], .07) == pytest.approx(row["ev"] / row["next_profit"])
+    assert row["next_profit"] == pytest.approx(200 * 0.82 * 1.1)
+    assert dyn_pe(row["m"], 0.07) == pytest.approx(row["ev"] / row["next_profit"])
     assert row["m_r_minus_1"] < row["m"] < row["m_r_plus_1"]
     assert row["fcf_m"] > row["m"]
     assert row["quality"] == "低"
@@ -28,18 +38,20 @@ def test_ev_normalized_profit_cash_quality_and_rate_sensitivity():
 
 def test_missing_debt_or_future_financial_is_not_silently_zeroed():
     for changed in ({"net_debt": None}, {"financial_filed": "2026-10-31"}):
-        data = inputs(); data.update(changed)
+        data = inputs()
+        data.update(changed)
         row = calculate_ceiling(data, day=DAY, kind="稳定", tier=None, bands=BANDS)
         assert row["m"] is None
         assert row["missing"]
 
 
 def test_loss_and_nonapplicable_methods_do_not_create_risk_band():
-    data = inputs(); data.update(ni_ttm=-20, op_margin_ttm=-2)
+    data = inputs()
+    data.update(ni_ttm=-20, op_margin_ttm=-2)
     loss = calculate_ceiling(data, day=DAY, kind="未盈利成长", tier=None, bands=BANDS)
     assert loss["method"] == "loss"
-    assert loss["r"] == .10
-    assert loss["implied_terminal_profit"] == pytest.approx(3100 / cap_multiplier(10, .1))
+    assert loss["r"] == 0.10
+    assert loss["implied_terminal_profit"] == pytest.approx(3100 / cap_multiplier(10, 0.1))
     for kind, method in [("周期", "cyclical"), ("金融", "financial")]:
         out = calculate_ceiling(inputs(), day=DAY, kind=kind, tier="进攻", bands=BANDS)
         assert out["method"] == method
