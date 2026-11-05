@@ -60,6 +60,11 @@ class BacktestEngine(ExecutionEngine):
     def fill(self, day, opening, execution_scores=None, **kwargs):
         previously_held = dict(self.positions)
         fills = super().fill(day, opening, execution_scores, **kwargs)
+        if self.flags.get("buy_consistency"):
+            for fill in fills:
+                position = self.positions.get(fill["ticker"])
+                if fill["side"] == "buy" and position is not None:
+                    position["last_buy_index"] = self.index
         if self.flags.get("breakdown_confirm"):
             for fill in fills:
                 ticker = fill["ticker"]
@@ -118,7 +123,7 @@ class BacktestEngine(ExecutionEngine):
                         self.flags_counts.get("buy_consistency_blocked", 0) + 1
                     )
                     return None
-            if action.startswith("sell") and position and self.index - position["entry_index"] < 10:
+            if action.startswith("sell") and position and self.index - position.get("last_buy_index", position["entry_index"]) < 10:
                 red_exit = rule == "M-50" and FUNDAMENTAL_RED_LINES.intersection((score or {}).get("red_lines", []))
                 if rule != "M-51" and not red_exit:
                     if rule in {"M-55", "M-56"}:
