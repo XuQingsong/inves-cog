@@ -1,0 +1,88 @@
+{
+  "started_at": "2026-11-05 18:25:24.509786+00:00",
+  "deadline": "2026-11-05 18:28:24.509786+00:00",
+  "total": 16,
+  "completed": [
+    {
+      "filed": "2020-01-31",
+      "accession": "0001403161-20-000012",
+      "filename": "v123119form10q_htm.xml"
+    },
+    {
+      "filed": "2020-05-04",
+      "accession": "0001403161-20-000028",
+      "filename": "v033120form10q_htm.xml"
+    },
+    {
+      "filed": "2020-07-31",
+      "accession": "0001403161-20-000048",
+      "filename": "v-20200630_htm.xml"
+    },
+    {
+      "filed": "2020-11-19",
+      "accession": "0001403161-20-000070",
+      "filename": "v-20200930_htm.xml"
+    },
+    {
+      "filed": "2021-01-29",
+      "accession": "0001403161-21-000012",
+      "filename": "v-20201231_htm.xml"
+    },
+    {
+      "filed": "2021-04-29",
+      "accession": "0001403161-21-000029",
+      "filename": "v-20210331_htm.xml"
+    },
+    {
+      "filed": "2021-07-29",
+      "accession": "0001403161-21-000042",
+      "filename": "v-20210630_htm.xml"
+    },
+    {
+      "filed": "2021-11-18",
+      "accession": "0001403161-21-000060",
+      "filename": "v-20210930_htm.xml"
+    },
+    {
+      "filed": "2022-01-28",
+      "accession": "0001403161-22-000013",
+      "filename": "v-20211231_htm.xml"
+    },
+    {
+      "filed": "2022-04-28",
+      "accession": "0001403161-22-000027",
+      "filename": "v-20220331_htm.xml"
+    },
+    {
+      "filed": "2022-07-28",
+      "accession": "0001403161-22-000058",
+      "filename": "v-20220630_htm.xml"
+    },
+    {
+      "filed": "2022-11-16",
+      "accession": "0001403161-22-000081",
+      "filename": "v-20220930_htm.xml"
+    },
+    {
+      "filed": "2023-01-27",
+      "accession": "0001403161-23-000013",
+      "filename": "v-20221231_htm.xml"
+    },
+    {
+      "filed": "2023-04-27",
+      "accession": "0001403161-23-000031",
+      "filename": "v-20230331_htm.xml"
+    },
+    {
+      "filed": "2023-07-26",
+      "accession": "0001403161-23-000072",
+      "filename": "v-20230630_htm.xml"
+    },
+    {
+      "filed": "2023-11-15",
+      "accession": "0001403161-23-000099",
+      "filename": "v-20230930_htm.xml"
+    }
+  ],
+  "phase": "download_complete"
+}

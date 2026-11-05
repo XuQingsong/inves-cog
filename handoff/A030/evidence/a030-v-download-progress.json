@@ -1,0 +1,111 @@
+{
+  "started_at": "2026-11-05 18:16:24.392198+00:00",
+  "deadline": "2026-11-05 18:21:24.392198+00:00",
+  "total": 36,
+  "completed": [
+    {
+      "filed": "2015-01-29",
+      "accession": "0001403161-15-000003",
+      "filename": "v-20141231.xml"
+    },
+    {
+      "filed": "2015-04-30",
+      "accession": "0001403161-15-000007",
+      "filename": "v-20150331.xml"
+    },
+    {
+      "filed": "2015-07-23",
+      "accession": "0001403161-15-000010",
+      "filename": "v-20150630.xml"
+    },
+    {
+      "filed": "2015-11-20",
+      "accession": "0001403161-15-000013",
+      "filename": "v-20150930.xml"
+    },
+    {
+      "filed": "2016-01-28",
+      "accession": "0001403161-16-000015",
+      "filename": "v-20151231.xml"
+    },
+    {
+      "filed": "2016-04-25",
+      "accession": "0001403161-16-000022",
+      "filename": "v-20160331.xml"
+    },
+    {
+      "filed": "2016-07-25",
+      "accession": "0001403161-16-000039",
+      "filename": "v-20160630.xml"
+    },
+    {
+      "filed": "2016-11-15",
+      "accession": "0001403161-16-000058",
+      "filename": "v-20160930.xml"
+    },
+    {
+      "filed": "2017-02-02",
+      "accession": "0001403161-17-000011",
+      "filename": "v-20161231.xml"
+    },
+    {
+      "filed": "2017-04-21",
+      "accession": "0001403161-17-000028",
+      "filename": "v-20170331.xml"
+    },
+    {
+      "filed": "2017-07-20",
+      "accession": "0001403161-17-000037",
+      "filename": "v-20170630.xml"
+    },
+    {
+      "filed": "2017-11-17",
+      "accession": "0001403161-17-000044",
+      "filename": "v-20170930.xml"
+    },
+    {
+      "filed": "2018-02-01",
+      "accession": "0001403161-18-000009",
+      "filename": "v-20171231.xml"
+    },
+    {
+      "filed": "2018-04-27",
+      "accession": "0001403161-18-000020",
+      "filename": "v-20180331.xml"
+    },
+    {
+      "filed": "2018-07-27",
+      "accession": "0001403161-18-000034",
+      "filename": "v-20180630.xml"
+    },
+    {
+      "filed": "2018-11-16",
+      "accession": "0001403161-18-000055",
+      "filename": "v-20180930.xml"
+    },
+    {
+      "filed": "2019-01-31",
+      "accession": "0001403161-19-000005",
+      "filename": "v-20181231.xml"
+    },
+    {
+      "filed": "2019-04-26",
+      "accession": "0001403161-19-000017",
+      "filename": "v-20190331.xml"
+    },
+    {
+      "filed": "2019-07-26",
+      "accession": "0001403161-19-000030",
+      "filename": "v63019form10q_htm.xml"
+    },
+    {
+      "filed": "2019-11-14",
+      "accession": "0001403161-19-000050",
+      "filename": "v093019form10k_htm.xml"
+    }
+  ],
+  "phase": "failed",
+  "failed_filed": "2020-01-31",
+  "error_type": "SourceError",
+  "http_status": null
+}
