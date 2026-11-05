@@ -1,0 +1,311 @@
+{
+  "base": [
+    {
+      "trade": {
+        "ticker": "NVDA",
+        "action": "sell_frac",
+        "label": "\u7834\u4f4d\u51cf\u4ed3",
+        "rule_ids": [
+          "M-55"
+        ],
+        "reason_zh": "M-55 \u7834\u4f4d\u51cf\u4ed3",
+        "signal_date": "2025-03-17",
+        "trade_date": "2025-03-18",
+        "rule_set": "A",
+        "params_version": "p-2026.10",
+        "fraction": 0.3333333333333333,
+        "order_id": "aabf23e626628f22738c75b579c0d019b00d921f3fd30bf8769752e907b00dcc",
+        "kind": "reduce",
+        "qty": 246,
+        "cost": 29.028000000000002,
+        "tier": "attack",
+        "side": "sell",
+        "fill_price": 118.0,
+        "notional": 29028.0,
+        "status": "filled"
+      },
+      "trigger": {
+        "score": {
+          "books": {
+            "quality": 92.3,
+            "growth": 74.8,
+            "valuation": 48.3,
+            "timing": 54.4
+          },
+          "tech": {
+            "price": 119.53,
+            "raw_price": 119.53,
+            "open": 122.74,
+            "price_vs_ma200": -6.373597934250508,
+            "ma50_vs_ma200": 1.045078375003472,
+            "ma200_slope20": 2.3120817503048396,
+            "mom3": -14.19854999641088,
+            "mom6": 0.32734597951988853,
+            "rsi": 44.650391802290535,
+            "dev50": -7.341947206692656,
+            "vol_ratio": 1.118370505382264,
+            "up_share": 54.34391829173624,
+            "vol20": 67.51147469297632,
+            "vol60": 65.89737499422104,
+            "drawdown252": -20.00936893528743
+          },
+          "red_lines": [],
+          "fear_level": null,
+          "breakdown_below_days": null,
+          "breakdown_depth_atr": null,
+          "consec_below200": 13,
+          "consec_tim35": 0,
+          "consec_tim30": 0
+        },
+        "position": {
+          "tier_now": "attack",
+          "entry_index": 78,
+          "entry_books": null,
+          "peak_price": 149.43,
+          "avg_cost": 119.29268970189703,
+          "breakdown_half_done": null
+        },
+        "decision_index": 301,
+        "order_values": {
+          "fraction": 0.3333333333333333
+        },
+        "fundamentals_weakened": false
+      }
+    }
+  ],
+  "f2": [
+    {
+      "trade": {
+        "ticker": "NVDA",
+        "action": "sell_frac",
+        "label": "\u56de\u64a4\u5239\u8f66\u51cf\u4ed3",
+        "rule_ids": [
+          "M-62"
+        ],
+        "reason_zh": "M-62 \u56de\u64a4\u5239\u8f66\u51cf\u4ed3",
+        "signal_date": "2025-02-24",
+        "trade_date": "2025-02-25",
+        "rule_set": "A",
+        "params_version": "p-2026.10",
+        "fraction": 0.3333333333333333,
+        "order_id": "958396d39c0f193efdb7ab6c8f72af7495dbed8d6e36d9c8d87bea11aba292ca",
+        "kind": "reduce",
+        "qty": 340,
+        "cost": 44.1932,
+        "tier": "attack",
+        "side": "sell",
+        "fill_price": 129.98,
+        "notional": 44193.2,
+        "status": "filled"
+      },
+      "trigger": {
+        "score": {
+          "books": {
+            "quality": 92.7,
+            "growth": 74.5,
+            "valuation": 43.3,
+            "timing": 62.8
+          },
+          "tech": {
+            "price": 130.28,
+            "raw_price": 130.28,
+            "open": 136.56,
+            "price_vs_ma200": 3.3818719474901338,
+            "ma50_vs_ma200": 6.642828844796056,
+            "ma200_slope20": 3.6355265977269458,
+            "mom3": -11.380178219168757,
+            "mom6": 1.3852140077821096,
+            "rsi": 67.69750519750517,
+            "dev50": -3.0578304538899648,
+            "vol_ratio": 1.2566813401671388,
+            "up_share": 52.910166365934295,
+            "vol20": 81.31342305432358,
+            "vol60": 57.163785562961536,
+            "drawdown252": -12.815365053871385
+          },
+          "red_lines": [],
+          "fear_level": 1.74,
+          "breakdown_below_days": 0,
+          "breakdown_depth_atr": null,
+          "consec_below200": 0,
+          "consec_tim35": 0,
+          "consec_tim30": 0
+        },
+        "position": {
+          "tier_now": "attack",
+          "entry_index": 78,
+          "entry_books": {
+            "quality": 95.0,
+            "growth": 95.8,
+            "valuation": 89.9,
+            "timing": 78.0
+          },
+          "peak_price": 149.43,
+          "avg_cost": 83.9385048923679,
+          "breakdown_half_done": null
+        },
+        "decision_index": 286,
+        "order_values": {
+          "fraction": 0.3333333333333333
+        },
+        "fundamentals_weakened": true
+      }
+    },
+    {
+      "trade": {
+        "ticker": "GOOGL",
+        "action": "sell_frac",
+        "label": "\u7834\u4f4d\u51cf\u4ed3",
+        "rule_ids": [
+          "M-55"
+        ],
+        "reason_zh": "M-55 \u7834\u4f4d\u51cf\u4ed3",
+        "signal_date": "2025-02-28",
+        "trade_date": "2025-03-03",
+        "rule_set": "A",
+        "params_version": "p-2026.10",
+        "fraction": 0.5,
+        "breakdown_first_half": true,
+        "order_id": "e12feca17ab9f9c8665365679fc74490543bc2c6768213146ff23bbb5af6d9e9",
+        "kind": "reduce",
+        "qty": 262,
+        "cost": 45.04435000000001,
+        "tier": "normal",
+        "side": "sell",
+        "fill_price": 171.925,
+        "notional": 45044.350000000006,
+        "status": "filled"
+      },
+      "trigger": {
+        "score": {
+          "books": {
+            "quality": 91.1,
+            "growth": 68.8,
+            "valuation": 61.4,
+            "timing": 59.7
+          },
+          "tech": {
+            "price": 170.28,
+            "raw_price": 170.28,
+            "open": 168.68,
+            "price_vs_ma200": -3.137094175398192,
+            "ma50_vs_ma200": 8.408750313220214,
+            "ma200_slope20": 1.3130451570888102,
+            "mom3": 1.5687444079928392,
+            "mom6": 3.4005343696866586,
+            "rsi": 23.98064961990319,
+            "dev50": -10.65028833489875,
+            "vol_ratio": 1.1174097554370157,
+            "up_share": 53.008335127205044,
+            "vol20": 34.213817644260445,
+            "vol60": 33.8048150901068,
+            "drawdown252": -17.49200503924798
+          },
+          "red_lines": [],
+          "fear_level": 2.06,
+          "breakdown_below_days": 4,
+          "breakdown_depth_atr": 1.4589467557818068,
+          "consec_below200": 4,
+          "consec_tim35": 0,
+          "consec_tim30": 0
+        },
+        "position": {
+          "tier_now": "normal",
+          "entry_index": 176,
+          "entry_books": {
+            "quality": 90.0,
+            "growth": 71.3,
+            "valuation": 59.4,
+            "timing": 58.6
+          },
+          "peak_price": 206.38,
+          "avg_cost": 161.34807194244604,
+          "breakdown_half_done": null
+        },
+        "decision_index": 290,
+        "order_values": {
+          "fraction": 0.5,
+          "breakdown_first_half": true
+        },
+        "fundamentals_weakened": false
+      }
+    },
+    {
+      "trade": {
+        "ticker": "NVDA",
+        "action": "sell_frac",
+        "label": "\u7834\u4f4d\u51cf\u4ed3",
+        "rule_ids": [
+          "M-55"
+        ],
+        "reason_zh": "M-55 \u7834\u4f4d\u51cf\u4ed3",
+        "signal_date": "2025-03-17",
+        "trade_date": "2025-03-18",
+        "rule_set": "A",
+        "params_version": "p-2026.10",
+        "fraction": 0.3333333333333333,
+        "order_id": "8607c4c46f1896ca794a69cf8c7f73e73dbbde3e3dea7c94b4710331f9833328",
+        "kind": "reduce",
+        "qty": 227,
+        "cost": 26.786,
+        "tier": "attack",
+        "side": "sell",
+        "fill_price": 118.0,
+        "notional": 26786.0,
+        "status": "filled"
+      },
+      "trigger": {
+        "score": {
+          "books": {
+            "quality": 92.3,
+            "growth": 74.8,
+            "valuation": 48.3,
+            "timing": 54.4
+          },
+          "tech": {
+            "price": 119.53,
+            "raw_price": 119.53,
+            "open": 122.74,
+            "price_vs_ma200": -6.373597934250508,
+            "ma50_vs_ma200": 1.045078375003472,
+            "ma200_slope20": 2.3120817503048396,
+            "mom3": -14.19854999641088,
+            "mom6": 0.32734597951988853,
+            "rsi": 44.650391802290535,
+            "dev50": -7.341947206692656,
+            "vol_ratio": 1.118370505382264,
+            "up_share": 54.34391829173624,
+            "vol20": 67.51147469297632,
+            "vol60": 65.89737499422104,
+            "drawdown252": -20.00936893528743
+          },
+          "red_lines": [],
+          "fear_level": 1.76,
+          "breakdown_below_days": 13,
+          "breakdown_depth_atr": 1.0624264507699308,
+          "consec_below200": 13,
+          "consec_tim35": 0,
+          "consec_tim30": 0
+        },
+        "position": {
+          "tier_now": "attack",
+          "entry_index": 78,
+          "entry_books": {
+            "quality": 95.0,
+            "growth": 95.8,
+            "valuation": 89.9,
+            "timing": 78.0
+          },
+          "peak_price": 149.43,
+          "avg_cost": 83.9385048923679,
+          "breakdown_half_done": null
+        },
+        "decision_index": 301,
+        "order_values": {
+          "fraction": 0.3333333333333333
+        },
+        "fundamentals_weakened": true
+      }
+    }
+  ]
+}

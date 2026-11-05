@@ -10,6 +10,7 @@ from pathlib import Path
 
 from inves_cog.backtest.loader import BacktestLoader
 from inves_cog.backtest.metrics import bench_buy_and_hold, equity_metrics, trade_hash
+from inves_cog.backtest.policies import BacktestEngine, apply_ceiling_gate, breakdown_depth_atr
 from inves_cog.clock import FrozenClock
 from inves_cog.trading.engine import ExecutionEngine
 from inves_cog.trading.execution.signals import enrich
@@ -39,20 +40,39 @@ def prepare_inputs(connection, spec):
     start, end = spec["start"], spec["end"]
     extractor = spec.get("extractor", "fixed")
     prices, signals = {}, {}
+    state_lookup = loader.state_asof
+    if spec.get("visa_repair") and "V" in tickers:
+        from .tier_repair import repaired_state, visa_reconstruction
+
+        companyfacts, cache_dir = spec["visa_repair"]
+        candidates = visa_reconstruction(loader.fundamentals, companyfacts, cache_dir, end=end)
+
+        def state_lookup(ticker, day, extractor):
+            original = loader.state_asof(ticker, day, extractor)
+            return repaired_state(original, candidates, day) if ticker == "V" and extractor == "fixed" else original
+
     for t in tickers + ["SPY", "QQQ"]:
         prices[t] = {r["trade_date"]: r for r in loader.bars(t, end=end)}
     for t in tickers:
         snaps = score_history(
             t,
             loader.bars(t, end=end),
-            state_asof=loader.state_asof,
+            state_asof=state_lookup,
             extractor=extractor,
             start=start,
             end=end,
         )
-        signals[t] = enrich(snaps, loader.state_asof, t, extractor)
+        signals[t] = enrich(snaps, state_lookup, t, extractor)
     vix = loader.vix(end)
-    return {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
+    prepared = {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
+    if spec.get("load_fear_levels") or (spec.get("flags") or {}).get("breakdown_confirm"):
+        rows = connection.execute(
+            "SELECT date, fear_level FROM flows.barometer_daily WHERE date BETWEEN %s AND %s "
+            "AND asof < ((date + 1)::timestamp AT TIME ZONE 'America/New_York')",
+            (start, end),
+        ).fetchall()
+        prepared["fear_levels"] = {row["date"]: row["fear_level"] for row in rows}
+    return prepared
 
 
 def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
@@ -69,25 +89,35 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     mode = spec.get("mode", "paper")
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
-    engine = ExecutionEngine(
+    flags = spec.get("flags") or {}
+    engine_type = (
+        BacktestEngine
+        if any(
+            flags.get(k) for k in ("buy_consistency", "watch_promote", "breakdown_confirm", "reentry_after_price_exit")
+        )
+        else ExecutionEngine
+    )
+    engine = engine_type(
         clock=clock,
         initial_cash=initial,
         mode=mode,
         portfolio_id=f"bt-{spec.get('label', 'run')}",
         flags=spec.get("flags") or {},
     )
-    flags = spec.get("flags") or {}
     flag_counts = {}
     veto_events = []
     overval = None
-    if flags.get("overval_veto"):
+    if flags.get("overval_veto") or flags.get("ceiling_gate"):
         from .overval import load_quintiles
         from .overval import quintile_at as overval_quintile
         from .overval import vetoed as overval_vetoed
 
         panel_path = spec.get("overval_panel") or str(Path.home() / "inves-cog-bt" / "valuation" / "panel_sp500.csv")
         financials = set(spec.get("overval_financials") or ())
-        overval = load_quintiles(panel_path, financials=financials)
+        panel, panel_days = load_quintiles(panel_path, financials=financials)
+        if flags.get("overval_veto"):
+            overval = panel, panel_days
+        ceiling_fridays = [day for day in panel_days if day.weekday() == 4]
     locked = {}
     if flags.get("tier_lock"):
         import yaml
@@ -158,6 +188,11 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                         break
     engine.chase_upgrades = chase_upgrades
     prev_blocked = set()
+    ceiling_streaks = {}
+    fear_levels = pre.get("fear_levels", {})
+    if flags.get("breakdown_confirm") and "fear_levels" not in pre:
+        raise ValueError("F2 requires the local PIT market-risk input in prepared data")
+    bar_dates = {t: sorted(rows) for t, rows in prices.items()} if flags.get("breakdown_confirm") else {}
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
@@ -169,6 +204,12 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                 past = [d for d in rule_tier_map.get(t, {}) if d <= day]
                 if past:
                     sc["tier"] = rule_tier_map[t][max(past)]
+        if flags.get("ceiling_gate"):
+            ceiling_streaks = {ticker: ceiling_streaks.get(ticker, 0) for ticker in daily}
+            for ticker, score in daily.items():
+                apply_ceiling_gate(score, panel, ceiling_fridays, ticker, day)
+                ceiling_streaks[ticker] = ceiling_streaks[ticker] + 1 if score.get("entry_pass") else 0
+                score["consec_pass"] = ceiling_streaks[ticker]
         if flags.get("chase_v2"):
             from .chase_v2 import category, chase_trigger, tranche
             from .valuation import valuation_inputs
@@ -233,6 +274,17 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                         "quintile": overval_quintile(qmap, qdays, t, day),
                         "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
                     }
+                )
+        if flags.get("breakdown_confirm"):
+            for ticker, score in daily.items():
+                bars = prices.get(ticker, {})
+                index = bisect.bisect_right(bar_dates.get(ticker, ()), day)
+                recent = [bars[d] for d in bar_dates.get(ticker, ())[max(0, index - 15) : index]]
+                tech = score.get("tech") or {}
+                score["fear_level"] = fear_levels.get(day)
+                score["breakdown_below_days"] = score.get("consec_below200", 0)
+                score["breakdown_depth_atr"] = breakdown_depth_atr(
+                    recent, tech.get("price"), tech.get("price_vs_ma200")
                 )
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():

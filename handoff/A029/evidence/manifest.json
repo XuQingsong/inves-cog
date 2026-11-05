@@ -1,0 +1,18 @@
+{
+  "a029-veto-exclusion.json": "592cd341c5e20ccd8c30fef75603022962e48228bec5e7cc9a4ad6377ef9be7a",
+  "a029-veto-contributions.json": "69a5cd260df35836cfb97c4036e2e8b6aa7dadd13d272776f1dcb79edee233ca",
+  "a029-v-repaired-tier-history.json": "6061f8c04126d47c27f3f47bfc8d268654f12313501b0e5323ae7f32adbc46e9",
+  "a029-tier-diagnostic.json": "4cf6767f34eb80d50b99b330a96ee4eb369639fbf81e94b69a604d2c59bb87b1",
+  "a029-fixed-rolling.json": "c2f75d56ada5db464e92ed9abda5b6ffc042e1fe46b75daa147a3d5a69dc0bb8",
+  "a029-final-default-off.json": "d7327c675d34368b46177390492c95dd5040d6e2fa6f758b251ca2c21358abcd",
+  "a029-signals-partial.json": "d3861ea16660baa5269257e8c869aa61a20fb392c20048f6008b10ef21218674",
+  "a029-case-valuation.json": "761eef0f23f178ab5954c4561827a8f00a028ca6f4516d00dc00bc29a7d1c314",
+  "a029-last-short.json": "601fb846c6edd4d2fb12137fea77f0339104c89106c27a490cb25a9e8429c185",
+  "a029-f1-final-rolling.json": "48ba265be096431d448c8a7464712d0dfd03b544dbcc1c458eb3977bd50f72d8",
+  "a029-case-partial.json": "24995975980f6d1b162bfb2068606bbefc3a210d716b981768882b369d360768",
+  "a029-fixed-case.json": "c10b50183722b249443eb39a24836b01b0c4a8ddb3a947147f4dfe19c1d9b0ad",
+  "a029-rolling-partial.json": "45191ec286fccf6fa73981816846267f7f8c443364f797ac2d504f6a5c23dc39",
+  "a029-sell-evidence.json": "4a25c08f93d567c4042c20891a8e1bb4b54b1ed11d403288a5c60179256ec219",
+  "a029-f1-final-signals.json": "5ca8e3d129230c426d4a7381f4a0c09a6710bcaf7f61c3044eeef0165241ba64",
+  "a029-fixed-signals.json": "bc477a206071fc049408245ae7fe48e7058b96b753e085abaaeca4958f16b46c"
+}

@@ -80,7 +80,7 @@ class BacktestLoader:
     def bars(self, ticker, start=None, end=None):
         """Split-adjusted series for the ENGINE (fills/marks/history/benchmarks)."""
         rows = self.connection.execute(
-            "SELECT trade_date, open, low, close, volume, adj_factor "
+            "SELECT trade_date, open, high, low, close, volume, adj_factor "
             "FROM ingest.bars_daily WHERE ticker=%s AND trade_date <= %s "
             "ORDER BY trade_date",
             (ticker, end or date(9999, 12, 31)),
@@ -94,6 +94,7 @@ class BacktestLoader:
                     # one split-adjusted series: engine/scoring see adjusted prices
                     # with adj_factor=1 so technical.py's own adjustment is a no-op
                     "open": float(r["open"]) * factor if r["open"] is not None else None,
+                    "high": float(r["high"]) * factor if r.get("high") is not None else None,
                     "low": float(r["low"]) * factor if r["low"] is not None else None,
                     "close": float(r["close"]) * factor if r["close"] is not None else None,
                     "volume": int(r["volume"] / factor) if r["volume"] is not None else None,

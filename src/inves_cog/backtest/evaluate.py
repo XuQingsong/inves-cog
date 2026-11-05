@@ -4,6 +4,8 @@ import multiprocessing
 import statistics
 from datetime import date
 
+from inves_cog.ingest.market import next_trading_day
+
 from .runner import prepare_inputs, run_backtest
 
 _G_PREPARED = None
@@ -21,7 +23,31 @@ def quarter_starts(begin=date(2018, 1, 1), end=date(2024, 12, 31)):
 
 
 def _one_replay(spec):
-    return run_backtest(None, spec, write=False, prepared=_G_PREPARED)["metrics"]
+    result = run_backtest(None, spec, write=False, prepared=_G_PREPARED)
+    return {**result["metrics"], "short_hold_sales": short_hold_sales(result["trades"])}
+
+
+def short_hold_sales(trades):
+    """Count sells on the same or next exchange session after a buy in the same name."""
+    until = {}
+    count = 0
+    for trade in trades:
+        ticker, day = trade["ticker"], trade["trade_date"]
+        if trade["side"] == "buy":
+            until[ticker] = next_trading_day(day)
+        elif trade["side"] == "sell" and ticker in until and day <= until[ticker]:
+            count += 1
+    return count
+
+
+def fear_coverage(replay_days, fear_levels, start, end):
+    days = {day for day in replay_days if start <= day <= end}
+    covered = sum(fear_levels.get(day) is not None for day in days)
+    return {
+        "covered_days": covered,
+        "replay_days": len(days),
+        "coverage_pct": 100 * covered / len(days) if days else 0,
+    }
 
 
 def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
@@ -32,7 +58,10 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     """
     global _G_PREPARED
     starts = starts or quarter_starts()
-    _G_PREPARED = prepare_inputs(connection, {**spec, "start": min(starts)})
+    _G_PREPARED = prepare_inputs(
+        connection,
+        {**spec, "start": min(starts), "load_fear_levels": any(f.get("breakdown_confirm") for f in variants.values())},
+    )
     jobs = []
     for st in starts:
         jobs.append({**spec, "start": st, "label": f"base-{st}", "flags": {}})
@@ -40,6 +69,8 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     ctx = multiprocessing.get_context("fork")
     with ctx.Pool(max(1, min(workers, 4))) as pool:
         results = pool.map(_one_replay, jobs)
+    replay_days = {day for prices in _G_PREPARED["prices"].values() for day in prices}
+    fear_levels = _G_PREPARED.get("fear_levels", {})
     i = 0
     rows = []
     for st in starts:
@@ -55,7 +86,12 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "rdd": m.get("return_over_maxdd"),
                     "base_ret": base["return_pct"],
                     "base_dd": base["max_drawdown_pct"],
+                    "base_rdd": base.get("return_over_maxdd"),
                     "beats": m["return_pct"] > base["return_pct"],
+                    "short_hold_sales": m["short_hold_sales"],
+                    "fear_coverage": fear_coverage(replay_days, fear_levels, st, spec["end"])
+                    if variants[name].get("breakdown_confirm")
+                    else None,
                 }
             )
     return _distribution(rows)
@@ -67,16 +103,29 @@ def _distribution(rows):
         rs = [r for r in rows if r["variant"] == name]
         ret_diffs = [r["ret"] - r["base_ret"] for r in rs]
         dd_diffs = [r["dd"] - r["base_dd"] for r in rs]
+        rdd_diffs = [r["rdd"] - r["base_rdd"] for r in rs if r["rdd"] is not None and r["base_rdd"] is not None]
         out[name] = {
             "n_starts": len(rs),
+            "short_hold_sales_total": sum(r["short_hold_sales"] for r in rs),
             "beats_baseline_pct": round(100 * sum(r["beats"] for r in rs) / len(rs), 1),
-            "ret_diff_median": round(statistics.median(ret_diffs), 1),
-            "ret_diff_q25": round(sorted(ret_diffs)[len(ret_diffs) // 4], 1),
-            "ret_diff_q75": round(sorted(ret_diffs)[3 * len(ret_diffs) // 4], 1),
-            "dd_diff_median": round(statistics.median(dd_diffs), 1),
+            **_quantiles("ret_diff", ret_diffs),
+            **_quantiles("dd_diff", dd_diffs),
+            **_quantiles("rdd_diff", rdd_diffs),
             "rows": rs,
         }
     return out
+
+
+def _quantiles(prefix, values):
+    if len(values) >= 2:
+        q25, _, q75 = statistics.quantiles(values, n=4, method="inclusive")
+    else:
+        q25 = q75 = values[0] if values else None
+    return {
+        prefix + "_median": statistics.median(values) if values else None,
+        prefix + "_q25": q25,
+        prefix + "_q75": q75,
+    }
 
 
 def signal_level_eval(connection, spec, variants, *, lookahead=(20, 60), prepared=None):
