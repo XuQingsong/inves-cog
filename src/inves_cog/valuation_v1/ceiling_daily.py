@@ -1,5 +1,10 @@
 """Auditable EV reverse valuation, independent of all trading decisions."""
 
+from functools import lru_cache
+from pathlib import Path
+
+import yaml
+
 from inves_cog.valuation.ceiling import cap_multiplier, implied_m
 from inves_cog.valuation_v1.ceiling_bands import classify_band, finite
 
@@ -90,3 +95,8 @@ def calculate_ceiling(data, *, day, kind, tier, bands, asof=None):
     if "band_calibration_not_visible" not in missing:
         row["band"] = classify_band(m, bands)
     return row
+
+
+@lru_cache(maxsize=1)
+def band_settings():
+    return yaml.safe_load((Path(__file__).resolve().parents[3] / "config/valuation_ceiling_bands.yaml").read_text())

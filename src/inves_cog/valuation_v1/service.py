@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from inves_cog.ingest.market import exchange
 from inves_cog.valuation_v1.annual_inputs import valuation_history, valuation_state
 from inves_cog.valuation_v1.calculations import LABEL, calculate, pe_percentiles, settings
+from inves_cog.valuation_v1.ceiling_daily import band_settings, calculate_ceiling
 from inves_cog.valuation_v1.inputs import consensus_inputs, financial_inputs, selected_consensus
 from inves_cog.valuation_v1.lifecycle import TypeHistory, classify
 from inves_cog.valuation_v1.listed_units import normalize_listing
@@ -111,6 +112,18 @@ def candidate_sources(state, rows, as_of, cutoff):
             "raw_candidate": {k: deepcopy(v) for k, v in selected.items() if k != "raw"} if selected else None,
         },
     }
+
+
+def ceiling_for_row(row, source, ticker, price, as_of, cutoff):
+    ceiling_input = {**row.get("candidate_inputs", {}), "ticker": ticker, "price": price}
+    forecast = selected_consensus(source["consensus"].get(ticker, []), as_of, cutoff=cutoff)
+    if forecast and not settings().get("listed_units", {}).get(ticker):
+        if forecast.get("fy_cy") and str(forecast["fy_cy"])[:10] >= str(as_of):
+            ceiling_input["fy1_eps"] = forecast.get("eps_cy")
+    tier = source.get("tiers", {}).get(ticker)
+    return calculate_ceiling(
+        ceiling_input, day=as_of, kind=row.get("type"), tier=tier, bands=band_settings(), asof=cutoff
+    )
 
 
 def build(*, clock, repository, universe, as_of, persist=True, book=None, source=None):
@@ -226,6 +239,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
                 financial_version="failed",
                 period=None,
             )
+        row["ceiling"] = ceiling_for_row(row, source, ticker, price, as_of, cutoff)
         ranges.append(row)
         shadows.append(shadow(row, bear_30d=bear_past.get(ticker), seen_versions=seen.get(ticker, set())))
         # A loop variable must not keep the previous issuer's financial history
@@ -294,6 +308,7 @@ def build(*, clock, repository, universe, as_of, persist=True, book=None, source
         "params_version": settings()["params_version"],
         "trade_date": as_of,
         "ranges": ranges,
+        "ceilings": [r["ceiling"] for r in ranges],
         "shadows": shadows,
         "panel": list(panel_rows.values()),
         "summary": summary,
