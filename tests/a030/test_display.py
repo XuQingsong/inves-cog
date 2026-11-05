@@ -37,8 +37,16 @@ pytestmark = pytest.mark.phase1_blocking
 def test_stock_page_explanation_no_longer_promotes_historical_pe_percentiles():
     from inves_cog.web.investor_html import render_brief
 
-    html = render_brief({"page": "/s/NVDA", "symbol": "NVDA", "date": "2026-11-04",
-                         "trend": {}, "position": {}, "valuation": {"ceiling": {"method": "growth", "m": 3.2, "r": .08, "band": "偏高"}}})
+    html = render_brief(
+        {
+            "page": "/s/NVDA",
+            "symbol": "NVDA",
+            "date": "2026-11-04",
+            "trend": {},
+            "position": {},
+            "valuation": {"ceiling": {"method": "growth", "m": 3.2, "r": 0.08, "band": "偏高"}},
+        }
+    )
     assert "历史分位" not in html
     assert "隐含" in html
 
@@ -46,8 +54,31 @@ def test_stock_page_explanation_no_longer_promotes_historical_pe_percentiles():
 def test_institution_module_keeps_ratings_without_price_targets():
     from inves_cog.web.investor_html import _actions_body
 
-    html = _actions_body({"analyst_actions": [{"firm": "Fixture Research", "action_date": "2026-11-04",
-                                              "from_grade": "Hold", "to_grade": "Buy", "action": "up",
-                                              "prior_pt": 99999, "current_pt": 88888}]})
+    html = _actions_body(
+        {
+            "analyst_actions": [
+                {
+                    "firm": "Fixture Research",
+                    "action_date": "2026-11-04",
+                    "from_grade": "Hold",
+                    "to_grade": "Buy",
+                    "action": "up",
+                    "prior_pt": 99999,
+                    "current_pt": 88888,
+                }
+            ]
+        }
+    )
     assert "Fixture Research" in html and "Buy" in html
     assert "目标价" not in html and "99999" not in html and "88888" not in html
+
+
+def test_price_bar_formats_earnings_date_without_exposing_source_dictionary():
+    from inves_cog.web.investor_html import _price_bar
+
+    payload = {"price_now": {"px": 100},
+               "bar_stats": {"next_earnings": {"report_date": "2026-11-17", "time": "post", "eps_forecast": 2.49}},
+               "next_report": {"report_date": "2026-11-17", "time": "post"}}
+    text = _price_bar(payload)
+    assert "2026-11-17" in text and "盘后" in text
+    assert "eps_forecast" not in text and "report_date" not in text
