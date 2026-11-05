@@ -225,6 +225,7 @@ def valuation_card(range_row, pe, price):
     card = {
         "state": valuation_view(price, neutral)["status"],
         "pe": pe,
+        "ceiling": payload.get("ceiling"),
         "eps": eps,
         "pe_text": pe_phrase(pe, eps),
         "pe_extreme": pe_extreme(pe, eps),

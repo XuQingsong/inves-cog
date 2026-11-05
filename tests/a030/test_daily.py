@@ -62,3 +62,6 @@ def test_calibration_from_future_cannot_be_used_for_historical_label():
     out = calculate_ceiling(inputs(), day=date(2025, 1, 1), kind="稳定", tier=None, bands=BANDS)
     assert out["band"] == "不适用"
     assert "band_calibration_not_visible" in out["missing"]
+
+
+pytestmark = pytest.mark.phase1_blocking

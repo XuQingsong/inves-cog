@@ -38,3 +38,6 @@ def test_incomplete_or_duplicate_panel_is_not_silently_calibrated():
     rows = panel()
     with pytest.raises(ValueError, match="duplicate"):
         calibrate(rows + rows[:1], as_of=date(2026, 10, 30), source="fixture")
+
+
+pytestmark = pytest.mark.phase1_blocking

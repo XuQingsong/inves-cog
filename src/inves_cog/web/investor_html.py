@@ -16,6 +16,7 @@ from inves_cog.web.brief import (
     human_reason,
     short_unvalued_text,
 )
+from inves_cog.web.ceiling import ceiling_text
 from inves_cog.web.exit_levels import money
 from inves_cog.web.pages import CLOSED
 from inves_cog.web.risk_brief import format_plain_percent, risk_params
@@ -138,17 +139,13 @@ def _valuation(view, full=False):
     if view.get("state") == "未估值":
         short = short_unvalued_text(view.get("text") or "未估值")
         inner = short[len("未估值（") : -1] if short.startswith("未估值（") and short.endswith("）") else ""
-        return f"未估值：{inner}" if inner else "未估值"
+        original = f"未估值：{inner}" if inner else "未估值"
+        return original + " · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else original
     bits = []
     if view.get("pe_extreme"):
         bits.append("市盈率不适用（盈利过低）")
     elif view.get("pe") is not None:
         bits.append(f"市盈率 {half_up(float(view['pe']), 1):.1f}")
-    low, mid, high = view.get("pe_p25"), view.get("pe_p50"), view.get("pe_p75")
-    if low is not None and low == mid == high:
-        bits.append("历史样本不足")
-    elif None not in (low, mid, high):
-        bits.append(f"历史 25/50/75 分位 {_whole(low)}/{_whole(mid)}/{_whole(high)}")
     if view.get("implied_growth") is not None:
         bits.append(f"隐含增速 {half_up(float(view['implied_growth']), 1):.1f}%")
     elif view.get("implied_reason"):
@@ -160,6 +157,8 @@ def _valuation(view, full=False):
             bits.append(f"EPS 增速 {_signed(float(view['eps_growth']), 1)}")
     if view.get("state") == "模型不适用":
         bits.append("模型不适用")
+    if view.get("ceiling"):
+        bits.append(ceiling_text(view["ceiling"], full=full))
     return " · ".join(bits) if bits else "估值暂缺"
 
 

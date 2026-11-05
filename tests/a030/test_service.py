@@ -1,5 +1,7 @@
 from datetime import date, datetime, timezone
 
+import pytest
+
 from inves_cog.clock import FrozenClock
 from inves_cog.valuation_v1.service import build
 from tests.m5.test_a019_batching import BatchRepository
@@ -19,3 +21,6 @@ def test_daily_build_emits_one_ceiling_for_every_monitored_ticker():
     assert out["ceilings"][0]["ticker"] == "AAA"
     assert out["ceilings"][0]["missing"]
     assert out["ranges"][0]["ceiling"] == out["ceilings"][0]
+
+
+pytestmark = pytest.mark.phase1_blocking
