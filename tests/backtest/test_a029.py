@@ -163,3 +163,13 @@ def test_a029_repaired_state_cannot_replace_newer_or_healthy_state():
     assert repaired_state(original, [later], date(2025, 4, 30)) is original
     assert repaired_state(later, [healthy], date(2025, 5, 2)) is later
     assert repaired_state(healthy, [row("2025-04-30", ["ni_tag_fallback"])], date(2025, 5, 2)) is healthy
+
+
+def test_fear_coverage_counts_available_replay_days_from_each_start():
+    from inves_cog.backtest.evaluate import fear_coverage
+
+    first, second, third = (date(2024, 1, day) for day in (2, 3, 4))
+    assert fear_coverage({first, second, third}, {first: 0, second: None}, first, third) == {
+        "covered_days": 1, "replay_days": 3, "coverage_pct": 100 / 3,
+    }
+    assert fear_coverage({first, second, third}, {first: 0}, second, third)["coverage_pct"] == 0
