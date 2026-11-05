@@ -177,3 +177,29 @@ def test_replay_rebuilds_and_clears_stale_events_on_disposable_database():
         anom = conn.execute("SELECT cause_event_id FROM perception.live_anomalies WHERE subject='INTC'").fetchone()
         assert gone == 0 and kept == 1
         assert anom["cause_event_id"] is None
+
+
+def test_update_cards_single_calendar_query():
+    """Regression for the 2026-11-05 I/O stall: update_cards must issue the
+    session-calendar query once per call, not once per card."""
+    with _disposable_database() as dsn:
+        conn = psycopg.connect(dsn, row_factory=dict_row, autocommit=True)
+        _seed(conn)
+
+        class CountingConn:
+            def __init__(self, inner):
+                self._inner, self.queries = inner, []
+
+            def execute(self, sql, params=None):
+                if "min(trade_date)" in sql or "max(trade_date)" in sql or "DISTINCT trade_date" in sql:
+                    self.queries.append(sql.strip()[:60])
+                return self._inner.execute(sql, params)
+
+        c = CountingConn(conn)
+        now = datetime(2026, 11, 3, 12, 0, tzinfo=timezone.utc)
+        update_cards(c, now, {"INTC": "x", "AMD": "y", "ARM": "z"})
+        # one DISTINCT trade_date fetch for the whole run — no per-card min/max
+        minmax = [q for q in c.queries if "min(" in q or "max(" in q]
+        assert minmax == [], f"per-card session queries still firing: {minmax}"
+        distinct = [q for q in c.queries if "DISTINCT trade_date" in q]
+        assert len(distinct) == 1

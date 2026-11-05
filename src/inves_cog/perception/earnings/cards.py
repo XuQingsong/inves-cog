@@ -5,6 +5,7 @@ function computes stage/card/missing deterministically so the disposable-DB
 test and the production read-only replay share the same code path.
 """
 
+import bisect
 import json
 from datetime import datetime, timedelta
 from statistics import median
@@ -14,14 +15,30 @@ from inves_cog.ingest.market import NY
 STRONG_REPORT_KINDS = ("earnings_result", "guidance", "capex")
 
 
-def _next_session(connection, day):
+def _session_days(connection, lo, hi):
+    """Trading calendar for a range — one query, shared across a card run."""
+    rows = connection.execute(
+        "SELECT DISTINCT trade_date AS d FROM ingest.bars_daily "
+        "WHERE trade_date >= %s AND trade_date <= %s ORDER BY trade_date",
+        (lo, hi),
+    ).fetchall()
+    return [r["d"] for r in rows]
+
+
+def _next_session(connection, day, sessions=None):
+    if sessions is not None:
+        i = bisect.bisect_right(sessions, day)
+        return sessions[i] if i < len(sessions) else None
     row = connection.execute(
         "SELECT min(trade_date) AS d FROM ingest.bars_daily WHERE trade_date > %s", (day,)
     ).fetchone()
     return row["d"]
 
 
-def _prev_session(connection, day):
+def _prev_session(connection, day, sessions=None):
+    if sessions is not None:
+        i = bisect.bisect_left(sessions, day) - 1
+        return sessions[i] if i >= 0 else None
     row = connection.execute(
         "SELECT max(trade_date) AS d FROM ingest.bars_daily WHERE trade_date < %s", (day,)
     ).fetchone()
@@ -50,14 +67,14 @@ def previous_trading_day(day):
     return d
 
 
-def stage_of(connection, ticker, report_date, report_time, now):
+def stage_of(connection, ticker, report_date, report_time, now, sessions=None):
     """voted once the voting-day close exists; released inside the report
     window; upcoming otherwise."""
     local_now = now.astimezone(NY)
     if report_time == "pre":
         vote_day = report_date
     else:
-        vote_day = _next_session(connection, report_date)
+        vote_day = _next_session(connection, report_date, sessions)
     if vote_day is not None and _close(connection, ticker, vote_day) is not None:
         if local_now.date() > vote_day or (
             local_now.date() == vote_day and (local_now.hour, local_now.minute) >= (20, 0)
@@ -99,7 +116,7 @@ def _implied_move(connection, ticker, report_date):
     }
 
 
-def _history(connection, ticker, report_date):
+def _history(connection, ticker, report_date, sessions=None):
     """Past earnings vote returns for this ticker from calendar history
     (shallow on this deployment -> '历史不足' below 4)."""
     rows = connection.execute(
@@ -109,21 +126,21 @@ def _history(connection, ticker, report_date):
     ).fetchall()
     votes = []
     for r in rows:
-        v = _vote_return(connection, ticker, r["report_date"], r["time"])
+        v = _vote_return(connection, ticker, r["report_date"], r["time"], sessions)
         if v is not None:
             votes.append({"report_date": str(r["report_date"]), "ret": v})
     return votes
 
 
-def _vote_return(connection, ticker, report_date, report_time):
+def _vote_return(connection, ticker, report_date, report_time, sessions=None):
     """post: next-session close / report-date close - 1;
     pre: report-date close / prior-session close - 1."""
     if report_time == "pre":
-        base_day = _prev_session(connection, report_date)
+        base_day = _prev_session(connection, report_date, sessions)
         vote_day = report_date
     else:
         base_day = report_date
-        vote_day = _next_session(connection, report_date)
+        vote_day = _next_session(connection, report_date, sessions)
     if base_day is None or vote_day is None:
         return None
     base, vote = _close(connection, ticker, base_day), _close(connection, ticker, vote_day)
@@ -132,11 +149,11 @@ def _vote_return(connection, ticker, report_date, report_time):
     return vote / base - 1
 
 
-def _events(connection, ticker, report_date, report_time, now):
+def _events(connection, ticker, report_date, report_time, now, sessions=None):
     start = _window_start(report_date, report_time)
     # cap the window at the vote close (post -> next session 16:00 ET,
     # pre -> report_date 16:00 ET); still-open windows use now
-    vote_day = report_date if report_time == "pre" else _next_session(connection, report_date)
+    vote_day = report_date if report_time == "pre" else _next_session(connection, report_date, sessions)
     if vote_day is not None:
         end = datetime(vote_day.year, vote_day.month, vote_day.day, 16, 0, tzinfo=NY)
         now = min(now, end)
@@ -184,15 +201,15 @@ def _live_anomalies(connection, event_ids):
     ]
 
 
-def _segment_reaction(connection, ticker, segment, members, report_date, report_time):
+def _segment_reaction(connection, ticker, segment, members, report_date, report_time, sessions=None):
     """Same-window equal-weight return of segment peers + the ticker's
     L2/L3 baskets; counts followers (same sign & |ret| >= |vote|/3)."""
     if report_time == "pre":
-        base_day = _prev_session(connection, report_date)
+        base_day = _prev_session(connection, report_date, sessions)
         vote_day = report_date
     else:
         base_day = report_date
-        vote_day = _next_session(connection, report_date)
+        vote_day = _next_session(connection, report_date, sessions)
     if base_day is None or vote_day is None:
         return None
     peer_rets = []
@@ -220,10 +237,10 @@ def _segment_reaction(connection, ticker, segment, members, report_date, report_
     return {"peers": peer_rets, "baskets": basket_rets}
 
 
-def build_card(connection, ticker, report_date, report_time, now, segment="", peers=()):
+def build_card(connection, ticker, report_date, report_time, now, segment="", peers=(), sessions=None):
     """-> (stage, card dict, missing list). No writes."""
     missing = []
-    stage = stage_of(connection, ticker, report_date, report_time, now)
+    stage = stage_of(connection, ticker, report_date, report_time, now, sessions)
     card = {"ticker": ticker, "report_date": str(report_date), "report_time": report_time}
 
     cons = _consensus(connection, ticker)
@@ -242,7 +259,7 @@ def build_card(connection, ticker, report_date, report_time, now, segment="", pe
     card["peers"] = [p for p in peers if p != ticker]
 
     if stage == "upcoming":
-        hist = _history(connection, ticker, report_date)
+        hist = _history(connection, ticker, report_date, sessions)
         if len(hist) >= 4:
             card["history"] = {
                 "votes": hist,
@@ -251,11 +268,11 @@ def build_card(connection, ticker, report_date, report_time, now, segment="", pe
         else:
             card["history"] = {"votes": hist, "median_abs": None, "note": "历史不足"}
     else:
-        events = _events(connection, ticker, report_date, report_time, now)
+        events = _events(connection, ticker, report_date, report_time, now, sessions)
         card["events"] = events or missing.append("报道事件") or []
         card["live_anomalies"] = _live_anomalies(connection, [e["event_id"] for e in events])
         if stage == "voted":
-            vote = _vote_return(connection, ticker, report_date, report_time)
+            vote = _vote_return(connection, ticker, report_date, report_time, sessions)
             if vote is None:
                 missing.append("投票涨跌")
             else:
@@ -275,7 +292,7 @@ def build_card(connection, ticker, report_date, report_time, now, segment="", pe
                     )
                 else:
                     card["vs_implied"] = "无期权参照"
-                seg = _segment_reaction(connection, ticker, segment, peers, report_date, report_time)
+                seg = _segment_reaction(connection, ticker, segment, peers, report_date, report_time, sessions)
                 if seg:
                     followed = sum(1 for _, r in seg["peers"] if r * vote > 0 and abs(r) >= max(abs(vote) / 3, 0.01))
                     card["segment_reaction"] = {
@@ -295,6 +312,10 @@ def update_cards(connection, now, core_segments):
            FROM ingest.earnings_calendar c WHERE c.report_date >= %s AND c.report_date <= %s""",
         (today - timedelta(days=7), today + timedelta(days=7)),
     ).fetchall()
+    dates = [r["report_date"] for r in rows if r["ticker"] in core_segments]
+    sessions = (
+        _session_days(connection, min(dates) - timedelta(days=10), max(dates) + timedelta(days=30)) if dates else None
+    )
     written = 0
     for r in rows:
         ticker = r["ticker"]
@@ -309,6 +330,7 @@ def update_cards(connection, now, core_segments):
             now,
             segment=core_segments[ticker],
             peers=_segment_peers(core_segments, ticker),
+            sessions=sessions,
         )
         connection.execute(
             """INSERT INTO perception.earnings_cards
