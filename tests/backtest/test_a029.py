@@ -172,7 +172,9 @@ def test_fear_coverage_counts_available_replay_days_from_each_start():
 
     first, second, third = (date(2024, 1, day) for day in (2, 3, 4))
     assert fear_coverage({first, second, third}, {first: 0, second: None}, first, third) == {
-        "covered_days": 1, "replay_days": 3, "coverage_pct": 100 / 3,
+        "covered_days": 1,
+        "replay_days": 3,
+        "coverage_pct": 100 / 3,
     }
     assert fear_coverage({first, second, third}, {first: 0}, second, third)["coverage_pct"] == 0
 

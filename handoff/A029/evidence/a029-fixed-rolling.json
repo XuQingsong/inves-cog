@@ -1,0 +1,990 @@
+{
+  "mode": "rolling",
+  "partial": false,
+  "result": {
+    "combo": {
+      "n_starts": 28,
+      "short_hold_sales_total": 1,
+      "beats_baseline_pct": 42.9,
+      "ret_diff_median": -15.148670875939962,
+      "ret_diff_q25": -93.08035906253167,
+      "ret_diff_q75": 26.116822802534944,
+      "dd_diff_median": 0.5390345775398497,
+      "dd_diff_q25": -1.9199157714383777,
+      "dd_diff_q75": 1.806080679782868,
+      "rdd_diff_median": -0.4882518526223697,
+      "rdd_diff_q25": -3.9131487370440814,
+      "rdd_diff_q75": 1.1570436099042862,
+      "rows": [
+        {
+          "variant": "combo",
+          "start": "2018-01-01",
+          "ret": 214.02602389128666,
+          "dd": -25.546176807050635,
+          "rdd": 8.378006051857293,
+          "base_ret": 150.24529698852066,
+          "base_dd": -27.506664973696083,
+          "base_rdd": 5.462141525779166,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 2220,
+            "replay_days": 2220,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2018-04-01",
+          "ret": 166.37592871290389,
+          "dd": -29.516566534523125,
+          "rdd": 5.636696548641845,
+          "base_ret": 62.37743752710501,
+          "base_dd": -27.15338752109271,
+          "base_rdd": 2.297224885059012,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 2159,
+            "replay_days": 2159,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2018-07-01",
+          "ret": 154.63237334647494,
+          "dd": -29.86885302664586,
+          "rdd": 5.177044234290756,
+          "base_ret": 110.60601933671666,
+          "base_dd": -27.465226223982576,
+          "base_rdd": 4.027129375695282,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 2095,
+            "replay_days": 2095,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2018-10-01",
+          "ret": 88.27381785307249,
+          "dd": -28.982245496780934,
+          "rdd": 3.045789459718609,
+          "base_ret": 82.82180211947336,
+          "base_dd": -27.096975477898376,
+          "base_rdd": 3.0564961830159567,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 2032,
+            "replay_days": 2032,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2019-01-01",
+          "ret": 145.03251759656072,
+          "dd": -30.57877271373941,
+          "rdd": 4.742914928413588,
+          "base_ret": 408.4255769920623,
+          "base_dd": -28.554919684633575,
+          "base_rdd": 14.303159718283178,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1969,
+            "replay_days": 1969,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2019-04-01",
+          "ret": 82.05713657143,
+          "dd": -27.226183200843767,
+          "rdd": 3.0139052531199804,
+          "base_ret": 267.9317564532449,
+          "base_dd": -23.753662599001892,
+          "base_rdd": 11.279597634114038,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1908,
+            "replay_days": 1908,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2019-07-01",
+          "ret": 113.03214169605607,
+          "dd": -26.801834762703713,
+          "rdd": 4.217328503694335,
+          "base_ret": 76.47472050848585,
+          "base_dd": -25.165275177430104,
+          "base_rdd": 3.0388986398636115,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1845,
+            "replay_days": 1845,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2019-10-01",
+          "ret": 110.5273878434792,
+          "dd": -25.818020502268656,
+          "rdd": 4.281017122663105,
+          "base_ret": 261.2731571340858,
+          "base_dd": -24.98956347795468,
+          "base_rdd": 10.455290960347348,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1781,
+            "replay_days": 1781,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2020-01-01",
+          "ret": 123.28603613004164,
+          "dd": -23.241587595258327,
+          "rdd": 5.304544520667514,
+          "base_ret": 247.60443205506485,
+          "base_dd": -25.271285415073606,
+          "base_rdd": 9.797856657792952,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1717,
+            "replay_days": 1717,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2020-04-01",
+          "ret": 117.25825074495005,
+          "dd": -20.2906140296102,
+          "rdd": 5.778940478283923,
+          "base_ret": 305.5016562476767,
+          "base_dd": -27.608922200135723,
+          "base_rdd": 11.065323522342167,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1655,
+            "replay_days": 1655,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2020-07-01",
+          "ret": 81.52841687690504,
+          "dd": -21.711450292807864,
+          "rdd": 3.7550884799212216,
+          "base_ret": 132.60717055098934,
+          "base_dd": -26.896092316892084,
+          "base_rdd": 4.9303508103928335,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1592,
+            "replay_days": 1592,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2020-10-01",
+          "ret": 126.55214913193164,
+          "dd": -24.538975234525395,
+          "rdd": 5.157189651256408,
+          "base_ret": 239.9458369622334,
+          "base_dd": -24.147688210903716,
+          "base_rdd": 9.936596616063957,
+          "beats": false,
+          "short_hold_sales": 1,
+          "fear_coverage": {
+            "covered_days": 1528,
+            "replay_days": 1528,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2021-01-01",
+          "ret": 84.0777858604277,
+          "dd": -22.48308514247004,
+          "rdd": 3.7396018085439113,
+          "base_ret": 203.03644549865703,
+          "base_dd": -23.417738128390674,
+          "base_rdd": 8.670198820461838,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1464,
+            "replay_days": 1464,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2021-04-01",
+          "ret": 80.47292176784731,
+          "dd": -24.922651603942413,
+          "rdd": 3.228906901507929,
+          "base_ret": 83.44074674698068,
+          "base_dd": -25.717073614555574,
+          "base_rdd": 3.2445661585598975,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1403,
+            "replay_days": 1403,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2021-07-01",
+          "ret": 63.298845010940006,
+          "dd": -22.3982669303339,
+          "rdd": 2.8260599450761337,
+          "base_ret": 81.34403115226998,
+          "base_dd": -23.794743055949606,
+          "base_rdd": 3.418571529055903,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1340,
+            "replay_days": 1340,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2021-10-01",
+          "ret": 67.78134639362554,
+          "dd": -23.391535154317168,
+          "rdd": 2.8976869601102577,
+          "base_ret": 66.12906480647929,
+          "base_dd": -26.635626855757423,
+          "base_rdd": 2.482729810137176,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1276,
+            "replay_days": 1276,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2022-01-01",
+          "ret": 56.55189231100002,
+          "dd": -22.391761492999997,
+          "rdd": 2.525566929099303,
+          "base_ret": 28.11164327261999,
+          "base_dd": -27.53987855648,
+          "base_rdd": 1.020761337598762,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1212,
+            "replay_days": 1212,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2022-04-01",
+          "ret": 167.5975602646333,
+          "dd": -21.577095539254955,
+          "rdd": 7.767382776784069,
+          "base_ret": 142.25521287404672,
+          "base_dd": -21.599323837349193,
+          "base_rdd": 6.586095654904779,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1150,
+            "replay_days": 1150,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2022-07-01",
+          "ret": 109.15670524974996,
+          "dd": -24.563053681853507,
+          "rdd": 4.443938716397948,
+          "base_ret": 156.28389366092503,
+          "base_dd": -21.859105065713734,
+          "base_rdd": 7.149601650712507,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1088,
+            "replay_days": 1088,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2022-10-01",
+          "ret": 144.78670423825002,
+          "dd": -24.530402101454342,
+          "rdd": 5.902337174883326,
+          "base_ret": 195.42722685863336,
+          "base_dd": -21.10277770816863,
+          "base_rdd": 9.26073475071416,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 1024,
+            "replay_days": 1024,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2023-01-01",
+          "ret": 108.24528358533337,
+          "dd": -23.470666678358675,
+          "rdd": 4.611939024516157,
+          "base_ret": 93.6153563608,
+          "base_dd": -24.005549148203276,
+          "base_rdd": 3.8997381723219924,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 961,
+            "replay_days": 961,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2023-04-01",
+          "ret": 140.79523712574996,
+          "dd": -22.092189666090757,
+          "rdd": 6.373077510820767,
+          "base_ret": 136.12783017060002,
+          "base_dd": -23.290755105458626,
+          "base_rdd": 5.84471519082247,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 899,
+            "replay_days": 899,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2023-07-01",
+          "ret": 118.29487037150001,
+          "dd": -21.226538004957384,
+          "rdd": 5.5729705119069655,
+          "base_ret": 66.26858918459999,
+          "base_dd": -23.34201560940501,
+          "base_rdd": 2.8390259990186504,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 837,
+            "replay_days": 837,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2023-10-01",
+          "ret": 99.26893024619991,
+          "dd": -23.101647001383153,
+          "rdd": 4.297049913378749,
+          "base_ret": 162.62235992936996,
+          "base_dd": -20.50091211600915,
+          "base_rdd": 7.932445103375584,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 774,
+            "replay_days": 774,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2024-01-01",
+          "ret": 71.11970180211668,
+          "dd": -21.97607899955738,
+          "rdd": 3.236232532816664,
+          "base_ret": 97.70142179138166,
+          "base_dd": -22.83370765440955,
+          "base_rdd": 4.278824239589227,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 711,
+            "replay_days": 711,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2024-04-01",
+          "ret": 63.617025461449984,
+          "dd": -23.148138107077997,
+          "rdd": 2.7482566920575713,
+          "base_ret": 32.915928493449975,
+          "base_dd": -23.691324792313097,
+          "base_rdd": 1.3893663094826127,
+          "beats": true,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 650,
+            "replay_days": 650,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2024-07-01",
+          "ret": 31.609640634750026,
+          "dd": -24.179062206880598,
+          "rdd": 1.3073145833486841,
+          "base_ret": 43.86179624529998,
+          "base_dd": -25.93367372437594,
+          "base_rdd": 1.691306704613654,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 587,
+            "replay_days": 587,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "combo",
+          "start": "2024-10-01",
+          "ret": 25.2578318676,
+          "dd": -22.554034916428854,
+          "rdd": 1.1198808533014037,
+          "base_ret": 111.56708134087498,
+          "base_dd": -23.052756004393405,
+          "base_rdd": 4.839641790318367,
+          "beats": false,
+          "short_hold_sales": 0,
+          "fear_coverage": {
+            "covered_days": 523,
+            "replay_days": 523,
+            "coverage_pct": 100.0
+          }
+        }
+      ]
+    },
+    "f2": {
+      "n_starts": 28,
+      "short_hold_sales_total": 335,
+      "beats_baseline_pct": 46.4,
+      "ret_diff_median": -0.4683516068500211,
+      "ret_diff_q25": -26.7103874836243,
+      "ret_diff_q75": 4.466855428466637,
+      "dd_diff_median": 0.22078701630656283,
+      "dd_diff_q25": -0.022808177485659442,
+      "dd_diff_q75": 0.6239627057061057,
+      "rdd_diff_median": -0.05557520994707543,
+      "rdd_diff_q25": -1.0921470299616225,
+      "rdd_diff_q75": 0.4358760062734241,
+      "rows": [
+        {
+          "variant": "f2",
+          "start": "2018-01-01",
+          "ret": 120.62092869727338,
+          "dd": -27.375006437997406,
+          "rdd": 4.406242934425308,
+          "base_ret": 150.24529698852066,
+          "base_dd": -27.506664973696083,
+          "base_rdd": 5.462141525779166,
+          "beats": false,
+          "short_hold_sales": 15,
+          "fear_coverage": {
+            "covered_days": 2220,
+            "replay_days": 2220,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2018-04-01",
+          "ret": 64.72757958695072,
+          "dd": -23.504321026519605,
+          "rdd": 2.7538587272493205,
+          "base_ret": 62.37743752710501,
+          "base_dd": -27.15338752109271,
+          "base_rdd": 2.297224885059012,
+          "beats": true,
+          "short_hold_sales": 13,
+          "fear_coverage": {
+            "covered_days": 2159,
+            "replay_days": 2159,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2018-07-01",
+          "ret": 114.62770472222088,
+          "dd": -24.999664296522685,
+          "rdd": 4.585169759186125,
+          "base_ret": 110.60601933671666,
+          "base_dd": -27.465226223982576,
+          "base_rdd": 4.027129375695282,
+          "beats": true,
+          "short_hold_sales": 16,
+          "fear_coverage": {
+            "covered_days": 2095,
+            "replay_days": 2095,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2018-10-01",
+          "ret": 195.42488932783826,
+          "dd": -26.266836513617065,
+          "rdd": 7.4399857488178105,
+          "base_ret": 82.82180211947336,
+          "base_dd": -27.096975477898376,
+          "base_rdd": 3.0564961830159567,
+          "beats": true,
+          "short_hold_sales": 16,
+          "fear_coverage": {
+            "covered_days": 2032,
+            "replay_days": 2032,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2019-01-01",
+          "ret": 242.84514025874992,
+          "dd": -28.337350269104235,
+          "rdd": 8.569789975159397,
+          "base_ret": 408.4255769920623,
+          "base_dd": -28.554919684633575,
+          "base_rdd": 14.303159718283178,
+          "beats": false,
+          "short_hold_sales": 13,
+          "fear_coverage": {
+            "covered_days": 1969,
+            "replay_days": 1969,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2019-04-01",
+          "ret": 282.346787812913,
+          "dd": -23.046794283195304,
+          "rdd": 12.251022174428298,
+          "base_ret": 267.9317564532449,
+          "base_dd": -23.753662599001892,
+          "base_rdd": 11.279597634114038,
+          "beats": true,
+          "short_hold_sales": 13,
+          "fear_coverage": {
+            "covered_days": 1908,
+            "replay_days": 1908,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2019-07-01",
+          "ret": 103.52615062578501,
+          "dd": -25.18384867832265,
+          "rdd": 4.110815306593571,
+          "base_ret": 76.47472050848585,
+          "base_dd": -25.165275177430104,
+          "base_rdd": 3.0388986398636115,
+          "beats": true,
+          "short_hold_sales": 13,
+          "fear_coverage": {
+            "covered_days": 1845,
+            "replay_days": 1845,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2019-10-01",
+          "ret": 264.3186642660866,
+          "dd": -24.76734271749984,
+          "rdd": 10.672063906126159,
+          "base_ret": 261.2731571340858,
+          "base_dd": -24.98956347795468,
+          "base_rdd": 10.455290960347348,
+          "beats": true,
+          "short_hold_sales": 19,
+          "fear_coverage": {
+            "covered_days": 1781,
+            "replay_days": 1781,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2020-01-01",
+          "ret": 235.52915718981504,
+          "dd": -26.090504083776967,
+          "rdd": 9.027390058602458,
+          "base_ret": 247.60443205506485,
+          "base_dd": -25.271285415073606,
+          "base_rdd": 9.797856657792952,
+          "beats": false,
+          "short_hold_sales": 18,
+          "fear_coverage": {
+            "covered_days": 1717,
+            "replay_days": 1717,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2020-04-01",
+          "ret": 156.54150782047668,
+          "dd": -27.478348473691682,
+          "rdd": 5.696903799380543,
+          "base_ret": 305.5016562476767,
+          "base_dd": -27.608922200135723,
+          "base_rdd": 11.065323522342167,
+          "beats": false,
+          "short_hold_sales": 11,
+          "fear_coverage": {
+            "covered_days": 1655,
+            "replay_days": 1655,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2020-07-01",
+          "ret": 80.660840117088,
+          "dd": -23.95570389550835,
+          "rdd": 3.3670828654803904,
+          "base_ret": 132.60717055098934,
+          "base_dd": -26.896092316892084,
+          "base_rdd": 4.9303508103928335,
+          "beats": false,
+          "short_hold_sales": 20,
+          "fear_coverage": {
+            "covered_days": 1592,
+            "replay_days": 1592,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2020-10-01",
+          "ret": 245.6233787942499,
+          "dd": -23.723141612821852,
+          "rdd": 10.353745840369461,
+          "base_ret": 239.9458369622334,
+          "base_dd": -24.147688210903716,
+          "base_rdd": 9.936596616063957,
+          "beats": true,
+          "short_hold_sales": 11,
+          "fear_coverage": {
+            "covered_days": 1528,
+            "replay_days": 1528,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2021-01-01",
+          "ret": 108.55969365898228,
+          "dd": -22.443471333807242,
+          "rdd": 4.8370277504913295,
+          "base_ret": 203.03644549865703,
+          "base_dd": -23.417738128390674,
+          "base_rdd": 8.670198820461838,
+          "beats": false,
+          "short_hold_sales": 9,
+          "fear_coverage": {
+            "covered_days": 1464,
+            "replay_days": 1464,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2021-04-01",
+          "ret": 46.88613405140429,
+          "dd": -27.92086120128995,
+          "rdd": 1.6792509985056672,
+          "base_ret": 83.44074674698068,
+          "base_dd": -25.717073614555574,
+          "base_rdd": 3.2445661585598975,
+          "beats": false,
+          "short_hold_sales": 9,
+          "fear_coverage": {
+            "covered_days": 1403,
+            "replay_days": 1403,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2021-07-01",
+          "ret": 124.67370484396403,
+          "dd": -23.45888809512028,
+          "rdd": 5.314561557156565,
+          "base_ret": 81.34403115226998,
+          "base_dd": -23.794743055949606,
+          "base_rdd": 3.418571529055903,
+          "beats": true,
+          "short_hold_sales": 10,
+          "fear_coverage": {
+            "covered_days": 1340,
+            "replay_days": 1340,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2021-10-01",
+          "ret": 66.62846002237923,
+          "dd": -26.519537287589568,
+          "rdd": 2.512429206431123,
+          "base_ret": 66.12906480647929,
+          "base_dd": -26.635626855757423,
+          "base_rdd": 2.482729810137176,
+          "beats": true,
+          "short_hold_sales": 7,
+          "fear_coverage": {
+            "covered_days": 1276,
+            "replay_days": 1276,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2022-01-01",
+          "ret": 38.65277919386998,
+          "dd": -26.662273252180025,
+          "rdd": 1.4497180652332247,
+          "base_ret": 28.11164327261999,
+          "base_dd": -27.53987855648,
+          "base_rdd": 1.020761337598762,
+          "beats": true,
+          "short_hold_sales": 9,
+          "fear_coverage": {
+            "covered_days": 1212,
+            "replay_days": 1212,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2022-04-01",
+          "ret": 82.61359908631664,
+          "dd": -21.505031561043552,
+          "rdd": 3.84159394752861,
+          "base_ret": 142.25521287404672,
+          "base_dd": -21.599323837349193,
+          "base_rdd": 6.586095654904779,
+          "beats": false,
+          "short_hold_sales": 13,
+          "fear_coverage": {
+            "covered_days": 1150,
+            "replay_days": 1150,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2022-07-01",
+          "ret": 155.94798566687498,
+          "dd": -21.46277814057487,
+          "rdd": 7.265973894221039,
+          "base_ret": 156.28389366092503,
+          "base_dd": -21.859105065713734,
+          "base_rdd": 7.149601650712507,
+          "beats": false,
+          "short_hold_sales": 14,
+          "fear_coverage": {
+            "covered_days": 1088,
+            "replay_days": 1088,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2022-10-01",
+          "ret": 228.47126774460006,
+          "dd": -20.590692333435157,
+          "rdd": 11.095851661753427,
+          "base_ret": 195.42722685863336,
+          "base_dd": -21.10277770816863,
+          "base_rdd": 9.26073475071416,
+          "beats": true,
+          "short_hold_sales": 15,
+          "fear_coverage": {
+            "covered_days": 1024,
+            "replay_days": 1024,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2023-01-01",
+          "ret": 76.73257389484998,
+          "dd": -24.796183042791476,
+          "rdd": 3.0945316770097397,
+          "base_ret": 93.6153563608,
+          "base_dd": -24.005549148203276,
+          "base_rdd": 3.8997381723219924,
+          "beats": false,
+          "short_hold_sales": 15,
+          "fear_coverage": {
+            "covered_days": 961,
+            "replay_days": 961,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2023-04-01",
+          "ret": 110.38876962285005,
+          "dd": -23.771098361517563,
+          "rdd": 4.643822845037555,
+          "base_ret": 136.12783017060002,
+          "base_dd": -23.290755105458626,
+          "base_rdd": 5.84471519082247,
+          "beats": false,
+          "short_hold_sales": 11,
+          "fear_coverage": {
+            "covered_days": 899,
+            "replay_days": 899,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2023-07-01",
+          "ret": 66.41493240269996,
+          "dd": -23.38501264100611,
+          "rdd": 2.8400639940745633,
+          "base_ret": 66.26858918459999,
+          "base_dd": -23.34201560940501,
+          "base_rdd": 2.8390259990186504,
+          "beats": true,
+          "short_hold_sales": 9,
+          "fear_coverage": {
+            "covered_days": 837,
+            "replay_days": 837,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2023-10-01",
+          "ret": 166.68565322331997,
+          "dd": -21.568926139641796,
+          "rdd": 7.728045992839966,
+          "base_ret": 162.62235992936996,
+          "base_dd": -20.50091211600915,
+          "base_rdd": 7.932445103375584,
+          "beats": true,
+          "short_hold_sales": 13,
+          "fear_coverage": {
+            "covered_days": 774,
+            "replay_days": 774,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2024-01-01",
+          "ret": 73.67433367363168,
+          "dd": -22.237380152070273,
+          "rdd": 3.313085137269315,
+          "base_ret": 97.70142179138166,
+          "base_dd": -22.83370765440955,
+          "base_rdd": 4.278824239589227,
+          "beats": false,
+          "short_hold_sales": 6,
+          "fear_coverage": {
+            "covered_days": 711,
+            "replay_days": 711,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2024-04-01",
+          "ret": 32.31513327379998,
+          "dd": -23.726836999578094,
+          "rdd": 1.361965493941506,
+          "base_ret": 32.915928493449975,
+          "base_dd": -23.691324792313097,
+          "base_rdd": 1.3893663094826127,
+          "beats": false,
+          "short_hold_sales": 7,
+          "fear_coverage": {
+            "covered_days": 650,
+            "replay_days": 650,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2024-07-01",
+          "ret": 32.543119441300014,
+          "dd": -25.714320452217653,
+          "rdd": 1.265564046375312,
+          "base_ret": 43.86179624529998,
+          "base_dd": -25.93367372437594,
+          "base_rdd": 1.691306704613654,
+          "beats": false,
+          "short_hold_sales": 6,
+          "fear_coverage": {
+            "covered_days": 587,
+            "replay_days": 587,
+            "coverage_pct": 100.0
+          }
+        },
+        {
+          "variant": "f2",
+          "start": "2024-10-01",
+          "ret": 108.01697585099994,
+          "dd": -22.71224233588788,
+          "rdd": 4.7558921859653225,
+          "base_ret": 111.56708134087498,
+          "base_dd": -23.052756004393405,
+          "base_rdd": 4.839641790318367,
+          "beats": false,
+          "short_hold_sales": 4,
+          "fear_coverage": {
+            "covered_days": 523,
+            "replay_days": 523,
+            "coverage_pct": 100.0
+          }
+        }
+      ]
+    }
+  }
+}

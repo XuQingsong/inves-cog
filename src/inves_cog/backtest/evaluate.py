@@ -90,7 +90,8 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "beats": m["return_pct"] > base["return_pct"],
                     "short_hold_sales": m["short_hold_sales"],
                     "fear_coverage": fear_coverage(replay_days, fear_levels, st, spec["end"])
-                    if variants[name].get("breakdown_confirm") else None,
+                    if variants[name].get("breakdown_confirm")
+                    else None,
                 }
             )
     return _distribution(rows)
