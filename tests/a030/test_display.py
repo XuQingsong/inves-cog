@@ -41,3 +41,13 @@ def test_stock_page_explanation_no_longer_promotes_historical_pe_percentiles():
                          "trend": {}, "position": {}, "valuation": {"ceiling": {"method": "growth", "m": 3.2, "r": .08, "band": "偏高"}}})
     assert "历史分位" not in html
     assert "隐含" in html
+
+
+def test_institution_module_keeps_ratings_without_price_targets():
+    from inves_cog.web.investor_html import _actions_body
+
+    html = _actions_body({"analyst_actions": [{"firm": "Fixture Research", "action_date": "2026-11-04",
+                                              "from_grade": "Hold", "to_grade": "Buy", "action": "up",
+                                              "prior_pt": 99999, "current_pt": 88888}]})
+    assert "Fixture Research" in html and "Buy" in html
+    assert "目标价" not in html and "99999" not in html and "88888" not in html
