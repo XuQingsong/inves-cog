@@ -83,3 +83,33 @@ def dimension_allowed(fact, ticker):
         ):
             return True
     return False
+
+
+def class_eps_fallback(base, extra, as_of):
+    """Keep disclosed consolidated EPS; class facts fill only absent visible periods."""
+    import math
+
+    result = deepcopy(extra)
+    tag = "EarningsPerShareDiluted"
+    base_units = base.get("facts", {}).get("us-gaap", {}).get(tag, {}).get("units", {})
+    extra_units = result.get("facts", {}).get("us-gaap", {}).get(tag, {}).get("units", {})
+    for unit, rows in extra_units.items():
+
+        def visible(row):
+            try:
+                return row.get("filed", "9999") <= str(as_of) and math.isfinite(float(row["val"]))
+            except (TypeError, ValueError, KeyError):
+                return False
+
+        covered = {
+            (r.get("start"), r.get("end")) for r in base_units.get(unit, []) if not r.get("dimensions") and visible(r)
+        }
+        accepted = []
+        for row in rows:
+            if row.get("dimensions"):
+                if (row.get("start"), row.get("end")) in covered:
+                    continue
+                row["origin"] = "instance_class_eps_fallback"
+            accepted.append(row)
+        extra_units[unit] = accepted
+    return result
