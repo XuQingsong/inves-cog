@@ -225,9 +225,6 @@ def test_sessions_cache_equivalence_with_old_history():
             "('INTC','2026-07-31',100.00),('INTC','2026-08-03',110.00) ON CONFLICT DO NOTHING"
         )
         conn.commit()
-        from inves_cog.perception.earnings.cards import _session_days
-        from datetime import timedelta as _td
-
         sessions = _session_days(conn, date(2026, 10, 20), date(2026, 11, 30))
         now = datetime(2026, 10, 31, 12, 0, tzinfo=timezone.utc)
         for rt in ("pre", "post"):
