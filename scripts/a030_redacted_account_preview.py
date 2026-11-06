@@ -1,17 +1,15 @@
-"""UD-A-57: render and mask on the server; export only the verified PNG and safe metadata."""
+"""UD-A-57 preview: mask inside the server, render screenshots only on the Mac."""
 
 import argparse
-import hashlib
 import importlib.util
 import json
-import os
 import re
 import signal
-import subprocess
 import sys
 import urllib.request
 from html import escape
 from html.parser import HTMLParser
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 STRUCTURE = {
@@ -125,9 +123,10 @@ def load(name, path):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("directory", type=Path)
+    p.add_argument("--port", type=int, default=18094)
     a = p.parse_args()
     root = a.directory.resolve()
-    signal.alarm(55)
+    signal.alarm(50)
     sys.path.insert(0, "/home/claudeuser/inves-cog/src")
     load("inves_cog.web.ceiling", root / "ceiling.py")
     renderer = load("a030_account_renderer", root / "investor_html.py")
@@ -147,47 +146,31 @@ def main():
         "新增估值说明保留，数值遮盖。</div>"
     )
     masked = masked.replace("<body>", "<body>" + note)
-    html_path, png_path = root / "redacted.html", root / "account-redacted.png"
-    html_path.write_text(masked)
-    command = [
-        "/usr/bin/google-chrome",
-        "--headless=new",
-        "--disable-gpu",
-        "--disable-background-networking",
-        "--no-first-run",
-        "--no-default-browser-check",
-        "--hide-scrollbars",
-        "--host-resolver-rules=MAP * ~NOTFOUND",
-        "--user-data-dir=" + str(root / "browser"),
-        "--window-size=1440,7000",
-        "--virtual-time-budget=1500",
-        "--screenshot=" + str(png_path),
-        html_path.as_uri(),
-    ]
-    process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-    timed_out = False
+
+    # Production runs no browser. A loopback preview serves only already-masked HTML.
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path != "/redacted":
+                self.send_error(404)
+                return
+            body = masked.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    server = HTTPServer(("127.0.0.1", a.port), Handler)
+    server.timeout = 25
+    print(json.dumps({"ready": True, "port": a.port, "redacted_only": True, "browser_on_server": False}), flush=True)
     try:
-        process.wait(timeout=22)
-    except subprocess.TimeoutExpired:
-        timed_out = True
-        os.killpg(process.pid, signal.SIGKILL)
-        process.wait()
-    if not png_path.exists() or png_path.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
-        raise ValueError("redacted PNG was not generated")
-    html_path.unlink()
-    summary = dict(
-        source="production 2026-11-04 account; branch renderer; server-side text/attribute/script redaction",
-        authorization="UD-A-57",
-        raw_payload_exported=False,
-        raw_html_persisted=False,
-        redacted_html_exported=False,
-        output="account-redacted.png",
-        browser_exit=process.returncode,
-        browser_exit_timeout=timed_out,
-        sha256=hashlib.sha256(png_path.read_bytes()).hexdigest(),
-    )
-    (root / "redaction-verification.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
-    print(json.dumps(summary, ensure_ascii=False))
+        server.handle_request()
+    finally:
+        server.server_close()
 
 
 if __name__ == "__main__":
