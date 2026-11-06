@@ -58,14 +58,17 @@ class _PageCache:
     kept — the soonest-expiring are evicted first."""
 
     _MAX_ENTRIES = 32
+    _ACCESS_WINDOW = 900.0  # warmup refreshes only keys requested in the last 15 min
 
     def __init__(self, ttl=_RENDER_TTL, now=_now):
         self._entries = {}
         self._locks = {}
+        self._accessed = {}
         self._guard = threading.Lock()
         self._ttl, self._now = ttl, now
 
     def get(self, key, produce):
+        self._accessed[key] = self._now()
         hit = self._entries.get(key)
         if hit is not None and hit[0] > self._now():
             return HTMLResponse(hit[1])
@@ -81,6 +84,22 @@ class _PageCache:
                 self._sweep()
             return HTMLResponse(body)
 
+    def refresh(self, key, produce):
+        """Unconditional render + replace (warmup path); same locking/bounds
+        as get, but skips the hit early-return and does not count as user access."""
+        with self._guard:
+            lock = self._locks.setdefault(key, threading.Lock())
+        with lock:
+            body = produce()
+            with self._guard:
+                self._entries[key] = (self._now() + self._ttl, body)
+                self._sweep()
+            return HTMLResponse(body)
+
+    def recently(self, key, window=None):
+        window = self._ACCESS_WINDOW if window is None else window
+        return self._now() - self._accessed.get(key, -window - 1.0) < window
+
     def _sweep(self):
         """Purge expired entries, evict the soonest-expiring past the cap, drop
         orphan free locks. Caller must hold self._guard."""
@@ -93,13 +112,87 @@ class _PageCache:
                 self._entries.pop(k, None)
         for k in [k for k in list(self._locks) if k not in self._entries and not self._locks[k].locked()]:
             self._locks.pop(k, None)
+        for k in [k for k, v in list(self._accessed.items()) if now - v > 2 * self._ACCESS_WINDOW]:
+            self._accessed.pop(k, None)
 
 
 def _page(store, key, produce, cache):
     return store.get(key, produce) if cache else HTMLResponse(produce())
 
 
-def create_app(dsn=None, clock=None):
+_WARM_INTERVAL = 50.0
+
+
+def _warm_entries(call, clock):
+    """(cache-key, produce) pairs matching the cached routes' default requests —
+    the same keys a first user request would compute."""
+
+    def brief(builder):
+        return (
+            ("brief", builder.__name__, None, frozenset()),
+            lambda: render_brief(call(builder, default_session(clock))),
+        )
+
+    def plain(builder):
+        return (
+            ("show", builder.__name__, None, frozenset()),
+            lambda: render_page(call(builder, latest_visible_session(clock))),
+        )
+
+    def barometer():
+        from inves_cog.web.barometer import api_payload
+        from inves_cog.web.barometer import render_page as render_barometer
+
+        return (
+            ("barometer",),
+            lambda: render_barometer(call(lambda c, d, cl: api_payload(c, cl), None)["history"]),
+        )
+
+    return [
+        brief(page_brief_market),
+        brief(page_brief_stocks),
+        brief(page_brief_account),
+        brief(page_brief_trust),
+        plain(page_market),
+        barometer(),
+    ]
+
+
+def _warm_pass(cache, entries, log):
+    """Refresh only keys a user requested within the recent window — idle
+    periods cost nothing."""
+    for key, produce in entries:
+        try:
+            if cache.recently(key):
+                cache.refresh(key, produce)
+        except Exception as exc:  # noqa: BLE001
+            log.warning("page warmup failed for %s: %r", key, exc)
+
+
+def _warmup_loop(cache, entries, log, interval, stop):
+    if stop.wait(5):
+        return
+    while True:
+        _warm_pass(cache, entries, log)
+        if stop.wait(interval):
+            return
+
+
+def _start_warmup(cache, entries, interval=_WARM_INTERVAL):
+    import logging
+
+    stop = threading.Event()
+    thread = threading.Thread(
+        target=_warmup_loop,
+        args=(cache, entries, logging.getLogger(__name__), interval, stop),
+        daemon=True,
+        name="page-warmup",
+    )
+    thread.start()
+    return stop
+
+
+def create_app(dsn=None, clock=None, warmup=False):
     source = dsn or os.environ["INVES_COG_WEB_DATABASE_URL"]
     clock = clock or SystemClock()
     app = FastAPI()
@@ -203,6 +296,8 @@ def create_app(dsn=None, clock=None):
         return call(page_brief_stock, date, symbol=symbol)
 
     _register_html(app, call, clock, page_cache)
+    if warmup:
+        _start_warmup(page_cache, _warm_entries(call, clock))
     return app
 
 

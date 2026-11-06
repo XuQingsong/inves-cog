@@ -101,7 +101,7 @@ def protect(app, *, monotonic=time.monotonic):
 
 
 def create_app(*, dsn=None, clock=None, monotonic=None):
-    app = page_app(dsn=dsn, clock=clock)
+    app = page_app(dsn=dsn, clock=clock, warmup=True)
     app.add_middleware(GZipMiddleware, minimum_size=1024)
     if monotonic is None:
         return protect(app)
