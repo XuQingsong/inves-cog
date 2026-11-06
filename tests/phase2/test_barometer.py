@@ -61,8 +61,68 @@ def test_official_gate_bars_missing():
     assert "baro:2026-11-02" not in state
 
 
+def test_intraday_row_inherits_daily_and_maps_index_snapshots(monkeypatch):
+    """Provisional row inherits the previous trading day's px row, then
+    snapshot-covered columns override. ^VIX/^VIX3M/^TNX snapshots map to the
+    VIX/VIX3M/TNX columns; columns with no snapshot keep yesterday's value."""
+    from datetime import datetime
+    from unittest.mock import MagicMock
+
+    import pandas as pd
+
+    from inves_cog.perception.barometer import run
+
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = [
+        {"ticker": "^VIX", "last": 23.88, "as_of": datetime(2026, 11, 6, 15, 50)},
+        {"ticker": "^TNX", "last": 4.862, "as_of": datetime(2026, 11, 6, 15, 50)},
+        {"ticker": "SPY", "last": 490.0, "as_of": datetime(2026, 11, 6, 15, 50)},
+    ]
+    idx = pd.bdate_range("2026-10-26", "2026-11-05")
+    base = pd.Series(100.0, index=idx)
+    flat = ["SPY", "QQQ", "SMH", "MTUM", "TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT", "JPY=X", "BTC-USD", "XLK"]
+    px = pd.DataFrame(
+        {
+            **{t: base.copy() for t in flat},
+            "VIX": pd.Series(28.18, index=idx),
+            "VIX3M": pd.Series(25.55, index=idx),
+            "TNX": pd.Series(4.93, index=idx),
+            "MOVE": pd.Series(100.2, index=idx),
+        }
+    )
+    monkeypatch.setattr(run, "price_frame", lambda c, e: px.copy())
+    monkeypatch.setattr(
+        run,
+        "flows_inputs",
+        lambda c, i, p: {
+            k: pd.Series(0.0, index=i)
+            for k in [
+                "杠杆ETF调仓亿",
+                "SPDR资金5日%",
+                "杠杆基金4周变化",
+                "SOFR-IORB基点",
+                "净流动性4周%",
+                "个股看跌看涨5日",
+                "杠杆ETF净申购20日%",
+                "融资余额同比%",
+                "资管净多分位",
+                "资管净多%",
+                "杠杆基金净头寸%",
+            ]
+        },
+    )
+    rec = run.run_intraday(conn, datetime(2026, 11, 6, 15, 51))
+    assert rec["inputs"]["VIX"] == 23.88  # snapshot ^VIX mapped live
+    assert rec["inputs"]["VIX/VIX3M"] == round(23.88 / 25.55, 4)  # ^VIX3M absent -> inherited
+    assert rec["inputs"]["10Y"] == 4.862  # ^TNX mapped -> M["10Y"] (same units)
+    assert rec["inputs"]["MOVE"] == 100.2  # uncovered column inherited, not NaN
+    assert "VIX" not in rec["missing"]
+    assert "VIX/VIX3M" not in rec["missing"]
+
+
 def test_intraday_provisional_missing(monkeypatch):
-    """Provisional row: snapshot prices only; uncovered inputs → missing, not ffilled."""
+    """Provisional row inherits daily values for uncovered inputs; truly
+    absent columns (NaN in the daily frame too) still list as missing."""
     from datetime import datetime
     from unittest.mock import MagicMock
 
@@ -123,7 +183,7 @@ def test_intraday_provisional_missing(monkeypatch):
     )
     rec = run.run_intraday(conn, datetime(2026, 11, 2, 15, 30))
     assert rec["inputs"]["provisional"] is True
-    assert "MOVE" in rec["missing"] or rec["missing"]  # uncovered → listed missing
+    assert rec["inputs"]["MOVE"] == 100.0  # inherited from prior daily row
 
 
 def test_api_shape_and_missing():

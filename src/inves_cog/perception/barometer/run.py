@@ -25,10 +25,10 @@ def run_intraday(conn, local):
     """Provisional reading for the current intraday slot.
 
     Price inputs use today's ingest.intraday_snapshots.last (the same source
-    the live pages use for 现价); weekly/monthly/flow inputs carry their
-    latest published value; a price input with no snapshot today is left
-    NaN → excluded from its dimension and listed in missing (never filled
-    from yesterday).
+    the live pages use for 现价); columns with no snapshot today inherit the
+    previous trading day's px row (daily series stay live intraday). Index
+    snapshots map onto the daily columns they mirror (^VIX→VIX, ^VIX3M→VIX3M,
+    ^TNX→TNX — same units verified against the daily series).
     """
     px = price_frame(conn, local.date())
     today = pd.Timestamp(local.date())
@@ -40,8 +40,15 @@ def run_intraday(conn, local):
         (local.date(), local),
     ).fetchall()
     row = {r["ticker"]: float(r["last"]) for r in snaps}
-    prov = pd.Series({t: row.get(t, float("nan")) for t in px.columns}, name=today)
-    px.loc[today] = prov  # provisional row appended raw — no ffill from yesterday
+    for snap_t, col in {"^VIX": "VIX", "^VIX3M": "VIX3M", "^TNX": "TNX"}.items():
+        if snap_t in row:
+            row[col] = row[snap_t]
+    prov = px.loc[px.index[-1]].copy() if len(px.index) else pd.Series({t: float("nan") for t in px.columns})
+    for t in px.columns:
+        if t in row:
+            prov[t] = row[t]
+    prov.name = today
+    px.loc[today] = prov  # provisional row: inherits yesterday, snapshots override
     flows = flows_inputs(conn, px.index, px)
     M = indicators(px, flows)
     F, G = dimensions(M)
