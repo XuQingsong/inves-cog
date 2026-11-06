@@ -48,9 +48,21 @@ def test_official_midcap500_typo_still_identifies_500_not_400():
 
 def test_modern_official_table_expands_effective_date_and_index_rowspans():
     from inves_cog.backtest.membership import parse_announcement
-    html='''<table><tr><td>Effective Date</td><td>Index Name</td><td>Action</td><td>Company Name</td><td>Ticker</td><td>GICS Sector</td></tr>
+
+    html = """<table><tr><td>Effective Date</td><td>Index Name</td><td>Action</td><td>Company Name</td><td>Ticker</td><td>GICS Sector</td></tr>
     <tr><td rowspan="2">December 21, 2020</td><td rowspan="2">S&amp;P 500</td><td>Addition</td><td>Tesla</td><td>TSLA</td><td>Consumer Discretionary</td></tr>
-    <tr><td>Deletion</td><td>Apartment Investment</td><td>AIV</td><td>Real Estate</td></tr></table>'''
-    rows=parse_announcement(html,'https://press.spglobal.com/2020-12-11-example')
-    assert [(r['ticker'],r['action'],r['effective']) for r in rows]==[
-        ('TSLA','added','2020-12-21'),('AIV','deleted','2020-12-21')]
+    <tr><td>Deletion</td><td>Apartment Investment</td><td>AIV</td><td>Real Estate</td></tr></table>"""
+    rows = parse_announcement(html, "https://press.spglobal.com/2020-12-11-example")
+    assert [(r["ticker"], r["action"], r["effective"]) for r in rows] == [
+        ("TSLA", "added", "2020-12-21"),
+        ("AIV", "deleted", "2020-12-21"),
+    ]
+
+
+def test_abbreviated_official_dates_and_blank_following_date_are_carried():
+    from inves_cog.backtest.membership import parse_announcement
+    html='''<table><tr><td>Effective Date</td><td>Index Name</td><td>Action</td><td>Company Name</td><td>Ticker</td><td>GICS Sector</td></tr>
+    <tr><td>Sept. 21, 2020</td><td>S&amp;P 500</td><td>Addition</td><td>Etsy</td><td>ETSY</td><td>Discretionary</td></tr>
+    <tr><td></td><td>S&amp;P 500</td><td>Deletion</td><td>H&amp;R Block</td><td>HRB</td><td>Discretionary</td></tr></table>'''
+    rows=parse_announcement(html,'https://press.spglobal.com/2020-09-04-example')
+    assert [(r['ticker'],r['effective']) for r in rows]==[('ETSY','2020-09-21'),('HRB','2020-09-21')]
