@@ -912,3 +912,12 @@ Visa47份官方附件全部缓存，首批20份后TLS超时已退出，核对前
 [PR124](https://github.com/XuQingsong/inves-cog/pull/124)新head `9ff69c6d601b5249b0318c319cca5705bc594412`，已将main紧急通知与既有逐项回报合入，唯一ops/answers/A-030.md冲突双方内容都保留。旧bf88c454cd787edd6fca73e20e4cc2223b8491ea的[CI实际SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/42149825637/job/127670070319)，但生产浏览器方案已撤销，不能作新head最终CI；新head既有工作流正在触发。纯A03021 passed，静态检查通过；无PNG交付、未合入main、未迁移/部署/生产回填。
 
 当前问题/owner：服务器认证后无命令响应及网页超时，具体资源根因未取得证据；运维通过云控制台恢复并协助核对本次预览残留。A继续最新CI并在恢复后负责T6；用户截图授权已解决，无需重复答复。已在本对话直接反馈新通知、清理未证实及新方式。
+
+
+## A-030 阻塞：最新准确head全部CI通过，生产取证与清理待命令通道恢复
+
+[PR124草稿](https://github.com/XuQingsong/inves-cog/pull/124)准确head `9ff69c6d601b5249b0318c319cca5705bc594412` 的[phase1-blocking实际SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/42150701619/job/127672990495)已核对headSha一致；同次replay/cases也实际SUCCESS。已合入main22f87db紧急通知并移除生产浏览器调用，单机21项A030离线测试与静态检查通过。分支工作区干净；旧head结果不冒充本head。PR保持草稿，未合入main、未迁移/部署/生产EPS回填。
+
+UD-A-57截图授权已解决，不再等待用户答复。实际剩余：服务器SSH认证/session成功后命令无响应，首页HEAD超时；仅针对本次隔离目录的有界停止/清理命令也超时，无法确认远端进程/目录状态，持仓脱敏PNG没有交付。尚未取得主机负载/IO/内存指标，根因未知。需要服务器运维通过云控制台恢复命令响应，并核对仅本次 `/tmp/inves-cog-a030-ud57-bf88c45`、对应browser目录与render.py、`/tmp/inves-cog-a030-ud57.lock` 的残留；不全局停Chrome或业务。A负责恢复后先证实旧作业清理，再按服务器先脱敏loopback预览+Mac隧道截图完成T6。此轮不再重复线上诊断或启动预览，不将本机SSH断开当作远端退出。
+
+已在本对话直接告知新卡点与所需运维操作；其他已授权部分完成CI和PR同步，未用报告替代能够执行的工作。原A线自动接单持续开启，无新截图授权请求。
