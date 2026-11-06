@@ -71,3 +71,13 @@ def test_partial_coverage_uses_previous_five_median_not_one_bad_day():
 def test_configuration_never_allows_sql_identifier_injection():
     with pytest.raises(ValueError):
         Expectation(dataset="bad", table="flows.observations; DELETE", date_column="date", deadline_et="20:45")
+
+
+def test_null_value_is_partial_even_when_a_row_exists():
+    item=expected(value_column='value')
+    assert evaluate(item,D,[{'key':'VIX','value':None}],[])[0].kind=='partial'
+
+
+def test_nonfinite_current_value_is_suspect_without_needing_previous_value():
+    item=expected(value_column='value')
+    assert evaluate(item,D,[{'key':'VIX','value':float('nan')}],[])[0].kind=='suspect'

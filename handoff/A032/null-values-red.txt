@@ -1,0 +1,14 @@
+.........F                                                               [100%]
+=================================== FAILURES ===================================
+____ test_nonfinite_current_value_is_suspect_without_needing_previous_value ____
+
+    def test_nonfinite_current_value_is_suspect_without_needing_previous_value():
+        item=expected(value_column='value')
+>       assert evaluate(item,D,[{'key':'VIX','value':float('nan')}],[])[0].kind=='suspect'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/dataguard/test_detection.py:83: IndexError
+=========================== short test summary info ============================
+FAILED tests/dataguard/test_detection.py::test_nonfinite_current_value_is_suspect_without_needing_previous_value
+1 failed, 9 passed in 0.39s
