@@ -3,6 +3,7 @@
 import re
 import statistics
 import sys
+import time as _time
 from datetime import date, datetime, time, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
@@ -851,16 +852,19 @@ def _beijing_text(value):
 
 
 def _column_exists(connection, table, column):
-    try:
-        row = _one(
-            connection,
-            "SELECT 1 AS x FROM information_schema.columns"
-            " WHERE table_schema=%s AND table_name=%s AND column_name=%s LIMIT 1",
-            (table.split(".")[0], table.split(".")[1], column),
-        )
-    except Exception:
-        return False
-    return row is not None
+    def probe():
+        try:
+            row = _one(
+                connection,
+                "SELECT 1 AS x FROM information_schema.columns"
+                " WHERE table_schema=%s AND table_name=%s AND column_name=%s LIMIT 1",
+                (table.split(".")[0], table.split(".")[1], column),
+            )
+        except Exception:
+            return False
+        return row is not None
+
+    return _schema_cached(("column", table, column), probe)
 
 
 def _news_events(connection, day, is_today, clock=None):
@@ -2082,32 +2086,47 @@ _MARKET3 = {
 _YIELDS = {"^FVX", "^TNX", "^TYX"}
 
 
-def _close_series(connection, ticker, day, n=22):
+def _series_fetch(connection, tickers, day, n):
+    """Batched fetch backing _close_series: per ticker, the last `n` daily
+    closes <= day plus each ET date's latest intraday `last` in the recent
+    window — one query per source instead of one per ticker."""
+    tickers = list(dict.fromkeys(tickers))
+    out = {t: {"daily": [], "snaps": []} for t in tickers}
+    if not tickers:
+        return out
+    if _table_exists(connection, "ingest.bars_daily"):
+        rows = connection.execute(
+            "SELECT ticker, d, c FROM ("
+            " SELECT ticker, trade_date AS d, close AS c,"
+            " ROW_NUMBER() OVER (PARTITION BY ticker ORDER BY trade_date DESC) rn"
+            " FROM ingest.bars_daily WHERE ticker=ANY(%s) AND trade_date<=%s) x"
+            " WHERE rn <= %s ORDER BY ticker, d",
+            (tickers, day, n),
+        ).fetchall()
+        for r in rows:
+            out[r["ticker"]]["daily"].append((r["d"], r["c"]))
+    if _table_exists(connection, "ingest.intraday_snapshots"):
+        snaps = connection.execute(
+            "SELECT DISTINCT ON (ticker, d) ticker, d, last FROM ("
+            " SELECT ticker, (as_of AT TIME ZONE 'America/New_York')::date AS d, as_of, last"
+            " FROM ingest.intraday_snapshots WHERE ticker=ANY(%s)"
+            " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York'"
+            " AND as_of >= (%s::date - 40)::timestamp AT TIME ZONE 'America/New_York') x"
+            " WHERE last IS NOT NULL ORDER BY ticker, d, as_of DESC",
+            (tickers, day, day),
+        ).fetchall()
+        for r in snaps:
+            out[r["ticker"]]["snaps"].append((r["d"], r["last"]))
+    return out
+
+
+def _close_series(connection, ticker, day, n=22, shared=None):
     """Daily closes up to `day`: bars_daily when the ticker has bars (plus a
     same-day snapshot while the day's bar is not written yet), otherwise the
     last intraday snapshot of each ET date."""
-    rows = (
-        connection.execute(
-            "SELECT trade_date AS d, close AS c FROM ingest.bars_daily "
-            "WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT %s",
-            (ticker, day, n),
-        ).fetchall()
-        if _table_exists(connection, "ingest.bars_daily")
-        else []
-    )
-    series = [(r["d"], float(r["c"])) for r in reversed(rows) if r["c"] is not None]
-    if not _table_exists(connection, "ingest.intraday_snapshots"):
-        return series[-n:]
-    snaps = connection.execute(
-        "SELECT DISTINCT ON (d) d, last FROM ("
-        " SELECT (as_of AT TIME ZONE 'America/New_York')::date AS d, as_of, last"
-        " FROM ingest.intraday_snapshots WHERE ticker=%s"
-        " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York'"
-        " AND as_of >= (%s::date - 40)::timestamp AT TIME ZONE 'America/New_York') x"
-        " WHERE last IS NOT NULL ORDER BY d DESC, as_of DESC",
-        (ticker, day, day),
-    ).fetchall()
-    snap_series = [(r["d"], float(r["last"])) for r in reversed(snaps)]
+    data = (shared or _series_fetch(connection, [ticker], day, n)).get(ticker, {"daily": [], "snaps": []})
+    series = [(d, float(c)) for d, c in data["daily"] if c is not None]
+    snap_series = [(d, float(v)) for d, v in data["snaps"]]
     if series:
         if series[-1][0] < day and snap_series and snap_series[-1][0] == day:
             series.append(snap_series[-1])
@@ -2115,10 +2134,10 @@ def _close_series(connection, ticker, day, n=22):
     return snap_series[-n:]
 
 
-def _quote(connection, ticker, day):
+def _quote(connection, ticker, day, shared=None):
     """Latest value for `day`, change vs the previous session, and the size of
     that change relative to the prior 20 sessions (σ multiple)."""
-    series = _close_series(connection, ticker, day)
+    series = _close_series(connection, ticker, day, shared=shared)
     if len(series) < 2:
         return None
     (d1, last), (_, prev) = series[-1], series[-2]
@@ -2161,8 +2180,9 @@ def _safe_call(fn, fallback):
 
 def _tape_rows(connection, day):
     out = []
+    shared = _series_fetch(connection, [t for t, _ in _TAPE], day, 22)
     for ticker, name in _TAPE:
-        q = _quote(connection, ticker, day)
+        q = _quote(connection, ticker, day, shared=shared)
         if q is not None:
             out.append({"sym": ticker, "name": name, **q})
     return out
@@ -2171,7 +2191,8 @@ def _tape_rows(connection, day):
 def _market_state(connection, day, payload, live):
     """§2: band by SPY/QQQ day return vs own prior-20-session σ; direction from
     sign, breadth and the SPY/QQQ gap; cause only from linked market/basket anomalies."""
-    quotes = {t: _quote(connection, t, day) for t in ("SPY", "QQQ")}
+    shared = _series_fetch(connection, ("SPY", "QQQ"), day, 22)
+    quotes = {t: _quote(connection, t, day, shared=shared) for t in ("SPY", "QQQ")}
     spy, qqq = quotes["SPY"] or {}, quotes["QQQ"] or {}
     mults = [q["mult"] for q in (spy, qqq) if q.get("sig")]
     max_mult = max(mults) if mults else 0
@@ -2318,10 +2339,12 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
     index_quotes/index_closes: payload fallbacks so fixture/no-snapshot days
     still show index rows and chartable daily closes."""
     groups = {}
+    all_tickers = [t for rows in _MARKET3.values() for t, _ in rows]
+    shared = _series_fetch(connection, all_tickers, day, 22)
     for tab, rows in _MARKET3.items():
         items = []
         for t, name in rows:
-            q = _quote(connection, t, day)
+            q = _quote(connection, t, day, shared=shared)
             if q is not None:
                 items.append({"sym": t, "name": name, **q})
         if tab == "美股指数":
@@ -2348,15 +2371,31 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
         if items:
             groups[tab] = items
     daily, intraday = {}, {}
-    for t in [t for rows in _MARKET3.values() for t, _ in rows]:
-        rows = (
-            connection.execute(
-                "SELECT * FROM ingest.bars_daily WHERE ticker=%s AND trade_date<=%s ORDER BY trade_date DESC LIMIT 260",
-                (t, day),
-            ).fetchall()
-            if _table_exists(connection, "ingest.bars_daily")
-            else []
-        )
+    bar_rows = (
+        connection.execute(
+            "SELECT * FROM ("
+            " SELECT *, ROW_NUMBER() OVER (PARTITION BY ticker ORDER BY trade_date DESC) rn"
+            " FROM ingest.bars_daily WHERE ticker=ANY(%s) AND trade_date<=%s) x"
+            " WHERE rn <= 260 ORDER BY ticker, trade_date DESC",
+            (all_tickers, day),
+        ).fetchall()
+        if _table_exists(connection, "ingest.bars_daily")
+        else []
+    )
+    bars_by_ticker = {}
+    for r in bar_rows:
+        bars_by_ticker.setdefault(r["ticker"], []).append(r)
+    snap_by_ticker = {}
+    if _table_exists(connection, "ingest.intraday_snapshots"):
+        for r in connection.execute(
+            "SELECT ticker, as_of, last FROM ingest.intraday_snapshots WHERE ticker=ANY(%s)"
+            " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
+            " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY ticker, as_of",
+            (all_tickers, day, day),
+        ).fetchall():
+            snap_by_ticker.setdefault(r["ticker"], []).append(r)
+    for t in all_tickers:
+        rows = bars_by_ticker.get(t, [])
         if rows:
             daily[t] = [
                 {
@@ -2374,16 +2413,7 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             daily[t] = [
                 {"d": str(d), "o": v, "h": v, "l": v, "c": v, "v": 0} for d, v in _close_series(connection, t, day, 260)
             ]
-        srows = (
-            connection.execute(
-                "SELECT as_of, last FROM ingest.intraday_snapshots WHERE ticker=%s"
-                " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
-                " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY as_of",
-                (t, day, day),
-            ).fetchall()
-            if _table_exists(connection, "ingest.intraday_snapshots")
-            else []
-        )
+        srows = snap_by_ticker.get(t, [])
         if len(srows) > 1:
             intraday[t] = [{"t": r["as_of"].isoformat(), "p": float(r["last"])} for r in srows if r["last"] is not None]
     return {"groups": groups, "daily": daily, "intraday": intraday}
@@ -2795,9 +2825,27 @@ def _technicals(bars, day):
     return found
 
 
+_SCHEMA_CACHE = {}
+_SCHEMA_HIT_TTL = 600.0
+_SCHEMA_MISS_TTL = 60.0
+
+
+def _schema_cached(key, probe):
+    hit = _SCHEMA_CACHE.get(key)
+    now = _time.monotonic()
+    if hit is not None and hit[0] > now:
+        return hit[1]
+    found = probe()
+    _SCHEMA_CACHE[key] = (now + (_SCHEMA_HIT_TTL if found else _SCHEMA_MISS_TTL), found)
+    return found
+
+
 def _table_exists(connection, name):
-    row = _one(connection, "SELECT to_regclass(%s) AS t", (name,))
-    return row is not None and row["t"] is not None
+    def probe():
+        row = _one(connection, "SELECT to_regclass(%s) AS t", (name,))
+        return row is not None and row["t"] is not None
+
+    return _schema_cached(("table", name), probe)
 
 
 def _earnings_calendar(connection, day):

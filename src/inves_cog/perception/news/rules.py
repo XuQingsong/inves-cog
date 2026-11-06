@@ -67,6 +67,9 @@ MACRO_RULES = [
 ]
 HOT_TAGS = {"财报", "指引", "并购", "公司行动"}
 
+_TAG_COMPILED = [(name, re.compile(pat, re.I)) for name, pat in TAG_RULES]
+_MACRO_COMPILED = [(name, re.compile(pat, re.I)) for name, pat in MACRO_RULES]
+
 ECON_KEY = re.compile(
     r"FOMC|Fed Interest Rate|Fed Chair|Powell|CPI|PCE|Nonfarm|Unemployment Rate|\bGDP\b(?!Now)|ISM|"
     r"Retail Sales|Initial Jobless|Consumer Confidence|Michigan|JOLTS|PPI",
@@ -92,14 +95,14 @@ def classify(headline, symbols, universe, holdings):
     primary = [t for t in tickers if t in universe]
     if len(tickers) > 5:
         primary = [t for t in primary if re.search(rf"\b{re.escape(t)}\b", headline)]
-    tags = [name for name, pat in TAG_RULES if re.search(pat, headline, re.I)]
+    tags = [name for name, pat in _TAG_COMPILED if pat.search(headline)]
     # Known limitation: earnings keywords belonging to a different company in the
     # headline are suppressed for the hard-coded SpaceX/Tesla pair.
     if "SpaceX" in headline and set(primary) == {"TSLA"}:
         tags = [t for t in tags if t not in ("财报", "财报前瞻")]
     if "并购" in tags and "产品合作" in tags:
         tags.remove("产品合作")
-    macro = next((name for name, pat in MACRO_RULES if re.search(pat, headline, re.I)), None)
+    macro = next((name for name, pat in _MACRO_COMPILED if pat.search(headline)), None)
     score = 0
     held_hit = any(t in holdings for t in primary)
     if held_hit:
