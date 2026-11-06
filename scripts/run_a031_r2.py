@@ -94,8 +94,14 @@ def main():
                 dict(metrics=result["metrics"], sales=sale_audit(result["trades"], pre["prices"])),
             )
             save(args.output / "progress.json", {"phase": name, "elapsed": time.monotonic() - started})
-        save(args.output / "signals.json", signal_level_eval(db, spec, VARIANTS, prepared=pre))
-        save(args.output / "rolling.json", rolling_start_eval(db, spec, VARIANTS, prepared=pre, workers=4))
+        if not (args.output / "signals.json").exists():
+            save(args.output / "signals.json", signal_level_eval(db, spec, VARIANTS, prepared=pre))
+        save(
+            args.output / "rolling.json",
+            rolling_start_eval(
+                db, spec, VARIANTS, prepared=pre, workers=4, checkpoint_dir=args.output / "rolling-checkpoints"
+            ),
+        )
     save(
         args.output / "progress.json",
         {"phase": "complete", "elapsed": time.monotonic() - started, "database": "inves_cog_bt", "workers": 4},
