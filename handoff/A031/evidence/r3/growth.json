@@ -1,0 +1,1741 @@
+{
+  "method": "same-day whole-pool p60, min(original threshold, p60), missing never imputed",
+  "metrics": {
+    "return_pct": 123.26609498776241,
+    "annualized_pct": 9.529403538823345,
+    "max_drawdown_pct": -27.506664973696083,
+    "return_over_maxdd": 4.481317350018209,
+    "trades": 494,
+    "buys": 268,
+    "sells": 226,
+    "turnover_x": 27.747631330708316,
+    "turnover_annual_x": 3.1445306681790917,
+    "avg_invested_pct": 69.75013854941183,
+    "win_rate": 0.5176991150442478,
+    "avg_holding_days": 330.6818181818182,
+    "exposure_pct": 99.95495495495496,
+    "yearly": {
+      "2018": {
+        "return_pct": 0.2585478221399873,
+        "maxdd_pct": -19.977162823709126
+      },
+      "2019": {
+        "return_pct": 25.8382692076478,
+        "maxdd_pct": -5.938210175645864
+      },
+      "2020": {
+        "return_pct": 16.402316441861544,
+        "maxdd_pct": -27.506664973696083
+      },
+      "2021": {
+        "return_pct": 18.09302415493239,
+        "maxdd_pct": -8.925826027541707
+      },
+      "2022": {
+        "return_pct": -16.19759472675795,
+        "maxdd_pct": -19.916419111305693
+      },
+      "2023": {
+        "return_pct": 7.627410223649433,
+        "maxdd_pct": -3.23052738745927
+      },
+      "2024": {
+        "return_pct": 18.521342609624725,
+        "maxdd_pct": -9.867081132467204
+      },
+      "2025": {
+        "return_pct": 14.794131780525843,
+        "maxdd_pct": -19.72940038284847
+      },
+      "2026": {
+        "return_pct": 4.702203278578887,
+        "maxdd_pct": -9.004944828354455
+      }
+    },
+    "benchmarks": {
+      "SPY": 181.17721471890468,
+      "QQQ": 335.66786548047196
+    },
+    "trade_hash": "efb662751069d75094b70fd337d9d372ce7efc937852b5ffb69549ac3a42c5c3",
+    "survivorship_bias": true,
+    "flags_counts": {}
+  },
+  "extra": [
+    {
+      "ticker": "PANW",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2024-03-07",
+      "trade_date": "2024-03-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.48,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "4a754c4adc9c6f1ba833caaa75b749ed50a2e8ec24e77113f02851a18ee04c74",
+      "kind": "open",
+      "qty": 447,
+      "cost": 63.96123000000001,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 447,
+      "side": "buy",
+      "fill_price": 143.09,
+      "notional": 63961.23,
+      "status": "filled",
+      "forward_pct": {
+        "20": -4.1,
+        "60": 3.5,
+        "120": 27.8
+      }
+    },
+    {
+      "ticker": "CRWD",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2024-03-07",
+      "trade_date": "2024-03-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.48,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "571d840f8c8bf7807586516402a4eb4e90424ebe3087e7f91edf67ffc8fccb18",
+      "kind": "open",
+      "qty": 773,
+      "cost": 63.96575,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 773,
+      "side": "buy",
+      "fill_price": 82.75,
+      "notional": 63965.75,
+      "status": "filled",
+      "forward_pct": {
+        "20": -2.8,
+        "60": -5.3,
+        "120": -15.9
+      }
+    },
+    {
+      "ticker": "ZS",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2024-03-07",
+      "trade_date": "2024-03-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.48,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "0204c3f75fec6d00b8c3ba4c987a70e29288ee17e2b65e8a0480be01b03f74cd",
+      "kind": "open",
+      "qty": 318,
+      "cost": 63.96252,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 318,
+      "side": "buy",
+      "fill_price": 201.14,
+      "notional": 63962.52,
+      "status": "filled",
+      "forward_pct": {
+        "20": -7.5,
+        "60": -14.9,
+        "120": -0.7
+      }
+    },
+    {
+      "ticker": "NFLX",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2024-03-07",
+      "trade_date": "2024-03-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.5800000000000001,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "3e0268e198680e9e2c2c13927621f3ff14fb1b93b60ab2c711eacd6f7659a153",
+      "kind": "open",
+      "qty": 1907,
+      "cost": 115.99708899999999,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 1907,
+      "side": "buy",
+      "fill_price": 60.827,
+      "notional": 115997.08899999999,
+      "status": "filled",
+      "forward_pct": {
+        "20": 3.9,
+        "60": 4.4,
+        "120": 14.5
+      }
+    },
+    {
+      "ticker": "JPM",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2024-03-07",
+      "trade_date": "2024-03-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.32,
+      "certainty": "low",
+      "half": false,
+      "order_id": "8a47e1334fc59fbb6090702f03b98efb62be4357ddd88f7b4008722a4f383746",
+      "kind": "open",
+      "qty": 339,
+      "cost": 63.881159999999994,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 339,
+      "side": "buy",
+      "fill_price": 188.44,
+      "notional": 63881.159999999996,
+      "status": "filled",
+      "forward_pct": {
+        "20": 5.5,
+        "60": 5.8,
+        "120": 18.1
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2024-03-08",
+      "trade_date": "2024-03-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 26529.384123729997,
+      "order_id": "e8850532f328cf1c331c8cecf194d818556a2529b75a13a05c614c27066bf073",
+      "kind": "swing_buy",
+      "qty": 190,
+      "cost": 26.4385,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 190,
+      "side": "buy",
+      "fill_price": 139.15,
+      "notional": 26438.5,
+      "status": "filled",
+      "forward_pct": {
+        "20": -1.5,
+        "60": 4.3,
+        "120": 28.0
+      }
+    },
+    {
+      "ticker": "ZS",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2024-03-08",
+      "trade_date": "2024-03-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 26529.384123729997,
+      "order_id": "9da05f186f279f14204b53c8e13ae83d3d9bad3a213a674851655bd630056566",
+      "kind": "swing_buy",
+      "qty": 134,
+      "cost": 26.3578,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 134,
+      "side": "buy",
+      "fill_price": 196.7,
+      "notional": 26357.8,
+      "status": "filled",
+      "forward_pct": {
+        "20": -6.1,
+        "60": -13.0,
+        "120": -0.4
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2024-03-15",
+      "trade_date": "2024-03-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.78,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "7e687a1ca9dfbc821370c52cca68c058c33a38a88fc7a0acfe92ec4a23aa0d1b",
+      "kind": "add",
+      "qty": 91,
+      "cost": 12.984335000000002,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 91,
+      "side": "buy",
+      "fill_price": 142.685,
+      "notional": 12984.335000000001,
+      "status": "filled",
+      "forward_pct": {
+        "20": -3.6,
+        "60": 12.1,
+        "120": 20.6
+      }
+    },
+    {
+      "ticker": "CRWD",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2024-03-15",
+      "trade_date": "2024-03-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.78,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "d6e19d06c6bc260bfa0d564cd3935191fb35f69d532de0b56445708275b8f692",
+      "kind": "add",
+      "qty": 529,
+      "cost": 42.1917175,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 529,
+      "side": "buy",
+      "fill_price": 79.7575,
+      "notional": 42191.7175,
+      "status": "filled",
+      "forward_pct": {
+        "20": -6.8,
+        "60": 20.7,
+        "120": -23.2
+      }
+    },
+    {
+      "ticker": "ZS",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2024-03-15",
+      "trade_date": "2024-03-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.78,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "f551c89a8f136aadc3ee7c0ea56d5df79b49ee6b8b7519ce067ede747910d277",
+      "kind": "add",
+      "qty": 83,
+      "cost": 16.102,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 83,
+      "side": "buy",
+      "fill_price": 194.0,
+      "notional": 16102.0,
+      "status": "filled",
+      "forward_pct": {
+        "20": -11.0,
+        "60": -3.6,
+        "120": -18.8
+      }
+    },
+    {
+      "ticker": "JPM",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2024-03-15",
+      "trade_date": "2024-03-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.62,
+      "certainty": "low",
+      "half": false,
+      "order_id": "0070f11ba8d9fa5ddec333384e5dbf966cb34ce920145350f4f657380ab95bec",
+      "kind": "add",
+      "qty": 310,
+      "cost": 59.095299999999995,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 310,
+      "side": "buy",
+      "fill_price": 190.63,
+      "notional": 59095.299999999996,
+      "status": "filled",
+      "forward_pct": {
+        "20": -6.2,
+        "60": -0.6,
+        "120": 12.5
+      }
+    },
+    {
+      "ticker": "NFLX",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2024-03-18",
+      "trade_date": "2024-03-19",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "7be7c312a777f5d90deabc2ca7f7f22b0b9a7821d951dc078563f84087b63c09",
+      "kind": "add",
+      "qty": 853,
+      "cost": 52.51238600000001,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 853,
+      "side": "buy",
+      "fill_price": 61.562000000000005,
+      "notional": 52512.386000000006,
+      "status": "filled",
+      "forward_pct": {
+        "20": -1.1,
+        "60": 5.2,
+        "120": 8.5
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2024-03-19",
+      "trade_date": "2024-03-20",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 67078.450395785,
+      "watch_cap": 0.08,
+      "order_id": "8332fe98b98e50c8b70acdba2ee68925d12a7a091b4714e3fe20bd89d887cdef",
+      "kind": "swing_buy",
+      "qty": 381,
+      "cost": 66.94932,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 381,
+      "side": "buy",
+      "fill_price": 175.72,
+      "notional": 66949.31999999999,
+      "status": "filled",
+      "forward_pct": {
+        "20": -6.5,
+        "60": 18.9,
+        "120": 24.6
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2024-03-25",
+      "trade_date": "2024-03-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 26876.545769194,
+      "order_id": "08e49ca85d533c272982fec9e27ae8ba59e312da1e41d3d3c27c5ba388665c21",
+      "kind": "swing_buy",
+      "qty": 188,
+      "cost": 26.8699,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 188,
+      "side": "buy",
+      "fill_price": 142.925,
+      "notional": 26869.9,
+      "status": "filled",
+      "forward_pct": {
+        "20": 2.5,
+        "60": 11.7,
+        "120": 17.9
+      }
+    },
+    {
+      "ticker": "ZS",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2024-03-25",
+      "trade_date": "2024-03-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 26876.545769194,
+      "order_id": "f52de7aa8ab4b9871b6f4d1a498e5d9e93681a4d9674932ffae86c9f68c0ab86",
+      "kind": "swing_buy",
+      "qty": 137,
+      "cost": 26.830080000000002,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 137,
+      "side": "buy",
+      "fill_price": 195.84,
+      "notional": 26830.08,
+      "status": "filled",
+      "forward_pct": {
+        "20": -9.3,
+        "60": -8.2,
+        "120": -12.9
+      }
+    },
+    {
+      "ticker": "CRWD",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2024-04-01",
+      "trade_date": "2024-04-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 1.0,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "f91d5f66b221f1a128dce6a0dba44b102796cfc7934ac30028eddc1a0ac6f05d",
+      "kind": "add",
+      "qty": 342,
+      "cost": 26.75466,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 342,
+      "side": "buy",
+      "fill_price": 78.23,
+      "notional": 26754.66,
+      "status": "filled",
+      "forward_pct": {
+        "20": -8.5,
+        "60": 21.2,
+        "120": -8.3
+      }
+    },
+    {
+      "ticker": "JPM",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2024-04-01",
+      "trade_date": "2024-04-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 1.0,
+      "certainty": "low",
+      "half": false,
+      "order_id": "a5b121912cc8d518d94dfb5a9b40c187bd5cc21fdb9663c21c519244aa31c9cb",
+      "kind": "add",
+      "qty": 323,
+      "cost": 64.07996999999999,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 323,
+      "side": "buy",
+      "fill_price": 198.39,
+      "notional": 64079.969999999994,
+      "status": "filled",
+      "forward_pct": {
+        "20": -3.6,
+        "60": 0.2,
+        "120": 6.3
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2024-04-05",
+      "trade_date": "2024-04-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 1.0,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "f8e84a4250549726c63676e8250fa3ae5368a20c3f47cfb4778ae3f6b64cd81f",
+      "kind": "add",
+      "qty": 61,
+      "cost": 8.174305,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 61,
+      "side": "buy",
+      "fill_price": 134.005,
+      "notional": 8174.304999999999,
+      "status": "filled",
+      "forward_pct": {
+        "20": 11.9,
+        "60": 27.0,
+        "120": 25.0
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2024-04-29",
+      "trade_date": "2024-04-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 62984.239233569984,
+      "order_id": "0252764faf810b46c697184443477549230c6b43a249c64d33eff4dd16e18809",
+      "kind": "swing_buy",
+      "qty": 363,
+      "cost": 62.91879000000001,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 363,
+      "side": "buy",
+      "fill_price": 173.33,
+      "notional": 62918.79000000001,
+      "status": "filled",
+      "forward_pct": {
+        "20": 11.7,
+        "60": 28.0,
+        "120": 38.8
+      }
+    },
+    {
+      "ticker": "FTNT",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2024-06-06",
+      "trade_date": "2024-06-07",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 66991.165500385,
+      "watch_cap": 0.08,
+      "order_id": "2540f6b63d4f9a00377df3d68da32584b4f36f6ffb1676e847048c122e14ca94",
+      "kind": "swing_buy",
+      "qty": 1128,
+      "cost": 66.98064,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 1128,
+      "side": "buy",
+      "fill_price": 59.38,
+      "notional": 66980.64,
+      "status": "filled",
+      "forward_pct": {
+        "20": 0.9,
+        "60": 28.7,
+        "120": 57.5
+      }
+    },
+    {
+      "ticker": "FTNT",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2024-07-29",
+      "trade_date": "2024-07-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 40498.63965587099,
+      "order_id": "894f07a9bf343c274545c064539c7a526a6f22bb8f85ce9088658f4a6879aa4d",
+      "kind": "swing_buy",
+      "qty": 704,
+      "cost": 40.47296,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 704,
+      "side": "buy",
+      "fill_price": 57.49,
+      "notional": 40472.96,
+      "status": "filled",
+      "forward_pct": {
+        "20": 32.1,
+        "60": 39.8,
+        "120": 70.9
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2024-08-05",
+      "trade_date": "2024-08-06",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 38203.17676547099,
+      "order_id": "840f5448c4406302ba3d83c7c6d9d26511a236166f1d00e0333cfb1a6dba48a2",
+      "kind": "swing_buy",
+      "qty": 254,
+      "cost": 38.11524,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 254,
+      "side": "buy",
+      "fill_price": 150.06,
+      "notional": 38115.24,
+      "status": "filled",
+      "forward_pct": {
+        "20": 14.6,
+        "60": 19.1,
+        "120": 22.8
+      }
+    },
+    {
+      "ticker": "QCOM",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2024-08-08",
+      "trade_date": "2024-08-09",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 66965.970811465,
+      "watch_cap": 0.08,
+      "order_id": "5b7e8869b14ad9cc77d46253e74aeae3b2e0442229afe7b4603afd333568ff00",
+      "kind": "swing_buy",
+      "qty": 408,
+      "cost": 66.94056,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 408,
+      "side": "buy",
+      "fill_price": 164.07,
+      "notional": 66940.56,
+      "status": "filled",
+      "forward_pct": {
+        "20": -2.3,
+        "60": 0.4,
+        "120": 3.5
+      }
+    },
+    {
+      "ticker": "AMAT",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2024-08-09",
+      "trade_date": "2024-08-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 67592.545389065,
+      "watch_cap": 0.08,
+      "order_id": "14064e274b216539438f085c63dd29e80b68cbae2a63676b227b8303cce386f6",
+      "kind": "swing_buy",
+      "qty": 352,
+      "cost": 67.408,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 352,
+      "side": "buy",
+      "fill_price": 191.5,
+      "notional": 67408.0,
+      "status": "filled",
+      "forward_pct": {
+        "20": -7.8,
+        "60": -3.4,
+        "120": -7.5
+      }
+    },
+    {
+      "ticker": "LRCX",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2024-08-09",
+      "trade_date": "2024-08-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 67592.545389065,
+      "watch_cap": 0.08,
+      "order_id": "be97348a698943192bf0793ce6798b396218ed380faf2c78c16dcbb5748aaacb",
+      "kind": "swing_buy",
+      "qty": 837,
+      "cost": 67.58272800000002,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 837,
+      "side": "buy",
+      "fill_price": 80.74400000000001,
+      "notional": 67582.72800000002,
+      "status": "filled",
+      "forward_pct": {
+        "20": -9.8,
+        "60": -5.8,
+        "120": -1.5
+      }
+    },
+    {
+      "ticker": "QCOM",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2024-09-26",
+      "trade_date": "2024-09-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 72904.74461980996,
+      "order_id": "b1befecf66557f9d648a1418dff614640018ab96573b4f7889939bc456884fe9",
+      "kind": "swing_buy",
+      "qty": 421,
+      "cost": 72.833,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 421,
+      "side": "buy",
+      "fill_price": 173.0,
+      "notional": 72833.0,
+      "status": "filled",
+      "forward_pct": {
+        "20": 0.1,
+        "60": -7.0,
+        "120": -5.9
+      }
+    },
+    {
+      "ticker": "QCOM",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2024-11-07",
+      "trade_date": "2024-11-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 1.0,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "e02693a0ce391a057b4ec070ed9ef3cc856d578da69e4ed6d4007f0a534d3680",
+      "kind": "add",
+      "qty": 495,
+      "cost": 85.18455,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 495,
+      "side": "buy",
+      "fill_price": 172.09,
+      "notional": 85184.55,
+      "status": "filled",
+      "forward_pct": {
+        "20": -6.0,
+        "60": -1.7,
+        "120": -18.1
+      }
+    },
+    {
+      "ticker": "KLAC",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2024-11-21",
+      "trade_date": "2024-11-22",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 47772.75388694063,
+      "watch_cap": 0.08,
+      "order_id": "07eb7b738c8ba8197e3304e4becca68826c9637038fe593fb625453e62b02bc9",
+      "kind": "swing_buy",
+      "qty": 758,
+      "cost": 47.754,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 758,
+      "side": "buy",
+      "fill_price": 63.0,
+      "notional": 47754.0,
+      "status": "filled",
+      "forward_pct": {
+        "20": 1.3,
+        "60": 15.3,
+        "120": 23.6
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2025-01-02",
+      "trade_date": "2025-01-03",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 46736.88194169062,
+      "watch_cap": 0.08,
+      "order_id": "d93dd1a53a45eb7b066ce6fbb90ac947ad99978815539fc0ac36e7fa49fd320c",
+      "kind": "swing_buy",
+      "qty": 753,
+      "cost": 46.72365,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 753,
+      "side": "buy",
+      "fill_price": 62.05,
+      "notional": 46723.65,
+      "status": "filled",
+      "forward_pct": {
+        "20": -0.4,
+        "60": -34.8,
+        "120": -0.1
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2025-01-13",
+      "trade_date": "2025-01-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 44802.782242502995,
+      "order_id": "cd6c84a975bfa24153ae63ba9ac26f2d6b31ae4e81fda5be5fddb0954ed718ca",
+      "kind": "swing_buy",
+      "qty": 266,
+      "cost": 44.7678,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 266,
+      "side": "buy",
+      "fill_price": 168.3,
+      "notional": 44767.8,
+      "status": "filled",
+      "forward_pct": {
+        "20": 15.3,
+        "60": -1.4,
+        "120": 20.8
+      }
+    },
+    {
+      "ticker": "VRT",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2025-02-21",
+      "trade_date": "2025-02-24",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 1.0,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "2237876a033f15c01c1ab061ac40e5d6abc5cc8bc8d6bdf4b2367dae36e53dca",
+      "kind": "add",
+      "qty": 631,
+      "cost": 61.207,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 631,
+      "side": "buy",
+      "fill_price": 97.0,
+      "notional": 61207.0,
+      "status": "filled",
+      "forward_pct": {
+        "20": 2.9,
+        "60": 16.9,
+        "120": 46.2
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2025-06-30",
+      "trade_date": "2025-07-01",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 131084.94891300995,
+      "order_id": "44bcba9b6edc9d75d5b48ab52973a69b104ee409e974ac8024a89734ad480063",
+      "kind": "swing_buy",
+      "qty": 634,
+      "cost": 131.02561,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 634,
+      "side": "buy",
+      "fill_price": 206.665,
+      "notional": 131025.61,
+      "status": "filled",
+      "forward_pct": {
+        "20": 0.6,
+        "60": 23.6,
+        "120": 31.7
+      }
+    },
+    {
+      "ticker": "HD",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2025-10-08",
+      "trade_date": "2025-10-09",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "defense",
+      "value": 55071.88375152299,
+      "order_id": "528f543efaec733547e5c88da71a3245a8347ea59dd6bf319355fc9e5770096a",
+      "kind": "swing_buy",
+      "qty": 143,
+      "cost": 54.7547,
+      "planned_tier": "defense",
+      "planned_tier_only_qty": 143,
+      "side": "buy",
+      "fill_price": 382.9,
+      "notional": 54754.7,
+      "status": "filled",
+      "forward_pct": {
+        "20": -2.3,
+        "60": -7.5,
+        "120": -14.8
+      }
+    },
+    {
+      "ticker": "AMZN",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-02-18",
+      "trade_date": "2026-02-19",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 52340.03058519062,
+      "watch_cap": 0.08,
+      "order_id": "9eeb855aa86d0607d778cf5531fb3fbc2c7b2446cb0e3efd4f3e35c5baa6a613",
+      "kind": "swing_buy",
+      "qty": 256,
+      "cost": 52.1728,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 256,
+      "side": "buy",
+      "fill_price": 203.8,
+      "notional": 52172.8,
+      "status": "filled",
+      "forward_pct": {
+        "20": 1.9,
+        "60": 28.9,
+        "120": 30.5
+      }
+    },
+    {
+      "ticker": "AMZN",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-03-09",
+      "trade_date": "2026-03-10",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 51053.968585623,
+      "order_id": "f2eadd52450ea556fb7510c7367f94f17a7026ff258eba1553c8143f6a86d935",
+      "kind": "swing_buy",
+      "qty": 238,
+      "cost": 50.97722,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 238,
+      "side": "buy",
+      "fill_price": 214.19,
+      "notional": 50977.22,
+      "status": "filled",
+      "forward_pct": {
+        "20": 3.2,
+        "60": 18.4,
+        "120": 21.2
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-05-07",
+      "trade_date": "2026-05-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.6,
+      "certainty": "high",
+      "half": true,
+      "order_id": "21533870dd793ea7e0578df2e0e505a964da5bc752eef1962b8f1b0d18c34a0b",
+      "kind": "open",
+      "qty": 111,
+      "cost": 52.731660000000005,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 111,
+      "side": "buy",
+      "fill_price": 475.06,
+      "notional": 52731.66,
+      "status": "filled",
+      "forward_pct": {
+        "20": 9.8,
+        "60": 8.2,
+        "120": -17.6
+      }
+    },
+    {
+      "ticker": "ANET",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-05-07",
+      "trade_date": "2026-05-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.6,
+      "certainty": "high",
+      "half": false,
+      "order_id": "a56c3f47ef6a632c02247563e80d22a08a36e726dfd61039cbcd078168e39bbf",
+      "kind": "open",
+      "qty": 740,
+      "cost": 105.561,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 740,
+      "side": "buy",
+      "fill_price": 142.65,
+      "notional": 105561.0,
+      "status": "filled",
+      "forward_pct": {
+        "20": 10.3,
+        "60": 39.2,
+        "120": 29.9
+      }
+    },
+    {
+      "ticker": "LRCX",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-05-11",
+      "trade_date": "2026-05-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.48,
+      "certainty": "medium",
+      "half": true,
+      "order_id": "ac74cfcf7cd9b71bb572349e25b1a3bd6ea6c1c20c9461df8a48d510ab50de07",
+      "kind": "open",
+      "qty": 147,
+      "cost": 42.220605,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 147,
+      "side": "buy",
+      "fill_price": 287.215,
+      "notional": 42220.604999999996,
+      "status": "filled",
+      "forward_pct": {
+        "20": 11.3,
+        "60": 7.6,
+        "120": null
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-05-13",
+      "trade_date": "2026-05-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "fdbf9e1a9335997fd88cec199eda6c348c4fdc199398bc6ab9fe8979d140ae71",
+      "kind": "add",
+      "qty": 99,
+      "cost": 47.990745000000004,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 99,
+      "side": "buy",
+      "fill_price": 484.755,
+      "notional": 47990.745,
+      "status": "filled",
+      "forward_pct": {
+        "20": 15.1,
+        "60": -10.5,
+        "120": null
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-05-14",
+      "trade_date": "2026-05-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "65824d6f0190b8b50290d03ac7270c0196dffc3623793126527dd1388e965376",
+      "kind": "add",
+      "qty": 55,
+      "cost": 25.89125,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 55,
+      "side": "buy",
+      "fill_price": 470.75,
+      "notional": 25891.25,
+      "status": "filled",
+      "forward_pct": {
+        "20": 35.6,
+        "60": -5.8,
+        "120": null
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-05-15",
+      "trade_date": "2026-05-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "24f8ed076e0e62989615625868a70a424097639a336752a0d1115c88fc996e94",
+      "kind": "add",
+      "qty": 23,
+      "cost": 11.162705,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 23,
+      "side": "buy",
+      "fill_price": 485.335,
+      "notional": 11162.705,
+      "status": "filled",
+      "forward_pct": {
+        "20": 48.5,
+        "60": 6.2,
+        "120": null
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-05-18",
+      "trade_date": "2026-05-19",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": true,
+      "order_id": "d9b4bd55480a162628ed56b83be3a413f92de76edb8b89ebe1be1f9baa475212",
+      "kind": "add",
+      "qty": 27,
+      "cost": 11.9259,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 27,
+      "side": "buy",
+      "fill_price": 441.7,
+      "notional": 11925.9,
+      "status": "filled",
+      "forward_pct": {
+        "20": 56.2,
+        "60": 11.6,
+        "120": null
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.85,
+      "certainty": "high",
+      "half": false,
+      "order_id": "3f487530a53e1c6f02606f192d267745f92472b942e4fad805578854b7ea95dc",
+      "kind": "add",
+      "qty": 28,
+      "cost": 12.631639999999999,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 28,
+      "side": "buy",
+      "fill_price": 451.13,
+      "notional": 12631.64,
+      "status": "filled",
+      "forward_pct": {
+        "20": 6.6,
+        "60": -18.9,
+        "120": null
+      }
+    },
+    {
+      "ticker": "WDC",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-07-16",
+      "trade_date": "2026-07-17",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "value": 37154.30056964199,
+      "order_id": "a91304958bf6ee7f7c27b4f6272b373e3664e0a936ad0b63b48d9d44a873a7d2",
+      "kind": "swing_buy",
+      "qty": 82,
+      "cost": 36.992659999999994,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 82,
+      "side": "buy",
+      "fill_price": 451.13,
+      "notional": 36992.659999999996,
+      "status": "filled",
+      "forward_pct": {
+        "20": 6.6,
+        "60": -18.9,
+        "120": null
+      }
+    },
+    {
+      "ticker": "AVGO",
+      "action": "buy_watch",
+      "label": "观察波段加仓",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段加仓",
+      "signal_date": "2026-08-04",
+      "trade_date": "2026-08-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 86648.52300980997,
+      "order_id": "710bdc714163a26fc395c8114d83e657dfa46c766cba36441ac8591d3d3a1095",
+      "kind": "swing_buy",
+      "qty": 205,
+      "cost": 86.4485,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 205,
+      "side": "buy",
+      "fill_price": 421.7,
+      "notional": 86448.5,
+      "status": "filled",
+      "forward_pct": {
+        "20": -12.2,
+        "60": -17.5,
+        "120": null
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-08-31",
+      "trade_date": "2026-09-01",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": true,
+      "order_id": "d8296b45ed4eb2ced1f53840a88558003bd206f883f308df809766717bdc1879",
+      "kind": "add",
+      "qty": 24,
+      "cost": 11.940479999999999,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 24,
+      "side": "buy",
+      "fill_price": 497.52,
+      "notional": 11940.48,
+      "status": "filled",
+      "forward_pct": {
+        "20": 2.4,
+        "60": null,
+        "120": null
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "action": "buy_to",
+      "label": "确认加仓",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认加仓",
+      "signal_date": "2026-09-04",
+      "trade_date": "2026-09-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 0.85,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "6b9824d4fe528f02f345dca24658c80a835a92b4a6c8e60bcdca0252aef2cd3b",
+      "kind": "add",
+      "qty": 33,
+      "cost": 16.26933,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 33,
+      "side": "buy",
+      "fill_price": 493.01,
+      "notional": 16269.33,
+      "status": "filled",
+      "forward_pct": {
+        "20": 7.2,
+        "60": null,
+        "120": null
+      }
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "buy_swing",
+      "label": "波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 波段买入",
+      "signal_date": "2026-09-09",
+      "trade_date": "2026-09-10",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 56746.02483378298,
+      "order_id": "01a1d6e423e32cd4bc9c7c659dc6cc3de6dd0d5d12349e8af7e3a3878a8ae4a0",
+      "kind": "swing_buy",
+      "qty": 172,
+      "cost": 56.4547,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 172,
+      "side": "buy",
+      "fill_price": 328.225,
+      "notional": 56454.700000000004,
+      "status": "filled",
+      "forward_pct": {
+        "20": 4.7,
+        "60": null,
+        "120": null
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "buy_watch",
+      "label": "观察波段买入",
+      "rule_ids": [
+        "M-60"
+      ],
+      "reason_zh": "M-60 观察波段买入",
+      "signal_date": "2026-09-10",
+      "trade_date": "2026-09-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "value": 93484.364668305,
+      "watch_cap": 0.08,
+      "order_id": "876be9dfe72274cbd92a1920c7aab8381da6469d13a085965f81e9a310449aff",
+      "kind": "swing_buy",
+      "qty": 114,
+      "cost": 93.2235,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 114,
+      "side": "buy",
+      "fill_price": 817.75,
+      "notional": 93223.5,
+      "status": "filled",
+      "forward_pct": {
+        "20": -2.2,
+        "60": null,
+        "120": null
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "buy_to",
+      "label": "确认补满",
+      "rule_ids": [
+        "M-40"
+      ],
+      "reason_zh": "M-40 确认补满",
+      "signal_date": "2026-10-02",
+      "trade_date": "2026-10-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "normal",
+      "fraction": 1.0,
+      "certainty": "medium",
+      "half": false,
+      "order_id": "2ad3044780b7b7f5461e49e08e88fcd503b9527a57184df4fa0659459dd0e90b",
+      "kind": "add",
+      "qty": 232,
+      "cost": 195.61544,
+      "planned_tier": "normal",
+      "planned_tier_only_qty": 232,
+      "side": "buy",
+      "fill_price": 843.17,
+      "notional": 195615.44,
+      "status": "filled",
+      "forward_pct": {
+        "20": null,
+        "60": null,
+        "120": null
+      }
+    }
+  ],
+  "extra_summary": {
+    "buys": 50,
+    "tickers": [
+      "AAPL",
+      "AMAT",
+      "AMZN",
+      "ANET",
+      "AVGO",
+      "CAT",
+      "CRWD",
+      "FTNT",
+      "GOOGL",
+      "HD",
+      "JPM",
+      "KLAC",
+      "LRCX",
+      "MSFT",
+      "NFLX",
+      "PANW",
+      "QCOM",
+      "VRT",
+      "WDC",
+      "ZS"
+    ],
+    "20": {
+      "n": 49,
+      "median_pct": 0.9,
+      "win_pct": 55.10204081632653
+    },
+    "60": {
+      "n": 45,
+      "median_pct": 4.4,
+      "win_pct": 60.0
+    },
+    "120": {
+      "n": 37,
+      "median_pct": 14.5,
+      "win_pct": 62.16216216216216
+    }
+  },
+  "baseline_summary": {
+    "buys": 112,
+    "tickers": [
+      "AAPL",
+      "ADBE",
+      "AMAT",
+      "AMD",
+      "AMZN",
+      "ANET",
+      "AVGO",
+      "CAT",
+      "CRWD",
+      "DELL",
+      "FTNT",
+      "GOOGL",
+      "HD",
+      "JNJ",
+      "KLAC",
+      "LLY",
+      "LRCX",
+      "META",
+      "MSFT",
+      "MU",
+      "NFLX",
+      "NOW",
+      "NVDA",
+      "ORCL",
+      "PANW",
+      "QCOM",
+      "UNH",
+      "VRT",
+      "WDC",
+      "WMT",
+      "ZS"
+    ],
+    "20": {
+      "n": 106,
+      "median_pct": 1.6,
+      "win_pct": 54.716981132075475
+    },
+    "60": {
+      "n": 100,
+      "median_pct": 10.25,
+      "win_pct": 70.0
+    },
+    "120": {
+      "n": 87,
+      "median_pct": 14.1,
+      "win_pct": 71.26436781609195
+    }
+  }
+}

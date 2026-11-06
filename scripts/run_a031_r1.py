@@ -18,8 +18,9 @@ from inves_cog.backtest.risk_study import PriceSeries, horizon_metrics, monthly_
 # Explicit, reviewable bank/insurer classification. Payment networks and asset managers remain included.
 BANK_INSURANCE = set(
     (
-        "ACGL ADS AFL AIG AIZ ALL AXP BAC BNY C CB CFG CI CINF CMA CNC COF EG ERIE ETFC FITB GL GS HBAN HIG HUM "
-        "JPM KEY L MET MOH MS MTB NTRS PBCT PFG PGR PNC PRU RF SCHW SIVB STT SYF TFC TRV "
+        "ACGL ADS AET AFL AIG AIZ ALL AXP BAC BHF BNY C CB CFG CI CINF CMA CNC COF DFS EG ERIE ETFC FITB FRC "
+        "GL GS HBAN HIG HUM "
+        "JPM KEY L LNC MET MOH MS MTB NTRS PBCT PFG PGR PNC PRU RF SBNY SCHW SIVB STI STT SYF TFC TRV "
         "UNH UNM USB WCG WRB XL ZION ELV"
     ).split()
 )
@@ -34,16 +35,25 @@ def main():
     p.add_argument("--panel", type=Path, required=True)
     p.add_argument("--coverage", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--memberships", type=Path, required=True)
     a = p.parse_args()
     signal.alarm(900)
     started = time.monotonic()
     a.output.mkdir(parents=True, exist_ok=True)
+    from inves_cog.backtest.membership import is_member
+
+    membership_metadata = json.loads(a.memberships.read_text())
+    memberships = membership_metadata["events"]
+    removed_pre_membership = {}
     panel, excluded, raw_counts = {}, set(), {}
     with a.panel.open() as f:
         for row in csv.DictReader(f):
             day = date.fromisoformat(row["date"])
             ticker = row["ticker"]
             raw_counts[day.year] = raw_counts.get(day.year, 0) + 1
+            if is_member(memberships.get(ticker, []), day) is False:
+                removed_pre_membership[ticker] = removed_pre_membership.get(ticker, 0) + 1
+                continue
             if ticker in BANK_INSURANCE:
                 excluded.add(ticker)
                 continue
@@ -112,9 +122,9 @@ def main():
             excluded_bank_insurers=sorted(excluded),
             yearly=yearly,
             known_removed_in_input=len(removed & names),
-            membership_contract=(
-                "supplied panel weekly rows; membership timeline and original joins are not locally present"
-            ),
+            membership_contract="official events filter panel; no-event names retain supplied weekly membership",
+            official_membership=membership_metadata,
+            excluded_outside_membership=removed_pre_membership,
             coverage_limit=(
                 "portfolios cover observable supplied-panel members, not unavailable company prices/fundamentals"
             ),
@@ -130,7 +140,7 @@ def main():
         for month in range(1, 13):
             for variant in ("A", "B", "C"):
                 start = date(2018, month, 1)
-                result = monthly_portfolio(panel, series, spy, start, variant)
+                result = monthly_portfolio(panel, series, spy, start, variant, memberships=memberships)
                 key = f"{start}-{variant}"
                 portfolios[key] = dict(metrics=result["metrics"], rebalances=result["rebalances"])
                 w.writerows(dict(start=start, variant=variant, **row) for row in result["curve"])

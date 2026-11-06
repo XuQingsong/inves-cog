@@ -90,16 +90,28 @@ def curve_metrics(curve):
     )
 
 
-def monthly_portfolio(panel, prices, spy, start, variant):
+def monthly_portfolio(panel, prices, spy, start, variant, memberships=None):
     weeks = sorted(panel)
     days = [d for d in spy.days if d >= start]
     units, curve, month, rebalances = {}, [], None, []
     for day in days:
         equity = sum(q * prices[t].at(day) for t, q in units.items()) if units else 1.0
-        if (day.year, day.month) != month:
+        if (day.year, day.month) != month or not units:
             index = bisect_left(weeks, day) - 1
             if index >= 0:
                 sample = {t: m for t, m in panel[weeks[index]].items() if t in prices and prices[t].at(day) is not None}
+                if memberships:
+                    from .membership import is_member
+
+                    sample = {t: m for t, m in sample.items() if is_member(memberships.get(t, []), day) is not False}
+                    for ticker, events in memberships.items():
+                        if (
+                            ticker in prices
+                            and prices[ticker].at(day) is not None
+                            and any(e["action"] == "added" and e["effective"] <= str(day) for e in events)
+                            and is_member(events, day)
+                        ):
+                            sample.setdefault(ticker, None)
                 allocations = weights(sample, variant)
                 if allocations:
                     units = {t: equity * w / prices[t].at(day) for t, w in allocations.items()}

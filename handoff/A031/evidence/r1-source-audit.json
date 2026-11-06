@@ -1,0 +1,28 @@
+{
+  "status": "official_events_applied_coverage_limits_retained",
+  "reason": "supplied panel includes pre-membership observations; exact entry/exit periods required",
+  "counterexamples": [
+    {
+      "ticker": "ABMD",
+      "panel_first": "2018-01-05",
+      "official_entry": "2018-05-31",
+      "source": "https://press.spglobal.com/2018-05-25-ABIOMED-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    },
+    {
+      "ticker": "SIVB",
+      "panel_first": "2018-01-05",
+      "official_entry": "2018-03-19",
+      "source": "https://www.spglobal.com/spdji/en/documents/indexnews/announcements/20180309-675150/675150_idesshuf18nktr.pdf"
+    }
+  ],
+  "next": "await authorized official-announcement ledger or demand-side verified membership periods; continue R2/R3",
+  "initial_status": "provisional_not_acceptance",
+  "resolution": {
+    "announcements": 121,
+    "official_events": 326,
+    "excluded_weekly_rows": 2988,
+    "affected_tickers": 23,
+    "corrected_output": "r1-corrected/",
+    "remaining": "observable panel lacks some removed issuers; no-event names retain supplied membership; terminal quote is a proxy"
+  }
+}

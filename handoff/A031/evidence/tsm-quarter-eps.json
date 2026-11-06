@@ -1,0 +1,6 @@
+{
+  "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001046179.json",
+  "status": 200,
+  "quarter_eps_rows": [],
+  "remaining_gap": "Quarter EPS currency/listing units require PIT FX before research layer repair; raw TWD EPS is not USD ADR EPS"
+}

@@ -1,0 +1,3891 @@
+{
+  "events": {
+    "IPGP": [
+      {
+        "ticker": "IPGP",
+        "company": "IPG Photonics",
+        "action": "added",
+        "effective": "2018-03-07",
+        "classification": "Electronic Manufacturing Services",
+        "source": "https://press.spglobal.com/2018-03-02-IPG-Photonics-Set-to-Join-S-P-500-ALLETE-and-LendingTree-to-Join-S-P-MidCap-400-New-York-Mortgage-Trust-Global-Net-Lease-and-Finisar-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "IPGP",
+        "company": "IPG Photonics",
+        "action": "deleted",
+        "effective": "2022-06-21",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "SNI": [
+      {
+        "ticker": "SNI",
+        "company": "Scripps Networks Interactive",
+        "action": "deleted",
+        "effective": "2018-03-07",
+        "classification": "Broadcasting",
+        "source": "https://press.spglobal.com/2018-03-02-IPG-Photonics-Set-to-Join-S-P-500-ALLETE-and-LendingTree-to-Join-S-P-MidCap-400-New-York-Mortgage-Trust-Global-Net-Lease-and-Finisar-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TTWO": [
+      {
+        "ticker": "TTWO",
+        "company": "Take-Two Interactive Software",
+        "action": "added",
+        "effective": "2018-03-19",
+        "classification": "Home Entertainment Software",
+        "source": "https://press.spglobal.com/2018-03-09-Take-Two-Interactive-Software-SVB-Financial-and-Nektar-Pharmaceuticals-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "SIVB": [
+      {
+        "ticker": "SIVB",
+        "company": "SVB Financial Group",
+        "action": "added",
+        "effective": "2018-03-19",
+        "classification": "Regional Banks",
+        "source": "https://press.spglobal.com/2018-03-09-Take-Two-Interactive-Software-SVB-Financial-and-Nektar-Pharmaceuticals-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "SIVB",
+        "company": "SVB Financial Group",
+        "action": "deleted",
+        "effective": "2023-03-15",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2023-03-10-Insulet-Set-to-Join-S-P-500"
+      }
+    ],
+    "NKTR": [
+      {
+        "ticker": "NKTR",
+        "company": "Nektar Therapeutics",
+        "action": "added",
+        "effective": "2018-03-19",
+        "classification": "Pharmaceuticals",
+        "source": "https://press.spglobal.com/2018-03-09-Take-Two-Interactive-Software-SVB-Financial-and-Nektar-Pharmaceuticals-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "NKTR",
+        "company": "Nektar Therapeutics",
+        "action": "deleted",
+        "effective": "2019-10-03",
+        "classification": "Pharmaceuticals",
+        "source": "https://press.spglobal.com/2019-09-26-Las-Vegas-Sands-Set-to-Join-S-P-500-Nektar-Therapeutics-to-Join-S-P-MidCap-400-The-Pennant-Group-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "SIG": [
+      {
+        "ticker": "SIG",
+        "company": "Signet Jewelers",
+        "action": "deleted",
+        "effective": "2018-03-19",
+        "classification": "Specialty Stores",
+        "source": "https://press.spglobal.com/2018-03-09-Take-Two-Interactive-Software-SVB-Financial-and-Nektar-Pharmaceuticals-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "PDCO": [
+      {
+        "ticker": "PDCO",
+        "company": "Patterson Companies",
+        "action": "deleted",
+        "effective": "2018-03-19",
+        "classification": "Health Care Distributors",
+        "source": "https://press.spglobal.com/2018-03-09-Take-Two-Interactive-Software-SVB-Financial-and-Nektar-Pharmaceuticals-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CHK": [
+      {
+        "ticker": "CHK",
+        "company": "Chesapeake Energy",
+        "action": "deleted",
+        "effective": "2018-03-19",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2018-03-09-Take-Two-Interactive-Software-SVB-Financial-and-Nektar-Pharmaceuticals-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "MSCI": [
+      {
+        "ticker": "MSCI",
+        "company": "MSCI",
+        "action": "added",
+        "effective": "2018-04-04",
+        "classification": "Financial Exchanges & Data",
+        "source": "https://press.spglobal.com/2018-03-28-MSCI-Set-to-Join-S-P-500-Lumentum-Holdings-to-Join-S-P-MidCap-400-C-J-Energy-Services-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CSRA": [
+      {
+        "ticker": "CSRA",
+        "company": "CSRA",
+        "action": "deleted",
+        "effective": "2018-04-04",
+        "classification": "IT Consulting & Other Services",
+        "source": "https://press.spglobal.com/2018-03-28-MSCI-Set-to-Join-S-P-500-Lumentum-Holdings-to-Join-S-P-MidCap-400-C-J-Energy-Services-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "ABMD": [
+      {
+        "ticker": "ABMD",
+        "company": "ABIOMED",
+        "action": "added",
+        "effective": "2018-05-31",
+        "classification": "Health Care Equipment",
+        "source": "https://press.spglobal.com/2018-05-25-ABIOMED-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "ABMD",
+        "company": "Abiomed",
+        "action": "deleted",
+        "effective": "2022-12-22",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2022-12-19-Steel-Dynamics-Set-to-Join-S-P-500-Super-Micro-Computer-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "WYN": [
+      {
+        "ticker": "WYN",
+        "company": "Wyndham Worldwide",
+        "action": "deleted",
+        "effective": "2018-05-31",
+        "classification": "Hotels, Resorts & Cruise Lines",
+        "source": "https://press.spglobal.com/2018-05-25-ABIOMED-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "EVRG": [
+      {
+        "ticker": "EVRG",
+        "company": "Evergy (renamed from Westar Energy)",
+        "action": "added",
+        "effective": "2018-06-05",
+        "classification": "Electric Utilities",
+        "source": "https://press.spglobal.com/2018-05-31-Evergy-Set-to-Join-S-P-500-Navient-and-Integra-Lifesciences-Holdings-to-Join-S-P-MidCap-400-Ambac-Financial-Group-to-Join-S-P-SmallCap-600",
+        "alias_note": "official release: Westar renamed Evergy; EVRG effective 2018-06-05"
+      }
+    ],
+    "NAVI": [
+      {
+        "ticker": "NAVI",
+        "company": "Navient",
+        "action": "deleted",
+        "effective": "2018-06-05",
+        "classification": "Consumer Finance",
+        "source": "https://press.spglobal.com/2018-05-31-Evergy-Set-to-Join-S-P-500-Navient-and-Integra-Lifesciences-Holdings-to-Join-S-P-MidCap-400-Ambac-Financial-Group-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TWTR": [
+      {
+        "ticker": "TWTR",
+        "company": "Twitter",
+        "action": "added",
+        "effective": "2018-06-07",
+        "classification": "Internet Software & Services",
+        "source": "https://press.spglobal.com/2018-06-04-Netflix-Set-to-Join-S-P-100-Twitter-to-Join-S-P-500-REGENXBIO-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "TWTR",
+        "company": "Twitter",
+        "action": "deleted",
+        "effective": "2022-11-01",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2022-10-27-Arch-Capital-Group-Set-to-Join-S-P-500-RXO-to-Join-S-P-MidCap-400-Bread-Financial-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "MON": [
+      {
+        "ticker": "MON",
+        "company": "Monsanto",
+        "action": "deleted",
+        "effective": "2018-06-07",
+        "classification": "Fertilizers & Agricultural Chemicals",
+        "source": "https://press.spglobal.com/2018-06-04-Netflix-Set-to-Join-S-P-100-Twitter-to-Join-S-P-500-REGENXBIO-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "HFC": [
+      {
+        "ticker": "HFC",
+        "company": "HollyFrontier",
+        "action": "added",
+        "effective": "2018-06-18",
+        "classification": "Oil & Gas Refining & Marketing",
+        "source": "https://press.spglobal.com/2018-06-08-HollyFrontier-Broadridge-Financial-Solutions-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "HFC",
+        "company": "HollyFrontier",
+        "action": "deleted",
+        "effective": "2021-06-04",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2021-05-27-Organon-Set-to-Join-S-P-500-HollyFrontier-to-Join-S-P-MidCap-400-Service-Properties-Trust-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "BR": [
+      {
+        "ticker": "BR",
+        "company": "Broadridge Financial Solutions",
+        "action": "added",
+        "effective": "2018-06-18",
+        "classification": "Data Processing & Outsourced Services",
+        "source": "https://press.spglobal.com/2018-06-08-HollyFrontier-Broadridge-Financial-Solutions-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "AYI": [
+      {
+        "ticker": "AYI",
+        "company": "Acuity Brands",
+        "action": "deleted",
+        "effective": "2018-06-18",
+        "classification": "Electrical Components & Equipment",
+        "source": "https://press.spglobal.com/2018-06-08-HollyFrontier-Broadridge-Financial-Solutions-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "RRC": [
+      {
+        "ticker": "RRC",
+        "company": "Range Resources",
+        "action": "deleted",
+        "effective": "2018-06-18",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2018-06-08-HollyFrontier-Broadridge-Financial-Solutions-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FLT": [
+      {
+        "ticker": "FLT",
+        "company": "FleetCor Technologies",
+        "action": "added",
+        "effective": "2018-06-20",
+        "classification": "Data Processing & Outsources Services",
+        "source": "https://press.spglobal.com/2018-06-15-NVIDIA-Set-to-Join-S-P-100-FleetCor-Technologies-to-Join-S-P-500-Penn-Virginia-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TWX": [
+      {
+        "ticker": "TWX",
+        "company": "Time Warner",
+        "action": "deleted",
+        "effective": "2018-06-20",
+        "classification": "Movies & Entertainment",
+        "source": "https://press.spglobal.com/2018-06-15-NVIDIA-Set-to-Join-S-P-100-FleetCor-Technologies-to-Join-S-P-500-Penn-Virginia-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CPRT": [
+      {
+        "ticker": "CPRT",
+        "company": "Copart",
+        "action": "added",
+        "effective": "2018-07-02",
+        "classification": "Diversified Support Services",
+        "source": "https://press.spglobal.com/2018-06-25-Copart-Set-to-Join-S-P-500-Exelixis-to-Join-S-P-MidCap-400-Clarifications-to-S-P-U-S-Indices-Methodology"
+      }
+    ],
+    "DPS": [
+      {
+        "ticker": "DPS",
+        "company": "Dr Pepper Snapple",
+        "action": "deleted",
+        "effective": "2018-07-02",
+        "classification": "Soft Drinks",
+        "source": "https://press.spglobal.com/2018-06-25-Copart-Set-to-Join-S-P-500-Exelixis-to-Join-S-P-MidCap-400-Clarifications-to-S-P-U-S-Indices-Methodology"
+      }
+    ],
+    "ANET": [
+      {
+        "ticker": "ANET",
+        "company": "Arista Networks",
+        "action": "added",
+        "effective": "2018-08-28",
+        "classification": "Communications Equipment",
+        "source": "https://press.spglobal.com/2018-08-23-Arista-Networks-Set-to-Join-S-P-500-and-Ichor-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "GGP": [
+      {
+        "ticker": "GGP",
+        "company": "GGP",
+        "action": "deleted",
+        "effective": "2018-08-28",
+        "classification": "Retail REIT's",
+        "source": "https://press.spglobal.com/2018-08-23-Arista-Networks-Set-to-Join-S-P-500-and-Ichor-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "WCG": [
+      {
+        "ticker": "WCG",
+        "company": "WellCare Health Plans",
+        "action": "added",
+        "effective": "2018-09-17",
+        "classification": "Managed Health Care",
+        "source": "https://press.spglobal.com/2018-09-11-WellCare-Health-Plans-Set-to-Join-S-P-500-HealthEquity-to-Join-S-P-MidCap-400-Laredo-Petroleum-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "WCG",
+        "company": "WellCare Health Plans",
+        "action": "deleted",
+        "effective": "2020-01-28",
+        "classification": "Managed Health Care",
+        "source": "https://press.spglobal.com/2020-01-22-Paycom-Software-Set-to-Join-S-P-500"
+      }
+    ],
+    "XL": [
+      {
+        "ticker": "XL",
+        "company": "XL Group",
+        "action": "deleted",
+        "effective": "2018-09-17",
+        "classification": "Property & Casualty Insurance",
+        "source": "https://press.spglobal.com/2018-09-11-WellCare-Health-Plans-Set-to-Join-S-P-500-HealthEquity-to-Join-S-P-MidCap-400-Laredo-Petroleum-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "ROL": [
+      {
+        "ticker": "ROL",
+        "company": "Rollins",
+        "action": "added",
+        "effective": "2018-10-01",
+        "classification": "Environmental & Facilities Services",
+        "source": "https://press.spglobal.com/2018-09-25-Rollins-Set-to-Join-S-P-500-Inogen-to-Join-S-P-MidCap-400-Vanda-Pharmaceuticals-and-Garrett-Motion-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "ANDV": [
+      {
+        "ticker": "ANDV",
+        "company": "Andeavor",
+        "action": "deleted",
+        "effective": "2018-10-01",
+        "classification": "Oil & Gas Refining & Marketing",
+        "source": "https://press.spglobal.com/2018-09-25-Rollins-Set-to-Join-S-P-500-Inogen-to-Join-S-P-MidCap-400-Vanda-Pharmaceuticals-and-Garrett-Motion-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FTNT": [
+      {
+        "ticker": "FTNT",
+        "company": "Fortinet",
+        "action": "added",
+        "effective": "2018-10-11",
+        "classification": "Systems Software",
+        "source": "https://press.spglobal.com/2018-10-04-Fortinet-Set-to-Join-S-P-500-ASGN-and-Penn-National-Gaming-to-Join-S-P-MidCap-400-Veritex-Holdings-and-The-Chefs-Warehouse-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "EVHC": [
+      {
+        "ticker": "EVHC",
+        "company": "Envision Healthcare",
+        "action": "deleted",
+        "effective": "2018-10-11",
+        "classification": "Health Care Services",
+        "source": "https://press.spglobal.com/2018-10-04-Fortinet-Set-to-Join-S-P-500-ASGN-and-Penn-National-Gaming-to-Join-S-P-MidCap-400-Veritex-Holdings-and-The-Chefs-Warehouse-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "KEYS": [
+      {
+        "ticker": "KEYS",
+        "company": "Keysight Technologies",
+        "action": "added",
+        "effective": "2018-11-06",
+        "classification": "Electronic Equipment & Instruments",
+        "source": "https://press.spglobal.com/2018-10-30-Keysight-Technologies-Set-to-Join-S-P-500-Ligand-Pharmaceuticals-to-Join-S-P-MidCap-400-Marcus-Millichap-and-Arcosa-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CA": [
+      {
+        "ticker": "CA",
+        "company": "CA",
+        "action": "deleted",
+        "effective": "2018-11-06",
+        "classification": "Systems Software",
+        "source": "https://press.spglobal.com/2018-10-30-Keysight-Technologies-Set-to-Join-S-P-500-Ligand-Pharmaceuticals-to-Join-S-P-MidCap-400-Marcus-Millichap-and-Arcosa-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "JKHY": [
+      {
+        "ticker": "JKHY",
+        "company": "Jack Henry",
+        "action": "added",
+        "effective": "2018-11-13",
+        "classification": "Data Processing & Outsourced Services",
+        "source": "https://press.spglobal.com/2018-11-07-Jack-Henry-Associates-Set-to-Join-S-P-500-EQT-Equitrans-Midstream-MasTec-to-Join-S-P-MidCap-400-Superior-Energy-Services-United-Natural-Foods-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "EQT": [
+      {
+        "ticker": "EQT",
+        "company": "EQT",
+        "action": "deleted",
+        "effective": "2018-11-13",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2018-11-07-Jack-Henry-Associates-Set-to-Join-S-P-500-EQT-Equitrans-Midstream-MasTec-to-Join-S-P-MidCap-400-Superior-Energy-Services-United-Natural-Foods-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "EQT",
+        "company": "Addition",
+        "action": "added",
+        "effective": "2022-10-03",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2022-09-23-PG-E-and-EQT-Set-to-Join-S-P-500-ExlService-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "LW": [
+      {
+        "ticker": "LW",
+        "company": "Lamb Weston Holdings",
+        "action": "added",
+        "effective": "2018-12-03",
+        "classification": "Packaged Foods & Meats",
+        "source": "https://press.spglobal.com/2018-11-26-Lamb-Weston-Holdings-Maxim-Integrated-Products-and-Diamondback-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "LW",
+        "company": "Lamb Weston Holdings",
+        "action": "deleted",
+        "effective": "2026-03-23",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "MXIM": [
+      {
+        "ticker": "MXIM",
+        "company": "Maxim Integrated Products",
+        "action": "added",
+        "effective": "2018-12-03",
+        "classification": "Semiconductors",
+        "source": "https://press.spglobal.com/2018-11-26-Lamb-Weston-Holdings-Maxim-Integrated-Products-and-Diamondback-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "MXIM",
+        "company": "Maxim Integrated Products",
+        "action": "deleted",
+        "effective": "2021-08-30",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-08-24-Bio-Techne-Set-to-Join-S-P-500-Saia,-Mimecast-Option-Care-Health-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FANG": [
+      {
+        "ticker": "FANG",
+        "company": "Diamondback Energy",
+        "action": "added",
+        "effective": "2018-12-03",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2018-11-26-Lamb-Weston-Holdings-Maxim-Integrated-Products-and-Diamondback-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "COL": [
+      {
+        "ticker": "COL",
+        "company": "Rockwell Collins",
+        "action": "deleted",
+        "effective": "2018-12-03",
+        "classification": "Aerospace & Defense",
+        "source": "https://press.spglobal.com/2018-11-26-Lamb-Weston-Holdings-Maxim-Integrated-Products-and-Diamondback-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "AET": [
+      {
+        "ticker": "AET",
+        "company": "Aetna",
+        "action": "deleted",
+        "effective": "2018-12-03",
+        "classification": "Managed Health Care",
+        "source": "https://press.spglobal.com/2018-11-26-Lamb-Weston-Holdings-Maxim-Integrated-Products-and-Diamondback-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "SRCL": [
+      {
+        "ticker": "SRCL",
+        "company": "Stericycle",
+        "action": "deleted",
+        "effective": "2018-12-03",
+        "classification": "Environmental & Facilities Services",
+        "source": "https://press.spglobal.com/2018-11-26-Lamb-Weston-Holdings-Maxim-Integrated-Products-and-Diamondback-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CE": [
+      {
+        "ticker": "CE",
+        "company": "Celanese",
+        "action": "added",
+        "effective": "2018-12-24",
+        "classification": "Specialty Chemicals",
+        "source": "https://press.spglobal.com/2018-12-19-Celanese-Set-to-Join-S-P-500"
+      },
+      {
+        "ticker": "CE",
+        "company": "Celanese",
+        "action": "deleted",
+        "effective": "2025-03-24",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ESRX": [
+      {
+        "ticker": "ESRX",
+        "company": "Express Scripts Holding",
+        "action": "deleted",
+        "effective": "2018-12-24",
+        "classification": "Health Care Services",
+        "source": "https://press.spglobal.com/2018-12-19-Celanese-Set-to-Join-S-P-500"
+      }
+    ],
+    "FRC": [
+      {
+        "ticker": "FRC",
+        "company": "First Republic",
+        "action": "added",
+        "effective": "2019-01-02",
+        "classification": "Regional Banks",
+        "source": "https://press.spglobal.com/2018-12-27-First-Republic-Bank-Set-to-Join-S-P-500"
+      },
+      {
+        "ticker": "FRC",
+        "company": "First Republic Bank",
+        "action": "deleted",
+        "effective": "2023-05-04",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2023-05-01-Axon-Enterprise-Set-to-Join-S-P-500-STAG-Industrial-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "SCG": [
+      {
+        "ticker": "SCG",
+        "company": "SCANA",
+        "action": "deleted",
+        "effective": "2019-01-02",
+        "classification": "Multi-Utilities",
+        "source": "https://press.spglobal.com/2018-12-27-First-Republic-Bank-Set-to-Join-S-P-500"
+      }
+    ],
+    "TFX": [
+      {
+        "ticker": "TFX",
+        "company": "Teleflex",
+        "action": "added",
+        "effective": "2019-01-18",
+        "classification": "Health Care Equipment",
+        "source": "https://press.spglobal.com/2019-01-15-Teleflex-Set-to-Join-S-P-500-Green-Dot-to-Join-S-P-MidCap-400-Mercer-International-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "TFX",
+        "company": "Teleflex",
+        "action": "deleted",
+        "effective": "2025-03-24",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "PCG": [
+      {
+        "ticker": "PCG",
+        "company": "PG&E",
+        "action": "deleted",
+        "effective": "2019-01-18",
+        "classification": "Electric Utilities",
+        "source": "https://press.spglobal.com/2019-01-15-Teleflex-Set-to-Join-S-P-500-Green-Dot-to-Join-S-P-MidCap-400-Mercer-International-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "PCG",
+        "company": "Addition",
+        "action": "added",
+        "effective": "2022-10-03",
+        "classification": "Utilities",
+        "source": "https://press.spglobal.com/2022-09-23-PG-E-and-EQT-Set-to-Join-S-P-500-ExlService-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "ATO": [
+      {
+        "ticker": "ATO",
+        "company": "Atmos Energy",
+        "action": "added",
+        "effective": "2019-02-15",
+        "classification": "Gas Utilities",
+        "source": "https://press.spglobal.com/2019-02-08-Atmos-Energy-Set-to-Join-S-P-500-Spire-to-Join-S-P-MidCap-400-NorthStar-Realty-Europe-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "NFX": [
+      {
+        "ticker": "NFX",
+        "company": "Newfield Exploration",
+        "action": "deleted",
+        "effective": "2019-02-15",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2019-02-08-Atmos-Energy-Set-to-Join-S-P-500-Spire-to-Join-S-P-MidCap-400-NorthStar-Realty-Europe-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "WAB": [
+      {
+        "ticker": "WAB",
+        "company": "Wabtec",
+        "action": "added",
+        "effective": "2019-02-27",
+        "classification": "Construction Machinery & Heavy Trucks",
+        "source": "https://press.spglobal.com/2019-02-21-Wabtec-Set-to-Join-S-P-500-and-The-Goodyear-Tire-Rubber-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "GT": [
+      {
+        "ticker": "GT",
+        "company": "Goodyear Tire & Rubber",
+        "action": "deleted",
+        "effective": "2019-02-27",
+        "classification": "Tires & Rubber",
+        "source": "https://press.spglobal.com/2019-02-21-Wabtec-Set-to-Join-S-P-500-and-The-Goodyear-Tire-Rubber-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "FOXA": [
+      {
+        "ticker": "FOXA",
+        "company": "Fox",
+        "action": "added",
+        "effective": "2019-03-19",
+        "classification": "Broadcasting*",
+        "source": "https://press.spglobal.com/2019-03-14-Fox-Set-to-Join-S-P-500-Adobe-to-Join-S-P-100",
+        "alias_note": "official release says FOXAV/FOXBV become FOXA/FOX on 2019-03-19"
+      }
+    ],
+    "FOX": [
+      {
+        "ticker": "FOX",
+        "company": "Fox",
+        "action": "added",
+        "effective": "2019-03-19",
+        "classification": "Broadcasting*",
+        "source": "https://press.spglobal.com/2019-03-14-Fox-Set-to-Join-S-P-500-Adobe-to-Join-S-P-100",
+        "alias_note": "official release says FOXAV/FOXBV become FOXA/FOX on 2019-03-19"
+      }
+    ],
+    "DOW": [
+      {
+        "ticker": "DOW",
+        "company": "Dow",
+        "action": "added",
+        "effective": "2019-04-02",
+        "classification": "Commodity Chemical*",
+        "source": "https://press.spglobal.com/2019-03-26-Dow-Set-to-Join-S-P-500-and-S-P-100-Brighthouse-Financial-and-Trex-Company-to-Join-S-P-MidCap-400-Pitney-Bowes-and-Xenia-Hotels-Resorts-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "BHF": [
+      {
+        "ticker": "BHF",
+        "company": "Brighthouse Financial",
+        "action": "deleted",
+        "effective": "2019-04-03",
+        "classification": "Life & Health Insurance",
+        "source": "https://press.spglobal.com/2019-03-26-Dow-Set-to-Join-S-P-500-and-S-P-100-Brighthouse-Financial-and-Trex-Company-to-Join-S-P-MidCap-400-Pitney-Bowes-and-Xenia-Hotels-Resorts-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CTVA": [
+      {
+        "ticker": "CTVA",
+        "company": "Corteva",
+        "action": "added",
+        "effective": "2019-06-03",
+        "classification": "Agricultural Products",
+        "source": "https://press.spglobal.com/2019-05-28-Corteva-Set-to-Join-S-P-500-Fluor-to-Join-S-P-MidCap-400-and-Realogy-and-Bloomin-Brands-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "CTVA",
+        "company": "Corteva",
+        "action": "deleted",
+        "effective": "2026-10-06",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FLR": [
+      {
+        "ticker": "FLR",
+        "company": "Fluor",
+        "action": "deleted",
+        "effective": "2019-06-04",
+        "classification": "Construction & Engineering",
+        "source": "https://press.spglobal.com/2019-05-28-Corteva-Set-to-Join-S-P-500-Fluor-to-Join-S-P-MidCap-400-and-Realogy-and-Bloomin-Brands-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "BMS": [
+      {
+        "ticker": "BMS",
+        "company": "Bemis",
+        "action": "added",
+        "effective": "2019-06-07",
+        "classification": "Paper Packaging",
+        "source": "https://press.spglobal.com/2019-06-03-Bemis-Set-to-Join-S-P-500-Mattel-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "MAT": [
+      {
+        "ticker": "MAT",
+        "company": "Mattel",
+        "action": "deleted",
+        "effective": "2019-06-07",
+        "classification": "Leisure Products",
+        "source": "https://press.spglobal.com/2019-06-03-Bemis-Set-to-Join-S-P-500-Mattel-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "MKTX": [
+      {
+        "ticker": "MKTX",
+        "company": "MarketAxess Holdings",
+        "action": "added",
+        "effective": "2019-07-01",
+        "classification": "Financial Exchanges & Data",
+        "source": "https://press.spglobal.com/2019-06-24-MarketAxess-Holdings-Set-to-Join-S-P-500-Axon-Enterprise-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "MKTX",
+        "company": "MarketAxess Holdings",
+        "action": "deleted",
+        "effective": "2025-09-22",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-09-05-AppLovin,-Robinhood-Markets-and-Emcor-Group-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "LLL": [
+      {
+        "ticker": "LLL",
+        "company": "L3 Technologies",
+        "action": "deleted",
+        "effective": "2019-07-01",
+        "classification": "Aerospace & Defense",
+        "source": "https://press.spglobal.com/2019-06-24-MarketAxess-Holdings-Set-to-Join-S-P-500-Axon-Enterprise-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TMUS": [
+      {
+        "ticker": "TMUS",
+        "company": "T-Mobile US",
+        "action": "added",
+        "effective": "2019-07-15",
+        "classification": "Wireless Telecommunication Services",
+        "source": "https://press.spglobal.com/2019-07-09-T-Mobile-US-Set-to-Join-S-P-500"
+      }
+    ],
+    "RHT": [
+      {
+        "ticker": "RHT",
+        "company": "Red Hat",
+        "action": "deleted",
+        "effective": "2019-07-15",
+        "classification": "Systems Software",
+        "source": "https://press.spglobal.com/2019-07-09-T-Mobile-US-Set-to-Join-S-P-500"
+      }
+    ],
+    "LDOS": [
+      {
+        "ticker": "LDOS",
+        "company": "Leidos Holdings",
+        "action": "added",
+        "effective": "2019-08-09",
+        "classification": "IT Consulting & Other Services",
+        "source": "https://press.spglobal.com/2019-08-01-Leidos-Holdings-IDEX-Set-to-Join-S-P-500-Grubhub-Foot-Locker-to-Join-S-P-MidCap-400-National-Beverage-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "IEX": [
+      {
+        "ticker": "IEX",
+        "company": "IDEX",
+        "action": "added",
+        "effective": "2019-08-09",
+        "classification": "Industrial Machinery",
+        "source": "https://press.spglobal.com/2019-08-01-Leidos-Holdings-IDEX-Set-to-Join-S-P-500-Grubhub-Foot-Locker-to-Join-S-P-MidCap-400-National-Beverage-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "APC": [
+      {
+        "ticker": "APC",
+        "company": "Anadarko Petroleum",
+        "action": "deleted",
+        "effective": "2019-08-09",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2019-08-01-Leidos-Holdings-IDEX-Set-to-Join-S-P-500-Grubhub-Foot-Locker-to-Join-S-P-MidCap-400-National-Beverage-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FL": [
+      {
+        "ticker": "FL",
+        "company": "Foot Locker",
+        "action": "deleted",
+        "effective": "2019-08-09",
+        "classification": "Apparel Retail",
+        "source": "https://press.spglobal.com/2019-08-01-Leidos-Holdings-IDEX-Set-to-Join-S-P-500-Grubhub-Foot-Locker-to-Join-S-P-MidCap-400-National-Beverage-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CDW": [
+      {
+        "ticker": "CDW",
+        "company": "CDW Corp",
+        "action": "added",
+        "effective": "2019-09-23",
+        "classification": "Technology Distributors",
+        "source": "https://press.spglobal.com/2019-09-17-CDW-Set-to-Join-S-P-500"
+      }
+    ],
+    "TSS": [
+      {
+        "ticker": "TSS",
+        "company": "Total System Services",
+        "action": "deleted",
+        "effective": "2019-09-23",
+        "classification": "Data Processing & Outsourced Services",
+        "source": "https://press.spglobal.com/2019-09-17-CDW-Set-to-Join-S-P-500"
+      }
+    ],
+    "NVR": [
+      {
+        "ticker": "NVR",
+        "company": "NVR",
+        "action": "added",
+        "effective": "2019-09-26",
+        "classification": "Homebuilding",
+        "source": "https://press.spglobal.com/2019-09-20-NVR-Set-to-Join-S-P-500-Jefferies-Financial-Group-II-VI-to-Join-S-P-MidCap-400-Callon-Petroleum-PriceSmart-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "JEF": [
+      {
+        "ticker": "JEF",
+        "company": "Jefferies Financial Group",
+        "action": "deleted",
+        "effective": "2019-09-26",
+        "classification": "Multi-Sector Holdings",
+        "source": "https://press.spglobal.com/2019-09-20-NVR-Set-to-Join-S-P-500-Jefferies-Financial-Group-II-VI-to-Join-S-P-MidCap-400-Callon-Petroleum-PriceSmart-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "LVS": [
+      {
+        "ticker": "LVS",
+        "company": "Las Vegas Sands",
+        "action": "added",
+        "effective": "2019-10-03",
+        "classification": "Casinos & Gaming",
+        "source": "https://press.spglobal.com/2019-09-26-Las-Vegas-Sands-Set-to-Join-S-P-500-Nektar-Therapeutics-to-Join-S-P-MidCap-400-The-Pennant-Group-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "NOW": [
+      {
+        "ticker": "NOW",
+        "company": "ServiceNow",
+        "action": "added",
+        "effective": "2019-11-21",
+        "classification": "Systems Software",
+        "source": "https://press.spglobal.com/2019-11-19-Thermo-Fisher-Scientific-Set-to-Join-S-P-100-ServiceNow-to-Join-S-P-500"
+      }
+    ],
+    "CELG": [
+      {
+        "ticker": "CELG",
+        "company": "Celgene",
+        "action": "deleted",
+        "effective": "2019-11-21",
+        "classification": "Biotechnology",
+        "source": "https://press.spglobal.com/2019-11-19-Thermo-Fisher-Scientific-Set-to-Join-S-P-100-ServiceNow-to-Join-S-P-500"
+      }
+    ],
+    "WRB": [
+      {
+        "ticker": "WRB",
+        "company": "W.R. Berkley",
+        "action": "added",
+        "effective": "2019-12-05",
+        "classification": "Property & Casualty Insurance",
+        "source": "https://press.spglobal.com/2019-11-27-W-R-Berkley-Set-to-Join-S-P-500-RLI-to-Join-S-P-MidCap-400-The-St-Joe-Company-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VIAB": [
+      {
+        "ticker": "VIAB",
+        "company": "Viacom",
+        "action": "deleted",
+        "effective": "2019-12-05",
+        "classification": "Movies & Entertainment",
+        "source": "https://press.spglobal.com/2019-11-27-W-R-Berkley-Set-to-Join-S-P-500-RLI-to-Join-S-P-MidCap-400-The-St-Joe-Company-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "ODFL": [
+      {
+        "ticker": "ODFL",
+        "company": "Old Dominion Freight Line",
+        "action": "added",
+        "effective": "2019-12-09",
+        "classification": "Trucking",
+        "source": "https://press.spglobal.com/2019-12-02-Old-Dominion-Freight-Line-Set-to-Join-S-P-500-Cabot-Microelectronics-to-Join-S-P-MidCap-400-Ready-Capital-and-Industrial-Logistics-Properties-Trust-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "STI": [
+      {
+        "ticker": "STI",
+        "company": "SunTrust Banks",
+        "action": "deleted",
+        "effective": "2019-12-09",
+        "classification": "Regional Banks",
+        "source": "https://press.spglobal.com/2019-12-02-Old-Dominion-Freight-Line-Set-to-Join-S-P-500-Cabot-Microelectronics-to-Join-S-P-MidCap-400-Ready-Capital-and-Industrial-Logistics-Properties-Trust-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "LYV": [
+      {
+        "ticker": "LYV",
+        "company": "Live Nation Entertainment",
+        "action": "added",
+        "effective": "2019-12-23",
+        "classification": "Movies & Entertainment",
+        "source": "https://press.spglobal.com/2019-12-13-Live-Nation-Entertainment-Zebra-Technologies-STERIS-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ZBRA": [
+      {
+        "ticker": "ZBRA",
+        "company": "Zebra Technologies",
+        "action": "added",
+        "effective": "2019-12-23",
+        "classification": "Electronic Equipment & Instruments",
+        "source": "https://press.spglobal.com/2019-12-13-Live-Nation-Entertainment-Zebra-Technologies-STERIS-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "STE": [
+      {
+        "ticker": "STE",
+        "company": "STERIS",
+        "action": "added",
+        "effective": "2019-12-23",
+        "classification": "Health Care Equipment",
+        "source": "https://press.spglobal.com/2019-12-13-Live-Nation-Entertainment-Zebra-Technologies-STERIS-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "AMG": [
+      {
+        "ticker": "AMG",
+        "company": "Affiliated Managers Group",
+        "action": "deleted",
+        "effective": "2019-12-23",
+        "classification": "Asset Management & Custody Banks",
+        "source": "https://press.spglobal.com/2019-12-13-Live-Nation-Entertainment-Zebra-Technologies-STERIS-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "TRIP": [
+      {
+        "ticker": "TRIP",
+        "company": "TripAdvisor",
+        "action": "deleted",
+        "effective": "2019-12-23",
+        "classification": "Interactive Media & Services",
+        "source": "https://press.spglobal.com/2019-12-13-Live-Nation-Entertainment-Zebra-Technologies-STERIS-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "MAC": [
+      {
+        "ticker": "MAC",
+        "company": "Macerich",
+        "action": "deleted",
+        "effective": "2019-12-23",
+        "classification": "Retail REITs",
+        "source": "https://press.spglobal.com/2019-12-13-Live-Nation-Entertainment-Zebra-Technologies-STERIS-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "PAYC": [
+      {
+        "ticker": "PAYC",
+        "company": "Paycom Software",
+        "action": "added",
+        "effective": "2020-01-28",
+        "classification": "Application Software",
+        "source": "https://press.spglobal.com/2020-01-22-Paycom-Software-Set-to-Join-S-P-500"
+      },
+      {
+        "ticker": "PAYC",
+        "company": "Paycom Software",
+        "action": "deleted",
+        "effective": "2026-03-23",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "GDI": [
+      {
+        "ticker": "GDI",
+        "company": "Gardner Denver",
+        "action": "added",
+        "effective": "2020-03-03",
+        "classification": "Industrial Machinery",
+        "source": "https://press.spglobal.com/2020-02-27-Gardner-Denver-Holdings-Set-to-Join-S-P-500-Cimarex-Energy-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "XEC": [
+      {
+        "ticker": "XEC",
+        "company": "Cimarex Energy",
+        "action": "deleted",
+        "effective": "2020-03-03",
+        "classification": "Oil & Gas Exploration & Production",
+        "source": "https://press.spglobal.com/2020-02-27-Gardner-Denver-Holdings-Set-to-Join-S-P-500-Cimarex-Energy-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "OTIS": [
+      {
+        "ticker": "OTIS",
+        "company": "Otis Worldwide",
+        "action": "added",
+        "effective": "2020-04-03",
+        "classification": "Industrial Equipment",
+        "source": "https://press.spglobal.com/2020-03-31-Otis-Worldwide-and-Carrier-Global-Set-to-Join-S-P-500-American-Tower-to-Join-S-P-100-and-Macys-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CARR": [
+      {
+        "ticker": "CARR",
+        "company": "Carrier Global",
+        "action": "added",
+        "effective": "2020-04-03",
+        "classification": "Building Products",
+        "source": "https://press.spglobal.com/2020-03-31-Otis-Worldwide-and-Carrier-Global-Set-to-Join-S-P-500-American-Tower-to-Join-S-P-100-and-Macys-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "RTN": [
+      {
+        "ticker": "RTN",
+        "company": "Raytheon",
+        "action": "deleted",
+        "effective": "2020-04-06",
+        "classification": "Aerospace & Defense",
+        "source": "https://press.spglobal.com/2020-03-31-Otis-Worldwide-and-Carrier-Global-Set-to-Join-S-P-500-American-Tower-to-Join-S-P-100-and-Macys-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "M": [
+      {
+        "ticker": "M",
+        "company": "Macy's",
+        "action": "deleted",
+        "effective": "2020-04-06",
+        "classification": "Department Stores",
+        "source": "https://press.spglobal.com/2020-03-31-Otis-Worldwide-and-Carrier-Global-Set-to-Join-S-P-500-American-Tower-to-Join-S-P-100-and-Macys-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "DXCM": [
+      {
+        "ticker": "DXCM",
+        "company": "DexCom",
+        "action": "added",
+        "effective": "2020-05-12",
+        "classification": "Health Care Equipment",
+        "source": "https://press.spglobal.com/2020-05-06-DexCom-Dominos-Pizza-Set-to-Join-S-P-500-Salesforce-com-to-Join-S-P-100-STORE-Capital-to-Join-S-P-MidCap-400-Capri-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "DPZ": [
+      {
+        "ticker": "DPZ",
+        "company": "Domino's Pizza",
+        "action": "added",
+        "effective": "2020-05-12",
+        "classification": "Restaurants",
+        "source": "https://press.spglobal.com/2020-05-06-DexCom-Dominos-Pizza-Set-to-Join-S-P-500-Salesforce-com-to-Join-S-P-100-STORE-Capital-to-Join-S-P-MidCap-400-Capri-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "AGN": [
+      {
+        "ticker": "AGN",
+        "company": "Allergan",
+        "action": "deleted",
+        "effective": "2020-05-12",
+        "classification": "Pharmaceuticals",
+        "source": "https://press.spglobal.com/2020-05-06-DexCom-Dominos-Pizza-Set-to-Join-S-P-500-Salesforce-com-to-Join-S-P-100-STORE-Capital-to-Join-S-P-MidCap-400-Capri-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CPRI": [
+      {
+        "ticker": "CPRI",
+        "company": "Capri Holdings",
+        "action": "deleted",
+        "effective": "2020-05-12",
+        "classification": "Apparel Accessories & Luxury Goods",
+        "source": "https://press.spglobal.com/2020-05-06-DexCom-Dominos-Pizza-Set-to-Join-S-P-500-Salesforce-com-to-Join-S-P-100-STORE-Capital-to-Join-S-P-MidCap-400-Capri-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "WST": [
+      {
+        "ticker": "WST",
+        "company": "West Pharmaceutical Services",
+        "action": "added",
+        "effective": "2020-05-22",
+        "classification": "Health Care Supplies",
+        "source": "https://press.spglobal.com/2020-05-18-West-Pharmaceutical-Services-Set-to-Join-S-P-500-Physicians-Realty-Trust-to-Join-S-P-MidCap-400-Helmerich-Payne-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "HP": [
+      {
+        "ticker": "HP",
+        "company": "Helmerich & Payne",
+        "action": "deleted",
+        "effective": "2020-05-22",
+        "classification": "Oil & Gas Drilling",
+        "source": "https://press.spglobal.com/2020-05-18-West-Pharmaceutical-Services-Set-to-Join-S-P-500-Physicians-Realty-Trust-to-Join-S-P-MidCap-400-Helmerich-Payne-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TYL": [
+      {
+        "ticker": "TYL",
+        "company": "Tyler Technologies",
+        "action": "added",
+        "effective": "2020-06-22",
+        "classification": "Application Software",
+        "source": "https://press.spglobal.com/2020-06-12-S-P-Dow-Jones-Indices-Announces-Tyler-Technologies-Bio-Rad-Laboratories-and-Teledyne-Technologies-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "BIO": [
+      {
+        "ticker": "BIO",
+        "company": "Bio-Rad Laboratories",
+        "action": "added",
+        "effective": "2020-06-22",
+        "classification": "Life Sciences Tools & Services",
+        "source": "https://press.spglobal.com/2020-06-12-S-P-Dow-Jones-Indices-Announces-Tyler-Technologies-Bio-Rad-Laboratories-and-Teledyne-Technologies-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "BIO",
+        "company": "Bio-Rad Laboratories",
+        "action": "deleted",
+        "effective": "2024-09-23",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2024-09-06-Palantir-Technologies,-Dell-Technologies,-and-Erie-Indemnity-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "TDY": [
+      {
+        "ticker": "TDY",
+        "company": "Teledyne Technologies",
+        "action": "added",
+        "effective": "2020-06-22",
+        "classification": "Aerospace & Defense",
+        "source": "https://press.spglobal.com/2020-06-12-S-P-Dow-Jones-Indices-Announces-Tyler-Technologies-Bio-Rad-Laboratories-and-Teledyne-Technologies-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "JWN": [
+      {
+        "ticker": "JWN",
+        "company": "Nordstrom",
+        "action": "deleted",
+        "effective": "2020-06-22",
+        "classification": "Department Stores",
+        "source": "https://press.spglobal.com/2020-06-12-S-P-Dow-Jones-Indices-Announces-Tyler-Technologies-Bio-Rad-Laboratories-and-Teledyne-Technologies-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ADS": [
+      {
+        "ticker": "ADS",
+        "company": "Alliance Data Systems",
+        "action": "deleted",
+        "effective": "2020-06-22",
+        "classification": "Data Processing & Outsourced Services",
+        "source": "https://press.spglobal.com/2020-06-12-S-P-Dow-Jones-Indices-Announces-Tyler-Technologies-Bio-Rad-Laboratories-and-Teledyne-Technologies-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ETSY": [
+      {
+        "ticker": "ETSY",
+        "company": "Etsy",
+        "action": "added",
+        "effective": "2020-09-21",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2020-09-04-Etsy-Teradyne-and-Catalent-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "ETSY",
+        "company": "Etsy",
+        "action": "deleted",
+        "effective": "2024-09-23",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2024-09-06-Palantir-Technologies,-Dell-Technologies,-and-Erie-Indemnity-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "TER": [
+      {
+        "ticker": "TER",
+        "company": "Teradyne",
+        "action": "added",
+        "effective": "2020-09-21",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2020-09-04-Etsy-Teradyne-and-Catalent-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CTLT": [
+      {
+        "ticker": "CTLT",
+        "company": "Catalent",
+        "action": "added",
+        "effective": "2020-09-21",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2020-09-04-Etsy-Teradyne-and-Catalent-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "CTLT",
+        "company": "Catalent",
+        "action": "deleted",
+        "effective": "2024-12-23",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2024-12-18-Lennox-International-Set-to-Join-S-P-500-and-BILL-Holdings-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "HRB": [
+      {
+        "ticker": "HRB",
+        "company": "H&R Block",
+        "action": "deleted",
+        "effective": "2020-09-21",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2020-09-04-Etsy-Teradyne-and-Catalent-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "COTY": [
+      {
+        "ticker": "COTY",
+        "company": "Coty",
+        "action": "deleted",
+        "effective": "2020-09-21",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2020-09-04-Etsy-Teradyne-and-Catalent-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "KSS": [
+      {
+        "ticker": "KSS",
+        "company": "Kohl's",
+        "action": "deleted",
+        "effective": "2020-09-21",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2020-09-04-Etsy-Teradyne-and-Catalent-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "POOL": [
+      {
+        "ticker": "POOL",
+        "company": "Pool",
+        "action": "added",
+        "effective": "2020-10-07",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2020-10-01-Pool-Set-to-Join-S-P-500-Neogen-Simpson-Manufacturing-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "POOL",
+        "company": "Pool Corp",
+        "action": "deleted",
+        "effective": "2026-06-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2026-06-05-Marvell-Technology-and-Flex-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ETFC": [
+      {
+        "ticker": "ETFC",
+        "company": "E*TRADE Financial",
+        "action": "deleted",
+        "effective": "2020-10-07",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2020-10-01-Pool-Set-to-Join-S-P-500-Neogen-Simpson-Manufacturing-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VNT": [
+      {
+        "ticker": "VNT",
+        "company": "Vontier",
+        "action": "added",
+        "effective": "2020-10-09",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2020-10-05-Vontier-Set-to-Join-S-P-500"
+      },
+      {
+        "ticker": "VNT",
+        "company": "Vontier",
+        "action": "deleted",
+        "effective": "2021-03-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      }
+    ],
+    "NBL": [
+      {
+        "ticker": "NBL",
+        "company": "Noble Energy",
+        "action": "deleted",
+        "effective": "2020-10-12",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2020-10-05-Vontier-Set-to-Join-S-P-500"
+      }
+    ],
+    "TSLA": [
+      {
+        "ticker": "TSLA",
+        "company": "Tesla",
+        "action": "added",
+        "effective": "2020-12-21",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2020-11-16-Tesla-Set-to-Join-S-P-500"
+      }
+    ],
+    "AIV": [
+      {
+        "ticker": "AIV",
+        "company": "Apartment Investment & Mgt",
+        "action": "deleted",
+        "effective": "2020-12-21",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2020-12-11-Tesla-Set-to-Join-S-P-500-100-Apartment-Income-REIT-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "ENPH": [
+      {
+        "ticker": "ENPH",
+        "company": "Enphase Energy",
+        "action": "added",
+        "effective": "2021-01-07",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2020-12-30-Enphase-Energy-Set-to-Join-S-P-500-Capri-Holdings-Brooks-Automation-to-Join-S-P-MidCap-400-Celsius-Holdings-e-l-f-Beauty-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "ENPH",
+        "company": "Enphase Energy",
+        "action": "deleted",
+        "effective": "2025-09-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-09-05-AppLovin,-Robinhood-Markets-and-Emcor-Group-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "TIF": [
+      {
+        "ticker": "TIF",
+        "company": "Tiffany & Co",
+        "action": "deleted",
+        "effective": "2021-01-07",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2020-12-30-Enphase-Energy-Set-to-Join-S-P-500-Capri-Holdings-Brooks-Automation-to-Join-S-P-MidCap-400-Celsius-Holdings-e-l-f-Beauty-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TRMB": [
+      {
+        "ticker": "TRMB",
+        "company": "Trimble",
+        "action": "added",
+        "effective": "2021-01-21",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-01-15-Trimble-Set-to-Join-S-P-500-YETI-Holdings-to-Join-S-P-MidCap-400-Hilltop-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CXO": [
+      {
+        "ticker": "CXO",
+        "company": "Concho Resources",
+        "action": "deleted",
+        "effective": "2021-01-21",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2021-01-15-Trimble-Set-to-Join-S-P-500-YETI-Holdings-to-Join-S-P-MidCap-400-Hilltop-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "MPWR": [
+      {
+        "ticker": "MPWR",
+        "company": "Monolithic Power Systems",
+        "action": "added",
+        "effective": "2021-02-12",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-02-08-Monolithic-Power-Systems-Set-to-Join-S-P-500-Iridium-Communications-to-Join-S-P-MidCap-400-Collegium-Pharmaceutical-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FTI": [
+      {
+        "ticker": "FTI",
+        "company": "TechnipFMC",
+        "action": "deleted",
+        "effective": "2021-02-12",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2021-02-08-Monolithic-Power-Systems-Set-to-Join-S-P-500-Iridium-Communications-to-Join-S-P-MidCap-400-Collegium-Pharmaceutical-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "NXPI": [
+      {
+        "ticker": "NXPI",
+        "company": "NXP Semiconductors",
+        "action": "added",
+        "effective": "2021-03-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      }
+    ],
+    "PENN": [
+      {
+        "ticker": "PENN",
+        "company": "Penn National Gaming",
+        "action": "added",
+        "effective": "2021-03-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      },
+      {
+        "ticker": "PENN",
+        "company": "PENN Entertainment",
+        "action": "deleted",
+        "effective": "2022-09-19",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2022-09-02-CoStar-Group,-Invitation-Homes-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "GNRC": [
+      {
+        "ticker": "GNRC",
+        "company": "Generac Holdings",
+        "action": "added",
+        "effective": "2021-03-22",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      }
+    ],
+    "CZR": [
+      {
+        "ticker": "CZR",
+        "company": "Caesars Entertainment",
+        "action": "added",
+        "effective": "2021-03-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      },
+      {
+        "ticker": "CZR",
+        "company": "Caesars Entertainment",
+        "action": "deleted",
+        "effective": "2025-09-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-09-05-AppLovin,-Robinhood-Markets-and-Emcor-Group-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FLS": [
+      {
+        "ticker": "FLS",
+        "company": "Flowserve",
+        "action": "deleted",
+        "effective": "2021-03-22",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      }
+    ],
+    "SLG": [
+      {
+        "ticker": "SLG",
+        "company": "SL Green Realty",
+        "action": "deleted",
+        "effective": "2021-03-22",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      }
+    ],
+    "XRX": [
+      {
+        "ticker": "XRX",
+        "company": "Xerox Holdings",
+        "action": "deleted",
+        "effective": "2021-03-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-03-12-NXP-Semiconductors-Penn-National-Gaming-Generac-Holdings-and-Caesars-Entertainment-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-S-P-SmallCap-600-and-S-P-100"
+      }
+    ],
+    "PTC": [
+      {
+        "ticker": "PTC",
+        "company": "PTC",
+        "action": "added",
+        "effective": "2021-04-20",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-04-15-PTC-Set-to-Join-S-P-500-Lattice-Semiconductor-Progyny-to-Join-S-P-MidCap-400-Domtar-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VAR": [
+      {
+        "ticker": "VAR",
+        "company": "Varian Medical Systems",
+        "action": "deleted",
+        "effective": "2021-04-20",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-04-15-PTC-Set-to-Join-S-P-500-Lattice-Semiconductor-Progyny-to-Join-S-P-MidCap-400-Domtar-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CRL": [
+      {
+        "ticker": "CRL",
+        "company": "Charles River Laboratories Intl",
+        "action": "added",
+        "effective": "2021-05-14",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-05-10-Charles-River-Laboratories-International-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FLIR": [
+      {
+        "ticker": "FLIR",
+        "company": "FLIR Systems",
+        "action": "deleted",
+        "effective": "2021-05-14",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-05-10-Charles-River-Laboratories-International-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "OGN": [
+      {
+        "ticker": "OGN",
+        "company": "Organon",
+        "action": "added",
+        "effective": "2021-06-03",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-05-27-Organon-Set-to-Join-S-P-500-HollyFrontier-to-Join-S-P-MidCap-400-Service-Properties-Trust-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "OGN",
+        "company": "Organon & Co",
+        "action": "deleted",
+        "effective": "2023-10-18",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2023-10-13-Lululemon-Athletica-Hubbell-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "MRNA": [
+      {
+        "ticker": "MRNA",
+        "company": "Moderna",
+        "action": "added",
+        "effective": "2021-07-21",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-07-15-Moderna-Set-to-Join-S-P-500"
+      }
+    ],
+    "ALXN": [
+      {
+        "ticker": "ALXN",
+        "company": "Alexion Pharmaceuticals",
+        "action": "deleted",
+        "effective": "2021-07-21",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-07-15-Moderna-Set-to-Join-S-P-500"
+      }
+    ],
+    "TECH": [
+      {
+        "ticker": "TECH",
+        "company": "Bio-Techne",
+        "action": "added",
+        "effective": "2021-08-30",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-08-24-Bio-Techne-Set-to-Join-S-P-500-Saia,-Mimecast-Option-Care-Health-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CDAY": [
+      {
+        "ticker": "CDAY",
+        "company": "Ceridian HCM Holding",
+        "action": "added",
+        "effective": "2021-09-20",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-09-03-Match-Group,-Ceridian-HCM-and-Brown-Brown-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "BRO": [
+      {
+        "ticker": "BRO",
+        "company": "Brown & Brown",
+        "action": "added",
+        "effective": "2021-09-20",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2021-09-03-Match-Group,-Ceridian-HCM-and-Brown-Brown-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "MTCH": [
+      {
+        "ticker": "MTCH",
+        "company": "Match Group",
+        "action": "added",
+        "effective": "2021-09-20",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2021-09-03-Match-Group,-Ceridian-HCM-and-Brown-Brown-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "MTCH",
+        "company": "Match Group",
+        "action": "deleted",
+        "effective": "2026-03-23",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "UNM": [
+      {
+        "ticker": "UNM",
+        "company": "Unum Group",
+        "action": "deleted",
+        "effective": "2021-09-20",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2021-09-03-Match-Group,-Ceridian-HCM-and-Brown-Brown-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "NOV": [
+      {
+        "ticker": "NOV",
+        "company": "NOV",
+        "action": "deleted",
+        "effective": "2021-09-20",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2021-09-03-Match-Group,-Ceridian-HCM-and-Brown-Brown-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "PRGO": [
+      {
+        "ticker": "PRGO",
+        "company": "Perrigo Company",
+        "action": "deleted",
+        "effective": "2021-09-20",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2021-09-03-Match-Group,-Ceridian-HCM-and-Brown-Brown-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "SBNY": [
+      {
+        "ticker": "SBNY",
+        "company": "Signature Bank",
+        "action": "added",
+        "effective": "2021-12-20",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2021-12-03-Signature-Bank,-SolarEdge-Technologies-and-FactSet-Research-Systems-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "SBNY",
+        "company": "Signature Bank",
+        "action": "deleted",
+        "effective": "2023-03-15",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2023-03-13-Bunge-Set-to-Join-S-P-500"
+      }
+    ],
+    "SEDG": [
+      {
+        "ticker": "SEDG",
+        "company": "SolarEdge Technologies",
+        "action": "added",
+        "effective": "2021-12-20",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-12-03-Signature-Bank,-SolarEdge-Technologies-and-FactSet-Research-Systems-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "SEDG",
+        "company": "SolarEdge Technologies",
+        "action": "deleted",
+        "effective": "2023-12-18",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2023-12-01-Uber-Technologies,-Jabil-and-Builders-FirstSource-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FDS": [
+      {
+        "ticker": "FDS",
+        "company": "FactSet Research Systems",
+        "action": "added",
+        "effective": "2021-12-20",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2021-12-03-Signature-Bank,-SolarEdge-Technologies-and-FactSet-Research-Systems-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "LEG": [
+      {
+        "ticker": "LEG",
+        "company": "Leggett & Platt",
+        "action": "deleted",
+        "effective": "2021-12-20",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2021-12-03-Signature-Bank,-SolarEdge-Technologies-and-FactSet-Research-Systems-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "HBI": [
+      {
+        "ticker": "HBI",
+        "company": "Hanesbrands",
+        "action": "deleted",
+        "effective": "2021-12-20",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2021-12-03-Signature-Bank,-SolarEdge-Technologies-and-FactSet-Research-Systems-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "WU": [
+      {
+        "ticker": "WU",
+        "company": "The Western Union",
+        "action": "deleted",
+        "effective": "2021-12-20",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-12-03-Signature-Bank,-SolarEdge-Technologies-and-FactSet-Research-Systems-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "EPAM": [
+      {
+        "ticker": "EPAM",
+        "company": "EPAM Systems",
+        "action": "added",
+        "effective": "2021-12-14",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2021-12-07-EPAM-Systems-Set-to-Join-S-P-500"
+      },
+      {
+        "ticker": "EPAM",
+        "company": "EPAM Systems",
+        "action": "deleted",
+        "effective": "2026-06-02",
+        "classification": "Information Technologies",
+        "source": "https://press.spglobal.com/2026-05-27-FedEx-Freight-Holding-Company-Set-to-Join-S-P-500-EPAM-Systems-and-Dave-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "KSU": [
+      {
+        "ticker": "KSU",
+        "company": "Kansas City Southern",
+        "action": "deleted",
+        "effective": "2021-12-14",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2021-12-07-EPAM-Systems-Set-to-Join-S-P-500"
+      }
+    ],
+    "CEG": [
+      {
+        "ticker": "CEG",
+        "company": "Constellation Energy",
+        "action": "added",
+        "effective": "2022-02-02",
+        "classification": "Utilities",
+        "source": "https://press.spglobal.com/2022-01-26-Constellation-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "GPS": [
+      {
+        "ticker": "GPS",
+        "company": "Gap",
+        "action": "deleted",
+        "effective": "2022-02-03",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2022-01-26-Constellation-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "NDSN": [
+      {
+        "ticker": "NDSN",
+        "company": "Nordson",
+        "action": "added",
+        "effective": "2022-02-15",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-02-10-Nordson-Set-to-Join-S-P-500-PDC-Energy-to-Join-S-P-MidCap-400-XPEL-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "XLNX": [
+      {
+        "ticker": "XLNX",
+        "company": "Xilinx",
+        "action": "deleted",
+        "effective": "2022-02-15",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2022-02-10-Nordson-Set-to-Join-S-P-500-PDC-Energy-to-Join-S-P-MidCap-400-XPEL-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "MOH": [
+      {
+        "ticker": "MOH",
+        "company": "Molina Healthcare",
+        "action": "added",
+        "effective": "2022-03-02",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2022-02-25-Molina-Healthcare-Set-to-Join-S-P-500-Range-Resources-to-Join-S-P-MidCap-400-Golden-Entertainment-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "MOH",
+        "company": "Molina Healthcare",
+        "action": "deleted",
+        "effective": "2026-03-23",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "INFO": [
+      {
+        "ticker": "INFO",
+        "company": "IHS Markit",
+        "action": "deleted",
+        "effective": "2022-03-02",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-02-25-Molina-Healthcare-Set-to-Join-S-P-500-Range-Resources-to-Join-S-P-MidCap-400-Golden-Entertainment-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CPT": [
+      {
+        "ticker": "CPT",
+        "company": "Camden Property Trust",
+        "action": "added",
+        "effective": "2022-04-04",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2022-03-29-Camden-Property-Trust-Set-to-Join-S-P-500-Matador-Resources-to-Join-S-P-MidCap-400-Vir-Biotechnology-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "PBCT": [
+      {
+        "ticker": "PBCT",
+        "company": "People's United Financial",
+        "action": "deleted",
+        "effective": "2022-04-04",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2022-03-29-Camden-Property-Trust-Set-to-Join-S-P-500-Matador-Resources-to-Join-S-P-MidCap-400-Vir-Biotechnology-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VICI": [
+      {
+        "ticker": "VICI",
+        "company": "VICI Properties",
+        "action": "added",
+        "effective": "2022-06-08",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "CERN": [
+      {
+        "ticker": "CERN",
+        "company": "Cerner",
+        "action": "deleted",
+        "effective": "2022-06-08",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "KDP": [
+      {
+        "ticker": "KDP",
+        "company": "Keurig Dr Pepper",
+        "action": "added",
+        "effective": "2022-06-21",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "ON": [
+      {
+        "ticker": "ON",
+        "company": "ON Semiconductor",
+        "action": "added",
+        "effective": "2022-06-21",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "UA": [
+      {
+        "ticker": "UA",
+        "company": "Under Armour",
+        "action": "deleted",
+        "effective": "2022-06-21",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "UAA": [
+      {
+        "ticker": "UAA",
+        "company": "Under Armour",
+        "action": "deleted",
+        "effective": "2022-06-21",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2022-06-03-Keurig-Dr-Pepper,-VICI-Properties-and-ON-Semiconductor-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "CSGP": [
+      {
+        "ticker": "CSGP",
+        "company": "CoStar Group",
+        "action": "added",
+        "effective": "2022-09-19",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-09-02-CoStar-Group,-Invitation-Homes-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "INVH": [
+      {
+        "ticker": "INVH",
+        "company": "Invitation Homes",
+        "action": "added",
+        "effective": "2022-09-19",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2022-09-02-CoStar-Group,-Invitation-Homes-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "PVH": [
+      {
+        "ticker": "PVH",
+        "company": "PVH",
+        "action": "deleted",
+        "effective": "2022-09-19",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2022-09-02-CoStar-Group,-Invitation-Homes-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "CTXS": [
+      {
+        "ticker": "CTXS",
+        "company": "Deletion",
+        "action": "deleted",
+        "effective": "2022-10-03",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2022-09-23-PG-E-and-EQT-Set-to-Join-S-P-500-ExlService-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "DRE": [
+      {
+        "ticker": "DRE",
+        "company": "Deletion",
+        "action": "deleted",
+        "effective": "2022-10-03",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2022-09-23-PG-E-and-EQT-Set-to-Join-S-P-500-ExlService-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TRGP": [
+      {
+        "ticker": "TRGP",
+        "company": "Targa Resources",
+        "action": "added",
+        "effective": "2022-10-12",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2022-10-06-Targa-Resources-Set-to-Join-S-P-500-Lantheus-Holdings-to-Join-S-P-MidCap-400-Payoneer-Global-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "NLSN": [
+      {
+        "ticker": "NLSN",
+        "company": "Nielsen Holdings",
+        "action": "deleted",
+        "effective": "2022-10-12",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-10-06-Targa-Resources-Set-to-Join-S-P-500-Lantheus-Holdings-to-Join-S-P-MidCap-400-Payoneer-Global-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "ACGL": [
+      {
+        "ticker": "ACGL",
+        "company": "Arch Capital Group",
+        "action": "added",
+        "effective": "2022-11-01",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2022-10-27-Arch-Capital-Group-Set-to-Join-S-P-500-RXO-to-Join-S-P-MidCap-400-Bread-Financial-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "MBC": [
+      {
+        "ticker": "MBC",
+        "company": "MasterBrand",
+        "action": "added",
+        "effective": "2022-12-15",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-12-12-First-Solar-Set-to-Join-S-P-500-Fortune-Brands-Innovations-to-Join-S-P-MidCap-400-MasterBrand-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "MBC",
+        "company": "MasterBrand",
+        "action": "deleted",
+        "effective": "2022-12-19",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-12-12-First-Solar-Set-to-Join-S-P-500-Fortune-Brands-Innovations-to-Join-S-P-MidCap-400-MasterBrand-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FSLR": [
+      {
+        "ticker": "FSLR",
+        "company": "First Solar",
+        "action": "added",
+        "effective": "2022-12-19",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2022-12-12-First-Solar-Set-to-Join-S-P-500-Fortune-Brands-Innovations-to-Join-S-P-MidCap-400-MasterBrand-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FBHS": [
+      {
+        "ticker": "FBHS",
+        "company": "Fortune Brands Home & Security",
+        "action": "deleted",
+        "effective": "2022-12-19",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2022-12-12-First-Solar-Set-to-Join-S-P-500-Fortune-Brands-Innovations-to-Join-S-P-MidCap-400-MasterBrand-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "STLD": [
+      {
+        "ticker": "STLD",
+        "company": "Steel Dynamics",
+        "action": "added",
+        "effective": "2022-12-22",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2022-12-19-Steel-Dynamics-Set-to-Join-S-P-500-Super-Micro-Computer-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "GEHC": [
+      {
+        "ticker": "GEHC",
+        "company": "GE HealthCare Technologies",
+        "action": "added",
+        "effective": "2023-01-04",
+        "classification": "Health Care*",
+        "source": "https://press.spglobal.com/2022-12-28-GE-HealthCare-Technologies-Set-to-Join-S-P-500-Vornado-Realty-Trust-to-Join-S-P-MidCap-400-RXO-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VNO": [
+      {
+        "ticker": "VNO",
+        "company": "Vornado Realty Trust",
+        "action": "deleted",
+        "effective": "2023-01-05",
+        "classification": "Real Estate",
+        "source": "https://press.spglobal.com/2022-12-28-GE-HealthCare-Technologies-Set-to-Join-S-P-500-Vornado-Realty-Trust-to-Join-S-P-MidCap-400-RXO-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "FICO": [
+      {
+        "ticker": "FICO",
+        "company": "Fair Isaac & Co",
+        "action": "added",
+        "effective": "2023-03-20",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2023-03-03-Fair-Isaac-Co-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "LUMN": [
+      {
+        "ticker": "LUMN",
+        "company": "Lumen Technologies",
+        "action": "deleted",
+        "effective": "2023-03-20",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2023-03-03-Fair-Isaac-Co-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "PODD": [
+      {
+        "ticker": "PODD",
+        "company": "Insulet",
+        "action": "added",
+        "effective": "2023-03-15",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2023-03-10-Insulet-Set-to-Join-S-P-500"
+      }
+    ],
+    "BG": [
+      {
+        "ticker": "BG",
+        "company": "Bunge",
+        "action": "added",
+        "effective": "2023-03-15",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2023-03-13-Bunge-Set-to-Join-S-P-500"
+      }
+    ],
+    "AXON": [
+      {
+        "ticker": "AXON",
+        "company": "Axon Enterprise",
+        "action": "added",
+        "effective": "2023-05-04",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2023-05-01-Axon-Enterprise-Set-to-Join-S-P-500-STAG-Industrial-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "PANW": [
+      {
+        "ticker": "PANW",
+        "company": "Palo Alto Networks",
+        "action": "added",
+        "effective": "2023-06-19",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2023-06-02-Palo-Alto-Networks-Set-to-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "DISH": [
+      {
+        "ticker": "DISH",
+        "company": "DISH Network",
+        "action": "deleted",
+        "effective": "2023-06-19",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2023-06-02-Palo-Alto-Networks-Set-to-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "KVUE": [
+      {
+        "ticker": "KVUE",
+        "company": "Kenvue",
+        "action": "added",
+        "effective": "2023-08-25",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2023-08-21-Kenvue-Set-to-Join-S-P-500-Advance-Auto-Parts-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "KVUE",
+        "company": "Kenvue",
+        "action": "deleted",
+        "effective": "2026-11-04",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-10-30-Okta-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "AAP": [
+      {
+        "ticker": "AAP",
+        "company": "Advance Auto Parts",
+        "action": "deleted",
+        "effective": "2023-08-25",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2023-08-21-Kenvue-Set-to-Join-S-P-500-Advance-Auto-Parts-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "BX": [
+      {
+        "ticker": "BX",
+        "company": "Blackstone",
+        "action": "added",
+        "effective": "2023-09-18",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2023-09-01-Blackstone-and-Airbnb-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ABNB": [
+      {
+        "ticker": "ABNB",
+        "company": "Airbnb",
+        "action": "added",
+        "effective": "2023-09-18",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2023-09-01-Blackstone-and-Airbnb-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "LNC": [
+      {
+        "ticker": "LNC",
+        "company": "Lincoln National",
+        "action": "deleted",
+        "effective": "2023-09-18",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2023-09-01-Blackstone-and-Airbnb-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "NWL": [
+      {
+        "ticker": "NWL",
+        "company": "Newell Brands",
+        "action": "deleted",
+        "effective": "2023-09-18",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2023-09-01-Blackstone-and-Airbnb-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "VLTO": [
+      {
+        "ticker": "VLTO",
+        "company": "Veralto",
+        "action": "added",
+        "effective": "2023-10-02",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2023-09-28-Veralto-Set-to-Join-S-P-500-Vestis-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "DXC": [
+      {
+        "ticker": "DXC",
+        "company": "DXC Technologies",
+        "action": "deleted",
+        "effective": "2023-10-03",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2023-09-28-Veralto-Set-to-Join-S-P-500-Vestis-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "LULU": [
+      {
+        "ticker": "LULU",
+        "company": "Lululemon Athletica",
+        "action": "added",
+        "effective": "2023-10-18",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2023-10-13-Lululemon-Athletica-Hubbell-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "HUBB": [
+      {
+        "ticker": "HUBB",
+        "company": "Hubbell",
+        "action": "added",
+        "effective": "2023-10-18",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2023-10-13-Lululemon-Athletica-Hubbell-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ATVI": [
+      {
+        "ticker": "ATVI",
+        "company": "Activision Blizzard",
+        "action": "deleted",
+        "effective": "2023-10-18",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2023-10-13-Lululemon-Athletica-Hubbell-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "UBER": [
+      {
+        "ticker": "UBER",
+        "company": "Uber Technologies",
+        "action": "added",
+        "effective": "2023-12-18",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2023-12-01-Uber-Technologies,-Jabil-and-Builders-FirstSource-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "JBL": [
+      {
+        "ticker": "JBL",
+        "company": "Jabil",
+        "action": "added",
+        "effective": "2023-12-18",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2023-12-01-Uber-Technologies,-Jabil-and-Builders-FirstSource-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "BLDR": [
+      {
+        "ticker": "BLDR",
+        "company": "Builders FirstSource",
+        "action": "added",
+        "effective": "2023-12-18",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2023-12-01-Uber-Technologies,-Jabil-and-Builders-FirstSource-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "BLDR",
+        "company": "Builders FirstSource",
+        "action": "deleted",
+        "effective": "2026-09-21",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "SEE": [
+      {
+        "ticker": "SEE",
+        "company": "Sealed Air",
+        "action": "deleted",
+        "effective": "2023-12-18",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2023-12-01-Uber-Technologies,-Jabil-and-Builders-FirstSource-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ALK": [
+      {
+        "ticker": "ALK",
+        "company": "Alaska Air Group",
+        "action": "deleted",
+        "effective": "2023-12-18",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2023-12-01-Uber-Technologies,-Jabil-and-Builders-FirstSource-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "SMCI": [
+      {
+        "ticker": "SMCI",
+        "company": "Super Micro Computer",
+        "action": "added",
+        "effective": "2024-03-18",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-03-01-Super-Micro-Computer-and-Deckers-Outdoor-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "DECK": [
+      {
+        "ticker": "DECK",
+        "company": "Deckers Outdoor",
+        "action": "added",
+        "effective": "2024-03-18",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2024-03-01-Super-Micro-Computer-and-Deckers-Outdoor-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "WHR": [
+      {
+        "ticker": "WHR",
+        "company": "Whirlpool",
+        "action": "deleted",
+        "effective": "2024-03-18",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2024-03-01-Super-Micro-Computer-and-Deckers-Outdoor-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ZION": [
+      {
+        "ticker": "ZION",
+        "company": "Zions Bancorporation",
+        "action": "deleted",
+        "effective": "2024-03-18",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2024-03-01-Super-Micro-Computer-and-Deckers-Outdoor-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "SOLV": [
+      {
+        "ticker": "SOLV",
+        "company": "Solventum",
+        "action": "added",
+        "effective": "2024-04-01",
+        "classification": "Health Care*",
+        "source": "https://press.spglobal.com/2024-03-27-GE-Vernova-and-Solventum-Set-to-Join-S-P-500-Dentsply-Sirona-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "GEV": [
+      {
+        "ticker": "GEV",
+        "company": "GE Vernova",
+        "action": "added",
+        "effective": "2024-04-02",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2024-03-27-GE-Vernova-and-Solventum-Set-to-Join-S-P-500-Dentsply-Sirona-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VFC": [
+      {
+        "ticker": "VFC",
+        "company": "V.F.",
+        "action": "deleted",
+        "effective": "2024-04-03",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2024-03-27-GE-Vernova-and-Solventum-Set-to-Join-S-P-500-Dentsply-Sirona-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "XRAY": [
+      {
+        "ticker": "XRAY",
+        "company": "Dentsply Sirona",
+        "action": "deleted",
+        "effective": "2024-04-03",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2024-03-27-GE-Vernova-and-Solventum-Set-to-Join-S-P-500-Dentsply-Sirona-to-Join-S-P-MidCap-400-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VST": [
+      {
+        "ticker": "VST",
+        "company": "Vistra",
+        "action": "added",
+        "effective": "2024-05-08",
+        "classification": "Utilities",
+        "source": "https://press.spglobal.com/2024-05-03-Vistra-Set-to-Join-S-P-500-Aaon-to-Join-S-P-MidCap-400-Marathon-Digital-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "PXD": [
+      {
+        "ticker": "PXD",
+        "company": "Pioneer Natural Resources",
+        "action": "deleted",
+        "effective": "2024-05-08",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2024-05-03-Vistra-Set-to-Join-S-P-500-Aaon-to-Join-S-P-MidCap-400-Marathon-Digital-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "KKR": [
+      {
+        "ticker": "KKR",
+        "company": "KKR & Co",
+        "action": "added",
+        "effective": "2024-06-24",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2024-06-07-KKR,-CrowdStrike-Holdings-and-GoDaddy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CRWD": [
+      {
+        "ticker": "CRWD",
+        "company": "CrowdStrike Holdings",
+        "action": "added",
+        "effective": "2024-06-24",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-06-07-KKR,-CrowdStrike-Holdings-and-GoDaddy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "GDDY": [
+      {
+        "ticker": "GDDY",
+        "company": "GoDaddy",
+        "action": "added",
+        "effective": "2024-06-24",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-06-07-KKR,-CrowdStrike-Holdings-and-GoDaddy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "RHI": [
+      {
+        "ticker": "RHI",
+        "company": "Robert Half",
+        "action": "deleted",
+        "effective": "2024-06-24",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2024-06-07-KKR,-CrowdStrike-Holdings-and-GoDaddy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CMA": [
+      {
+        "ticker": "CMA",
+        "company": "Comerica",
+        "action": "deleted",
+        "effective": "2024-06-24",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2024-06-07-KKR,-CrowdStrike-Holdings-and-GoDaddy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ILMN": [
+      {
+        "ticker": "ILMN",
+        "company": "Illumina",
+        "action": "deleted",
+        "effective": "2024-06-24",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2024-06-07-KKR,-CrowdStrike-Holdings-and-GoDaddy-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "ILMN",
+        "company": "Illumina",
+        "action": "added",
+        "effective": "2026-09-21",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "PLTR": [
+      {
+        "ticker": "PLTR",
+        "company": "Palantir Technologies",
+        "action": "added",
+        "effective": "2024-09-23",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-09-06-Palantir-Technologies,-Dell-Technologies,-and-Erie-Indemnity-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "DELL": [
+      {
+        "ticker": "DELL",
+        "company": "Dell Technologies",
+        "action": "added",
+        "effective": "2024-09-23",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-09-06-Palantir-Technologies,-Dell-Technologies,-and-Erie-Indemnity-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ERIE": [
+      {
+        "ticker": "ERIE",
+        "company": "Erie Indemnity",
+        "action": "added",
+        "effective": "2024-09-23",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2024-09-06-Palantir-Technologies,-Dell-Technologies,-and-Erie-Indemnity-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "AAL": [
+      {
+        "ticker": "AAL",
+        "company": "American Airlines Group",
+        "action": "deleted",
+        "effective": "2024-09-23",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2024-09-06-Palantir-Technologies,-Dell-Technologies,-and-Erie-Indemnity-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "AMTM": [
+      {
+        "ticker": "AMTM",
+        "company": "Amentum",
+        "action": "added",
+        "effective": "2024-09-30",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2024-09-24-Amentum-Set-to-Join-S-P-500-Bath-Body-Works-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "AMTM",
+        "company": "Amentum Holdings",
+        "action": "deleted",
+        "effective": "2024-12-23",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2024-12-06-Apollo-Global-Management-and-Workday-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "BBWI": [
+      {
+        "ticker": "BBWI",
+        "company": "Bath & Body Works",
+        "action": "deleted",
+        "effective": "2024-10-01",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2024-09-24-Amentum-Set-to-Join-S-P-500-Bath-Body-Works-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "TPL": [
+      {
+        "ticker": "TPL",
+        "company": "Texas Pacific Land",
+        "action": "added",
+        "effective": "2024-11-26",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2024-11-21-Texas-Pacific-Land-Set-to-Join-S-P-500,-Mueller-Industries-to-Join-S-P-MidCap-400-and-Atlas-Energy-Solutions-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "MRO": [
+      {
+        "ticker": "MRO",
+        "company": "Marathon Oil",
+        "action": "deleted",
+        "effective": "2024-11-26",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2024-11-21-Texas-Pacific-Land-Set-to-Join-S-P-500,-Mueller-Industries-to-Join-S-P-MidCap-400-and-Atlas-Energy-Solutions-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "APO": [
+      {
+        "ticker": "APO",
+        "company": "Apollo Global Mgt",
+        "action": "added",
+        "effective": "2024-12-23",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2024-12-06-Apollo-Global-Management-and-Workday-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "WDAY": [
+      {
+        "ticker": "WDAY",
+        "company": "Workday",
+        "action": "added",
+        "effective": "2024-12-23",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-12-06-Apollo-Global-Management-and-Workday-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "QRVO": [
+      {
+        "ticker": "QRVO",
+        "company": "Qorvo",
+        "action": "deleted",
+        "effective": "2024-12-23",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2024-12-06-Apollo-Global-Management-and-Workday-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "LII": [
+      {
+        "ticker": "LII",
+        "company": "Lennox International",
+        "action": "added",
+        "effective": "2024-12-23",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2024-12-18-Lennox-International-Set-to-Join-S-P-500-and-BILL-Holdings-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "DASH": [
+      {
+        "ticker": "DASH",
+        "company": "DoorDash",
+        "action": "added",
+        "effective": "2025-03-24",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "TKO": [
+      {
+        "ticker": "TKO",
+        "company": "TKO Group Holdings",
+        "action": "added",
+        "effective": "2025-03-24",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "WSM": [
+      {
+        "ticker": "WSM",
+        "company": "Williams-Sonoma",
+        "action": "added",
+        "effective": "2025-03-24",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "EXE": [
+      {
+        "ticker": "EXE",
+        "company": "Expand Energy",
+        "action": "added",
+        "effective": "2025-03-24",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "BWA": [
+      {
+        "ticker": "BWA",
+        "company": "Borgwarner",
+        "action": "deleted",
+        "effective": "2025-03-24",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FMC": [
+      {
+        "ticker": "FMC",
+        "company": "FMC",
+        "action": "deleted",
+        "effective": "2025-03-24",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2025-03-07-DoorDash,-TKO-Group-Holdings,-Williams-Sonoma-and-Expand-Energy-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "COIN": [
+      {
+        "ticker": "COIN",
+        "company": "Coinbase Global",
+        "action": "added",
+        "effective": "2025-05-19",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-05-12-Coinbase-Global-Set-to-Join-S-P-500"
+      }
+    ],
+    "DFS": [
+      {
+        "ticker": "DFS",
+        "company": "Discover Financial Services",
+        "action": "deleted",
+        "effective": "2025-05-19",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-05-12-Coinbase-Global-Set-to-Join-S-P-500"
+      }
+    ],
+    "DDOG": [
+      {
+        "ticker": "DDOG",
+        "company": "Datadog",
+        "action": "added",
+        "effective": "2025-07-09",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-07-02-Datadog-Set-to-Join-S-P-500"
+      }
+    ],
+    "JNPR": [
+      {
+        "ticker": "JNPR",
+        "company": "Juniper Networks",
+        "action": "deleted",
+        "effective": "2025-07-09",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-07-02-Datadog-Set-to-Join-S-P-500"
+      }
+    ],
+    "TTD": [
+      {
+        "ticker": "TTD",
+        "company": "The Trade Desk",
+        "action": "added",
+        "effective": "2025-07-18",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2025-07-14-The-Trade-Desk-Set-to-Join-S-P-500"
+      },
+      {
+        "ticker": "TTD",
+        "company": "The Trade Desk",
+        "action": "deleted",
+        "effective": "2026-09-21",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "ANSS": [
+      {
+        "ticker": "ANSS",
+        "company": "ANSYS",
+        "action": "deleted",
+        "effective": "2025-07-18",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-07-14-The-Trade-Desk-Set-to-Join-S-P-500"
+      }
+    ],
+    "XYZ": [
+      {
+        "ticker": "XYZ",
+        "company": "Block",
+        "action": "added",
+        "effective": "2025-07-23",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-07-18-Block-Set-to-Join-S-P-500"
+      }
+    ],
+    "HES": [
+      {
+        "ticker": "HES",
+        "company": "Hess",
+        "action": "deleted",
+        "effective": "2025-07-23",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2025-07-18-Block-Set-to-Join-S-P-500"
+      }
+    ],
+    "IBKR": [
+      {
+        "ticker": "IBKR",
+        "company": "Interactive Brokers Group",
+        "action": "added",
+        "effective": "2025-08-28",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-08-25-Interactive-Brokers-Group-Set-to-Join-S-P-500,-Talen-Energy-to-Join-S-P-MidCap-400-and-Kinetik-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "WBA": [
+      {
+        "ticker": "WBA",
+        "company": "Walgreens Boots Alliance",
+        "action": "deleted",
+        "effective": "2025-08-28",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2025-08-25-Interactive-Brokers-Group-Set-to-Join-S-P-500,-Talen-Energy-to-Join-S-P-MidCap-400-and-Kinetik-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "APP": [
+      {
+        "ticker": "APP",
+        "company": "AppLovin",
+        "action": "added",
+        "effective": "2025-09-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-09-05-AppLovin,-Robinhood-Markets-and-Emcor-Group-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "HOOD": [
+      {
+        "ticker": "HOOD",
+        "company": "Robinhood Markets",
+        "action": "added",
+        "effective": "2025-09-22",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-09-05-AppLovin,-Robinhood-Markets-and-Emcor-Group-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "EME": [
+      {
+        "ticker": "EME",
+        "company": "Emcor Group",
+        "action": "added",
+        "effective": "2025-09-22",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2025-09-05-AppLovin,-Robinhood-Markets-and-Emcor-Group-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "SOLS": [
+      {
+        "ticker": "SOLS",
+        "company": "Solstice Advance Materials",
+        "action": "added",
+        "effective": "2025-10-30",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2025-10-27-Solstice-Advance-Materials-and-Qnity-Electronics-Set-to-Join-S-P-500-Others-to-Join-S-P-SmallCap-600"
+      },
+      {
+        "ticker": "SOLS",
+        "company": "Solstice Advanced Materials",
+        "action": "deleted",
+        "effective": "2025-12-22",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2025-12-05-CRH,-Carvana-and-Comfort-Systems-USA-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "KMX": [
+      {
+        "ticker": "KMX",
+        "company": "CarMax",
+        "action": "deleted",
+        "effective": "2025-10-31",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-10-27-Solstice-Advance-Materials-and-Qnity-Electronics-Set-to-Join-S-P-500-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "Q": [
+      {
+        "ticker": "Q",
+        "company": "Qnity Electronics",
+        "action": "added",
+        "effective": "2025-11-03",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-10-27-Solstice-Advance-Materials-and-Qnity-Electronics-Set-to-Join-S-P-500-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "EMN": [
+      {
+        "ticker": "EMN",
+        "company": "Eastman Chemical Co",
+        "action": "deleted",
+        "effective": "2025-11-04",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2025-10-27-Solstice-Advance-Materials-and-Qnity-Electronics-Set-to-Join-S-P-500-Others-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "SNDK": [
+      {
+        "ticker": "SNDK",
+        "company": "Sandisk",
+        "action": "added",
+        "effective": "2025-11-28",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2025-11-24-Sandisk-Set-to-Join-S-P-500-Upwork,-First-Interstate-BancSystem,-PTC-Therapeutics-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "IPG": [
+      {
+        "ticker": "IPG",
+        "company": "Interpublic Group",
+        "action": "deleted",
+        "effective": "2025-11-28",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2025-11-24-Sandisk-Set-to-Join-S-P-500-Upwork,-First-Interstate-BancSystem,-PTC-Therapeutics-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CRH": [
+      {
+        "ticker": "CRH",
+        "company": "CRH",
+        "action": "added",
+        "effective": "2025-12-22",
+        "classification": "Materials",
+        "source": "https://press.spglobal.com/2025-12-05-CRH,-Carvana-and-Comfort-Systems-USA-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CVNA": [
+      {
+        "ticker": "CVNA",
+        "company": "Carvana",
+        "action": "added",
+        "effective": "2025-12-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-12-05-CRH,-Carvana-and-Comfort-Systems-USA-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FIX": [
+      {
+        "ticker": "FIX",
+        "company": "Comfort Systems USA",
+        "action": "added",
+        "effective": "2025-12-22",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2025-12-05-CRH,-Carvana-and-Comfort-Systems-USA-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "LKQ": [
+      {
+        "ticker": "LKQ",
+        "company": "LKQ",
+        "action": "deleted",
+        "effective": "2025-12-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-12-05-CRH,-Carvana-and-Comfort-Systems-USA-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "MHK": [
+      {
+        "ticker": "MHK",
+        "company": "Mohawk Industries",
+        "action": "deleted",
+        "effective": "2025-12-22",
+        "classification": "Consumer Discretionary",
+        "source": "https://press.spglobal.com/2025-12-05-CRH,-Carvana-and-Comfort-Systems-USA-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "ARES": [
+      {
+        "ticker": "ARES",
+        "company": "Ares Management",
+        "action": "added",
+        "effective": "2025-12-11",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2025-12-08-Ares-Management-Set-to-Join-S-P-500-Sezzle-and-Vital-Farms-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "K": [
+      {
+        "ticker": "K",
+        "company": "Kellanova",
+        "action": "deleted",
+        "effective": "2025-12-11",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2025-12-08-Ares-Management-Set-to-Join-S-P-500-Sezzle-and-Vital-Farms-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "CIEN": [
+      {
+        "ticker": "CIEN",
+        "company": "Ciena",
+        "action": "added",
+        "effective": "2026-02-09",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-02-04-Ciena-Set-to-Join-S-P-500-Arrowhead-Pharmaceuticals-to-Join-S-P-MidCap-400-ADT-and-OneSpaWorld-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "DAY": [
+      {
+        "ticker": "DAY",
+        "company": "Dayforce",
+        "action": "deleted",
+        "effective": "2026-02-09",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-02-04-Ciena-Set-to-Join-S-P-500-Arrowhead-Pharmaceuticals-to-Join-S-P-MidCap-400-ADT-and-OneSpaWorld-Holdings-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VRT": [
+      {
+        "ticker": "VRT",
+        "company": "Vertiv Holdings",
+        "action": "added",
+        "effective": "2026-03-23",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "LITE": [
+      {
+        "ticker": "LITE",
+        "company": "Lumentum Holdings",
+        "action": "added",
+        "effective": "2026-03-23",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "COHR": [
+      {
+        "ticker": "COHR",
+        "company": "Coherent",
+        "action": "added",
+        "effective": "2026-03-23",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "SATS": [
+      {
+        "ticker": "SATS",
+        "company": "EchoStar",
+        "action": "added",
+        "effective": "2026-03-23",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2026-03-06-Vertiv-Holdings,-Lumentum-Holdings,-Coherent,-and-EchoStar-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "CASY": [
+      {
+        "ticker": "CASY",
+        "company": "Casey's General Stores",
+        "action": "added",
+        "effective": "2026-04-09",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-04-06-Caseys-General-Stores-Set-to-Join-S-P-500-DigitalOcean-Holdings-to-Join-S-P-MidCap-400-Broadstone-Net-Lease-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "HOLX": [
+      {
+        "ticker": "HOLX",
+        "company": "Hologic",
+        "action": "deleted",
+        "effective": "2026-04-09",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2026-04-06-Caseys-General-Stores-Set-to-Join-S-P-500-DigitalOcean-Holdings-to-Join-S-P-MidCap-400-Broadstone-Net-Lease-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "VEEV": [
+      {
+        "ticker": "VEEV",
+        "company": "Veeva Systems",
+        "action": "added",
+        "effective": "2026-05-07",
+        "classification": "Health Care",
+        "source": "https://press.spglobal.com/2026-04-30-Veeva-Systems-Set-to-Join-S-P-500"
+      }
+    ],
+    "CTRA": [
+      {
+        "ticker": "CTRA",
+        "company": "Coterra Energy",
+        "action": "deleted",
+        "effective": "2026-05-07",
+        "classification": "Energy",
+        "source": "https://press.spglobal.com/2026-04-30-Veeva-Systems-Set-to-Join-S-P-500"
+      }
+    ],
+    "FDXF": [
+      {
+        "ticker": "FDXF",
+        "company": "FedEx Freight",
+        "action": "added",
+        "effective": "2026-06-01",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-05-27-FedEx-Freight-Holding-Company-Set-to-Join-S-P-500-EPAM-Systems-and-Dave-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "MRVL": [
+      {
+        "ticker": "MRVL",
+        "company": "Marvell Technology",
+        "action": "added",
+        "effective": "2026-06-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-06-05-Marvell-Technology-and-Flex-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FLEX": [
+      {
+        "ticker": "FLEX",
+        "company": "Flex",
+        "action": "added",
+        "effective": "2026-06-22",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-06-05-Marvell-Technology-and-Flex-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CPB": [
+      {
+        "ticker": "CPB",
+        "company": "The Campbell's Company",
+        "action": "deleted",
+        "effective": "2026-06-22",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-06-05-Marvell-Technology-and-Flex-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "HONA": [
+      {
+        "ticker": "HONA",
+        "company": "Honeywell Aerospace",
+        "action": "added",
+        "effective": "2026-06-29",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-06-23-Honeywell-Aerospace-Set-to-Join-S-P-500-S-P-100-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "CAG": [
+      {
+        "ticker": "CAG",
+        "company": "Conagra Brands",
+        "action": "deleted",
+        "effective": "2026-06-30",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-06-23-Honeywell-Aerospace-Set-to-Join-S-P-500-S-P-100-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "FERG": [
+      {
+        "ticker": "FERG",
+        "company": "Ferguson Enterprises",
+        "action": "added",
+        "effective": "2026-08-05",
+        "classification": "",
+        "source": "https://press.spglobal.com/2026-07-31-Ferguson-Enterprises-Set-to-Join-S-P-500-and-ADI-Global-Distribution-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "EA": [
+      {
+        "ticker": "EA",
+        "company": "Electronic Arts",
+        "action": "deleted",
+        "effective": "2026-08-05",
+        "classification": "",
+        "source": "https://press.spglobal.com/2026-07-31-Ferguson-Enterprises-Set-to-Join-S-P-500-and-ADI-Global-Distribution-to-Join-S-P-SmallCap-600"
+      }
+    ],
+    "RDDT": [
+      {
+        "ticker": "RDDT",
+        "company": "Reddit",
+        "action": "added",
+        "effective": "2026-08-18",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2026-08-13-Reddit-Set-to-Join-S-P-500-and-Sun-Communities-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "AVB": [
+      {
+        "ticker": "AVB",
+        "company": "AvalonBay Communities",
+        "action": "deleted",
+        "effective": "2026-08-18",
+        "classification": "Financials",
+        "source": "https://press.spglobal.com/2026-08-13-Reddit-Set-to-Join-S-P-500-and-Sun-Communities-to-Join-S-P-MidCap-400"
+      }
+    ],
+    "BE": [
+      {
+        "ticker": "BE",
+        "company": "Bloom Energy",
+        "action": "added",
+        "effective": "2026-09-21",
+        "classification": "Industrials",
+        "source": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "TAP": [
+      {
+        "ticker": "TAP",
+        "company": "Molson Coors Beverage",
+        "action": "deleted",
+        "effective": "2026-09-21",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "P": [
+      {
+        "ticker": "P",
+        "company": "Everpure",
+        "action": "added",
+        "effective": "2026-09-21",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+      }
+    ],
+    "VYLR": [
+      {
+        "ticker": "VYLR",
+        "company": "Vylor",
+        "action": "added",
+        "effective": "2026-10-01",
+        "classification": "Consumer Staples",
+        "source": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "TWLO": [
+      {
+        "ticker": "TWLO",
+        "company": "Twilio",
+        "action": "added",
+        "effective": "2026-10-06",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "WBD": [
+      {
+        "ticker": "WBD",
+        "company": "Warner Bros. Discovery",
+        "action": "deleted",
+        "effective": "2026-10-06",
+        "classification": "Communication Services",
+        "source": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ],
+    "OKTA": [
+      {
+        "ticker": "OKTA",
+        "company": "Okta",
+        "action": "added",
+        "effective": "2026-11-04",
+        "classification": "Information Technology",
+        "source": "https://press.spglobal.com/2026-10-30-Okta-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+      }
+    ]
+  },
+  "exceptions": [
+    {
+      "ticker": "FOXA",
+      "company": "Twenty-First Century Fox",
+      "action": "deleted",
+      "effective": "2019-03-20",
+      "classification": "Movies & Entertainment",
+      "source": "https://press.spglobal.com/2019-03-14-Fox-Set-to-Join-S-P-500-Adobe-to-Join-S-P-100",
+      "disposition": "predecessor changes to TFCFA/TFCF before deletion; not the post-spin FOXA/FOX series"
+    },
+    {
+      "ticker": null,
+      "company": "Harley-Davidson",
+      "action": "deleted",
+      "effective": "2020-06-22",
+      "classification": "Motorcycle Manufacturers",
+      "source": "https://press.spglobal.com/2020-06-12-S-P-Dow-Jones-Indices-Announces-Tyler-Technologies-Bio-Rad-Laboratories-and-Teledyne-Technologies-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600",
+      "disposition": "unresolved symbol; company not represented in supplied panel"
+    }
+  ],
+  "reviewed_non_event_announcements": [
+    {
+      "source": "https://press.spglobal.com/2018-01-18-S-P-Dow-Jones-Indices-Announces-Changes-to-the-S-P-U-S-Indices-and-S-P-DJIs-Equity-Indices-Policies-Practices-Methodologies",
+      "title": "S&P Dow Jones Indices Announces Changes to the S&P U.S. Indices and S&P DJI's Equity Indices Policies & Practices Methodologies",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "methodology, classification consultation or economic research; no S&P500 constituent event"
+    },
+    {
+      "source": "https://press.spglobal.com/2018-04-26-S-P-Dow-Jones-Indices-Announces-Changes-to-the-S-P-U-S-Indices-and-Equity-Indices-Policies-Practices-Methodologies",
+      "title": "S&P Dow Jones Indices Announces Changes to the S&P U.S. Indices and Equity Indices Policies & Practices Methodologies",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "methodology, classification consultation or economic research; no S&P500 constituent event"
+    },
+    {
+      "source": "https://press.spglobal.com/2019-01-29-Caesars-Entertainment-Set-to-Join-S-P-MidCap-400-Conns-and-Dril-Quip-to-Join-S-P-SmallCap-600-New-Fox-Continues-in-S-P-500",
+      "title": "Caesars Entertainment Set to Join S&P MidCap 400; Conn's and Dril-Quip to Join S&P SmallCap 600; \"New\" Fox Continues in S&P 500",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "continuing entity narrative; final 2019-03-14 announcement covers the event and alias"
+    },
+    {
+      "source": "https://press.spglobal.com/2020-11-30-S-P-Dow-Jones-Indices-Announces-Implementation-of-Teslas-Addition-to-S-P-500",
+      "title": "S&P Dow Jones Indices Announces Implementation of Tesla's Addition to S&P 500",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "implementation narrative; dated 2020-11-16 and 2020-12-11 tables cover the effective event"
+    },
+    {
+      "source": "https://press.spglobal.com/2021-10-18-S-P-Dow-Jones-Indices-And-MSCI-Announce-Consultation-On-Potential-Changes-To-The-Global-Industry-Classification-Standard-GICS-R",
+      "title": "S&P Dow Jones Indices And MSCI Announce Consultation On Potential Changes To The Global Industry Classification Standard (GICS®)",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "methodology, classification consultation or economic research; no S&P500 constituent event"
+    },
+    {
+      "source": "https://press.spglobal.com/2023-08-09-Kenvue-Set-to-Join-S-P-500",
+      "title": "Kenvue Set to Join S&P 500",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "TBA preliminary announcement; dated 2023-08-21 announcement parsed separately"
+    },
+    {
+      "source": "https://press.spglobal.com/2024-12-17-Expected-Growth-of-U-S-LNG-Exports-to-Support-Nearly-500,000-Jobs-Annually-and-Add-1-3-Trillion-to-United-States-Gross-Domestic-Product-Through-2040,-New-S-P-Global-Study-Finds",
+      "title": "Expected Growth of U.S. LNG Exports to Support Nearly 500,000 Jobs Annually and Add $1.3 Trillion to United States Gross Domestic Product Through 2040, New S&P Global Study Finds",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "methodology, classification consultation or economic research; no S&P500 constituent event"
+    },
+    {
+      "source": "https://press.spglobal.com/2026-05-27-S-P-U-S-Indices-Eligible-Exchanges-Methodology-Update",
+      "title": "S&P U.S. Indices Eligible Exchanges Methodology Update",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "methodology, classification consultation or economic research; no S&P500 constituent event"
+    },
+    {
+      "source": "https://press.spglobal.com/2026-07-17-S-P-DOW-JONES-INDICES-AND-MSCI-ANNOUNCE-CONSULTATION-ON-POTENTIAL-CHANGES-TO-THE-GLOBAL-INDUSTRY-CLASSIFICATION-STANDARD-GICS-R",
+      "title": "S&P DOW JONES INDICES AND MSCI ANNOUNCE CONSULTATION ON POTENTIAL CHANGES TO THE GLOBAL INDUSTRY CLASSIFICATION STANDARD (GICS®)",
+      "reason": "no dated S&P500 table parsed",
+      "disposition": "methodology, classification consultation or economic research; no S&P500 constituent event"
+    }
+  ],
+  "source_count": 121,
+  "input_tickers": 616,
+  "input_tickers_with_events": [
+    "AAL",
+    "AAP",
+    "ABMD",
+    "ABNB",
+    "ACGL",
+    "ADS",
+    "ALK",
+    "ALXN",
+    "AMG",
+    "AMTM",
+    "ANET",
+    "ANSS",
+    "APO",
+    "APP",
+    "ARES",
+    "ATO",
+    "AVB",
+    "AXON",
+    "AYI",
+    "BBWI",
+    "BE",
+    "BG",
+    "BLDR",
+    "BMS",
+    "BR",
+    "BRO",
+    "BWA",
+    "BX",
+    "CA",
+    "CAG",
+    "CARR",
+    "CASY",
+    "CDAY",
+    "CDW",
+    "CE",
+    "CELG",
+    "CERN",
+    "CHK",
+    "CIEN",
+    "CMA",
+    "COHR",
+    "COIN",
+    "COL",
+    "COTY",
+    "CPB",
+    "CPRI",
+    "CPRT",
+    "CPT",
+    "CRH",
+    "CRL",
+    "CRWD",
+    "CSGP",
+    "CSRA",
+    "CTLT",
+    "CTRA",
+    "CTXS",
+    "CVNA",
+    "CZR",
+    "DASH",
+    "DAY",
+    "DDOG",
+    "DECK",
+    "DISH",
+    "DOW",
+    "DPS",
+    "DPZ",
+    "DRE",
+    "DXC",
+    "DXCM",
+    "EA",
+    "EME",
+    "EMN",
+    "ENPH",
+    "EPAM",
+    "EQT",
+    "ERIE",
+    "ESRX",
+    "ETFC",
+    "ETSY",
+    "EVHC",
+    "EVRG",
+    "EXE",
+    "FANG",
+    "FBHS",
+    "FDS",
+    "FDXF",
+    "FERG",
+    "FICO",
+    "FIX",
+    "FL",
+    "FLEX",
+    "FLIR",
+    "FLR",
+    "FLS",
+    "FMC",
+    "FOX",
+    "FOXA",
+    "FSLR",
+    "FTNT",
+    "GDDY",
+    "GEHC",
+    "GEV",
+    "GGP",
+    "GNRC",
+    "GT",
+    "HBI",
+    "HES",
+    "HOLX",
+    "HONA",
+    "HOOD",
+    "HP",
+    "HRB",
+    "HUBB",
+    "IBKR",
+    "IEX",
+    "ILMN",
+    "INFO",
+    "INVH",
+    "IPG",
+    "IPGP",
+    "JKHY",
+    "JNPR",
+    "JWN",
+    "K",
+    "KDP",
+    "KEYS",
+    "KKR",
+    "KMX",
+    "KSS",
+    "KSU",
+    "KVUE",
+    "LDOS",
+    "LEG",
+    "LII",
+    "LITE",
+    "LLL",
+    "LULU",
+    "LVS",
+    "LW",
+    "LYV",
+    "M",
+    "MAC",
+    "MHK",
+    "MKTX",
+    "MOH",
+    "MPWR",
+    "MRNA",
+    "MRO",
+    "MRVL",
+    "MSCI",
+    "MTCH",
+    "NDSN",
+    "NFX",
+    "NKTR",
+    "NLSN",
+    "NOV",
+    "NOW",
+    "NVR",
+    "NXPI",
+    "ODFL",
+    "ON",
+    "OTIS",
+    "P",
+    "PANW",
+    "PAYC",
+    "PBCT",
+    "PCG",
+    "PDCO",
+    "PENN",
+    "PLTR",
+    "PODD",
+    "POOL",
+    "PRGO",
+    "PTC",
+    "PVH",
+    "QRVO",
+    "RDDT",
+    "RHT",
+    "ROL",
+    "RRC",
+    "RTN",
+    "SCG",
+    "SEDG",
+    "SIG",
+    "SIVB",
+    "SLG",
+    "SMCI",
+    "SNI",
+    "SOLS",
+    "SOLV",
+    "SRCL",
+    "STE",
+    "STLD",
+    "TAP",
+    "TDY",
+    "TECH",
+    "TER",
+    "TFX",
+    "TIF",
+    "TKO",
+    "TMUS",
+    "TPL",
+    "TRGP",
+    "TRIP",
+    "TRMB",
+    "TSLA",
+    "TSS",
+    "TTD",
+    "TTWO",
+    "TWLO",
+    "TWTR",
+    "TWX",
+    "TYL",
+    "UA",
+    "UAA",
+    "UBER",
+    "UNM",
+    "VEEV",
+    "VFC",
+    "VIAB",
+    "VICI",
+    "VLTO",
+    "VNO",
+    "VRT",
+    "VST",
+    "WAB",
+    "WBA",
+    "WCG",
+    "WDAY",
+    "WHR",
+    "WRB",
+    "WSM",
+    "WYN",
+    "XEC",
+    "XL",
+    "XLNX",
+    "XRAY",
+    "XRX",
+    "XYZ",
+    "ZBRA",
+    "ZION"
+  ],
+  "input_tickers_without_events": [
+    "A",
+    "AAPL",
+    "ABBV",
+    "ABT",
+    "ACN",
+    "ADBE",
+    "ADI",
+    "ADM",
+    "ADP",
+    "ADSK",
+    "AEE",
+    "AEP",
+    "AES",
+    "AFL",
+    "AIG",
+    "AIZ",
+    "AJG",
+    "AKAM",
+    "ALB",
+    "ALGN",
+    "ALL",
+    "ALLE",
+    "AMAT",
+    "AMCR",
+    "AME",
+    "AMGN",
+    "AMP",
+    "AMT",
+    "AMZN",
+    "AON",
+    "AOS",
+    "APA",
+    "APD",
+    "APH",
+    "APTV",
+    "ARE",
+    "AVGO",
+    "AVY",
+    "AWK",
+    "AXP",
+    "AZO",
+    "BA",
+    "BAC",
+    "BALL",
+    "BAX",
+    "BBY",
+    "BDX",
+    "BEN",
+    "BIIB",
+    "BKNG",
+    "BKR",
+    "BLK",
+    "BMY",
+    "BNY",
+    "BSX",
+    "BXP",
+    "C",
+    "CAH",
+    "CAT",
+    "CB",
+    "CBOE",
+    "CBRE",
+    "CCI",
+    "CCL",
+    "CDNS",
+    "CF",
+    "CFG",
+    "CHD",
+    "CHRW",
+    "CHTR",
+    "CI",
+    "CINF",
+    "CL",
+    "CLX",
+    "CMCSA",
+    "CME",
+    "CMG",
+    "CMI",
+    "CMS",
+    "CNC",
+    "CNP",
+    "COF",
+    "COO",
+    "COP",
+    "COR",
+    "COST",
+    "CPAY",
+    "CRM",
+    "CSCO",
+    "CSX",
+    "CTAS",
+    "CTSH",
+    "CVS",
+    "CVX",
+    "D",
+    "DAL",
+    "DD",
+    "DE",
+    "DG",
+    "DGX",
+    "DHI",
+    "DHR",
+    "DIS",
+    "DISCA",
+    "DISCK",
+    "DLR",
+    "DLTR",
+    "DOC",
+    "DOV",
+    "DRI",
+    "DTE",
+    "DUK",
+    "DVA",
+    "DVN",
+    "DWDP",
+    "EBAY",
+    "ECHO",
+    "ECL",
+    "ED",
+    "EFX",
+    "EG",
+    "EIX",
+    "EL",
+    "ELV",
+    "EMR",
+    "EOG",
+    "EQIX",
+    "ES",
+    "ESS",
+    "ETN",
+    "ETR",
+    "EW",
+    "EXC",
+    "EXPD",
+    "EXPE",
+    "EXR",
+    "F",
+    "FAST",
+    "FCX",
+    "FDX",
+    "FE",
+    "FFIV",
+    "FIS",
+    "FISV",
+    "FITB",
+    "FRT",
+    "FTV",
+    "GD",
+    "GE",
+    "GEN",
+    "GILD",
+    "GIS",
+    "GL",
+    "GLW",
+    "GM",
+    "GOOG",
+    "GOOGL",
+    "GPC",
+    "GPN",
+    "GRMN",
+    "GS",
+    "GWW",
+    "HAL",
+    "HAS",
+    "HBAN",
+    "HCA",
+    "HD",
+    "HIG",
+    "HII",
+    "HLT",
+    "HON",
+    "HPE",
+    "HPQ",
+    "HRL",
+    "HSIC",
+    "HST",
+    "HSY",
+    "HUM",
+    "HWM",
+    "IBM",
+    "ICE",
+    "IDXX",
+    "IFF",
+    "INCY",
+    "INTC",
+    "INTU",
+    "IP",
+    "IQV",
+    "IR",
+    "IRM",
+    "ISRG",
+    "IT",
+    "ITW",
+    "IVZ",
+    "J",
+    "JBHT",
+    "JCI",
+    "JNJ",
+    "JPM",
+    "KEY",
+    "KIM",
+    "KLAC",
+    "KMB",
+    "KMI",
+    "KO",
+    "KR",
+    "L",
+    "LEN",
+    "LH",
+    "LHX",
+    "LIN",
+    "LLY",
+    "LMT",
+    "LNT",
+    "LOW",
+    "LRCX",
+    "LUV",
+    "LYB",
+    "MA",
+    "MAA",
+    "MAR",
+    "MAS",
+    "MCD",
+    "MCHP",
+    "MCK",
+    "MCO",
+    "MDLZ",
+    "MDT",
+    "MET",
+    "META",
+    "MGM",
+    "MKC",
+    "MLM",
+    "MMM",
+    "MNST",
+    "MO",
+    "MOS",
+    "MPC",
+    "MRK",
+    "MRSH",
+    "MS",
+    "MSFT",
+    "MSI",
+    "MTB",
+    "MTD",
+    "MU",
+    "NCLH",
+    "NDAQ",
+    "NEE",
+    "NEM",
+    "NFLX",
+    "NI",
+    "NKE",
+    "NOC",
+    "NRG",
+    "NSC",
+    "NTAP",
+    "NTRS",
+    "NUE",
+    "NVDA",
+    "NWS",
+    "NWSA",
+    "O",
+    "OKE",
+    "OMC",
+    "ORCL",
+    "ORLY",
+    "OXY",
+    "PAYX",
+    "PCAR",
+    "PEG",
+    "PEP",
+    "PFE",
+    "PFG",
+    "PG",
+    "PGR",
+    "PH",
+    "PHM",
+    "PKG",
+    "PLD",
+    "PM",
+    "PNC",
+    "PNR",
+    "PNW",
+    "PPG",
+    "PPL",
+    "PRU",
+    "PSA",
+    "PSX",
+    "PWR",
+    "PYPL",
+    "QCOM",
+    "RCL",
+    "REG",
+    "REGN",
+    "RF",
+    "RJF",
+    "RL",
+    "RMD",
+    "ROK",
+    "ROP",
+    "ROST",
+    "RSG",
+    "RTX",
+    "RVTY",
+    "SBAC",
+    "SBUX",
+    "SCHW",
+    "SHW",
+    "SJM",
+    "SKYD",
+    "SLB",
+    "SNA",
+    "SNPS",
+    "SO",
+    "SPG",
+    "SPGI",
+    "SRE",
+    "STT",
+    "STX",
+    "STZ",
+    "SW",
+    "SWK",
+    "SWKS",
+    "SYF",
+    "SYK",
+    "SYY",
+    "T",
+    "TDG",
+    "TFC",
+    "TGT",
+    "TJX",
+    "TMO",
+    "TPR",
+    "TROW",
+    "TRV",
+    "TSCO",
+    "TSN",
+    "TT",
+    "TXN",
+    "TXT",
+    "UAL",
+    "UDR",
+    "UHS",
+    "ULTA",
+    "UNH",
+    "UNP",
+    "UPS",
+    "URI",
+    "USB",
+    "V",
+    "VLO",
+    "VMC",
+    "VMRK",
+    "VRSK",
+    "VRSN",
+    "VRTX",
+    "VTR",
+    "VTRS",
+    "VZ",
+    "WAT",
+    "WDC",
+    "WEC",
+    "WELL",
+    "WLTW",
+    "WM",
+    "WMB",
+    "WMT",
+    "WTW",
+    "XEL",
+    "XOM",
+    "XYL",
+    "YUM",
+    "ZBH",
+    "ZTS"
+  ],
+  "rule": "entry inclusive, exit exclusive; first deletion implies initial member; no-event tickers retain supplied weekly membership",
+  "authority": "only official S&P press release tables and explicitly cited issuer-continuity narrative"
+}

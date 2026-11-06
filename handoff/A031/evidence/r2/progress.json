@@ -1,4 +1,6 @@
 {
-  "phase": "F2",
-  "elapsed": 239.8208037079894
+  "phase": "complete",
+  "elapsed": 303.5411914580036,
+  "database": "inves_cog_bt",
+  "workers": 4
 }

@@ -1,0 +1,1604 @@
+{
+  "metrics": {
+    "return_pct": 361.71686680552915,
+    "annualized_pct": 18.929914688221537,
+    "max_drawdown_pct": -28.324379854896087,
+    "return_over_maxdd": 12.77051319953272,
+    "trades": 399,
+    "buys": 214,
+    "sells": 185,
+    "turnover_x": 29.333929903041668,
+    "turnover_annual_x": 3.324299688825929,
+    "avg_invested_pct": 80.85372621363706,
+    "win_rate": 0.6162162162162163,
+    "avg_holding_days": 358.7030303030303,
+    "exposure_pct": 99.95495495495496,
+    "yearly": {
+      "2018": {
+        "return_pct": -3.2656793559000086,
+        "maxdd_pct": -21.076364437284834
+      },
+      "2019": {
+        "return_pct": 30.752655624223202,
+        "maxdd_pct": -7.6208877187784685
+      },
+      "2020": {
+        "return_pct": 22.554289190459965,
+        "maxdd_pct": -28.324379854896087
+      },
+      "2021": {
+        "return_pct": 19.227445158616852,
+        "maxdd_pct": -10.962110262547364
+      },
+      "2022": {
+        "return_pct": -16.618880880594624,
+        "maxdd_pct": -21.859341531141887
+      },
+      "2023": {
+        "return_pct": 14.604517570055586,
+        "maxdd_pct": -3.274246951291604
+      },
+      "2024": {
+        "return_pct": 49.15507939334063,
+        "maxdd_pct": -9.585589747293
+      },
+      "2025": {
+        "return_pct": 23.2349613154772,
+        "maxdd_pct": -22.854393335277745
+      },
+      "2026": {
+        "return_pct": 38.626139309276944,
+        "maxdd_pct": -15.015609915500328
+      }
+    },
+    "benchmarks": {
+      "SPY": 181.17721471890468,
+      "QQQ": 335.66786548047196
+    },
+    "trade_hash": "0e3b5ac2751a5c27c1379b779e6a031832c96b440607568f076d257bbd7b0901",
+    "survivorship_bias": true,
+    "flags_counts": {
+      "breakdown_v2_blocked": 1488
+    }
+  },
+  "sales": [
+    {
+      "ticker": "META",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2018-07-30",
+      "trade_date": "2018-07-31",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "cf28bc197a0ecdade249369e62f8f6fab22b7f4a77d149f10663e65a09c60d55",
+      "kind": "reduce",
+      "qty": 290,
+      "cost": 49.494299999999996,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 170.67,
+      "notional": 49494.299999999996,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 2.1323444199791375,
+        "60": -15.37837524626261
+      }
+    },
+    {
+      "ticker": "META",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2018-08-14",
+      "trade_date": "2018-08-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "6e30ef625acef3625b81ce868d619c2d4287e1ea245008ee41fad08642fdf69f",
+      "kind": "reduce",
+      "qty": 145,
+      "cost": 26.0043,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 179.34,
+      "notional": 26004.3,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -10.120871163593826,
+        "60": -17.634935665348404
+      }
+    },
+    {
+      "ticker": "ETN",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2018-11-01",
+      "trade_date": "2018-11-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "5f5f8b1688ac53d3421fee58a7aedf52ef71918ff184763121c68596bdb5a0bc",
+      "kind": "reduce",
+      "qty": 676,
+      "cost": 50.307919999999996,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 74.42,
+      "notional": 50307.92,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 6.512834516657584,
+        "60": 4.423812124522142
+      }
+    },
+    {
+      "ticker": "AMAT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2018-12-13",
+      "trade_date": "2018-12-14",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "de65ae50b25b5f4176e8e08318f829315692c1df4145072a755e5c34f89efedd",
+      "kind": "reduce",
+      "qty": 938,
+      "cost": 31.132219999999997,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 33.19,
+      "notional": 31132.219999999998,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 3.369065849923425,
+        "60": 19.234303215926495
+      }
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-01-02",
+      "trade_date": "2019-01-03",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "bbd6e46b60e23797f201655661daaf0202cb86af5df7af5144c4a98b7f29ba3b",
+      "kind": "reduce",
+      "qty": 260,
+      "cost": 63.3048,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 243.48,
+      "notional": 63304.799999999996,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 13.45577369643236,
+        "60": 3.668988811484053
+      }
+    },
+    {
+      "ticker": "COST",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-01-02",
+      "trade_date": "2019-01-03",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "1d19617c2c68e0a454efbc957713a242c98e2d3bc1f840d0084e00e34a3ba3b9",
+      "kind": "reduce",
+      "qty": 322,
+      "cost": 65.5914,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 203.7,
+      "notional": 65591.4,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 4.914679173735159,
+        "60": 21.83913781059774
+      }
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-03-12",
+      "trade_date": "2019-03-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "94180d06bda3e38984532a8cec2964179747411424809f5da6983a8d8a7e81fa",
+      "kind": "reduce",
+      "qty": 97,
+      "cost": 24.05212,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 247.96,
+      "notional": 24052.12,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -2.4658077304261616,
+        "60": -2.172447968285429
+      }
+    },
+    {
+      "ticker": "COHR",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-05-14",
+      "trade_date": "2019-05-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "fade021d221bb701d51faf7a4faf7ddf5b52a3163200e987b963ebf94e902b17",
+      "kind": "reduce",
+      "qty": 593,
+      "cost": 21.12266,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 35.62,
+      "notional": 21122.66,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -4.266446462978246,
+        "60": 4.789430222956237
+      }
+    },
+    {
+      "ticker": "STX",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-06-03",
+      "trade_date": "2019-06-04",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "0a0f7df6d193004d24ac7e54f41d141cd4391b7fda372f0b25ffa3a7973a9d51",
+      "kind": "reduce",
+      "qty": 963,
+      "cost": 41.41863,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 43.01,
+      "notional": 41418.63,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 7.359601449275366,
+        "60": 6.770833333333348
+      }
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-08-02",
+      "trade_date": "2019-08-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "54be2ae0bd8d3049f64f92403183f1ab36e5d80a3d88bfa9bb3b2647a2db3a42",
+      "kind": "reduce",
+      "qty": 97,
+      "cost": 24.06861,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 248.13,
+      "notional": 24068.61,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -5.892434505835309,
+        "60": 2.950297886231934
+      }
+    },
+    {
+      "ticker": "JNJ",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-08-06",
+      "trade_date": "2019-08-07",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "e188cafc398fa89374f7a0f46a66d2f0dad222272f07d424fce86da982c74cfa",
+      "kind": "reduce",
+      "qty": 270,
+      "cost": 34.8705,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 129.15,
+      "notional": 34870.5,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -1.2518239766530992,
+        "60": 1.4054220105982562
+      }
+    },
+    {
+      "ticker": "CVX",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-08-27",
+      "trade_date": "2019-08-28",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "af4a94834b14eb3c8ff3a4eb4b7b91c4dab506014feb45a615bc86ecc6a0bb4a",
+      "kind": "reduce",
+      "qty": 386,
+      "cost": 44.93426,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 116.41,
+      "notional": 44934.26,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 2.8502953008644916,
+        "60": 1.6605323975006359
+      }
+    },
+    {
+      "ticker": "CVX",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2019-10-10",
+      "trade_date": "2019-10-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "47ce5bc18ca7d1154d76aad684b8ea55427ef807dba1dde7ec5b51696736ee56",
+      "kind": "reduce",
+      "qty": 258,
+      "cost": 29.84802,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 115.69,
+      "notional": 29848.02,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 4.115368058544977,
+        "60": 1.334481274214383
+      }
+    },
+    {
+      "ticker": "META",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2020-04-14",
+      "trade_date": "2020-04-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "56484da5d716aeb48fdcf1396e514c6ea2eb8ee67273486faa6b7ba5ef03415f",
+      "kind": "reduce",
+      "qty": 221,
+      "cost": 38.7162165,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 175.1865,
+      "notional": 38716.2165,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 15.895349494264565,
+        "60": 38.481098491269705
+      }
+    },
+    {
+      "ticker": "HD",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2020-04-14",
+      "trade_date": "2020-04-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "ea94973e4a2d5d3219f22eeaad56271bbd2ade7ab6e96b1544a067b59faf3eed",
+      "kind": "reduce",
+      "qty": 206,
+      "cost": 40.985760000000006,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 198.96,
+      "notional": 40985.76,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 15.931076178960101,
+        "60": 26.012696493349473
+      }
+    },
+    {
+      "ticker": "CIEN",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2020-09-23",
+      "trade_date": "2020-09-24",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "5774db56939499516da180c8ab52adddc75bb0c98b85981adb0ea45e967d4f7c",
+      "kind": "reduce",
+      "qty": 580,
+      "cost": 22.6896,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 39.12,
+      "notional": 22689.6,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 6.877897990726445,
+        "60": 32.30293663060277
+      }
+    },
+    {
+      "ticker": "COST",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2021-02-25",
+      "trade_date": "2021-02-26",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "14baa6ced772d24105397ca08ff7a1a1f6b5854e814650a8f80c25ff685f871b",
+      "kind": "reduce",
+      "qty": 161,
+      "cost": 54.01711,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 335.51,
+      "notional": 54017.11,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 6.350453172205439,
+        "60": 15.845921450151046
+      }
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2021-03-31",
+      "trade_date": "2021-04-01",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "5cd415d22df35b03eacbde57ce9c07adc43173673dd2d7f7d42d2ec7fdaf16f6",
+      "kind": "reduce",
+      "qty": 321,
+      "cost": 25.729755,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 80.155,
+      "notional": 25729.755,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 0.6535947712418277,
+        "60": 7.3868541127142695
+      }
+    },
+    {
+      "ticker": "COHR",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2021-08-20",
+      "trade_date": "2021-08-23",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "e80c8d30b2898e9c5d5c3374d0993daff1250f969683f6f76e945059cea3be3b",
+      "kind": "reduce",
+      "qty": 601,
+      "cost": 36.76317,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 61.17,
+      "notional": 36763.17,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -3.5575048732943593,
+        "60": 5.9941520467836185
+      }
+    },
+    {
+      "ticker": "CRM",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-01-06",
+      "trade_date": "2022-01-07",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "8321a69f118a87bb3ac2abffed154d2e55c496c6e89835e4f4379f1fedbffe93",
+      "kind": "reduce",
+      "qty": 193,
+      "cost": 44.100500000000004,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 228.5,
+      "notional": 44100.5,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -4.966930927248036,
+        "60": -7.95847750865053
+      }
+    },
+    {
+      "ticker": "META",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-02-01",
+      "trade_date": "2022-02-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "3f470a85ce221c5835436cebbce45e621dea3f2e0565cc38cdb43ab1a1bae099",
+      "kind": "reduce",
+      "qty": 203,
+      "cost": 66.54745999999999,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 327.82,
+      "notional": 66547.45999999999,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -37.1609907120743,
+        "60": -37.93498452012384
+      }
+    },
+    {
+      "ticker": "COHR",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-02-01",
+      "trade_date": "2022-02-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "34053c8fdbb6d73e9427df676c684c1910d2cc20575abed28302ef68cb94d747",
+      "kind": "reduce",
+      "qty": 300,
+      "cost": 19.220999999999997,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 64.07,
+      "notional": 19220.999999999996,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 9.50078003120125,
+        "60": -4.508580343213719
+      }
+    },
+    {
+      "ticker": "HD",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-03-23",
+      "trade_date": "2022-03-24",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "386905769010aa184b85d65080035d2fdb679591c8777508a1f48ec85ef7e657",
+      "kind": "reduce",
+      "qty": 219,
+      "cost": 69.45585,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 317.15,
+      "notional": 69455.84999999999,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -4.962315536132733,
+        "60": -14.750775856609033
+      }
+    },
+    {
+      "ticker": "AMD",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-04-08",
+      "trade_date": "2022-04-11",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "11f2dfc8490a9dd42c4f9d7fdbc1bb7a7fcd724b24c5dcf8b22665ac57acae41",
+      "kind": "reduce",
+      "qty": 218,
+      "cost": 21.4948,
+      "tier": "attack",
+      "side": "sell",
+      "fill_price": 98.6,
+      "notional": 21494.8,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -8.873369621033177,
+        "60": -18.506726917941883
+      }
+    },
+    {
+      "ticker": "AMZN",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-04-11",
+      "trade_date": "2022-04-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "0e3c8fd6cf2f1f13be22e49415742ed98d3679f6cd1cd58839fb7e34df67a0a9",
+      "kind": "reduce",
+      "qty": 916,
+      "cost": 140.78233,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 153.6925,
+      "notional": 140782.33,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -30.11887590151703,
+        "60": -25.88908231783138
+      }
+    },
+    {
+      "ticker": "COHR",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-04-12",
+      "trade_date": "2022-04-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "3a2bcff59bda007794e81c7078c9f58b269565b76c24f5db3d02a70f9013c9b3",
+      "kind": "reduce",
+      "qty": 150,
+      "cost": 9.543000000000001,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 63.62,
+      "notional": 9543.0,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -2.9639975170701383,
+        "60": -27.063935443823706
+      }
+    },
+    {
+      "ticker": "COST",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-05-13",
+      "trade_date": "2022-05-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "61735611a0658c9d6a1d0fb8c8aa16b06513f0fd4598655fe51d8eae2e97d1f5",
+      "kind": "reduce",
+      "qty": 81,
+      "cost": 40.18734,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 496.14,
+      "notional": 40187.34,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -8.033890764968755,
+        "60": 7.617333629911238
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-05-13",
+      "trade_date": "2022-05-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "a20ddc01e6a5c0583a7136c568dedc4cec7154af82aedbfd6c8837399cea87a3",
+      "kind": "reduce",
+      "qty": 306,
+      "cost": 79.54623,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 259.955,
+      "notional": 79546.23,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -6.504780114722752,
+        "60": 9.759082217973214
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-05-13",
+      "trade_date": "2022-05-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "4a65a1a17b264a34c9ce3c4449828219c83ff2101def171ed6c7f76a5715b242",
+      "kind": "reduce",
+      "qty": 449,
+      "cost": 65.35195,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 145.55,
+      "notional": 65351.950000000004,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -8.781091108973483,
+        "60": 15.768860794283368
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-05-13",
+      "trade_date": "2022-05-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "17e3815d2e26d951b9f7ed92f02e93882fe0b155c53f6aeaa7da2e42e068c1ad",
+      "kind": "reduce",
+      "qty": 311,
+      "cost": 63.76122,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 205.02,
+      "notional": 63761.22,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -0.24132438824268077,
+        "60": -6.366137361841783
+      }
+    },
+    {
+      "ticker": "AVGO",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-05-24",
+      "trade_date": "2022-05-25",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "1d3fad384166df9aa4fd71fa396c42728a389149943876e3d61b2ecfcf450f1c",
+      "kind": "reduce",
+      "qty": 2113,
+      "cost": 110.70007000000001,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 52.39,
+      "notional": 110700.07,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -4.239790831969614,
+        "60": -0.5417301506687067
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-06-15",
+      "trade_date": "2022-06-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "6977c03c603dbc09798a6a955ac34f2ef87011b6eec19c86bf98c48ce5fc96bf",
+      "kind": "reduce",
+      "qty": 155,
+      "cost": 31.16585,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 201.07,
+      "notional": 31165.85,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -10.934852918527637,
+        "60": -5.380152985266184
+      }
+    },
+    {
+      "ticker": "JNJ",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-08-18",
+      "trade_date": "2022-08-19",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "5cbe1e603db2c160435957cace824b68f2b0699d7c6df8788680f073c3f8ac49",
+      "kind": "reduce",
+      "qty": 346,
+      "cost": 57.8166,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 167.1,
+      "notional": 57816.6,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -1.7896166794637014,
+        "60": 1.5356446754474007
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-09-01",
+      "trade_date": "2022-09-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "c44fbc7e129f8afa10705c16378965ee98492024e23a0011bf99c8c5e5b71646",
+      "kind": "reduce",
+      "qty": 225,
+      "cost": 35.94375,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 159.75,
+      "notional": 35943.75,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -8.574545921314424,
+        "60": -9.396059302997251
+      }
+    },
+    {
+      "ticker": "COST",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2022-09-15",
+      "trade_date": "2022-09-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "450aa2ec0ca3f78d4083fd4b11006bcdbedff9d3b51d56d703f2418fa2326373",
+      "kind": "reduce",
+      "qty": 40,
+      "cost": 19.9828,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 499.57,
+      "notional": 19982.8,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -9.81671757845043,
+        "60": -3.264966080850551
+      }
+    },
+    {
+      "ticker": "JNJ",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-01-27",
+      "trade_date": "2023-01-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "dfa5168b5d8af62c35caede53e3d1b45954918cb921b3f984a1fdb0754786e53",
+      "kind": "reduce",
+      "qty": 230,
+      "cost": 38.6239,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 167.93,
+      "notional": 38623.9,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -5.395061728395067,
+        "60": 0.3827160493827142
+      }
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-02-24",
+      "trade_date": "2023-02-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "108d0a20327262d223271b2714faa6ce3381dd7cdb7bcea67c2559a67294daf3",
+      "kind": "reduce",
+      "qty": 42,
+      "cost": 20.52834,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 488.77,
+      "notional": 20528.34,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -0.29380120830919676,
+        "60": -0.8027807663659625
+      }
+    },
+    {
+      "ticker": "HD",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-03-10",
+      "trade_date": "2023-03-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "bf0d0d7a5c57be3c6258044c696204338154cce10d9f379b7af87405671dd816",
+      "kind": "reduce",
+      "qty": 103,
+      "cost": 29.250970000000002,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 283.99,
+      "notional": 29250.97,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 2.530364372469629,
+        "60": 5.298059472288141
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-05-15",
+      "trade_date": "2023-05-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "49720d1c0c6626ee7a2bf95e8c3b64b7cdf020ad14e05aa38192cc5a010d85a7",
+      "kind": "reduce",
+      "qty": 174,
+      "cost": 36.548700000000004,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 210.05,
+      "notional": 36548.700000000004,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 17.432432432432442,
+        "60": 37.654440154440174
+      }
+    },
+    {
+      "ticker": "XOM",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-05-15",
+      "trade_date": "2023-05-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "4755b761d3f3ecfc215c29ab4c66b978b3d6a4e19c7a1798f459039c914f573b",
+      "kind": "reduce",
+      "qty": 969,
+      "cost": 101.38647,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 104.63,
+      "notional": 101386.47,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 2.5751072961373467,
+        "60": 9.081154896605547
+      }
+    },
+    {
+      "ticker": "XOM",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-06-14",
+      "trade_date": "2023-06-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "2e7b9552f1026743626e5ce42e397611c1e0c10930d0e4d7a86476c85359b8ea",
+      "kind": "reduce",
+      "qty": 484,
+      "cost": 51.062,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 105.5,
+      "notional": 51062.0,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -4.259136840117106,
+        "60": 10.954764378128235
+      }
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-09-05",
+      "trade_date": "2023-09-06",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "c6df7c42bf5ea516730090472bbac3200da377a9bc26b43d8c6a7f071a42ead8",
+      "kind": "reduce",
+      "qty": 16,
+      "cost": 7.713439999999999,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 482.09,
+      "notional": 7713.44,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 7.0616849079548905,
+        "60": 15.941208537761575
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2023-11-07",
+      "trade_date": "2023-11-08",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "9c9f04c482667a1a18381bbf6e128770bc7db53d441dd273bd70a40727893daa",
+      "kind": "reduce",
+      "qty": 52,
+      "cost": 12.272,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 236.0,
+      "notional": 12272.0,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 9.62013457116091,
+        "60": 37.43292734860746
+      }
+    },
+    {
+      "ticker": "UNH",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2024-03-12",
+      "trade_date": "2024-03-13",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "aca14a607859c6694dd38b86a0a78bfa4395b54d186a6d0240de183dc4316340",
+      "kind": "reduce",
+      "qty": 44,
+      "cost": 21.714879999999997,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 493.52,
+      "notional": 21714.879999999997,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -9.483606557377044,
+        "60": 0.5512295081967267
+      }
+    },
+    {
+      "ticker": "JNJ",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2024-05-01",
+      "trade_date": "2024-05-02",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.3333333333333333,
+      "order_id": "d3981dd1c878c76ec1c3541221a852f030196210be72cde60e4f6ce4a663956a",
+      "kind": "reduce",
+      "qty": 440,
+      "cost": 66.8976,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 152.04,
+      "notional": 66897.59999999999,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -2.1678228388473886,
+        "60": 7.610725720384215
+      }
+    },
+    {
+      "ticker": "GE",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2024-12-13",
+      "trade_date": "2024-12-16",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "b8b623fe9f3409afd98bc721b29d8988586afc107e0fa5c7ba213492dd8f4370",
+      "kind": "reduce",
+      "qty": 647,
+      "cost": 107.60904,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 166.32,
+      "notional": 107609.04,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 8.414259002352376,
+        "60": 21.858978225465965
+      }
+    },
+    {
+      "ticker": "CAT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2025-02-14",
+      "trade_date": "2025-02-18",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "749d344082e16bb57631583091c968278db1ea7c1fbad5ca6eb087a448e02eae",
+      "kind": "reduce",
+      "qty": 52,
+      "cost": 18.484440000000003,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 355.47,
+      "notional": 18484.440000000002,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": -4.884180790960457,
+        "60": -1.2259887005649617
+      }
+    },
+    {
+      "ticker": "COST",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2025-03-20",
+      "trade_date": "2025-03-21",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "bb75cca6dbc70f2b3d2b92c59402ce73b32aaca2719e5b5b373bbb5cc687c461",
+      "kind": "reduce",
+      "qty": 20,
+      "cost": 17.775000000000002,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 888.75,
+      "notional": 17775.0,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 5.335107669973382,
+        "60": 7.529199568880185
+      }
+    },
+    {
+      "ticker": "PANW",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2025-04-02",
+      "trade_date": "2025-04-03",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "a0bc8f47933def0d7e661ebd41f3e096add1fa9b7660d184112ca1ce413b261f",
+      "kind": "reduce",
+      "qty": 285,
+      "cost": 47.14755,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 165.43,
+      "notional": 47147.55,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 13.6404916147,
+        "60": 19.622207422655457
+      }
+    },
+    {
+      "ticker": "META",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2025-05-14",
+      "trade_date": "2025-05-15",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "17f0a337676b7678f29382db59bd9dc18df418993c677933cd0dca30277228db",
+      "kind": "swing_sell",
+      "qty": 207,
+      "cost": 135.434925,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 654.275,
+      "notional": 135434.925,
+      "status": "filled",
+      "requested_case": true,
+      "forward_pct": {
+        "20": 6.055476175684915,
+        "60": 22.693669627880976
+      }
+    },
+    {
+      "ticker": "META",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-02-04",
+      "trade_date": "2026-02-05",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "1ea4673f58ebb94af677095fe5adcf7de3bfbdd06a86abb75724592a62ea64aa",
+      "kind": "reduce",
+      "qty": 223,
+      "cost": 147.97834,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 663.58,
+      "notional": 147978.34,
+      "status": "filled",
+      "requested_case": true,
+      "forward_pct": {
+        "20": -3.7823965622715283,
+        "60": -8.922576505871305
+      }
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "sell_swing",
+      "label": "波段卖出",
+      "rule_ids": [
+        "M-53"
+      ],
+      "reason_zh": "M-53 波段卖出",
+      "signal_date": "2026-04-24",
+      "trade_date": "2026-04-27",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "order_id": "544d4159f2217f30bf288d7d03c86b8d92a53090da7a1a3b1e695db732f4ecf4",
+      "kind": "swing_sell",
+      "qty": 301,
+      "cost": 104.13998000000001,
+      "tier": "defense",
+      "side": "sell",
+      "fill_price": 345.98,
+      "notional": 104139.98000000001,
+      "status": "filled",
+      "requested_case": true,
+      "forward_pct": {
+        "20": 11.00074213621054,
+        "60": -9.31951818233715
+      }
+    },
+    {
+      "ticker": "WMT",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-06-29",
+      "trade_date": "2026-06-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "88e44f9141d597297ca77719aa35c36d3335fb8fd912aa98076785b242c592b1",
+      "kind": "reduce",
+      "qty": 1529,
+      "cost": 174.26013,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 113.97,
+      "notional": 174260.13,
+      "status": "filled",
+      "requested_case": false,
+      "forward_pct": {
+        "20": 0.8476072752957808,
+        "60": -5.006180469715704
+      }
+    },
+    {
+      "ticker": "META",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-10-28",
+      "trade_date": "2026-10-29",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "bbd4c5c6d52e4e57cbbea3a352b792b595af715e719fb8c0e90657973013805a",
+      "kind": "reduce",
+      "qty": 112,
+      "cost": 69.58392,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 621.285,
+      "notional": 69583.92,
+      "status": "filled",
+      "requested_case": true,
+      "forward_pct": {
+        "20": null,
+        "60": null
+      }
+    },
+    {
+      "ticker": "GOOGL",
+      "action": "sell_frac",
+      "label": "破位减仓",
+      "rule_ids": [
+        "M-55"
+      ],
+      "reason_zh": "M-55 破位减仓",
+      "signal_date": "2026-10-29",
+      "trade_date": "2026-10-30",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "fraction": 0.5,
+      "order_id": "e7ae0cd66847684015785403ed074cacdacc373839b713351f0d4544085c6fb2",
+      "kind": "reduce",
+      "qty": 532,
+      "cost": 149.55318,
+      "tier": "normal",
+      "side": "sell",
+      "fill_price": 281.115,
+      "notional": 149553.18,
+      "status": "filled",
+      "requested_case": true,
+      "forward_pct": {
+        "20": null,
+        "60": null
+      }
+    }
+  ]
+}

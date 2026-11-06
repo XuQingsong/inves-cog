@@ -3,6 +3,7 @@
 from copy import deepcopy
 from math import isfinite
 
+from inves_cog.trading.scoring import FOREIGN
 from inves_cog.trading.scoring.rules import BOOK_KEYS, ENTRY, EXCLUDED
 
 
@@ -23,6 +24,8 @@ def score_blockers(score, thresholds=None):
         books = effective_books(score)
         limits = thresholds or dict(zip(BOOK_KEYS, ENTRY[tier], strict=True))
         out.extend(k for k in BOOK_KEYS if books.get(k) is None or books[k] < limits[k])
+    if score.get("ticker") in FOREIGN:
+        out.append("foreign_issuer")
     if not score.get("tradable", True):
         out.append("untradable")
     if not score.get("m32_ok", False):
