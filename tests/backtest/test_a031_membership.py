@@ -37,9 +37,20 @@ def test_membership_uses_entry_inclusive_exit_exclusive_and_supports_reentry():
 
 def test_official_midcap500_typo_still_identifies_500_not_400():
     from inves_cog.backtest.membership import parse_announcement
-    html = '''<p>Twitter Inc. (NYSE: TWTR) replaces Monsanto (NYSE: MON) in the S&amp;P 500.</p>
+
+    html = """<p>Twitter Inc. (NYSE: TWTR) replaces Monsanto (NYSE: MON) in the S&amp;P 500.</p>
     <table><tr><td>S&amp;P MIDCAP 500 INDEX – JUNE 7, 2018</td></tr>
-    <tr><td>ADDED</td><td>Twitter</td><td>Information Technology</td><td>Software</td></tr></table>'''
-    rows=parse_announcement(html,'https://press.spglobal.com/2018-06-04-example')
-    assert rows[0]['ticker']=='TWTR'
-    assert rows[0]['effective']=='2018-06-07'
+    <tr><td>ADDED</td><td>Twitter</td><td>Information Technology</td><td>Software</td></tr></table>"""
+    rows = parse_announcement(html, "https://press.spglobal.com/2018-06-04-example")
+    assert rows[0]["ticker"] == "TWTR"
+    assert rows[0]["effective"] == "2018-06-07"
+
+
+def test_modern_official_table_expands_effective_date_and_index_rowspans():
+    from inves_cog.backtest.membership import parse_announcement
+    html='''<table><tr><td>Effective Date</td><td>Index Name</td><td>Action</td><td>Company Name</td><td>Ticker</td><td>GICS Sector</td></tr>
+    <tr><td rowspan="2">December 21, 2020</td><td rowspan="2">S&amp;P 500</td><td>Addition</td><td>Tesla</td><td>TSLA</td><td>Consumer Discretionary</td></tr>
+    <tr><td>Deletion</td><td>Apartment Investment</td><td>AIV</td><td>Real Estate</td></tr></table>'''
+    rows=parse_announcement(html,'https://press.spglobal.com/2020-12-11-example')
+    assert [(r['ticker'],r['action'],r['effective']) for r in rows]==[
+        ('TSLA','added','2020-12-21'),('AIV','deleted','2020-12-21')]
