@@ -29,3 +29,14 @@ def test_forward_window_never_fills_an_unfinished_two_year_horizon():
 
     prices = {date(2024, 1, 2): 100, date(2024, 1, 3): 90}
     assert horizon_metrics(prices, prices, date(2024, 1, 2), 104) is None
+
+
+def test_portfolio_initializes_when_first_prior_week_arrives_not_next_month():
+    from datetime import date
+    from inves_cog.backtest.risk_study import PriceSeries, monthly_portfolio
+    ds=[date(2018,1,2),date(2018,1,5),date(2018,1,8),date(2018,1,9)]
+    spy=PriceSeries(ds,[100]*4)
+    stock=PriceSeries(ds,[100,100,100,200])
+    result=monthly_portfolio({date(2018,1,5):{'A':1}},{'A':stock},spy,date(2018,1,1),'A')
+    assert result['rebalances'][0]['date']==date(2018,1,8)
+    assert result['curve'][-1]['equity']==2
