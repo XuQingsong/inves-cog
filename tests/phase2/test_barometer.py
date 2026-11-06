@@ -220,3 +220,10 @@ def test_baro_sentence():
     assert "纳指距 200 日线仅 1.6%" in sent
     neutral = baro_sentence({}, {}, {"__fear": 20, "__greed": 15}, 1.0, 1.0)
     assert "两侧读数都在正常范围" in neutral
+
+
+def test_sentence_missing_vix():
+    from inves_cog.web.barometer import sentence
+
+    rec = {"m": {}, "fl": 3, "gl": 0, "F": 50, "G": 10, "FD": {"恐慌情绪": 80}, "GD": {}}
+    assert "VIX 缺" in sentence(rec)
