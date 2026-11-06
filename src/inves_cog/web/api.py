@@ -1,6 +1,8 @@
 """FastAPI page routes. Each request uses its own read-only transaction."""
 
 import os
+import threading
+import time
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -45,6 +47,37 @@ def _jsonable(value):
     return value
 
 
+_RENDER_TTL = 60.0
+_render_cache = {}
+_render_locks = {}
+_render_guard = threading.Lock()
+_now = time.monotonic
+
+
+def _cached_page(key, produce):
+    """Single-flight 60s cache for slow HTML renders; key = route + query params."""
+    hit = _render_cache.get(key)
+    if hit is not None and hit[0] > _now():
+        return HTMLResponse(hit[1])
+    with _render_guard:
+        lock = _render_locks.setdefault(key, threading.Lock())
+    with lock:
+        hit = _render_cache.get(key)
+        if hit is not None and hit[0] > _now():
+            return HTMLResponse(hit[1])
+        body = produce()
+        _render_cache[key] = (_now() + _RENDER_TTL, body)
+        if len(_render_cache) > 512:
+            cutoff = _now()
+            for stale in [k for k, v in _render_cache.items() if v[0] <= cutoff]:
+                _render_cache.pop(stale, None)
+        return HTMLResponse(body)
+
+
+def _page(key, produce, cache):
+    return _cached_page(key, produce) if cache else HTMLResponse(produce())
+
+
 def create_app(dsn=None, clock=None):
     source = dsn or os.environ["INVES_COG_WEB_DATABASE_URL"]
     clock = clock or SystemClock()
@@ -77,8 +110,11 @@ def create_app(dsn=None, clock=None):
     def barometer_page():
         from inves_cog.web.barometer import api_payload, render_page
 
-        payload = call(lambda c, d, cl: api_payload(c, cl), None)
-        return HTMLResponse(render_page(payload["history"]))
+        def produce():
+            payload = call(lambda c, d, cl: api_payload(c, cl), None)
+            return render_page(payload["history"])
+
+        return _cached_page(("barometer",), produce)
 
     @app.get("/api/pages/linkage/{event_id}")
     def linkage(event_id: str, date: date):
@@ -161,30 +197,30 @@ def _register_html(app, call, clock):
     def lwc_script():
         return Response(_LWC_JS.read_text(encoding="utf-8"), media_type="text/javascript; charset=utf-8")
 
-    def show(builder, requested, **extra):
-        payload = call(builder, requested or latest_visible_session(clock), **extra)
-        return HTMLResponse(render_page(payload))
+    def show(builder, requested, cache=False, **extra):
+        produce = lambda: render_page(call(builder, requested or latest_visible_session(clock), **extra))  # noqa: E731
+        return _page(("show", builder.__name__, requested, frozenset(extra.items())), produce, cache)
 
-    def show_brief(builder, requested, **extra):
+    def show_brief(builder, requested, cache=False, **extra):
         # B-064: brief pages default to today; close cards carry the prior session.
-        payload = call(builder, requested or default_session(clock), **extra)
-        return HTMLResponse(render_brief(payload))
+        produce = lambda: render_brief(call(builder, requested or default_session(clock), **extra))  # noqa: E731
+        return _page(("brief", builder.__name__, requested, frozenset(extra.items())), produce, cache)
 
     @app.get("/")
     def home_html(date: date | None = None):
-        return show_brief(page_brief_market, date)
+        return show_brief(page_brief_market, date, cache=True)
 
     @app.get("/stocks")
     def stocks_html(date: date | None = None):
-        return show_brief(page_brief_stocks, date)
+        return show_brief(page_brief_stocks, date, cache=True)
 
     @app.get("/account")
     def account_html(date: date | None = None):
-        return show_brief(page_brief_account, date)
+        return show_brief(page_brief_account, date, cache=True)
 
     @app.get("/trust")
     def trust_html(date: date | None = None):
-        return show_brief(page_brief_trust, date)
+        return show_brief(page_brief_trust, date, cache=True)
 
     @app.get("/log")
     def log_html(date: date | None = None):
@@ -192,7 +228,7 @@ def _register_html(app, call, clock):
 
     @app.get("/market")
     def market_html(date: date | None = None):
-        return show(page_market, date)
+        return show(page_market, date, cache=True)
 
     @app.get("/linkage/{event_id}")
     def linkage_html(event_id: str, date: date | None = None):
