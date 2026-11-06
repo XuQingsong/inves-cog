@@ -752,10 +752,10 @@ def _bars(connection, day, tickers):
         """
         SELECT ticker, trade_date, volume, close, adj_factor
         FROM ingest.bars_daily
-        WHERE ticker = ANY(%s) AND trade_date <= %s
+        WHERE ticker = ANY(%s) AND trade_date <= %s AND trade_date > %s - 730
         ORDER BY ticker, trade_date
         """,
-        (tickers, day),
+        (tickers, day, day),
     )
     grouped = {}
     for row in rows:
