@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_fresh_upstream_vix_does_not_hide_an_old_cached_barometer_input ______
+
+    def test_fresh_upstream_vix_does_not_hide_an_old_cached_barometer_input():
+>       from inves_cog.dataguard.reader import barometer_drift
+E       ImportError: cannot import name 'barometer_drift' from 'inves_cog.dataguard.reader' (/private/tmp/inves-cog-a030/src/inves_cog/dataguard/reader.py)
+
+tests/dataguard/test_reader.py:83: ImportError
+=========================== short test summary info ============================
+FAILED tests/dataguard/test_reader.py::test_fresh_upstream_vix_does_not_hide_an_old_cached_barometer_input
+1 failed, 6 deselected in 0.33s
