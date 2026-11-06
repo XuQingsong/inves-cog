@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/dataguard/test_recovery.py _______________
+ImportError while importing test module '/private/tmp/inves-cog-a030/tests/dataguard/test_recovery.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/Users/xuqingsong/Documents/Codex/2026-10-13/new-chat-2/work/m0-python/cpython-3.11.17-macos-aarch64-none/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/dataguard/test_recovery.py:3: in <module>
+    from inves_cog.dataguard.recovery import attempt, eligible, ResourceState
+E   ModuleNotFoundError: No module named 'inves_cog.dataguard.recovery'
+=========================== short test summary info ============================
+ERROR tests/dataguard/test_recovery.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.41s
