@@ -1,0 +1,2017 @@
+{
+  "semantics": "Current stored rows classified by observation date; not proof of original pre-repair availability.",
+  "production_writes": false,
+  "provider_calls": 0,
+  "model_calls": 0,
+  "replay": {
+    "2026-11-03": {
+      "errors": [],
+      "findings": [
+        {
+          "dataset": "利率信用与跨资产日线",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "晴雨表恐慌、信用、跨资产判断可能失真",
+            "rows": 0,
+            "label": "利率信用与跨资产日线",
+            "affects_barometer": true,
+            "missing_keys": [
+              "yahoo_px_btcusd",
+              "yahoo_px_gld",
+              "yahoo_px_hyg",
+              "yahoo_px_ief",
+              "yahoo_px_jpyx",
+              "yahoo_px_move",
+              "yahoo_px_soxl",
+              "yahoo_px_tlt",
+              "yahoo_px_tnx",
+              "yahoo_px_tqqq"
+            ]
+          }
+        },
+        {
+          "dataset": "看跌看涨成交比",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "期权情绪判断",
+            "rows": 0,
+            "label": "看跌看涨成交比",
+            "affects_barometer": true,
+            "missing_keys": [
+              "cboe_pc_equity",
+              "cboe_pc_index",
+              "cboe_pc_total"
+            ]
+          }
+        },
+        {
+          "dataset": "空头成交量",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "空头交易活跃度判断；不代表空头持仓",
+            "rows": 0,
+            "label": "空头成交量",
+            "affects_barometer": true,
+            "missing_keys": []
+          }
+        },
+        {
+          "dataset": "隔夜逆回购",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "流动性判断",
+            "rows": 0,
+            "label": "隔夜逆回购",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_rrpontsyd"
+            ]
+          }
+        },
+        {
+          "dataset": "隔夜融资利率",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资压力判断",
+            "rows": 0,
+            "label": "隔夜融资利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_sofr"
+            ]
+          }
+        },
+        {
+          "dataset": "准备金利率",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资利差判断",
+            "rows": 0,
+            "label": "准备金利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_iorb"
+            ]
+          }
+        },
+        {
+          "dataset": "金融压力日报",
+          "date": "2026-11-03",
+          "kind": "missing",
+          "detail": {
+            "impact": "金融压力判断",
+            "rows": 0,
+            "label": "金融压力日报",
+            "affects_barometer": true,
+            "missing_keys": [
+              "ofr_fsi"
+            ]
+          }
+        }
+      ]
+    },
+    "2026-11-04": {
+      "errors": [],
+      "findings": [
+        {
+          "dataset": "利率信用与跨资产日线",
+          "date": "2026-11-04",
+          "kind": "missing",
+          "detail": {
+            "impact": "晴雨表恐慌、信用、跨资产判断可能失真",
+            "rows": 0,
+            "label": "利率信用与跨资产日线",
+            "affects_barometer": true,
+            "missing_keys": [
+              "yahoo_px_btcusd",
+              "yahoo_px_gld",
+              "yahoo_px_hyg",
+              "yahoo_px_ief",
+              "yahoo_px_jpyx",
+              "yahoo_px_move",
+              "yahoo_px_soxl",
+              "yahoo_px_tlt",
+              "yahoo_px_tnx",
+              "yahoo_px_tqqq"
+            ]
+          }
+        },
+        {
+          "dataset": "空头成交量",
+          "date": "2026-11-04",
+          "kind": "missing",
+          "detail": {
+            "impact": "空头交易活跃度判断；不代表空头持仓",
+            "rows": 0,
+            "label": "空头成交量",
+            "affects_barometer": true,
+            "missing_keys": []
+          }
+        },
+        {
+          "dataset": "隔夜逆回购",
+          "date": "2026-11-04",
+          "kind": "missing",
+          "detail": {
+            "impact": "流动性判断",
+            "rows": 0,
+            "label": "隔夜逆回购",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_rrpontsyd"
+            ]
+          }
+        },
+        {
+          "dataset": "隔夜融资利率",
+          "date": "2026-11-04",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资压力判断",
+            "rows": 0,
+            "label": "隔夜融资利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_sofr"
+            ]
+          }
+        },
+        {
+          "dataset": "准备金利率",
+          "date": "2026-11-04",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资利差判断",
+            "rows": 0,
+            "label": "准备金利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_iorb"
+            ]
+          }
+        },
+        {
+          "dataset": "金融压力日报",
+          "date": "2026-11-04",
+          "kind": "missing",
+          "detail": {
+            "impact": "金融压力判断",
+            "rows": 0,
+            "label": "金融压力日报",
+            "affects_barometer": true,
+            "missing_keys": [
+              "ofr_fsi"
+            ]
+          }
+        }
+      ]
+    },
+    "2026-11-05": {
+      "errors": [],
+      "findings": [
+        {
+          "dataset": "利率信用与跨资产日线",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "晴雨表恐慌、信用、跨资产判断可能失真",
+            "rows": 0,
+            "label": "利率信用与跨资产日线",
+            "affects_barometer": true,
+            "missing_keys": [
+              "yahoo_px_btcusd",
+              "yahoo_px_gld",
+              "yahoo_px_hyg",
+              "yahoo_px_ief",
+              "yahoo_px_jpyx",
+              "yahoo_px_move",
+              "yahoo_px_soxl",
+              "yahoo_px_tlt",
+              "yahoo_px_tnx",
+              "yahoo_px_tqqq"
+            ]
+          }
+        },
+        {
+          "dataset": "看跌看涨成交比",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "期权情绪判断",
+            "rows": 0,
+            "label": "看跌看涨成交比",
+            "affects_barometer": true,
+            "missing_keys": [
+              "cboe_pc_equity",
+              "cboe_pc_index",
+              "cboe_pc_total"
+            ]
+          }
+        },
+        {
+          "dataset": "空头成交量",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "空头交易活跃度判断；不代表空头持仓",
+            "rows": 0,
+            "label": "空头成交量",
+            "affects_barometer": true,
+            "missing_keys": []
+          }
+        },
+        {
+          "dataset": "隔夜逆回购",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "流动性判断",
+            "rows": 0,
+            "label": "隔夜逆回购",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_rrpontsyd"
+            ]
+          }
+        },
+        {
+          "dataset": "隔夜融资利率",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资压力判断",
+            "rows": 0,
+            "label": "隔夜融资利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_sofr"
+            ]
+          }
+        },
+        {
+          "dataset": "准备金利率",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资利差判断",
+            "rows": 0,
+            "label": "准备金利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_iorb"
+            ]
+          }
+        },
+        {
+          "dataset": "金融压力日报",
+          "date": "2026-11-05",
+          "kind": "missing",
+          "detail": {
+            "impact": "金融压力判断",
+            "rows": 0,
+            "label": "金融压力日报",
+            "affects_barometer": true,
+            "missing_keys": [
+              "ofr_fsi"
+            ]
+          }
+        }
+      ]
+    },
+    "2026-11-06": {
+      "errors": [],
+      "findings": [
+        {
+          "dataset": "指数与半导体基金日线",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "市场走势与晴雨表",
+            "rows": 0,
+            "label": "指数与半导体基金日线",
+            "affects_barometer": true,
+            "missing_keys": [
+              "QQQ",
+              "SMH",
+              "SOXX",
+              "SPY"
+            ]
+          }
+        },
+        {
+          "dataset": "波动率日线",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "晴雨表恐慌情绪读数可能失真",
+            "rows": 0,
+            "label": "波动率日线",
+            "affects_barometer": true,
+            "missing_keys": [
+              "VIX3M_CBOE",
+              "VIX_CBOE"
+            ]
+          }
+        },
+        {
+          "dataset": "利率信用与跨资产日线",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "晴雨表恐慌、信用、跨资产判断可能失真",
+            "rows": 0,
+            "label": "利率信用与跨资产日线",
+            "affects_barometer": true,
+            "missing_keys": [
+              "yahoo_px_btcusd",
+              "yahoo_px_gld",
+              "yahoo_px_hyg",
+              "yahoo_px_ief",
+              "yahoo_px_jpyx",
+              "yahoo_px_move",
+              "yahoo_px_soxl",
+              "yahoo_px_tlt",
+              "yahoo_px_tnx",
+              "yahoo_px_tqqq"
+            ]
+          }
+        },
+        {
+          "dataset": "看跌看涨成交比",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "期权情绪判断",
+            "rows": 0,
+            "label": "看跌看涨成交比",
+            "affects_barometer": true,
+            "missing_keys": [
+              "cboe_pc_equity",
+              "cboe_pc_index",
+              "cboe_pc_total"
+            ]
+          }
+        },
+        {
+          "dataset": "短期波动与偏斜",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "短期风险判断",
+            "rows": 0,
+            "label": "短期波动与偏斜",
+            "affects_barometer": true,
+            "missing_keys": [
+              "cboe_idx_skew",
+              "cboe_idx_vix9d",
+              "cboe_idx_vvix"
+            ]
+          }
+        },
+        {
+          "dataset": "空头成交量",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "空头交易活跃度判断；不代表空头持仓",
+            "rows": 0,
+            "label": "空头成交量",
+            "affects_barometer": true,
+            "missing_keys": []
+          }
+        },
+        {
+          "dataset": "隔夜逆回购",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "流动性判断",
+            "rows": 0,
+            "label": "隔夜逆回购",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_rrpontsyd"
+            ]
+          }
+        },
+        {
+          "dataset": "准备金利率",
+          "date": "2026-11-06",
+          "kind": "missing",
+          "detail": {
+            "impact": "融资利差判断",
+            "rows": 0,
+            "label": "准备金利率",
+            "affects_barometer": true,
+            "missing_keys": [
+              "fred_iorb"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "plans": [
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,ticker) trade_date AS day,ticker AS key,close AS value,1 AS n,adj_factor AS adjustment FROM ingest.bars_daily WHERE trade_date>=%s AND trade_date<%s AND ticker=ANY(%s) ORDER BY trade_date,ticker,trade_date DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "bars_daily_pkey",
+          "Plan Rows": 18839
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date AS day,ticker AS key,count(*) AS n,NULL AS value FROM ingest.bars_daily WHERE trade_date>=%s AND trade_date<%s GROUP BY trade_date,ticker",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "bars_daily_trade_date_idx",
+          "Plan Rows": 61468
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 181548
+        }
+      ]
+    },
+    {
+      "sql": "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 13634
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 195586
+        }
+      ]
+    },
+    {
+      "sql": "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 14039
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 195586
+        }
+      ]
+    },
+    {
+      "sql": "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 14039
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 209325
+        }
+      ]
+    },
+    {
+      "sql": "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 13739
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 209325
+        }
+      ]
+    },
+    {
+      "sql": "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,ticker) trade_date AS day,ticker AS key,close AS value,1 AS n,adj_factor AS adjustment FROM ingest.bars_daily WHERE trade_date>=%s AND trade_date<%s AND ticker=ANY(%s) ORDER BY trade_date,ticker,trade_date DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "bars_daily_pkey",
+          "Plan Rows": 1290
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::timestamptz[],%s::timestamptz[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM ingest.intraday_snapshots WHERE as_of>=p.lo AND as_of<p.hi AND ticker=ANY(%s) AND ticker=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "intraday_snapshots",
+          "Index Name": "intraday_snapshots_pkey",
+          "Plan Rows": 13
+        }
+      ]
+    },
+    {
+      "sql": "SELECT (as_of AT TIME ZONE 'America/New_York')::date AS day,'all' AS key,count(*) AS n,NULL AS value FROM ingest.wide_snapshots WHERE as_of>=%s AND as_of<%s GROUP BY (as_of AT TIME ZONE 'America/New_York')::date",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_snapshots",
+          "Index Name": "wide_snapshots_as_of",
+          "Plan Rows": 319
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 209325
+        }
+      ]
+    },
+    {
+      "sql": "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "wide_universe",
+          "Index Name": "wide_universe_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::timestamptz[],%s::timestamptz[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM ingest.info_items WHERE first_seen_at>=p.lo AND first_seen_at<p.hi AND kind=ANY(%s) LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "info_items",
+          "Index Name": "info_items_first_seen_idx",
+          "Plan Rows": 581
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (observation_date,series_id) observation_date AS day,series_id AS key,value AS value,1 AS n FROM ingest.macro_observations WHERE observation_date>=%s AND observation_date<%s AND series_id=ANY(%s) ORDER BY observation_date,series_id,fetched_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "macro_observations",
+          "Index Name": "macro_observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (obs_date,series_id) obs_date AS day,series_id AS key,value AS value,1 AS n FROM flows.observations WHERE obs_date>=%s AND obs_date<%s AND series_id=ANY(%s) ORDER BY obs_date,series_id,ingested_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 95
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (obs_date,series_id) obs_date AS day,series_id AS key,value AS value,1 AS n FROM flows.observations WHERE obs_date>=%s AND obs_date<%s AND series_id=ANY(%s) ORDER BY obs_date,series_id,ingested_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 20
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (obs_date,series_id) obs_date AS day,series_id AS key,value AS value,1 AS n FROM flows.observations WHERE obs_date>=%s AND obs_date<%s AND series_id=ANY(%s) ORDER BY obs_date,series_id,ingested_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 16
+        }
+      ]
+    },
+    {
+      "sql": "SELECT date AS day,ticker AS key,count(*) AS n,NULL AS value FROM flows.etf_daily WHERE date>=%s AND date<%s GROUP BY date,ticker",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "etf_daily",
+          "Index Name": "etf_daily_pkey",
+          "Plan Rows": 262
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.option_volume_occ WHERE date>=p.lo AND date<p.hi LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "option_volume_occ",
+          "Index Name": "option_volume_occ_pkey",
+          "Plan Rows": 748
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::timestamptz[],%s::timestamptz[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.option_chain WHERE snapshot_at>=p.lo AND snapshot_at<p.hi AND underlying=ANY(%s) AND underlying=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "option_chain",
+          "Index Name": "option_chain_und_snap_idx",
+          "Plan Rows": 217
+        }
+      ]
+    },
+    {
+      "sql": "SELECT date AS day,ticker AS key,count(*) AS n,NULL AS value FROM flows.short_volume WHERE date>=%s AND date<%s AND ticker=ANY(%s) GROUP BY date,ticker",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "short_volume_pkey",
+          "Plan Rows": 2
+        }
+      ]
+    },
+    {
+      "sql": "SELECT report_date AS day,'all' AS key,count(*) AS n,NULL AS value FROM flows.cftc_positions WHERE report_date>=%s AND report_date<%s GROUP BY report_date",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "cftc_positions",
+          "Index Name": "cftc_positions_pkey",
+          "Plan Rows": 226
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (date) date AS day,'all' AS key,fear AS value,1 AS n,missing AS quality FROM flows.barometer_daily WHERE date>=%s AND date<%s ORDER BY date,date DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "barometer_daily",
+          "Index Name": "barometer_daily_pkey",
+          "Plan Rows": 5
+        }
+      ]
+    },
+    {
+      "sql": "SELECT b.date,b.inputs->>'VIX' AS cached,r.value FROM flows.barometer_daily b LEFT JOIN LATERAL (SELECT value FROM ingest.macro_observations WHERE series_id='VIX_CBOE' AND observation_date=b.date ORDER BY fetched_at DESC LIMIT 1) r ON true WHERE b.date>=%s AND b.date<=%s",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "barometer_daily",
+          "Index Name": "barometer_daily_pkey",
+          "Plan Rows": 5
+        },
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "macro_observations",
+          "Index Name": "macro_observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON ((ts AT TIME ZONE 'America/New_York')::date) (ts AT TIME ZONE 'America/New_York')::date AS day,'all' AS key,fear AS value,1 AS n,missing AS quality FROM flows.barometer_intraday WHERE ts>=%s AND ts<%s ORDER BY (ts AT TIME ZONE 'America/New_York')::date,ts DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "barometer_intraday",
+          "Index Name": "barometer_intraday_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT k.key,r.filed AS day,1 AS n,NULL AS value,f.filing_date AS expected_filed FROM unnest(%s::text[]) AS k(key) JOIN LATERAL (SELECT filed FROM fundamentals.fin_state WHERE ticker=k.key AND filed<=%s AND extractor=ANY(%s) ORDER BY filed DESC LIMIT 1) r ON true LEFT JOIN LATERAL (SELECT filing_date FROM ingest.sec_filings WHERE ticker=k.key AND filing_date<=%s AND form IN ('10-K','10-K/A','10-Q','10-Q/A','20-F','20-F/A','40-F','40-F/A') ORDER BY filing_date DESC LIMIT 1) f ON true",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "fin_state",
+          "Index Name": "fin_state_pkey",
+          "Plan Rows": 61
+        },
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "sec_filings",
+          "Index Name": "sec_filings_ticker_date",
+          "Plan Rows": 47
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::timestamptz[],%s::timestamptz[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM valuation_v1.consensus_snapshots WHERE fetched_at>=p.lo AND fetched_at<p.hi AND kind=ANY(%s) AND status=ANY(%s) LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "consensus_snapshots",
+          "Index Name": "consensus_snapshot_quota",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date AS day,ticker AS key,count(*) AS n,NULL AS value FROM valuation_v1.ranges WHERE trade_date>=%s AND trade_date<%s GROUP BY trade_date,ticker",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "ranges",
+          "Index Name": "ranges_pkey",
+          "Plan Rows": 107
+        }
+      ]
+    },
+    {
+      "sql": "SELECT trade_date AS day,ticker AS key,count(*) AS n,NULL AS value FROM valuation_v1.ceiling_daily WHERE trade_date>=%s AND trade_date<%s AND ticker=ANY(%s) GROUP BY trade_date,ticker",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "ceiling_daily_pkey",
+          "Plan Rows": 112
+        }
+      ]
+    },
+    {
+      "sql": "SELECT signal_date AS day,ticker AS key,count(*) AS n,NULL AS value FROM trading.daily_scores WHERE signal_date>=%s AND signal_date<%s GROUP BY signal_date,ticker",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "daily_scores",
+          "Index Name": "daily_scores_pkey",
+          "Plan Rows": 210
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM trading.plan WHERE trade_date>=p.lo AND trade_date<p.hi AND extractor=ANY(%s) AND portfolio_id=ANY(%s) AND rule_set=ANY(%s) LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "plan",
+          "Index Name": "plan_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 19
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 20
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 4
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 7
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 4
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 4
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 3
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 4
+        }
+      ]
+    },
+    {
+      "sql": "SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::date[],%s::date[],%s::text[]) AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM flows.observations WHERE obs_date>=p.lo AND obs_date<p.hi AND series_id=ANY(%s) AND series_id=p.key LIMIT %s) bounded) r ON r.n>0",
+      "nodes": [
+        {
+          "Node Type": "Index Only Scan",
+          "Relation Name": "observations",
+          "Index Name": "observations_pkey",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 8
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 7
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 3
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 10
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 6
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 3
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 4
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 6
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 4
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 3
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 11
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,ended_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) AND status<>'running' AND ended_at IS NOT NULL ORDER BY trade_date,task_name,ended_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 677
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,ended_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) AND status<>'running' AND ended_at IS NOT NULL ORDER BY trade_date,task_name,ended_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 18
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,ended_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) AND status<>'running' AND ended_at IS NOT NULL ORDER BY trade_date,task_name,ended_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 15
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,ended_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) AND status<>'running' AND ended_at IS NOT NULL ORDER BY trade_date,task_name,ended_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 50
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,ended_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) AND status<>'running' AND ended_at IS NOT NULL ORDER BY trade_date,task_name,ended_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 105
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Bitmap Index Scan",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 8144
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 1
+        }
+      ]
+    },
+    {
+      "sql": "SELECT DISTINCT ON (trade_date,task_name) trade_date AS day,task_name AS key,status AS value,1 AS n,started_at AS seen_at FROM ingest.job_runs WHERE trade_date>=%s AND trade_date<%s AND task_name=ANY(%s) ORDER BY trade_date,task_name,started_at DESC",
+      "nodes": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "job_runs",
+          "Index Name": "job_runs_trade_task",
+          "Plan Rows": 3
+        }
+      ]
+    }
+  ],
+  "read_only": true,
+  "non_admin": true,
+  "cycle_seconds": 0.904,
+  "checked_datasets": 59,
+  "query_errors": [],
+  "current_findings": [
+    {
+      "dataset": "宽池盘中快照",
+      "date": "2026-11-06",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "利率信用与跨资产日线",
+      "date": "2026-10-30",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "利率信用与跨资产日线",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "利率信用与跨资产日线",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "利率信用与跨资产日线",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "利率信用与跨资产日线",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "看跌看涨成交比",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "看跌看涨成交比",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "基金份额",
+      "date": "2026-11-05",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "期权链",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "期权链",
+      "date": "2026-11-03",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "期权链",
+      "date": "2026-11-04",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "空头成交量",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "空头成交量",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "空头成交量",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "空头成交量",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "空头成交量",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "央行与财政流动性",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "货币基金规模",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "金融压力周报",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜逆回购",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜逆回购",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜逆回购",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜逆回购",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜融资利率",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜融资利率",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜融资利率",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜融资利率",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "隔夜融资利率",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "准备金利率",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "准备金利率",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "准备金利率",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "准备金利率",
+      "date": "2026-11-06",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "金融压力日报",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "金融压力日报",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "金融压力日报",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "金融压力日报",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "金融压力日报",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "晴雨表日报",
+      "date": "2026-10-30",
+      "kinds": [
+        "stale"
+      ]
+    },
+    {
+      "dataset": "晴雨表日报",
+      "date": "2026-11-02",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "晴雨表日报",
+      "date": "2026-11-03",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "晴雨表日报",
+      "date": "2026-11-04",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "晴雨表日报",
+      "date": "2026-11-05",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "晴雨表盘中",
+      "date": "2026-11-06",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "一致预期新增快照",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "一致预期新增快照",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "一致预期新增快照",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "增长透支判断",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "增长透支判断",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "纸面计划",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "纸面计划",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "纸面计划",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "日线采集任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "波动与宏观采集任务",
+      "date": "2026-10-30",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "波动与宏观采集任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "波动与宏观采集任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "基本面采集任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "基本面采集任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "晚间评分估值任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "晚间评分估值任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "纸面计划任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "纸面计划任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "纸面计划任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "市场归因日报任务",
+      "date": "2026-11-02",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "市场归因日报任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "市场归因日报任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "市场归因日报任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "归因跟踪任务",
+      "date": "2026-11-02",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "归因跟踪任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "归因跟踪任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "归因跟踪任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "归因标签任务",
+      "date": "2026-11-02",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "归因标签任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "归因标签任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "归因标签任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "事件日历采集任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "早间预采集任务",
+      "date": "2026-10-30",
+      "kinds": [
+        "partial"
+      ]
+    },
+    {
+      "dataset": "早间预采集任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "申报与索引任务",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "申报与索引任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "申报与索引任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "申报与索引任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "每日异动任务",
+      "date": "2026-11-02",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "全量新闻任务",
+      "date": "2026-10-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "全量新闻任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "一致预期采集任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "影子评估任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "影子评估任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "影子评估任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "次日复盘任务",
+      "date": "2026-11-02",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "次日复盘任务",
+      "date": "2026-11-03",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "次日复盘任务",
+      "date": "2026-11-04",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "次日复盘任务",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-10-30",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-10-31",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-11-01",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-11-02",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-11-03",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-11-04",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-11-05",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "全部定时任务失败记录",
+      "date": "2026-11-06",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "每周复盘任务",
+      "date": "2026-10-30",
+      "kinds": [
+        "job_failed"
+      ]
+    },
+    {
+      "dataset": "每月复盘任务",
+      "date": "2026-08-31",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "每月复盘任务",
+      "date": "2026-09-30",
+      "kinds": [
+        "missing"
+      ]
+    },
+    {
+      "dataset": "每月复盘任务",
+      "date": "2026-10-30",
+      "kinds": [
+        "job_failed"
+      ]
+    }
+  ],
+  "incident_values": [
+    {
+      "ticker": "SOXX",
+      "trade_date": "2026-11-03",
+      "close": 465.0,
+      "adj_factor": 0.3333333333333333
+    },
+    {
+      "ticker": "SOXX",
+      "trade_date": "2026-11-04",
+      "close": 450.41,
+      "adj_factor": 0.3333333333333333
+    },
+    {
+      "ticker": "SOXX",
+      "trade_date": "2026-11-05",
+      "close": 131.9,
+      "adj_factor": 1.0
+    }
+  ],
+  "peak_rss_mb": 66.5,
+  "code_head": "33fe469198562f39097f7e44e7c96a279bacb4a2",
+  "measurement": "59 datasets; complete source cycle plus four bounded historical replays; temporary read-only process, not 24-hour resident observation"
+}

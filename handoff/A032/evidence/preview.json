@@ -1,0 +1,16 @@
+{
+  "data_status_head": "33fe469198562f39097f7e44e7c96a279bacb4a2",
+  "home_head": "84be066b8822109ee5f429b174e0a1e1d92d994d",
+  "http": {
+    "/data-status": 200,
+    "/": 200,
+    "/barometer?static": 200
+  },
+  "server": "temporary loopback only, read-only production login",
+  "browser": "Mac Chromium",
+  "redacted": "account payload excluded server-side; event details hidden",
+  "production_install": false,
+  "emails_sent": 0,
+  "images_opened_and_checked": true,
+  "temporary_preview_stopped": true
+}
