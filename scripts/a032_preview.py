@@ -87,6 +87,16 @@ def main():
         "barometer",
         "barometer_today",
         "barometer_intraday",
+        "market3",
+        "mstrip",
+        "sector_strip",
+        "wide_movers_up",
+        "wide_movers_down",
+        "wide_asof",
+        "et_now",
+        "trading_day",
+        "today",
+        "is_today",
     }
 
     def public_market(connection, day, clock):
@@ -125,6 +135,7 @@ def main():
             '<div style="padding:8px 32px;background:#e6f1ec;color:#23705e">'
             "只读预览：守护服务尚未安装，未发送邮件；账户数据已隐藏。</div>"
         )
+        body = body.replace("今天没有需要重点关注的异常", "事件明细已在本次预览隐藏")
         body = re.sub(r"(<body\b[^>]*>)", lambda m: m[0] + notice, body, count=1)
         return HTMLResponse(body, status_code=response.status_code)
 
