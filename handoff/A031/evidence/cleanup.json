@@ -1,0 +1,60 @@
+{
+  "scope": "only this A031 temporary downloads and probe scripts; shared local DB, input panel and CompanyFacts untouched",
+  "paths": [
+    {
+      "path": "/private/tmp/a031-sp-official",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-sp-archive-2018.html",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-sp-abmd.html",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-tsm-companyfacts.json",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-tsm-quarter-index.json",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-tsm-quarter-a3q26e_withguidancexfinal.htm",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-official-discovery.py",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-sp-sample.py",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-tsm-probe.py",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-tsm-facts-probe.py",
+      "existed": true,
+      "removed": true
+    },
+    {
+      "path": "/private/tmp/a031-tsm-quarter-filing.py",
+      "existed": true,
+      "removed": true
+    }
+  ]
+}
