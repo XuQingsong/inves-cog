@@ -91,3 +91,26 @@ def test_expired_entries_purged_on_write():
     cache.get(("new",), lambda: "y")
     assert "old" not in {k[0] for k in cache._entries}
     assert "new" in {k[0] for k in cache._entries}
+
+
+def test_concurrent_stress_no_errors_and_bounded():
+    import random
+
+    cache = api._PageCache()
+    errors = []
+    rng = random.Random(7)
+
+    def worker():
+        try:
+            for _ in range(200):
+                cache.get((f"k{rng.randrange(100)}",), lambda: "x" * 64)
+        except Exception as exc:  # noqa: BLE001
+            errors.append(exc)
+
+    threads = [threading.Thread(target=worker) for _ in range(16)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(30)
+    assert errors == []
+    assert len(cache._entries) <= api._PageCache._MAX_ENTRIES

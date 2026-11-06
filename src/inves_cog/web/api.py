@@ -76,19 +76,22 @@ class _PageCache:
             if hit is not None and hit[0] > self._now():
                 return HTMLResponse(hit[1])
             body = produce()
-            self._entries[key] = (self._now() + self._ttl, body)
-            self._sweep()
+            with self._guard:
+                self._entries[key] = (self._now() + self._ttl, body)
+                self._sweep()
             return HTMLResponse(body)
 
     def _sweep(self):
+        """Purge expired entries, evict the soonest-expiring past the cap, drop
+        orphan free locks. Caller must hold self._guard."""
         now = self._now()
-        for stale in [k for k, v in self._entries.items() if v[0] <= now]:
+        for stale in [k for k, v in list(self._entries.items()) if v[0] <= now]:
             self._entries.pop(stale, None)
         overflow = len(self._entries) - self._MAX_ENTRIES
         if overflow > 0:
             for k, _ in sorted(self._entries.items(), key=lambda kv: kv[1][0])[:overflow]:
                 self._entries.pop(k, None)
-        for k in [k for k in self._locks if k not in self._entries and not self._locks[k].locked()]:
+        for k in [k for k in list(self._locks) if k not in self._entries and not self._locks[k].locked()]:
             self._locks.pop(k, None)
 
 
