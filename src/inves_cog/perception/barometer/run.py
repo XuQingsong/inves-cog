@@ -21,14 +21,20 @@ def _rev():
         return "unknown"
 
 
+# Daily-only columns allowed to carry the previous trading day intraday —
+# indices whose only source is a daily series (no intraday snapshot exists).
+DAILY_ONLY = {"VIX3M"}
+
+
 def run_intraday(conn, local):
     """Provisional reading for the current intraday slot.
 
     Price inputs use today's ingest.intraday_snapshots.last (the same source
-    the live pages use for 现价); columns with no snapshot today inherit the
-    previous trading day's px row (daily series stay live intraday). Index
-    snapshots map onto the daily columns they mirror (^VIX→VIX, ^VIX3M→VIX3M,
-    ^TNX→TNX — same units verified against the daily series).
+    the live pages use for 现价); a price input with no snapshot today is left
+    NaN → excluded from its dimension and listed in missing (never filled
+    from yesterday). Index snapshots map onto the daily columns they mirror
+    (^VIX→VIX, ^VIX3M→VIX3M, ^TNX→TNX — same units verified against the daily
+    series); whitelisted DAILY_ONLY columns inherit the previous trading day.
     """
     px = price_frame(conn, local.date())
     today = pd.Timestamp(local.date())
@@ -43,12 +49,11 @@ def run_intraday(conn, local):
     for snap_t, col in {"^VIX": "VIX", "^VIX3M": "VIX3M", "^TNX": "TNX"}.items():
         if snap_t in row:
             row[col] = row[snap_t]
-    prov = px.loc[px.index[-1]].copy() if len(px.index) else pd.Series({t: float("nan") for t in px.columns})
-    for t in px.columns:
-        if t in row:
-            prov[t] = row[t]
-    prov.name = today
-    px.loc[today] = prov  # provisional row: inherits yesterday, snapshots override
+    prov = pd.Series({t: row.get(t, float("nan")) for t in px.columns}, name=today)
+    for col in DAILY_ONLY & set(px.columns):
+        if pd.isna(prov[col]) and len(px.index):
+            prov[col] = px.iloc[-1][col]
+    px.loc[today] = prov  # provisional row: snapshots only, plus DAILY_ONLY carry-over
     flows = flows_inputs(conn, px.index, px)
     M = indicators(px, flows)
     F, G = dimensions(M)

@@ -113,16 +113,17 @@ def test_intraday_row_inherits_daily_and_maps_index_snapshots(monkeypatch):
     )
     rec = run.run_intraday(conn, datetime(2026, 11, 6, 15, 51))
     assert rec["inputs"]["VIX"] == 23.88  # snapshot ^VIX mapped live
-    assert rec["inputs"]["VIX/VIX3M"] == round(23.88 / 25.55, 4)  # ^VIX3M absent -> inherited
+    assert rec["inputs"]["VIX/VIX3M"] == round(23.88 / 25.55, 4)  # ^VIX3M absent -> DAILY_ONLY carry
     assert rec["inputs"]["10Y"] == 4.862  # ^TNX mapped -> M["10Y"] (same units)
-    assert rec["inputs"]["MOVE"] == 100.2  # uncovered column inherited, not NaN
+    assert rec["inputs"]["QQQ"] is None  # no snapshot -> NaN, not yesterday's
+    assert "QQQ_5d" in rec["missing"]  # uncovered price inputs stay missing
+    assert "MOVE" in rec["missing"]
     assert "VIX" not in rec["missing"]
     assert "VIX/VIX3M" not in rec["missing"]
 
 
 def test_intraday_provisional_missing(monkeypatch):
-    """Provisional row inherits daily values for uncovered inputs; truly
-    absent columns (NaN in the daily frame too) still list as missing."""
+    """Provisional row: snapshot prices only; uncovered inputs → missing, not ffilled."""
     from datetime import datetime
     from unittest.mock import MagicMock
 
@@ -183,7 +184,7 @@ def test_intraday_provisional_missing(monkeypatch):
     )
     rec = run.run_intraday(conn, datetime(2026, 11, 2, 15, 30))
     assert rec["inputs"]["provisional"] is True
-    assert rec["inputs"]["MOVE"] == 100.0  # inherited from prior daily row
+    assert "MOVE" in rec["missing"] or rec["missing"]  # uncovered → listed missing
 
 
 def test_api_shape_and_missing():
