@@ -1,4 +1,4 @@
-"""Page render cache: TTL, single-flight, 200-only."""
+"""Page render cache: TTL, single-flight, per-app isolation."""
 
 import threading
 import time
@@ -6,43 +6,37 @@ import time
 import inves_cog.web.api as api
 
 
-def _reset():
-    api._render_cache.clear()
-    api._render_locks.clear()
-
-
-def test_second_request_within_ttl_skips_render(monkeypatch):
-    _reset()
+def test_second_request_within_ttl_skips_render():
+    cache = api._PageCache()
     calls = []
 
     def produce():
         calls.append(1)
         return "<html>one</html>"
 
-    r1 = api._cached_page(("k",), produce)
-    r2 = api._cached_page(("k",), produce)
+    r1 = cache.get(("k",), produce)
+    r2 = cache.get(("k",), produce)
     assert calls == [1]
     assert r1.body == r2.body == b"<html>one</html>"
 
 
-def test_expired_key_renders_again(monkeypatch):
-    _reset()
-    calls = []
+def test_expired_key_renders_again():
     now = [1000.0]
-    monkeypatch.setattr(api, "_now", lambda: now[0])
+    cache = api._PageCache(now=lambda: now[0])
+    calls = []
 
     def produce():
         calls.append(1)
         return "<html>x</html>"
 
-    api._cached_page(("k",), produce)
+    cache.get(("k",), produce)
     now[0] += api._RENDER_TTL + 1
-    api._cached_page(("k",), produce)
+    cache.get(("k",), produce)
     assert len(calls) == 2
 
 
 def test_concurrent_requests_render_once():
-    _reset()
+    cache = api._PageCache()
     calls = []
     gate = threading.Event()
 
@@ -52,11 +46,11 @@ def test_concurrent_requests_render_once():
         return "<html>s</html>"
 
     results = []
-    t1 = threading.Thread(target=lambda: results.append(api._cached_page(("k",), produce)))
+    t1 = threading.Thread(target=lambda: results.append(cache.get(("k",), produce)))
     t1.start()
     while not calls:  # t1 is inside produce holding the lock
         time.sleep(0.01)
-    t2 = threading.Thread(target=lambda: results.append(api._cached_page(("k",), produce)))
+    t2 = threading.Thread(target=lambda: results.append(cache.get(("k",), produce)))
     t2.start()
     time.sleep(0.1)  # t2 now waits on the key lock
     gate.set()
@@ -67,8 +61,16 @@ def test_concurrent_requests_render_once():
 
 
 def test_different_keys_render_separately():
-    _reset()
+    cache = api._PageCache()
     calls = []
-    api._cached_page(("a",), lambda: calls.append("a") or "A")
-    api._cached_page(("b",), lambda: calls.append("b") or "B")
+    cache.get(("a",), lambda: calls.append("a") or "A")
+    cache.get(("b",), lambda: calls.append("b") or "B")
     assert sorted(calls) == ["a", "b"]
+
+
+def test_caches_are_isolated_per_instance():
+    a, b = api._PageCache(), api._PageCache()
+    calls = []
+    a.get(("k",), lambda: calls.append(1) or "A")
+    b.get(("k",), lambda: calls.append(1) or "B")
+    assert calls == [1, 1]
