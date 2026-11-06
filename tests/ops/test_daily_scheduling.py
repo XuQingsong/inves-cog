@@ -144,3 +144,45 @@ def test_module_poll_never_starts_on_weekend():
         score_run=lambda **kw: pytest.fail("weekend scoring task started"),
     )
     assert result == {}
+
+
+def test_isolated_task_failure_surfaces_as_failed(monkeypatch):
+    import scripts.schedule_daily_modules as mod
+
+    def boom(name, kwargs):
+        raise RuntimeError(f"{name} isolated task failed (exit=1): ValueError: bad")
+
+    monkeypatch.setattr(mod, "_run_isolated", boom)
+    result = mod.run_once(
+        clock=frozen("2026-10-17T02:30:00Z"),
+        values={},
+        ready=lambda *args: True,
+    )
+    assert result["market_structure"] == {"status": "failed", "error_type": "RuntimeError"}
+
+
+def test_isolated_task_returns_task_output(monkeypatch):
+    import scripts.schedule_daily_modules as mod
+
+    seen = []
+
+    def fake(name, kwargs):
+        seen.append(name)
+        return {"status": "ok", "processed_count": 7, "job_id": 42, "ignored_key": "x"}
+
+    monkeypatch.setattr(mod, "_run_isolated", fake)
+    result = mod.run_once(
+        clock=frozen("2026-10-17T02:30:00Z"),
+        values={},
+        ready=lambda *args: True,
+    )
+    assert result["market_structure"] == {"status": "ok", "processed_count": 7, "job_id": 42}
+    assert "ignored_key" not in result["market_structure"]
+    assert "market_structure" in seen
+
+
+def test_run_isolated_propagates_child_failure():
+    import scripts.schedule_daily_modules as mod
+
+    with pytest.raises(RuntimeError, match="not_a_real_task"):
+        mod._run_isolated("not_a_real_task", {"clock": frozen("2026-10-17T02:30:00Z"), "values": {}})

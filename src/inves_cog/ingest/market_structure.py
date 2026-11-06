@@ -125,16 +125,18 @@ def collect_issuer_profiles(pipeline):
             cik = mapping.get(ticker)
             if not cik:
                 raise ValueError("SEC ticker/CIK mapping unavailable")
-            return ticker, cik, sec.submissions(cik), None
+            profile = sec.submissions(cik)
+            return ticker, cik, (profile.get("sic"), profile.get("sicDescription")), None
         except Exception as exc:
             return ticker, None, None, type(exc).__name__ + ": " + str(exc)
 
     count, failures = 0, []
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         for ticker, cik, profile, error in executor.map(fetch, selected):
             if error:
                 failures.append({"ticker": ticker, "reason": error})
                 continue
+            sic, sic_description = profile
             pipeline.repo.connection.execute(
                 "INSERT INTO ingest.issuer_profiles (cik,ticker,sic,sic_description,fetched_at) "
                 "VALUES (%s,%s,%s,%s,%s) ON CONFLICT (ticker) DO UPDATE SET cik=EXCLUDED.cik,"
@@ -142,8 +144,8 @@ def collect_issuer_profiles(pipeline):
                 (
                     cik,
                     ticker,
-                    int(profile["sic"]) if str(profile.get("sic", "")).isdigit() else None,
-                    profile.get("sicDescription"),
+                    int(sic) if str(sic or "").isdigit() else None,
+                    sic_description,
                     pipeline.clock.now_utc(),
                 ),
             )

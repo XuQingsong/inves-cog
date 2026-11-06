@@ -1,6 +1,7 @@
 """Poll accepted module entry points; ET windows and persisted job guards own dispatch."""
 
 import argparse
+import multiprocessing
 import time
 from datetime import datetime, timezone
 
@@ -266,6 +267,40 @@ def _operation(name):
     return run
 
 
+def _child_entry(pipe, name, kwargs):
+    try:
+        pipe.send((True, _operation(name)(**kwargs)))
+    except BaseException as exc:
+        try:
+            pipe.send((False, type(exc).__name__ + ": " + str(exc)))
+        except Exception:
+            pass
+    finally:
+        pipe.close()
+
+
+def _run_isolated(name, kwargs):
+    ctx = multiprocessing.get_context("spawn")
+    recv, send = ctx.Pipe(duplex=False)
+    proc = ctx.Process(target=_child_entry, args=(send, name, kwargs))
+    proc.start()
+    send.close()
+    ok, payload = False, None
+    try:
+        ok, payload = recv.recv()
+    except (EOFError, OSError):
+        pass
+    finally:
+        recv.close()
+        proc.join(timeout=120)
+        if proc.is_alive():
+            proc.terminate()
+            proc.join(timeout=10)
+    if not ok:
+        raise RuntimeError(f"{name} isolated task failed (exit={proc.exitcode}): {payload}")
+    return payload
+
+
 def run_once(
     *,
     clock,
@@ -322,7 +357,7 @@ def run_once(
             kwargs = {"clock": clock, "values": values}
             if day_key:
                 kwargs.update(schedule=True, **{day_key: local.date()})
-            output = (operation or _operation(name))(**kwargs)
+            output = operation(**kwargs) if operation is not None else _run_isolated(name, kwargs)
             result[name] = {
                 key: output[key]
                 for key in (

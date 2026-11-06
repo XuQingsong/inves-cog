@@ -62,9 +62,19 @@ class ReadInputs:
             (signal_day, tickers),
         ).fetchall()
         states = db.execute(
-            "SELECT * FROM fundamentals.fin_state WHERE filed<=%s AND ticker=ANY(%s) AND extractor='fixed' "
-            "ORDER BY ticker,filed DESC",
-            (signal_day, tickers),
+            "SELECT t.* FROM fundamentals.fin_state t JOIN ("
+            "SELECT ticker,filed FROM ("
+            "SELECT ticker,filed,"
+            " dense_rank() OVER (PARTITION BY ticker ORDER BY period_end DESC NULLS LAST) AS period_rank,"
+            " row_number() OVER (PARTITION BY ticker, period_end ORDER BY filed DESC) AS per_period,"
+            " row_number() OVER (PARTITION BY ticker ORDER BY filed DESC) AS filed_rank"
+            " FROM fundamentals.fin_state"
+            " WHERE filed<=%s AND ticker=ANY(%s) AND extractor='fixed'"
+            ") ranked WHERE (per_period=1 AND period_rank<=15) OR filed_rank<=8"
+            ") keep ON keep.ticker=t.ticker AND keep.filed=t.filed"
+            " WHERE t.filed<=%s AND t.ticker=ANY(%s) AND t.extractor='fixed'"
+            " ORDER BY t.ticker,t.filed DESC",
+            (signal_day, tickers, signal_day, tickers),
         ).fetchall()
         valuations = db.execute(
             "SELECT DISTINCT ON(ticker) * FROM valuation_v1.shadow_rules WHERE trade_date<=%s "
