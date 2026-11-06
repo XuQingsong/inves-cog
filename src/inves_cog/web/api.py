@@ -53,7 +53,11 @@ _now = time.monotonic
 
 class _PageCache:
     """Single-flight TTL cache for slow HTML renders; one instance per app,
-    keyed on (route builder, requested date, extra params)."""
+    keyed on (route builder, requested date, extra params). Bounded: expired
+    entries are purged on every write and at most 32 entries (~3MB each) are
+    kept — the soonest-expiring are evicted first."""
+
+    _MAX_ENTRIES = 32
 
     def __init__(self, ttl=_RENDER_TTL, now=_now):
         self._entries = {}
@@ -73,11 +77,19 @@ class _PageCache:
                 return HTMLResponse(hit[1])
             body = produce()
             self._entries[key] = (self._now() + self._ttl, body)
-            if len(self._entries) > 512:
-                cutoff = self._now()
-                for stale in [k for k, v in self._entries.items() if v[0] <= cutoff]:
-                    self._entries.pop(stale, None)
+            self._sweep()
             return HTMLResponse(body)
+
+    def _sweep(self):
+        now = self._now()
+        for stale in [k for k, v in self._entries.items() if v[0] <= now]:
+            self._entries.pop(stale, None)
+        overflow = len(self._entries) - self._MAX_ENTRIES
+        if overflow > 0:
+            for k, _ in sorted(self._entries.items(), key=lambda kv: kv[1][0])[:overflow]:
+                self._entries.pop(k, None)
+        for k in [k for k in self._locks if k not in self._entries and not self._locks[k].locked()]:
+            self._locks.pop(k, None)
 
 
 def _page(store, key, produce, cache):

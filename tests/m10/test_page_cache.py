@@ -74,3 +74,20 @@ def test_caches_are_isolated_per_instance():
     a.get(("k",), lambda: calls.append(1) or "A")
     b.get(("k",), lambda: calls.append(1) or "B")
     assert calls == [1, 1]
+
+
+def test_entries_capped_at_max():
+    cache = api._PageCache()
+    for i in range(40):
+        cache.get((f"k{i}",), lambda i=i: f"<html>{i}</html>")
+    assert len(cache._entries) <= 32
+
+
+def test_expired_entries_purged_on_write():
+    now = [1000.0]
+    cache = api._PageCache(now=lambda: now[0])
+    cache.get(("old",), lambda: "x")
+    now[0] += api._RENDER_TTL + 1
+    cache.get(("new",), lambda: "y")
+    assert "old" not in {k[0] for k in cache._entries}
+    assert "new" in {k[0] for k in cache._entries}
