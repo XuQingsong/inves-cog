@@ -83,7 +83,10 @@ class BacktestEngine(ExecutionEngine):
                         score = self.scores.get(ticker) or {}
                         if score.get("books") and not fundamentals_weakened(previous, score):
                             self.price_exit_recovery[ticker] = {"position": previous, "closes": 0}
-        if self.flags.get("breakdown_confirm") or self.flags.get("reentry_after_price_exit"):
+        if any(
+            self.flags.get(k)
+            for k in ("breakdown_confirm", "breakdown_v2", "breakdown_v2b", "reentry_after_price_exit")
+        ):
             for ticker in self.positions.keys() - previously_held.keys():
                 score = self.scores.get(ticker) or {}
                 self.positions[ticker]["entry_books"] = dict(score.get("books") or {})
@@ -134,7 +137,16 @@ class BacktestEngine(ExecutionEngine):
                         self.restore_sell_stage(ticker, position)
                     self.flags_counts["minimum_hold_blocked"] = self.flags_counts.get("minimum_hold_blocked", 0) + 1
                     return None
-        if rule == "M-55" and self.flags.get("breakdown_confirm"):
+        if rule == "M-55" and (self.flags.get("breakdown_v2") or self.flags.get("breakdown_v2b")):
+            position = self.positions[ticker]
+            weakened = fundamentals_weakened(position, score)
+            if not weakened and (score.get("fear_level") or 0) < 3:
+                self.restore_sell_stage(ticker, position)
+                self.flags_counts["breakdown_v2_blocked"] = self.flags_counts.get("breakdown_v2_blocked", 0) + 1
+                return None
+            if not weakened and self.flags.get("breakdown_v2b"):
+                values["fraction"] = 1 / 3
+        elif rule == "M-55" and self.flags.get("breakdown_confirm"):
             values = self.confirm_breakdown(ticker, values)
             if values is None:
                 return None

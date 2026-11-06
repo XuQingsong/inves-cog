@@ -1,0 +1,442 @@
+[
+  {
+    "ticker": "AGN",
+    "bars": 843,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "AIV",
+    "bars": 33,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "AMTM",
+    "bars": 525,
+    "states": 8,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Amentum Holdings, Inc.",
+        "cik": "0002011286",
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0002011286.json"
+      }
+    ],
+    "resolved_cik": "0002011286"
+  },
+  {
+    "ticker": "ANDV",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "APC",
+    "bars": 836,
+    "states": 2,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "ATVI",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "BIO",
+    "bars": 33,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "COTY",
+    "bars": 2472,
+    "states": 44,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "COTY INC.",
+        "cik": 1024305,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001024305.json"
+      }
+    ],
+    "resolved_cik": 1024305
+  },
+  {
+    "ticker": "CTLT",
+    "bars": 2003,
+    "states": 36,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "CATALENT, INC.",
+        "cik": 1596783,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001596783.json"
+      }
+    ],
+    "resolved_cik": 1596783
+  },
+  {
+    "ticker": "CTVA",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "CXO",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "FTI",
+    "bars": 564,
+    "states": 41,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "TechnipFMC plc",
+        "cik": 1681459,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001681459.json"
+      }
+    ],
+    "resolved_cik": 1681459
+  },
+  {
+    "ticker": "GPS",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "HFC",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "ILMN",
+    "bars": 2472,
+    "states": 44,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Illumina, Inc.",
+        "cik": 1110803,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001110803.json"
+      }
+    ],
+    "resolved_cik": 1110803
+  },
+  {
+    "ticker": "JEF",
+    "bars": 33,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "LKQ",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "LUMN",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "MAT",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "MBC",
+    "bars": 973,
+    "states": 14,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "MasterBrand, Inc.",
+        "cik": "0001941365",
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001941365.json"
+      }
+    ],
+    "resolved_cik": "0001941365"
+  },
+  {
+    "ticker": "MON",
+    "bars": 1506,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "MXIM",
+    "bars": 1170,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "NAVI",
+    "bars": 2472,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Navient Holdings, Inc.",
+        "cik": "2152623",
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0002152623.json"
+      }
+    ],
+    "resolved_cik": "2152623"
+  },
+  {
+    "ticker": "NBL",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "NOV",
+    "bars": 2472,
+    "states": 44,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "NOV INC.",
+        "cik": 1021860,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001021860.json"
+      }
+    ],
+    "resolved_cik": 1021860
+  },
+  {
+    "ticker": "NWL",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "OGN",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "PXD",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "RHI",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "SCG",
+    "bars": 502,
+    "states": 13,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "SCANA CORP",
+        "cik": 754737,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0000754737.json"
+      }
+    ],
+    "resolved_cik": 754737
+  },
+  {
+    "ticker": "SEE",
+    "bars": 2328,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "SOLS",
+    "bars": 261,
+    "states": 4,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Solstice Advanced Materials Inc.",
+        "cik": "0002064953",
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0002064953.json"
+      }
+    ],
+    "resolved_cik": "0002064953"
+  },
+  {
+    "ticker": "TAP",
+    "bars": 2472,
+    "states": 42,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Molson Coors Beverage Company",
+        "cik": 24545,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0000024545.json"
+      }
+    ],
+    "resolved_cik": 24545
+  },
+  {
+    "ticker": "TWTR",
+    "bars": 1466,
+    "states": 27,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Twitter, Inc.",
+        "cik": 1418091,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001418091.json"
+      }
+    ],
+    "resolved_cik": 1418091
+  },
+  {
+    "ticker": "VAR",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "VNO",
+    "bars": 2472,
+    "states": 43,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Vornado Realty Trust",
+        "cik": 899689,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0000899689.json"
+      }
+    ],
+    "resolved_cik": 899689
+  },
+  {
+    "ticker": "VNT",
+    "bars": 564,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "WBA",
+    "bars": 2175,
+    "states": 42,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "WALGREENS BOOTS ALLIANCE, INC.",
+        "cik": 1618921,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001618921.json"
+      }
+    ],
+    "resolved_cik": 1618921
+  },
+  {
+    "ticker": "WBD",
+    "bars": 0,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "Warner Bros. Discovery, Inc.",
+        "cik": 1437107,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0001437107.json"
+      }
+    ],
+    "resolved_cik": 1437107
+  },
+  {
+    "ticker": "WU",
+    "bars": 2472,
+    "states": 0,
+    "cik": null,
+    "local_companyfacts": null,
+    "cached_companyfacts_matches": []
+  },
+  {
+    "ticker": "XRAY",
+    "bars": 2472,
+    "states": 42,
+    "cik": null,
+    "local_companyfacts": true,
+    "cached_companyfacts_matches": [
+      {
+        "entity": "DENTSPLY SIRONA Inc.",
+        "cik": 818479,
+        "path": "/Users/xuqingsong/inves-cog-bt/companyfacts/CIK0000818479.json"
+      }
+    ],
+    "resolved_cik": 818479
+  }
+]

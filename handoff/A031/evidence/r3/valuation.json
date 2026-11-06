@@ -1,0 +1,172 @@
+{
+  "method": "same-day whole-pool p60, min(original threshold, p60), missing never imputed",
+  "metrics": {
+    "return_pct": 150.26865584552067,
+    "annualized_pct": 10.955758834927476,
+    "max_drawdown_pct": -27.506664973696083,
+    "return_over_maxdd": 5.46299073294486,
+    "trades": 480,
+    "buys": 258,
+    "sells": 222,
+    "turnover_x": 28.162003003124983,
+    "turnover_annual_x": 3.1914897911546385,
+    "avg_invested_pct": 70.4694880361309,
+    "win_rate": 0.5495495495495496,
+    "avg_holding_days": 328.21649484536084,
+    "exposure_pct": 99.95495495495496,
+    "yearly": {
+      "2018": {
+        "return_pct": 0.2585478221399873,
+        "maxdd_pct": -19.977162823709126
+      },
+      "2019": {
+        "return_pct": 25.8382692076478,
+        "maxdd_pct": -5.938210175645864
+      },
+      "2020": {
+        "return_pct": 18.92154381799449,
+        "maxdd_pct": -27.506664973696083
+      },
+      "2021": {
+        "return_pct": 18.136212654649174,
+        "maxdd_pct": -8.274170329122976
+      },
+      "2022": {
+        "return_pct": -16.756346868029837,
+        "maxdd_pct": -20.423993630136895
+      },
+      "2023": {
+        "return_pct": 7.2848430036499545,
+        "maxdd_pct": -3.250282263124449
+      },
+      "2024": {
+        "return_pct": 20.850683068238208,
+        "maxdd_pct": -12.926156261404165
+      },
+      "2025": {
+        "return_pct": 14.8465472493579,
+        "maxdd_pct": -19.63254975656842
+      },
+      "2026": {
+        "return_pct": 12.592444117297985,
+        "maxdd_pct": -9.448234412927459
+      }
+    },
+    "benchmarks": {
+      "SPY": 181.17721471890468,
+      "QQQ": 335.66786548047196
+    },
+    "trade_hash": "f12bd3515f7df5cb4fd42170e1a49c80d7ff5ea7654805a80318fcb5143701d3",
+    "survivorship_bias": true,
+    "flags_counts": {}
+  },
+  "extra": [
+    {
+      "ticker": "LRCX",
+      "action": "buy_to",
+      "label": "试仓买入",
+      "rule_ids": [
+        "M-34",
+        "M-35",
+        "M-36",
+        "M-37"
+      ],
+      "reason_zh": "M-34 试仓买入",
+      "signal_date": "2026-05-11",
+      "trade_date": "2026-05-12",
+      "rule_set": "A",
+      "params_version": "p-2026.10",
+      "tier": "attack",
+      "fraction": 0.48,
+      "certainty": "medium",
+      "half": true,
+      "order_id": "ac74cfcf7cd9b71bb572349e25b1a3bd6ea6c1c20c9461df8a48d510ab50de07",
+      "kind": "open",
+      "qty": 158,
+      "cost": 45.37996999999999,
+      "planned_tier": "attack",
+      "planned_tier_only_qty": 158,
+      "side": "buy",
+      "fill_price": 287.215,
+      "notional": 45379.969999999994,
+      "status": "filled",
+      "forward_pct": {
+        "20": 11.3,
+        "60": 7.6,
+        "120": null
+      }
+    }
+  ],
+  "extra_summary": {
+    "buys": 1,
+    "tickers": [
+      "LRCX"
+    ],
+    "20": {
+      "n": 1,
+      "median_pct": 11.3,
+      "win_pct": 100.0
+    },
+    "60": {
+      "n": 1,
+      "median_pct": 7.6,
+      "win_pct": 100.0
+    },
+    "120": {
+      "n": 0,
+      "median_pct": null,
+      "win_pct": null
+    }
+  },
+  "baseline_summary": {
+    "buys": 112,
+    "tickers": [
+      "AAPL",
+      "ADBE",
+      "AMAT",
+      "AMD",
+      "AMZN",
+      "ANET",
+      "AVGO",
+      "CAT",
+      "CRWD",
+      "DELL",
+      "FTNT",
+      "GOOGL",
+      "HD",
+      "JNJ",
+      "KLAC",
+      "LLY",
+      "LRCX",
+      "META",
+      "MSFT",
+      "MU",
+      "NFLX",
+      "NOW",
+      "NVDA",
+      "ORCL",
+      "PANW",
+      "QCOM",
+      "UNH",
+      "VRT",
+      "WDC",
+      "WMT",
+      "ZS"
+    ],
+    "20": {
+      "n": 106,
+      "median_pct": 1.6,
+      "win_pct": 54.716981132075475
+    },
+    "60": {
+      "n": 100,
+      "median_pct": 10.25,
+      "win_pct": 70.0
+    },
+    "120": {
+      "n": 87,
+      "median_pct": 14.1,
+      "win_pct": 71.26436781609195
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "tests": "tests/backtest and tests/m4/test_execution.py::test_v18_replay",
+  "result": "42 passed",
+  "seconds": 9.6,
+  "ruff": "passed",
+  "default_trade_hash": "f56ffe611b7c029a8e55a59936fdb298b9ce902377c8a74ff39428d0e4a7e767",
+  "ci": "recorded separately for final exact head; local result is not CI"
+}

@@ -29,6 +29,16 @@ def _code_rev():
         return "unknown"
 
 
+def breakdown_policy_enabled(flags):
+    return any(flags.get(k) for k in ("breakdown_confirm", "breakdown_v2", "breakdown_v2b"))
+
+
+def research_policy_enabled(flags):
+    return breakdown_policy_enabled(flags) or any(
+        flags.get(k) for k in ("buy_consistency", "watch_promote", "reentry_after_price_exit")
+    )
+
+
 def prepare_inputs(connection, spec):
     """Load prices/signals/vix once — reused across replays and rolling starts."""
     loader = BacktestLoader(connection)
@@ -65,7 +75,7 @@ def prepare_inputs(connection, spec):
         signals[t] = enrich(snaps, state_lookup, t, extractor)
     vix = loader.vix(end)
     prepared = {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
-    if spec.get("load_fear_levels") or (spec.get("flags") or {}).get("breakdown_confirm"):
+    if spec.get("load_fear_levels") or breakdown_policy_enabled(spec.get("flags") or {}):
         rows = connection.execute(
             "SELECT date, fear_level FROM flows.barometer_daily WHERE date BETWEEN %s AND %s "
             "AND asof < ((date + 1)::timestamp AT TIME ZONE 'America/New_York')",
@@ -90,13 +100,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     flags = spec.get("flags") or {}
-    engine_type = (
-        BacktestEngine
-        if any(
-            flags.get(k) for k in ("buy_consistency", "watch_promote", "breakdown_confirm", "reentry_after_price_exit")
-        )
-        else ExecutionEngine
-    )
+    engine_type = BacktestEngine if research_policy_enabled(flags) else ExecutionEngine
     engine = engine_type(
         clock=clock,
         initial_cash=initial,
@@ -190,9 +194,14 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     prev_blocked = set()
     ceiling_streaks = {}
     fear_levels = pre.get("fear_levels", {})
-    if flags.get("breakdown_confirm") and "fear_levels" not in pre:
+    if breakdown_policy_enabled(flags) and "fear_levels" not in pre:
         raise ValueError("F2 requires the local PIT market-risk input in prepared data")
-    bar_dates = {t: sorted(rows) for t, rows in prices.items()} if flags.get("breakdown_confirm") else {}
+    bar_dates = {t: sorted(rows) for t, rows in prices.items()} if breakdown_policy_enabled(flags) else {}
+    from .history import CloseHistory
+
+    histories = {ticker: CloseHistory(rows) for ticker, rows in prices.items()}
+    vix_history = CloseHistory({d: {"close": value} for d, value in vix.items()})
+    selection_rows, relaxed_streaks = [], {}
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
@@ -275,7 +284,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                         "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
                     }
                 )
-        if flags.get("breakdown_confirm"):
+        if breakdown_policy_enabled(flags):
             for ticker, score in daily.items():
                 bars = prices.get(ticker, {})
                 index = bisect.bisect_right(bar_dates.get(ticker, ()), day)
@@ -286,6 +295,16 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                 score["breakdown_depth_atr"] = breakdown_depth_atr(
                     recent, tech.get("price"), tech.get("price_vs_ma200")
                 )
+        if spec.get("relax_book"):
+            from .selection_gap import effective_books, quantile, relax_book
+
+            book = spec["relax_book"]
+            cutoff = quantile([effective_books(score).get(book) for score in daily.values()])
+            if cutoff is not None:
+                daily = {ticker: relax_book(score, book, cutoff) for ticker, score in daily.items()}
+                for ticker, score in daily.items():
+                    relaxed_streaks[ticker] = relaxed_streaks.get(ticker, 0) + 1 if score["entry_pass"] else 0
+                    score["consec_pass"] = relaxed_streaks[ticker]
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
@@ -304,12 +323,12 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                 if day in r
             },
         )
-        spy = [prices["SPY"][d]["close"] for d in sorted(prices["SPY"]) if d <= day]
+        spy = histories["SPY"].at(day)
         returns = (
             100 * (spy[-1] / spy[-2] - 1) if len(spy) >= 2 else None,
             100 * (spy[-1] / spy[-6] - 1) if len(spy) >= 6 else None,
         )
-        history = {t: [r["close"] for d, r in sorted(rows.items()) if d <= day] for t, rows in prices.items()}
+        history = {ticker: history.at(day) for ticker, history in histories.items()}
         engine.decide(
             day,
             daily,
@@ -317,8 +336,12 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
             history=history,
             spy_returns=returns,
             vix=vix.get(day),
-            vix_history=[v for d, v in sorted(vix.items()) if d <= day],
+            vix_history=vix_history.at(day),
         )
+        if spec.get("audit_selection") and day >= spec.get("audit_selection_start", start):
+            from .selection_gap import selection_audit
+
+            selection_rows.extend(selection_audit(engine, daily, day, spec["audit_selection"]))
     metrics = equity_metrics(
         [{"date": r["day"], "equity": r["equity"], "cash": r["cash"]} for r in engine.curve],
         engine.trades,
@@ -340,6 +363,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
         "metrics": metrics,
         "trades": copy.deepcopy(engine.trades),
         "veto_events": veto_events,
+        "selection_audit": selection_rows,
         "curve": engine.curve,
         "positions": engine.positions,
         "audit": {

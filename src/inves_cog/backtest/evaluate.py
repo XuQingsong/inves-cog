@@ -1,12 +1,14 @@
 """Evaluation methods for P2-R4: rolling-start distribution + signal-level analysis."""
 
+import json
 import multiprocessing
 import statistics
 from datetime import date
+from pathlib import Path
 
 from inves_cog.ingest.market import next_trading_day
 
-from .runner import prepare_inputs, run_backtest
+from .runner import breakdown_policy_enabled, prepare_inputs, run_backtest
 
 _G_PREPARED = None
 
@@ -50,7 +52,7 @@ def fear_coverage(replay_days, fear_levels, start, end):
     }
 
 
-def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
+def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4, prepared=None, checkpoint_dir=None):
     """For each quarter start, run baseline + each variant; report the distribution.
 
     Scores/prices are computed once for the earliest start and inherited by fork
@@ -58,17 +60,35 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     """
     global _G_PREPARED
     starts = starts or quarter_starts()
-    _G_PREPARED = prepare_inputs(
+    _G_PREPARED = prepared or prepare_inputs(
         connection,
-        {**spec, "start": min(starts), "load_fear_levels": any(f.get("breakdown_confirm") for f in variants.values())},
+        {**spec, "start": min(starts), "load_fear_levels": any(breakdown_policy_enabled(f) for f in variants.values())},
     )
     jobs = []
     for st in starts:
         jobs.append({**spec, "start": st, "label": f"base-{st}", "flags": {}})
         jobs += [{**spec, "start": st, "label": f"{n}-{st}", "flags": f} for n, f in variants.items()]
     ctx = multiprocessing.get_context("fork")
+    directory = Path(checkpoint_dir) if checkpoint_dir is not None else None
+    if directory:
+        directory.mkdir(parents=True, exist_ok=True)
+    results = [None] * len(jobs)
+    todo = []
+    for index, job in enumerate(jobs):
+        checkpoint = directory / (job["label"] + ".json") if directory else None
+        if checkpoint is not None and checkpoint.exists():
+            results[index] = json.loads(checkpoint.read_text())
+        else:
+            todo.append((index, job))
     with ctx.Pool(max(1, min(workers, 4))) as pool:
-        results = pool.map(_one_replay, jobs)
+        pending = pool.imap(_one_replay, [job for _, job in todo], chunksize=1)
+        for (index, job), result in zip(todo, pending, strict=True):
+            results[index] = result
+            if directory:
+                checkpoint = directory / (job["label"] + ".json")
+                temporary = checkpoint.with_suffix(".tmp")
+                temporary.write_text(json.dumps(result, default=str) + "\n")
+                temporary.replace(checkpoint)
     replay_days = {day for prices in _G_PREPARED["prices"].values() for day in prices}
     fear_levels = _G_PREPARED.get("fear_levels", {})
     i = 0
@@ -90,7 +110,7 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "beats": m["return_pct"] > base["return_pct"],
                     "short_hold_sales": m["short_hold_sales"],
                     "fear_coverage": fear_coverage(replay_days, fear_levels, st, spec["end"])
-                    if variants[name].get("breakdown_confirm")
+                    if breakdown_policy_enabled(variants[name])
                     else None,
                 }
             )
