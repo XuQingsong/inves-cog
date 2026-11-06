@@ -1,0 +1,67 @@
+{
+  "comparison": "same cached filing EPS facts: Arelle versus namespace-checked XML",
+  "results": [
+    {
+      "filed": "2024-04-24",
+      "arelle_eps_facts": 4,
+      "raw_eps_facts": 4,
+      "identical": true
+    },
+    {
+      "filed": "2024-07-24",
+      "arelle_eps_facts": 4,
+      "raw_eps_facts": 4,
+      "identical": true
+    },
+    {
+      "filed": "2024-11-13",
+      "arelle_eps_facts": 3,
+      "raw_eps_facts": 3,
+      "identical": true
+    },
+    {
+      "filed": "2025-01-31",
+      "arelle_eps_facts": 2,
+      "raw_eps_facts": 2,
+      "identical": true
+    },
+    {
+      "filed": "2025-04-30",
+      "arelle_eps_facts": 4,
+      "raw_eps_facts": 4,
+      "identical": true
+    },
+    {
+      "filed": "2025-07-30",
+      "arelle_eps_facts": 4,
+      "raw_eps_facts": 4,
+      "identical": true
+    },
+    {
+      "filed": "2025-11-06",
+      "arelle_eps_facts": 3,
+      "raw_eps_facts": 3,
+      "identical": true
+    },
+    {
+      "filed": "2026-01-30",
+      "arelle_eps_facts": 2,
+      "raw_eps_facts": 2,
+      "identical": true
+    },
+    {
+      "filed": "2026-04-29",
+      "arelle_eps_facts": 4,
+      "raw_eps_facts": 4,
+      "identical": true
+    },
+    {
+      "filed": "2026-07-29",
+      "arelle_eps_facts": 4,
+      "raw_eps_facts": 4,
+      "identical": true
+    }
+  ],
+  "all_identical": true,
+  "production_writes": false
+}

@@ -1,0 +1,57 @@
+{
+  "source": "Mac existing SEC filing cache; offline, no production writes",
+  "rows": [
+    {
+      "filed": "2024-07-24",
+      "period_end": "2024-06-30",
+      "old_eps_ttm": null,
+      "new_eps_ttm": 8.719999999999999,
+      "eps_growth": null,
+      "origins": [
+        "instance_parsed"
+      ],
+      "health": [
+        "ni_tag_fallback"
+      ]
+    },
+    {
+      "filed": "2025-11-06",
+      "period_end": "2025-09-30",
+      "old_eps_ttm": null,
+      "new_eps_ttm": 10.2,
+      "eps_growth": 4.830421377183947,
+      "origins": [
+        "instance_parsed"
+      ],
+      "health": [
+        "ni_tag_fallback"
+      ]
+    },
+    {
+      "filed": "2026-01-30",
+      "period_end": "2025-12-31",
+      "old_eps_ttm": null,
+      "new_eps_ttm": 10.649999999999999,
+      "eps_growth": 7.358870967741926,
+      "origins": [
+        "instance_parsed"
+      ],
+      "health": [
+        "ni_tag_fallback"
+      ]
+    },
+    {
+      "filed": "2026-04-29",
+      "period_end": "2026-03-31",
+      "old_eps_ttm": null,
+      "new_eps_ttm": 11.469999999999999,
+      "eps_growth": 15.27638190954772,
+      "origins": [
+        "instance_parsed"
+      ],
+      "health": [
+        "ni_tag_fallback"
+      ]
+    }
+  ]
+}

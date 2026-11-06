@@ -166,6 +166,7 @@ def source(row):
             "original_value",
             "original_unit",
             "origin",
+            "eps_fallback",
             "d9_only",
             "dimensions",
             "split_adjustment",
@@ -430,7 +431,9 @@ def extract_state(
     d9 = settings().get("d9", {})
     approved_extra = ticker in d9.get("predecessor_ciks", {}) or ticker in d9.get("dimensional_facts", {})
     if enabled["D9"] and approved_extra and instance_facts:
-        data = merge_facts(data, instance_facts)
+        from inves_cog.ingest.fundamentals.repairs import class_eps_fallback
+
+        data = merge_facts(data, class_eps_fallback(data, instance_facts, as_of))
     if (
         fixed
         and foreign

@@ -90,6 +90,21 @@ def prepare(engine, target, inputs, universe, overlay=None):
     return plan
 
 
+def annotate_ceiling(plan, ceilings):
+    """Explanation-only annotation after the execution engine has decided orders."""
+    for order in plan.get("orders", []):
+        if order.get("side") != "buy":
+            continue
+        row = ceilings.get(order["ticker"], {})
+        if not row:
+            continue
+        m = row.get("m")
+        note = f"隐含利润倍数 {m:.1f}，{row.get('band', '档位暂缺')}" if m is not None else "隐含天花板数据暂缺或不适用"
+        original = order.get("reason_zh", "").split("；隐含利润倍数", 1)[0]
+        original = original.split("；隐含天花板数据", 1)[0]
+        order["reason_zh"] = original + "；" + note
+
+
 def daily_plan(*, clock, connection, universe, target, overlay=None, persist=True):
     signal_day = exchange(target.year).previous_session(str(target)).date()
     repository = Repository(connection)
@@ -113,6 +128,7 @@ def daily_plan(*, clock, connection, universe, target, overlay=None, persist=Tru
         ledger_checked=persist,
         overlay=overlay,
     )
+    annotate_ceiling(plan, repository.ceiling_notes(signal_day, clock.now_utc()))
     if persist:
         with connection.transaction():
             engine.persist_orders(connection, plan["orders"])

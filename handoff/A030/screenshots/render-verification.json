@@ -1,0 +1,38 @@
+[
+  {
+    "symbol": "NVDA",
+    "dimensions": [
+      1440,
+      4300
+    ],
+    "exit_code": null,
+    "exit_timeout": true
+  },
+  {
+    "symbol": "KO",
+    "dimensions": [
+      1440,
+      1700
+    ],
+    "exit_code": null,
+    "exit_timeout": true
+  },
+  {
+    "symbol": "MU",
+    "dimensions": [
+      1440,
+      4300
+    ],
+    "exit_code": null,
+    "exit_timeout": true
+  },
+  {
+    "symbol": "INTC",
+    "dimensions": [
+      1440,
+      4300
+    ],
+    "exit_code": null,
+    "exit_timeout": true
+  }
+]

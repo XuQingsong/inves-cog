@@ -106,6 +106,7 @@ class Repository:
             else []
         )
         return {
+            "tiers": self.tiers(through, tickers),
             "sic": {r["ticker"]: r["sic"] for r in profiles},
             "store": StateStore(states),
             "states": dict(grouped),
@@ -227,8 +228,43 @@ class Repository:
             list(base.values()),
         )
 
+    def tiers(self, day, tickers):
+        if not self.exists("trading", "daily_scores"):
+            return {}
+        rows = self.connection.execute(
+            "SELECT ticker,tier FROM trading.daily_scores WHERE signal_date=%s AND ticker=ANY(%s) "
+            "AND extractor='fixed' AND rule_set='A' AND params_version=%s",
+            (day, tickers, settings()["params_version"]),
+        ).fetchall()
+        return {r["ticker"]: {"attack": "进攻", "defense": "防守", "normal": "普通"}.get(r["tier"]) for r in rows}
+
+    def save_ceiling(self, day, row, observed_at):
+        columns = ["method", "r", "m", "m_r_minus_1", "m_r_plus_1", "fcf_m", "quality", "band", "band_rule"]
+        base = {
+            "ticker": row["ticker"],
+            "trade_date": day,
+            **{k: row[k] for k in columns},
+            "evidence": jsonb(row["evidence"]),
+            "missing": jsonb(row["missing"]),
+            "asof": row["asof"],
+            "payload": jsonb(row),
+            "observed_at": observed_at,
+        }
+        keys = list(base)
+        self.connection.execute(
+            "INSERT INTO valuation_v1.ceiling_daily ("
+            + ",".join(keys)
+            + ") VALUES ("
+            + ",".join(["%s"] * len(keys))
+            + ") ON CONFLICT(ticker,trade_date) DO UPDATE SET "
+            + ",".join(k + "=EXCLUDED." + k for k in keys if k not in {"ticker", "trade_date"}),
+            list(base.values()),
+        )
+
     def save(self, day, result, observed_at):
         with self.connection.transaction():
+            for row in result.get("ceilings", []):
+                self.save_ceiling(day, row, observed_at)
             for table, rows in [
                 ("ranges", result["ranges"]),
                 ("position_panel", result["panel"] + [result["summary"]]),

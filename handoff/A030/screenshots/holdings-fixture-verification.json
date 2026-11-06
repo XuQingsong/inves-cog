@@ -1,0 +1,11 @@
+[
+  {
+    "symbol": "holdings-fixture",
+    "dimensions": [
+      1440,
+      1000
+    ],
+    "exit_code": null,
+    "exit_timeout": true
+  }
+]

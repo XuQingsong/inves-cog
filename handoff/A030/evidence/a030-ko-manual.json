@@ -1,0 +1,69 @@
+{
+  "day": "2026-11-04",
+  "source": "KO existing Mac production-copy financials; production 2026-11-04 close; not added to 59-stock universe",
+  "count": 1,
+  "compute_seconds": 0.013492833000782412,
+  "process_peak_mb": 31.96875,
+  "rows": [
+    {
+      "ticker": "KO",
+      "trade_date": "2026-11-04",
+      "method": "growth",
+      "r": 0.08,
+      "m": 3.969578446806315,
+      "m_r_minus_1": 3.194117486706541,
+      "m_r_plus_1": 4.852386409331929,
+      "fcf_m": null,
+      "quality": "高",
+      "band": "不适用",
+      "band_rule": "ceiling-bands-v1-2026-11-05",
+      "missing": [
+        "rule_a_tier",
+        "band_calibration_not_visible",
+        "FY1_consensus",
+        "roic",
+        "fy2_eps",
+        "gross_margin_trend_pp"
+      ],
+      "asof": "2026-11-04 22:30:00-05:00",
+      "evidence": {
+        "rev_growth": 7.114533285777225,
+        "rev_accel_pp": 0.685611400082986,
+        "gross_margin": 62.31832961178361,
+        "roic": null,
+        "financial_filed": "2026-10-28",
+        "fy2_eps": null,
+        "normalized_profit": 12576340000.0,
+        "tax_rate_proxy": 0.18,
+        "profit_basis": "normalized_TTM_revenue_growth_proxy",
+        "gross_margin_trend_pp": null,
+        "fy2_coverage": null,
+        "fcf_net_profit_ratio": 0.9762799917971153
+      },
+      "ev": 436323200000.0,
+      "next_profit": 13471087895.432516,
+      "implied_terminal_profit": null
+    }
+  ],
+  "manual_checks": [
+    {
+      "ticker": "KO",
+      "close": 95.8,
+      "diluted_shares": 4314000000.0,
+      "net_debt": 23042000000.0,
+      "revenue": 51054000000.0,
+      "operating_margin_pct": 30.040741176009718,
+      "fy1_eps": null,
+      "method": "growth",
+      "manual_ev": 436323200000.0,
+      "ev_error": 0.0,
+      "manual_multiple": 32.389603823158104,
+      "reported_ev_over_next_profit": 32.38960382315811,
+      "multiple_error": -7.105427357601002e-15
+    }
+  ],
+  "limitations": [
+    "當日規則A層級缺失時用8%並明示",
+    "先前校准日期不得用於更早的歷史档位"
+  ]
+}

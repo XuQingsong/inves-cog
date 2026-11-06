@@ -16,6 +16,7 @@ from inves_cog.web.brief import (
     human_reason,
     short_unvalued_text,
 )
+from inves_cog.web.ceiling import ceiling_text
 from inves_cog.web.exit_levels import money
 from inves_cog.web.pages import CLOSED
 from inves_cog.web.risk_brief import format_plain_percent, risk_params
@@ -138,7 +139,8 @@ def _valuation(view, full=False):
     if view.get("state") == "未估值":
         short = short_unvalued_text(view.get("text") or "未估值")
         inner = short[len("未估值（") : -1] if short.startswith("未估值（") and short.endswith("）") else ""
-        return f"未估值：{inner}" if inner else "未估值"
+        original = f"未估值：{inner}" if inner else "未估值"
+        return original + " · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else original
     bits = []
     if view.get("pe_extreme"):
         bits.append("市盈率不适用（盈利过低）")
@@ -147,8 +149,6 @@ def _valuation(view, full=False):
     low, mid, high = view.get("pe_p25"), view.get("pe_p50"), view.get("pe_p75")
     if low is not None and low == mid == high:
         bits.append("历史样本不足")
-    elif None not in (low, mid, high):
-        bits.append(f"历史 25/50/75 分位 {_whole(low)}/{_whole(mid)}/{_whole(high)}")
     if view.get("implied_growth") is not None:
         bits.append(f"隐含增速 {half_up(float(view['implied_growth']), 1):.1f}%")
     elif view.get("implied_reason"):
@@ -160,6 +160,8 @@ def _valuation(view, full=False):
             bits.append(f"EPS 增速 {_signed(float(view['eps_growth']), 1)}")
     if view.get("state") == "模型不适用":
         bits.append("模型不适用")
+    if view.get("ceiling"):
+        bits.append(ceiling_text(view["ceiling"], full=full))
     return " · ".join(bits) if bits else "估值暂缺"
 
 
@@ -1243,7 +1245,7 @@ _TRUST_IMPACT = {
     "新闻": "大事原因标“暂不可信”，只能引用旧闻；价格、持仓和规则 A 计算不受影响。",
     "VIX": "市场情绪可用；行情汇总缺 VIX 时改用 FRED 官方数据。",
     "冷静期覆盖层": "页面不显示冷静期；规则 A 照常执行，不受影响。",
-    "估值": "多数成长股、周期股估值模型不适用，页面只显示市盈率、历史分位和隐含增速，不给出估值价位。",
+    "估值": "多数成长股、周期股估值模型不适用，页面展示隐含天花板、折现率敏感性与现金口径对照，缺失数据明确列示。",
     "订单": "过期和被替代的旧单已标终态；待成交单按下一交易日开盘价成交。",
     "纸面计划": "计划缺失的日子，账户页沿用最近一次持仓并提示，不显示成空仓。",
     "期权数据": "看跌/看涨比不参与情绪判断；超过 2 个交易日即视为过期。",
@@ -1367,7 +1369,9 @@ def _price_bar(payload):
         vr = f" · 量比 {st['vol_ratio']:.1f}" if st.get("vol_ratio") else ""
         extra.append(f"量 {st['vol']:,}{vr}")
     if st.get("next_earnings"):
-        extra.append(f"下次财报 {_text(str(st['next_earnings']))}")
+        event = st["next_earnings"]
+        when = _next_earn({"next_report": event}) if isinstance(event, dict) else _text(str(event))
+        extra.append("下次财报 " + when)
     return (
         '<div class="card sec cat-market"><div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">'
         f'<span class="px-big">${px:,.2f}</span>{chg}'
@@ -1558,7 +1562,7 @@ def _stock(payload):
         + '<div class="card sec"><h2>基本面与估值</h2>'
         + f'<p style="margin:0">{_text(_valuation(payload.get("valuation"), full=True))}</p>'
         + _consensus(payload.get("consensus"))
-        + '<div class="gap">系统目前不给出估值价位，只展示市盈率、历史分位和隐含增速。</div>'
+        + '<div class="gap">隐含天花板用于展示现价预期与长期风险；缺失数据明确列示，不作为买卖信号。</div>'
         + f'<h3 style="margin-top:16px">数据时间</h3><div class="kv small">{stamps}</div></div>'
     )
 
@@ -2089,7 +2093,7 @@ def _ticker_strip(payload):
         + "".join(cells)
         + "</div>"
         + f'<div class="small muted" style="margin-top:4px">{note} · 盘前/盘中行情只用于看盘，不进入规则 A</div>'
-        + '<div class="small muted">IEX 为单一交易所实时成交，约占全市场成交 2–3%，仅供看盘，不进入规则 A</div></div>'
+        + '<div class="small muted">IEX 为单一交易所盘中成交，约占全市场成交 2–3%，仅供看盘，不进入规则 A</div></div>'
     )
 
 
@@ -2162,7 +2166,7 @@ def _intra_line(row):
         "FRED": "FRED",
     }.get(src, src or "snapshot")
     if src == "Alpaca:iex" and moment:
-        label = f"IEX 实时 {moment.astimezone(NY):%H:%M:%S}"
+        label = f"IEX 盘中 {moment.astimezone(NY):%H:%M:%S}"
     elif src == "Alpaca:delayed_sip" and moment:
         label = f"延迟 15 分 {moment.astimezone(NY):%H:%M}"
     else:
@@ -2281,7 +2285,7 @@ def _group_row(item, held, compact=False):
     if compact:
         return (
             f'<div class="nrow"><span class="tm">{_hm(item.get("published_at") or item.get("published"))}</span>'
-            f'<div class="hl"><span class="tag">评级</span>{_text(ticker)} 今日 {count} 家机构调整目标价'
+            f'<div class="hl"><span class="tag">评级</span>{_text(ticker)} 今日 {count} 家机构观点更新'
             f"（{names}）</div>"
             f'<span class="codes">{_ncodes(item, held)}</span></div>'
         )
@@ -2289,7 +2293,7 @@ def _group_row(item, held, compact=False):
     return (
         f'<details class="nrow ngroup"><summary>'
         f'<span class="tm">{_hm(item.get("published_at") or item.get("published"))}</span>'
-        f'<span class="hl"><span class="tag">评级</span>{_text(ticker)} 今日 {count} 家机构调整目标价（{names}）</span>'
+        f'<span class="hl"><span class="tag">评级</span>{_text(ticker)} 今日 {count} 家机构观点更新（{names}）</span>'
         f'<span class="codes">{_ncodes(item, held)}</span></summary>{detail}</details>'
     )
 
@@ -2404,7 +2408,7 @@ def _live_module(payload):
             f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
         )
     return (
-        '<div class="card sec cat-anomaly" id="live"><h2>实时异常'
+        '<div class="card sec cat-anomaly" id="live"><h2>盘中异常'
         '<span class="stamp">' + _text(str(payload.get("et_now") or "")) + " ET</span></h2>"
         '<table class="tbl"><tr><th>层级</th><th>对象</th><th>现价</th><th>涨跌</th>'
         "<th>峰值</th><th>首次出现</th><th>起因</th></tr>" + "".join(body) + "</table></div>"
@@ -2773,7 +2777,7 @@ def _ratings_body(payload):
 
 
 def _actions_module(payload):
-    return f'<div class="card sec"><h2>机构评级与目标价</h2>{_actions_body(payload)}</div>'
+    return f'<div class="card sec"><h2>机构评级</h2>{_actions_body(payload)}</div>'
 
 
 def _actions_body(payload):
@@ -2787,17 +2791,6 @@ def _actions_body(payload):
         if seen.get(key, 0) >= 2:
             continue
         seen[key] = seen.get(key, 0) + 1
-        prior, cur = r.get("prior_pt"), r.get("current_pt")
-        pt = ""
-        if cur:
-            cur = float(cur)
-            if prior:
-                prior = float(prior)
-                tone = "down" if cur < prior else "up" if cur > prior else ""
-                mark = "↓" if cur < prior else "↑" if cur > prior else "→"
-                pt = f' · 目标价 ${prior:,.0f} → <b class="{tone}">${cur:,.0f} {mark}</b>'
-            else:
-                pt = f" · 目标价 前值暂缺 → ${cur:,.0f}"
         act = r.get("action")
         grade_tone = "down" if act == "down" else "up" if act == "up" else ""
         grade = (
@@ -2807,7 +2800,7 @@ def _actions_body(payload):
         )
         items.append(
             f'<div class="row"><span class="dim">{r["action_date"]}</span> <b>{_text(r["firm"])}</b> '
-            f'<span class="{grade_tone}">{grade}</span>{pt}</div>'
+            f'<span class="{grade_tone}">{grade}</span></div>'
         )
     newest = max((r["action_date"] for r in rows), default=None)
     recent = [
@@ -2815,15 +2808,11 @@ def _actions_body(payload):
         for r in rows
         if newest and (date.fromisoformat(str(newest)[:10]) - date.fromisoformat(str(r["action_date"])[:10])).days <= 30
     ]
-    ups = sum(
-        1 for r in recent if r.get("current_pt") and r.get("prior_pt") and float(r["current_pt"]) > float(r["prior_pt"])
-    )
-    downs = sum(
-        1 for r in recent if r.get("current_pt") and r.get("prior_pt") and float(r["current_pt"]) < float(r["prior_pt"])
-    )
+    ups = sum(r.get("action") == "up" for r in recent)
+    downs = sum(r.get("action") == "down" for r in recent)
     return (
-        '<div class="card sec"><h2>机构评级与目标价'
-        f'<span class="stamp">近 30 天目标价 上调 {ups} 家 · 下调 {downs} 家</span></h2>'
+        '<div class="card sec"><h2>机构评级'
+        f'<span class="stamp">近 30 天评级 上调 {ups} 家 · 下调 {downs} 家</span></h2>'
         + "".join(items[:10])
         + (
             f'<details><summary class="dim">更多 {len(items) - 10} 条</summary>' + "".join(items[10:]) + "</details>"

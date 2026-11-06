@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-11-06 04:11:34.778370+00:00",
+  "source": "production 2026-11-04 account; branch renderer 08019e1, privacy redactor 2ae8baa; server first redacts; Mac captures through loopback SSH tunnel",
+  "authorization": "UD-A-57",
+  "original_payload_exported": false,
+  "original_html_exported": false,
+  "server_browser_started": false,
+  "preview_exit": 0,
+  "mac_browser_exit": -9,
+  "mac_browser_exit_timeout": true,
+  "dimensions": [
+    1440,
+    7000
+  ],
+  "sha256": "4d5f3c8801f338b9221afdfd291ad49daaa8139ba97ab160114a0a25372d9262"
+}

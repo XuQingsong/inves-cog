@@ -1,0 +1,1156 @@
+{
+  "universe_count": 59,
+  "tiers": {
+    "NVDA": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1364,
+        "attack": 856
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "AMD": {
+      "days": 2220,
+      "with_tier": 2156,
+      "tier_counts": {
+        "attack": 1019,
+        "normal": 1137
+      },
+      "missing_reasons": {
+        "implausible_value": 64
+      },
+      "first": [
+        "2018-01-02",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "AVGO": {
+      "days": 2220,
+      "with_tier": 1975,
+      "tier_counts": {
+        "normal": 1256,
+        "defense": 370,
+        "attack": 349
+      },
+      "missing_reasons": {
+        "core_field_missing": 176,
+        "implausible_value": 69
+      },
+      "first": [
+        "2018-12-21",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "MRVL": {
+      "days": 2220,
+      "with_tier": 1166,
+      "tier_counts": {
+        "attack": 736,
+        "normal": 430
+      },
+      "missing_reasons": {
+        "core_field_missing": 920,
+        "missing_book:growth": 134
+      },
+      "first": [
+        "2022-03-10",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "MU": {
+      "days": 2220,
+      "with_tier": 2022,
+      "tier_counts": {
+        "normal": 967,
+        "attack": 993,
+        "defense": 62
+      },
+      "missing_reasons": {
+        "q4_missing": 198
+      },
+      "first": [
+        "2018-10-15",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "SKHY": {
+      "days": 80,
+      "with_tier": 0,
+      "tier_counts": {},
+      "missing_reasons": {
+        "insufficient_history": 80
+      },
+      "first": null,
+      "last": null
+    },
+    "INTC": {
+      "days": 2220,
+      "with_tier": 2038,
+      "tier_counts": {
+        "normal": 1210,
+        "attack": 762,
+        "defense": 66
+      },
+      "missing_reasons": {
+        "implausible_value": 182
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "NOK": {
+      "days": 2220,
+      "with_tier": 747,
+      "tier_counts": {
+        "normal": 617,
+        "attack": 130
+      },
+      "missing_reasons": {
+        "companyfacts_lag;core_field_missing": 55,
+        "stale_fundamentals": 1407,
+        "missing_book:growth": 11
+      },
+      "first": [
+        "2018-03-22",
+        "normal"
+      ],
+      "last": [
+        "2026-06-29",
+        "attack"
+      ]
+    },
+    "LITE": {
+      "days": 2220,
+      "with_tier": 2036,
+      "tier_counts": {
+        "attack": 867,
+        "normal": 1061,
+        "defense": 108
+      },
+      "missing_reasons": {
+        "implausible_value": 184
+      },
+      "first": [
+        "2018-01-02",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "MSFT": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 700,
+        "defense": 1456,
+        "attack": 64
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "defense"
+      ]
+    },
+    "ORCL": {
+      "days": 2220,
+      "with_tier": 1970,
+      "tier_counts": {
+        "normal": 1312,
+        "defense": 431,
+        "attack": 227
+      },
+      "missing_reasons": {
+        "q4_missing": 250
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "CRM": {
+      "days": 2220,
+      "with_tier": 2056,
+      "tier_counts": {
+        "normal": 1065,
+        "defense": 814,
+        "attack": 177
+      },
+      "missing_reasons": {
+        "stale_fundamentals": 103,
+        "missing_book:growth": 61
+      },
+      "first": [
+        "2018-05-31",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "NOW": {
+      "days": 2220,
+      "with_tier": 1833,
+      "tier_counts": {
+        "normal": 1057,
+        "defense": 457,
+        "attack": 319
+      },
+      "missing_reasons": {
+        "implausible_value": 139,
+        "implausible_value;q4_missing": 112,
+        "q4_missing": 136
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "ADBE": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1296,
+        "defense": 861,
+        "attack": 63
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "PLTR": {
+      "days": 1529,
+      "with_tier": 1176,
+      "tier_counts": {
+        "attack": 1041,
+        "normal": 135
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "implausible_value;q4_missing": 19,
+        "q4_missing": 135
+      },
+      "first": [
+        "2022-02-24",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "META": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 654,
+        "normal": 1065,
+        "attack": 501
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "GOOGL": {
+      "days": 2220,
+      "with_tier": 2033,
+      "tier_counts": {
+        "defense": 1160,
+        "normal": 808,
+        "attack": 65
+      },
+      "missing_reasons": {
+        "companyfacts_lag": 57,
+        "implausible_value": 130
+      },
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "AMZN": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1408,
+        "defense": 628,
+        "attack": 184
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "NFLX": {
+      "days": 2220,
+      "with_tier": 2172,
+      "tier_counts": {
+        "normal": 1721,
+        "attack": 262,
+        "defense": 189
+      },
+      "missing_reasons": {
+        "companyfacts_lag": 48
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "AAPL": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1026,
+        "defense": 1131,
+        "attack": 63
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "TSLA": {
+      "days": 2220,
+      "with_tier": 1518,
+      "tier_counts": {
+        "normal": 479,
+        "attack": 1039
+      },
+      "missing_reasons": {
+        "implausible_value;q4_missing": 50,
+        "q4_missing": 197,
+        "implausible_value": 455
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "COST": {
+      "days": 2220,
+      "with_tier": 1971,
+      "tier_counts": {
+        "normal": 1971
+      },
+      "missing_reasons": {
+        "q4_missing": 249
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "WMT": {
+      "days": 2220,
+      "with_tier": 2029,
+      "tier_counts": {
+        "normal": 2029
+      },
+      "missing_reasons": {
+        "implausible_value": 191
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "HD": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 1195,
+        "normal": 919,
+        "attack": 106
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "defense"
+      ]
+    },
+    "UNH": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 1346,
+        "normal": 748,
+        "attack": 126
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "LLY": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 2035,
+        "attack": 185
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "JNJ": {
+      "days": 2220,
+      "with_tier": 2010,
+      "tier_counts": {
+        "normal": 763,
+        "defense": 1187,
+        "attack": 60
+      },
+      "missing_reasons": {
+        "stale_fundamentals": 210
+      },
+      "first": [
+        "2018-10-31",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "JPM": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 2160,
+        "attack": 60
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "V": {
+      "days": 2220,
+      "with_tier": 67,
+      "tier_counts": {
+        "defense": 67
+      },
+      "missing_reasons": {
+        "core_field_missing": 2153
+      },
+      "first": [
+        "2026-07-29",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "defense"
+      ]
+    },
+    "MA": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 1665,
+        "normal": 491,
+        "attack": 64
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "defense"
+      ]
+    },
+    "XOM": {
+      "days": 2220,
+      "with_tier": 1716,
+      "tier_counts": {
+        "normal": 1443,
+        "attack": 112,
+        "defense": 161
+      },
+      "missing_reasons": {
+        "core_field_missing;q4_missing": 147,
+        "q4_missing": 142,
+        "implausible_value": 151,
+        "core_field_missing": 64
+      },
+      "first": [
+        "2019-02-27",
+        "normal"
+      ],
+      "last": [
+        "2026-07-31",
+        "normal"
+      ]
+    },
+    "CVX": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1681,
+        "defense": 476,
+        "attack": 63
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "defense"
+      ]
+    },
+    "CAT": {
+      "days": 2220,
+      "with_tier": 1991,
+      "tier_counts": {
+        "normal": 1433,
+        "attack": 63,
+        "defense": 495
+      },
+      "missing_reasons": {
+        "missing_book:quality": 229
+      },
+      "first": [
+        "2018-02-15",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "GE": {
+      "days": 2220,
+      "with_tier": 2095,
+      "tier_counts": {
+        "normal": 1189,
+        "attack": 569,
+        "defense": 337
+      },
+      "missing_reasons": {
+        "implausible_value": 125
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "defense"
+      ]
+    },
+    "WDC": {
+      "days": 2220,
+      "with_tier": 1764,
+      "tier_counts": {
+        "normal": 948,
+        "attack": 816
+      },
+      "missing_reasons": {
+        "core_field_missing": 274,
+        "implausible_value": 134,
+        "q4_missing": 48
+      },
+      "first": [
+        "2019-02-05",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "STX": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1838,
+        "attack": 382
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "SNDK": {
+      "days": 431,
+      "with_tier": 54,
+      "tier_counts": {
+        "attack": 54
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "q4_missing": 178
+      },
+      "first": [
+        "2026-08-17",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "AMAT": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 239,
+        "normal": 1805,
+        "attack": 176
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "LRCX": {
+      "days": 2220,
+      "with_tier": 2156,
+      "tier_counts": {
+        "normal": 1523,
+        "attack": 464,
+        "defense": 169
+      },
+      "missing_reasons": {
+        "implausible_value": 64
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "KLAC": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 274,
+        "normal": 1754,
+        "attack": 192
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "ASML": {
+      "days": 2220,
+      "with_tier": 129,
+      "tier_counts": {
+        "normal": 129
+      },
+      "missing_reasons": {
+        "companyfacts_lag;stale_fundamentals": 1291,
+        "companyfacts_lag": 723,
+        "missing_book:growth": 64,
+        "stale_fundamentals": 13
+      },
+      "first": [
+        "2020-02-12",
+        "normal"
+      ],
+      "last": [
+        "2026-07-14",
+        "normal"
+      ]
+    },
+    "QCOM": {
+      "days": 2220,
+      "with_tier": 1573,
+      "tier_counts": {
+        "normal": 1248,
+        "defense": 258,
+        "attack": 67
+      },
+      "missing_reasons": {
+        "q4_missing": 647
+      },
+      "first": [
+        "2020-07-29",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "ARM": {
+      "days": 786,
+      "with_tier": 146,
+      "tier_counts": {
+        "attack": 138,
+        "normal": 8
+      },
+      "missing_reasons": {
+        "insufficient_history": 177,
+        "companyfacts_lag": 69,
+        "companyfacts_lag;stale_fundamentals": 112,
+        "stale_fundamentals": 216,
+        "missing_book:growth": 66
+      },
+      "first": [
+        "2024-05-29",
+        "attack"
+      ],
+      "last": [
+        "2026-09-18",
+        "attack"
+      ]
+    },
+    "TSM": {
+      "days": 2220,
+      "with_tier": 6,
+      "tier_counts": {
+        "normal": 5,
+        "attack": 1
+      },
+      "missing_reasons": {
+        "companyfacts_lag;core_field_missing": 74,
+        "companyfacts_lag": 400,
+        "companyfacts_lag;stale_fundamentals": 1602,
+        "missing_book:growth": 121,
+        "stale_fundamentals": 17
+      },
+      "first": [
+        "2024-04-18",
+        "normal"
+      ],
+      "last": [
+        "2025-04-17",
+        "attack"
+      ]
+    },
+    "ANET": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "normal": 1421,
+        "attack": 620,
+        "defense": 179
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "CIEN": {
+      "days": 2220,
+      "with_tier": 2220,
+      "tier_counts": {
+        "defense": 107,
+        "normal": 1449,
+        "attack": 664
+      },
+      "missing_reasons": {},
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "COHR": {
+      "days": 2220,
+      "with_tier": 1649,
+      "tier_counts": {
+        "normal": 1023,
+        "attack": 626
+      },
+      "missing_reasons": {
+        "implausible_value": 571
+      },
+      "first": [
+        "2018-01-02",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "VRT": {
+      "days": 2076,
+      "with_tier": 1177,
+      "tier_counts": {
+        "normal": 590,
+        "attack": 587
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "core_field_missing": 247,
+        "core_field_missing;implausible_value": 62,
+        "implausible_value": 391
+      },
+      "first": [
+        "2021-03-01",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "ETN": {
+      "days": 2220,
+      "with_tier": 2181,
+      "tier_counts": {
+        "defense": 658,
+        "normal": 1461,
+        "attack": 62
+      },
+      "missing_reasons": {
+        "implausible_value": 39
+      },
+      "first": [
+        "2018-02-28",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "GEV": {
+      "days": 649,
+      "with_tier": 191,
+      "tier_counts": {
+        "attack": 126,
+        "normal": 65
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "missing_book:growth": 14,
+        "q4_missing": 245
+      },
+      "first": [
+        "2026-01-29",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "CEG": {
+      "days": 1191,
+      "with_tier": 930,
+      "tier_counts": {
+        "attack": 366,
+        "normal": 564
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "implausible_value": 62
+      },
+      "first": [
+        "2023-02-16",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    },
+    "BE": {
+      "days": 2079,
+      "with_tier": 766,
+      "tier_counts": {
+        "attack": 766
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "core_field_missing": 628,
+        "core_field_missing;stale_fundamentals": 1,
+        "q4_missing": 247,
+        "implausible_value": 238
+      },
+      "first": [
+        "2021-11-05",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "DELL": {
+      "days": 1971,
+      "with_tier": 1604,
+      "tier_counts": {
+        "normal": 953,
+        "attack": 449,
+        "defense": 202
+      },
+      "missing_reasons": {
+        "insufficient_history": 175,
+        "implausible_value": 192
+      },
+      "first": [
+        "2019-09-10",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "SMCI": {
+      "days": 2220,
+      "with_tier": 1725,
+      "tier_counts": {
+        "normal": 396,
+        "attack": 1329
+      },
+      "missing_reasons": {
+        "stale_fundamentals": 495
+      },
+      "first": [
+        "2019-12-19",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "CRWV": {
+      "days": 401,
+      "with_tier": 170,
+      "tier_counts": {
+        "attack": 170
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "missing_book:growth": 32
+      },
+      "first": [
+        "2026-03-02",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "CRWD": {
+      "days": 1858,
+      "with_tier": 1230,
+      "tier_counts": {
+        "attack": 477,
+        "normal": 753
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "core_field_missing": 362,
+        "implausible_value": 67
+      },
+      "first": [
+        "2021-09-01",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "PANW": {
+      "days": 2220,
+      "with_tier": 1115,
+      "tier_counts": {
+        "normal": 827,
+        "attack": 173,
+        "defense": 115
+      },
+      "missing_reasons": {
+        "implausible_value": 604,
+        "implausible_value;q4_missing": 242,
+        "q4_missing": 259
+      },
+      "first": [
+        "2019-05-30",
+        "normal"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "FTNT": {
+      "days": 2220,
+      "with_tier": 2214,
+      "tier_counts": {
+        "defense": 663,
+        "normal": 1060,
+        "attack": 491
+      },
+      "missing_reasons": {
+        "companyfacts_lag": 6
+      },
+      "first": [
+        "2018-01-02",
+        "defense"
+      ],
+      "last": [
+        "2026-10-30",
+        "attack"
+      ]
+    },
+    "ZS": {
+      "days": 2169,
+      "with_tier": 1103,
+      "tier_counts": {
+        "attack": 637,
+        "normal": 466
+      },
+      "missing_reasons": {
+        "insufficient_history": 199,
+        "core_field_missing": 683,
+        "core_field_missing;q4_missing": 120,
+        "q4_missing": 64
+      },
+      "first": [
+        "2022-06-09",
+        "attack"
+      ],
+      "last": [
+        "2026-10-30",
+        "normal"
+      ]
+    }
+  }
+}

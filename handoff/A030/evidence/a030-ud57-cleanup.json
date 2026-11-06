@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-11-06 04:29:12.567286+00:00",
+  "matching_preview_processes": 0,
+  "preview_directory_removed": true,
+  "lock_removed": true,
+  "old_preview_directory_absent": true,
+  "production_head": "def6c08d8b118210d0149571ccfec2ef7222b0b6",
+  "production_browser_started_for_capture": false,
+  "source": "successful bounded SSH cleanup stdout after preview exit 0"
+}

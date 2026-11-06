@@ -20,6 +20,19 @@ class Repository:
     def __init__(self, connection):
         self.connection = connection
 
+    def ceiling_notes(self, day, cutoff):
+        exists = self.connection.execute(
+            "SELECT to_regclass('valuation_v1.ceiling_daily') IS NOT NULL AS available"
+        ).fetchone()
+        if not exists or not exists.get("available"):
+            return {}
+        rows = self.connection.execute(
+            "SELECT ticker,payload FROM valuation_v1.ceiling_daily WHERE trade_date=%s "
+            "AND asof<=%s AND observed_at<=%s",
+            (day, cutoff, cutoff),
+        ).fetchall()
+        return {r["ticker"]: r["payload"] for r in rows}
+
     def inputs(self, through, tickers, *, historical=False):
         bars = defaultdict(dict)
         for row in self.connection.execute(

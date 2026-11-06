@@ -1,0 +1,728 @@
+{
+  "f5": {
+    "metrics": {
+      "return_pct": 68.90212895726665,
+      "annualized_pct": 20.38312941657543,
+      "max_drawdown_pct": -26.52971466267775,
+      "return_over_maxdd": 2.597168112561678,
+      "trades": 190,
+      "buys": 110,
+      "sells": 80,
+      "turnover_x": 8.569429760666665,
+      "turnover_annual_x": 3.0329304458173447,
+      "avg_invested_pct": 89.97271950579095,
+      "win_rate": 0.5625,
+      "avg_holding_days": 222.0810810810811,
+      "exposure_pct": 99.85935302390999,
+      "yearly": {
+        "2024": {
+          "return_pct": 34.98930074486666,
+          "maxdd_pct": -11.076576413676564
+        },
+        "2025": {
+          "return_pct": -1.5912603362994049,
+          "maxdd_pct": -26.52971466267775
+        },
+        "2026": {
+          "return_pct": 27.162008331759367,
+          "maxdd_pct": -12.683852967020314
+        }
+      },
+      "benchmarks": {
+        "SPY": 59.88998201629114,
+        "QQQ": 71.51196005862045
+      },
+      "trade_hash": "62549ccc34e07ae41c70ec52249d301567676e45f47ff6e7ae0416d457fc6a8b",
+      "survivorship_bias": false,
+      "flags_counts": {}
+    },
+    "case_trades": [
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2024-02-08",
+        "fill_price": 145.83,
+        "qty": 375,
+        "rule_ids": [
+          "M-34",
+          "M-35",
+          "M-36",
+          "M-37"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2024-07-29",
+        "fill_price": 168.83,
+        "qty": 208,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2024-07-30",
+        "fill_price": 170.24,
+        "qty": 110,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2025-03-03",
+        "fill_price": 171.925,
+        "qty": 346,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2025-03-12",
+        "fill_price": 629.9,
+        "qty": 137,
+        "rule_ids": [
+          "M-34",
+          "M-35",
+          "M-36",
+          "M-37"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2025-03-20",
+        "fill_price": 582.755,
+        "qty": 79,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2025-04-30",
+        "fill_price": 538.4,
+        "qty": 72,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2025-06-23",
+        "fill_price": 166.27,
+        "qty": 173,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2025-09-12",
+        "fill_price": 748.725,
+        "qty": 43,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2025-10-06",
+        "fill_price": 705.185,
+        "qty": 12,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2025-10-30",
+        "fill_price": 669.15,
+        "qty": 12,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2025-11-04",
+        "fill_price": 628.035,
+        "qty": 105,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "buy",
+        "trade_date": "2026-01-27",
+        "fill_price": 259.17,
+        "qty": 211,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "buy",
+        "trade_date": "2026-02-02",
+        "fill_price": 260.03,
+        "qty": 418,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2026-03-09",
+        "fill_price": 294.36,
+        "qty": 95,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2026-03-24",
+        "fill_price": 299.2,
+        "qty": 106,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2026-04-27",
+        "fill_price": 345.98,
+        "qty": 201,
+        "rule_ids": [
+          "M-53"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "sell",
+        "trade_date": "2026-05-06",
+        "fill_price": 281.915,
+        "qty": 211,
+        "rule_ids": [
+          "M-53"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2026-09-10",
+        "fill_price": 328.225,
+        "qty": 127,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2026-09-28",
+        "fill_price": 750.04,
+        "qty": 68,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2026-09-29",
+        "fill_price": 725.0,
+        "qty": 38,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2026-10-12",
+        "fill_price": 728.495,
+        "qty": 38,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2026-10-23",
+        "fill_price": 321.145,
+        "qty": 150,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2026-10-23",
+        "fill_price": 638.175,
+        "qty": 20,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2026-10-29",
+        "fill_price": 621.285,
+        "qty": 135,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      }
+    ]
+  },
+  "veto": {
+    "metrics": {
+      "return_pct": 193.71647582594161,
+      "annualized_pct": 46.423658762748275,
+      "max_drawdown_pct": -23.550891428045194,
+      "return_over_maxdd": 8.225441334898157,
+      "trades": 191,
+      "buys": 101,
+      "sells": 90,
+      "turnover_x": 11.826775323916669,
+      "turnover_annual_x": 4.185784580485042,
+      "avg_invested_pct": 85.1810223237444,
+      "win_rate": 0.5888888888888889,
+      "avg_holding_days": 256.0126582278481,
+      "exposure_pct": 99.85935302390999,
+      "yearly": {
+        "2024": {
+          "return_pct": 35.81947672529162,
+          "maxdd_pct": -9.202291464809642
+        },
+        "2025": {
+          "return_pct": 42.849790658256445,
+          "maxdd_pct": -23.550891428045194
+        },
+        "2026": {
+          "return_pct": 46.20684287328689,
+          "maxdd_pct": -13.61898936080258
+        }
+      },
+      "benchmarks": {
+        "SPY": 59.88998201629114,
+        "QQQ": 71.51196005862045
+      },
+      "trade_hash": "4a44a6bba48b971f843598a20a7e238e24151812ba38603557a2aa7013c527fd",
+      "survivorship_bias": false,
+      "flags_counts": {
+        "overval_veto": 1873,
+        "overval_veto_watch": 9182,
+        "overval_veto_swing": 764
+      }
+    },
+    "case_trades": [
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2024-02-07",
+        "fill_price": 144.76,
+        "qty": 374,
+        "rule_ids": [
+          "M-34",
+          "M-35",
+          "M-36",
+          "M-37"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2024-04-24",
+        "fill_price": 508.06,
+        "qty": 112,
+        "rule_ids": [
+          "M-34",
+          "M-35",
+          "M-36",
+          "M-37"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2024-05-02",
+        "fill_price": 438.84,
+        "qty": 37,
+        "rule_ids": [
+          "M-62"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2024-05-02",
+        "fill_price": 438.84,
+        "qty": 78,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2024-05-03",
+        "fill_price": 167.56,
+        "qty": 188,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2024-05-06",
+        "fill_price": 167.46,
+        "qty": 223,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2024-07-01",
+        "fill_price": 504.95,
+        "qty": 21,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "buy",
+        "trade_date": "2025-02-26",
+        "fill_price": 129.985,
+        "qty": 319,
+        "rule_ids": [
+          "M-34",
+          "M-35",
+          "M-36",
+          "M-37"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "buy",
+        "trade_date": "2025-02-27",
+        "fill_price": 135.0,
+        "qty": 233,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "buy",
+        "trade_date": "2025-02-28",
+        "fill_price": 118.02,
+        "qty": 362,
+        "rule_ids": [
+          "M-40"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2025-03-03",
+        "fill_price": 171.925,
+        "qty": 392,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2025-03-11",
+        "fill_price": 595.055,
+        "qty": 50,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "sell",
+        "trade_date": "2025-03-18",
+        "fill_price": 118.0,
+        "qty": 304,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "buy",
+        "trade_date": "2025-04-14",
+        "fill_price": 211.44,
+        "qty": 145,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2025-04-30",
+        "fill_price": 538.4,
+        "qty": 74,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2025-06-23",
+        "fill_price": 166.27,
+        "qty": 196,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "buy",
+        "trade_date": "2025-07-01",
+        "fill_price": 206.665,
+        "qty": 406,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "sell",
+        "trade_date": "2025-08-11",
+        "fill_price": 227.92,
+        "qty": 551,
+        "rule_ids": [
+          "M-52"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2025-11-04",
+        "fill_price": 628.035,
+        "qty": 75,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "sell",
+        "trade_date": "2025-11-24",
+        "fill_price": 179.49,
+        "qty": 203,
+        "rule_ids": [
+          "M-62"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "buy",
+        "trade_date": "2025-12-18",
+        "fill_price": 174.53,
+        "qty": 169,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "buy",
+        "trade_date": "2026-01-27",
+        "fill_price": 259.17,
+        "qty": 341,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "buy",
+        "trade_date": "2026-02-04",
+        "fill_price": 272.285,
+        "qty": 344,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2026-02-19",
+        "fill_price": 301.82,
+        "qty": 154,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2026-03-09",
+        "fill_price": 294.36,
+        "qty": 174,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "NVDA",
+        "side": "sell",
+        "trade_date": "2026-04-02",
+        "fill_price": 172.18,
+        "qty": 288,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2026-04-27",
+        "fill_price": 345.98,
+        "qty": 328,
+        "rule_ids": [
+          "M-53"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "AAPL",
+        "side": "sell",
+        "trade_date": "2026-05-06",
+        "fill_price": 281.915,
+        "qty": 685,
+        "rule_ids": [
+          "M-52"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "buy",
+        "trade_date": "2026-09-10",
+        "fill_price": 328.225,
+        "qty": 223,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "GOOGL",
+        "side": "sell",
+        "trade_date": "2026-10-23",
+        "fill_price": 321.145,
+        "qty": 210,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "buy",
+        "trade_date": "2026-10-28",
+        "fill_price": 621.85,
+        "qty": 114,
+        "rule_ids": [
+          "M-60"
+        ],
+        "price_reentry": null
+      },
+      {
+        "ticker": "META",
+        "side": "sell",
+        "trade_date": "2026-10-29",
+        "fill_price": 621.285,
+        "qty": 94,
+        "rule_ids": [
+          "M-55"
+        ],
+        "price_reentry": null
+      }
+    ]
+  }
+}

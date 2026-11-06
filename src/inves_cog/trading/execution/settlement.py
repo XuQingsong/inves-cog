@@ -75,6 +75,8 @@ def sell(engine, order, day, price):
         if action == "sell_all"
         else old["swing_shares"]
         if action == "sell_swing"
+        else min(old["shares"], order["shares"])
+        if order.get("shares")
         else int(old["shares"] * order["fraction"])
     )
     if quantity <= 0:

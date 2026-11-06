@@ -1,0 +1,40 @@
+{
+  "mode": "signals",
+  "partial": false,
+  "result": {
+    "f2": {
+      "allowed": {
+        "n": 154,
+        "ret20": 1.7,
+        "ret60": 3.9
+      },
+      "delayed": {
+        "n": 0,
+        "ret20": null,
+        "ret60": null
+      },
+      "blocked": {
+        "n": 105,
+        "ret20": 1.3,
+        "ret60": 9.0
+      }
+    },
+    "combo": {
+      "allowed": {
+        "n": 71,
+        "ret20": 0.7,
+        "ret60": 4.0
+      },
+      "delayed": {
+        "n": 0,
+        "ret20": null,
+        "ret60": null
+      },
+      "blocked": {
+        "n": 188,
+        "ret20": 2.0,
+        "ret60": 6.1
+      }
+    }
+  }
+}
