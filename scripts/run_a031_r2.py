@@ -3,6 +3,7 @@
 import argparse
 import bisect
 import json
+import multiprocessing
 import signal
 import time
 from datetime import date
@@ -53,6 +54,15 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--seconds", type=int, default=1800)
     args = p.parse_args()
+
+    def deadline(signum, frame):
+        for child in multiprocessing.active_children():
+            child.terminate()
+        for child in multiprocessing.active_children():
+            child.join(timeout=2)
+        raise TimeoutError("A031 evaluation deadline reached; preserve completed checkpoints")
+
+    signal.signal(signal.SIGALRM, deadline)
     signal.alarm(args.seconds)
     args.output.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
@@ -75,6 +85,9 @@ def main():
         pre = prepare_inputs(db, spec)
         save(args.output / "progress.json", {"phase": "prepared", "elapsed": time.monotonic() - started})
         for name, flags in {"base": {}, **VARIANTS}.items():
+            checkpoint = args.output / (name + ".json")
+            if checkpoint.exists() and "metrics" in json.loads(checkpoint.read_text()):
+                continue
             result = run_backtest(None, {**spec, "flags": flags, "label": name}, prepared=pre, write=False)
             save(
                 args.output / (name + ".json"),
