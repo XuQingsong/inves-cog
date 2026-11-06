@@ -1,6 +1,7 @@
 from configparser import ConfigParser
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -157,6 +158,7 @@ def test_isolated_task_failure_surfaces_as_failed(monkeypatch):
         clock=frozen("2026-10-17T02:30:00Z"),
         values={},
         ready=lambda *args: True,
+        done=lambda name: False,
     )
     assert result["market_structure"] == {"status": "failed", "error_type": "RuntimeError"}
 
@@ -175,6 +177,7 @@ def test_isolated_task_returns_task_output(monkeypatch):
         clock=frozen("2026-10-17T02:30:00Z"),
         values={},
         ready=lambda *args: True,
+        done=lambda name: False,
     )
     assert result["market_structure"] == {"status": "ok", "processed_count": 7, "job_id": 42}
     assert "ignored_key" not in result["market_structure"]
@@ -186,3 +189,127 @@ def test_run_isolated_propagates_child_failure():
 
     with pytest.raises(RuntimeError, match="not_a_real_task"):
         mod._run_isolated("not_a_real_task", {"clock": frozen("2026-10-17T02:30:00Z"), "values": {}})
+
+
+def test_completed_task_is_not_respawned(monkeypatch):
+    import scripts.schedule_daily_modules as mod
+
+    monkeypatch.setattr(mod, "_run_isolated", lambda name, kwargs: pytest.fail(f"{name} respawned after completion"))
+    result = mod.run_once(
+        clock=frozen("2026-10-17T02:30:00Z"),
+        values={},
+        ready=lambda *args: True,
+        done=lambda name: True,
+    )
+    assert result["market_structure"] == {"status": "not_due"}
+    assert result["rule_a_scores"] == {"status": "not_due"}
+    assert result["valuation_v1"] == {"status": "not_due"}
+
+
+def test_incomplete_task_still_spawns(monkeypatch):
+    import scripts.schedule_daily_modules as mod
+
+    seen = []
+    monkeypatch.setattr(mod, "_run_isolated", lambda name, kwargs: seen.append(name) or {"status": "ok"})
+    result = mod.run_once(
+        clock=frozen("2026-10-17T02:30:00Z"),
+        values={},
+        ready=lambda *args: True,
+        done=lambda name: False,
+    )
+    assert result["market_structure"] == {"status": "ok"}
+    assert "market_structure" in seen
+
+
+def test_injected_operation_bypasses_done_check(monkeypatch):
+    import scripts.schedule_daily_modules as mod
+
+    calls, probed = [], []
+    result = mod.run_once(
+        clock=frozen("2026-10-17T02:30:00Z"),
+        values={},
+        ready=lambda *args: True,
+        market_run=lambda **kw: calls.append("market") or {"status": "ok"},
+        done=lambda name: probed.append(name) or True,
+    )
+    assert result["market_structure"] == {"status": "ok"}
+    assert calls == ["market"]
+    assert "market_structure" not in probed
+
+
+def _cursor(rows):
+    class C:
+        def fetchone(self):
+            return rows[0] if rows else None
+
+        def fetchall(self):
+            return list(rows)
+
+    return C()
+
+
+def test_task_done_slot_tasks_need_started_at_after_slot():
+    import scripts.schedule_daily_modules as mod
+
+    local = datetime(2026, 10, 16, 22, 45, tzinfo=ZoneInfo("America/New_York"))
+
+    class DB:
+        def __init__(self, started_at):
+            self.started_at = started_at
+
+        def execute(self, sql, params):
+            assert "max(started_at)" in " ".join(sql.split())
+            return _cursor([{"started_at": self.started_at}])
+
+    day = date(2026, 10, 16)
+    # a run started before today's 20:45 ET slot does not count
+    assert not mod._task_done(
+        DB(datetime(2026, 10, 16, 20, 0, tzinfo=ZoneInfo("America/New_York"))),
+        "market_structure",
+        day,
+        local,
+    )
+    # a run (any status) started after the slot counts
+    assert mod._task_done(
+        DB(datetime(2026, 10, 16, 20, 50, tzinfo=ZoneInfo("America/New_York"))),
+        "market_structure",
+        day,
+        local,
+    )
+    assert not mod._task_done(DB(None), "rule_a_scores", day, local)
+    # valuation_v1: any run started today suppresses, even pre-slot
+    assert mod._task_done(
+        DB(datetime(2026, 10, 16, 9, 0, tzinfo=ZoneInfo("America/New_York"))),
+        "valuation_v1",
+        day,
+        local,
+    )
+    assert not mod._task_done(
+        DB(datetime(2026, 10, 15, 23, 0, tzinfo=ZoneInfo("America/New_York"))),
+        "valuation_v1",
+        day,
+        local,
+    )
+
+
+def test_task_done_row_tasks_and_anomaly_retry():
+    import scripts.schedule_daily_modules as mod
+
+    local = datetime(2026, 10, 16, 9, 0, tzinfo=ZoneInfo("America/New_York"))
+    day = date(2026, 10, 16)
+
+    class DB:
+        def __init__(self, rows):
+            self.rows = rows
+
+        def execute(self, sql, params):
+            if "error_summary" in sql:
+                return _cursor(self.rows)
+            return _cursor(self.rows[:1])
+
+    assert mod._task_done(DB([{"id": 1}]), "premarket_review", day, local)
+    assert mod._task_done(DB([{"id": 1}]), "paper_plan", day, local)
+    assert not mod._task_done(DB([]), "premarket_review", day, local)
+    # anomaly_daily: a finished run is done; a failed row under the retry cap still reruns
+    assert mod._task_done(DB([{"status": "ok", "error_summary": None}]), "anomaly_daily", day, local)
+    assert not mod._task_done(DB([{"status": "failed", "error_summary": "boom"}]), "anomaly_daily", day, local)

@@ -301,6 +301,57 @@ def _run_isolated(name, kwargs):
     return payload
 
 
+def _task_done(connection, name, day, local):
+    # Mirrors each task's own completion guard so a finished task is not respawned every poll.
+    if name in {"market_structure", "rule_a_scores", "valuation_v1"}:
+        last = connection.execute(
+            "SELECT max(started_at) AS started_at FROM ingest.job_runs WHERE task_name=%s",
+            (name,),
+        ).fetchone()["started_at"]
+        if last is None:
+            return False
+        stamp = last.astimezone(NY)
+        if name == "valuation_v1":
+            return stamp.date() >= local.date()
+        slot = {"market_structure": (20, 45), "rule_a_scores": (22, 30)}[name]
+        return stamp >= local.replace(hour=slot[0], minute=slot[1], second=0, microsecond=0)
+    if name == "anomaly_daily":
+        rows = connection.execute(
+            "SELECT status, error_summary FROM ingest.job_runs WHERE task_name=%s AND trade_date=%s",
+            (name, day),
+        ).fetchall()
+        return dispatch_decision(name, rows) != "run"
+    return (
+        connection.execute(
+            "SELECT 1 FROM ingest.job_runs WHERE task_name=%s AND trade_date=%s LIMIT 1",
+            (name, day),
+        ).fetchone()
+        is not None
+    )
+
+
+def _done_probe(values, *, clock, local):
+    day, cache = clock.today_trade_date(), {}
+
+    def done(name):
+        if name not in cache:
+            with connect(values) as connection:
+                cache[name] = _task_done(connection, name, day, local)
+        return cache[name]
+
+    return done
+
+
+_DONE_STATUS = {
+    "market_structure": "not_due",
+    "rule_a_scores": "not_due",
+    "valuation_v1": "not_due",
+    "anomaly_daily": "already_attempted",
+    "premarket_review": "already_attempted",
+    "paper_plan": "already_attempted",
+}
+
+
 def run_once(
     *,
     clock,
@@ -315,6 +366,7 @@ def run_once(
     names=None,
     dependency_rows=None,
     skip_job=None,
+    done=None,
 ):
     local = clock.now_utc().astimezone(NY)
     if not trading_day(local.date()):
@@ -336,6 +388,7 @@ def run_once(
 
     if paper_due(clock):
         tasks.append(("paper_plan", paper_run, None))
+    done = done or _done_probe(values, clock=clock, local=local)
     allowed = {"market_structure", "rule_a_scores", "anomaly_daily", "valuation_v1", "paper_plan", "premarket_review"}
     if names is not None and set(names) - allowed:
         raise ValueError("Unknown module task filter")
@@ -353,6 +406,9 @@ def run_once(
                     result[name] = _skip_anomaly(clock, values, dependency_day, dependency_rows, skip_job)
                 else:
                     result[name] = {"status": "waiting_dependencies"}
+                continue
+            if operation is None and done(name):
+                result[name] = {"status": _DONE_STATUS[name]}
                 continue
             kwargs = {"clock": clock, "values": values}
             if day_key:
