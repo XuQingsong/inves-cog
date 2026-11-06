@@ -96,9 +96,14 @@ class Redactor(HTMLParser):
             return
         if value in STRUCTURE:
             self.output.append(escape(value))
-        elif "隐含" in value or "长期回报大概率偏低" in value:
-            value = re.sub(r"[A-Za-z0-9_$%+−.,:/@=-]+", "[已遮盖]", value)
-            self.output.append(escape(value))
+        elif any(phrase in value for phrase in ("现价隐含利润约涨到现在的", "隐含天花板", "长期回报大概率偏低")):
+            labels = [
+                label for label in ("可信", "偏高", "严重透支", "不适用", "周期股", "金融股", "亏损") if label in value
+            ]
+            safe = "隐含天花板（数值已遮盖）" + ("：" + "、".join(labels) if labels else "")
+            if "长期回报大概率偏低" in value:
+                safe += "；长期回报大概率偏低（隐含天花板处于严重透支档）"
+            self.output.append(escape(safe))
         else:
             self.output.append("已遮盖")
 
@@ -136,8 +141,11 @@ def main():
     # Raw payload and rendered raw HTML remain in memory on this server only.
     masked = redact_html(renderer.render_brief(private))
     del private
-    assert "<script" not in masked and "data-" not in masked and "href=" not in masked
-    note = '<div class="banner">服务器端完全遮盖的生产结构预览；身份、数值及交易内容不导出。新增估值说明保留，数值遮盖。</div>'
+    assert "<script" not in masked and not re.search(r"\sdata-[\w-]+=", masked) and "href=" not in masked
+    note = (
+        '<div class="banner">服务器端完全遮盖的生产结构预览；身份、数值及交易内容不导出。'
+        "新增估值说明保留，数值遮盖。</div>"
+    )
     masked = masked.replace("<body>", "<body>" + note)
     html_path, png_path = root / "redacted.html", root / "account-redacted.png"
     html_path.write_text(masked)
