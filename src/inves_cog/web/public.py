@@ -6,6 +6,7 @@ from collections import deque
 from threading import Lock
 
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from starlette.responses import JSONResponse
 
 from inves_cog.web.api import create_app as page_app
@@ -100,7 +101,8 @@ def protect(app, *, monotonic=time.monotonic):
 
 
 def create_app(*, dsn=None, clock=None, monotonic=None):
-    app = page_app(dsn=dsn, clock=clock)
+    app = page_app(dsn=dsn, clock=clock, warmup=True)
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
     if monotonic is None:
         return protect(app)
     return protect(app, monotonic=monotonic)
