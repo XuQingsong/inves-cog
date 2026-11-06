@@ -71,5 +71,14 @@ def test_abbreviated_official_dates_and_blank_following_date_are_carried():
 
 def test_compact_effective_date_is_not_publication_or_tba_date():
     from inves_cog.backtest.membership import effective_date
-    assert effective_date('23-Sep-24')=='2024-09-23'
-    assert effective_date('TBA') is None
+
+    assert effective_date("23-Sep-24") == "2024-09-23"
+    assert effective_date("TBA") is None
+
+
+def test_company_ticker_cannot_capture_another_issuer_from_a_headline_or_partial_word():
+    from inves_cog.backtest.membership import company_ticker
+    text=('Goodyear Tire & Rubber Set to Join. NEW YORK Wabtec (NYSE: WAB) replaces '
+          'Goodyear Tire & Rubber Co. (NASD: GT). Capital Markets announced CA Inc. (NASD: CA).')
+    assert company_ticker('Goodyear Tire & Rubber',text)=='GT'
+    assert company_ticker('CA',text)=='CA'
