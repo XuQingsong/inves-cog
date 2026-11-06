@@ -4,10 +4,12 @@ No credentials or provider responses are written to logs. Business data is read-
 
 import json
 import logging
+import os
+import stat
 import subprocess
 import sys
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import time as wall_time
 from datetime import timedelta
 from pathlib import Path
@@ -16,17 +18,40 @@ from zoneinfo import ZoneInfo
 from psycopg.types.json import Jsonb
 
 from inves_cog.clock import SystemClock
+from inves_cog.dataguard.calendar import NY
 from inves_cog.dataguard.core import Finding, due_dates
 from inves_cog.dataguard.mail import Mailer
-from inves_cog.dataguard.reader import findings, load, read
+from inves_cog.dataguard.reader import findings, load, read, wide_scope
 from inves_cog.dataguard.recovery import eligible, slice_resources
 from inves_cog.dataguard.store import Store
-from inves_cog.ingest.market import NY
 from inves_cog.ingest.settings import read_environment
 
 ROOT = Path(__file__).resolve().parents[3]
 BJ = ZoneInfo("Asia/Shanghai")
 log = logging.getLogger(__name__)
+
+
+def load_values():
+    values = read_environment()
+    path = Path(os.environ.get("INVES_DATAGUARD_ENV_FILE", str(ROOT.parent / "inves-cog-data/dataguard.env")))
+    if path.exists():
+        if stat.S_IMODE(path.stat().st_mode) & 0o077:
+            raise ValueError("Data guard environment file must be owner-readable only")
+        supplied = read_environment(path, environ={})
+        allowed = {
+            "INVES_SMTP_HOST",
+            "INVES_SMTP_PORT",
+            "INVES_SMTP_USER",
+            "INVES_SMTP_PASSWORD",
+            "INVES_SMTP_FROM",
+            "INVES_ALERT_TO",
+            "INVES_DATAGUARD_BACKFILL",
+            "INVES_DATAGUARD_ALERT_LOG",
+        }
+        if set(supplied) - allowed:
+            raise ValueError("Unsupported setting in data guard environment file")
+        values.update(supplied)
+    return values
 
 
 def connect(values, *, writer=False):
@@ -36,7 +61,7 @@ def connect(values, *, writer=False):
     key = "INVES_COG_DATABASE_URL" if writer else "INVES_COG_WEB_DATABASE_URL"
     options = "-c statement_timeout=1000 -c lock_timeout=1000"
     if not writer:
-        options += " -c default_transaction_read_only=on"
+        options += " -c default_transaction_read_only=on -c enable_seqscan=off -c jit=off"
     return psycopg.connect(values[key], row_factory=dict_row, autocommit=True, options=options, connect_timeout=5)
 
 
@@ -49,23 +74,30 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
             errors.extend(i.dataset for i in items[index:])
             break
         days = due_dates(item, now, lookback=70 if item.cadence == "monthly" else max(7, item.release_days + 7))
-        if item.cadence.startswith("intraday:") or item.carry_forward:
+        if item.cadence.startswith("intraday:"):
+            days = days[-1:]
+        elif item.carry_forward:
             days = [now.astimezone(NY).date()] if days else []
         if not days:
             results.append((item, {}))
             continue
         try:
-            grouped = read(connection, item, min(days) - timedelta(days=10), max(days), now)
+            history = 10 if item.staleness or item.sanity or (item.min_coverage and not item.scope) else 0
+            grouped = read(connection, item, min(days) - timedelta(days=history), max(days), now)
             # Outside the trading window is not an empty data window.
             if item.cadence.startswith("intraday:") and not grouped:
-                from inves_cog.ingest.market import regular_bounds
+                from inves_cog.dataguard.calendar import regular_bounds
 
-                bounds = regular_bounds(now.astimezone(NY).date())
+                bounds = regular_bounds(max(days))
                 minutes = int(item.cadence.split(":")[1]) + item.grace_min
-                if not bounds or not bounds[0] + timedelta(minutes=minutes) <= now <= bounds[1]:
+                if not bounds or now < bounds[0] + timedelta(minutes=minutes):
                     results.append((item, {}))
                     continue
-            results.append((item, {d: findings(item, d, grouped) for d in days}))
+            found = {}
+            for day in days:
+                scoped = replace(item, expected_keys=wide_scope(connection, day)) if item.scope == "wide" else item
+                found[day] = findings(scoped, day, grouped)
+            results.append((item, found))
         except Exception as exc:
             errors.append(item.dataset)
             log.warning("data check failed dataset=%s error_type=%s", item.dataset, type(exc).__name__)
@@ -107,14 +139,23 @@ def run_once(reader, writer, items, now, *, detect_only, values, resources=None,
         store.enqueue(keys, notices, now)
         local = now.astimezone(BJ)
         if local.time() >= wall_time(8, 30):
-            daily_rows = writer.execute(
-                "SELECT * FROM ops.data_gaps WHERE data_date>=%s AND data_date<=%s ORDER BY data_date,dataset",
-                (now.astimezone(NY).date() - timedelta(days=1), now.astimezone(NY).date()),
+            from inves_cog.dataguard.daily import matrix, resource_log_summary
+
+            daily_rows = matrix(items, results, now)
+            open_rows = writer.execute(
+                "SELECT * FROM ops.data_gaps WHERE status<>'resolved' ORDER BY data_date,dataset LIMIT 200"
             ).fetchall()
-            summary = (
-                f"已核查{checked}项，完整{complete}项；内存告警：{resources.memory_alarm}；"
-                f"IO告警：{resources.io_alarm}；资源可核实：{resources.known}"
-            )
+            known = {(r["dataset"], r["data_date"], r["kind"]) for r in daily_rows}
+            actual = {(r["dataset"], r["data_date"], r["kind"]): r for r in open_rows}
+            daily_rows = [actual.get((r["dataset"], r["data_date"], r["kind"]), r) for r in daily_rows]
+            daily_rows += [r for r in open_rows if (r["dataset"], r["data_date"], r["kind"]) not in known]
+            daily_rows += writer.execute(
+                "SELECT * FROM ops.data_gaps WHERE resolved_at>=%s AND resolved_at<=%s ORDER BY resolved_at LIMIT 100",
+                (now - timedelta(days=1), now),
+            ).fetchall()
+            log_path = values.get("INVES_DATAGUARD_ALERT_LOG", str(ROOT.parent / "inves-cog-data/monitor/alerts.log"))
+            summary = resource_log_summary(log_path, now)
+            summary += f"；当前资源{'已核实' if resources.known else '未能核实'}"
             store.enqueue([], daily_rows, now, event_key=f"daily:{local.date()}", daily=True, resources=summary)
     mailer = Mailer(values)
     mail_status = store.send_pending(mailer, now)
@@ -198,7 +239,7 @@ def dispatch(writer, items, now, *, detect_only, resources, child, root=ROOT):
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    values = read_environment()
+    values = load_values()
     config, items = load(ROOT / "config/data_expectations.yaml")
     clock = SystemClock()
     child = None
@@ -206,6 +247,7 @@ def main():
         if not writer.execute("SELECT pg_try_advisory_lock(hashtextextended('data_guard',0)) ok").fetchone()["ok"]:
             return
         while True:
+            values = load_values()
             now = clock.now_utc()
             first = writer.execute("SELECT first_started_at FROM ops.data_guard_runtime WHERE singleton").fetchone()
             day_one = not first or now < first["first_started_at"] + timedelta(days=1)

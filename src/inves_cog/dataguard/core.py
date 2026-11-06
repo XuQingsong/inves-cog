@@ -6,7 +6,7 @@ from datetime import date, datetime, time, timedelta
 from math import ceil, isfinite
 from statistics import median
 
-from inves_cog.ingest.market import NY, next_trading_day, trading_day
+from inves_cog.dataguard.calendar import NY, next_trading_day, trading_day
 
 
 @dataclass(frozen=True)
@@ -28,6 +28,7 @@ class Expectation:
     staleness: bool = False
     sanity: float | None = None
     filter: dict = field(default_factory=dict)
+    scope: str | None = None
     timestamp: bool = False
     latest_column: str | None = None
     carry_forward: bool = False
@@ -43,6 +44,8 @@ class Expectation:
         for identifier in [self.date_column, self.key_column, self.value_column, self.latest_column, *self.filter]:
             if identifier is not None and not re.fullmatch(r"[a-z_][a-z_0-9]*", identifier):
                 raise ValueError("Invalid column identifier")
+        if self.scope not in {None, "wide"}:
+            raise ValueError("Invalid monitored scope")
         time.fromisoformat(self.deadline_et)
         if self.cadence not in {"trading_day", "weekday", "weekly", "monthly"}:
             if not re.fullmatch(r"intraday:[1-9][0-9]*", self.cadence):
@@ -101,11 +104,21 @@ def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset(),
     keys = {r["key"] for r in rows if r.get("key") is not None}
     missing = sorted(set(item.expected_keys) - keys)
     expected = item.min_rows
-    if item.min_coverage and len(prior_counts) >= 5:
+    enough_keys = not missing
+    if item.min_coverage and item.expected_keys:
+        expected = max(expected, ceil(len(item.expected_keys) * item.min_coverage))
+        enough_keys = len(set(item.expected_keys) & keys) >= expected
+    elif item.min_coverage and len(prior_counts) >= 5:
         expected = max(expected, ceil(median(prior_counts[-5:]) * item.min_coverage))
-    if missing or count < expected:
+    null_keys = [r.get("key") for r in rows if item.value_column and r.get("value") is None]
+    if not enough_keys or count < expected or null_keys:
         result.append(
-            Finding(item.dataset, day, "partial", {**detail, "missing_keys": missing, "expected_rows": expected})
+            Finding(
+                item.dataset,
+                day,
+                "partial",
+                {**detail, "missing_keys": missing, "null_keys": null_keys, "expected_rows": expected},
+            )
         )
     if item.table == "ingest.job_runs":
         failed = [r["key"] for r in rows if r.get("value") not in {"ok", "degraded"}]

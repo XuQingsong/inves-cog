@@ -6,8 +6,8 @@ from pathlib import Path
 
 import yaml
 
+from inves_cog.dataguard.calendar import NY, regular_bounds, trading_day
 from inves_cog.dataguard.core import Expectation, evaluate
-from inves_cog.ingest.market import NY, regular_bounds, trading_day
 
 
 def load(path):
@@ -32,9 +32,11 @@ def query(item, lower, upper):
     if item.value_column:
         latest = item.latest_column or column
         sql = (
-            f"SELECT DISTINCT ON ({bucket},{key}) {bucket} AS day,{key} AS key,"
+            f"SELECT DISTINCT ON ({bucket}"
+            + (f",{key}" if item.key_column else "")
+            + f") {bucket} AS day,{key} AS key,"
             f"{item.value_column} AS value,1 AS n FROM {item.table} WHERE {predicate} "
-            f"ORDER BY {bucket},{key},{latest} DESC"
+            f"ORDER BY {bucket}" + (f",{key}" if item.key_column else "") + f",{latest} DESC"
         )
     else:
         sql = (
@@ -66,15 +68,18 @@ def read(connection, item, start, end, now):
         lower = datetime.combine(start, time(), NY)
         upper = min(datetime.combine(end + timedelta(days=1), time(), NY), now)
         if item.cadence.startswith("intraday:"):
-            bounds = regular_bounds(now.astimezone(NY).date())
-            if not bounds or not bounds[0] <= now <= bounds[1]:
+            bounds = regular_bounds(end)
+            if not bounds or now < bounds[0]:
                 return {}
             minutes = int(item.cadence.split(":")[1])
             if now < bounds[0] + timedelta(minutes=minutes + item.grace_min):
                 return {}
-            lower, upper = now - timedelta(minutes=minutes + item.grace_min), now
+            upper = min(now, bounds[1])
+            lower = upper - timedelta(minutes=minutes + item.grace_min)
     else:
         lower, upper = start, end + timedelta(days=1)
+    if not item.value_column and item.min_coverage is None:
+        return presence(connection, item, start, end, now, lower, upper)
     sql, args = query(item, lower, upper)
     rows = connection.execute(sql, args).fetchall()
     grouped = defaultdict(list)
@@ -90,3 +95,59 @@ def findings(item, day, grouped):
     rows, prior = grouped.get(day, []), grouped.get(previous, [])
     counts = [sum(r["n"] for r in values) for d, values in sorted(grouped.items()) if d < day][-5:]
     return evaluate(item, day, rows, prior, prior_counts=counts, row_count=sum(r["n"] for r in rows))
+
+
+def presence(connection, item, start, end, now, lower, upper):
+    """Bounded index seeks: presence checks do not aggregate millions of option strikes."""
+    sessions = [start + timedelta(days=n) for n in range((end - start).days + 1)]
+    sessions = [d for d in sessions if trading_day(d)]
+    keys = list(item.expected_keys) or list(item.filter.get(item.key_column, ())) or ["all"]
+    days, lowers, uppers, names = [], [], [], []
+    for day in sessions:
+        for key in keys:
+            days.append(day)
+            names.append(key)
+            if item.timestamp:
+                lo = datetime.combine(day, time(), NY)
+                hi = datetime.combine(day + timedelta(days=1), time(), NY)
+                if item.cadence.startswith("intraday:"):
+                    lo, hi = lower, upper
+                lowers.append(lo)
+                uppers.append(min(hi, now))
+            else:
+                lowers.append(day)
+                uppers.append(day + timedelta(days=1))
+    if not days:
+        return {}
+    typename = "timestamptz" if item.timestamp else "date"
+    predicates = [f"{item.date_column}>=p.lo", f"{item.date_column}<p.hi"]
+    arguments = [days, lowers, uppers, names]
+    for name, values in sorted(item.filter.items()):
+        predicates.append(f"{name}=ANY(%s)")
+        arguments.append(list(values))
+    if item.key_column and keys != ["all"]:
+        predicates.append(f"{item.key_column}=p.key")
+    where = " AND ".join(predicates)
+    sql = (
+        f"SELECT p.day,p.key,r.n,NULL AS value FROM unnest(%s::date[],%s::{typename}[],%s::{typename}[],%s::text[]) "
+        f"AS p(day,lo,hi,key) JOIN LATERAL (SELECT count(*) AS n FROM (SELECT 1 FROM {item.table} "
+        f"WHERE {where} LIMIT %s) bounded) r ON r.n>0"
+    )
+    arguments.append(item.min_rows)
+    rows = connection.execute(sql, arguments).fetchall()
+    grouped = defaultdict(list)
+    for row in rows:
+        grouped[row["day"]].append(row)
+    return grouped
+
+
+def wide_scope(connection, day):
+    latest = connection.execute(
+        "SELECT trade_date FROM ingest.wide_universe WHERE trade_date<=%s ORDER BY trade_date DESC LIMIT 1", (day,)
+    ).fetchone()
+    if not latest:
+        raise ValueError("Wide monitored pool is unavailable")
+    rows = connection.execute(
+        "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included", (latest["trade_date"],)
+    ).fetchall()
+    return tuple(r["ticker"] for r in rows)

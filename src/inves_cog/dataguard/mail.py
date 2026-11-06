@@ -5,8 +5,25 @@ import ssl
 from email.message import EmailMessage
 from hashlib import sha256
 
-KINDS = {"missing": "缺失", "partial": "不完整", "stale": "陈旧", "suspect": "数值可疑", "job_failed": "采集任务失败"}
-STATES = {"open": "待处理", "backfilling": "正在补数", "resolved": "已补齐", "unrecoverable": "补数未成功，需人工处理"}
+KINDS = {
+    "complete": "完整",
+    "not_due": "尚未到核查期限",
+    "unknown": "核查未完成",
+    "missing": "缺失",
+    "partial": "不完整",
+    "stale": "陈旧",
+    "suspect": "数值可疑",
+    "job_failed": "采集任务失败",
+}
+STATES = {
+    "complete": "本轮完整",
+    "not_due": "待发布后核查",
+    "unknown": "需核查守护程序",
+    "open": "待处理",
+    "backfilling": "正在补数",
+    "resolved": "已补齐",
+    "unrecoverable": "补数未成功，需人工处理",
+}
 
 
 def compose(rows, *, daily=False, resources="资源状态尚未核实"):

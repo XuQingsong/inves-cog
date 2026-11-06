@@ -80,3 +80,8 @@ def limited_run(argv, *, cwd, env, timeout=600):
         os.killpg(child.pid, signal.SIGKILL)
         child.wait()
         return False
+    except BaseException:
+        if child.poll() is None:
+            os.killpg(child.pid, signal.SIGKILL)
+            child.wait()
+        raise

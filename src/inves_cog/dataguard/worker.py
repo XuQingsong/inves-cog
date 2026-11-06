@@ -11,9 +11,8 @@ from inves_cog.clock import SystemClock
 from inves_cog.dataguard.reader import findings, load, read
 from inves_cog.dataguard.receipts import ReceiptWriter
 from inves_cog.dataguard.recovery import attempt, eligible, limited_run, slice_resources
-from inves_cog.dataguard.service import ROOT, connect
+from inves_cog.dataguard.service import ROOT, connect, load_values
 from inves_cog.dataguard.store import Store
-from inves_cog.ingest.settings import read_environment
 
 
 def recover(item, day, now, values):
@@ -75,7 +74,7 @@ def main():
     parser.add_argument("--date", required=True, type=date.fromisoformat)
     parser.add_argument("--kind", required=True, choices=["missing", "partial", "stale", "job_failed"])
     args = parser.parse_args()
-    values = read_environment()
+    values = load_values()
     _, items = load(ROOT / "config/data_expectations.yaml")
     item = next(i for i in items if i.dataset == args.dataset)
     clock = SystemClock()

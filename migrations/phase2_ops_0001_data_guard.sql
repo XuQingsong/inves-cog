@@ -15,6 +15,7 @@ CREATE TABLE ops.data_gaps (
  PRIMARY KEY(dataset,data_date,kind)
 );
 CREATE INDEX data_gaps_active_idx ON ops.data_gaps(last_checked_at) WHERE status<>'resolved';
+CREATE INDEX data_gaps_resolved_idx ON ops.data_gaps(resolved_at) WHERE resolved_at IS NOT NULL;
 CREATE TABLE ops.data_gap_events (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  dataset text NOT NULL, data_date date NOT NULL, kind text NOT NULL,

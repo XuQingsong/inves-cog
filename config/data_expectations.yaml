@@ -96,6 +96,7 @@ datasets:
     - barometer
   key_column: ticker
   min_coverage: 0.9
+  scope: wide
 - dataset: 指数与半导体基金日线
   table: ingest.bars_daily
   date_column: trade_date
@@ -136,6 +137,7 @@ datasets:
   timestamp: true
   filter:
     ticker: *id001
+  expected_keys: *id001
 - dataset: 宽池盘中快照
   table: ingest.wide_snapshots
   date_column: as_of
@@ -150,6 +152,8 @@ datasets:
     max_attempts: 3
     depends_on: []
   timestamp: true
+  scope: wide
+  min_coverage: 0.9
 - dataset: 新闻新增
   table: ingest.info_items
   date_column: first_seen_at
@@ -559,6 +563,7 @@ datasets:
     entry: barometer
     max_attempts: 2
     depends_on: []
+  value_column: fear
 - dataset: 晴雨表盘中
   table: flows.barometer_intraday
   date_column: ts
@@ -573,6 +578,8 @@ datasets:
     max_attempts: 3
     depends_on: []
   timestamp: true
+  value_column: fear
+  latest_column: ts
 - dataset: 财报状态
   table: fundamentals.fin_state
   date_column: filed
@@ -641,6 +648,67 @@ datasets:
     depends_on: []
   key_column: ticker
   min_coverage: 0.9
+  filter:
+    ticker:
+    - NVDA
+    - AMD
+    - AVGO
+    - MRVL
+    - MU
+    - SKHY
+    - INTC
+    - NOK
+    - LITE
+    - MSFT
+    - ORCL
+    - CRM
+    - NOW
+    - ADBE
+    - PLTR
+    - META
+    - GOOGL
+    - AMZN
+    - NFLX
+    - AAPL
+    - TSLA
+    - COST
+    - WMT
+    - HD
+    - UNH
+    - LLY
+    - JNJ
+    - JPM
+    - V
+    - MA
+    - XOM
+    - CVX
+    - CAT
+    - GE
+    - WDC
+    - STX
+    - SNDK
+    - AMAT
+    - LRCX
+    - KLAC
+    - ASML
+    - QCOM
+    - ARM
+    - TSM
+    - ANET
+    - CIEN
+    - COHR
+    - VRT
+    - ETN
+    - GEV
+    - CEG
+    - BE
+    - DELL
+    - SMCI
+    - CRWV
+    - CRWD
+    - PANW
+    - FTNT
+    - ZS
 - dataset: 规则评分
   table: trading.daily_scores
   date_column: signal_date
@@ -669,6 +737,13 @@ datasets:
     entry: manual
     max_attempts: 3
     depends_on: []
+  filter:
+    portfolio_id:
+    - paper-fixed
+    extractor:
+    - fixed
+    rule_set:
+    - A
 - dataset: 日线采集任务
   table: ingest.job_runs
   date_column: trade_date
