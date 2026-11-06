@@ -50,7 +50,7 @@ def fear_coverage(replay_days, fear_levels, start, end):
     }
 
 
-def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
+def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4, prepared=None):
     """For each quarter start, run baseline + each variant; report the distribution.
 
     Scores/prices are computed once for the earliest start and inherited by fork
@@ -58,7 +58,7 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     """
     global _G_PREPARED
     starts = starts or quarter_starts()
-    _G_PREPARED = prepare_inputs(
+    _G_PREPARED = prepared or prepare_inputs(
         connection,
         {**spec, "start": min(starts), "load_fear_levels": any(breakdown_policy_enabled(f) for f in variants.values())},
     )
