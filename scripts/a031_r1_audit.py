@@ -49,7 +49,10 @@ def main():
             excluded_weekly_rows=sum(counts.values()),
             affected_tickers=len(counts),
             corrected_output="r1-corrected/",
-            remaining="observable panel lacks some removed issuers; no-event names retain supplied membership; terminal quote is a proxy",
+            remaining=(
+                "observable panel lacks some removed issuers; "
+                "no-event names retain supplied membership; terminal quote is a proxy"
+            ),
         ),
     )
     (root / "r1-source-audit.json").write_text(json.dumps(source, indent=2) + "\n")
