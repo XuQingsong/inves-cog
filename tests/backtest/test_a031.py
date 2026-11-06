@@ -54,13 +54,13 @@ def test_r2_runner_selects_optional_engine():
 
 def test_history_cache_matches_irregular_pit_prefixes_and_isolates_mutation():
     from datetime import date
+
     from inves_cog.backtest.history import CloseHistory
 
-    rows = {date(2026, 1, 5): {'close': 5}, date(2026, 1, 2): {'close': 2},
-            date(2026, 1, 8): {'close': None}}
+    rows = {date(2026, 1, 5): {"close": 5}, date(2026, 1, 2): {"close": 2}, date(2026, 1, 8): {"close": None}}
     history = CloseHistory(rows)
     for day in (date(2026, 1, 1), date(2026, 1, 4), date(2026, 1, 8)):
-        expected = [row['close'] for d, row in sorted(rows.items()) if d <= day]
+        expected = [row["close"] for d, row in sorted(rows.items()) if d <= day]
         assert history.at(day) == expected
     history.at(date(2026, 1, 5)).append(999)
     assert history.at(date(2026, 1, 5)) == [2, 5]

@@ -1,0 +1,22 @@
+{
+  "existing_contact_user_agent": true,
+  "attempts": 2,
+  "max_attempts": 2,
+  "timeout_per_request_seconds": 8,
+  "results": [
+    {
+      "accession": "0002012383-26-003352",
+      "filed": "2026-10-27",
+      "url": "https://www.sec.gov/Archives/edgar/data/1046179/000201238326003352/index.json",
+      "status": 200,
+      "items": 6
+    },
+    {
+      "accession": "0001046179-26-000728",
+      "filed": "2026-10-22",
+      "url": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000728/index.json",
+      "status": 200,
+      "items": 4
+    }
+  ]
+}

@@ -197,6 +197,11 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     if breakdown_policy_enabled(flags) and "fear_levels" not in pre:
         raise ValueError("F2 requires the local PIT market-risk input in prepared data")
     bar_dates = {t: sorted(rows) for t, rows in prices.items()} if breakdown_policy_enabled(flags) else {}
+    from .history import CloseHistory
+
+    histories = {ticker: CloseHistory(rows) for ticker, rows in prices.items()}
+    vix_history = CloseHistory({d: {"close": value} for d, value in vix.items()})
+    selection_rows, relaxed_streaks = [], {}
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
@@ -290,6 +295,16 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                 score["breakdown_depth_atr"] = breakdown_depth_atr(
                     recent, tech.get("price"), tech.get("price_vs_ma200")
                 )
+        if spec.get("relax_book"):
+            from .selection_gap import effective_books, quantile, relax_book
+
+            book = spec["relax_book"]
+            cutoff = quantile([effective_books(score).get(book) for score in daily.values()])
+            if cutoff is not None:
+                daily = {ticker: relax_book(score, book, cutoff) for ticker, score in daily.items()}
+                for ticker, score in daily.items():
+                    relaxed_streaks[ticker] = relaxed_streaks.get(ticker, 0) + 1 if score["entry_pass"] else 0
+                    score["consec_pass"] = relaxed_streaks[ticker]
         # PIT audit: a signal dated after the decision day must never appear
         for t, s in daily.items():
             if s["signal_date"] > day:
@@ -308,12 +323,12 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                 if day in r
             },
         )
-        spy = [prices["SPY"][d]["close"] for d in sorted(prices["SPY"]) if d <= day]
+        spy = histories["SPY"].at(day)
         returns = (
             100 * (spy[-1] / spy[-2] - 1) if len(spy) >= 2 else None,
             100 * (spy[-1] / spy[-6] - 1) if len(spy) >= 6 else None,
         )
-        history = {t: [r["close"] for d, r in sorted(rows.items()) if d <= day] for t, rows in prices.items()}
+        history = {ticker: history.at(day) for ticker, history in histories.items()}
         engine.decide(
             day,
             daily,
@@ -321,8 +336,12 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
             history=history,
             spy_returns=returns,
             vix=vix.get(day),
-            vix_history=[v for d, v in sorted(vix.items()) if d <= day],
+            vix_history=vix_history.at(day),
         )
+        if spec.get("audit_selection") and day >= spec.get("audit_selection_start", start):
+            from .selection_gap import selection_audit
+
+            selection_rows.extend(selection_audit(engine, daily, day, spec["audit_selection"]))
     metrics = equity_metrics(
         [{"date": r["day"], "equity": r["equity"], "cash": r["cash"]} for r in engine.curve],
         engine.trades,
@@ -344,6 +363,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
         "metrics": metrics,
         "trades": copy.deepcopy(engine.trades),
         "veto_events": veto_events,
+        "selection_audit": selection_rows,
         "curve": engine.curve,
         "positions": engine.positions,
         "audit": {
