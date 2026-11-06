@@ -942,3 +942,14 @@ A不再等待运维或重复截图授权，立即按UD-A-57及main紧急约束�
 最终只读核验：本次服务器预览进程0，临时目录/锁已删除，旧bf88c45目录亦不存在，证据a030-ud57-cleanup.json；生产当前head为 `def6c08d8b118210d0149571ccfec2ef7222b0b6`。此前命令响应/清理未证实卡点已解除，不再等待运维或截图授权。本轮未改线上服务/数据库、未部署A030或生产回填。
 
 [PR124](https://github.com/XuQingsong/inves-cog/pull/124)最终证据head `1afdf27db8fcfbbff7cc71f28172b9569ad2adca` 已推送，含main内存修复及紧急禁令、颜色遮盖失败测试/实现历史、T1–T10回报，21份证据/截图SHA256逐个核验通过。本地A03022 passed；08019e1准确CI实际SUCCESS，但本head新增了颜色遮盖及最终证据，须核对自身CI，不借旧绿灯。正在跟到该head真实CI完成，随后转非草稿提交需求方验收，不自动合并。无待用户输入；合并后A继续原授权迁移、45条EPS幂等补缺、限定重启和真实运行核验。
+
+
+## A-030 已完成（开发与离线验收交付）／已提交需求方验收，尚未合并部署
+
+[PR124](https://github.com/XuQingsong/inves-cog/pull/124)已真实转为非草稿（OPEN、isDraft=false），head `1afdf27db8fcfbbff7cc71f28172b9569ad2adca`。该准确head的[phase1-blocking实际SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/42162946446/job/127712680092)已核对headSha完全一致，同次replay/cases也实际SUCCESS。最新分支工作区干净，GitHub为MERGEABLE；已继承main def6c08内存修复和22f87db紧急禁令，保留#122/#123。最新main a51918c后续调度优化的两文件在本PR相对merge-base无变更，不回退main。本地A03022 passed、静态检查通过；Docker用例由真实CI验证，不计本地通过。首次PR ready请求TLS超时，先核对仍草稿后一次重试，已实际核验非草稿。
+
+完整T1–T10回报在ops/answers/A-030.md，结果/限制/部署准备在handoff/A030/progress.md。manifest.json的21份证据/截图SHA256已逐个核验。T6生产持仓结构完全遮盖图account-redacted.png已实际查看，身份/数值/交易文字及颜色、链接/属性/脚本均遮盖，原始payload/HTML不出服务器；服务器仅loopback预览，浏览器在Mac，预览退出0。服务器本次进程0、临时目录和锁已删除，旧目录也不存在，证据a030-ud57-cleanup.json。生产当前读取head为def6c08，命令/持仓接口已恢复，本轮未替生产安装或改服务。旧服务器/清理/授权卡点均已解除，无待用户输入，不再重复请求UD-A-57。
+
+T3真实11-04的59只逐项输出与5只手算已提交；KO不在池且生产无fin_state，用已有Mac财报+生产同日价格单独手算，混合来源明确；历史日早于校准、缺当日层级均明示，不伪造当时档位。T7真实10-30已发布计划只改2处理由，其余字段完全一致，原持仓/订单未导出。T8最终45条Visa EPS-only补缺清单：47状态EPS非空1→46，层级70→2203/2223交易日为Mac离线试算，首份前序不足仍缺、原非空不覆盖；GOOGL/META公司EPS存在，BRK.B不在池，不扩池。历史下载/回测不重复启动。
+
+阶段边界：本条“已完成”只指开发及验收提交，不是需求方验收通过、main已合入或线上功能完成。T1真正进main、T8生产回填及T10首日真实运行均在需求方验收合并后，由A继续原授权唯一迁移、45条幂等补缺、限定程序重启、全部程序前后对照、ceiling首日行数/HTTP200/实际EPS覆盖核验。A没有自动合并PR、迁移、部署、生产财务写入或模型调用。需求方负责验收/合并并关单，A持续接收答复并完成后续授权阶段；原a-github保持ACTIVE原线程，不因本阶段交付暂停。
