@@ -61,8 +61,15 @@ def test_modern_official_table_expands_effective_date_and_index_rowspans():
 
 def test_abbreviated_official_dates_and_blank_following_date_are_carried():
     from inves_cog.backtest.membership import parse_announcement
-    html='''<table><tr><td>Effective Date</td><td>Index Name</td><td>Action</td><td>Company Name</td><td>Ticker</td><td>GICS Sector</td></tr>
+
+    html = """<table><tr><td>Effective Date</td><td>Index Name</td><td>Action</td><td>Company Name</td><td>Ticker</td><td>GICS Sector</td></tr>
     <tr><td>Sept. 21, 2020</td><td>S&amp;P 500</td><td>Addition</td><td>Etsy</td><td>ETSY</td><td>Discretionary</td></tr>
-    <tr><td></td><td>S&amp;P 500</td><td>Deletion</td><td>H&amp;R Block</td><td>HRB</td><td>Discretionary</td></tr></table>'''
-    rows=parse_announcement(html,'https://press.spglobal.com/2020-09-04-example')
-    assert [(r['ticker'],r['effective']) for r in rows]==[('ETSY','2020-09-21'),('HRB','2020-09-21')]
+    <tr><td></td><td>S&amp;P 500</td><td>Deletion</td><td>H&amp;R Block</td><td>HRB</td><td>Discretionary</td></tr></table>"""
+    rows = parse_announcement(html, "https://press.spglobal.com/2020-09-04-example")
+    assert [(r["ticker"], r["effective"]) for r in rows] == [("ETSY", "2020-09-21"), ("HRB", "2020-09-21")]
+
+
+def test_compact_effective_date_is_not_publication_or_tba_date():
+    from inves_cog.backtest.membership import effective_date
+    assert effective_date('23-Sep-24')=='2024-09-23'
+    assert effective_date('TBA') is None
