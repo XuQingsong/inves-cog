@@ -30,3 +30,9 @@ def test_account_redaction_drops_private_text_attributes_scripts_and_prices():
     assert "持仓与关键价位" in out
     assert "长期回报大概率偏低" in out and "严重透支" in out
     assert "已遮盖" in out and ".card{color:black}" in out
+
+
+def test_redaction_removes_colour_signals_of_pnl_orders_and_risk_states():
+    html = '<div class="card down buy stale held y n2">private amount</div>'
+    out = redact_html(html)
+    assert out == '<div class="card">已遮盖</div>'
