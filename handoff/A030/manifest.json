@@ -23,6 +23,10 @@
     "sha256": "e3f76969597d53447a671b3127d7869671947243c2fc9ba2bdce5ebc608a95f3",
     "bytes": 61538
   },
+  "evidence/a030-ud57-cleanup.json": {
+    "sha256": "cbce02f8e0a0130bfd2ebc443cd97cf8ec180ae49b9e910bc1734f5d3d9eedf9",
+    "bytes": 382
+  },
   "evidence/a030-v-download-progress.json": {
     "sha256": "b05ffe1b1c9f7aaf34c5d017010f104644faf9583af8d0da4de981448500d8af",
     "bytes": 2662
@@ -58,6 +62,14 @@
   "screenshots/NVDA.png": {
     "sha256": "0b6d7f7175adbe8c1e224bf80caa5a34aa438b39a0c07e538494cc4d2c50ae9b",
     "bytes": 415705
+  },
+  "screenshots/account-redacted.png": {
+    "sha256": "4d5f3c8801f338b9221afdfd291ad49daaa8139ba97ab160114a0a25372d9262",
+    "bytes": 452323
+  },
+  "screenshots/account-redaction-verification.json": {
+    "sha256": "fd1e2bc317df2a7815be1d2196406550d6c12b5088b28cd9303b2a52fb6afd1b",
+    "bytes": 560
   },
   "screenshots/holdings-fixture-verification.json": {
     "sha256": "881c1bc1502b9a9a64bf71c1a42091f684c1be4a4179539e58ad807bbe974c67",
