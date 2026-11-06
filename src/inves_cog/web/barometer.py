@@ -99,7 +99,8 @@ def sentence(rec):
     dims = rec["FD"] if side == "F" else rec["GD"]
     phrases = {
         "下跌冲击": f"纳指 {_fmt(m.get('QQQ_1d'), '%')}（平时 {abs(m.get('QQQ_sig') or 0):.1f} 倍），距高点 {_fmt(m.get('QQQ_dd63'), '%')}",
-        "恐慌情绪": f"VIX {m.get('VIX'):.1f}" + ("，期限倒挂" if (m.get("VIX/VIX3M") or 0) > 1 else ""),
+        "恐慌情绪": ("VIX 缺" if m.get("VIX") is None else f"VIX {m['VIX']:.1f}")
+        + ("，期限倒挂" if (m.get("VIX/VIX3M") or 0) > 1 else ""),
         "债市信用": f"10 年美债 10 日 {_fmt(m.get('10Y_10dbp'), '%')} 基点，MOVE {(m.get('MOVE') or 0):.0f}",
         "超卖扩散": f"{(m.get('行业破50日线') or 0):.0f}% 行业跌破 50 日线",
         "去杠杆": f"动量股 5 日 {_fmt(m.get('MTUM/SPY5d'), '%')}，TQQQ {(m.get('TQQQ5d') or 0):.0f}%",
