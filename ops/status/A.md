@@ -962,3 +962,17 @@ T3真实11-04的59只逐项输出与5只手算已提交；KO不在池且生产�
 部署优先：先核对远端真实head/工作区、已有job/迁移/回填前缀、全部程序/PID及inves-cog-data/monitor/alerts.log；唯一迁移phase1_m5_0003_ceiling_daily.sql，V45条先备份、仅既有非管理员ingest业务角色幂等补缺，仅重启valuation_v1/pages/paper_plan/financials，禁止supervisorctl update及生产浏览器。过程出现新告警即暂停，不把命令发出、程序存活计为成功。需求方补充真实故障原因为claudeuser slice内存上限，用户已提高至7G，PR125/126已降内存；本轮不擅自改资源上限。
 
 A031已收到（ops/inbox/A/A-031.md及T1–T9）：R1历史标普500透支否决风险/三组合12滚动起点；R2基本面或fear≥3才触发的破位v2/v2b与28起点评估；R3规则A漏选逐门诊断及单门放宽全池对照，只报数据、观察，不提或上线规则修改。TSM按既有合规SEC User-Agent限速有界重试，失败保留缺口。全部Mac inves_cog_bt/本项目目录，最多4工作进程，代码仅backtest/scripts/tests/handoff/A031，新开关默认关闭。部署为独立运维与本单并行且优先；A031结果尚未运行，不把已收到说成已完成。无待用户输入，A负责执行与核验，需求方负责最终研究判断和验收。
+
+## A-030 已完成（合并安装、EPS回填及首日真实运行核验） 2026-11-06
+
+生产安装 main `1377557c43aed5656e6d8acdfb285e9338a38665`，包含已验收 PR124 merge `5622d2b3b2c1ef6e1307f925ac3a258375228f99` 与准确交付head `1afdf27db8fcfbbff7cc71f28172b9569ad2adca`；该head [phase1-blocking SUCCESS](https://github.com/XuQingsong/inves-cog/actions/runs/42162946446/job/127712680092)。没有新代码改动，不借新main声称重新CI。生产原先detached HEAD，守卫在数据库写入前停止；核对已跟踪文件无修改后切回既有main并fast-forward，未覆盖未跟踪运维记录。仅执行批准的phase1_m5_0003_ceiling_daily.sql，未执行其他迁移、supervisorctl update、生产浏览器、模型或回测。
+
+真实结果：服务器内先备份V原47状态，备份 `/home/claudeuser/inves-cog-data/deploy/a030-20261106/v-eps-before.json` 权限受umask077保护，SHA256 `0daff60277326ac8eb72cec4f8390444d813d6135a0914a8b5ddeee7728e8aeb`；既有非管理员inves_cog_ingest业务登录实际updated45/already_present0/missing_state0。EPS非空1→46/47；同一真实历史2018-01-01至2026-11-04共2223交易日，score_history只读核算层级70→2203天。首份前序不足仍缺，原非空保留。未将历史补缺伪称历史当时已可见。该层级核算单票内存函数，无生产交易回测或模型调用。
+
+仅重启 valuation_v1/pages/paper_plan/financials，全部22程序前后清单保存在同目录 services-before.json、services-after.json。逐项核对：anomaly_daily63473→63473；attribution_labels1624→1624；attribution_tracks1625→1625；consensus_snapshots1626→1626；daily_modules63440→63440；embedding原EXITED仍EXITED；financials1629→110513；flows1630→1630；iex_snapshots1631→1631；live_perception1635→1635；m9 45421→45421；macro_snapshots1640→1640；morning_page1641→1641；news_translate1642→1642；pages1644→110392；paper_plan63530→110436；review1646→1646；scheduler1650→1650；stock_snapshots1664→1664；valuation_v1 63489→110380；watchdog1666→1666；wide_snapshots1667→1667。除原embedding外均RUNNING，不将原EXITED称全部健康；未改变范围外进程。
+
+首日真实业务估值使用既有valuation业务角色完成，数据库独立复查ceiling_daily在2026-11-05实际59行。首页、/account、/barometer?static 独立HTTP检查均200，不输出页面或持仓内容。全过程监控alerts.log inode1179927/306bytes，独立终检仍306bytes，无新增告警。迁移、回填、四程序重启、真实估值均只执行一次；最后打印完成摘要时date JSON编码失败，但completed.json已保存，随后独立只读核验表行数/EPS/HTTP/服务清单，不重复运行。完成时间2026-11-06 05:43:29 UTC；服务器completed.json、eps-result.json、valuation-result.json、progress.json与备份保留供需求方复核。
+
+自动审批曾拒绝原始alerts日志末尾导出（可能敏感运行信息）；已改为服务器内检查inode/字节变化，未导出日志原文，不绕过拒绝，无需新增用户授权。没有新增权限、数据来源、服务或调度变更。已自行决定：以已知历史窗口复核同口径层级，首日仅运行既有估值计算，不触发纸面执行或补跑其他业务。
+
+下一步：需求方负责上线走查/最终验收；A继续已收到A031 Mac本地研究，生产部署已收口，不再重复迁移、回填、账户生成或首日计算。A031尚无结果，不冒称已完成。原a-github持续开启。
