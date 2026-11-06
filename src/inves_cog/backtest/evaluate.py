@@ -6,7 +6,7 @@ from datetime import date
 
 from inves_cog.ingest.market import next_trading_day
 
-from .runner import prepare_inputs, run_backtest
+from .runner import breakdown_policy_enabled, prepare_inputs, run_backtest
 
 _G_PREPARED = None
 
@@ -60,7 +60,7 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
     starts = starts or quarter_starts()
     _G_PREPARED = prepare_inputs(
         connection,
-        {**spec, "start": min(starts), "load_fear_levels": any(f.get("breakdown_confirm") for f in variants.values())},
+        {**spec, "start": min(starts), "load_fear_levels": any(breakdown_policy_enabled(f) for f in variants.values())},
     )
     jobs = []
     for st in starts:
@@ -90,7 +90,7 @@ def rolling_start_eval(connection, spec, variants, *, starts=None, workers=4):
                     "beats": m["return_pct"] > base["return_pct"],
                     "short_hold_sales": m["short_hold_sales"],
                     "fear_coverage": fear_coverage(replay_days, fear_levels, st, spec["end"])
-                    if variants[name].get("breakdown_confirm")
+                    if breakdown_policy_enabled(variants[name])
                     else None,
                 }
             )

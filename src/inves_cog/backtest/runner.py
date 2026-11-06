@@ -29,6 +29,16 @@ def _code_rev():
         return "unknown"
 
 
+def breakdown_policy_enabled(flags):
+    return any(flags.get(k) for k in ("breakdown_confirm", "breakdown_v2", "breakdown_v2b"))
+
+
+def research_policy_enabled(flags):
+    return breakdown_policy_enabled(flags) or any(
+        flags.get(k) for k in ("buy_consistency", "watch_promote", "reentry_after_price_exit")
+    )
+
+
 def prepare_inputs(connection, spec):
     """Load prices/signals/vix once — reused across replays and rolling starts."""
     loader = BacktestLoader(connection)
@@ -65,7 +75,7 @@ def prepare_inputs(connection, spec):
         signals[t] = enrich(snaps, state_lookup, t, extractor)
     vix = loader.vix(end)
     prepared = {"loader": loader, "tickers": tickers, "prices": prices, "signals": signals, "vix": vix}
-    if spec.get("load_fear_levels") or (spec.get("flags") or {}).get("breakdown_confirm"):
+    if spec.get("load_fear_levels") or breakdown_policy_enabled(spec.get("flags") or {}):
         rows = connection.execute(
             "SELECT date, fear_level FROM flows.barometer_daily WHERE date BETWEEN %s AND %s "
             "AND asof < ((date + 1)::timestamp AT TIME ZONE 'America/New_York')",
@@ -90,13 +100,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     days = sorted({d for rows in prices.values() for d in rows if start <= d <= end})
     clock = FrozenClock(datetime.combine(end, datetime.min.time(), timezone.utc))
     flags = spec.get("flags") or {}
-    engine_type = (
-        BacktestEngine
-        if any(
-            flags.get(k) for k in ("buy_consistency", "watch_promote", "breakdown_confirm", "reentry_after_price_exit")
-        )
-        else ExecutionEngine
-    )
+    engine_type = BacktestEngine if research_policy_enabled(flags) else ExecutionEngine
     engine = engine_type(
         clock=clock,
         initial_cash=initial,
@@ -190,9 +194,9 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
     prev_blocked = set()
     ceiling_streaks = {}
     fear_levels = pre.get("fear_levels", {})
-    if flags.get("breakdown_confirm") and "fear_levels" not in pre:
+    if breakdown_policy_enabled(flags) and "fear_levels" not in pre:
         raise ValueError("F2 requires the local PIT market-risk input in prepared data")
-    bar_dates = {t: sorted(rows) for t, rows in prices.items()} if flags.get("breakdown_confirm") else {}
+    bar_dates = {t: sorted(rows) for t, rows in prices.items()} if breakdown_policy_enabled(flags) else {}
     for day in days:
         daily = {t: dict(signals[t][day]) for t in tickers if day in signals[t]}
         if flags.get("tier_lock"):
@@ -275,7 +279,7 @@ def run_backtest(connection, spec, *, write=True, prepared=None):  # noqa: C901
                         "m8": qmap[qdays[fidx]]["m8"].get(t) if fidx >= 0 else None,
                     }
                 )
-        if flags.get("breakdown_confirm"):
+        if breakdown_policy_enabled(flags):
             for ticker, score in daily.items():
                 bars = prices.get(ticker, {})
                 index = bisect.bisect_right(bar_dates.get(ticker, ()), day)
