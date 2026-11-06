@@ -269,6 +269,7 @@ def test_e7_add_only_m9_program_separate_migration():
         "embedding",
         "news_translate",
         "flows",
+        "data_guard",
         "pages",
         "review",
         "live_perception",

@@ -21,7 +21,7 @@ from inves_cog.clock import SystemClock
 from inves_cog.dataguard.calendar import NY
 from inves_cog.dataguard.core import Finding, due_dates
 from inves_cog.dataguard.mail import Mailer
-from inves_cog.dataguard.reader import findings, load, read, wide_scope
+from inves_cog.dataguard.reader import barometer_drifts, findings, load, read, wide_scope
 from inves_cog.dataguard.recovery import eligible, slice_resources
 from inves_cog.dataguard.store import Store
 from inves_cog.ingest.settings import read_environment
@@ -74,15 +74,19 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
             errors.extend(i.dataset for i in items[index:])
             break
         days = due_dates(item, now, lookback=70 if item.cadence == "monthly" else max(7, item.release_days + 7))
-        if item.cadence.startswith("intraday:"):
+        if item.cadence.startswith("intraday:") and not item.failures_only:
             days = days[-1:]
         elif item.carry_forward:
-            days = [now.astimezone(NY).date()] if days else []
+            days = days[-1:]
         if not days:
             results.append((item, {}))
             continue
         try:
-            history = 10 if item.staleness or item.sanity or (item.min_coverage and not item.scope) else 0
+            history = (
+                (45 if item.cadence == "weekly" else 180 if item.cadence == "monthly" else 10)
+                if (item.staleness or item.sanity or (item.min_coverage and not item.scope))
+                else 0
+            )
             grouped = read(connection, item, min(days) - timedelta(days=history), max(days), now)
             # Outside the trading window is not an empty data window.
             if item.cadence.startswith("intraday:") and not grouped:
@@ -93,10 +97,17 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
                 if not bounds or now < bounds[0] + timedelta(minutes=minutes):
                     results.append((item, {}))
                     continue
+            drift = (
+                barometer_drifts(connection, item, min(days), max(days))
+                if item.table == "flows.barometer_daily"
+                else {}
+            )
             found = {}
             for day in days:
                 scoped = replace(item, expected_keys=wide_scope(connection, day)) if item.scope == "wide" else item
-                found[day] = findings(scoped, day, grouped)
+                found[day] = findings(scoped, day, grouped, now=now)
+                if day in drift:
+                    found[day].append(drift[day])
             results.append((item, found))
         except Exception as exc:
             errors.append(item.dataset)
@@ -194,7 +205,7 @@ def dispatch(writer, items, now, *, detect_only, resources, child, root=ROOT):
     by_name = {i.dataset: i for i in items}
     rows = writer.execute(
         "SELECT * FROM ops.data_gaps WHERE status IN ('open','backfilling') "
-        "ORDER BY last_attempt_at NULLS FIRST,data_date LIMIT 100"
+        "ORDER BY last_attempt_at NULLS FIRST,data_date DESC LIMIT 100"
     ).fetchall()
     store = Store(writer)
     for row in rows:

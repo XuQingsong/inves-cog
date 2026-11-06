@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 from hashlib import sha256
+from zoneinfo import ZoneInfo
 
 from psycopg.types.json import Jsonb
 
@@ -27,6 +28,7 @@ class Store:
             reopened = prev and prev["status"] == "resolved"
             generation = (prev["generation"] + 1 if reopened else prev["generation"]) if prev else 1
             status = "open" if not prev or reopened else prev["status"]
+            detail = {**(prev["detail"] if prev and not reopened else {}), **f.detail}
             self.db.execute(
                 "INSERT INTO ops.data_gaps(dataset,data_date,kind,detail,first_detected_at,last_checked_at,generation) "
                 "VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(dataset,data_date,kind) DO UPDATE SET "
@@ -38,7 +40,7 @@ class Store:
                     dataset,
                     day,
                     f.kind,
-                    Jsonb(f.detail),
+                    Jsonb(detail),
                     now,
                     now,
                     generation,
@@ -54,7 +56,7 @@ class Store:
                     dataset=dataset,
                     data_date=day,
                     kind=f.kind,
-                    detail=f.detail,
+                    detail=detail,
                     status=status,
                     generation=generation,
                     attempts=0,
@@ -110,6 +112,8 @@ class Store:
             return
         key = event_key or sha256("\n".join(sorted(keys)).encode()).hexdigest()
         subject, body = compose(rows, daily=daily, resources=resources)
+        stamp = now.astimezone(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
+        body = f"检测记录时间（北京时间）：{stamp}\n" + body
         self.db.execute(
             "INSERT INTO ops.data_notices(event_key,subject,body,created_at,next_attempt_at) "
             "VALUES(%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
@@ -121,11 +125,16 @@ class Store:
             return "邮件未配置"
         # Service singleton lock excludes a second sender; only one batch per cycle bounds SMTP time.
         row = self.db.execute(
-            "SELECT * FROM ops.data_notices WHERE sent_at IS NULL AND next_attempt_at<=%s ORDER BY created_at LIMIT 1",
+            "SELECT * FROM ops.data_notices WHERE sent_at IS NULL AND next_attempt_at<=%s "
+            "ORDER BY next_attempt_at,created_at LIMIT 1",
             (now,),
         ).fetchone()
         if not row:
-            return "邮件已配置"
+            waiting = self.db.execute(
+                "SELECT result FROM ops.data_notices WHERE sent_at IS NULL AND attempts>0 "
+                "ORDER BY next_attempt_at LIMIT 1"
+            ).fetchone()
+            return "邮件发送失败，等待重试" if waiting else "邮件已配置"
         outcome = mailer.send(row["event_key"], row["subject"], row["body"])
         attempts = row["attempts"] + 1
         self.db.execute(

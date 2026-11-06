@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 
 from inves_cog.dataguard.calendar import NY, regular_bounds, trading_day
-from inves_cog.dataguard.core import Expectation, evaluate
+from inves_cog.dataguard.core import Expectation, Finding, evaluate
 
 
 def load(path):
@@ -28,6 +28,8 @@ def query(item, lower, upper):
     for name, values in sorted(item.filter.items()):
         where.append(f"{name}=ANY(%s)")
         args.append(list(values))
+    if item.table == "ingest.job_runs" and item.cadence.startswith("intraday:") and not item.failures_only:
+        where.extend(["status<>'running'", "ended_at IS NOT NULL"])
     predicate = " AND ".join(where)
     if item.value_column:
         latest = item.latest_column or column
@@ -35,7 +37,11 @@ def query(item, lower, upper):
             f"SELECT DISTINCT ON ({bucket}"
             + (f",{key}" if item.key_column else "")
             + f") {bucket} AS day,{key} AS key,"
-            f"{item.value_column} AS value,1 AS n FROM {item.table} WHERE {predicate} "
+            f"{item.value_column} AS value,1 AS n"
+            + (f",{latest} AS seen_at" if item.table == "ingest.job_runs" else "")
+            + (f",{item.adjustment_column} AS adjustment" if item.adjustment_column else "")
+            + (f",{item.quality_column} AS quality" if item.quality_column else "")
+            + f" FROM {item.table} WHERE {predicate} "
             f"ORDER BY {bucket}" + (f",{key}" if item.key_column else "") + f",{latest} DESC"
         )
     else:
@@ -57,12 +63,15 @@ def read(connection, item, start, end, now):
             filter_args.append(list(values))
         suffix = " AND " + " AND ".join(conditions) if conditions else ""
         sql = (
-            f"SELECT k.key,r.{item.date_column} AS day,1 AS n,NULL AS value "
+            f"SELECT k.key,r.{item.date_column} AS day,1 AS n,NULL AS value,f.filing_date AS expected_filed "
             f"FROM unnest(%s::text[]) AS k(key) JOIN LATERAL "
             f"(SELECT {item.date_column} FROM {item.table} WHERE {item.key_column}=k.key "
-            f"AND {item.date_column}<=%s{suffix} ORDER BY {item.date_column} DESC LIMIT 1) r ON true"
+            f"AND {item.date_column}<=%s{suffix} ORDER BY {item.date_column} DESC LIMIT 1) r ON true "
+            "LEFT JOIN LATERAL (SELECT filing_date FROM ingest.sec_filings WHERE ticker=k.key AND filing_date<=%s "
+            "AND form IN ('10-K','10-K/A','10-Q','10-Q/A','20-F','20-F/A','40-F','40-F/A') "
+            "ORDER BY filing_date DESC LIMIT 1) f ON true"
         )
-        rows = connection.execute(sql, (keys, end, *filter_args)).fetchall()
+        rows = connection.execute(sql, (keys, end, *filter_args, end)).fetchall()
         return {end: rows}
     if item.timestamp:
         lower = datetime.combine(start, time(), NY)
@@ -88,13 +97,22 @@ def read(connection, item, start, end, now):
     return grouped
 
 
-def findings(item, day, grouped):
+def findings(item, day, grouped, *, now=None):
     previous = day - timedelta(days=1)
     while not trading_day(previous):
         previous -= timedelta(days=1)
     rows, prior = grouped.get(day, []), grouped.get(previous, [])
     counts = [sum(r["n"] for r in values) for d, values in sorted(grouped.items()) if d < day][-5:]
-    return evaluate(item, day, rows, prior, prior_counts=counts, row_count=sum(r["n"] for r in rows))
+    return evaluate(
+        item,
+        day,
+        rows,
+        prior,
+        prior_counts=counts,
+        row_count=sum(r["n"] for r in rows),
+        actions=set(item.corporate_actions.get(str(day), {})),
+        now=now,
+    )
 
 
 def presence(connection, item, start, end, now, lower, upper):
@@ -151,3 +169,42 @@ def wide_scope(connection, day):
         "SELECT ticker FROM ingest.wide_universe WHERE trade_date=%s AND included", (latest["trade_date"],)
     ).fetchall()
     return tuple(r["ticker"] for r in rows)
+
+
+def barometer_drift(dataset, day, saved, current):
+    if current is None:
+        return None
+    try:
+        same = saved is not None and abs(float(saved) - float(current)) < 1e-8
+    except (TypeError, ValueError):
+        same = False
+    if same:
+        return None
+    return Finding(
+        dataset,
+        day,
+        "stale",
+        {
+            "impact": "来源波动率已更新，但该日晴雨表读数尚未修订",
+            "affects_barometer": True,
+            "cached_value": saved,
+            "source_value": current,
+            "source": "VIX_CBOE",
+        },
+    )
+
+
+def barometer_drifts(connection, item, first, last):
+    rows = connection.execute(
+        "SELECT b.date,b.inputs->>'VIX' AS cached,r.value FROM flows.barometer_daily b "
+        "LEFT JOIN LATERAL (SELECT value FROM ingest.macro_observations "
+        "WHERE series_id='VIX_CBOE' AND observation_date=b.date ORDER BY fetched_at DESC LIMIT 1) r ON true "
+        "WHERE b.date>=%s AND b.date<=%s",
+        (first, last),
+    ).fetchall()
+    result = {}
+    for row in rows:
+        finding = barometer_drift(item.dataset, row["date"], row["cached"], row["value"])
+        if finding:
+            result[row["date"]] = finding
+    return result

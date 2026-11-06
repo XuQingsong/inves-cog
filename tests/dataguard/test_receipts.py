@@ -25,3 +25,34 @@ def test_historical_parser_output_is_clipped_to_requested_date_and_receipt_is_ac
 def test_unknown_table_is_rejected_instead_of_unbounded_business_writes():
     with pytest.raises(ValueError):
         bounded_rows("orders", [], day=DAY, now=NOW, filters={})
+
+
+def test_existing_yahoo_parser_through_adapter_writes_only_target_with_actual_receipt(monkeypatch, tmp_path):
+    from inves_cog.dataguard.receipts import ReceiptWriter
+    from inves_cog.flows import backfill
+
+    calls = []
+
+    class Cursor:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+        def executemany(self, sql, values):
+            calls.append((sql, values))
+
+    class DB:
+        def cursor(self):
+            return Cursor()
+
+    monkeypatch.setattr(backfill, "BARO_YAHOO", ["HYG"])
+    monkeypatch.setattr(backfill, "_yahoo_close", lambda *a: {DAY: 80, date(2026, 11, 6): 81})
+    monkeypatch.setattr(backfill.time, "sleep", lambda *_: None)
+    writer = ReceiptWriter(DB(), day=DAY, now=NOW, filters={"series_id": ["yahoo_px_hyg"]})
+    backfill.backfill_yahoo_px(None, writer, tmp_path, DAY, DAY, NOW)
+    sql, rows = calls[-1]
+    assert writer.filtered_rows == 1 and len(rows) == 1
+    assert rows[0][1] == DAY and NOW in rows[0]
+    assert "ingested_at" in sql

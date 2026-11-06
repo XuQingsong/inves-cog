@@ -30,10 +30,11 @@ def compose(rows, *, daily=False, resources="资源状态尚未核实"):
     subject = f"数据{'日报' if daily else '提醒'}：{len(rows)} 项"
     lines = [subject]
     for r in rows:
+        explanation = r["detail"].get("recovery_reason", "")
         lines.append(
             f"{r['dataset']} / {r['data_date']}：{KINDS.get(r['kind'], '待核实')}；"
             f"{STATES.get(r['status'], '待核实')}。影响：{r['detail'].get('impact', '相关数据展示')}。"
-            f"系统已尝试补数 {r['attempts']} 次。"
+            f"系统已尝试补数 {r['attempts']} 次。" + (f"原因：{explanation}。" if explanation else "")
         )
     lines += [
         f"服务器资源：{resources}",
@@ -69,7 +70,8 @@ class Mailer:
                 server.starttls(context=ssl.create_default_context())
                 server.ehlo()
                 server.login(v["INVES_SMTP_USER"], v["INVES_SMTP_PASSWORD"])
-                server.send_message(message)
+                if server.send_message(message):
+                    return "邮件部分收件人发送失败，将重试"
             return "sent"
         except (OSError, ValueError, smtplib.SMTPException):
             return "邮件发送失败，将重试"

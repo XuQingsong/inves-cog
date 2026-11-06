@@ -6,8 +6,10 @@ from inves_cog.dataguard.finra import parse_daily
 
 pytestmark = pytest.mark.phase1_blocking
 DAY = date(2026, 11, 5)
-FILE = ("Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market\n"
-        "20261105|SPY|120|5|300|B,Q,N\n20261105|QQQ|80|1|200|Q,N\n2\n")
+FILE = (
+    "Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market\n"
+    "20261105|SPY|120|5|300|B,Q,N\n20261105|QQQ|80|1|200|Q,N\n2\n"
+)
 
 
 def test_only_monitored_symbols_and_short_exempt_is_already_in_short_volume():

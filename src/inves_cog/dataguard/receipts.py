@@ -40,6 +40,7 @@ class ReceiptWriter:
 
     def __init__(self, connection, *, day, now, filters):
         self.db, self.day, self.now, self.filters = connection, day, now, filters
+        self.filtered_rows = 0
 
     def execute(self, sql, args=None):
         if not sql.lstrip().startswith("INSERT INTO flows.raw_files "):
@@ -74,5 +75,7 @@ class _Cursor:
             filters=owner.filters,
         )
         if rows:
+            if table != "series_catalog":
+                owner.filtered_rows += len(rows)
             # Reuse the existing upsert helper, with the original connection, to avoid recursion.
             upsert_many(owner.db, table, list(rows[0]), rows, "update" if table != "series_catalog" else "nothing")

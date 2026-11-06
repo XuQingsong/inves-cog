@@ -23,7 +23,7 @@ def payload(connection, _day, clock):
                 return unknown
             gaps = connection.execute(
                 "SELECT dataset,data_date,kind,status,detail->>'impact' AS impact,"
-                "detail->>'affects_barometer' AS affects_barometer "
+                "detail->>'affects_barometer' AS affects_barometer,detail->>'recovery_reason' AS recovery_reason "
                 "FROM ops.data_gaps WHERE status<>'resolved' "
                 "ORDER BY data_date DESC,dataset LIMIT 100"
             ).fetchall()
@@ -98,7 +98,7 @@ def render_status(data):
         cells = [
             r["dataset"],
             str(r["data_date"]),
-            KINDS.get(r["kind"], "待核查"),
+            KINDS.get(r["kind"], "待核查") + ("；" + r["recovery_reason"] if r.get("recovery_reason") else ""),
             r.get("impact") or "相关数据展示",
             STATES.get(r["status"], "待核查"),
         ]

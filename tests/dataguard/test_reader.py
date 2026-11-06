@@ -81,7 +81,8 @@ def test_barometer_row_with_partial_inputs_is_not_healthy_just_because_fear_is_a
 
 def test_fresh_upstream_vix_does_not_hide_an_old_cached_barometer_input():
     from inves_cog.dataguard.reader import barometer_drift
-    day=date(2026,11,5)
-    got=barometer_drift('晴雨表日报',day,16.61,28.18)
-    assert got.kind=='stale' and got.detail['cached_value']==16.61
-    assert barometer_drift('晴雨表日报',day,28.18,28.18) is None
+
+    day = date(2026, 11, 5)
+    got = barometer_drift("晴雨表日报", day, 16.61, 28.18)
+    assert got.kind == "stale" and got.detail["cached_value"] == 16.61
+    assert barometer_drift("晴雨表日报", day, 28.18, 28.18) is None

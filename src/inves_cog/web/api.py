@@ -320,16 +320,20 @@ def _register_html(app, call, clock, page_cache):
 
     def show(builder, requested, cache=False, **extra):
         produce = lambda: render_page(call(builder, requested or latest_visible_session(clock), **extra))  # noqa: E731
-        return _page(page_cache, ("show", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        return _data_warning(
+            call, _page(page_cache, ("show", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        )
 
     def show_brief(builder, requested, cache=False, **extra):
         # B-064: brief pages default to today; close cards carry the prior session.
         produce = lambda: render_brief(call(builder, requested or default_session(clock), **extra))  # noqa: E731
-        return _page(page_cache, ("brief", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        return _data_warning(
+            call, _page(page_cache, ("brief", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        )
 
     @app.get("/")
     def home_html(date: date | None = None):
-        return _data_warning(call, show_brief(page_brief_market, date, cache=True))
+        return show_brief(page_brief_market, date, cache=True)
 
     @app.get("/stocks")
     def stocks_html(date: date | None = None):
@@ -341,7 +345,7 @@ def _register_html(app, call, clock, page_cache):
 
     @app.get("/trust")
     def trust_html(date: date | None = None):
-        return _data_warning(call, show_brief(page_brief_trust, date, cache=True))
+        return show_brief(page_brief_trust, date, cache=True)
 
     @app.get("/log")
     def log_html(date: date | None = None):

@@ -74,10 +74,31 @@ def test_configuration_never_allows_sql_identifier_injection():
 
 
 def test_null_value_is_partial_even_when_a_row_exists():
-    item=expected(value_column='value')
-    assert evaluate(item,D,[{'key':'VIX','value':None}],[])[0].kind=='partial'
+    item = expected(value_column="value")
+    assert evaluate(item, D, [{"key": "VIX", "value": None}], [])[0].kind == "partial"
 
 
 def test_nonfinite_current_value_is_suspect_without_needing_previous_value():
-    item=expected(value_column='value')
-    assert evaluate(item,D,[{'key':'VIX','value':float('nan')}],[])[0].kind=='suspect'
+    item = expected(value_column="value")
+    assert evaluate(item, D, [{"key": "VIX", "value": float("nan")}], [])[0].kind == "suspect"
+
+
+def test_review_period_deadline_uses_last_exchange_session_not_calendar_month_end():
+    item = expected(cadence="monthly", period_end="month", release_days=1)
+    # October 2026 ends Saturday; Friday's review is due on Saturday evening ET.
+    days = due_dates(item, datetime(2026, 11, 1, 3, tzinfo=timezone.utc), lookback=5)
+    assert date(2026, 10, 30) in days and date(2026, 10, 31) not in days
+
+
+def test_financial_state_behind_a_known_qualifying_filing_is_partial():
+    item = expected(carry_forward=True, key_column="ticker")
+    got = evaluate(item, D, [{"key": "AAA", "day": date(2026, 10, 1), "expected_filed": D}], [])
+    assert got[0].kind == "partial"
+    assert got[0].detail["outdated_filings"][0]["expected_filed"] == "2026-11-05"
+
+
+def test_multiple_partial_reasons_still_produce_one_gap_per_kind():
+    item = expected(value_column="fear", quality_column="missing")
+    got = evaluate(item, D, [{"key": "all", "value": None, "quality": ["信用利差"]}], [])
+    assert [r.kind for r in got] == ["partial"]
+    assert got[0].detail["missing_fields"] == ["信用利差"]

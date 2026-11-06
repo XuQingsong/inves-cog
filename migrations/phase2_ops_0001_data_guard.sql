@@ -2,7 +2,6 @@
 BEGIN;
 SET LOCAL ROLE inves_cog_admin;
 CREATE SCHEMA IF NOT EXISTS ops;
-REVOKE ALL ON SCHEMA ops FROM PUBLIC;
 GRANT USAGE ON SCHEMA ops TO role_ingest,role_web;
 CREATE TABLE ops.data_gaps (
  dataset text NOT NULL, data_date date NOT NULL,

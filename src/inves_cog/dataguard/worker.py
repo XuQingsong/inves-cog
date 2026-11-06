@@ -5,17 +5,20 @@ import os
 import resource
 import signal
 import sys
+from dataclasses import replace
 from datetime import date, timedelta
 
 from inves_cog.clock import SystemClock
-from inves_cog.dataguard.reader import findings, load, read
+from inves_cog.dataguard.calendar import NY
+from inves_cog.dataguard.reader import findings, load, read, wide_scope
 from inves_cog.dataguard.receipts import ReceiptWriter
 from inves_cog.dataguard.recovery import attempt, eligible, limited_run, slice_resources
 from inves_cog.dataguard.service import ROOT, connect, load_values
 from inves_cog.dataguard.store import Store
 
 
-def recover(item, day, now, values):
+def recover(item, day, now, values, *, evidence=None, trace=None):
+    evidence = {} if evidence is None else evidence
     entry = item.backfill["entry"]
     if entry in {"bars_full", "wide_universe", "vix_daily"}:
         return limited_run(
@@ -28,20 +31,28 @@ def recover(item, day, now, values):
         from inves_cog.perception.barometer.run import persist, run_range
 
         with connect(values, writer=True) as db:
+            # Until a separately authorized restatement path exists, preserve historical/original readings.
+            if (
+                day != now.astimezone(NY).date()
+                or db.execute("SELECT 1 FROM flows.barometer_daily WHERE date=%s", (day,)).fetchone()
+            ):
+                evidence["blocked"] = "historical_restatement"
+                return False
             records = run_range(db, day, day)
             persist(db, records)
-            return bool(records)
+            return bool(records) and all(not r.get("missing") for r in records)
     from inves_cog.flows import backfill
     from inves_cog.flows.collectors import collect_occ
     from inves_cog.flows.store import DEFAULT_RAW, polite_http
 
     with connect(values, writer=True) as db, db.transaction():
         receipt = ReceiptWriter(db, day=day, now=now, filters=item.filter)
-        http = polite_http()
+        http = trace.wrap(polite_http()) if trace else polite_http()
         if entry == "finra_short":
             from inves_cog.dataguard.finra import collect
 
-            collect(http, db, DEFAULT_RAW, day=day, tickers=item.filter.get("ticker", ()), now=now)
+            result = collect(http, db, DEFAULT_RAW, day=day, tickers=item.filter.get("ticker", ()), now=now)
+            evidence["candidate_rows"] = result["rows"]
         elif entry == "yahoo_px":
             backfill.backfill_yahoo_px(http, receipt, DEFAULT_RAW, day, day, now)
         elif entry == "occ":
@@ -58,13 +69,24 @@ def recover(item, day, now, values):
         elif entry == "cftc":
             backfill.backfill_cftc(http, receipt, DEFAULT_RAW, day, day, now)
         elif entry == "fred":
-            backfill.backfill_fred(http, receipt, DEFAULT_RAW, now)
+            previous = os.environ.get("FRED_API_KEY")
+            if values.get("FRED_API_KEY"):
+                os.environ["FRED_API_KEY"] = values["FRED_API_KEY"]
+            try:
+                backfill.backfill_fred(http, receipt, DEFAULT_RAW, now)
+            finally:
+                if previous is None:
+                    os.environ.pop("FRED_API_KEY", None)
+                else:
+                    os.environ["FRED_API_KEY"] = previous
         elif entry == "ofr":
             backfill.backfill_ofr(http, receipt, DEFAULT_RAW, now)
         elif entry == "finra_margin":
             backfill.backfill_finra_margin(http, receipt, DEFAULT_RAW, now)
         else:
             return False
+        if entry != "finra_short":
+            evidence["candidate_rows"] = receipt.filtered_rows
     return True  # authoritative success still requires downstream and source recheck below
 
 
@@ -111,6 +133,18 @@ def main():
         ).fetchone()
         if not row or not eligible(row, now, detect_only=False, resources=slice_resources()):
             return
+        entry = item.backfill.get("entry")
+        if entry in {"bars_full", "wide_universe", "vix_daily"}:
+            original = writer.execute(
+                "SELECT id FROM ingest.job_runs WHERE task_name=%s AND trade_date=%s "
+                "AND status='running' AND ended_at IS NULL LIMIT 1",
+                (entry, args.date),
+            ).fetchone()
+            if original:
+                row["reason"] = "原采集任务尚未结束，未重复启动；需要核实原任务实际退出后再重试"
+                row["detail"]["original_running_job_id"] = original["id"]
+                Store(writer).transition(row, now)
+                return
         store = Store(writer)
 
         def persist(row):
@@ -123,15 +157,39 @@ def main():
                     key = f"{row['dataset']}:{row['data_date']}:{row['kind']}:{row['generation']}:{row['status']}"
                     store.enqueue([key], [row], stamp)
 
+        from inves_cog.dataguard.trace import SourceTrace, reason
+
+        evidence = {}
+
+        def run_recovery():
+            trace = SourceTrace()
+            try:
+                with trace:
+                    return recover(item, args.date, clock.now_utc(), values, evidence=evidence, trace=trace)
+            except Exception as exc:
+                trace.record(exc)
+                return False
+            finally:
+                evidence["source_errors"] = trace.errors
+                row["detail"]["recovery_evidence"] = evidence
+                row["reason"] = reason(evidence)
+
         def downstream():
             for name in item.backfill.get("depends_on", []):
-                if name != "barometer" or not recover(_barometer(items), args.date, clock.now_utc(), values):
+                if name != "barometer" or not recover(
+                    _barometer(items), args.date, clock.now_utc(), values, evidence=evidence
+                ):
+                    row["reason"] = reason(evidence)
                     return False
             return True
 
         def recheck():
-            grouped = read(reader, item, args.date - timedelta(days=10), args.date, clock.now_utc())
-            return not findings(item, args.date, grouped)
+            scoped = replace(item, expected_keys=wide_scope(reader, args.date)) if item.scope == "wide" else item
+            grouped = read(reader, scoped, args.date - timedelta(days=10), args.date, clock.now_utc())
+            left = findings(scoped, args.date, grouped, now=clock.now_utc())
+            row["detail"]["remaining_checks"] = [f.kind for f in left]
+            row["detail"]["verified_source_rows"] = sum(r["n"] for r in grouped.get(args.date, []))
+            return not left
 
         maximum = item.backfill.get("max_attempts", 3)
         if row["attempts"] >= maximum:
@@ -142,7 +200,7 @@ def main():
             row,
             now,
             max_attempts=maximum,
-            run=lambda: recover(item, args.date, clock.now_utc(), values),
+            run=run_recovery,
             downstream=downstream,
             recheck=recheck,
             persist=persist,

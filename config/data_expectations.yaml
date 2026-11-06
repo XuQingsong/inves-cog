@@ -80,6 +80,7 @@ datasets:
     - ZS
   expected_keys: *id001
   sanity: 0.6
+  adjustment_column: adj_factor
 - dataset: 宽池日线
   table: ingest.bars_daily
   date_column: trade_date
@@ -120,14 +121,21 @@ datasets:
     - SOXX
   expected_keys: *id002
   sanity: 0.25
+  adjustment_column: adj_factor
+  corporate_actions:
+    '2026-11-05':
+      SOXX:
+        type: split
+        ratio: '3:1'
+        source: https://www.sec.gov/Archives/edgar/data/1100663/000119312526430480/d156277d497.htm
 - dataset: 监控池盘中快照
   table: ingest.intraday_snapshots
   date_column: as_of
   cadence: intraday:1
   deadline_et: 09:30
-  grace_min: 10
+  grace_min: 20
   min_rows: 1
-  basis: src/inves_cog/ingest/runtime.py:intraday_snapshots 1 分钟；仅在交易时段查最近窗口
+  basis: src/inves_cog/ingest/runtime.py:intraday_snapshots 1 分钟；仅在交易时段查最近窗口；ingest/intraday.py合同延迟15分钟，宽限20分钟包含报价延迟与轮询余量
   impact: 盘中价格提示
   backfill:
     entry: manual
@@ -143,9 +151,9 @@ datasets:
   date_column: as_of
   cadence: intraday:5
   deadline_et: 09:30
-  grace_min: 10
+  grace_min: 20
   min_rows: 1
-  basis: src/inves_cog/ingest/runtime.py:wide_snapshots 5 分钟，09:30–16:00
+  basis: src/inves_cog/ingest/runtime.py:wide_snapshots 5 分钟，09:30–16:00；ingest/intraday.py合同延迟15分钟，宽限20分钟包含报价延迟与轮询余量
   impact: 盘中市场广度
   backfill:
     entry: manual
@@ -287,10 +295,10 @@ datasets:
   table: flows.etf_daily
   date_column: date
   cadence: trading_day
-  deadline_et: '22:30'
+  deadline_et: 09:00
   grace_min: 30
   min_rows: 1
-  basis: scripts/schedule_flows.py:ETF 22:30 ET 后重试
+  basis: scripts/schedule_flows.py:22:30开始采集，次日09:00仍陈旧则degraded；采用最终期限，不把启动时间当到位期限
   impact: 基金资金流判断
   backfill:
     entry: etf
@@ -299,6 +307,7 @@ datasets:
     - barometer
   key_column: ticker
   min_coverage: 0.9
+  release_days: 1
 - dataset: 期权日成交量
   table: flows.option_volume_occ
   date_column: date
@@ -394,7 +403,7 @@ datasets:
   cadence: weekly
   deadline_et: '15:30'
   grace_min: 30
-  min_rows: 1
+  min_rows: 5
   basis: flows/backfill.py:backfill_cftc release_at 周五15:30，报告日周二
   impact: 杠杆与期货定位判断
   backfill:
@@ -404,6 +413,7 @@ datasets:
     - barometer
   weekday: 1
   release_days: 3
+  min_coverage: 0.9
 - dataset: 央行与财政流动性
   table: flows.observations
   date_column: obs_date
@@ -564,6 +574,7 @@ datasets:
     max_attempts: 2
     depends_on: []
   value_column: fear
+  quality_column: missing
 - dataset: 晴雨表盘中
   table: flows.barometer_intraday
   date_column: ts
@@ -580,6 +591,7 @@ datasets:
   timestamp: true
   value_column: fear
   latest_column: ts
+  quality_column: missing
 - dataset: 财报状态
   table: fundamentals.fin_state
   date_column: filed
@@ -942,3 +954,466 @@ datasets:
     max_attempts: 3
     depends_on:
     - barometer
+- dataset: 事件日历采集任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: 06:00
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id015
+    - earnings_calendar
+    - econ_calendar
+  expected_keys: *id015
+  basis: ingest/runtime.py:06:00每日
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  calendar_days: true
+- dataset: 早间预采集任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: 08:10
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id016
+    - bars_prefill
+    - news_prefill
+  expected_keys: *id016
+  basis: ingest/runtime.py:08:00–08:10窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 盘前检查任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: 08:30
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id017
+    - premarket_review
+  expected_keys: *id017
+  basis: scripts/schedule_daily_modules.py:08:00–08:30
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 申报与索引任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '21:15'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id018
+    - sec_submissions
+    - sec_index
+  expected_keys: *id018
+  basis: ingest/runtime.py:20:45–21:15
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 行情结构任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '20:45'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id019
+    - market_structure
+  expected_keys: *id019
+  basis: scripts/schedule_daily_modules.py:20:45依赖日线
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 每日异动任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '21:10'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id020
+    - anomaly_daily
+  expected_keys: *id020
+  basis: scripts/schedule_daily_modules.py:20:55–21:10
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 全量新闻任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '20:20'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id021
+    - news_full
+  expected_keys: *id021
+  basis: ingest/runtime.py:20:20每日
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  calendar_days: true
+- dataset: 一致预期采集任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id022
+    - consensus_snapshots
+  expected_keys: *id022
+  basis: schedule_consensus.py全天受额度限制轮询
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  calendar_days: true
+- dataset: 晨间覆盖任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: 08:30
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id023
+    - m9_overlay
+  expected_keys: *id023
+  basis: m9.yaml:08:00–08:30发布窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 影子评估任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: 09:05
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id024
+    - m9_shadow
+  expected_keys: *id024
+  basis: shadow/scheduling.py:等纸面计划，M4截止09:05
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 次日复盘任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: 07:30
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id025
+    - review_snapshots
+    - review_labels
+    - review_oneliner
+  expected_keys: *id025
+  basis: perception/review/schedule.py:_DAILY与D+1 01:00–07:30窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  release_days: 1
+- dataset: 盘中快照采集任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: intraday:1
+  deadline_et: 04:00
+  grace_min: 15
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: ended_at
+  filter:
+    task_name: &id026
+    - intraday_snapshots
+    - iex_intraday
+    - yahoo_intraday
+  expected_keys: *id026
+  basis: ingest/runtime.py相应任务的真实轮询间隔与窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  active_start_et: 04:00
+  window_end_et: '20:00'
+  inactive_windows: []
+  calendar_days: false
+- dataset: 宽池快照采集任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: intraday:5
+  deadline_et: 09:30
+  grace_min: 15
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: ended_at
+  filter:
+    task_name: &id027
+    - wide_snapshots
+  expected_keys: *id027
+  basis: ingest/runtime.py相应任务的真实轮询间隔与窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  active_start_et: 09:30
+  window_end_et: '16:00'
+  inactive_windows: []
+  calendar_days: false
+- dataset: 新闻巡检任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: intraday:10
+  deadline_et: '10:00'
+  grace_min: 15
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: ended_at
+  filter:
+    task_name: &id028
+    - news_watchdog
+  expected_keys: *id028
+  basis: ingest/runtime.py相应任务的真实轮询间隔与窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  active_start_et: '10:00'
+  window_end_et: '20:00'
+  inactive_windows: []
+  calendar_days: false
+- dataset: 新闻采集轮询任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: intraday:10
+  deadline_et: 00:00
+  grace_min: 15
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: ended_at
+  filter:
+    task_name: &id029
+    - news_poll
+  expected_keys: *id029
+  basis: ingest/runtime.py相应任务的真实轮询间隔与窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  active_start_et: 00:00
+  window_end_et: '23:59'
+  inactive_windows: []
+  calendar_days: true
+- dataset: 申报轮询任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: intraday:10
+  deadline_et: 00:00
+  grace_min: 15
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: ended_at
+  filter:
+    task_name: &id030
+    - sec_atom
+  expected_keys: *id030
+  basis: ingest/runtime.py相应任务的真实轮询间隔与窗口
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  active_start_et: 00:00
+  window_end_et: '23:59'
+  inactive_windows:
+  - - '21:15'
+    - '21:45'
+  calendar_days: true
+- dataset: 全部定时任务失败记录
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: intraday:10
+  deadline_et: 00:00
+  grace_min: 0
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - anomaly_daily
+    - attribution_candidates
+    - attribution_labels
+    - attribution_tracks
+    - bars_full
+    - bars_prefill
+    - cboe
+    - consensus_snapshots
+    - earnings_calendar
+    - econ_calendar
+    - fed_news
+    - finra
+    - fred
+    - iex_intraday
+    - intraday_snapshots
+    - issuer_profiles
+    - m2_financials
+    - m6_market_inputs
+    - m9_overlay
+    - m9_shadow
+    - market_structure
+    - news_full
+    - news_poll
+    - news_prefill
+    - news_watchdog
+    - paper_plan
+    - premarket_review
+    - review_labels
+    - review_monthly_report
+    - review_monthly_sample
+    - review_oneliner
+    - review_snapshots
+    - review_weekly_report
+    - review_weekly_sample
+    - rule_a_scores
+    - sec_atom
+    - sec_index
+    - sec_submissions
+    - valuation_v1
+    - vix_daily
+    - wide_snapshots
+    - wide_universe
+    - yahoo_intraday
+  expected_keys: []
+  basis: 现有调度器任务名注册表；包括条件性周月任务，只报真实失败或超时，不把待机视为缺跑
+  impact: 相关数据采集或市场解释尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+  failures_only: true
+  calendar_days: true
+- dataset: 每周复盘任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: weekly
+  period_end: week
+  deadline_et: 07:30
+  release_days: 1
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id031
+    - review_weekly_sample
+    - review_weekly_report
+  expected_keys: *id031
+  basis: perception/review/schedule.py:due_tasks，周/月最后交易日D，D+1 01:00–07:30
+  impact: 周/月复盘尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []
+- dataset: 每月复盘任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: monthly
+  period_end: month
+  deadline_et: 07:30
+  release_days: 1
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name: &id032
+    - review_monthly_sample
+    - review_monthly_report
+  expected_keys: *id032
+  basis: perception/review/schedule.py:due_tasks，周/月最后交易日D，D+1 01:00–07:30
+  impact: 周/月复盘尚未完成
+  backfill:
+    entry: manual
+    max_attempts: 3
+    depends_on: []

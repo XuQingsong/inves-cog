@@ -35,9 +35,9 @@ def attempt(row, now, *, max_attempts, run, downstream, recheck, persist):
     if success:
         row.update(status="resolved", resolved_at=now)
     elif row["attempts"] >= max_attempts:
-        row.update(status="unrecoverable", reason="补数达到重试上限，数据或下游仍未通过复核")
+        row.update(status="unrecoverable", reason=row.get("reason", "补数达到重试上限，数据或下游仍未通过复核"))
     else:
-        row.update(status="open", reason="补数后数据或下游仍未通过复核")
+        row.update(status="open", reason=row.get("reason", "补数后数据或下游仍未通过复核"))
     persist(row)
 
 
