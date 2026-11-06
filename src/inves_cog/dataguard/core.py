@@ -28,6 +28,11 @@ class Expectation:
     staleness: bool = False
     sanity: float | None = None
     filter: dict = field(default_factory=dict)
+    timestamp: bool = False
+    latest_column: str | None = None
+    carry_forward: bool = False
+    window_end_et: str = "16:00"
+    monthly_day: str = "last"
     basis: str = ""
     impact: str = ""
     backfill: dict = field(default_factory=dict)
@@ -35,7 +40,7 @@ class Expectation:
     def __post_init__(self):
         if not re.fullmatch(r"[a-z_][a-z_0-9]*\.[a-z_][a-z_0-9]*", self.table):
             raise ValueError("Invalid table identifier")
-        for identifier in [self.date_column, self.key_column, self.value_column, *self.filter]:
+        for identifier in [self.date_column, self.key_column, self.value_column, self.latest_column, *self.filter]:
             if identifier is not None and not re.fullmatch(r"[a-z_][a-z_0-9]*", identifier):
                 raise ValueError("Invalid column identifier")
         time.fromisoformat(self.deadline_et)
@@ -57,11 +62,11 @@ def due_dates(item, now, *, lookback=7):
         day = today - timedelta(days=offset)
         if item.cadence == "weekday" and day.weekday() >= 5:
             continue
-        if item.cadence != "weekday" and not trading_day(day):
+        if item.cadence not in {"weekday", "monthly"} and not trading_day(day):
             continue
         if item.cadence == "weekly" and day.weekday() != item.weekday:
             continue
-        if item.cadence == "monthly" and day.day != 1:
+        if item.cadence == "monthly" and (day + timedelta(days=1)).month == day.month:
             continue
         release = day + timedelta(days=item.release_days)
         for _ in range(item.release_sessions):
@@ -80,10 +85,17 @@ class Finding:
     detail: dict
 
 
-def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset()):
+def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset(), row_count=None):
     """One finding per kind/date, with actual input evidence. Missing is never a numeric zero."""
-    detail = {"impact": item.impact, "rows": len(rows), "label": item.dataset}
-    if not rows:
+    count = len(rows) if row_count is None else row_count
+    detail = {
+        "impact": item.impact,
+        "rows": count,
+        "label": item.dataset,
+        "affects_barometer": item.table.startswith("flows.")
+        or item.table in {"ingest.bars_daily", "ingest.macro_observations"},
+    }
+    if not count:
         return [Finding(item.dataset, day, "missing", detail)]
     result = []
     keys = {r["key"] for r in rows if r.get("key") is not None}
@@ -91,10 +103,15 @@ def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset())
     expected = item.min_rows
     if item.min_coverage and len(prior_counts) >= 5:
         expected = max(expected, ceil(median(prior_counts[-5:]) * item.min_coverage))
-    if missing or len(rows) < expected:
+    if missing or count < expected:
         result.append(
             Finding(item.dataset, day, "partial", {**detail, "missing_keys": missing, "expected_rows": expected})
         )
+    if item.table == "ingest.job_runs":
+        failed = [r["key"] for r in rows if r.get("value") not in {"ok", "degraded"}]
+        if failed:
+            result.append(Finding(item.dataset, day, "job_failed", {**detail, "failed_tasks": failed}))
+        return result
     before = {r.get("key"): r.get("value") for r in previous}
     stale, suspect = [], []
     for row in rows:
