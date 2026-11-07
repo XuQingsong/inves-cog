@@ -62,9 +62,15 @@ def test_highlights_card_renders_peak_text_without_double_escape():
     payload = {
         "hl_groups": [
             {
-                "scope": "stock", "subject": "STX", "basket_name": None,
-                "ret": 0.092, "session": "pre", "cur_ret": -0.012, "last_px": 460.77,
-                "why": "单股异常", "cause": None,
+                "scope": "stock",
+                "subject": "STX",
+                "basket_name": None,
+                "ret": 0.092,
+                "session": "pre",
+                "cur_ret": -0.012,
+                "last_px": 460.77,
+                "why": "单股异常",
+                "cause": None,
                 "members": [{"severity": "watch", "scope": "stock"}],
             }
         ],
