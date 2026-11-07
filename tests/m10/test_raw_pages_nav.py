@@ -62,3 +62,14 @@ def test_system_page_lists_dev_links():
     assert "开发视图" in body
     for href, _ in DEV_PAGES:
         assert f'href="{href}"' in body
+
+
+def test_public_boundary_serves_system_and_redirects():
+    from fastapi.testclient import TestClient
+
+    from inves_cog.web.public import create_app
+
+    client = TestClient(create_app(dsn="postgresql://unused"))
+    assert client.get("/system").status_code == 200
+    assert client.get("/stock/NVDA", follow_redirects=False).status_code == 302
+    assert client.get("/paper/universe", follow_redirects=False).status_code == 302
