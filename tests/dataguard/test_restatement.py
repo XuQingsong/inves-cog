@@ -86,7 +86,7 @@ def test_existing_calculator_runs_on_nonempty_restatement_view_without_future_ro
     import pandas as pd
 
     from inves_cog.perception.barometer.compute import SPDR_FLOW
-    from inves_cog.perception.barometer.loader import AI_CHAIN, BARS_TICKERS, SECTORS
+    from inves_cog.perception.barometer.loader import AI_CHAIN, BARS_ETFS, BARS_TICKERS, SECTORS
 
     days = pd.bdate_range(end=DAY, periods=390)
 
@@ -99,7 +99,7 @@ def test_existing_calculator_runs_on_nonempty_restatement_view_without_future_ro
                 return Result(
                     [
                         dict(ticker=t, d=d.date(), c=100 + n * 0.1)
-                        for t in BARS_TICKERS + SECTORS + AI_CHAIN
+                        for t in BARS_TICKERS + BARS_ETFS + SECTORS + AI_CHAIN
                         for n, d in enumerate(days)
                     ]
                 )
