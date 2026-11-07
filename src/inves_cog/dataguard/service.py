@@ -116,7 +116,18 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
     return results, errors
 
 
-def run_once(reader, writer, items, now, *, detect_only, values, resources=None, monotonic=time.monotonic):
+def run_once(
+    reader,
+    writer,
+    items,
+    now,
+    *,
+    detect_only,
+    values,
+    resources=None,
+    monotonic=time.monotonic,
+    alert_interval=timedelta(hours=3),
+):
     started = monotonic()
     resources = resources or slice_resources()
     results, errors = scan(reader, items, now, monotonic=monotonic)
@@ -169,7 +180,7 @@ def run_once(reader, writer, items, now, *, detect_only, values, resources=None,
             summary += f"；当前资源{'已核实' if resources.known else '未能核实'}"
             store.enqueue([], daily_rows, now, event_key=f"daily:{local.date()}", daily=True, resources=summary)
     mailer = Mailer(values)
-    mail_status = store.send_pending(mailer, now)
+    mail_status = store.send_pending(mailer, now, alert_interval=alert_interval)
     duration = monotonic() - started
     writer.execute(
         "INSERT INTO ops.data_guard_runtime(singleton,first_started_at,checked_at,detect_only,"
@@ -220,9 +231,6 @@ def dispatch(writer, items, now, *, detect_only, resources, child, root=ROOT):
             row.update(status="unrecoverable", reason="没有可安全调用的有界补采入口，需要人工处理")
             with writer.transaction():
                 store.transition(row, now)
-                store.enqueue(
-                    [f"{row['dataset']}:{row['data_date']}:{row['kind']}:{row['generation']}:unrecoverable"], [row], now
-                )
             continue
         # The worker owns its lock, resource limits, deadline, durable transition and recheck.
         return subprocess.Popen(
@@ -265,7 +273,14 @@ def main():
             resources = slice_resources()
             try:
                 result = run_once(
-                    reader, writer, items, now, detect_only=detect_only, values=values, resources=resources
+                    reader,
+                    writer,
+                    items,
+                    now,
+                    detect_only=detect_only,
+                    values=values,
+                    resources=resources,
+                    alert_interval=timedelta(hours=config.get("alert_min_interval_hours", 3)),
                 )
                 child = dispatch(writer, items, now, detect_only=detect_only, resources=resources, child=child)
                 print(json.dumps(result, ensure_ascii=False), flush=True)

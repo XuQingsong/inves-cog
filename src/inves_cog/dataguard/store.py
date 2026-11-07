@@ -68,8 +68,6 @@ class Store:
             if kind not in present and prev["status"] != "resolved":
                 prev.update(status="resolved", resolved_at=now, last_checked_at=now)
                 self.transition(prev, now)
-                notices.append(prev)
-                keys.append(f"{dataset}:{day}:{kind}:{prev['generation']}:resolved")
         return notices, keys
 
     def event(self, row, now):
@@ -120,31 +118,61 @@ class Store:
             (key, subject, body, now, now),
         )
 
-    def send_pending(self, mailer, now):
+    def send_pending(self, mailer, now, *, alert_interval=timedelta(hours=3)):
+        """Two mail types only: the 08:30 daily plus merged gap alerts.
+
+        Backfill status changes never mail — only newly opened/reopened gaps
+        do, and all due alert rows merge into ONE mail at most every
+        ``alert_interval`` (arrivals inside the window roll into the next one).
+        """
         if not mailer.configured:
             return "邮件未配置"
-        # Service singleton lock excludes a second sender; only one batch per cycle bounds SMTP time.
-        row = self.db.execute(
+        # Service singleton lock excludes a second sender; one merged batch per cycle bounds SMTP time.
+        rows = self.db.execute(
             "SELECT * FROM ops.data_notices WHERE sent_at IS NULL AND next_attempt_at<=%s "
-            "ORDER BY next_attempt_at,created_at LIMIT 1",
+            "ORDER BY next_attempt_at,created_at",
             (now,),
-        ).fetchone()
-        if not row:
+        ).fetchall()
+        if not rows:
             waiting = self.db.execute(
                 "SELECT result FROM ops.data_notices WHERE sent_at IS NULL AND attempts>0 "
                 "ORDER BY next_attempt_at LIMIT 1"
             ).fetchone()
             return "邮件发送失败，等待重试" if waiting else "邮件已配置"
-        outcome = mailer.send(row["event_key"], row["subject"], row["body"])
-        attempts = row["attempts"] + 1
-        self.db.execute(
-            "UPDATE ops.data_notices SET result=%s,attempts=%s,sent_at=%s,next_attempt_at=%s WHERE event_key=%s",
-            (
-                outcome,
-                attempts,
-                now if outcome == "sent" else None,
-                now + timedelta(minutes=min(120, 5 * attempts)),
-                row["event_key"],
-            ),
-        )
-        return "邮件发送正常" if outcome == "sent" else outcome
+        last = self.db.execute(
+            "SELECT max(sent_at) AS t FROM ops.data_notices WHERE event_key NOT LIKE 'daily:%'"
+        ).fetchone()["t"]
+        daily = next((r for r in rows if str(r["event_key"]).startswith("daily:")), None)
+        alerts = [r for r in rows if not str(r["event_key"]).startswith("daily:")]
+        alert_due = alerts and (last is None or now - last >= alert_interval)
+        sent, outcome = 0, "邮件已配置"
+        for group in ([daily] if daily else [], alerts if alert_due else []):
+            if not group:
+                continue
+            outcome = self._send_group(mailer, group, now)
+            sent += outcome == "sent"
+        if alerts and not alert_due:
+            return "告警暂存，等待发送间隔" if outcome == "邮件已配置" else outcome
+        return "邮件发送正常" if sent else outcome
+
+    def _send_group(self, mailer, group, now):
+        if len(group) == 1:
+            event_key, subject, body = group[0]["event_key"], group[0]["subject"], group[0]["body"]
+        else:
+            event_key = sha256("\n".join(sorted(r["event_key"] for r in group)).encode()).hexdigest()
+            subject = f"数据提醒：{len(group)} 批"
+            body = "\n\n".join(r["body"] for r in group)
+        outcome = mailer.send(event_key, subject, body)
+        for row in group:
+            attempts = row["attempts"] + 1
+            self.db.execute(
+                "UPDATE ops.data_notices SET result=%s,attempts=%s,sent_at=%s,next_attempt_at=%s WHERE event_key=%s",
+                (
+                    outcome,
+                    attempts,
+                    now if outcome == "sent" else None,
+                    now + timedelta(minutes=min(120, 5 * attempts)),
+                    row["event_key"],
+                ),
+            )
+        return outcome
