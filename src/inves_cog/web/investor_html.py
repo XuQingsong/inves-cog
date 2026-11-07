@@ -2379,8 +2379,13 @@ def _live_module(payload):
         )
         px_html = f"${r['last_px']:,.2f}" if r.get("last_px") is not None else "—"
         fs = r.get("first_seen_at")
+        if isinstance(fs, str):
+            try:
+                fs = datetime.fromisoformat(fs)
+            except ValueError:
+                fs = None
         when = (
-            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}"
+            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}美东"
             if hasattr(fs, "astimezone")
             else ""
         )
