@@ -190,6 +190,11 @@ def _rotation_hits(snapshot, rule):
 
 
 def _multi_hits(snapshot, rule, blocked):
+    # Multi-day paths score cumulative DAILY residuals; injecting a post-session
+    # ret into that window would conflate meanings, so post runs skip them.
+    # Single-day post path (_post_resid) is unaffected.
+    if snapshot.get("session") == "post":
+        return []
     hits = []
     daily = {row["ticker"]: row for row in snapshot.get("daily") or []}
     for ticker, history in (snapshot.get("daily_history") or {}).items():
