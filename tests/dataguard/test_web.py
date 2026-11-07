@@ -54,21 +54,21 @@ def test_escape_upstream_labels_instead_of_executing_html():
 
 def test_status_page_is_accessible_through_the_actual_public_read_only_boundary():
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
     from starlette.responses import HTMLResponse
+    from starlette.testclient import TestClient
 
     from inves_cog.web.public import protect
 
     app = FastAPI()
 
-    @app.get('/data-status')
+    @app.get("/data-status")
     def status_page():
         return HTMLResponse(render_status(sample()))
 
     client = TestClient(protect(app))
-    response = client.get('/data-status')
+    response = client.get("/data-status")
     assert response.status_code == 200
-    assert '波动率' in response.text and '邮件未配置' in response.text
-    assert response.headers['Cache-Control'] == 'no-store'
-    assert client.post('/data-status').status_code == 405
-    assert client.get('/not-a-public-page').status_code == 404
+    assert "波动率" in response.text and "邮件未配置" in response.text
+    assert response.headers["Cache-Control"] == "no-store"
+    assert client.post("/data-status").status_code == 405
+    assert client.get("/not-a-public-page").status_code == 404

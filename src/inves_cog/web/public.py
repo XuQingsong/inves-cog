@@ -69,6 +69,7 @@ def _html_page(path):
         "/market",
         "/graph",
         "/settings/data",
+        "/data-status",
         "/paper/plan",
         "/paper/portfolio",
         "/paper/universe",
