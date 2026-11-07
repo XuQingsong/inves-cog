@@ -40,3 +40,15 @@ def test_citation_from_prior_day_tagged_early_news():
     note = citation_stale_note("2026-11-03T18:00:00+00:00", date(2026, 11, 6))
     assert note == "早前消息（11-03）"
     assert citation_stale_note("2026-11-06T18:00:00+00:00", date(2026, 11, 6)) is None
+
+
+def test_prev_session_post_close_news_is_not_early():
+    """A cite from the previous session's post-close (e.g. a 17:00 ET earnings
+    print) is fresh context, not 早前消息; before 16:00 ET prev-session is."""
+    from inves_cog.web.brief import citation_stale_note
+
+    day = date(2026, 11, 6)  # Friday; prev session Thursday 11-05
+    # Thursday 17:00 ET post-close -> not tagged
+    assert citation_stale_note("2026-11-05T22:00:00+00:00", day) is None
+    # Thursday 15:00 ET (before the close) -> tagged
+    assert citation_stale_note("2026-11-05T20:00:00+00:00", day) == "早前消息（11-05）"

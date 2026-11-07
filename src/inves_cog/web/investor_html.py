@@ -2372,11 +2372,23 @@ def _live_module(payload):
         scope = {"stock": "个股", "basket": "板块", "market": "市场"}.get(r["scope"], r["scope"])
         name = r.get("basket_name") or r["subject"]
         link = _tk(r["subject"]) if r["scope"] == "stock" else _text(name)
-        cur = r.get("last_ret")
+        cur = r.get("cur_ret")
         peak = r.get("peak_ret")
-        cur_html = (
-            f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%</span>' if cur is not None else ""
-        )
+        cur_as_of = r.get("cur_as_of")
+        if isinstance(cur_as_of, str):
+            try:
+                cur_as_of = datetime.fromisoformat(cur_as_of)
+            except ValueError:
+                cur_as_of = None
+        if cur is None:
+            cur_html = '<span class="dim">暂缺</span>'
+        else:
+            if hasattr(cur_as_of, "astimezone"):
+                hhmm = cur_as_of.astimezone(ZoneInfo("America/New_York")).strftime("%H:%M")
+                asof = f' <span class="dim small">较昨收 · {hhmm}美东</span>'
+            else:
+                asof = ' <span class="dim small">较昨收</span>'
+            cur_html = f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%{asof}</span>'
         px_html = f"${r['last_px']:,.2f}" if r.get("last_px") is not None else "—"
         fs = r.get("first_seen_at")
         if isinstance(fs, str):
@@ -2426,10 +2438,13 @@ def _live_module(payload):
             )
             members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
         badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
+        peak_html = (
+            f'<span class="num" title="异动峰值（较昨收）">{_pct(peak, 1)}</span>' if peak is not None else ""
+        )
         body.append(
             f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
             f"<td class='num'>{px_html}</td>"
-            f"<td class='num'>{cur_html}</td><td class='num'>{_pct(peak, 1) if peak is not None else ''}</td>"
+            f"<td class='num'>{cur_html}</td><td class='num'>{peak_html}</td>"
             f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
         )
     return (
@@ -2613,12 +2628,17 @@ def _highlights_module(payload):
         link = _tk(g["subject"]) if g["scope"] == "stock" else f"<b>{who}</b>"
         sev_cls, sev_label = _severity(g["members"][0])
         px = f"${g['last_px']:,.2f} " if g.get("last_px") else ""
-        cls = "down" if (g.get("ret") or 0) < 0 else "up"
+        cur = g.get("cur_ret")
+        session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(g.get("session"), "")
+        cur_txt = _pct(cur, 1) if cur is not None else "暂缺"
+        cls = "down" if (cur or 0) < 0 else "up"
+        peak_txt = f"{session_label}异动 {_pct(g.get('ret'), 1)}（峰值）" if g.get("ret") is not None else ""
         merged = ""
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
             f'<span class="who">{link}{merged}</span>'
-            f'<div class="num {cls}">{px}{_pct(g.get("ret"), 1)}</div>'
+            f'<div class="num {cls}">{px}<span title="较昨收">{cur_txt}</span>'
+            f' <span class="dim small">{_text(peak_txt)}</span></div>'
             f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div>'
             + (
                 '<div class="small">'

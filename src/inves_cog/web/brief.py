@@ -975,12 +975,17 @@ def _day_window(day):
 
 
 def citation_stale_note(cited, trade_date):
-    """Cited evidence published before the anomaly's trade date, in New York."""
+    """Cited evidence published before the previous session's 16:00 ET close.
+    Post-close news from the prior session through today is current context —
+    a prior-day 17:00 ET earnings print is not "early news" for today's move."""
     moment = _parse_ts(cited)
     if moment is None or trade_date is None:
         return None
-    gap = (trade_date - moment.astimezone(NY).date()).days
-    if gap >= 1:
+    from inves_cog.ingest.intraday import previous_session
+
+    prev = previous_session(trade_date)
+    cutoff = datetime.combine(prev or trade_date, time(16, 0), NY)
+    if moment.astimezone(NY) < cutoff:
         return f"早前消息（{moment.astimezone(NY).date().strftime('%m-%d')}）"
     return None
 
@@ -2334,6 +2339,9 @@ def _hl_grouped(live, positions):
                 "subject": lead["subject"],
                 "basket_name": lead.get("basket_name"),
                 "ret": lead.get("peak_ret"),
+                "session": lead.get("session"),
+                "cur_ret": lead.get("cur_ret"),
+                "cur_as_of": lead.get("cur_as_of"),
                 "last_px": lead.get("last_px"),
                 "why": why,
                 "cause": top.get("cause_headline"),
@@ -3487,15 +3495,20 @@ def _live_anomalies(connection, day, is_today):
         tickers = [r["subject"] for r in rows if r["scope"] == "stock"]
         if tickers:
             px = {
-                r["ticker"]: r["last"]
+                r["ticker"]: r
                 for r in connection.execute(
-                    "SELECT DISTINCT ON (ticker) ticker, last FROM ingest.intraday_snapshots "
-                    "WHERE ticker = ANY(%s) ORDER BY ticker, as_of DESC",
+                    "SELECT DISTINCT ON (ticker) ticker, last, prev_close, as_of "
+                    "FROM ingest.intraday_snapshots WHERE ticker = ANY(%s) "
+                    "ORDER BY ticker, as_of DESC",
                     (tickers,),
                 ).fetchall()
             }
             for r in rows:
-                r["last_px"] = float(px[r["subject"]]) if r["subject"] in px and px[r["subject"]] else None
+                snap = px.get(r["subject"]) or {}
+                r["last_px"] = float(snap["last"]) if snap.get("last") else None
+                if snap.get("last") and snap.get("prev_close"):
+                    r["cur_ret"] = float(snap["last"] / snap["prev_close"] - 1)
+                    r["cur_as_of"] = snap["as_of"]
     except Exception:
         pass
     for r in rows:
