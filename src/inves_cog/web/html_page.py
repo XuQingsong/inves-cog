@@ -29,6 +29,11 @@ NAV = (
     ("/stocks", "我的标的"),
     ("/account", "纸面账户"),
     ("/trust", "复盘与数据"),
+    ("/barometer", "晴雨表"),
+    ("/data-status", "数据状态"),
+)
+# Raw developer pages: removed from the main nav, linked from /system footer.
+DEV_PAGES = (
     ("/log", "系统日志"),
     ("/market", "市场"),
     ("/graph", "图谱"),
@@ -40,6 +45,21 @@ NAV = (
     ("/paper/ledger", "纸面流水"),
     ("/review", "复盘"),
 )
+# Polished counterpart each raw page should defer to.
+POLISHED = {
+    "/market": "/",
+    "/linkage/{id}": "/",
+    "/stock/{symbol}": "/s/",
+    "/graph": "/",
+    "/settings/data": "/data-status",
+    "/paper/plan": "/account",
+    "/paper/portfolio": "/account",
+    "/paper/universe": "/stocks",
+    "/paper/stock/{symbol}": "/stocks",
+    "/paper/health": "/data-status",
+    "/paper/ledger": "/account",
+    "/review": "/trust",
+}
 TITLES = {
     "/": "系统日志",
     "/market": "市场",
@@ -134,7 +154,7 @@ def render_page(payload):
         payload = {}
     page = payload.get("page")
     research = page in _RESEARCH
-    parts = []
+    parts = [_dev_banner(payload)]
     if isinstance(page, str) and page.startswith("/paper"):
         parts.append(f"<p>{_text(PAPER_LABEL)}</p><p>{_text(VALUATION_LABEL)}</p>")
     if isinstance(payload.get("summary_oneliner"), str):
@@ -168,6 +188,21 @@ def _legend():
     return f"<section><h2>处置卡</h2><ul>{items}</ul></section>"
 
 
+def _dev_banner(payload):
+    page = payload.get("page") if isinstance(payload, dict) else None
+    if page == "/system":
+        return ""
+    target = POLISHED.get(page or "", "/")
+    if target.endswith("/"):
+        symbol = (payload or {}).get("symbol", "")
+        target = target + symbol if symbol else "/"
+    return (
+        '<aside role="note" style="padding:10px 16px;background:#fff3cd;border:1px solid #d9b265">'
+        f"开发视图：原始数据，未经解释，不作投资依据。"
+        f'<a href="{_text(target)}">查看对应的投资者页面</a></aside>'
+    )
+
+
 def _nav(payload):
     chosen = payload.get("date") if isinstance(payload.get("date"), str) else ""
     query = f"?date={_text(chosen)}" if chosen else ""
@@ -185,7 +220,9 @@ def _form(payload):
 def _document(title, body):
     return (
         '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
-        f"<title>{_text(title)}</title><style>{_STYLE}</style></head><body>{body}</body></html>"
+        f"<title>{_text(title)}</title><style>{_STYLE}</style></head><body>{body}"
+        '<footer style="padding:12px 16px;border-top:1px solid #ccc">'
+        '<a href="/system">开发视图</a></footer></body></html>'
     )
 
 

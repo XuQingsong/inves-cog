@@ -211,6 +211,18 @@ def create_app(dsn=None, clock=None, warmup=False):
 
     register(app, call)
 
+    @app.get("/system")
+    def system_html():
+        from inves_cog.web.html_page import DEV_PAGES, _document
+
+        links = "".join(f'<li><a href="{href}">{label}（{href}）</a></li>' for href, label in DEV_PAGES)
+        body = (
+            '<aside role="note" style="padding:10px 16px;background:#fff3cd;border:1px solid #d9b265">'
+            "开发视图：原始数据，未经解释，不作投资依据。</aside>"
+            f"<main><h2>开发视图</h2><ul>{links}</ul></main>"
+        )
+        return HTMLResponse(_document("开发视图", body))
+
     @app.get("/api/pages/home")
     def home(date: date):
         return call(page_home, date)
@@ -376,7 +388,9 @@ def _register_html(app, call, clock, page_cache):
 
     @app.get("/stock/{symbol}")
     def stock_html(symbol: str, date: date | None = None):
-        return show(page_stock, date, symbol=symbol)
+        from fastapi.responses import RedirectResponse
+
+        return RedirectResponse(f"/s/{symbol}" + (f"?date={date}" if date else ""), status_code=302)
 
     @app.get("/graph")
     def graph_html(date: date | None = None):
@@ -396,7 +410,9 @@ def _register_html(app, call, clock, page_cache):
 
     @app.get("/paper/universe")
     def universe_html(date: date | None = None):
-        return show(page_universe, date)
+        from fastapi.responses import RedirectResponse
+
+        return RedirectResponse("/stocks" + (f"?date={date}" if date else ""), status_code=302)
 
     @app.get("/paper/stock/{symbol}")
     def paper_stock_html(symbol: str, date: date | None = None):
