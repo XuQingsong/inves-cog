@@ -72,3 +72,12 @@ def test_status_page_is_accessible_through_the_actual_public_read_only_boundary(
     assert response.headers["Cache-Control"] == "no-store"
     assert client.post("/data-status").status_code == 405
     assert client.get("/not-a-public-page").status_code == 404
+
+
+def test_revision_notice_accepts_serialized_timestamp():
+    from inves_cog.web.data_status import revision_notice
+
+    html = revision_notice(
+        [{"data_date": "2026-11-06", "revised_at": "2026-11-07T05:32:04+00:00", "record": {"fear": 40, "greed": 10}}]
+    )
+    assert "2026-11-07 13:32" in html
