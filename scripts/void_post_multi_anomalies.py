@@ -24,9 +24,8 @@ VOID_REASON = "盘后多日路径沿用收盘日线残差z"
 VOID_FIXED_IN = "dbc6465"
 UPDATE = (
     "UPDATE perception.anomalies SET data_quality = "
-    "coalesce(data_quality,'{}'::jsonb) || jsonb_build_object("
-    "'voided', jsonb_build_object('reason', %s, 'fixed_in', %s, 'at', now())) "
-    "WHERE anomaly_id=ANY(%s)"
+    "coalesce(data_quality,'[]'::jsonb) || '[\"voided\"]'::jsonb "
+    "WHERE anomaly_id=ANY(%s) AND NOT (coalesce(data_quality,'[]'::jsonb) ? 'voided')"
 )
 
 
@@ -39,11 +38,11 @@ def main():
     values = read_environment(ROOT / ".env", environ={})
     conn = psycopg.connect(values["INVES_COG_PERCEPTION_DATABASE_URL"], row_factory=dict_row)
     rows = conn.execute(SELECT).fetchall()
-    targets = [r for r in rows if not (r.get("data_quality") or {}).get("voided")]
+    targets = [r for r in rows if "voided" not in (r.get("data_quality") or [])]
     print(f"matched {len(rows)} post multi_* rows, {len(targets)} need voiding")
     if "--apply" not in sys.argv:
         for r in rows:
-            print(" ", r["anomaly_id"], r["status"], "voided" if (r.get("data_quality") or {}).get("voided") else "")
+            print(" ", r["anomaly_id"], r["status"], "voided" if "voided" in (r.get("data_quality") or []) else "")
         print("dry-run only; pass --apply to update")
         return
     evidence = ROOT / "ops" / f"swe2-void-post-multi-{datetime.now(timezone.utc).date().isoformat()}.json"
@@ -70,7 +69,7 @@ def main():
     with conn.transaction():
         result = conn.execute(
             UPDATE,
-            (VOID_REASON, VOID_FIXED_IN, [r["anomaly_id"] for r in targets]),
+            ([r["anomaly_id"] for r in targets],),
         )
         updated = result.rowcount
         if updated != len(targets):
