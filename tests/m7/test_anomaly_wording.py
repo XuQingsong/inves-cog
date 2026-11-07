@@ -52,3 +52,25 @@ def test_prev_session_post_close_news_is_not_early():
     assert citation_stale_note("2026-11-05T22:00:00+00:00", day) is None
     # Thursday 15:00 ET (before the close) -> tagged
     assert citation_stale_note("2026-11-05T20:00:00+00:00", day) == "早前消息（11-05）"
+
+
+def test_highlights_card_renders_peak_text_without_double_escape():
+    """Regression: _pct() returns an HTML span — embedding it inside _text()
+    double-escaped it and the card literally showed '<span class="num up">'."""
+    from inves_cog.web.investor_html import _highlights_module
+
+    payload = {
+        "hl_groups": [
+            {
+                "scope": "stock", "subject": "STX", "basket_name": None,
+                "ret": 0.092, "session": "pre", "cur_ret": -0.012, "last_px": 460.77,
+                "why": "单股异常", "cause": None,
+                "members": [{"severity": "watch", "scope": "stock"}],
+            }
+        ],
+        "state": {},
+    }
+    html = _highlights_module(payload)
+    assert "&lt;span" not in html and "&quot;" not in html
+    assert "盘前异动 +9.2%（峰值）" in html
+    assert "$460.77" in html and "-1.2%" in html

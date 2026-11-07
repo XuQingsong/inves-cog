@@ -2448,8 +2448,8 @@ def _live_module(payload):
     return (
         '<div class="card sec cat-anomaly" id="live"><h2>盘中异常'
         '<span class="stamp">' + _text(str(payload.get("et_now") or "")) + " ET</span></h2>"
-        '<table class="tbl"><tr><th>层级</th><th>对象</th><th>现价</th><th>涨跌</th>'
-        "<th>峰值</th><th>首次出现</th><th>起因</th></tr>" + "".join(body) + "</table></div>"
+        '<table class="tbl"><tr><th>层级</th><th>对象</th><th>现价</th><th>当前涨跌</th>'
+        "<th>异动峰值</th><th>首次出现</th><th>起因</th></tr>" + "".join(body) + "</table></div>"
     )
 
 
@@ -2628,9 +2628,9 @@ def _highlights_module(payload):
         px = f"${g['last_px']:,.2f} " if g.get("last_px") else ""
         cur = g.get("cur_ret")
         session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(g.get("session"), "")
-        cur_txt = _pct(cur, 1) if cur is not None else "暂缺"
+        cur_txt = f"{cur * 100:+.1f}%" if cur is not None else "暂缺"
         cls = "down" if (cur or 0) < 0 else "up"
-        peak_txt = f"{session_label}异动 {_pct(g.get('ret'), 1)}（峰值）" if g.get("ret") is not None else ""
+        peak_txt = f"{session_label}异动 {g['ret'] * 100:+.1f}%（峰值）" if g.get("ret") is not None else ""
         merged = ""
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
