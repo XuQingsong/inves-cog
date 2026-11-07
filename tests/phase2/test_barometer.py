@@ -288,3 +288,41 @@ def test_sentence_missing_vix():
 
     rec = {"m": {}, "fl": 3, "gl": 0, "F": 50, "G": 10, "FD": {"恐慌情绪": 80}, "GD": {}}
     assert "VIX 缺" in sentence(rec)
+
+
+def test_loader_sources(monkeypatch):
+    """price_frame: six ETFs come from bars_daily (not yahoo_px), TNX from
+    macro_observations DGS10, and only JPY=X/BTC-USD/MOVE remain on yahoo_px."""
+    from datetime import date
+    from unittest.mock import MagicMock
+
+    from inves_cog.perception.barometer import loader
+
+    assert set(loader.YAHOO) == {"JPY=X", "BTC-USD", "MOVE"}
+    assert loader.MACRO["TNX"] == ("ingest.macro_observations", "DGS10")
+    assert set(loader.BARS_ETFS) == {"TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"}
+
+    queries = []
+
+    class _Conn:
+        def execute(self, sql, params=()):
+            queries.append(sql)
+            cur = MagicMock()
+            if "bars_daily" in sql:
+                tickers = params[0]
+                assert set(loader.BARS_ETFS) <= set(tickers)
+                cur.fetchall.return_value = [
+                    {"ticker": t, "d": date(2026, 10, 29), "c": 100.0 + i} for i, t in enumerate(loader.BARS_ETFS)
+                ]
+            elif "yahoo_px_tnx" in sql:
+                raise AssertionError("TNX must not come from yahoo_px_tnx")
+            else:
+                cur.fetchall.return_value = [{"d": date(2026, 10, 29), "value": 4.5}]
+            return cur
+
+    px = loader.price_frame(_Conn(), date(2026, 10, 29))
+    for t in loader.BARS_ETFS:
+        assert px[t].iloc[-1] == 100.0 + loader.BARS_ETFS.index(t)
+    assert px["TNX"].iloc[-1] == 4.5
+    obs_queries = [q for q in queries if "flows.observations" in q and "macro" not in q]
+    assert len(obs_queries) == 3  # JPY=X, BTC-USD, MOVE only

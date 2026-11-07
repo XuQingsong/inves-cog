@@ -1,7 +1,8 @@
 """Load barometer inputs from prod DB → the px DataFrame + flows series comp.py needs.
 
-bars_daily is canonical where covered (SPY/QQQ/SMH/sectors/AI chain/MTUM);
-yahoo_px_* observations fill the rest (TQQQ/SOXL/GLD/HYG/IEF/TLT/JPY=X/BTC/^MOVE).
+bars_daily is canonical where covered (SPY/QQQ/SMH/sectors/AI chain/MTUM +
+the six index/bond ETFs TQQQ/SOXL/GLD/HYG/IEF/TLT);
+yahoo_px_* observations fill the rest (JPY=X/BTC/^MOVE).
 PIT: every value is the latest with published_at <= asof for flows inputs.
 """
 
@@ -42,22 +43,18 @@ AI_CHAIN = [
     "ARM",
     "QCOM",
 ]
+# Index/bond ETFs with full bars_daily history (backfilled 2016-01-04 onward)
+BARS_ETFS = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"]
 YAHOO = {
-    "TQQQ": "yahoo_px_tqqq",
-    "SOXL": "yahoo_px_soxl",
-    "GLD": "yahoo_px_gld",
-    "HYG": "yahoo_px_hyg",
-    "IEF": "yahoo_px_ief",
-    "TLT": "yahoo_px_tlt",
     "JPY=X": "yahoo_px_jpyx",
     "BTC-USD": "yahoo_px_btcusd",
     "MOVE": "yahoo_px_move",
 }
-# VIX/VIX3M/10Y live in macro/flows series
+# VIX/VIX3M/10Y live in macro/flows series (TNX from FRED DGS10, % yield)
 MACRO = {
     "VIX": ("ingest.macro_observations", "VIX_CBOE"),
     "VIX3M": ("ingest.macro_observations", "VIX3M_CBOE"),
-    "TNX": ("flows.observations", "yahoo_px_tnx"),
+    "TNX": ("ingest.macro_observations", "DGS10"),
 }
 
 
@@ -73,7 +70,7 @@ def _series(conn, table, series_id, end):
 def price_frame(conn, end, start=None):
     """px DataFrame like comp.py: bars_daily tickers + yahoo_px_/macro columns."""
     cols = {}
-    tickers = BARS_TICKERS + SECTORS + AI_CHAIN
+    tickers = BARS_TICKERS + BARS_ETFS + SECTORS + AI_CHAIN
     rows = conn.execute(
         "SELECT ticker, trade_date AS d, close*adj_factor AS c FROM ingest.bars_daily "
         "WHERE ticker = ANY(%s) AND trade_date <= %s ORDER BY 1,2",
