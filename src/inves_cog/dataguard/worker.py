@@ -79,6 +79,13 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
                 rows = []
                 for key in item.filter.get("series_id", ()):
                     sid = key.removeprefix("fred_").upper()
+                    latest = {}
+                    for r in fred.collect(sid):
+                        if r["observation_date"] != day or r["value"] is None:
+                            continue
+                        prev = latest.get(r["observation_date"])
+                        if prev is None or r["realtime_start"] > prev["realtime_start"]:
+                            latest[r["observation_date"]] = r
                     rows += [
                         {
                             "series_id": key,
@@ -87,7 +94,7 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
                             "published_at": backfill.published_at_fred(sid, r["observation_date"]),
                             "vintage": "recovery",
                         }
-                        for r in fred.collect(sid)
+                        for r in latest.values()
                     ]
                 if rows:
                     upsert_many(

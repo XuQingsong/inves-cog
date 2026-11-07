@@ -233,6 +233,7 @@ datasets:
   expected_keys:
   - DGS10
   staleness: true
+  release_sessions: 1
 - dataset: 利率信用与跨资产日线
   table: flows.observations
   date_column: obs_date

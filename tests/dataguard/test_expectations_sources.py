@@ -48,6 +48,21 @@ def test_dgs10_expected_with_fred_recovery():
     assert item.filter["series_id"] == ["DGS10"]
 
 
+def test_dgs10_deadline_is_next_trading_day_after_gap():
+    """FRED publishes DGS10 for day D on the next trading day; flagging D
+    itself overdue on D's evening would false-alarm + trigger daily backfill."""
+    from inves_cog.dataguard.core import due_dates
+
+    item = _items()["十年期国债收益率日线"]
+    assert item.release_sessions == 1
+    # Friday 2026-11-06 21:15 ET: Friday's own DGS10 is NOT yet due (publishes Monday)
+    friday_evening = datetime(2026, 11, 7, 2, 15, tzinfo=timezone.utc)
+    assert date(2026, 11, 6) not in due_dates(item, friday_evening)
+    # Tuesday 2026-11-10 21:15 ET: Monday's DGS10 became due at Tuesday 21:15
+    tuesday_evening = datetime(2026, 11, 11, 2, 15, tzinfo=timezone.utc)
+    assert date(2026, 11, 9) in due_dates(item, tuesday_evening)
+
+
 def test_intraday_snapshots_never_auto_backfilled():
     assert _items()["宽池盘中快照"].backfill["entry"] == "manual"
     assert _items()["监控池盘中快照"].backfill["entry"] == "manual"
@@ -84,9 +99,12 @@ def test_fred_recovery_uses_provider_for_flows_series(monkeypatch):
 
         def collect(self, sid):
             assert sid == "SOFR"
+            # ALFRED multi-vintage rows: same obs_date, several realtime_starts
             return [
-                {"observation_date": DAY, "value": 4.28},
-                {"observation_date": date(2026, 11, 4), "value": 4.3},
+                {"observation_date": DAY, "realtime_start": date(2026, 11, 5), "value": 4.20},
+                {"observation_date": DAY, "realtime_start": date(2026, 11, 6), "value": 4.28},
+                {"observation_date": DAY, "realtime_start": date(2026, 11, 4), "value": None},
+                {"observation_date": date(2026, 11, 4), "realtime_start": date(2026, 11, 5), "value": 4.3},
             ]
 
     db = _stub_conn(monkeypatch)
@@ -100,6 +118,7 @@ def test_fred_recovery_uses_provider_for_flows_series(monkeypatch):
     rows = [dict(zip(sql.split("(")[1].split(")")[0].split(","), v, strict=True)) for v in values]
     assert [r["series_id"] for r in rows] == ["fred_sofr"]
     assert all(r["obs_date"] == DAY for r in rows)  # receipt bounds to the gap day
+    assert rows[0]["value"] == 4.28  # newest realtime_start wins; None skipped
     assert evidence["candidate_rows"] == 1
 
 
