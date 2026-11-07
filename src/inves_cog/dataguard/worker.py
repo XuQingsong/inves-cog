@@ -112,12 +112,7 @@ def main():
             "SELECT first_started_at,detect_only FROM ops.data_guard_runtime WHERE singleton"
         ).fetchone()
         now = clock.now_utc()
-        if (
-            values.get("INVES_DATAGUARD_BACKFILL") != "1"
-            or not first
-            or first["detect_only"]
-            or now < first["first_started_at"] + timedelta(days=1)
-        ):
+        if values.get("INVES_DATAGUARD_BACKFILL") != "1" or not first or first["detect_only"]:
             return
         row = writer.execute(
             "SELECT * FROM ops.data_gaps WHERE dataset=%s AND data_date=%s AND kind=%s",
