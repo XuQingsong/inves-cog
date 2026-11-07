@@ -180,7 +180,7 @@ def main():
             grouped = read(reader, scoped, args.date - timedelta(days=10), args.date, clock.now_utc())
             left = findings(scoped, args.date, grouped, now=clock.now_utc())
             if item.table == "flows.barometer_daily":
-                drift = barometer_drifts(reader, item, args.date, args.date)
+                drift = barometer_drifts(reader, item, args.date, args.date, clock.now_utc())
                 if args.date in drift:
                     left.append(drift[args.date])
             row["detail"]["remaining_checks"] = [f.kind for f in left]

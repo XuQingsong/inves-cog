@@ -138,7 +138,8 @@ def test_revisions_keep_original_append_only_roles_and_actual_late_daily_inputs(
         _, items = load("config/data_expectations.yaml")
         item = next(i for i in items if i.table == "flows.barometer_daily")
         assert read(c, item, day, day, now)[day][0]["value"] == "42.0"
-        assert not barometer_drifts(c, item, day, day)
+        assert not barometer_drifts(c, item, day, day, now)
+        assert day in barometer_drifts(c, item, day, day, now - timedelta(minutes=1))
         assert c.execute("SELECT fear FROM flows.barometer_daily WHERE date=%s", (day,)).fetchone()["fear"] == 10
         c.execute("SET LOCAL ROLE role_web")
         assert (

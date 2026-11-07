@@ -203,16 +203,17 @@ def barometer_drift(dataset, day, saved, current):
     )
 
 
-def barometer_drifts(connection, item, first, last):
+def barometer_drifts(connection, item, first, last, now=None):
     rows = connection.execute(
         "SELECT b.date,COALESCE(v.record->'inputs'->>'VIX',b.inputs->>'VIX') AS cached,r.value "
         "FROM flows.barometer_daily b "
         "LEFT JOIN LATERAL (SELECT record FROM ops.barometer_revisions WHERE data_date=b.date "
+        "AND (%s::timestamptz IS NULL OR revised_at<=%s) "
         "ORDER BY revised_at DESC,input_hash LIMIT 1) v ON true "
         "LEFT JOIN LATERAL (SELECT value FROM ingest.macro_observations "
         "WHERE series_id='VIX_CBOE' AND observation_date=b.date ORDER BY fetched_at DESC LIMIT 1) r ON true "
         "WHERE b.date>=%s AND b.date<=%s",
-        (first, last),
+        (now, now, first, last),
     ).fetchall()
     result = {}
     for row in rows:

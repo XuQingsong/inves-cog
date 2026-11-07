@@ -98,7 +98,7 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
                     results.append((item, {}))
                     continue
             drift = (
-                barometer_drifts(connection, item, min(days), max(days))
+                barometer_drifts(connection, item, min(days), max(days), now)
                 if item.table == "flows.barometer_daily"
                 else {}
             )

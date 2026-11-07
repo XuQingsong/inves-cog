@@ -76,7 +76,7 @@ class InputView:
             # A backfill vintage wins over older initial rows deterministically.
             before = before.replace("SELECT ", "SELECT DISTINCT ON (obs_date) ", 1)
             after = " ORDER BY obs_date,ingested_at DESC,published_at DESC,vintage DESC"
-        sql = before + join + " AND ".join(conditions) + after
+        sql = before + join + " AND ".join(conditions) + after + " LIMIT 50001"
         rows = self.connection.execute(sql, (*args, *bound)).fetchall()
         if len(rows) > 50000:
             raise ValueError("Restatement input limit exceeded")
