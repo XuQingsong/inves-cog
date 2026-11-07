@@ -1458,12 +1458,17 @@ def _visible_anomalies(anomalies, stocks):
 
 def _event_title(baskets, members, direction, catalog):
     real = [str(item) for item in baskets if item and str(item) not in STYLE_LABELS]
-    tickers = list(members)
+    tickers = _tickers(members)
+    by_name = {
+        m["ticker"]: m
+        for m in (members if isinstance(members, list) else [])
+        if isinstance(m, dict) and isinstance(m.get("ticker"), str)
+    }
     count = len(tickers)
     down = direction not in {"up", "上涨"}
     if count == 1:
         name = display_name(tickers[0], catalog)
-        member = members.get(tickers[0]) or {}
+        member = by_name.get(tickers[0]) or {}
         ret, resid = member.get("ret"), member.get("resid")
         if ret is not None and resid is not None and ret != 0 and resid != 0 and (ret > 0) != (resid > 0):
             verb = "相对同组走弱" if ret > 0 else "相对同组走强"
