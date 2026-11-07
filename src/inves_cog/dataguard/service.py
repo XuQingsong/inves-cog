@@ -260,10 +260,8 @@ def main():
         while True:
             values = load_values()
             now = clock.now_utc()
-            first = writer.execute("SELECT first_started_at FROM ops.data_guard_runtime WHERE singleton").fetchone()
-            day_one = not first or now < first["first_started_at"] + timedelta(days=1)
             enabled = values.get("INVES_DATAGUARD_BACKFILL") == "1"
-            detect_only = day_one or not enabled
+            detect_only = not enabled
             resources = slice_resources()
             try:
                 result = run_once(
