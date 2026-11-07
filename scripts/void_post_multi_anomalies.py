@@ -29,7 +29,7 @@ def main():
     from inves_cog.ingest.settings import read_environment
 
     values = read_environment(ROOT / ".env", environ={})
-    conn = psycopg.connect(values["INVES_COG_DATABASE_URL"], row_factory=dict_row)
+    conn = psycopg.connect(values["INVES_COG_PERCEPTION_DATABASE_URL"], row_factory=dict_row)
     rows = conn.execute(SELECT).fetchall()
     targets = [r for r in rows if r["status"] != NEW_STATUS]
     print(f"matched {len(rows)} post multi_* rows, {len(targets)} need voiding")
