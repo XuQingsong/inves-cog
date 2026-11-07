@@ -1117,3 +1117,8 @@ A032正式开工授权已到，不再等待A031验收。变更先记录：按任
 - PR135：https://github.com/XuQingsong/inves-cog/pull/135 ，完整head `afa980df9f2fde12a02e66e3538823c10d337e6c`；先失败提交40b34348，真实public边界测试404→200，本地4 passed；准确CI运行 https://github.com/XuQingsong/inves-cog/actions/runs/42334463617 ，不冒称通过。补丁仅增加/data-status只读白名单，POST405/未知地址404/no-store均保留。待需求方验收合并后只重启pages，不重迁移/重启data_guard。
 - 已独立核对部署前22程序、部署后23程序，唯一新增data_guard，除已授权pages外所有原程序状态/PID完全相同。运行写登录inves_cog_ingest、读role_web均非superuser。首轮真实检测、RSS/耗时、零超时、memory.events high不增证据已保存在服务器ops/a032-deploy-20261107.txt。
 - 用户邮件安全配置入口已实际准备并chmod0600，dataguard.env0600、补数0；已向用户说明在自己的终端隐藏输入全部三项，尚未收到“已配置”。不在聊天索取明文密码、不将账号/密码写证据。检测持续运行，真实邮件尚不可用；页面404修复继续跟准确CI及需求方合并。
+
+## A-032 进行中／用户决策 UD-A-61：指定Gmail通知邮箱，用户私密输入密码
+- 用户直接要求“你来用[用户指定的Gmail邮箱]来配置，我可以输密码”。据此由A预填发件账号与同一收件邮箱，用户仅在隐藏输入入口输入Google应用专用密码；邮箱地址及密码不写本状态、Git或部署证据。若用户随后指定其他收件人，以新答复为准。
+- 变更：仅更新服务器已有0600 dataguard.env和私密配置入口，密码仍不经聊天、参数或日志；补数开关保持0。不创建Google账号、不修改Google登录密码。真正发送仍须独立核验队列/发送结果。
+- 电脑控制工具拒绝控制macOS Terminal（安全限制），未绕过；已请求打开Codex终端供用户私密输入，是否实际显示待用户完成。其余网页修复继续跟PR135及准确CI，不等待密码停止检测。
