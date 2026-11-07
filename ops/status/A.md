@@ -1112,3 +1112,8 @@ A032正式开工授权已到，不再等待A031验收。变更先记录：按任
 - 已核实404原因：生产serve_pages使用web.public.PageBoundary，原预览走web.api；新地址未加入public页面白名单。变更：在原授权web范围补齐/data-status公共只读入口并保留失败优先测试；将另交修复PR，待需求方验收合并后部署，绝不直接安装未合并补丁。检测已在运行，不重复迁移或重启其他程序。
 - 邮件未配置且实际不可用。已准备服务器0600安全交互入口inves-cog-data/configure-dataguard-mail.py，隐藏输入Gmail账号/应用密码/收件地址，只写dataguard.env，不回显、不入Git。已在本对话一次性请用户在自己的终端配置并回复“已配置”，不收集聊天明文秘密；其余继续，不以凭据阻塞检测修复。
 - 下一步A立即提交公共入口修复并跟真实CI；需求方验收合并。首次24小时从2026-11-07 03:28:43 UTC开始，至少到11-08同刻才具备开关时间条件，仍由需求方明确决定，A不自行开启。
+
+## A-032 进行中：公共入口修复PR135已交，检测部署独立复核通过
+- PR135：https://github.com/XuQingsong/inves-cog/pull/135 ，完整head `afa980df9f2fde12a02e66e3538823c10d337e6c`；先失败提交40b34348，真实public边界测试404→200，本地4 passed；准确CI运行 https://github.com/XuQingsong/inves-cog/actions/runs/42334463617 ，不冒称通过。补丁仅增加/data-status只读白名单，POST405/未知地址404/no-store均保留。待需求方验收合并后只重启pages，不重迁移/重启data_guard。
+- 已独立核对部署前22程序、部署后23程序，唯一新增data_guard，除已授权pages外所有原程序状态/PID完全相同。运行写登录inves_cog_ingest、读role_web均非superuser。首轮真实检测、RSS/耗时、零超时、memory.events high不增证据已保存在服务器ops/a032-deploy-20261107.txt。
+- 用户邮件安全配置入口已实际准备并chmod0600，dataguard.env0600、补数0；已向用户说明在自己的终端隐藏输入全部三项，尚未收到“已配置”。不在聊天索取明文密码、不将账号/密码写证据。检测持续运行，真实邮件尚不可用；页面404修复继续跟准确CI及需求方合并。
