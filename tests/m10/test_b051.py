@@ -32,18 +32,16 @@ PAIRS = (
     ("/log", "/api/pages/home"),
     ("/market", "/api/pages/market"),
     ("/linkage/b048-e2", "/api/pages/linkage/b048-e2"),
-    ("/stock/NVDA", "/api/pages/stock/NVDA"),
     ("/graph", "/api/pages/graph"),
     ("/settings/data", "/api/pages/settings/data"),
     ("/paper/plan", "/api/pages/paper/plan"),
     ("/paper/portfolio", "/api/pages/paper/portfolio"),
-    ("/paper/universe", "/api/pages/paper/universe"),
     ("/paper/stock/NVDA", "/api/pages/paper/stock/NVDA"),
     ("/paper/health", "/api/pages/paper/health"),
     ("/paper/ledger", "/api/pages/paper/ledger"),
     ("/review", "/api/pages/review"),
 )
-RESEARCH = ("/log", "/market", "/linkage/b048-e2", "/stock/NVDA", "/graph", "/settings/data", "/review")
+RESEARCH = ("/log", "/market", "/linkage/b048-e2", "/graph", "/settings/data", "/review")
 PAPER = tuple(path for path, _ in PAIRS if path.startswith("/paper"))
 COUNT_LABELS = ("异常数", "各状态数", "高优先级信息数", "交易动作数", "决定不动数", "影子分歧数")
 MEANINGS = ("原因未明", "已归因·不需要行动", "已行动", "截止日已结", "事后确认漏检")

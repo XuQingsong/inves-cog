@@ -48,7 +48,6 @@ DETAIL_PATHS = (
     "/settings/data",
     "/paper/plan",
     "/paper/portfolio",
-    "/paper/universe",
     "/paper/health",
     "/paper/ledger",
     "/review",
