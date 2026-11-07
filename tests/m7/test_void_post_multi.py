@@ -12,8 +12,8 @@ def test_web_anomaly_reads_exclude_voided():
 
     pages_src = inspect.getsource(pages)
     stock_src = inspect.getsource(stock_brief)
-    assert pages_src.count("NOT LIKE '已作废%'") >= 2
-    assert "NOT LIKE '已作废%'" in stock_src
+    assert pages_src.count("NOT LIKE '已作废%%'") >= 2
+    assert "NOT LIKE '已作废%%'" in stock_src
 
 
 def test_dry_run_never_writes(monkeypatch):
