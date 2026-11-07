@@ -606,7 +606,7 @@ def test_d5_news_and_events(pages):
     assert [item["text"] for item in reasons] == ["供给增加", "需求放缓"]
     assert reasons[0]["stale_note"] is None
     assert reasons[1]["stale_note"] == citation_stale_note(reasons[1]["cited_at"], DAY)
-    assert "天前的新闻" in reasons[1]["stale_note"]
+    assert "早前消息" in reasons[1]["stale_note"]
     html = _visible(_get(pages, "/s/NVDA").text)
     # B-063: the 7-day news feed keeps published-in-window items; late ingestion is flagged 事后补采.
     assert "截点之后不应出现" in html and "事后补采" in html

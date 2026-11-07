@@ -407,7 +407,11 @@ def _events(payload):
         items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
         if reasons:
-            label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
+            label = (
+                "候选（待证实）"
+                if "原因未明" in (row.get("status") or "")
+                else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
+            )
             why = (
                 f'<div style="margin-top:10px"><div class="small muted">{label}'
                 f'</div><ul class="news">{"".join(reasons)}</ul></div>'
@@ -1645,7 +1649,11 @@ def _stock_news(payload):
     for row in payload.get("events") or []:
         items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
-        label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
+        label = (
+            "候选（待证实）"
+            if "原因未明" in (row.get("status") or "")
+            else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
+        )
         status = str(row.get("status") or "")
         why = (
             f'<div class="small muted">{label}</div><ul class="news">{"".join(reasons)}</ul>'
@@ -2364,20 +2372,48 @@ def _live_module(payload):
         scope = {"stock": "个股", "basket": "板块", "market": "市场"}.get(r["scope"], r["scope"])
         name = r.get("basket_name") or r["subject"]
         link = _tk(r["subject"]) if r["scope"] == "stock" else _text(name)
-        cur = r.get("last_ret")
+        cur = r.get("cur_ret")
         peak = r.get("peak_ret")
-        cur_html = (
-            f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%</span>' if cur is not None else ""
-        )
+        cur_as_of = r.get("cur_as_of")
+        if isinstance(cur_as_of, str):
+            try:
+                cur_as_of = datetime.fromisoformat(cur_as_of)
+            except ValueError:
+                cur_as_of = None
+        if cur is None:
+            cur_html = '<span class="dim">暂缺</span>'
+        else:
+            if hasattr(cur_as_of, "astimezone"):
+                hhmm = cur_as_of.astimezone(ZoneInfo("America/New_York")).strftime("%H:%M")
+                asof = f' <span class="dim small">较昨收 · {hhmm}美东</span>'
+            else:
+                asof = ' <span class="dim small">较昨收</span>'
+            cur_html = f'<span class="num {"down" if cur < 0 else "up"}">{cur * 100:+.1f}%{asof}</span>'
         px_html = f"${r['last_px']:,.2f}" if r.get("last_px") is not None else "—"
         fs = r.get("first_seen_at")
+        if isinstance(fs, str):
+            try:
+                fs = datetime.fromisoformat(fs)
+            except ValueError:
+                fs = None
         when = (
-            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}"
+            f"{_bj_hhmm(fs)} / {fs.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')}美东"
             if hasattr(fs, "astimezone")
             else ""
         )
         sev_cls, sev_label = _severity(r)
-        faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
+        session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(r.get("session"), "")
+        first = r.get("first_ret")
+        direction_up = r.get("direction") in {"up", "上涨"}
+        # faded + current move opposite the anomaly direction -> 已反转
+        reversed_now = r.get("status") == "faded" and cur is not None and (cur > 0) != direction_up
+        if reversed_now:
+            det = f"{session_label} {first * 100:+.1f}%" if first is not None else session_label
+            faded = f' <span class="chip stale">已反转（{det} → {cur * 100:+.1f}%）</span>'
+        else:
+            faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
+        if session_label and first is not None:
+            when = f"{session_label} {first * 100:+.1f}%（较昨收） {when}".strip()
         cause_html = "原因未明"
         if r.get("cause_event_id"):
             lag = r.get("cause_lag_minutes")
@@ -2402,17 +2438,18 @@ def _live_module(payload):
             )
             members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
         badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
+        peak_html = f'<span class="num" title="异动峰值（较昨收）">{_pct(peak, 1)}</span>' if peak is not None else ""
         body.append(
             f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
             f"<td class='num'>{px_html}</td>"
-            f"<td class='num'>{cur_html}</td><td class='num'>{_pct(peak, 1) if peak is not None else ''}</td>"
+            f"<td class='num'>{cur_html}</td><td class='num'>{peak_html}</td>"
             f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
         )
     return (
         '<div class="card sec cat-anomaly" id="live"><h2>盘中异常'
         '<span class="stamp">' + _text(str(payload.get("et_now") or "")) + " ET</span></h2>"
-        '<table class="tbl"><tr><th>层级</th><th>对象</th><th>现价</th><th>涨跌</th>'
-        "<th>峰值</th><th>首次出现</th><th>起因</th></tr>" + "".join(body) + "</table></div>"
+        '<table class="tbl"><tr><th>层级</th><th>对象</th><th>现价</th><th>当前涨跌</th>'
+        "<th>异动峰值</th><th>首次出现</th><th>起因</th></tr>" + "".join(body) + "</table></div>"
     )
 
 
@@ -2589,12 +2626,17 @@ def _highlights_module(payload):
         link = _tk(g["subject"]) if g["scope"] == "stock" else f"<b>{who}</b>"
         sev_cls, sev_label = _severity(g["members"][0])
         px = f"${g['last_px']:,.2f} " if g.get("last_px") else ""
-        cls = "down" if (g.get("ret") or 0) < 0 else "up"
+        cur = g.get("cur_ret")
+        session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(g.get("session"), "")
+        cur_txt = f"{cur * 100:+.1f}%" if cur is not None else "暂缺"
+        cls = "down" if (cur or 0) < 0 else "up"
+        peak_txt = f"{session_label}异动 {g['ret'] * 100:+.1f}%（峰值）" if g.get("ret") is not None else ""
         merged = ""
         items.append(
             f'<div class="hl-card"><span class="badge {sev_cls}">{sev_label}</span> '
             f'<span class="who">{link}{merged}</span>'
-            f'<div class="num {cls}">{px}{_pct(g.get("ret"), 1)}</div>'
+            f'<div class="num {cls}">{px}<span title="较昨收">{cur_txt}</span>'
+            f' <span class="dim small">{_text(peak_txt)}</span></div>'
             f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div>'
             + (
                 '<div class="small">'
@@ -2857,13 +2899,22 @@ def _stock_today(payload):
             '<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>'
             '<p class="dim">今天没有该股或所在板块的异常</p></div>'
         )
-    items = "".join(
-        f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
-        f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span> '
-        f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'
-        f"{_text(r.get('cause_label') or r.get('cause_headline') or '原因未明')}</span></div>"
-        for r in mine
-    )
+
+    def _row(r):
+        session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(r.get("session"), "")
+        cur = r.get("cur_ret")
+        cur_txt = f"{_pct(cur, 1)}较昨收" if cur is not None else "暂缺"
+        det = r.get("first_ret")
+        det_txt = f"{session_label} {_pct(det, 1)}（检测时）" if det is not None else session_label
+        return (
+            f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
+            f' <span class="num" title="当前（较昨收）">{cur_txt}</span>'
+            f' <span class="dim small">{det_txt} · 峰值 {_pct(r.get("peak_ret"), 1)}</span> '
+            f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'
+            f"{_text(r.get('cause_label') or r.get('cause_headline') or '原因未明')}</span></div>"
+        )
+
+    items = "".join(_row(r) for r in mine)
     return f'<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>{items}</div>'
 
 

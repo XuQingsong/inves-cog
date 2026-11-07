@@ -636,11 +636,11 @@ def test_r3_market_event_cards_cite_stale_news(pages):
     assert "引用的是旧闻，只作参考" in market
     cards = re.findall(r'<div class="event.*?(?=<div class="event|<div class="empty|$)', market, re.S)
     assert cards
-    cited = [card for card in cards if "引用的是" in card]
+    cited = [card for card in cards if "早前消息" in card]
     assert cited
-    assert "可能原因 · 含旧闻" in cited[0]
+    assert "候选（待证实）" in cited[0]
     for card in cited:
         assert "当日新闻缺失，原因解释不可用" not in card
-    uncited = [card for card in cards if "引用的是" not in card]
+    uncited = [card for card in cards if "早前消息" not in card]
     if uncited:
         assert "原因解释不可用" in uncited[0]

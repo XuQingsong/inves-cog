@@ -975,13 +975,18 @@ def _day_window(day):
 
 
 def citation_stale_note(cited, trade_date):
-    """More than three calendar days before the trade date, in New York."""
+    """Cited evidence published before the previous session's 16:00 ET close.
+    Post-close news from the prior session through today is current context —
+    a prior-day 17:00 ET earnings print is not "early news" for today's move."""
     moment = _parse_ts(cited)
     if moment is None or trade_date is None:
         return None
-    gap = (trade_date - moment.astimezone(NY).date()).days
-    if gap > STALE_NEWS_DAYS:
-        return f"引用的是 {gap} 天前的新闻"
+    from inves_cog.ingest.intraday import previous_session
+
+    prev = previous_session(trade_date)
+    cutoff = datetime.combine(prev or trade_date, time(16, 0), NY)
+    if moment.astimezone(NY) < cutoff:
+        return f"早前消息（{moment.astimezone(NY).date().strftime('%m-%d')}）"
     return None
 
 
@@ -1456,10 +1461,25 @@ def _visible_anomalies(anomalies, stocks):
     return chosen
 
 
-def _event_title(baskets, tickers, direction, catalog):
+def _event_title(baskets, members, direction, catalog):
     real = [str(item) for item in baskets if item and str(item) not in STYLE_LABELS]
+    tickers = _tickers(members)
+    by_name = {
+        m["ticker"]: m
+        for m in (members if isinstance(members, list) else [])
+        if isinstance(m, dict) and isinstance(m.get("ticker"), str)
+    }
     count = len(tickers)
     down = direction not in {"up", "上涨"}
+    if count == 1:
+        name = display_name(tickers[0], catalog)
+        member = by_name.get(tickers[0]) or {}
+        ret, resid = member.get("ret"), member.get("resid")
+        if ret is not None and resid is not None and ret != 0 and resid != 0 and (ret > 0) != (resid > 0):
+            verb = "相对同组走弱" if ret > 0 else "相对同组走强"
+            return f"{name} {verb}（自身 {ret * 100:+.1f}%）"
+        ret_txt = f"（{ret * 100:+.1f}%）" if ret is not None else ""
+        return f"{name} {'下跌' if down else '上涨'}{ret_txt}"
     if len(real) <= 1:
         name = display_name(real[0], catalog) if real else "、".join(tickers[:4])
         verb = "集体下跌" if down else "集体上涨"
@@ -1505,7 +1525,9 @@ def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day):
                 "event_id": None if view is None else view["event_id"],
                 "max_abs_z": row["max_abs_z"],
                 "direction": row["direction"],
-                "title": _event_title(baskets, names, row["direction"], catalog),
+                "session": row["session"],
+                "status": row["status"],
+                "title": _event_title(baskets, row["members"] or {}, row["direction"], catalog),
                 "members": names,
                 "explanation": explanation,
                 "cited_at": cited,
@@ -2317,6 +2339,9 @@ def _hl_grouped(live, positions):
                 "subject": lead["subject"],
                 "basket_name": lead.get("basket_name"),
                 "ret": lead.get("peak_ret"),
+                "session": lead.get("session"),
+                "cur_ret": lead.get("cur_ret"),
+                "cur_as_of": lead.get("cur_as_of"),
                 "last_px": lead.get("last_px"),
                 "why": why,
                 "cause": top.get("cause_headline"),
@@ -3470,15 +3495,20 @@ def _live_anomalies(connection, day, is_today):
         tickers = [r["subject"] for r in rows if r["scope"] == "stock"]
         if tickers:
             px = {
-                r["ticker"]: r["last"]
+                r["ticker"]: r
                 for r in connection.execute(
-                    "SELECT DISTINCT ON (ticker) ticker, last FROM ingest.intraday_snapshots "
-                    "WHERE ticker = ANY(%s) ORDER BY ticker, as_of DESC",
+                    "SELECT DISTINCT ON (ticker) ticker, last, prev_close, as_of "
+                    "FROM ingest.intraday_snapshots WHERE ticker = ANY(%s) "
+                    "ORDER BY ticker, as_of DESC",
                     (tickers,),
                 ).fetchall()
             }
             for r in rows:
-                r["last_px"] = float(px[r["subject"]]) if r["subject"] in px and px[r["subject"]] else None
+                snap = px.get(r["subject"]) or {}
+                r["last_px"] = float(snap["last"]) if snap.get("last") else None
+                if snap.get("last") and snap.get("prev_close"):
+                    r["cur_ret"] = float(snap["last"] / snap["prev_close"] - 1)
+                    r["cur_as_of"] = snap["as_of"]
     except Exception:
         pass
     for r in rows:

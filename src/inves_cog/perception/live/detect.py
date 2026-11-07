@@ -132,22 +132,26 @@ def apply_round(connection, hits, now, day, session):
                 ["daily_sigma"],
             ),
         )
+    # The regular round also judges pre rows: same-direction anomalies that did
+    # not carry into the session are faded (post never fades regular/pre rows;
+    # the close anomaly is a fact, not something that can "fade" after hours).
+    sessions = [session, "pre"] if session == "regular" else [session]
     if keep:
         ks, ss, ds = ([k[0] for k in keep], [k[1] for k in keep], [k[2] for k in keep])
         connection.execute(
             """UPDATE perception.live_anomalies SET status='faded', updated_at=now()
-               WHERE trade_date=%s AND session=%s AND status='active'
+               WHERE trade_date=%s AND session=ANY(%s) AND status='active'
                AND NOT EXISTS (
                    SELECT 1 FROM unnest(%s::text[], %s::text[], %s::text[]) k(a,b,c)
                    WHERE k.a = perception.live_anomalies.scope
                      AND k.b = perception.live_anomalies.subject
                      AND k.c = perception.live_anomalies.direction)""",
-            (day, session, ks, ss, ds),
+            (day, sessions, ks, ss, ds),
         )
     else:
         connection.execute(
             "UPDATE perception.live_anomalies SET status='faded', updated_at=now()"
-            " WHERE trade_date=%s AND session=%s AND status='active'",
-            (day, session),
+            " WHERE trade_date=%s AND session=ANY(%s) AND status='active'",
+            (day, sessions),
         )
     return len(hits)
