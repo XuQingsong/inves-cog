@@ -12,8 +12,8 @@ def test_web_anomaly_reads_exclude_voided():
 
     pages_src = inspect.getsource(pages)
     stock_src = inspect.getsource(stock_brief)
-    assert pages_src.count("NOT LIKE '已作废%%'") >= 2
-    assert "NOT LIKE '已作废%%'" in stock_src
+    assert pages_src.count("? 'voided'") >= 2
+    assert "? 'voided'" in stock_src
 
 
 def test_dry_run_never_writes(monkeypatch):
@@ -34,5 +34,6 @@ def test_dry_run_never_writes(monkeypatch):
             return contextlib.nullcontext()
 
     monkeypatch.setattr(mod, "main", lambda: None)  # only verify module loads
-    assert mod.NEW_STATUS == "已作废·统计口径错误"
+    assert "'voided'" in mod.UPDATE and "data_quality" in mod.UPDATE
+    assert "SET status" not in mod.UPDATE  # status has a CHECK constraint — must not be touched
     assert "<@ '{multi_3d,multi_5d}'::text[]" in mod.SELECT

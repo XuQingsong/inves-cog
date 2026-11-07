@@ -991,7 +991,7 @@ def _anomaly_marks(connection, symbol, day):
     try:
         rows = connection.execute(
             "SELECT DISTINCT trade_date FROM perception.anomalies a "
-            "WHERE a.status NOT LIKE '已作废%%' "
+            "WHERE NOT (coalesce(a.data_quality,'{}'::jsonb) ? 'voided') "
             "AND EXISTS (SELECT 1 FROM jsonb_array_elements(a.members) m "
             "            WHERE m->>'ticker' = %s)",
             (symbol,),
