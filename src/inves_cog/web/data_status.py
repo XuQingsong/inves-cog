@@ -1,7 +1,7 @@
 """Format persisted guard results only; never recompute market or trading decisions."""
 
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 from html import escape
 from zoneinfo import ZoneInfo
 
@@ -158,7 +158,10 @@ def revision_notice(rows):
     parts = []
     for row in rows:
         record = row["record"]
-        stamp = row["revised_at"].astimezone(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
+        revised = row["revised_at"]
+        if isinstance(revised, str):
+            revised = datetime.fromisoformat(revised)
+        stamp = revised.astimezone(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
         quality = "仍有缺失，请结合数据状态查看" if record.get("missing") else "计算输入核查通过"
         line = (
             f"{row['data_date']} · 事后修订：恐慌 {record.get('fear')}，贪婪 {record.get('greed')}；"
