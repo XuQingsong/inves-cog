@@ -78,3 +78,23 @@ def test_starttls_then_login_and_stable_message_identifier():
     assert m.send("same-event", "数据提醒", "缺失") == "sent"
     assert trace[-1]["Message-ID"] == first
     assert trace.index("tls") < trace.index("login")
+
+
+def test_implicit_tls_requires_verified_context_and_never_falls_back_to_plain_smtp():
+    import ssl
+
+    def encrypted(host, port, timeout, context):
+        assert context.check_hostname and context.verify_mode == ssl.CERT_REQUIRED
+        assert port == 465
+        raise ssl.SSLError("fixture-only server refusal")
+
+    values = dict(
+        INVES_SMTP_HOST="smtp.163.com",
+        INVES_SMTP_PORT="465",
+        INVES_SMTP_USER="fixture@example.test",
+        INVES_SMTP_PASSWORD="fixture-only",
+        INVES_SMTP_FROM="fixture@example.test",
+        INVES_ALERT_TO="recipient@example.test",
+    )
+    mailer = Mailer(values, smtp=lambda *a, **k: pytest.fail("unsafe fallback"), smtp_ssl=encrypted)
+    assert mailer.send("tls-error", "数据提醒", "缺失") == "邮件发送失败，将重试"

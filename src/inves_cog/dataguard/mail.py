@@ -45,8 +45,8 @@ def compose(rows, *, daily=False, resources="资源状态尚未核实"):
 
 
 class Mailer:
-    def __init__(self, values, *, smtp=smtplib.SMTP):
-        self.values, self.smtp = values, smtp
+    def __init__(self, values, *, smtp=smtplib.SMTP, smtp_ssl=smtplib.SMTP_SSL):
+        self.values, self.smtp, self.smtp_ssl = values, smtp, smtp_ssl
 
     @property
     def configured(self):
@@ -65,10 +65,15 @@ class Mailer:
         message.set_content(body)
         # Do not log exceptions: SMTP providers can include login names or message content.
         try:
-            with self.smtp(v["INVES_SMTP_HOST"], int(v["INVES_SMTP_PORT"]), timeout=10) as server:
+            port = int(v["INVES_SMTP_PORT"])
+            implicit_tls = port in {465, 994}
+            factory = self.smtp_ssl if implicit_tls else self.smtp
+            options = {"context": ssl.create_default_context()} if implicit_tls else {}
+            with factory(v["INVES_SMTP_HOST"], port, timeout=10, **options) as server:
                 server.ehlo()
-                server.starttls(context=ssl.create_default_context())
-                server.ehlo()
+                if not implicit_tls:
+                    server.starttls(context=ssl.create_default_context())
+                    server.ehlo()
                 server.login(v["INVES_SMTP_USER"], v["INVES_SMTP_PASSWORD"])
                 if server.send_message(message):
                     return "邮件部分收件人发送失败，将重试"
