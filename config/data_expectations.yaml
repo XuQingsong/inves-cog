@@ -119,6 +119,12 @@ datasets:
     - QQQ
     - SMH
     - SOXX
+    - TQQQ
+    - SOXL
+    - GLD
+    - HYG
+    - IEF
+    - TLT
   expected_keys: *id002
   sanity: 0.25
   adjustment_column: adj_factor
@@ -204,6 +210,29 @@ datasets:
   - VIX_CBOE
   - VIX3M_CBOE
   staleness: true
+- dataset: 十年期国债收益率日线
+  table: ingest.macro_observations
+  date_column: observation_date
+  cadence: trading_day
+  deadline_et: '20:45'
+  grace_min: 30
+  min_rows: 1
+  basis: src/inves_cog/ingest/pipeline.py:fred_task 每日采集 fred_series（含 DGS10）
+  impact: 晴雨表利率与跨资产判断可能失真
+  backfill:
+    entry: fred
+    max_attempts: 3
+    depends_on:
+    - barometer
+  key_column: series_id
+  value_column: value
+  latest_column: fetched_at
+  filter:
+    series_id:
+    - DGS10
+  expected_keys:
+  - DGS10
+  staleness: true
 - dataset: 利率信用与跨资产日线
   table: flows.observations
   date_column: obs_date
@@ -223,16 +252,9 @@ datasets:
   latest_column: ingested_at
   filter:
     series_id: &id003
-    - yahoo_px_tqqq
-    - yahoo_px_soxl
-    - yahoo_px_gld
-    - yahoo_px_hyg
-    - yahoo_px_ief
-    - yahoo_px_tlt
     - yahoo_px_jpyx
     - yahoo_px_btcusd
     - yahoo_px_move
-    - yahoo_px_tnx
   expected_keys: *id003
   staleness: true
 - dataset: 看跌看涨成交比
