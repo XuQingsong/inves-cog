@@ -1,0 +1,863 @@
+[
+  {
+    "catalog": [
+      {
+        "series_id": "cboe_idx_skew",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_idx_vix9d",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_idx_vvix",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_equity",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_etp",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_index",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_oex",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_cbtx_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_djx_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_djxw_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_kpi_binary_option_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_kpi_binary_options_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mbtx_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mgtn_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mgtnw_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mrtbw_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mrtbx_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mrut_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mxacw_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mxea_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mxef_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mxusa_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_mxwld_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_speqw_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_speqx_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_xspbw_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_xspbx_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_other_xsp_put_call_ratio",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_spx",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_total",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "cboe_pc_vix",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Cboe"
+      },
+      {
+        "series_id": "finra_margin_cash_accounts",
+        "frequency": "monthly",
+        "publish_rule": null,
+        "source": "FINRA"
+      },
+      {
+        "series_id": "finra_margin_margin_debit",
+        "frequency": "monthly",
+        "publish_rule": null,
+        "source": "FINRA"
+      },
+      {
+        "series_id": "finra_margin_margin_free_credit",
+        "frequency": "monthly",
+        "publish_rule": null,
+        "source": "FINRA"
+      },
+      {
+        "series_id": "fred_ioer",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_iorb",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_rrpontsyd",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_sofr",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_stlfsi4",
+        "frequency": "weekly",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_walcl",
+        "frequency": "weekly",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_wrmfns",
+        "frequency": "weekly",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "fred_wtregen",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "FRED"
+      },
+      {
+        "series_id": "occ_oi_debt_calls",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "occ_oi_debt_puts",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "occ_oi_equity_calls",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "occ_oi_equity_puts",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "occ_oi_index_calls",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "occ_oi_index_puts",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "occ_oi_total",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OCC"
+      },
+      {
+        "series_id": "ofr_fsi",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_credit",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_em",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_equity_val",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_funding",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_oae",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_safe_assets",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_us",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "ofr_fsi_volatility",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "OFR"
+      },
+      {
+        "series_id": "shiller_pe",
+        "frequency": "monthly",
+        "publish_rule": null,
+        "source": "multpl"
+      },
+      {
+        "series_id": "yahoo_px_btcusd",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_gld",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_hyg",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_ief",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_jpyx",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_move",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_soxl",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_tlt",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_tnx",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      },
+      {
+        "series_id": "yahoo_px_tqqq",
+        "frequency": "daily",
+        "publish_rule": null,
+        "source": "Yahoo"
+      }
+    ]
+  },
+  {
+    "job_arrival": [
+      {
+        "task_name": "anomaly_daily",
+        "days": 10,
+        "p95_seconds_et": 80513.87262119999
+      },
+      {
+        "task_name": "app_free",
+        "days": 1,
+        "p95_seconds_et": 27092.8253684
+      },
+      {
+        "task_name": "app_grossing",
+        "days": 1,
+        "p95_seconds_et": 16269.663345
+      },
+      {
+        "task_name": "attribution_candidates",
+        "days": 9,
+        "p95_seconds_et": 77386.49680240001
+      },
+      {
+        "task_name": "attribution_labels",
+        "days": 5,
+        "p95_seconds_et": 1834.098003
+      },
+      {
+        "task_name": "attribution_tracks",
+        "days": 5,
+        "p95_seconds_et": 77689.861358
+      },
+      {
+        "task_name": "bars_full",
+        "days": 19,
+        "p95_seconds_et": 77435.2162326
+      },
+      {
+        "task_name": "bars_prefill",
+        "days": 9,
+        "p95_seconds_et": 28840.8998454
+      },
+      {
+        "task_name": "cboe",
+        "days": 3,
+        "p95_seconds_et": 81410.62693304999
+      },
+      {
+        "task_name": "consensus_snapshots",
+        "days": 12,
+        "p95_seconds_et": 75381.11031755
+      },
+      {
+        "task_name": "earnings_calendar",
+        "days": 11,
+        "p95_seconds_et": 21775.7657929
+      },
+      {
+        "task_name": "earnings_consensus",
+        "days": 1,
+        "p95_seconds_et": 39159.885666
+      },
+      {
+        "task_name": "earnings_history_backfill",
+        "days": 1,
+        "p95_seconds_et": 32303.02628315
+      },
+      {
+        "task_name": "earnings_implied_moves",
+        "days": 1,
+        "p95_seconds_et": 57096.487396
+      },
+      {
+        "task_name": "econ_calendar",
+        "days": 11,
+        "p95_seconds_et": 21804.262941250003
+      },
+      {
+        "task_name": "eia_energy",
+        "days": 1,
+        "p95_seconds_et": 48410.172225
+      },
+      {
+        "task_name": "eia_press",
+        "days": 1,
+        "p95_seconds_et": 48408.0605
+      },
+      {
+        "task_name": "fed_news",
+        "days": 12,
+        "p95_seconds_et": 80077.15699799999
+      },
+      {
+        "task_name": "finra",
+        "days": 12,
+        "p95_seconds_et": 80074.6159738
+      },
+      {
+        "task_name": "fred",
+        "days": 12,
+        "p95_seconds_et": 79958.4315578
+      },
+      {
+        "task_name": "graph_cluster",
+        "days": 1,
+        "p95_seconds_et": 36278.958687
+      },
+      {
+        "task_name": "graph_draft",
+        "days": 1,
+        "p95_seconds_et": 36279.096905
+      },
+      {
+        "task_name": "graph_monitored",
+        "days": 1,
+        "p95_seconds_et": 36278.489896
+      },
+      {
+        "task_name": "graph_seed",
+        "days": 1,
+        "p95_seconds_et": 36278.464924
+      },
+      {
+        "task_name": "iex_intraday",
+        "days": 8,
+        "p95_seconds_et": 68400.76427765
+      },
+      {
+        "task_name": "info_enrichment",
+        "days": 23,
+        "p95_seconds_et": 75550.8517544
+      },
+      {
+        "task_name": "intraday_snapshots",
+        "days": 9,
+        "p95_seconds_et": 68400.98507665
+      },
+      {
+        "task_name": "issuer_profiles",
+        "days": 2,
+        "p95_seconds_et": 76341.7952884
+      },
+      {
+        "task_name": "llm_usage_probe",
+        "days": 1,
+        "p95_seconds_et": 49982.3544488
+      },
+      {
+        "task_name": "m2_acceptance_consensus_1",
+        "days": 1,
+        "p95_seconds_et": 29070.361824
+      },
+      {
+        "task_name": "m2_acceptance_consensus_2",
+        "days": 1,
+        "p95_seconds_et": 29120.373834
+      },
+      {
+        "task_name": "m2_acceptance_financials_resume",
+        "days": 1,
+        "p95_seconds_et": 33671.5808592
+      },
+      {
+        "task_name": "m2_acceptance_segments_v3_cached",
+        "days": 1,
+        "p95_seconds_et": 42574.620142399996
+      },
+      {
+        "task_name": "m2_consensus",
+        "days": 1,
+        "p95_seconds_et": 79916.394854
+      },
+      {
+        "task_name": "m2_consensus_round2",
+        "days": 1,
+        "p95_seconds_et": 83786.575362
+      },
+      {
+        "task_name": "m2_consensus_round2_fixed",
+        "days": 1,
+        "p95_seconds_et": 84280.732343
+      },
+      {
+        "task_name": "m2_financials",
+        "days": 12,
+        "p95_seconds_et": 77619.22087735
+      },
+      {
+        "task_name": "m2_live_financials",
+        "days": 1,
+        "p95_seconds_et": 38126.049743
+      },
+      {
+        "task_name": "m2_round2_cached_rebuild",
+        "days": 2,
+        "p95_seconds_et": 85445.773012
+      },
+      {
+        "task_name": "m2_round3_cached_recompute",
+        "days": 1,
+        "p95_seconds_et": 12734.918004
+      },
+      {
+        "task_name": "m2_round3_foreign_backfill",
+        "days": 1,
+        "p95_seconds_et": 15046.98094715
+      },
+      {
+        "task_name": "m3_m6_history_warmup",
+        "days": 1,
+        "p95_seconds_et": 29894.864381
+      },
+      {
+        "task_name": "m6_market_inputs",
+        "days": 15,
+        "p95_seconds_et": 79133.24121319999
+      },
+      {
+        "task_name": "m6_wide_history_warmup",
+        "days": 1,
+        "p95_seconds_et": 33718.049493
+      },
+      {
+        "task_name": "m9_overlay",
+        "days": 11,
+        "p95_seconds_et": 59924.0711055
+      },
+      {
+        "task_name": "m9_shadow",
+        "days": 6,
+        "p95_seconds_et": 30966.873313250002
+      },
+      {
+        "task_name": "market_structure",
+        "days": 17,
+        "p95_seconds_et": 79019.9867488
+      },
+      {
+        "task_name": "news_full",
+        "days": 6,
+        "p95_seconds_et": 80233.48097219999
+      },
+      {
+        "task_name": "news_poll",
+        "days": 12,
+        "p95_seconds_et": 81656.6751256
+      },
+      {
+        "task_name": "news_prefill",
+        "days": 6,
+        "p95_seconds_et": 29004.284535
+      },
+      {
+        "task_name": "news_tier_backfill",
+        "days": 1,
+        "p95_seconds_et": 54033.9495969
+      },
+      {
+        "task_name": "news_watchdog",
+        "days": 8,
+        "p95_seconds_et": 69663.9522154
+      },
+      {
+        "task_name": "paper_plan",
+        "days": 8,
+        "p95_seconds_et": 30946.01592845
+      },
+      {
+        "task_name": "premarket_review",
+        "days": 10,
+        "p95_seconds_et": 29322.84841245
+      },
+      {
+        "task_name": "review_labels",
+        "days": 5,
+        "p95_seconds_et": 3623.4956795999997
+      },
+      {
+        "task_name": "review_oneliner",
+        "days": 5,
+        "p95_seconds_et": 3625.3807343999997
+      },
+      {
+        "task_name": "review_snapshots",
+        "days": 5,
+        "p95_seconds_et": 3623.3910232
+      },
+      {
+        "task_name": "review_weekly_sample",
+        "days": 2,
+        "p95_seconds_et": 3620.6308217
+      },
+      {
+        "task_name": "rule_a_scores",
+        "days": 12,
+        "p95_seconds_et": 81031.2905976
+      },
+      {
+        "task_name": "sec_atom",
+        "days": 23,
+        "p95_seconds_et": 81626.44919325
+      },
+      {
+        "task_name": "sec_index",
+        "days": 13,
+        "p95_seconds_et": 76103.09752859999
+      },
+      {
+        "task_name": "sec_submissions",
+        "days": 12,
+        "p95_seconds_et": 76107.75746509999
+      },
+      {
+        "task_name": "trends",
+        "days": 1,
+        "p95_seconds_et": 27325.79294185
+      },
+      {
+        "task_name": "valuation_v1",
+        "days": 8,
+        "p95_seconds_et": 81078.66977895
+      },
+      {
+        "task_name": "vix_daily",
+        "days": 8,
+        "p95_seconds_et": 78987.308311
+      },
+      {
+        "task_name": "websites",
+        "days": 1,
+        "p95_seconds_et": 50769.971208
+      },
+      {
+        "task_name": "wide_snapshots",
+        "days": 7,
+        "p95_seconds_et": 56107.5915655
+      },
+      {
+        "task_name": "wide_universe",
+        "days": 16,
+        "p95_seconds_et": 78818.2346774
+      },
+      {
+        "task_name": "yahoo_intraday",
+        "days": 12,
+        "p95_seconds_et": 69846.53500839997
+      }
+    ]
+  },
+  {
+    "indexes": [
+      {
+        "schemaname": "flows",
+        "tablename": "option_chain",
+        "indexdef": "CREATE INDEX option_chain_und_snap_idx ON flows.option_chain USING btree (underlying, snapshot_at)"
+      },
+      {
+        "schemaname": "flows",
+        "tablename": "option_chain",
+        "indexdef": "CREATE UNIQUE INDEX option_chain_pkey ON flows.option_chain USING btree (underlying, snapshot_at, expiry, strike, cp, source)"
+      },
+      {
+        "schemaname": "fundamentals",
+        "tablename": "fin_state",
+        "indexdef": "CREATE UNIQUE INDEX fin_state_pkey ON fundamentals.fin_state USING btree (ticker, extractor, filed)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "info_items",
+        "indexdef": "CREATE UNIQUE INDEX info_items_pkey ON ingest.info_items USING btree (info_id)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "info_items",
+        "indexdef": "CREATE INDEX info_items_publication ON ingest.info_items USING btree (published_at)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "info_items",
+        "indexdef": "CREATE INDEX info_items_source_root ON ingest.info_items USING btree (source_root)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "info_items",
+        "indexdef": "CREATE INDEX info_items_tickers ON ingest.info_items USING gin (tickers)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "info_items",
+        "indexdef": "CREATE INDEX info_items_first_seen_idx ON ingest.info_items USING btree (first_seen_at)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "info_items",
+        "indexdef": "CREATE INDEX info_items_pending_idx ON ingest.info_items USING btree (first_seen_at) WHERE (extraction_status = 'pending'::text)"
+      },
+      {
+        "schemaname": "ingest",
+        "tablename": "macro_observations",
+        "indexdef": "CREATE UNIQUE INDEX macro_observations_pkey ON ingest.macro_observations USING btree (series_id, observation_date, realtime_start)"
+      },
+      {
+        "schemaname": "trading",
+        "tablename": "daily_scores",
+        "indexdef": "CREATE UNIQUE INDEX daily_scores_pkey ON trading.daily_scores USING btree (signal_date, ticker, extractor, rule_set, params_version)"
+      },
+      {
+        "schemaname": "trading",
+        "tablename": "plan",
+        "indexdef": "CREATE UNIQUE INDEX plan_pkey ON trading.plan USING btree (portfolio_id, trade_date, extractor, rule_set, params_version)"
+      },
+      {
+        "schemaname": "valuation_v1",
+        "tablename": "ceiling_daily",
+        "indexdef": "CREATE UNIQUE INDEX ceiling_daily_pkey ON valuation_v1.ceiling_daily USING btree (ticker, trade_date)"
+      },
+      {
+        "schemaname": "valuation_v1",
+        "tablename": "consensus_snapshots",
+        "indexdef": "CREATE INDEX consensus_snapshot_pit ON valuation_v1.consensus_snapshots USING btree (ticker, fetched_at DESC)"
+      },
+      {
+        "schemaname": "valuation_v1",
+        "tablename": "consensus_snapshots",
+        "indexdef": "CREATE INDEX consensus_snapshot_quota ON valuation_v1.consensus_snapshots USING btree (fetched_at) WHERE (kind = ANY (ARRAY['request'::text, 'response'::text]))"
+      },
+      {
+        "schemaname": "valuation_v1",
+        "tablename": "consensus_snapshots",
+        "indexdef": "CREATE UNIQUE INDEX consensus_estimate_period ON valuation_v1.consensus_snapshots USING btree (request_id, horizon, fiscal_end) WHERE (kind = 'estimate'::text)"
+      },
+      {
+        "schemaname": "valuation_v1",
+        "tablename": "consensus_snapshots",
+        "indexdef": "CREATE UNIQUE INDEX consensus_request_phase ON valuation_v1.consensus_snapshots USING btree (request_id, kind) WHERE (kind = ANY (ARRAY['request'::text, 'response'::text]))"
+      },
+      {
+        "schemaname": "valuation_v1",
+        "tablename": "consensus_snapshots",
+        "indexdef": "CREATE UNIQUE INDEX consensus_snapshots_pkey ON valuation_v1.consensus_snapshots USING btree (id)"
+      }
+    ]
+  }
+]

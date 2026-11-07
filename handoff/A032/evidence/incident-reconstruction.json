@@ -1,0 +1,56 @@
+{
+  "provenance": {
+    "production_journal": "ops/swe2-backfill-20261106.txt",
+    "journal_sha256": "c73084453fc0d69d5476d57a1e41db3b13156461acfb6b8643f4f476cb5e11fa",
+    "public_lines": [
+      6,
+      8,
+      15,
+      16,
+      22,
+      23,
+      24,
+      25,
+      31,
+      32,
+      33,
+      34
+    ],
+    "semantics": "Repair-journal reconstruction, not an original database snapshot or historical availability proof."
+  },
+  "vix": {
+    "source_original_record": "  VIX_CBOE for 11-05 never written; many observation series also stale (see §5).",
+    "source_gap_kinds": [
+      "missing"
+    ],
+    "reported_cached_value": 16.61,
+    "canonical_after_repair": 28.18,
+    "cached_reading_kind": "stale"
+  },
+  "occ": {
+    "original_missing_basis": "A-032 task background and repair-journal section 2",
+    "repair_record": "- backfill_occ(11-04..11-05): 35119 rows total, 17765 for 11-05. occ_oi_* observations now at 11-04/05.",
+    "missing_classifier": [
+      "missing"
+    ]
+  },
+  "soxx": {
+    "raw_return": -0.7071557025820918,
+    "adjusted_return": -0.12146710774627567,
+    "confirmed_action": {
+      "type": "split",
+      "ratio": "3:1",
+      "source": "https://www.sec.gov/Archives/edgar/data/1100663/000119312526430480/d156277d497.htm"
+    },
+    "actual_kinds": [],
+    "synthetic_no_action_control_kinds": [
+      "suspect"
+    ],
+    "conclusion": "Confirmed 3:1 split is exempt under task section 1; the mandatory-suspect expectation in T2 conflicts with verified facts."
+  },
+  "unchanged_limits": [
+    "Original pre-repair row snapshot is unavailable.",
+    "Actual first availability cannot be reconstructed from overwritten rows.",
+    "No real provider request, database write, model call or email is made by this replay."
+  ]
+}

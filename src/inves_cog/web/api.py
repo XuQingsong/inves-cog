@@ -207,6 +207,10 @@ def create_app(dsn=None, clock=None, warmup=False):
         finally:
             connection.close()
 
+    from inves_cog.web.data_status import register
+
+    register(app, call)
+
     @app.get("/api/pages/home")
     def home(date: date):
         return call(page_home, date)
@@ -229,7 +233,7 @@ def create_app(dsn=None, clock=None, warmup=False):
             payload = call(lambda c, d, cl: api_payload(c, cl), None)
             return render_page(payload["history"])
 
-        return page_cache.get(("barometer",), produce)
+        return _data_warning(call, page_cache.get(("barometer",), produce), barometer=True)
 
     @app.get("/api/pages/linkage/{event_id}")
     def linkage(event_id: str, date: date):
@@ -316,12 +320,16 @@ def _register_html(app, call, clock, page_cache):
 
     def show(builder, requested, cache=False, **extra):
         produce = lambda: render_page(call(builder, requested or latest_visible_session(clock), **extra))  # noqa: E731
-        return _page(page_cache, ("show", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        return _data_warning(
+            call, _page(page_cache, ("show", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        )
 
     def show_brief(builder, requested, cache=False, **extra):
         # B-064: brief pages default to today; close cards carry the prior session.
         produce = lambda: render_brief(call(builder, requested or default_session(clock), **extra))  # noqa: E731
-        return _page(page_cache, ("brief", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        return _data_warning(
+            call, _page(page_cache, ("brief", builder.__name__, requested, frozenset(extra.items())), produce, cache)
+        )
 
     @app.get("/")
     def home_html(date: date | None = None):
@@ -405,3 +413,9 @@ def _register_html(app, call, clock, page_cache):
     @app.get("/review")
     def review_html(date: date | None = None):
         return show(page_review, date)
+
+
+def _data_warning(call, response, *, barometer=False):
+    from inves_cog.web.data_status import decorate, payload
+
+    return decorate(response, call(payload, None), barometer=barometer)

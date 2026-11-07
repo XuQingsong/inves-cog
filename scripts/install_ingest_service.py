@@ -79,6 +79,7 @@ serverurl=unix://{state}/supervisor.sock
         "embedding": ["-m", "inves_cog.ingest.embedding_backfill", "--model", "text-embedding-async-v1"],
         "news_translate": [str(root / "scripts/schedule_translate.py")],
         "flows": [str(root / "scripts/schedule_flows.py")],
+        "data_guard": ["-m", "inves_cog.dataguard.service"],
         "pages": [str(root / "scripts/serve_pages.py")],
         "review": [str(root / "scripts/schedule_review.py")],
         "live_perception": [str(root / "scripts/schedule_live_perception.py")],

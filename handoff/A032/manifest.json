@@ -1,0 +1,23 @@
+{
+  "cached-input-red.txt": "3a941b875248294e0696f6132b5b01c5f53483608570831c895c0d0df13cd7d7",
+  "current-green.txt": "ad7786f5649fa49b89c43dd79782c9cd783a8bd0b658cb82b4769f506fd96893",
+  "deadlines.md": "c1311d1140fa92d1c939678702fddb622ba4766b485068d17203c128cc6aaab5",
+  "detection-red.txt": "cb5eab32cef8d6b4fdc47a965ee9616a88b0e71ccceceee92860f56e69eb8202",
+  "evidence/catalog.json": "4cf2e22dd1f24cd5a4d97a3c3ea3525aac6362225c27dc5d8cc6a8e96889419f",
+  "evidence/data-status.png": "411be6820c7b8f960d826fda54399c0d8b238e3b68bca0f56919f0b6f391d942",
+  "evidence/home.png": "71711956005118c3cbbbe70385b9bbc03459fe13688314cdaabaf3964737e3b4",
+  "evidence/incident-reconstruction.json": "45d4ee24135e2990f09358b026dae5ca8d41b1b54cf12c7fb4a7f6b8f545c7ad",
+  "evidence/performance-28300894.json": "8d9f0fc15a29aa486b355aa242661df31cd9f9df9f7d272b28723ee08e9d35cc",
+  "evidence/performance-33fe4691.json": "6d4cae83d034e190380682af7bea01af47354cf9dd9af5b3cee89fa51155242a",
+  "evidence/preview.json": "d89b4581ba47b93aef335b88c96c67d652ea02d86c994bad79206e870a18fa2a",
+  "evidence/probe.json": "8b9ebd98ace9f24c6925d934866fdaff16c3949bd88d46ecf075a811fe4781d9",
+  "evidence/public-market-journal.json": "e61d32a42062b8885a7712391aa62c37c805da65f300e3c8bcce82a846a9f868",
+  "finra-red.txt": "bd302b070c164034bd482ccfb4bd59e91093c5026106cdae911e1625e12ef779",
+  "mail-red.txt": "702ab9f05b6649fd29de753d7eea66895cae87f41f8ea166820f283146736998",
+  "null-values-red.txt": "787e6a10f13e424938b6837655a93e18550f3687c30718aa32f1ec754c03e787",
+  "policy-green.txt": "f85c5b3a2091c2c7dfd13a6d2bca1172753fd6c56693a44cf3a07c5f6b617267",
+  "receipts-red.txt": "d5471eddaedf006469d42231d8936758a46357a5efb4f966f63386c2f0327658",
+  "recovery-red.txt": "dc34fb784f01dd515661255e6ecdaa670563a3c256f80d9a6813c9be5bf6901b",
+  "self-test.md": "1ac430217be793e86c32accbb82368fef5e724e3e5031033cda9bf826a639b41",
+  "web-red.txt": "5af822cd51c7b170f8754552dbb84d3eb4e0f42de9d9c005b45afed8614bd3d5"
+}

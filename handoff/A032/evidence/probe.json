@@ -1,0 +1,1442 @@
+[
+  {
+    "arrival_flows": [
+      {
+        "series_id": "cboe_idx_skew",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 06:11:06.105144+00:00"
+      },
+      {
+        "series_id": "cboe_idx_vix9d",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 06:11:05.025041+00:00"
+      },
+      {
+        "series_id": "cboe_idx_vvix",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 06:11:05.529777+00:00"
+      },
+      {
+        "series_id": "cboe_pc_equity",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_etp",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_index",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_oex",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_cbtx_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_djx_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_djxw_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_kpi_binary_options_put_call_ratio",
+        "n": 13,
+        "first": "2026-10-16",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mbtx_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mgtn_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mgtnw_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mrtbw_put_call_ratio",
+        "n": 7,
+        "first": "2026-10-26",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mrtbx_put_call_ratio",
+        "n": 7,
+        "first": "2026-10-26",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mrut_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mxacw_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mxea_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mxef_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mxusa_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_mxwld_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_speqw_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_speqx_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_xspbw_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_xspbx_put_call_ratio",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_other_xsp_put_call_ratio",
+        "n": 7,
+        "first": "2026-10-26",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_spx",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_total",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "cboe_pc_vix",
+        "n": 18,
+        "first": "2026-10-09",
+        "last": "2026-11-04",
+        "arrived": "2026-11-05 03:20:27.722372+00:00"
+      },
+      {
+        "series_id": "fred_iorb",
+        "n": 25,
+        "first": "2026-10-09",
+        "last": "2026-11-02",
+        "arrived": "2026-11-01 00:49:22.295138+00:00"
+      },
+      {
+        "series_id": "fred_rrpontsyd",
+        "n": 15,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 00:49:21.143004+00:00"
+      },
+      {
+        "series_id": "fred_sofr",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-29",
+        "arrived": "2026-11-01 00:49:21.786993+00:00"
+      },
+      {
+        "series_id": "fred_stlfsi4",
+        "n": 3,
+        "first": "2026-10-09",
+        "last": "2026-10-23",
+        "arrived": "2026-11-01 00:49:23.465002+00:00"
+      },
+      {
+        "series_id": "fred_walcl",
+        "n": 3,
+        "first": "2026-10-14",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:20.075000+00:00"
+      },
+      {
+        "series_id": "fred_wtregen",
+        "n": 3,
+        "first": "2026-10-14",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:20.557968+00:00"
+      },
+      {
+        "series_id": "occ_oi_debt_calls",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "occ_oi_debt_puts",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "occ_oi_equity_calls",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "occ_oi_equity_puts",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "occ_oi_index_calls",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "occ_oi_index_puts",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "occ_oi_total",
+        "n": 20,
+        "first": "2026-10-09",
+        "last": "2026-11-05",
+        "arrived": "2026-11-06 12:01:09.579128+00:00"
+      },
+      {
+        "series_id": "ofr_fsi",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:38:54.961582+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_credit",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_em",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_equity_val",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_funding",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_oae",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_safe_assets",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_us",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "ofr_fsi_volatility",
+        "n": 14,
+        "first": "2026-10-09",
+        "last": "2026-10-28",
+        "arrived": "2026-11-01 00:49:04.448298+00:00"
+      },
+      {
+        "series_id": "shiller_pe",
+        "n": 1,
+        "first": "2026-10-30",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:05:07.923500+00:00"
+      },
+      {
+        "series_id": "yahoo_px_btcusd",
+        "n": 22,
+        "first": "2026-10-09",
+        "last": "2026-10-31",
+        "arrived": "2026-11-01 03:01:58.946858+00:00"
+      },
+      {
+        "series_id": "yahoo_px_gld",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:01:49.548960+00:00"
+      },
+      {
+        "series_id": "yahoo_px_hyg",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:01:51.535252+00:00"
+      },
+      {
+        "series_id": "yahoo_px_ief",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:01:53.428760+00:00"
+      },
+      {
+        "series_id": "yahoo_px_jpyx",
+        "n": 15,
+        "first": "2026-10-11",
+        "last": "2026-10-29",
+        "arrived": "2026-11-01 03:01:57.142124+00:00"
+      },
+      {
+        "series_id": "yahoo_px_move",
+        "n": 15,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:02:00.815938+00:00"
+      },
+      {
+        "series_id": "yahoo_px_soxl",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:01:47.820848+00:00"
+      },
+      {
+        "series_id": "yahoo_px_tlt",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:01:55.258809+00:00"
+      },
+      {
+        "series_id": "yahoo_px_tnx",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:03:32.429112+00:00"
+      },
+      {
+        "series_id": "yahoo_px_tqqq",
+        "n": 16,
+        "first": "2026-10-09",
+        "last": "2026-10-30",
+        "arrived": "2026-11-01 03:01:43.296804+00:00"
+      }
+    ]
+  },
+  {
+    "arrival_jobs": [
+      {
+        "task_name": "a014_history_m4",
+        "n": 1,
+        "last_start": "2026-10-20 08:23:10.622313+00:00",
+        "last_end": "2026-10-20 08:24:02.728154+00:00"
+      },
+      {
+        "task_name": "a014_history_m4_continuous",
+        "n": 1,
+        "last_start": "2026-10-20 10:47:31.406932+00:00",
+        "last_end": "2026-10-20 10:48:28.477726+00:00"
+      },
+      {
+        "task_name": "a014_history_m5",
+        "n": 1,
+        "last_start": "2026-10-20 08:26:44.603325+00:00",
+        "last_end": "2026-10-20 08:34:07.807312+00:00"
+      },
+      {
+        "task_name": "a014_history_m5_commit",
+        "n": 1,
+        "last_start": "2026-10-20 08:40:59.056388+00:00",
+        "last_end": "2026-10-20 08:51:32.955648+00:00"
+      },
+      {
+        "task_name": "a014_history_m5_corrected",
+        "n": 1,
+        "last_start": "2026-10-20 08:58:05.278406+00:00",
+        "last_end": "2026-10-20 09:04:02.158447+00:00"
+      },
+      {
+        "task_name": "a014_history_m5_deployed_optional_inputs",
+        "n": 1,
+        "last_start": "2026-10-20 13:21:44.087888+00:00",
+        "last_end": "2026-10-20 13:55:18.986521+00:00"
+      },
+      {
+        "task_name": "a014_history_m5_indexed",
+        "n": 1,
+        "last_start": "2026-10-20 08:35:10.941155+00:00",
+        "last_end": "2026-10-20 08:37:37.814724+00:00"
+      },
+      {
+        "task_name": "a014_history_m5_native",
+        "n": 1,
+        "last_start": "2026-10-20 10:49:19.336618+00:00",
+        "last_end": "2026-10-20 11:19:18.704694+00:00"
+      },
+      {
+        "task_name": "a014_history_m5_native_complete_8735",
+        "n": 1,
+        "last_start": "2026-10-20 11:20:13.865692+00:00",
+        "last_end": "2026-10-20 11:20:25.572765+00:00"
+      },
+      {
+        "task_name": "a014_history_m7_checkpointed",
+        "n": 1,
+        "last_start": "2026-10-20 11:45:22.747620+00:00",
+        "last_end": "2026-10-20 12:02:06.855894+00:00"
+      },
+      {
+        "task_name": "a014_history_m7_four_day",
+        "n": 4,
+        "last_start": "2026-10-22 03:49:21.387358+00:00",
+        "last_end": "2026-10-22 03:49:21.397899+00:00"
+      },
+      {
+        "task_name": "a014_history_m7_four_day_prepare",
+        "n": 1,
+        "last_start": "2026-10-22 03:47:03.216369+00:00",
+        "last_end": "2026-10-22 03:49:19.305085+00:00"
+      },
+      {
+        "task_name": "a014_history_m7_resource_recheck",
+        "n": 1,
+        "last_start": "2026-10-20 11:25:59.010543+00:00",
+        "last_end": "2026-10-20 11:30:58.671660+00:00"
+      },
+      {
+        "task_name": "a014_history_m7_verify",
+        "n": 1,
+        "last_start": "2026-10-20 08:46:42.612311+00:00",
+        "last_end": "2026-10-20 08:51:42.151848+00:00"
+      },
+      {
+        "task_name": "a014_m2_valuation_input_repair",
+        "n": 1,
+        "last_start": "2026-10-20 12:35:43.216517+00:00",
+        "last_end": "2026-10-20 13:05:23.194578+00:00"
+      },
+      {
+        "task_name": "a014_m2_valuation_stream_repair",
+        "n": 1,
+        "last_start": "2026-10-20 13:03:19.319973+00:00",
+        "last_end": "2026-10-20 13:06:52.783670+00:00"
+      },
+      {
+        "task_name": "a014_m5_native_five_preflight",
+        "n": 1,
+        "last_start": "2026-10-20 13:17:52.121788+00:00",
+        "last_end": "2026-10-20 13:19:39.421381+00:00"
+      },
+      {
+        "task_name": "anomaly_daily",
+        "n": 11,
+        "last_start": "2026-11-06 02:00:00+00:00",
+        "last_end": "2026-11-06 02:00:00+00:00"
+      },
+      {
+        "task_name": "app_free",
+        "n": 2,
+        "last_start": "2026-10-14 11:40:59.011692+00:00",
+        "last_end": "2026-10-14 11:41:02.693544+00:00"
+      },
+      {
+        "task_name": "app_grossing",
+        "n": 1,
+        "last_start": "2026-10-14 08:31:05.330850+00:00",
+        "last_end": "2026-10-14 08:31:09.663345+00:00"
+      },
+      {
+        "task_name": "attribution_candidates",
+        "n": 11,
+        "last_start": "2026-11-06 02:45:10.023104+00:00",
+        "last_end": "2026-11-06 02:45:10.031938+00:00"
+      },
+      {
+        "task_name": "attribution_labels",
+        "n": 9,
+        "last_start": "2026-11-06 12:30:04.442707+00:00",
+        "last_end": "2026-11-06 12:30:04.446025+00:00"
+      },
+      {
+        "task_name": "attribution_tracks",
+        "n": 8,
+        "last_start": "2026-11-06 05:00:24.809274+00:00",
+        "last_end": "2026-11-06 05:00:24.814528+00:00"
+      },
+      {
+        "task_name": "bars_full",
+        "n": 24,
+        "last_start": "2026-11-06 01:21:28.890874+00:00",
+        "last_end": "2026-11-06 01:29:51.341771+00:00"
+      },
+      {
+        "task_name": "bars_prefill",
+        "n": 16,
+        "last_start": "2026-11-06 13:00:23.153577+00:00",
+        "last_end": "2026-11-06 13:00:43.256473+00:00"
+      },
+      {
+        "task_name": "cboe",
+        "n": 16,
+        "last_start": "2026-11-06 06:00:55.685475+00:00",
+        "last_end": "2026-11-06 06:00:57.555012+00:00"
+      },
+      {
+        "task_name": "consensus_snapshots",
+        "n": 22,
+        "last_start": "2026-11-06 00:00:05.115250+00:00",
+        "last_end": "2026-11-06 00:00:05.862761+00:00"
+      },
+      {
+        "task_name": "earnings_calendar",
+        "n": 13,
+        "last_start": "2026-11-06 11:01:33.324927+00:00",
+        "last_end": "2026-11-06 11:03:04.662385+00:00"
+      },
+      {
+        "task_name": "earnings_consensus",
+        "n": 1,
+        "last_start": "2026-10-30 14:47:48.390442+00:00",
+        "last_end": "2026-10-30 14:52:39.885666+00:00"
+      },
+      {
+        "task_name": "earnings_history_backfill",
+        "n": 3,
+        "last_start": "2026-10-15 12:59:06.556361+00:00",
+        "last_end": "2026-10-15 12:59:20.689606+00:00"
+      },
+      {
+        "task_name": "earnings_implied_moves",
+        "n": 1,
+        "last_start": "2026-10-30 19:50:06.889431+00:00",
+        "last_end": "2026-10-30 19:51:36.487396+00:00"
+      },
+      {
+        "task_name": "econ_calendar",
+        "n": 13,
+        "last_start": "2026-11-06 11:03:04.677132+00:00",
+        "last_end": "2026-11-06 11:03:36.472933+00:00"
+      },
+      {
+        "task_name": "eia_energy",
+        "n": 1,
+        "last_start": "2026-10-14 17:26:48.060908+00:00",
+        "last_end": "2026-10-14 17:26:50.172225+00:00"
+      },
+      {
+        "task_name": "eia_press",
+        "n": 1,
+        "last_start": "2026-10-14 17:26:45.829333+00:00",
+        "last_end": "2026-10-14 17:26:48.060500+00:00"
+      },
+      {
+        "task_name": "embedding_backfill",
+        "n": 1,
+        "last_start": "2026-10-15 02:18:42.516527+00:00",
+        "last_end": "2026-10-15 02:24:14.369868+00:00"
+      },
+      {
+        "task_name": "fed_news",
+        "n": 13,
+        "last_start": "2026-11-06 02:43:22.526090+00:00",
+        "last_end": "2026-11-06 02:43:22.632851+00:00"
+      },
+      {
+        "task_name": "finra",
+        "n": 14,
+        "last_start": "2026-11-06 02:41:38.825826+00:00",
+        "last_end": "2026-11-06 02:43:21.616440+00:00"
+      },
+      {
+        "task_name": "fred",
+        "n": 15,
+        "last_start": "2026-11-06 02:36:05.912202+00:00",
+        "last_end": "2026-11-06 02:41:38.786141+00:00"
+      },
+      {
+        "task_name": "graph_cluster",
+        "n": 1,
+        "last_start": "2026-10-15 14:04:38.943903+00:00",
+        "last_end": "2026-10-15 14:04:38.958687+00:00"
+      },
+      {
+        "task_name": "graph_draft",
+        "n": 1,
+        "last_start": "2026-10-15 14:04:38.976673+00:00",
+        "last_end": "2026-10-15 14:04:39.096905+00:00"
+      },
+      {
+        "task_name": "graph_monitored",
+        "n": 1,
+        "last_start": "2026-10-15 14:04:38.483467+00:00",
+        "last_end": "2026-10-15 14:04:38.489896+00:00"
+      },
+      {
+        "task_name": "graph_seed",
+        "n": 1,
+        "last_start": "2026-10-15 14:04:38.451743+00:00",
+        "last_end": "2026-10-15 14:04:38.464924+00:00"
+      },
+      {
+        "task_name": "iex_intraday",
+        "n": 5952,
+        "last_start": "2026-11-06 15:59:00.050780+00:00",
+        "last_end": "2026-11-06 15:59:00.767488+00:00"
+      },
+      {
+        "task_name": "info_enrichment",
+        "n": 14169,
+        "last_start": "2026-11-06 15:51:12.775636+00:00",
+        "last_end": "2026-11-06 15:51:12.781868+00:00"
+      },
+      {
+        "task_name": "intraday_snapshots",
+        "n": 5971,
+        "last_start": "2026-11-06 15:59:00.053431+00:00",
+        "last_end": "2026-11-06 15:59:00.973596+00:00"
+      },
+      {
+        "task_name": "issuer_profiles",
+        "n": 4,
+        "last_start": "2026-11-03 02:43:14.442284+00:00",
+        "last_end": "2026-11-03 02:47:33.026200+00:00"
+      },
+      {
+        "task_name": "llm_usage_probe",
+        "n": 2,
+        "last_start": "2026-10-14 17:53:26.666553+00:00",
+        "last_end": "2026-10-14 17:53:29.967459+00:00"
+      },
+      {
+        "task_name": "m2_acceptance_consensus_1",
+        "n": 1,
+        "last_start": "2026-10-14 12:03:44.349797+00:00",
+        "last_end": "2026-10-14 12:04:30.361824+00:00"
+      },
+      {
+        "task_name": "m2_acceptance_consensus_2",
+        "n": 1,
+        "last_start": "2026-10-14 12:04:30.419649+00:00",
+        "last_end": "2026-10-14 12:05:20.373834+00:00"
+      },
+      {
+        "task_name": "m2_acceptance_financials",
+        "n": 1,
+        "last_start": "2026-10-14 11:33:43.153316+00:00",
+        "last_end": "2026-10-14 12:03:44.332953+00:00"
+      },
+      {
+        "task_name": "m2_acceptance_financials_resume",
+        "n": 3,
+        "last_start": "2026-10-14 13:20:02.403616+00:00",
+        "last_end": "2026-10-14 13:21:38.798214+00:00"
+      },
+      {
+        "task_name": "m2_acceptance_segments_v3",
+        "n": 1,
+        "last_start": "2026-10-14 13:11:52.916106+00:00",
+        "last_end": "2026-10-14 13:42:30.048158+00:00"
+      },
+      {
+        "task_name": "m2_acceptance_segments_v3_cached",
+        "n": 4,
+        "last_start": "2026-10-14 15:49:40.906508+00:00",
+        "last_end": "2026-10-14 15:50:08.912711+00:00"
+      },
+      {
+        "task_name": "m2_consensus",
+        "n": 1,
+        "last_start": "2026-10-17 02:07:03.161571+00:00",
+        "last_end": "2026-10-17 02:11:56.394854+00:00"
+      },
+      {
+        "task_name": "m2_consensus_round2",
+        "n": 1,
+        "last_start": "2026-10-15 03:10:40.795117+00:00",
+        "last_end": "2026-10-15 03:16:26.575362+00:00"
+      },
+      {
+        "task_name": "m2_consensus_round2_fixed",
+        "n": 1,
+        "last_start": "2026-10-15 03:19:32.464449+00:00",
+        "last_end": "2026-10-15 03:24:40.732343+00:00"
+      },
+      {
+        "task_name": "m2_financials",
+        "n": 12,
+        "last_start": "2026-11-06 02:33:14.794460+00:00",
+        "last_end": "2026-11-06 02:38:18.363369+00:00"
+      },
+      {
+        "task_name": "m2_live_financials",
+        "n": 3,
+        "last_start": "2026-10-15 14:13:36.924132+00:00",
+        "last_end": "2026-10-15 14:35:26.049743+00:00"
+      },
+      {
+        "task_name": "m2_round2_cached_rebuild",
+        "n": 3,
+        "last_start": "2026-10-15 04:09:56.765103+00:00",
+        "last_end": "2026-10-15 04:14:57.264375+00:00"
+      },
+      {
+        "task_name": "m2_round3_cached_recompute",
+        "n": 2,
+        "last_start": "2026-10-15 07:32:44.871586+00:00",
+        "last_end": "2026-10-15 07:32:53.613630+00:00"
+      },
+      {
+        "task_name": "m2_round3_foreign_backfill",
+        "n": 4,
+        "last_start": "2026-10-15 08:11:05.450501+00:00",
+        "last_end": "2026-10-15 08:11:27.725567+00:00"
+      },
+      {
+        "task_name": "m3_m6_history_warmup",
+        "n": 1,
+        "last_start": "2026-10-15 12:17:32.198957+00:00",
+        "last_end": "2026-10-15 12:18:14.864381+00:00"
+      },
+      {
+        "task_name": "m6_market_inputs",
+        "n": 15,
+        "last_start": "2026-11-06 01:43:33.560843+00:00",
+        "last_end": "2026-11-06 01:43:35.855070+00:00"
+      },
+      {
+        "task_name": "m6_wide_history_warmup",
+        "n": 1,
+        "last_start": "2026-10-15 13:17:53.897365+00:00",
+        "last_end": "2026-10-15 13:21:58.049493+00:00"
+      },
+      {
+        "task_name": "m9_overlay",
+        "n": 11,
+        "last_start": "2026-11-06 13:30:03.205944+00:00",
+        "last_end": "2026-11-06 13:30:03.256732+00:00"
+      },
+      {
+        "task_name": "m9_shadow",
+        "n": 6,
+        "last_start": "2026-11-06 13:35:51.212390+00:00",
+        "last_end": "2026-11-06 13:35:51.550651+00:00"
+      },
+      {
+        "task_name": "market_structure",
+        "n": 20,
+        "last_start": "2026-11-06 02:33:07.843949+00:00",
+        "last_end": "2026-11-06 02:42:54.241419+00:00"
+      },
+      {
+        "task_name": "news_full",
+        "n": 10,
+        "last_start": "2026-11-06 01:43:35.869942+00:00",
+        "last_end": "2026-11-06 01:44:43.598755+00:00"
+      },
+      {
+        "task_name": "news_poll",
+        "n": 1323,
+        "last_start": "2026-11-06 15:50:08.787755+00:00",
+        "last_end": "2026-11-06 15:51:03.593249+00:00"
+      },
+      {
+        "task_name": "news_prefill",
+        "n": 6,
+        "last_start": "2026-11-06 13:00:43.270695+00:00",
+        "last_end": "2026-11-06 13:01:46.908912+00:00"
+      },
+      {
+        "task_name": "news_tier_backfill",
+        "n": 3,
+        "last_start": "2026-10-14 19:00:22.863070+00:00",
+        "last_end": "2026-10-14 19:01:04.828124+00:00"
+      },
+      {
+        "task_name": "news_watchdog",
+        "n": 411,
+        "last_start": "2026-11-06 15:51:03.607898+00:00",
+        "last_end": "2026-11-06 15:51:03.625423+00:00"
+      },
+      {
+        "task_name": "paper_plan",
+        "n": 11,
+        "last_start": "2026-11-06 13:35:24.660360+00:00",
+        "last_end": "2026-11-06 13:35:49.627779+00:00"
+      },
+      {
+        "task_name": "premarket_review",
+        "n": 10,
+        "last_start": "2026-11-06 13:00:59.868225+00:00",
+        "last_end": "2026-11-06 13:01:00.794487+00:00"
+      },
+      {
+        "task_name": "review_labels",
+        "n": 9,
+        "last_start": "2026-11-06 12:30:22.413879+00:00",
+        "last_end": "2026-11-06 12:30:22.418386+00:00"
+      },
+      {
+        "task_name": "review_monthly_report",
+        "n": 3,
+        "last_start": "2026-10-31 05:04:21.062541+00:00",
+        "last_end": "2026-10-31 05:04:21.067421+00:00"
+      },
+      {
+        "task_name": "review_monthly_sample",
+        "n": 3,
+        "last_start": "2026-10-31 05:02:50.926239+00:00",
+        "last_end": "2026-10-31 05:02:50.928889+00:00"
+      },
+      {
+        "task_name": "review_oneliner",
+        "n": 9,
+        "last_start": "2026-11-06 12:30:22.420708+00:00",
+        "last_end": "2026-11-06 12:30:22.422109+00:00"
+      },
+      {
+        "task_name": "review_snapshots",
+        "n": 9,
+        "last_start": "2026-11-06 12:30:22.403931+00:00",
+        "last_end": "2026-11-06 12:30:22.406206+00:00"
+      },
+      {
+        "task_name": "review_weekly_report",
+        "n": 15,
+        "last_start": "2026-10-31 05:01:20.806009+00:00",
+        "last_end": "2026-10-31 05:01:20.811266+00:00"
+      },
+      {
+        "task_name": "review_weekly_sample",
+        "n": 2,
+        "last_start": "2026-10-31 05:00:09.580992+00:00",
+        "last_end": "2026-10-31 05:00:20.692419+00:00"
+      },
+      {
+        "task_name": "rule_a_scores",
+        "n": 14,
+        "last_start": "2026-11-06 03:30:17.704764+00:00",
+        "last_end": "2026-11-06 03:30:30.405598+00:00"
+      },
+      {
+        "task_name": "sec_atom",
+        "n": 2822,
+        "last_start": "2026-11-06 15:51:03.639326+00:00",
+        "last_end": "2026-11-06 15:51:04.126154+00:00"
+      },
+      {
+        "task_name": "sec_index",
+        "n": 13,
+        "last_start": "2026-11-01 01:00:34.550574+00:00",
+        "last_end": "2026-11-01 01:00:35.045593+00:00"
+      },
+      {
+        "task_name": "sec_submissions",
+        "n": 19,
+        "last_start": "2026-11-02 01:45:15.980150+00:00",
+        "last_end": "2026-11-02 02:15:01.040501+00:00"
+      },
+      {
+        "task_name": "trends",
+        "n": 4,
+        "last_start": "2026-10-14 11:41:03.395675+00:00",
+        "last_end": "2026-10-14 11:44:55.477848+00:00"
+      },
+      {
+        "task_name": "valuation_v1",
+        "n": 11,
+        "last_start": "2026-11-06 03:30:16.160066+00:00",
+        "last_end": "2026-11-06 03:30:46.017613+00:00"
+      },
+      {
+        "task_name": "vix_daily",
+        "n": 10,
+        "last_start": "2026-11-06 06:00:53.965936+00:00",
+        "last_end": "2026-11-06 06:00:55.018849+00:00"
+      },
+      {
+        "task_name": "websites",
+        "n": 5,
+        "last_start": "2026-10-14 18:10:21.452235+00:00",
+        "last_end": "2026-10-14 18:10:29.896308+00:00"
+      },
+      {
+        "task_name": "wide_snapshots",
+        "n": 486,
+        "last_start": "2026-11-06 15:55:00.029717+00:00",
+        "last_end": "2026-11-06 15:55:07.021117+00:00"
+      },
+      {
+        "task_name": "wide_universe",
+        "n": 19,
+        "last_start": "2026-11-06 01:29:51.366323+00:00",
+        "last_end": "2026-11-06 01:43:33.544831+00:00"
+      },
+      {
+        "task_name": "yahoo_intraday",
+        "n": 6098,
+        "last_start": "2026-11-06 15:59:00.015593+00:00",
+        "last_end": "2026-11-06 15:59:00.460548+00:00"
+      }
+    ]
+  },
+  {
+    "columns": [
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "ticker"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "trade_date"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "open"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "high"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "low"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "close"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "volume"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "post_close"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "adj_factor"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "bars_daily",
+        "column_name": "source"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "info_id"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "kind"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "published_at"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "first_seen_at"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "source"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "source_root"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "source_level"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "headline"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "body"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "summary"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "url"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "tickers"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "entities"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "embedding"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "extraction_status"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "flags"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "payload"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "is_guidance"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "guidance_direction"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "is_rating_change"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "info_items",
+        "column_name": "extraction_source"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "ticker"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "as_of"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "session"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "last"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "prev_close"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "delay_minutes"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "source"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "fetched_at"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "intraday_snapshots",
+        "column_name": "day_volume"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "macro_observations",
+        "column_name": "series_id"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "macro_observations",
+        "column_name": "observation_date"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "macro_observations",
+        "column_name": "value"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "macro_observations",
+        "column_name": "units"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "macro_observations",
+        "column_name": "realtime_start"
+      },
+      {
+        "table_schema": "ingest",
+        "table_name": "macro_observations",
+        "column_name": "fetched_at"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "ticker"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "trade_date"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "method"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "r"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "m"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "m_r_minus_1"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "m_r_plus_1"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "fcf_m"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "quality"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "band"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "band_rule"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "evidence"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "missing"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "asof"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "payload"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ceiling_daily",
+        "column_name": "observed_at"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "id"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "request_id"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "kind"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "ticker"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "fetched_at"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "status"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "fiscal_end"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "horizon"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "eps_avg"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "eps_count"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "revenue_avg"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "consensus_snapshots",
+        "column_name": "raw"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "trade_date"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "ticker"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "params_version"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "method_version"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "version"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "type"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "status"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "bear"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "neutral"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "bull"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "pending_review"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "payload"
+      },
+      {
+        "table_schema": "valuation_v1",
+        "table_name": "ranges",
+        "column_name": "observed_at"
+      }
+    ]
+  }
+]
