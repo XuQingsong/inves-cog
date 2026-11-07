@@ -27,9 +27,16 @@ def payload(connection, _day, clock):
                 "FROM ops.data_gaps WHERE status<>'resolved' "
                 "ORDER BY data_date DESC,dataset LIMIT 100"
             ).fetchall()
+            revisions = []
+            if connection.execute("SELECT to_regclass('ops.barometer_revisions') AS name").fetchone()["name"]:
+                revisions = connection.execute(
+                    "SELECT DISTINCT ON (data_date) data_date,revised_at,record FROM ops.barometer_revisions "
+                    "ORDER BY data_date DESC,revised_at DESC,input_hash LIMIT 7"
+                ).fetchall()
             fresh = timedelta(0) <= clock.now_utc() - runtime["checked_at"] <= timedelta(minutes=20)
             stamp = runtime["checked_at"].astimezone(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
             return dict(
+                revisions=revisions,
                 available=True,
                 fresh=fresh,
                 gaps=gaps,
@@ -74,6 +81,8 @@ def decorate(response, data, *, barometer=False):
     from starlette.responses import HTMLResponse
 
     notice = banner(data, barometer=barometer)
+    if barometer:
+        notice += revision_notice(data.get("revisions", []))
     if not notice:
         return response
     body = response.body.decode("utf-8")
@@ -122,8 +131,11 @@ def render_status(data):
         + escape(str(stamp))
         + "</div>"
         '<div class="table-wrap"><table><thead><tr><th>数据</th><th>日期</th><th>问题</th><th>影响</th>'
-        "<th>处理状态</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table></div>"
-        '<p class="muted">补数后会重新核查。可疑价格不会自动修正。页面仅展示数据状态，不改变交易规则。</p>'
+        "<th>处理状态</th></tr></thead><tbody>"
+        + "".join(rows)
+        + "</tbody></table></div>"
+        + revision_notice(data.get("revisions", []))
+        + '<p class="muted">补数后会重新核查。可疑价格不会自动修正。页面仅展示数据状态，不改变交易规则。</p>'
         '<p><a href="/trust">查看可靠性说明</a> · <a href="/">返回市场</a></p></main></body></html>'
     )
 
@@ -138,3 +150,23 @@ def register(app, call):
     @app.get("/data-status")
     def data_status_page():
         return HTMLResponse(render_status(call(payload, None)))
+
+
+def revision_notice(rows):
+    if not rows:
+        return ""
+    parts = []
+    for row in rows:
+        record = row["record"]
+        stamp = row["revised_at"].astimezone(ZoneInfo("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M")
+        quality = "仍有缺失，请结合数据状态查看" if record.get("missing") else "计算输入核查通过"
+        line = (
+            f"{row['data_date']} · 事后修订：恐慌 {record.get('fear')}，贪婪 {record.get('greed')}；"
+            f"修订于 {stamp}（北京时间）；{quality}"
+        )
+        parts.append("<li>" + escape(line.replace("None", "缺失")) + "</li>")
+    return (
+        '<aside role="status" style="padding:16px 32px;background:#eef3f1">'
+        "<strong>晴雨表事后修订</strong><p>下方图表保留原读数。此处另列补数后的修订结果，"
+        "不代表当时已知信息，不用于改写历史交易。</p><ul>" + "".join(parts) + "</ul></aside>"
+    )

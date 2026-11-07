@@ -52,8 +52,6 @@ def reason(evidence):
         return "来源拒绝访问，需要核查权限；未绕过限制"
     if 404 in statuses:
         return "来源未提供目标文件（HTTP 404）"
-    if evidence.get("blocked") == "historical_restatement":
-        return "源数据已恢复；历史读数修订入口待授权，原读数保持"
     if any(e.get("error_type") == "ValueError" for e in evidence.get("source_errors", [])):
         return "来源文件的格式、日期或数值校验失败"
     if evidence.get("source_errors"):

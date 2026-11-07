@@ -9,8 +9,7 @@ from dataclasses import replace
 from datetime import date, timedelta
 
 from inves_cog.clock import SystemClock
-from inves_cog.dataguard.calendar import NY
-from inves_cog.dataguard.reader import findings, load, read, wide_scope
+from inves_cog.dataguard.reader import barometer_drifts, findings, load, read, wide_scope
 from inves_cog.dataguard.receipts import ReceiptWriter
 from inves_cog.dataguard.recovery import attempt, eligible, limited_run, slice_resources
 from inves_cog.dataguard.service import ROOT, connect, load_values
@@ -28,19 +27,12 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
             timeout=600,
         )
     if entry == "barometer":
-        from inves_cog.perception.barometer.run import persist, run_range
+        from inves_cog.dataguard.restatement import restate, verified
 
         with connect(values, writer=True) as db:
-            # Until a separately authorized restatement path exists, preserve historical/original readings.
-            if (
-                day != now.astimezone(NY).date()
-                or db.execute("SELECT 1 FROM flows.barometer_daily WHERE date=%s", (day,)).fetchone()
-            ):
-                evidence["blocked"] = "historical_restatement"
-                return False
-            records = run_range(db, day, day)
-            persist(db, records)
-            return bool(records) and all(not r.get("missing") for r in records)
+            revision = restate(db, day, now)
+            evidence["restatement"] = revision
+            return verified(revision)
     from inves_cog.flows import backfill
     from inves_cog.flows.collectors import collect_occ
     from inves_cog.flows.store import DEFAULT_RAW, polite_http
@@ -187,6 +179,10 @@ def main():
             scoped = replace(item, expected_keys=wide_scope(reader, args.date)) if item.scope == "wide" else item
             grouped = read(reader, scoped, args.date - timedelta(days=10), args.date, clock.now_utc())
             left = findings(scoped, args.date, grouped, now=clock.now_utc())
+            if item.table == "flows.barometer_daily":
+                drift = barometer_drifts(reader, item, args.date, args.date)
+                if args.date in drift:
+                    left.append(drift[args.date])
             row["detail"]["remaining_checks"] = [f.kind for f in left]
             row["detail"]["verified_source_rows"] = sum(r["n"] for r in grouped.get(args.date, []))
             return not left

@@ -91,6 +91,15 @@ def read(connection, item, start, end, now):
         return presence(connection, item, start, end, now, lower, upper)
     sql, args = query(item, lower, upper)
     rows = connection.execute(sql, args).fetchall()
+    if item.table == "flows.barometer_daily":
+        revisions = connection.execute(
+            "SELECT DISTINCT ON (data_date) data_date AS day,record->>'fear' AS value,"
+            "record->'missing' AS quality,1 AS n,'all' AS key FROM ops.barometer_revisions "
+            "WHERE data_date>=%s AND data_date<=%s AND revised_at<=%s ORDER BY data_date,revised_at DESC,input_hash",
+            (start, end, now),
+        ).fetchall()
+        revised_days = {r["day"] for r in revisions}
+        rows = [r for r in rows if r["day"] not in revised_days] + revisions
     grouped = defaultdict(list)
     for row in rows:
         grouped[row["day"]].append(row)
@@ -196,7 +205,10 @@ def barometer_drift(dataset, day, saved, current):
 
 def barometer_drifts(connection, item, first, last):
     rows = connection.execute(
-        "SELECT b.date,b.inputs->>'VIX' AS cached,r.value FROM flows.barometer_daily b "
+        "SELECT b.date,COALESCE(v.record->'inputs'->>'VIX',b.inputs->>'VIX') AS cached,r.value "
+        "FROM flows.barometer_daily b "
+        "LEFT JOIN LATERAL (SELECT record FROM ops.barometer_revisions WHERE data_date=b.date "
+        "ORDER BY revised_at DESC,input_hash LIMIT 1) v ON true "
         "LEFT JOIN LATERAL (SELECT value FROM ingest.macro_observations "
         "WHERE series_id='VIX_CBOE' AND observation_date=b.date ORDER BY fetched_at DESC LIMIT 1) r ON true "
         "WHERE b.date>=%s AND b.date<=%s",

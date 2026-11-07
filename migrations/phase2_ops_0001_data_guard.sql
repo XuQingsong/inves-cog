@@ -37,5 +37,15 @@ REVOKE ALL ON ops.data_gaps,ops.data_gap_events,ops.data_notices,ops.data_guard_
 GRANT SELECT,INSERT,UPDATE ON ops.data_gaps,ops.data_gap_events,ops.data_notices,ops.data_guard_runtime TO role_ingest;
 GRANT USAGE,SELECT ON SEQUENCE ops.data_gap_events_id_seq TO role_ingest;
 GRANT SELECT ON ops.data_gaps,ops.data_guard_runtime TO role_web;
+-- UD-A-60: independent revisions; original readings and trading PIT consumers unchanged.
+CREATE TABLE ops.barometer_revisions (
+ data_date date NOT NULL, revised_at timestamptz NOT NULL,
+ input_hash text NOT NULL, record jsonb NOT NULL, provenance jsonb NOT NULL, code_rev text NOT NULL,
+ PRIMARY KEY(data_date,input_hash)
+);
+CREATE INDEX barometer_revisions_latest_idx ON ops.barometer_revisions(data_date,revised_at DESC);
+REVOKE ALL ON ops.barometer_revisions FROM PUBLIC;
+GRANT SELECT,INSERT ON ops.barometer_revisions TO role_ingest;
+GRANT SELECT ON ops.barometer_revisions TO role_web;
 CREATE INDEX IF NOT EXISTS info_items_first_seen_idx ON ingest.info_items(first_seen_at);
 COMMIT;
