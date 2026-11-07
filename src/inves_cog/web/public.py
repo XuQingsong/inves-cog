@@ -70,6 +70,7 @@ def _html_page(path):
         "/graph",
         "/settings/data",
         "/data-status",
+        "/system",
         "/paper/plan",
         "/paper/portfolio",
         "/paper/universe",

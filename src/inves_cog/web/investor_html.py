@@ -1905,7 +1905,8 @@ def _document(title, body, refresh=False):
         '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{_text(title)}</title>{REFRESH_META}<style>{_STYLE}{_EXTRA}</style></head>"
-        f'<body>{body}<script src="/investor.js"></script></body></html>'
+        f'<body>{body}<footer style="padding:12px 16px;border-top:1px solid #ccc">'
+        '<a href="/system">开发视图</a></footer><script src="/investor.js"></script></body></html>'
     )
 
 
