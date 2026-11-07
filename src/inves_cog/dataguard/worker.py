@@ -35,7 +35,7 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
             return verified(revision)
     from inves_cog.flows import backfill
     from inves_cog.flows.collectors import collect_occ
-    from inves_cog.flows.store import DEFAULT_RAW, polite_http
+    from inves_cog.flows.store import DEFAULT_RAW, polite_http, upsert_many
 
     with connect(values, writer=True) as db, db.transaction():
         receipt = ReceiptWriter(db, day=day, now=now, filters=item.filter)
@@ -61,16 +61,49 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
         elif entry == "cftc":
             backfill.backfill_cftc(http, receipt, DEFAULT_RAW, day, day, now)
         elif entry == "fred":
-            previous = os.environ.get("FRED_API_KEY")
-            if values.get("FRED_API_KEY"):
-                os.environ["FRED_API_KEY"] = values["FRED_API_KEY"]
-            try:
-                backfill.backfill_fred(http, receipt, DEFAULT_RAW, now)
-            finally:
-                if previous is None:
-                    os.environ.pop("FRED_API_KEY", None)
-                else:
-                    os.environ["FRED_API_KEY"] = previous
+            from inves_cog.ingest.providers import FRED
+            from inves_cog.ingest.repository import Repository
+
+            fred = FRED(key=values.get("FRED_API_KEY"), clock=SystemClock())
+            if "macro_observations" in item.table:
+                repo = Repository(db)
+                recovered = 0
+                for key in item.filter.get("series_id", ()):
+                    for row in fred.collect(key):
+                        if row["observation_date"] == day:
+                            repo.write("macro_observations", row)
+                            recovered += 1
+                if recovered:
+                    evidence["candidate_rows"] = recovered
+            else:
+                rows = []
+                for key in item.filter.get("series_id", ()):
+                    sid = key.removeprefix("fred_").upper()
+                    latest = {}
+                    for r in fred.collect(sid):
+                        if r["observation_date"] != day or r["value"] is None:
+                            continue
+                        prev = latest.get(r["observation_date"])
+                        if prev is None or r["realtime_start"] > prev["realtime_start"]:
+                            latest[r["observation_date"]] = r
+                    rows += [
+                        {
+                            "series_id": key,
+                            "obs_date": r["observation_date"],
+                            "value": float(r["value"]),
+                            "published_at": backfill.published_at_fred(sid, r["observation_date"]),
+                            "vintage": "recovery",
+                        }
+                        for r in latest.values()
+                    ]
+                if rows:
+                    upsert_many(
+                        receipt,
+                        "observations",
+                        ("series_id", "obs_date", "value", "published_at", "vintage"),
+                        rows,
+                        "update",
+                    )
         elif entry == "ofr":
             backfill.backfill_ofr(http, receipt, DEFAULT_RAW, now)
         elif entry == "finra_margin":
@@ -78,7 +111,7 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
         else:
             return False
         if entry != "finra_short":
-            evidence["candidate_rows"] = receipt.filtered_rows
+            evidence["candidate_rows"] = evidence.get("candidate_rows", receipt.filtered_rows)
     return True  # authoritative success still requires downstream and source recheck below
 
 
