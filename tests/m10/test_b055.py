@@ -81,8 +81,8 @@ def test_stock_event_and_stale_citation_rules():
     three = datetime(2036, 10, 19, 14, tzinfo=timezone.utc)
     four = datetime(2036, 10, 18, 14, tzinfo=timezone.utc)
     assert citation_stale_note(same.isoformat(), DAY) is None
-    assert citation_stale_note(three.isoformat(), DAY) is None
-    assert citation_stale_note(four.isoformat(), DAY) == "引用的是 4 天前的新闻"
+    assert citation_stale_note(three.isoformat(), DAY) == "早前消息（10-19）"
+    assert citation_stale_note(four.isoformat(), DAY) == "早前消息（10-18）"
     report = {
         "daily_text": "可能的原因：早页原因 2036-10-22T14:00:00+00:00",
         "move_card": {
@@ -95,7 +95,7 @@ def test_stock_event_and_stale_citation_rules():
     }
     reasons = event_reasons(report, DAY)
     assert [item["text"] for item in reasons] == ["供给增加", "需求放缓"]
-    assert reasons[1]["stale_note"] == "引用的是 12 天前的新闻"
+    assert reasons[1]["stale_note"] == "早前消息（10-10）"
     assert reasons[0]["stale_note"] is None
     page_only = event_reasons({"daily_text": report["daily_text"]}, DAY)
     assert page_only[0]["text"] == "早页原因"
@@ -362,7 +362,7 @@ def test_w2_event_reasons_then_morning_page(pages):
     assert [item["text"] for item in event["reasons"]] == ["供给增加", "需求放缓"]
     assert "第三条不应出现" not in html
     assert "早页原因一" not in html
-    assert "引用的是 12 天前的新闻" in html
+    assert "早前消息（10-10）" in html
     assert "2036-10-10T14:00:00+00:00" in html
     admin = pages["admin"]
     try:
@@ -413,7 +413,7 @@ def test_w4_only_stock_events_and_both_sessions(pages):
         _anomaly(admin, "b055-wide", ["b055-wide"], ["ACME"], 1.1, "up")
         shown = _json(pages, "/api/pages/brief/market")["events"]
         wide = next(row for row in shown if row["members"] == ["ACME"])
-        assert wide["title"].endswith("1 只集体上涨")
+        assert wide["title"].startswith("ACME") and "集体" not in wide["title"]
         assert "AI 产业链 23 只同日下跌" in [row["title"] for row in shown]
     finally:
         admin.execute("DELETE FROM perception.anomalies WHERE anomaly_id = 'b055-wide'")
