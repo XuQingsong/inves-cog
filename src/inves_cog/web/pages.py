@@ -122,6 +122,7 @@ def _anomalies(connection, day, cutoff):
                max_abs_z, status, universe, generated_at
         FROM perception.anomalies
         WHERE trade_date = %s AND (generated_at IS NULL OR generated_at < %s)
+          AND status NOT LIKE '已作废%'
         ORDER BY anomaly_id
         """,
         (day, cutoff),
@@ -367,6 +368,7 @@ def page_home(connection, day, clock):
             FROM perception.ticker_status AS status
             JOIN perception.anomalies AS anomaly ON anomaly.anomaly_id = status.anomaly_id
             WHERE anomaly.trade_date = %s AND (anomaly.generated_at IS NULL OR anomaly.generated_at < %s)
+              AND anomaly.status NOT LIKE '已作废%'
             """,
             (day, cutoff),
         ),
