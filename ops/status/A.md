@@ -1105,3 +1105,10 @@ A032正式开工授权已到，不再等待A031验收。变更先记录：按任
 - 最新main `95ff2498569cfe8e104f642b3c10ec073df6b924`，answers明确PR134合并c56b6c6、开发验收通过，接受T1调度截止依据、作废SOXX错误强制异常预期，并接受UD-A-60。已核对交付head71e08fcf为main祖先；准确CI SUCCESS链接沿用上条。
 - 按已授权步骤执行迁移、新data_guard程序及pages重启，部署前后保存全部程序清单；禁止update，不重复A030部署或历史补数。首次至少24小时只检测，补数开关保持0。Gmail准备实际需要时安全配置；没有凭据也继续完成检测及网站部署。Yahoo依赖替换不属于本单，不处理。
 - 下一步A先核对真实生产版本、脏文件、原程序与资源基线，再安装并验证首轮入库、RSS/超时/memory.events和四个HTTP页面；不以启动命令当成功。
+
+## A-032 进行中：检测已上线；实际公共入口404待修复，邮件待安全配置
+- 生产main `95ff2498569cfe8e104f642b3c10ec073df6b924` 已包含验收合并c56b6c6。迁移真实COMMIT，新增data_guard PID825405，只重启pages PID825410；其他原程序PID保持，embedding原EXITED不变。完整前后清单及每阶段证据服务器ops/a032-deploy-20261107.txt。首次误用主机postgres账户仅检查失败，已核实本项目容器inves-cog-database并用inves_cog_admin完成迁移；业务使用既有非管理员登录。
+- 真实首轮03:28:43 UTC：59项、1.0087秒、RSS46376KiB；114缺口行（73 missing/13 partial/1 stale/27 job_failed），无检查错误/超时，memory.events high786510前后不变。只检测true、补数0、env0600。/、/barometer、/stock/NVDA均200；/data-status实际404，不能标部署验收完成。
+- 已核实404原因：生产serve_pages使用web.public.PageBoundary，原预览走web.api；新地址未加入public页面白名单。变更：在原授权web范围补齐/data-status公共只读入口并保留失败优先测试；将另交修复PR，待需求方验收合并后部署，绝不直接安装未合并补丁。检测已在运行，不重复迁移或重启其他程序。
+- 邮件未配置且实际不可用。已准备服务器0600安全交互入口inves-cog-data/configure-dataguard-mail.py，隐藏输入Gmail账号/应用密码/收件地址，只写dataguard.env，不回显、不入Git。已在本对话一次性请用户在自己的终端配置并回复“已配置”，不收集聊天明文秘密；其余继续，不以凭据阻塞检测修复。
+- 下一步A立即提交公共入口修复并跟真实CI；需求方验收合并。首次24小时从2026-11-07 03:28:43 UTC开始，至少到11-08同刻才具备开关时间条件，仍由需求方明确决定，A不自行开启。
