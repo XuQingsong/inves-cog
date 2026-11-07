@@ -1,4 +1,4 @@
-"""Offline SMTP integration: actual STARTTLS and MIME over a local Unix socket."""
+"""Offline SMTP integration: verified STARTTLS/implicit TLS and MIME over a Unix socket."""
 
 import smtplib
 import socket
@@ -22,7 +22,8 @@ def smtp_path():
         yield str(Path(folder) / "smtp.sock")
 
 
-def test_local_smtp_starttls_delivers_merged_notice_and_conclusion(tmp_path, monkeypatch, smtp_path):
+@pytest.mark.parametrize("port", [587, 465])
+def test_local_smtp_starttls_delivers_merged_notice_and_conclusion(tmp_path, monkeypatch, smtp_path, port):
     certificate, key = tmp_path / "certificate.pem", tmp_path / "key.pem"
     subprocess.run(
         [
@@ -63,6 +64,8 @@ def test_local_smtp_starttls_delivers_merged_notice_and_conclusion(tmp_path, mon
             for _ in range(2):
                 conn, _ = listener.accept()
                 conn.settimeout(5)
+                if port == 465:
+                    conn = server_context.wrap_socket(conn, server_side=True)
                 stream = conn.makefile("rb")
 
                 channel = {"socket": conn}
@@ -126,20 +129,32 @@ def test_local_smtp_starttls_delivers_merged_notice_and_conclusion(tmp_path, mon
             sock.connect(path)
             return sock
 
+    class LocalSMTPSSL(smtplib.SMTP_SSL):
+        def __init__(self, host, port, timeout, context):
+            super().__init__("localhost", port, local_hostname="fixture.local", timeout=timeout, context=context)
+
+        def _get_socket(self, host, port, timeout):
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.settimeout(timeout)
+            sock.connect(path)
+            return self.context.wrap_socket(sock, server_hostname="localhost")
+
     values = dict(
         INVES_SMTP_HOST="fixture.local",
-        INVES_SMTP_PORT="587",
+        INVES_SMTP_PORT=str(port),
         INVES_SMTP_USER="fixture",
         INVES_SMTP_PASSWORD="fixture-only",
         INVES_SMTP_FROM="sender@example.test",
         INVES_ALERT_TO="owner@example.test",
     )
-    mailer = Mailer(values, smtp=LocalSMTP)
+    mailer = Mailer(values, smtp=LocalSMTP, smtp_ssl=LocalSMTPSSL)
     assert mailer.send("merged-fixture", "数据提醒：2项", "波动率、期权成交量缺失") == "sent"
     assert mailer.send("resolved-fixture", "补数结论", "波动率已补齐") == "sent"
     thread.join(10)
     assert not thread.is_alive() and not errors
-    assert len(messages) == 2 and trace.count("STARTTLS") == 2
-    assert trace.index("STARTTLS") < trace.index("AUTH")
+    assert len(messages) == 2
+    assert trace.count("STARTTLS") == (0 if port == 465 else 2)
+    if port == 587:
+        assert trace.index("STARTTLS") < trace.index("AUTH")
     assert "波动率" in messages[0].get_payload(decode=True).decode("utf-8")
     assert "已补齐" in messages[1].get_payload(decode=True).decode("utf-8")
