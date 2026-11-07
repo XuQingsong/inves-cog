@@ -1,5 +1,6 @@
 detect_only: true
 interval_seconds: 600
+alert_min_interval_hours: 3
 datasets:
 - dataset: 监控池日线
   table: ingest.bars_daily

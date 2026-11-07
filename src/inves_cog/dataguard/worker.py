@@ -140,9 +140,6 @@ def main():
                 row["resolved_at"] = stamp
             with writer.transaction():
                 store.transition(row, stamp)
-                if row["status"] in {"resolved", "unrecoverable"}:
-                    key = f"{row['dataset']}:{row['data_date']}:{row['kind']}:{row['generation']}:{row['status']}"
-                    store.enqueue([key], [row], stamp)
 
         from inves_cog.dataguard.trace import SourceTrace, reason
 

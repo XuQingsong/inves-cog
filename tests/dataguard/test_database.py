@@ -46,10 +46,14 @@ def test_one_row_per_gap_atomic_notice_idempotence_resolution_and_reopen():
             store.send_pending(mailbox, now)
             assert len(mailbox.messages) == 1
             rows, keys = store.reconcile("TEST_guard", day, [], now)
-            assert rows[0]["status"] == "resolved"
+            assert rows == []  # resolved is a status change: daily report covers it, no alert mail
             store.enqueue(keys, rows, now)
             store.send_pending(mailbox, now)
-            assert len(mailbox.messages) == 2 and "已补齐" in mailbox.messages[-1][1]
+            assert len(mailbox.messages) == 1
+            assert (
+                c.execute("SELECT status FROM ops.data_gaps WHERE dataset='TEST_guard'").fetchone()["status"]
+                == "resolved"
+            )
             rows, keys = store.reconcile("TEST_guard", day, [finding], now)
             assert rows[0]["generation"] == 2
             c.execute("RESET ROLE")
