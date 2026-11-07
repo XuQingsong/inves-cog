@@ -2438,9 +2438,7 @@ def _live_module(payload):
             )
             members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
         badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
-        peak_html = (
-            f'<span class="num" title="异动峰值（较昨收）">{_pct(peak, 1)}</span>' if peak is not None else ""
-        )
+        peak_html = f'<span class="num" title="异动峰值（较昨收）">{_pct(peak, 1)}</span>' if peak is not None else ""
         body.append(
             f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
             f"<td class='num'>{px_html}</td>"
@@ -2901,13 +2899,22 @@ def _stock_today(payload):
             '<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>'
             '<p class="dim">今天没有该股或所在板块的异常</p></div>'
         )
-    items = "".join(
-        f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
-        f' <span class="num">{_pct(r.get("peak_ret"), 1)}</span> '
-        f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'
-        f"{_text(r.get('cause_label') or r.get('cause_headline') or '原因未明')}</span></div>"
-        for r in mine
-    )
+
+    def _row(r):
+        session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(r.get("session"), "")
+        cur = r.get("cur_ret")
+        cur_txt = f"{_pct(cur, 1)}较昨收" if cur is not None else "暂缺"
+        det = r.get("first_ret")
+        det_txt = f"{session_label} {_pct(det, 1)}（检测时）" if det is not None else session_label
+        return (
+            f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
+            f' <span class="num" title="当前（较昨收）">{cur_txt}</span>'
+            f' <span class="dim small">{det_txt} · 峰值 {_pct(r.get("peak_ret"), 1)}</span> '
+            f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'
+            f"{_text(r.get('cause_label') or r.get('cause_headline') or '原因未明')}</span></div>"
+        )
+
+    items = "".join(_row(r) for r in mine)
     return f'<div class="card sec cat-anomaly"><h2>今天发生了什么</h2>{items}</div>'
 
 
