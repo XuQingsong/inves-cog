@@ -407,7 +407,11 @@ def _events(payload):
         items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
         if reasons:
-            label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
+            label = (
+                "候选（待证实）"
+                if "原因未明" in (row.get("status") or "")
+                else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
+            )
             why = (
                 f'<div style="margin-top:10px"><div class="small muted">{label}'
                 f'</div><ul class="news">{"".join(reasons)}</ul></div>'
@@ -1645,7 +1649,11 @@ def _stock_news(payload):
     for row in payload.get("events") or []:
         items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
-        label = "可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因"
+        label = (
+            "候选（待证实）"
+            if "原因未明" in (row.get("status") or "")
+            else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
+        )
         status = str(row.get("status") or "")
         why = (
             f'<div class="small muted">{label}</div><ul class="news">{"".join(reasons)}</ul>'
@@ -2377,7 +2385,18 @@ def _live_module(payload):
             else ""
         )
         sev_cls, sev_label = _severity(r)
-        faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
+        session_label = {"pre": "盘前", "regular": "盘中", "post": "盘后"}.get(r.get("session"), "")
+        first = r.get("first_ret")
+        direction_up = r.get("direction") in {"up", "上涨"}
+        # faded + current move opposite the anomaly direction -> 已反转
+        reversed_now = r.get("status") == "faded" and cur is not None and (cur > 0) != direction_up
+        if reversed_now:
+            det = f"{session_label} {first * 100:+.1f}%" if first is not None else session_label
+            faded = f' <span class="chip stale">已反转（{det} → {cur * 100:+.1f}%）</span>'
+        else:
+            faded = ' <span class="chip stale">已消退</span>' if r.get("status") == "faded" else ""
+        if session_label and first is not None:
+            when = f"{session_label} {first * 100:+.1f}%（较昨收） {when}".strip()
         cause_html = "原因未明"
         if r.get("cause_event_id"):
             lag = r.get("cause_lag_minutes")

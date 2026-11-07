@@ -408,3 +408,50 @@ def test_event_headline_updates_to_facts_richest_on_replay():
             "SELECT headline FROM perception.news_events WHERE event_id='INTC:guidance:2026-10-29'"
         ).fetchone()
         assert "Sees Q4" in row["headline"]
+
+
+def test_regular_round_judges_pre_anomalies_post_round_does_not_touch_regular():
+    """Pre-session rows are re-judged by the regular round (same keep-set
+    keys ignoring session); post rounds never touch regular/pre rows."""
+    import psycopg
+    from psycopg.rows import dict_row
+
+    from inves_cog.perception.live.detect import apply_round
+    from tests.m8.test_attribution import _disposable_database
+
+    host = _disposable_database()
+    day = "2026-11-06"
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin", row_factory=dict_row) as conn:
+        stx = {
+            "scope": "stock",
+            "subject": "STX",
+            "ret": 0.092,
+            "z": 5.0,
+            "direction": "up",
+            "as_of": "2026-11-06T14:26:00+00:00",
+        }
+        amd = dict(stx, subject="AMD", ret=0.08)
+        apply_round(conn, [stx, amd], "2026-11-06T14:26:00+00:00", day, "pre")
+        conn.commit()
+        # regular round: STX still anomalous (same key) -> stays active; AMD -> faded
+        apply_round(
+            conn,
+            [dict(stx, ret=0.05, z=4.0, as_of="2026-11-06T15:00:00+00:00")],
+            "2026-11-06T15:00:00+00:00",
+            day,
+            "regular",
+        )
+        conn.commit()
+        rows = {
+            r["subject"]: r["status"]
+            for r in conn.execute("SELECT subject,status FROM perception.live_anomalies").fetchall()
+        }
+        assert rows == {"STX": "active", "AMD": "faded"}
+        # post round must NOT fade regular/pre rows
+        apply_round(conn, [], "2026-11-06T21:00:00+00:00", day, "post")
+        conn.commit()
+        rows = {
+            r["subject"]: r["status"]
+            for r in conn.execute("SELECT subject,status FROM perception.live_anomalies").fetchall()
+        }
+        assert rows == {"STX": "active", "AMD": "faded"}
