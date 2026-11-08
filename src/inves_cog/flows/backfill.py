@@ -801,6 +801,20 @@ def backfill_vxtlt(http, connection, raw_dir, start, end, _now=None):
         for d, v in sorted(_vxtlt_close(http, start, end).items())
     ]
     if connection is not None and rows:
+        upsert_many(
+            connection,
+            "series_catalog",
+            ["series_id", "name_zh", "unit", "frequency", "source"],
+            [
+                {
+                    "series_id": "cboe_vxtlt",
+                    "name_zh": "债市波动",
+                    "unit": "index",
+                    "frequency": "daily",
+                    "source": "Cboe",
+                }
+            ],
+        )
         upsert_many(connection, "observations", list(rows[0].keys()), rows)
     return [
         {
