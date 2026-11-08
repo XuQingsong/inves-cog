@@ -1,5 +1,4 @@
 """A session-wide socket/DNS guard that records even caught violations."""
-
 import inspect
 import socket
 
@@ -22,36 +21,27 @@ class NetworkGuard:
             if self.allowed or local:
                 return original(*args, **kwargs)
             frames = inspect.stack()[1:]
-            frame = next((f for f in frames if f.filename.rsplit("/", 1)[-1].startswith("test_")), None)
+            frame = next((f for f in frames if f.filename.rsplit('/', 1)[-1].startswith('test_')), None)
             frame = frame or next((f for f in frames if f.filename != __file__), None)
-            location = f"{frame.filename}:{frame.lineno}" if frame else "<socket>:1"
-            message = f"{location}: FR-M0-03: forbidden socket/DNS operation {operation}"
+            location = f'{frame.filename}:{frame.lineno}' if frame else '<socket>:1'
+            message = f'{location}: FR-M0-03: forbidden socket/DNS operation {operation}'
             self.events.append(message)
             raise NetworkBlockedError(message)
-
         return checked
 
     def install(self):
         for owner, names in (
-            (
-                socket,
-                (
-                    "create_connection",
-                    "getaddrinfo",
-                    "gethostbyname",
-                    "gethostbyname_ex",
-                    "gethostbyaddr",
-                    "getnameinfo",
-                    "getfqdn",
-                ),
-            ),
-            (socket.socket, ("connect", "connect_ex", "sendto", "send", "sendall", "sendmsg", "listen")),
+            (socket, ('create_connection', 'getaddrinfo', 'gethostbyname',
+                      'gethostbyname_ex', 'gethostbyaddr', 'getnameinfo', 'getfqdn')),
+            (socket.socket, ('connect', 'connect_ex', 'sendto', 'send', 'sendall',
+                             'sendmsg', 'listen')),
         ):
             for name in names:
                 if hasattr(owner, name):
                     original = getattr(owner, name)
                     self.originals.append((owner, name, original))
-                    setattr(owner, name, self._wrapper(original, name, socket_method=owner is socket.socket))
+                    setattr(owner, name, self._wrapper(original, name,
+                                                       socket_method=owner is socket.socket))
 
     def restore(self):
         for owner, name, original in reversed(self.originals):
