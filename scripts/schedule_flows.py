@@ -13,6 +13,7 @@ from inves_cog.flows.collectors import (
     INDEX_SYMS,
     collect_cboe_chain,
     collect_cboe_pc,
+    collect_ecb_fx,
     collect_etf_shares,
     collect_occ,
     collect_occ_series,
@@ -205,6 +206,13 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
+        if hm >= "11:00":
+            # ECB reference rate is published ~10:00 ET, well before the 16:45 barometer.
+            key = f"ecb_fx:{today}"
+            if key not in state:
+                result[key] = collect_ecb_fx(http, conn, raw_dir, today, local)
+                if result[key].get("rows", 0) > 0:
+                    state[key] = True
         if hm >= "19:00":
             key = f"cboe_pc:{today}"
             if key not in state:

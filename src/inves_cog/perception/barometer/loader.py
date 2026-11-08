@@ -2,7 +2,7 @@
 
 bars_daily is canonical where covered (SPY/QQQ/SMH/sectors/AI chain/MTUM +
 the six index/bond ETFs TQQQ/SOXL/GLD/HYG/IEF/TLT);
-yahoo_px_* observations fill the rest (JPY=X/BTC/^MOVE).
+flows.observations ecb_jpyx + yahoo_px_move fill the rest, BTC from FRED CBBTCUSD.
 PIT: every value is the latest with published_at <= asof for flows inputs.
 """
 
@@ -45,16 +45,17 @@ AI_CHAIN = [
 ]
 # Index/bond ETFs with full bars_daily history (backfilled 2016-01-04 onward)
 BARS_ETFS = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"]
-YAHOO = {
-    "JPY=X": "yahoo_px_jpyx",
-    "BTC-USD": "yahoo_px_btcusd",
+# JPY=X: ECB euro reference rates (14:15 CET, ~16:00 CET publish, no data on TARGET
+# holidays); BTC-USD: FRED CBBTCUSD via the daily fred_task; MOVE stays on Yahoo.
+FLOWS = {
+    "JPY=X": "ecb_jpyx",
     "MOVE": "yahoo_px_move",
 }
-# VIX/VIX3M/10Y live in macro/flows series (TNX from FRED DGS10, % yield)
 MACRO = {
     "VIX": ("ingest.macro_observations", "VIX_CBOE"),
     "VIX3M": ("ingest.macro_observations", "VIX3M_CBOE"),
     "TNX": ("ingest.macro_observations", "DGS10"),
+    "BTC-USD": ("ingest.macro_observations", "CBBTCUSD"),
 }
 
 
@@ -81,14 +82,19 @@ def price_frame(conn, end, start=None):
         per.setdefault(r["ticker"], []).append((pd.Timestamp(r["d"]), float(r["c"])))
     for t, pairs in per.items():
         cols[t] = pd.Series(dict(pairs))
-    for t, sid in YAHOO.items():
+    for t, sid in FLOWS.items():
         cols[t] = _series(conn, "flows.observations", sid, end)
     for t, (table, sid) in MACRO.items():
         cols[t] = _series(conn, table, sid, end)
     px = pd.DataFrame(cols).sort_index()
     if "SPY" in px:
         idx = px["SPY"].dropna().index
+        jpy_raw = cols.get("JPY=X")
         px = px.reindex(idx).ffill(limit=3)
+        if jpy_raw is not None:
+            # ECB TARGET-holiday days have no rate and must stay missing —
+            # never carry the previous session's value forward.
+            px["JPY=X"] = jpy_raw.reindex(idx)
     if start is not None:
         px = px.loc[px.index >= pd.Timestamp(start) - pd.Timedelta(days=400)]
     return px

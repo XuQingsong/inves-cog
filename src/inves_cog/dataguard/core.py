@@ -6,7 +6,7 @@ from datetime import date, datetime, time, timedelta
 from math import ceil, isfinite
 from statistics import median
 
-from inves_cog.dataguard.calendar import NY, next_trading_day, trading_day
+from inves_cog.dataguard.calendar import NY, ecb_target_holiday, next_trading_day, trading_day
 
 
 @dataclass(frozen=True)
@@ -36,6 +36,7 @@ class Expectation:
     staleness: bool = False
     sanity: float | None = None
     sanity_leverage: dict = field(default_factory=dict)
+    holiday_calendar: str | None = None
     filter: dict = field(default_factory=dict)
     scope: str | None = None
     timestamp: bool = False
@@ -87,6 +88,8 @@ def due_dates(item, now, *, lookback=7):
         if item.cadence == "weekday" and day.weekday() >= 5:
             continue
         if not item.calendar_days and item.cadence not in {"weekday", "monthly"} and not trading_day(day):
+            continue
+        if item.holiday_calendar == "ecb" and ecb_target_holiday(day):
             continue
         if item.period_end:
             if not trading_day(day):

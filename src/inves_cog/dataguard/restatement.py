@@ -64,7 +64,9 @@ class InputView:
         # The SELECT alias only changes alignment in this retrospective calculation.
         # No timestamp is written back to any business input table.
         sid = args[0] if args else ""
-        if table == "flows.observations" and (sid.startswith("yahoo_px_") or sid.startswith("cboe_")):
+        if table == "flows.observations" and (
+            sid.startswith("yahoo_px_") or sid.startswith("cboe_") or sid.startswith("ecb_")
+        ):
             sql = sql.replace("published_at AS p", "(obs_date::timestamp AT TIME ZONE 'America/New_York') AS p")
         order = sql.index(" ORDER BY ")
         before, after = sql[:order], sql[order:]

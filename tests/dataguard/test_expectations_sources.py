@@ -23,7 +23,7 @@ def _items():
 def test_cross_asset_daily_only_expects_remaining_yahoo_series():
     item = _items()["利率信用与跨资产日线"]
     keys = set(item.filter["series_id"])
-    assert keys == {"yahoo_px_jpyx", "yahoo_px_btcusd", "yahoo_px_move"}
+    assert keys == {"yahoo_px_move"}
     dropped = {
         "yahoo_px_tqqq",
         "yahoo_px_soxl",
@@ -152,3 +152,47 @@ def test_fred_recovery_writes_macro_series_directly(monkeypatch):
     assert worker.recover(_fred_item("ingest.macro_observations", ["DGS10"]), DAY, NOW, {}, evidence=evidence) is True
     assert written == [("macro_observations", {"observation_date": DAY, "value": 4.85})]
     assert evidence["candidate_rows"] == 1
+
+
+def test_ecb_jpyx_backfill_converts_cross_rate_and_marks_published_at(tmp_path):
+    csv_jpy = (
+        "KEY,FREQ,TIME_PERIOD,OBS_VALUE\n"
+        "EXR.D.JPY.EUR.SP00.A,D,2026-11-05,177.85\nEXR.D.JPY.EUR.SP00.A,D,2026-11-06,176.77\n"
+    )
+    csv_usd = (
+        "KEY,FREQ,TIME_PERIOD,OBS_VALUE\n"
+        "EXR.D.USD.EUR.SP00.A,D,2026-11-05,1.1560\nEXR.D.USD.EUR.SP00.A,D,2026-11-06,1.1600\n"
+    )
+
+    class FakeHTTP:
+        def request(self, method, url, headers=None):
+            return csv_jpy if "JPY" in url else csv_usd
+
+    written = []
+
+    class FakeConn:
+        pass
+
+    import inves_cog.flows.backfill as bf
+
+    orig = bf.upsert_many
+    bf.upsert_many = lambda conn, table, cols, rows, mode=None: written.append((table, rows))
+    try:
+        reports = bf.backfill_ecb_fx(FakeHTTP(), FakeConn(), tmp_path, date(2026, 11, 5), date(2026, 11, 6))
+    finally:
+        bf.upsert_many = orig
+    obs = [r for table, rows in written if table == "observations" for r in rows]
+    assert [r["series_id"] for r in obs] == ["ecb_jpyx", "ecb_jpyx"]
+    assert obs[0]["obs_date"] == date(2026, 11, 5)
+    assert abs(obs[0]["value"] - 177.85 / 1.1560) < 1e-9
+    assert obs[0]["published_at"].hour == 10 and obs[0]["published_at"].minute == 0
+    assert reports[0]["rows"] == 2
+
+
+def test_new_series_expectations_and_entries():
+    items = _items()
+    assert items["日元汇率日线"].filter["series_id"] == ["ecb_jpyx"]
+    assert items["日元汇率日线"].backfill["entry"] == "ecb_fx"
+    assert items["比特币日线"].filter["series_id"] == ["CBBTCUSD"]
+    assert items["比特币日线"].table == "ingest.macro_observations"
+    assert items["利率信用与跨资产日线"].filter["series_id"] == ["yahoo_px_move"]

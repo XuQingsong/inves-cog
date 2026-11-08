@@ -132,3 +132,24 @@ def test_multiple_partial_reasons_still_produce_one_gap_per_kind():
     got = evaluate(item, D, [{"key": "all", "value": None, "quality": ["信用利差"]}], [])
     assert [r.kind for r in got] == ["partial"]
     assert got[0].detail["missing_fields"] == ["信用利差"]
+
+
+def test_ecb_target_holidays_are_not_due_for_jpy_series():
+    from datetime import date
+
+    from inves_cog.dataguard.calendar import ecb_target_holiday
+
+    # Good Friday 2026-04-03, Easter Monday 2026-04-06, May 1, Dec 25/26
+    for d in [date(2026, 4, 3), date(2026, 4, 6), date(2026, 5, 1), date(2026, 12, 25), date(2026, 12, 26)]:
+        assert ecb_target_holiday(d), d
+    assert not ecb_target_holiday(date(2026, 4, 7))
+    assert not ecb_target_holiday(date(2026, 11, 5))
+    item = expected(holiday_calendar="ecb")
+    from datetime import datetime, timezone
+
+    now = datetime(2026, 4, 7, 17, 0, tzinfo=timezone.utc)
+    due = due_dates(item, now, lookback=10)
+    # Easter Monday is a US trading day but a TARGET holiday — must not be due
+    assert date(2026, 4, 6) not in due
+    # a normal trading day still becomes due
+    assert date(2026, 4, 7) in due or date(2026, 4, 2) in due

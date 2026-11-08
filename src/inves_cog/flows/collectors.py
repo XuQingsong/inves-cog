@@ -516,6 +516,18 @@ def parse_cboe_pc(payload, obs_date, published_at):
     return out
 
 
+def collect_ecb_fx(http, connection, raw_dir, day, now):
+    """Daily ECB USDJPY for the barometer → flows.observations ecb_jpyx.
+
+    TARGET-holiday days return 0 rows without erroring; a 10-day trailing window
+    self-heals any missed day on the next run.
+    """
+    from inves_cog.flows.backfill import backfill_ecb_fx
+
+    reports = backfill_ecb_fx(http, connection, raw_dir, day - timedelta(days=10), day, now)
+    return {"date": str(day), "rows": sum(r.get("rows", 0) for r in reports)}
+
+
 def collect_cboe_pc(http, connection, day, raw_dir, published_at=None):
     url = CBOE_PC_URL.format(day=day)
     t0 = time.monotonic()

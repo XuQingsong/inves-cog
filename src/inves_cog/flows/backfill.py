@@ -49,6 +49,9 @@ def published_at(source, obs_date):
         return _at(_biz_next(obs_date + timedelta(days=1)), "07:00")
     if source == "finra_margin":
         return _at(obs_date + timedelta(days=21), "17:00")  # note: estimated
+    if source == "ecb":
+        # ECB euro reference rates: 14:15 CET concertation, published ~16:00 CET = 10:00 ET.
+        return _at(obs_date, "10:00")
     if source == "ofr_fsi":
         return _at(_biz_next(obs_date + timedelta(days=1)), "09:00")
     return _at(obs_date, "17:00")
@@ -764,6 +767,52 @@ def backfill_yahoo_px(http, connection, raw_dir, start, end, _now=None):
             log.warning("yahoo %s failed: %r", sym, exc)
             reports.append(_report(f"YahooPx:{sym}", set()))
     return reports
+
+
+ECB_EXR = "https://data-api.ecb.europa.eu/service/data/EXR/{key}?startPeriod={start}&endPeriod={end}&format=csvdata"
+
+
+def _ecb_csv(http, key, start, end):
+    url = ECB_EXR.format(key=key, start=start, end=end)
+    text = http.request("GET", url, headers=UA)
+    rows = {}
+    for row in csv.DictReader(io.StringIO(text)):
+        d, v = row.get("TIME_PERIOD"), row.get("OBS_VALUE")
+        if d and v not in (None, ""):
+            rows[date.fromisoformat(d)] = float(v)
+    return rows
+
+
+def backfill_ecb_fx(http, connection, raw_dir, start, end, _now=None):
+    """ECB euro reference rates → flows.observations ecb_jpyx (yen per USD).
+
+    USDJPY = JPY-per-EUR / USD-per-EUR, same direction as the retired yahoo_px_jpyx.
+    ECB reference rate: 14:15 CET concertation published ~16:00 CET; no rows on
+    TARGET holidays, which is expected and must stay empty (not zero-filled).
+    """
+    jpy = _ecb_csv(http, "D.JPY.EUR.SP00.A", start, end)
+    usd = _ecb_csv(http, "D.USD.EUR.SP00.A", start, end)
+    common = sorted(set(jpy) & set(usd))
+    rows = [
+        {
+            "series_id": "ecb_jpyx",
+            "obs_date": d,
+            "value": jpy[d] / usd[d],
+            "published_at": published_at("ecb", d),
+            "vintage": "backfill",
+        }
+        for d in common
+        if start <= d <= end
+    ]
+    if connection is not None and rows:
+        upsert_many(
+            connection,
+            "series_catalog",
+            ["series_id", "name_zh", "unit", "frequency", "source"],
+            [{"series_id": "ecb_jpyx", "name_zh": "日元/美元", "unit": "jpy", "frequency": "daily", "source": "ECB"}],
+        )
+        upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+    return [_report("ECB:JPY=X", {r["obs_date"]: 1 for r in rows}, len(rows))]
 
 
 SHILLER_URL = "https://www.multpl.com/shiller-pe/table/by-month"
