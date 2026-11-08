@@ -20,10 +20,10 @@ def _items():
     return {item.dataset: item for item in items}
 
 
-def test_cross_asset_daily_only_expects_remaining_yahoo_series():
-    item = _items()["利率信用与跨资产日线"]
+def test_bond_vol_daily_expects_cboe_vxtlt():
+    item = _items()["债市波动日线"]
     keys = set(item.filter["series_id"])
-    assert keys == {"yahoo_px_move"}
+    assert keys == {"cboe_vxtlt"}
     dropped = {
         "yahoo_px_tqqq",
         "yahoo_px_soxl",
@@ -195,4 +195,5 @@ def test_new_series_expectations_and_entries():
     assert items["日元汇率日线"].backfill["entry"] == "ecb_fx"
     assert items["比特币日线"].filter["series_id"] == ["CBBTCUSD"]
     assert items["比特币日线"].table == "ingest.macro_observations"
-    assert items["利率信用与跨资产日线"].filter["series_id"] == ["yahoo_px_move"]
+    assert items["债市波动日线"].filter["series_id"] == ["cboe_vxtlt"]
+    assert items["债市波动日线"].backfill["entry"] == "vxtlt"

@@ -2,8 +2,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping
-
+from typing import Mapping, Any
 import yaml
 
 
