@@ -72,11 +72,13 @@ class InputView:
         before, after = sql[:order], sql[order:]
         join = " AND " if " WHERE " in before else " WHERE "
         if table == "ingest.macro_observations":
-            before = before.replace("SELECT ", "SELECT DISTINCT ON (observation_date) ", 1)
+            if "DISTINCT ON" not in before:
+                before = before.replace("SELECT ", "SELECT DISTINCT ON (observation_date) ", 1)
             after = " ORDER BY observation_date,fetched_at DESC,realtime_start DESC"
         if table == "flows.observations":
             # A backfill vintage wins over older initial rows deterministically.
-            before = before.replace("SELECT ", "SELECT DISTINCT ON (obs_date) ", 1)
+            if "DISTINCT ON" not in before:
+                before = before.replace("SELECT ", "SELECT DISTINCT ON (obs_date) ", 1)
             after = " ORDER BY obs_date,ingested_at DESC,published_at DESC,vintage DESC"
         sql = before + join + " AND ".join(conditions) + after + " LIMIT 50001"
         rows = self.connection.execute(sql, (*args, *bound)).fetchall()
