@@ -25,13 +25,15 @@ def main():
     p.add_argument("job")
     p.add_argument("--start", type=date.fromisoformat, default=None)
     p.add_argument("--end", type=date.fromisoformat, default=None)
+    p.add_argument("--series", default=None, help="comma-separated FRED series ids (fred_macro job)")
+    p.add_argument("--dry-run", action="store_true", help="report row counts without writing")
     args = p.parse_args()
     clock = SystemClock()
     now = clock.now_utc().astimezone(NY)
     today = now.date()
     http = polite_http()
     values = read_environment()
-    conn = _conn(values)
+    conn = None if args.dry_run else _conn(values)
     start, end = args.start or date(2006, 1, 1), args.end or today
     reports = []
     if args.job in ("proshares", "all"):
@@ -51,6 +53,11 @@ def main():
         reports.append(backfill.backfill_finra_margin(http, conn, DEFAULT_RAW, now))
     if args.job in ("fred", "all"):
         reports += backfill.backfill_fred(http, conn, DEFAULT_RAW, now)
+    if args.job == "fred_macro":
+        sids = (args.series or "").split(",") if args.series else []
+        if not sids or not all(sids):
+            p.error("fred_macro requires --series CBBTCUSD[,...]")
+        reports += backfill.backfill_fred_macro(http, conn, DEFAULT_RAW, sids, start, end, now)
     if args.job in ("yahoo_px", "all"):
         reports += backfill.backfill_yahoo_px(http, conn, DEFAULT_RAW, start, end)
     if args.job in ("dgs10", "all"):

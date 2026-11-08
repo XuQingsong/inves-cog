@@ -576,6 +576,43 @@ def _fred_rows(text, sid, pub_fn):
     return rows
 
 
+def backfill_fred_macro(http, connection, raw_dir, sids, start, end, now):
+    """History backfill into ingest.macro_observations via providers.FRED.
+
+    `rows` in each report counts rows actually upserted (one per returned
+    vintage), so a --dry-run report matches the write count exactly.
+    """
+    import os
+
+    from inves_cog.clock import SystemClock
+    from inves_cog.ingest.providers import FRED
+    from inves_cog.ingest.repository import Repository
+
+    fred = FRED(clock=SystemClock(), key=os.environ.get("FRED_API_KEY"))
+    reports = []
+    for sid in sids:
+        rows = [
+            r
+            for r in fred.collect(sid)
+            if r.get("observation_date") is not None
+            and start <= r["observation_date"] <= end
+            and r["value"] is not None
+        ]
+        if connection is not None and rows:
+            repo = Repository(connection)
+            for r in rows:
+                repo.write("macro_observations", r)
+        reports.append(
+            {
+                "source": f"FRED:{sid}",
+                "first": str(min((r["observation_date"] for r in rows), default="")),
+                "last": str(max((r["observation_date"] for r in rows), default="")),
+                "rows": len(rows),
+            }
+        )
+    return reports
+
+
 def backfill_fred(http, connection, raw_dir, _now=None):
     import os
 
