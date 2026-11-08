@@ -458,6 +458,9 @@ var Market3 = {
     Market3.draw();
   },
   draw: function () {
+    var el = document.getElementById("m3chart");
+    var miss = el && el.querySelector(".m3miss");
+    if (miss) miss.remove();
     var c = Market3._chart, rows = Market3._daily[Market3._sym] || [];
     var intra = Market3._intra[Market3._sym] || [];
     var k = Market3._range;
@@ -489,10 +492,18 @@ var Market3 = {
     tr.style.background = "rgba(90,120,200,.15)";
     if (!Market3._daily[Market3._sym]) {
       var el = document.getElementById("m3chart"), sym = Market3._sym;
-      fetch(el.dataset.src + encodeURIComponent(sym)).then(function (r) { return r.json(); }).then(function (d) {
+      fetch(el.dataset.src + encodeURIComponent(sym)).then(function (r) {
+        if (!r.ok) throw new Error("http " + r.status);
+        return r.json();
+      }).then(function (d) {
         Market3._daily[d.sym] = d.daily || [];
         Market3._intra[d.sym] = d.intraday || [];
         if (Market3._sym === d.sym) Market3.draw();
+      }).catch(function () {
+        if (Market3._sym === sym) {
+          Market3._line.setData([]); Market3._candle.setData([]); Market3._vol.setData([]);
+          el.querySelector(".m3miss") || el.insertAdjacentHTML("beforeend", "<div class='m3miss dim small'>暂缺</div>");
+        }
       });
       return;
     }

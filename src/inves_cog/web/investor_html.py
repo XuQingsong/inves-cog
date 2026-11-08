@@ -2591,7 +2591,7 @@ def _market3_module(payload):
         f'<div><table class="tbl" id="m3table">{"".join(panels)}</table></div>'
         f'<div><div class="chart-btns" style="margin-bottom:6px">{rbtns}</div>'
         f"<div id='m3chart' class='lwc' data-sym='{first}' data-daily='{daily}' data-intra='{intra}'"
-        " data-src='/api/pages/m3chart?sym='></div>"
+        f" data-src='/api/pages/m3chart?date={_day(payload)}&sym='></div>"
         '<div class="dim small">左栏点选品种切换图；1日为当日分钟，其余为日线。时间轴为美东时间。</div></div>'
         f'<div class="m3news"><h3 style="margin-top:0">滚动新闻</h3>'
         + (nitems or '<p class="dim">暂无</p>')

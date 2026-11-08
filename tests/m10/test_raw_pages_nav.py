@@ -86,3 +86,16 @@ def test_m3chart_endpoint_passes_public_boundary_and_rejects_unknown():
     client = TestClient(app)
     # sym whitelist is enforced before any DB access; unknown symbols 404.
     assert client.get("/api/pages/m3chart?sym=NOPE").status_code == 404
+
+
+def test_m3chart_fetch_failure_shows_fallback_text():
+    js = open("src/inves_cog/web/investor.js").read()
+    assert '.catch(function ()' in js and "m3miss" in js and "暂缺" in js
+    assert "if (!r.ok) throw" in js
+
+
+def test_m3chart_embed_carries_page_date():
+    html = open("src/inves_cog/web/investor_html.py").read()
+    assert "m3chart?date=" in html and "&sym=" in html
+    api = open("src/inves_cog/web/api.py").read()
+    assert 'date: date | None = None' in api and '("m3chart", sym, day_key)' in api

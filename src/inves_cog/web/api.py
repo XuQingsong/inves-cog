@@ -153,7 +153,7 @@ def _warm_entries(call, clock):
         from inves_cog.web.brief import m3_series
 
         return (
-            ("m3chart", sym),
+            ("m3chart", sym, "latest"),
             lambda: json.dumps(call(lambda c, d, cl: m3_series(c, latest_visible_session(cl), sym), None)),
         )
 
@@ -209,13 +209,17 @@ def _register_m3chart(app, call, page_cache):
     valid = {t for rows in _MARKET3.values() for t, _ in rows}
 
     @app.get("/api/pages/m3chart")
-    def m3chart_api(sym: str):
+    def m3chart_api(sym: str, date: date | None = None):
         if sym not in valid:
             return JSONResponse({"detail": "Not Found"}, status_code=404)
+        day_key = str(date) if date else "latest"
         produce = lambda: json.dumps(  # noqa: E731
-            call(lambda c, d, cl: m3_series(c, latest_visible_session(cl), sym), None)
+            call(
+                lambda c, d, cl: m3_series(c, date or latest_visible_session(cl), sym),
+                None,
+            )
         )
-        body = page_cache.get(("m3chart", sym), produce).body
+        body = page_cache.get(("m3chart", sym, day_key), produce).body
         return Response(content=body, media_type="application/json")
 
 
