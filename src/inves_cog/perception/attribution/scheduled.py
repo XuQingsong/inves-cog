@@ -5,7 +5,6 @@ import sys
 from inves_cog.perception.attribution.chain import _closed_trade_date, run_scheduled
 from inves_cog.perception.attribution.morning import (
     PARAMS,
-    _annotate_catchup,
     _catchup_note,
     _connections,
     _day_arg,
@@ -113,13 +112,10 @@ def _execute(connection, writer, moment, task_name, client, record_clock, *, cat
             valuation=loaded["valuation"],
             plan=loaded["plan"],
             holdings=loaded["holdings"],
+            note=marker,
         )
     except Exception:
-        if marker is not None:
-            _annotate_catchup(connection, task_name, day, marker)
         return 1
-    if marker is not None:
-        _annotate_catchup(connection, task_name, day, marker)
     return 0
 
 

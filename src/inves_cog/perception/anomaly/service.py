@@ -34,16 +34,17 @@ INSERT INTO perception.premarket_review (
 """
 
 
-def run_recorded(connection, *, clock, task_name, trade_date, params_version, operation):
+def run_recorded(connection, *, clock, task_name, trade_date, params_version, operation, note=None):
     started = clock.now_utc()
     inserted = connection.execute(INSERT_JOB, (task_name, trade_date, started, params_version)).fetchone()
     row_id = inserted["id"] if isinstance(inserted, dict) else inserted[0]
     try:
         count = operation()
     except Exception as exc:
-        connection.execute(UPDATE_JOB, (clock.now_utc(), "failed", 0, str(exc), row_id))
+        summary = f"{note}；{exc}" if note else str(exc)
+        connection.execute(UPDATE_JOB, (clock.now_utc(), "failed", 0, summary, row_id))
         raise
-    connection.execute(UPDATE_JOB, (clock.now_utc(), "ok", count, None, row_id))
+    connection.execute(UPDATE_JOB, (clock.now_utc(), "ok", count, note, row_id))
     return row_id
 
 

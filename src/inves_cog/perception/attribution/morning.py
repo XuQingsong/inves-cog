@@ -618,15 +618,6 @@ def _catchup_note(task_name, day, now):
     return f"{_CATCHUP_MARK}cutoff={cutoff.isoformat()} ran={stamp}"
 
 
-def _annotate_catchup(connection, task_name, day, marker):
-    connection.execute(
-        "UPDATE ingest.job_runs SET error_summary = %s || coalesce('；' || error_summary, '') "
-        "WHERE id = (SELECT id FROM ingest.job_runs WHERE task_name = %s AND trade_date = %s "
-        "ORDER BY started_at DESC LIMIT 1)",
-        (marker, task_name, str(day)[:10]),
-    )
-
-
 def job_rows(connection, day, task_name):
     return [_job_view(row) for row in connection.execute(_JOB_ROWS, (str(day)[:10], task_name)).fetchall()]
 
@@ -771,13 +762,10 @@ def _run_chain(connection, writer, now, client, record_clock, *, catchup_day=Non
             trade_date=day,
             params_version=PARAMS,
             operation=operation,
+            note=marker,
         )
     except Exception:
-        if marker is not None:
-            _annotate_catchup(connection, "attribution_candidates", day, marker)
         return 1
-    if marker is not None:
-        _annotate_catchup(connection, "attribution_candidates", day, marker)
     return 0
 
 

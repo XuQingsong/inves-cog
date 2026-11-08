@@ -63,16 +63,6 @@ class Conn(Pages):
 
     def execute(self, statement, params=None):
         compact = " ".join(statement.split())
-        if compact.startswith("UPDATE ingest.job_runs SET error_summary = %s ||"):
-            marker, task, day = params
-            found = [
-                row for row in self.jobs if row["task_name"] == task and str(row["trade_date"])[:10] == str(day)[:10]
-            ]
-            if found:
-                row = found[-1]
-                prior = row.get("error_summary")
-                row["error_summary"] = marker + ("；" + prior if prior else "")
-            return Cursor([])
         if "perception.anomalies" in compact:
             day, *bound = params or []
             rows = [row for row in self.anomalies if str(row.get("trade_date") or "")[:10] == str(day)[:10]]
@@ -174,9 +164,13 @@ def test_candidates_catchup_runs_and_annotates():
         )
         == 0
     )
+    assert conn.jobs[0]["error_summary"].startswith("skipped_upstream:")
+    assert conn.jobs[0]["error_summary"].startswith("skipped_upstream:")
     row = conn.jobs[-1]
     assert row["status"] == "ok"
     assert row["error_summary"].startswith("late_catchup: ")
+    assert row["error_summary"].count("late_catchup:") == 1
+    assert row["error_summary"].count("late_catchup:") == 1
     assert "cutoff=" in row["error_summary"]
     assert any(statement.startswith("INSERT INTO perception.reports") for statement, _p in conn.calls)
 
