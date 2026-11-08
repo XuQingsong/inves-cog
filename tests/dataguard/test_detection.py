@@ -61,6 +61,36 @@ def test_soxx_raw_drop_is_suspect_without_corporate_action():
     assert evaluate(item, D, current, previous, actions={"SOXX"}) == []
 
 
+def test_leveraged_etf_threshold_scales_by_sanity_leverage():
+    item = expected(sanity=0.25, sanity_leverage={"SOXL": 3, "TQQQ": 3})
+    current = [{"key": "SOXL", "value": 40.87}]
+    previous = [{"key": "SOXL", "value": 66.68}]
+    assert evaluate(item, D, current, previous) == []
+    current = [{"key": "SOXL", "value": 10.0}]
+    previous = [{"key": "SOXL", "value": 66.68}]
+    assert evaluate(item, D, current, previous)[0].kind == "suspect"
+
+
+def test_split_ratio_move_is_suspect_even_within_leverage_threshold():
+    # A real 3:1 split on a 3x ETF lands inside the scaled threshold but must still flag.
+    item = expected(sanity=0.25, sanity_leverage={"SOXL": 3})
+    current = [{"key": "SOXL", "value": 133.0}]
+    previous = [{"key": "SOXL", "value": 400.0}]
+    gap = evaluate(item, D, current, previous)[0]
+    assert gap.kind == "suspect"
+    assert gap.detail["evidence"][0]["split_like"] is True
+    assert evaluate(item, D, current, previous, actions={"SOXL"}) == []
+
+
+def test_unleveraged_move_matching_no_ratio_still_needs_threshold():
+    item = expected(sanity=0.25)
+    current = [{"key": "SMH", "value": 300.0}]
+    previous = [{"key": "SMH", "value": 400.0}]
+    assert evaluate(item, D, current, previous) == []
+    current = [{"key": "SMH", "value": 290.0}]
+    assert evaluate(item, D, current, previous)[0].kind == "suspect"
+
+
 def test_partial_coverage_uses_previous_five_median_not_one_bad_day():
     item = expected(min_coverage=0.9)
     gap = evaluate(item, D, [{"key": str(i)} for i in range(40)], [], prior_counts=[100, 101, 99, 1, 100])[0]

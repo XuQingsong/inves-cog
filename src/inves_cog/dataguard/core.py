@@ -35,6 +35,7 @@ class Expectation:
     corporate_actions: dict = field(default_factory=dict)
     staleness: bool = False
     sanity: float | None = None
+    sanity_leverage: dict = field(default_factory=dict)
     filter: dict = field(default_factory=dict)
     scope: str | None = None
     timestamp: bool = False
@@ -117,6 +118,12 @@ class Finding:
     detail: dict
 
 
+# value/old ratios matching integer splits (forward 2:1, 3:1 / reverse 1:2, 1:3). A day move that
+# lands within 0.05 of one of these with no recorded corporate action is almost surely an
+# unrecorded split, so it must be flagged regardless of the sanity threshold.
+SPLIT_RATIOS = (0.5, 1 / 3, 2.0, 3.0)
+
+
 def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset(), row_count=None, now=None):
     """One finding per kind/date, with actual input evidence. Missing is never a numeric zero."""
     count = len(rows) if row_count is None else row_count
@@ -194,8 +201,13 @@ def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset(),
             evidence["action_evidence"] = item.corporate_actions.get(str(day), {}).get(key)
         if item.staleness and value == old:
             stale.append(evidence)
-        if item.sanity and old > 0 and abs(value / old - 1) > item.sanity and key not in actions:
-            suspect.append({**evidence, "change": value / old - 1})
+        if old > 0 and key not in actions:
+            ratio = value / old
+            leverage = item.sanity_leverage.get(key, 1)
+            threshold = (item.sanity or 0) * leverage
+            split_like = any(abs(ratio - r) <= 0.05 for r in SPLIT_RATIOS)
+            if (item.sanity and abs(ratio - 1) > threshold) or split_like:
+                suspect.append({**evidence, "change": ratio - 1, "split_like": split_like})
     for kind, evidence in [("stale", stale), ("suspect", suspect)]:
         if evidence:
             result.append(Finding(item.dataset, day, kind, {**detail, "evidence": evidence}))
