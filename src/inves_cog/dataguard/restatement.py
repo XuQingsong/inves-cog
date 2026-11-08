@@ -46,11 +46,13 @@ class InputView:
             raise ValueError("Unknown restatement source")
         column, seen = columns[table]
         conditions = [f"{column}>=%s", f"{column}<=%s"]
-        # flows.cftc_positions feeds 资管净多分位 whose _pct_rank needs
-        # minp=504 non-null observations; size the lookback off that
-        # requirement (504 trading days ≈ 730 calendar days) plus margin.
-        lookback = 550 if table != "flows.cftc_positions" else int(504 * 365 / 252 * 1.3)
-        bound = [self.day - timedelta(days=lookback), self.day]
+        # The lookback must cover the deepest rolling input on px.index:
+        # 资管净多分位 is _pct_rank(minp=504) — a percentile over the trailing
+        # window that only computes once ≥504 non-null trading-day obs exist.
+        # px.index length is set by this bound (every day on it is a trading
+        # day), so 504 trading days ≈ 730 calendar days, +25% margin → 912.
+        # 550d yielded ~381 obs < 504 → the percentile was always NaN.
+        bound = [self.day - timedelta(days=int(504 * 365 / 252 * 1.25)), self.day]
         if seen:
             conditions.append(f"{seen}<=%s")
             bound.append(self.now)

@@ -372,3 +372,30 @@ def test_series_picks_latest_vintage_for_macro_observations():
     assert "DISTINCT ON (observation_date)" in conn.sql
     assert "fetched_at DESC, realtime_start DESC" in conn.sql
     assert s.iloc[0] == 200.0
+
+
+def test_price_frame_start_slice_covers_pct_rank_minp():
+    """资管净多分位 needs ≥504 trading days (~730 cal) of history before the
+    restated day; the price_frame start slice must retain that much px.index."""
+    from datetime import date
+
+    import pandas as pd
+
+    from inves_cog.perception.barometer.loader import price_frame
+
+    days = pd.bdate_range("2022-01-01", "2026-11-06")
+    rows = [{"ticker": "SPY", "d": d.date(), "c": 100.0} for d in days]
+
+    class _Rows:
+        def __init__(self, rs):
+            self.rs = rs
+
+        def fetchall(self):
+            return self.rs
+
+    class _Conn:
+        def execute(self, sql, *args):
+            return _Rows(rows if "bars_daily" in sql else [])
+
+    px = price_frame(_Conn(), days[-1].date(), start=days[-1].date())
+    assert (pd.Timestamp(days[-1].date()) - px.index.min()).days >= int(504 * 365 / 252)
