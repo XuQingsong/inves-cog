@@ -136,3 +136,19 @@ def test_existing_calculator_runs_on_nonempty_restatement_view_without_future_ro
     assert result["record"]["inputs"]["VIX"] == 28.18
     assert result["record"]["inputs"]["个股看跌看涨5日"] == 0.7
     assert isinstance(result["record"]["fear"], float)
+
+
+def test_inputview_does_not_double_distinct_on_already_deduped_macro_query():
+    """loader._series emits DISTINCT ON for macro_observations since #154;
+    InputView must not prepend a second DISTINCT ON (syntax error)."""
+    db = DB()
+    view = InputView(db, DAY, NOW)
+    view.execute(
+        "SELECT DISTINCT ON (observation_date) observation_date AS d, value "
+        "FROM ingest.macro_observations WHERE series_id=%s AND observation_date <= %s "
+        "ORDER BY observation_date, fetched_at DESC, realtime_start DESC",
+        ("CBBTCUSD",),
+    )
+    sql, _ = db.calls[-1]
+    assert sql.count("DISTINCT ON") == 1
+    assert "ORDER BY observation_date,fetched_at DESC,realtime_start DESC" in sql
