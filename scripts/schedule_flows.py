@@ -17,6 +17,7 @@ from inves_cog.flows.collectors import (
     collect_etf_shares,
     collect_occ,
     collect_occ_series,
+    collect_vxtlt,
 )
 from inves_cog.flows.store import DEFAULT_RAW, polite_http, record_health, record_health_agg
 from inves_cog.ingest.market import NY, trading_day
@@ -206,6 +207,14 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
+        if hm >= "17:30":
+            # Cboe publishes end-of-day VXTLT after ~17:00 ET; the 16:45 barometer
+            # therefore reads the prior session's value (latest stored obs).
+            key = f"vxtlt:{today}"
+            if key not in state:
+                result[key] = collect_vxtlt(http, conn, raw_dir, today, local)
+                if result[key].get("rows", 0) > 0:
+                    state[key] = True
         if hm >= "11:00":
             # ECB reference rate is published ~10:00 ET, well before the 16:45 barometer.
             key = f"ecb_fx:{today}"

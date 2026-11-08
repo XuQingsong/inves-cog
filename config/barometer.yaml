@@ -1,0 +1,9 @@
+# 债市波动 (Cboe VXTLT) — sc() anchors for the 债市信用 fear dimension.
+#
+# Calibrated 2026-11-08 by percentile alignment over the 2018-01-02 → 2026-10-30
+# overlap (2,194 common trading days) of ICE MOVE (retired Yahoo source) and
+# Cboe VXTLT (20+ yr treasury ETF implied volatility):
+#   MOVE=80  is the 52.7th percentile of MOVE's distribution → VXTLT = 15.71
+#   MOVE=160 is the 99.5th percentile                      → VXTLT = 38.61
+# Recalibrate if VXTLT's long-run distribution drifts (level corr MOVE↔VXTLT ~0.68).
+vxtlt_sc_anchors: [15.7, 38.6]

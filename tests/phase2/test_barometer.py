@@ -87,7 +87,7 @@ def test_intraday_row_inherits_daily_and_maps_index_snapshots(monkeypatch):
             "VIX": pd.Series(28.18, index=idx),
             "VIX3M": pd.Series(25.55, index=idx),
             "TNX": pd.Series(4.93, index=idx),
-            "MOVE": pd.Series(100.2, index=idx),
+            "债市波动": pd.Series(15.7, index=idx),
         }
     )
     monkeypatch.setattr(run, "price_frame", lambda c, e: px.copy())
@@ -117,7 +117,7 @@ def test_intraday_row_inherits_daily_and_maps_index_snapshots(monkeypatch):
     assert rec["inputs"]["10Y"] == 4.862  # ^TNX mapped -> M["10Y"] (same units)
     assert rec["inputs"]["QQQ"] is None  # no snapshot -> NaN, not yesterday's
     assert "QQQ_5d" in rec["missing"]  # uncovered price inputs stay missing
-    assert "MOVE" in rec["missing"]
+    assert "债市波动" in rec["missing"]
     assert "VIX" not in rec["missing"]
     assert "VIX/VIX3M" not in rec["missing"]
 
@@ -155,7 +155,7 @@ def test_intraday_provisional_missing(monkeypatch):
                 "TLT",
                 "JPY=X",
                 "BTC-USD",
-                "MOVE",
+                "债市波动",
                 "TNX",
             ]
             + ["XLK"]
@@ -184,7 +184,7 @@ def test_intraday_provisional_missing(monkeypatch):
     )
     rec = run.run_intraday(conn, datetime(2026, 11, 2, 15, 30))
     assert rec["inputs"]["provisional"] is True
-    assert "MOVE" in rec["missing"] or rec["missing"]  # uncovered → listed missing
+    assert "债市波动" in rec["missing"] or rec["missing"]  # uncovered → listed missing
 
 
 def test_api_shape_and_missing():
@@ -299,7 +299,7 @@ def test_loader_sources(monkeypatch):
 
     from inves_cog.perception.barometer import loader
 
-    assert loader.FLOWS == {"JPY=X": "ecb_jpyx", "MOVE": "yahoo_px_move"}
+    assert loader.FLOWS == {"JPY=X": "ecb_jpyx", "债市波动": "cboe_vxtlt"}
     assert loader.MACRO["BTC-USD"] == ("ingest.macro_observations", "CBBTCUSD")
     assert loader.MACRO["TNX"] == ("ingest.macro_observations", "DGS10")
     assert set(loader.BARS_ETFS) == {"TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"}
@@ -327,7 +327,7 @@ def test_loader_sources(monkeypatch):
         assert px[t].iloc[-1] == 100.0 + loader.BARS_ETFS.index(t)
     assert px["TNX"].iloc[-1] == 4.5
     obs_queries = [q for q in queries if "flows.observations" in q and "macro" not in q]
-    assert len(obs_queries) == 2  # JPY=X, MOVE only
+    assert len(obs_queries) == 2  # JPY=X, 债市波动 only
 
 
 def test_series_picks_latest_vintage_for_macro_observations():
@@ -372,3 +372,30 @@ def test_series_picks_latest_vintage_for_macro_observations():
     assert "DISTINCT ON (observation_date)" in conn.sql
     assert "fetched_at DESC, realtime_start DESC" in conn.sql
     assert s.iloc[0] == 200.0
+
+
+def test_price_frame_start_slice_covers_pct_rank_minp():
+    """资管净多分位 = _pct_rank(window=1260): the price_frame start slice must
+    retain the full 1260-trading-day rolling window (≈1825 cal days) so a
+    restated record reproduces the live percentile, not a NaN/approximation."""
+
+    import pandas as pd
+
+    from inves_cog.perception.barometer.loader import price_frame
+
+    days = pd.bdate_range("2019-01-01", "2026-11-06")
+    rows = [{"ticker": "SPY", "d": d.date(), "c": 100.0} for d in days]
+
+    class _Rows:
+        def __init__(self, rs):
+            self.rs = rs
+
+        def fetchall(self):
+            return self.rs
+
+    class _Conn:
+        def execute(self, sql, *args):
+            return _Rows(rows if "bars_daily" in sql else [])
+
+    px = price_frame(_Conn(), days[-1].date(), start=days[-1].date())
+    assert (pd.Timestamp(days[-1].date()) - px.index.min()).days >= int(1260 * 365 / 252)

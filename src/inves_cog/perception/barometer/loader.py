@@ -49,7 +49,7 @@ BARS_ETFS = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"]
 # holidays); BTC-USD: FRED CBBTCUSD via the daily fred_task; MOVE stays on Yahoo.
 FLOWS = {
     "JPY=X": "ecb_jpyx",
-    "MOVE": "yahoo_px_move",
+    "债市波动": "cboe_vxtlt",
 }
 MACRO = {
     "VIX": ("ingest.macro_observations", "VIX_CBOE"),
@@ -106,7 +106,10 @@ def price_frame(conn, end, start=None):
             # never carry the previous session's value forward.
             px["JPY=X"] = jpy_raw.reindex(idx)
     if start is not None:
-        px = px.loc[px.index >= pd.Timestamp(start) - pd.Timedelta(days=400)]
+        # Keep the full rolling window of the deepest input so restates
+        # reproduce live values: _pct_rank(window=1260, minp=504) reads the
+        # trailing 1260 trading-day positions; +20% margin → 2190 days.
+        px = px.loc[px.index >= pd.Timestamp(start) - pd.Timedelta(days=2190)]
     return px
 
 

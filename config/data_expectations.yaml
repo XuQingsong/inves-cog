@@ -286,17 +286,17 @@ datasets:
   - CBBTCUSD
   staleness: true
   release_sessions: 1
-- dataset: 利率信用与跨资产日线
+- dataset: 债市波动日线
   table: flows.observations
   date_column: obs_date
   cadence: trading_day
-  deadline_et: '17:00'
+  deadline_et: '18:30'
   grace_min: 30
   min_rows: 1
-  basis: src/inves_cog/flows/backfill.py:backfill_yahoo_px/published_at 17:00 ET；这是现有代码的估计发布时间，缺少连续到位分布，验收前待核实
-  impact: 晴雨表恐慌、信用、跨资产判断可能失真
+  basis: scripts/schedule_flows.py:vxtlt 17:30 ET 采集；Cboe 收盘后约 17:00 ET 发布当日指数值，晴雨表 16:45 读取最近一日值
+  impact: 晴雨表债市信用判断可能失真
   backfill:
-    entry: yahoo_px
+    entry: vxtlt
     max_attempts: 3
     depends_on:
     - barometer
@@ -305,7 +305,7 @@ datasets:
   latest_column: ingested_at
   filter:
     series_id: &id003
-    - yahoo_px_move
+    - cboe_vxtlt
   expected_keys: *id003
   staleness: true
 - dataset: 看跌看涨成交比

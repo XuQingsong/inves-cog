@@ -6,8 +6,15 @@ mean of its indicators (missing excluded + listed); the composite is the
 mean of dimensions. No triggers, no step rules.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+import yaml
+
+VXLT_SC = tuple(
+    yaml.safe_load((Path(__file__).resolve().parents[4] / "config/barometer.yaml").read_text())["vxtlt_sc_anchors"]
+)
 
 SECTORS = ["XLB", "XLC", "XLE", "XLF", "XLI", "XLK", "XLP", "XLRE", "XLU", "XLV", "XLY"]
 AI_CHAIN = [
@@ -112,7 +119,7 @@ def indicators(px, flows):
     M["VIX"] = V
     M["VIX_5d"] = V.pct_change(5) * 100
     M["VIX/VIX3M"] = V / V3
-    M["MOVE"] = px["MOVE"]
+    M["债市波动"] = px["债市波动"]
     M["10Y"] = px["TNX"]
     M["10Y_10dbp"] = (px["TNX"] - px["TNX"].shift(10)) * 100
     M["HYG-IEF_10d"] = (px["HYG"].pct_change(10) - px["IEF"].pct_change(10)) * 100
@@ -160,7 +167,7 @@ DIM_INPUTS = {
     "fear": {
         "下跌冲击": ["QQQ_sig", "SPY_sig", "QQQ_5d", "SPY_5d", "QQQ_dd63", "SPY_dd63"],
         "恐慌情绪": ["VIX", "VIX/VIX3M", "VIX_5d"],
-        "债市信用": ["MOVE", "10Y_10dbp", "HYG-IEF_10d"],
+        "债市信用": ["债市波动", "10Y_10dbp", "HYG-IEF_10d"],
         "超卖扩散": ["行业破50日线", "行业5日下跌占比", "QQQ_RSI"],
         "去杠杆": ["MTUM/SPY5d", "TQQQ5d", "SPY10d", "TLT10d", "QQQ_5d", "黄金5d", "比特币5d", "日元5d"],
         "资金与杠杆": [
@@ -199,7 +206,7 @@ def dimensions(M):
         _worst(sc(-M.QQQ_dd63, 3, 20), sc(-M.SPY_dd63, 3, 15)),
     )
     F["恐慌情绪"] = _mean(sc(M.VIX, 15, 45), sc(M["VIX/VIX3M"], 0.85, 1.15), sc(M.VIX_5d, 0, 80))
-    F["债市信用"] = _mean(sc(M.MOVE, 80, 160), sc(M["10Y_10dbp"].abs(), 10, 60), sc(-M["HYG-IEF_10d"], 0, 6))
+    F["债市信用"] = _mean(sc(M["债市波动"], *VXLT_SC), sc(M["10Y_10dbp"].abs(), 10, 60), sc(-M["HYG-IEF_10d"], 0, 6))
     F["超卖扩散"] = _mean(sc(M["行业破50日线"], 30, 100), sc(M["行业5日下跌占比"], 50, 85), sc(50 - M.QQQ_RSI, 5, 30))
     sb = pd.concat([-M.SPY10d, -M.TLT10d], axis=1).min(axis=1)
     co = pd.concat([-M.QQQ_5d / 5, -M["黄金5d"] / 3, -M["比特币5d"] / 12], axis=1).min(axis=1)
