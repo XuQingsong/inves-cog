@@ -377,7 +377,6 @@ def test_series_picks_latest_vintage_for_macro_observations():
 def test_price_frame_start_slice_covers_pct_rank_minp():
     """资管净多分位 needs ≥504 trading days (~730 cal) of history before the
     restated day; the price_frame start slice must retain that much px.index."""
-    from datetime import date
 
     import pandas as pd
 
