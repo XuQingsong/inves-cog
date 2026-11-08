@@ -1254,6 +1254,20 @@ def _previous_vix3m(connection, day):
     return None if row is None else row["vix3m"]
 
 
+def _attribution_state(connection, day):
+    rows = _rows(
+        connection,
+        "SELECT status, error_summary FROM ingest.job_runs"
+        " WHERE trade_date = %s AND task_name = 'attribution_candidates'",
+        (day,),
+    )
+    if any(str(row.get("error_summary") or "").startswith("late_catchup:") for row in rows):
+        return "catchup"
+    if any(row.get("status") in ("ok", "degraded") for row in rows):
+        return "attributed"
+    return "unattributed"
+
+
 def _reports(connection, ids):
     if not ids:
         return {}
@@ -1510,7 +1524,7 @@ def _covering_theme(tickers, catalog):
     return best[1]
 
 
-def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day):
+def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day, attribution=None):
     pool = _visible_anomalies(anomalies, stocks)
     pool.sort(key=lambda row: (-(row["max_abs_z"] or -1), row["anomaly_id"]))
     chosen = []
@@ -1532,6 +1546,7 @@ def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day):
                 "explanation": explanation,
                 "cited_at": cited,
                 "reasons": reasons,
+                "attribution": attribution,
                 "untrusted": not fresh,
             }
         )
@@ -2486,7 +2501,14 @@ def page_brief_market(connection, day, clock):
     vix = context["vix"]
     reports = _reports(connection, [row["anomaly_id"] for row in context["anomalies"]])
     events = _event_rows(
-        context["anomalies"], context["events"], reports, context["fresh"], catalog, context["stocks"], day
+        context["anomalies"],
+        context["events"],
+        reports,
+        context["fresh"],
+        catalog,
+        context["stocks"],
+        day,
+        _attribution_state(connection, day),
     )
     pool_returns = [context["daily"][ticker]["ret"] for ticker in context["pool"] if ticker in context["daily"]]
     down_count = sum(1 for value in pool_returns if value is not None and value < 0)

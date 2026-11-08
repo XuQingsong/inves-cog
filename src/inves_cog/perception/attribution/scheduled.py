@@ -5,7 +5,9 @@ import sys
 from inves_cog.perception.attribution.chain import _closed_trade_date, run_scheduled
 from inves_cog.perception.attribution.morning import (
     PARAMS,
+    _catchup_note,
     _connections,
+    _day_arg,
     _fail_job,
     _load,
     _moment,
@@ -13,6 +15,7 @@ from inves_cog.perception.attribution.morning import (
     _require_writer,
     in_stage_window,
     job_rows,
+    stage_bounds,
     stage_cutoff,
     upstream_ready,
 )
@@ -30,12 +33,15 @@ def main(argv=None, *, connection=None, perception=None, clock=None, client=None
     args = list(sys.argv[1:] if argv is None else argv)
     task_name = _named(args)
     moment = _moment(args, clock)
-    if not _due(moment, task_name):
+    catchup_day = _day_arg(args) if "--catchup" in args else None
+    if catchup_day is None and not _due(moment, task_name):
         print("not-due")
         return 0
     borrowed, writer, owned = _connections(connection, perception)
     try:
-        return _execute(borrowed, writer, moment, task_name, client, _record_clock(record_clock))
+        return _execute(
+            borrowed, writer, moment, task_name, client, _record_clock(record_clock), catchup_day=catchup_day
+        )
     finally:
         for item in owned:
             item.close()
@@ -58,9 +64,13 @@ def _due(moment, task_name):
     return in_stage_window(task_name, moment)
 
 
-def _execute(connection, writer, moment, task_name, client, record_clock):
-    cutoff = stage_cutoff(task_name, moment)
-    day = _closed_trade_date(cutoff)
+def _execute(connection, writer, moment, task_name, client, record_clock, *, catchup_day=None):
+    if catchup_day is not None:
+        cutoff = stage_bounds(task_name, catchup_day)[0]
+        day = str(catchup_day)[:10]
+    else:
+        cutoff = stage_cutoff(task_name, moment)
+        day = _closed_trade_date(cutoff)
     if writer is None:
         return _fail_job(
             connection,
@@ -82,8 +92,9 @@ def _execute(connection, writer, moment, task_name, client, record_clock):
     previous = _PREVIOUS[task_name]
     if not upstream_ready(job_rows(connection, day, previous), moment, previous):
         return _fail_job(connection, moment, task_name, day, f"缺少已成功的{previous}", clock=record_clock)
+    marker = _catchup_note(task_name, day, moment) if catchup_day is not None else None
     try:
-        loaded = _load(connection, cutoff, day)
+        loaded = _load(connection, cutoff, day, upstream_visible_for_day=day if catchup_day is not None else None)
     except Exception:
         return _fail_job(connection, moment, task_name, day, "读取上一阶段失败", clock=record_clock)
     try:
@@ -101,6 +112,7 @@ def _execute(connection, writer, moment, task_name, client, record_clock):
             valuation=loaded["valuation"],
             plan=loaded["plan"],
             holdings=loaded["holdings"],
+            note=marker,
         )
     except Exception:
         return 1

@@ -259,6 +259,7 @@ def run_scheduled(
     holdings=None,
     writer=None,
     prepared_pages=None,
+    note=None,
 ):
     """Run the job for this minute. Nothing is deployed, and no caller operation is substituted."""
     slot = job_slot(when)
@@ -309,6 +310,7 @@ def run_scheduled(
         trade_date=trade_date,
         params_version=params_version,
         operation=operation,
+        note=note,
     )
     rows = holder.get("rows") or []
     result = _scheduled_result(
