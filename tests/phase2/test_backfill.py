@@ -170,3 +170,25 @@ def test_cli_cftc_start():
     src = open("scripts/backfill_flows.py").read()
     assert "backfill.backfill_cftc(http, conn, DEFAULT_RAW, start, end, now)" in src
     assert "backfill.backfill_cboe_pc_csv(http, conn, DEFAULT_RAW, backfill.published_at, today)" in src
+
+
+def test_backfill_vxtlt_registers_catalog(monkeypatch):
+    """cboe_vxtlt must self-register in series_catalog before writing obs —
+    otherwise upsert_many hits the observations.series_id FK."""
+    from datetime import date
+    from unittest.mock import MagicMock
+
+    import inves_cog.flows.backfill as bf
+
+    csv_text = "DATE,VXTLT\n11/04/2026,13.520000\n11/05/2026,14.490000\n"
+    http = MagicMock()
+    http.request.return_value = csv_text
+    calls = []
+    monkeypatch.setattr(bf, "upsert_many", lambda conn, table, cols, rows: calls.append((table, rows)))
+
+    conn = MagicMock()
+    reports = bf.backfill_vxtlt(http, conn, "/tmp", date(2026, 11, 1), date(2026, 11, 6))
+    assert reports[0]["rows"] == 2
+    tables = [c[0] for c in calls]
+    assert tables[0] == "series_catalog" and tables[1] == "observations"
+    assert calls[0][1][0]["series_id"] == "cboe_vxtlt"
