@@ -47,7 +47,8 @@ def test_restatement_reads_are_bounded_and_late_daily_values_use_observation_day
     sql, args = db.calls[-1]
     assert "obs_date>=" in sql and "obs_date<=" in sql
     assert "ingested_at<=" in sql and "published_at<=" in sql
-    assert "obs_date::timestamp" in sql and args[0] == "cboe_pc_equity"
+    # parity with the live loader: real published_at, all rows kept, no alias/dedupe
+    assert "obs_date::timestamp" not in sql and "DISTINCT ON" not in sql and args[0] == "cboe_pc_equity"
     assert DAY in args and NOW in args
     view.execute("SELECT market, release_at AS p FROM flows.cftc_positions ORDER BY release_at")
     sql, args = db.calls[-1]
