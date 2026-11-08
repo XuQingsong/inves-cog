@@ -419,10 +419,10 @@ def _events(payload):
                 f'<div style="margin-top:10px"><div class="small muted">{label}'
                 f'</div><ul class="news">{"".join(reasons)}</ul></div>'
             )
-        elif row.get("attribution") == "unattributed":
-            why = '<div class="small muted" style="margin-top:8px">当日未归因。</div>'
         elif not payload.get("news_fresh"):
             why = '<div class="small muted" style="margin-top:8px">当日新闻缺失，原因解释不可用。</div>'
+        elif row.get("attribution") == "unattributed":
+            why = '<div class="small muted" style="margin-top:8px">当日未归因。</div>'
         elif catchup:
             why = '<div class="small muted" style="margin-top:8px">迟到补跑（按原定时点信息），暂无可引用的解释。</div>'
         else:
