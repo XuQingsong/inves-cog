@@ -29,11 +29,13 @@ def parse_daily(text, day, tickers):
         if not symbol or symbol in seen:
             raise ValueError("Duplicate or missing FINRA symbol")
         seen.add(symbol)
-        short, exempt, total = (int(row[k]) for k in ("ShortVolume", "ShortExemptVolume", "TotalVolume"))
+        # FINRA began shipping fractional-share volumes (e.g. 562765.465412); bounds-check the
+        # float, then round to the bigint storage columns.
+        short, exempt, total = (float(row[k]) for k in ("ShortVolume", "ShortExemptVolume", "TotalVolume"))
         if not 0 <= exempt <= short <= total:
             raise ValueError("Invalid FINRA volume bounds")
         if symbol in tickers:
-            rows.append(dict(date=day, ticker=symbol, short_volume=short, total_volume=total))
+            rows.append(dict(date=day, ticker=symbol, short_volume=int(round(short)), total_volume=int(round(total))))
     return rows
 
 

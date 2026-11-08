@@ -128,6 +128,9 @@ datasets:
     - TLT
   expected_keys: *id002
   sanity: 0.25
+  sanity_leverage:
+    TQQQ: 3
+    SOXL: 3
   adjustment_column: adj_factor
   corporate_actions:
     '2026-11-05':

@@ -34,3 +34,14 @@ def test_wrong_day_truncated_or_bad_quantity_is_rejected_before_any_write(text):
 
 def test_empty_official_file_is_no_data_not_fake_zero_rows():
     assert parse_daily(FILE.splitlines()[0] + "\n0\n", DAY, {"SPY"}) == []
+
+
+def test_fractional_share_volumes_are_bounds_checked_then_rounded():
+    text = FILE.replace("|SPY|120|5|300|", "|SPY|562765.465412|502|1110680.408842|")
+    assert parse_daily(text, DAY, {"SPY"}) == [dict(date=DAY, ticker="SPY", short_volume=562765, total_volume=1110680)]
+
+
+@pytest.mark.parametrize("text", [FILE.replace("|120|", "|-0.5|"), FILE.replace("|120|", "|300.5|")])
+def test_fractional_bounds_violations_still_rejected(text):
+    with pytest.raises(ValueError):
+        parse_daily(text, DAY, {"SPY"})
