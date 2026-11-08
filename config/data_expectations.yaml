@@ -238,6 +238,52 @@ datasets:
   - DGS10
   staleness: true
   release_sessions: 1
+- dataset: 日元汇率日线
+  table: flows.observations
+  date_column: obs_date
+  cadence: trading_day
+  deadline_et: '11:00'
+  grace_min: 30
+  min_rows: 1
+  basis: scripts/schedule_flows.py:ecb_fx 15:30 ET 采集；ECB 14:15 CET 参考价约 16:00 CET（10:00 ET）发布，TARGET 假日无数据
+  impact: 晴雨表跨资产与去杠杆判断可能失真
+  backfill:
+    entry: ecb_fx
+    max_attempts: 3
+    depends_on:
+    - barometer
+  key_column: series_id
+  value_column: value
+  latest_column: ingested_at
+  filter:
+    series_id:
+    - ecb_jpyx
+  expected_keys:
+  - ecb_jpyx
+  staleness: true
+- dataset: 比特币日线
+  table: ingest.macro_observations
+  date_column: observation_date
+  cadence: trading_day
+  deadline_et: '20:45'
+  grace_min: 30
+  min_rows: 1
+  basis: src/inves_cog/ingest/pipeline.py:fred_task 每日采集 fred_series（含 CBBTCUSD）
+  impact: 晴雨表跨资产与去杠杆判断可能失真
+  backfill:
+    entry: fred
+    max_attempts: 3
+    depends_on:
+    - barometer
+  key_column: series_id
+  value_column: value
+  latest_column: fetched_at
+  filter:
+    series_id:
+    - CBBTCUSD
+  expected_keys:
+  - CBBTCUSD
+  staleness: true
 - dataset: 利率信用与跨资产日线
   table: flows.observations
   date_column: obs_date
@@ -257,8 +303,6 @@ datasets:
   latest_column: ingested_at
   filter:
     series_id: &id003
-    - yahoo_px_jpyx
-    - yahoo_px_btcusd
     - yahoo_px_move
   expected_keys: *id003
   staleness: true
