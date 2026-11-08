@@ -23,28 +23,86 @@ def _asof_date(connection_hint, raw):
     return str(raw)
 
 
+# inputs keys the page JS (DIM/PH/tanks/trig) and the server-side sentence()
+# actually read — everything else in inputs is dropped from the embedded R.
+_M_KEYS = {
+    "10Y",
+    "10Y_10dbp",
+    "AI120日涨超50%占比",
+    "AI20日涨超25%占比",
+    "AI站上50日线",
+    "HYG-IEF_10d",
+    "MOVE",
+    "MTUM/SPY5d",
+    "QQQ15日上涨天数",
+    "QQQ_1d",
+    "QQQ_20d",
+    "QQQ_5d",
+    "QQQ_RSI",
+    "QQQ_dd63",
+    "QQQ_sig",
+    "QQQ距20日线",
+    "QQQ距200日线",
+    "QQQ距50日线",
+    "QQQ距半年低点",
+    "SMH20d",
+    "SMH_RSI",
+    "SMH相对QQQ20d",
+    "SMH距20日线",
+    "SMH距200日线",
+    "SOFR-IORB基点",
+    "SOXL60d",
+    "SPDR资金5日%",
+    "SPY10d",
+    "SPY_1d",
+    "SPY_5d",
+    "SPY距200日线",
+    "TLT10d",
+    "TQQQ5d",
+    "TQQQ60d",
+    "VIX",
+    "VIX/VIX3M",
+    "VIX_5d",
+    "个股看跌看涨5日",
+    "净流动性4周%",
+    "杠杆ETF净申购20日%",
+    "杠杆ETF调仓亿",
+    "杠杆基金4周变化",
+    "杠杆基金净头寸%",
+    "比特币5d",
+    "日元5d",
+    "行业5日下跌占比",
+    "行业破50日线",
+    "融资余额同比%",
+    "资管净多%",
+    "资管净多分位",
+    "黄金5d",
+}
+
+
+def _round(v):
+    return round(v, 4) if isinstance(v, float) else v
+
+
 def _row(d):
-    """barometer_daily row → the prototype record shape."""
+    """barometer_daily row → the prototype record shape (read keys only)."""
     stage = d.get("stage")
     st = STAGES.index(stage) - 3 if isinstance(stage, str) and stage in STAGES else 0
     dims = d.get("dims") or {}
     inp = d.get("inputs") or {}
     return {
         "d": str(d["date"]),
-        "F": d["fear"],
-        "G": d["greed"],
-        "fl": d["fear_level"],
-        "gl": d["greed_level"],
+        "F": _round(d["fear"]),
+        "G": _round(d["greed"]),
+        "fl": _round(d["fear_level"]),
+        "gl": _round(d["greed_level"]),
         "st": st,
-        "pc": d["pendulum"],
-        "sh": d["short_heat"],
-        "ac": d["accumulation"],
+        "pc": _round(d["pendulum"]),
         "nat": d.get("nature") or "",
-        "FD": _ordered(dims.get("fear") or {}, FEAR_ORDER),
-        "GD": _ordered(dims.get("greed") or {}, GREED_ORDER),
-        "m": inp,
+        "FD": {k: _round(v) for k, v in _ordered(dims.get("fear") or {}, FEAR_ORDER).items()},
+        "GD": {k: _round(v) for k, v in _ordered(dims.get("greed") or {}, GREED_ORDER).items()},
+        "m": {k: _round(v) for k, v in inp.items() if k in _M_KEYS},
         "asof": {"cftc": inp.get("asof_cftc") or "", "margin": (inp.get("asof_margin") or "")[:7]},
-        "missing": d.get("missing") or [],
     }
 
 

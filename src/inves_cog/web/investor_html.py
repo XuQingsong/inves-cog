@@ -2550,9 +2550,9 @@ def _market3_module(payload):
             '<tbody class="m3tab" data-p="%s"%s>'
             '<tr class="dim small"><th>名称</th><th>最新</th><th>涨跌</th></tr>%s</tbody>' % (_text(t), hidden, trs)
         )
-    daily = escape(json.dumps(m3.get("daily") or {}, ensure_ascii=False), quote=True)
-    intra = escape(json.dumps(m3.get("intraday") or {}, ensure_ascii=False), quote=True)
     first = groups[tabs[0]][0]["sym"] if has_groups else ""
+    daily = escape(json.dumps({first: (m3.get("daily") or {}).get(first) or []}, ensure_ascii=False), quote=True)
+    intra = escape(json.dumps({first: (m3.get("intraday") or {}).get(first) or []}, ensure_ascii=False), quote=True)
     rbtns = "".join(
         '<button class="rc%s" onclick="Market3.range(this,\'%s\')">%s</button>' % (" on" if k == "1日" else "", k, k)
         for k in ("1日", "5日", "1月", "6月", "1年")
@@ -2590,7 +2590,8 @@ def _market3_module(payload):
         '<div class="grid" style="grid-template-columns:1fr 1.4fr 1fr;gap:16px">'
         f'<div><table class="tbl" id="m3table">{"".join(panels)}</table></div>'
         f'<div><div class="chart-btns" style="margin-bottom:6px">{rbtns}</div>'
-        f"<div id='m3chart' class='lwc' data-sym='{first}' data-daily='{daily}' data-intra='{intra}'></div>"
+        f"<div id='m3chart' class='lwc' data-sym='{first}' data-daily='{daily}' data-intra='{intra}'"
+        f" data-src='/api/pages/m3chart?date={_day(payload)}&sym='></div>"
         '<div class="dim small">左栏点选品种切换图；1日为当日分钟，其余为日线。时间轴为美东时间。</div></div>'
         f'<div class="m3news"><h3 style="margin-top:0">滚动新闻</h3>'
         + (nitems or '<p class="dim">暂无</p>')
