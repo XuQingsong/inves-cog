@@ -193,7 +193,8 @@ def premarket_scope(connection, *, clock):
         "SELECT DISTINCT member->>'ticker' AS ticker FROM perception.linkage_events e "
         "JOIN perception.anomalies a ON a.anomaly_id=e.anomaly_id "
         "CROSS JOIN LATERAL jsonb_array_elements(a.members) member "
-        "WHERE e.lifecycle IN ('假设中','市场确认','基本面核查中') AND a.trade_date<=%s",
+        "WHERE e.lifecycle IN ('假设中','市场确认','基本面核查中') AND a.trade_date<=%s "
+        "AND NOT (coalesce(a.data_quality,'{}'::jsonb) ? 'voided')",
         (day,),
     ).fetchall()
     names = sorted(set(holdings) | {r["ticker"] for r in linked if r["ticker"]})

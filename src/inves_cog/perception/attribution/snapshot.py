@@ -82,6 +82,7 @@ LEFT JOIN LATERAL (
 ) AS claims ON true
 LEFT JOIN perception.reports AS r ON r.anomaly_id = e.anomaly_id
 LEFT JOIN perception.market_day AS m ON m.trade_date = %s
+WHERE NOT (coalesce(a.data_quality,'{}'::jsonb) ? 'voided')
 """
 
 _INSERT = """

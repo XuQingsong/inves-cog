@@ -548,6 +548,7 @@ SELECT anomaly_id, trade_date, session, direction, members, universe, generated_
 FROM perception.anomalies
 WHERE trade_date = %s
   AND generated_at IS NOT NULL
+  AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
 ORDER BY session, anomaly_id
 """
 

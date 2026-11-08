@@ -292,6 +292,7 @@ def _calibration(connection, start, end, visible):
         JOIN perception.anomalies AS anomaly ON anomaly.anomaly_id = candidate.anomaly_id
         WHERE anomaly.trade_date >= %s AND anomaly.trade_date <= %s
           AND (anomaly.generated_at IS NULL OR anomaly.generated_at < %s)
+          AND NOT (coalesce(anomaly.data_quality,'{}'::jsonb) ? 'voided')
         """,
         (start, end, visible),
     ).fetchall()
@@ -320,6 +321,7 @@ def _calibration(connection, start, end, visible):
         JOIN perception.anomalies AS anomaly ON anomaly.anomaly_id = event.anomaly_id
         WHERE anomaly.trade_date >= %s AND anomaly.trade_date <= %s
           AND (anomaly.generated_at IS NULL OR anomaly.generated_at < %s)
+          AND NOT (coalesce(anomaly.data_quality,'{}'::jsonb) ? 'voided')
         GROUP BY 1
         ORDER BY 1
         """,
@@ -346,6 +348,7 @@ def _unknown_trend(connection, start, end, visible):
         SELECT anomaly_id, trade_date FROM perception.anomalies
         WHERE trade_date >= %s AND trade_date <= %s
           AND (generated_at IS NULL OR generated_at < %s)
+          AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
         ORDER BY trade_date, anomaly_id
         """,
         (start, end, visible),
