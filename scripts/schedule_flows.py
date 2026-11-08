@@ -206,7 +206,7 @@ def run_once(clock, values, http=None, conn=None, raw_dir=DEFAULT_RAW):  # noqa:
                 result[key] = res
                 record_health_agg(conn, "Flows:CboeChain", res, local)
                 state[key] = True
-        if hm >= "15:30":
+        if hm >= "11:00":
             # ECB reference rate is published ~10:00 ET, well before the 16:45 barometer.
             key = f"ecb_fx:{today}"
             if key not in state:

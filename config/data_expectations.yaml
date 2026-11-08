@@ -242,11 +242,12 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: trading_day
-  deadline_et: '11:00'
+  deadline_et: '12:00'
   grace_min: 30
   min_rows: 1
-  basis: scripts/schedule_flows.py:ecb_fx 15:30 ET 采集；ECB 14:15 CET 参考价约 16:00 CET（10:00 ET）发布，TARGET 假日无数据
+  basis: scripts/schedule_flows.py:ecb_fx 11:00 ET 采集；ECB 14:15 CET 参考价约 16:00 CET（10:00 ET）发布，TARGET 假日无数据
   impact: 晴雨表跨资产与去杠杆判断可能失真
+  holiday_calendar: ecb
   backfill:
     entry: ecb_fx
     max_attempts: 3
@@ -284,6 +285,7 @@ datasets:
   expected_keys:
   - CBBTCUSD
   staleness: true
+  release_sessions: 1
 - dataset: 利率信用与跨资产日线
   table: flows.observations
   date_column: obs_date

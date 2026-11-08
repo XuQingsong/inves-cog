@@ -70,6 +70,12 @@ def _worst(a, b):
     return pd.concat([a, b], axis=1).max(axis=1)
 
 
+def _pct_no_carry(s, n):
+    """n-period change on non-null values only; NaN days stay NaN (missing,
+    not carried forward) without blanking the following n days."""
+    return s.dropna().pct_change(n).reindex(s.index) * 100
+
+
 def _pct_rank(s, window=1260, minp=504):
     return s.rolling(window, min_periods=minp).apply(
         lambda x: (x[:-1] < x[-1]).mean() * 100 if not np.isnan(x[-1]) else np.nan, raw=True
@@ -127,7 +133,7 @@ def indicators(px, flows):
     M["SOXL20d"] = px["SOXL"].pct_change(20) * 100
     M["TLT10d"] = px["TLT"].pct_change(10) * 100
     M["SPY10d"] = S.pct_change(10) * 100
-    M["日元5d"] = -px["JPY=X"].pct_change(5) * 100
+    M["日元5d"] = -_pct_no_carry(px["JPY=X"], 5)
     M["黄金5d"] = px["GLD"].pct_change(5) * 100
     M["比特币5d"] = px["BTC-USD"].pct_change(5) * 100
     M["SMH20d"] = SMH.pct_change(20) * 100

@@ -89,7 +89,12 @@ def price_frame(conn, end, start=None):
     px = pd.DataFrame(cols).sort_index()
     if "SPY" in px:
         idx = px["SPY"].dropna().index
+        jpy_raw = cols.get("JPY=X")
         px = px.reindex(idx).ffill(limit=3)
+        if jpy_raw is not None:
+            # ECB TARGET-holiday days have no rate and must stay missing —
+            # never carry the previous session's value forward.
+            px["JPY=X"] = jpy_raw.reindex(idx)
     if start is not None:
         px = px.loc[px.index >= pd.Timestamp(start) - pd.Timedelta(days=400)]
     return px
