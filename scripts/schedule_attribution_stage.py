@@ -15,6 +15,7 @@ from inves_cog.perception.attribution.morning import (
     _UPSTREAM,
     at_stage_deadline,
     catchup_ready,
+    catchup_signal,
     dispatch_decision,
     in_stage_window,
     job_rows,
@@ -48,6 +49,8 @@ def run_once(
         raise ValueError("未知任务")
     moment = clock.now_utc()
     if not in_stage_window(task_name, moment):
+        if not catchup_signal(root, task_name):
+            return {"status": "not_due"}
         day = _closed_trade_date(moment)
         own = _lookup(records, root, load_environment, task_name, day)
         if (

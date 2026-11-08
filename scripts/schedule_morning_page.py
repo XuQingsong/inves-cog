@@ -15,6 +15,7 @@ from inves_cog.perception.attribution.morning import (
     _is_morning,
     at_stage_deadline,
     catchup_ready,
+    catchup_signal,
     dispatch_decision,
     in_stage_window,
     job_rows,
@@ -54,6 +55,8 @@ def run_once(
     page_due = _is_morning(moment)
     chain_due = in_stage_window(_CHAIN, moment)
     if not page_due and not chain_due:
+        if not catchup_signal(root, _CHAIN):
+            return {"status": "not_due"}
         day = _closed_trade_date(moment)
         own = _lookup(records, root, load_environment, _CHAIN, day)
         if (
@@ -139,6 +142,7 @@ def _chain(root, moment, clock, python, run, load_environment, records, skip):
             return {"status": "waiting_dependencies"}
         summary = skip_summary([upstream_phrase(_ANOMALY, upstream or [])])
         _write_skip(root, load_environment, _CHAIN, day, summary, clock, skip)
+        _receipt(root, moment, _CHAIN, {"status": "failed", "error_summary": summary})
         return {"status": "failed", "error_summary": summary}
     try:
         values = dict(load_environment(root / ".env"))
@@ -173,6 +177,20 @@ def _ready(records, root, load_environment, task, moment):
     return bool(rows is not None and upstream_ready(rows, moment, task))
 
 
+def _receipt(root, moment, task_name, result):
+    try:
+        state = Path(root).resolve() / ".harness/service"
+        state.mkdir(parents=True, exist_ok=True, mode=0o700)
+        local = moment.astimezone(SHANGHAI)
+        name = task_name.replace("_", "-") + "-" + str(local.date()) + "-" + local.strftime("%H%M%S") + ".json"
+        (state / name).write_text(
+            json.dumps({"beijing_date": str(local.date()), "slot": local.strftime("%H:%M"), **result}),
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+
+
 def _run_catchup(root, moment, python, run, load_environment, records, task_name, day):
     root = Path(root).resolve()
     values = dict(load_environment(root / ".env"))
@@ -198,7 +216,9 @@ def _run_catchup(root, moment, python, run, load_environment, records, task_name
         return {"status": "failed", "catchup": True, "error_type": type(exc).__name__}
     found = _lookup(records, root, load_environment, task_name, day)
     status = "ok" if completed.returncode == 0 and upstream_ready(found, moment, task_name) else "failed"
-    return {"status": status, "catchup": True, "returncode": completed.returncode}
+    result = {"status": status, "catchup": True, "returncode": completed.returncode}
+    _receipt(root, moment, task_name, result)
+    return result
 
 
 def _lookup(records, root, load_environment, task, day):

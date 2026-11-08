@@ -212,7 +212,26 @@ def test_downstream_stage_catches_up_after_upstream_catchup():
     assert row["error_summary"].startswith("late_catchup: ")
 
 
-def test_dispatcher_fires_catchup_inside_the_deadline():
+def _receipt_dir(tmp_path, task_name):
+    import json
+
+    state = tmp_path / ".harness" / "service"
+    state.mkdir(parents=True)
+    (state / f"{task_name.replace('_', '-')}-{DAY}-094500.json").write_text(
+        json.dumps(
+            {
+                "beijing_date": DAY,
+                "slot": "09:45",
+                "status": "failed",
+                "error_summary": "skipped_upstream: upstream 没有记录",
+            }
+        ),
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def test_dispatcher_fires_catchup_inside_the_deadline(tmp_path):
     calls = []
     rows = [_ok("anomaly_daily", LATE - timedelta(hours=1)), _skip("attribution_candidates")]
 
@@ -224,8 +243,9 @@ def test_dispatcher_fires_catchup_inside_the_deadline():
     def records(task, _day):
         return [row for row in rows if row["task_name"] == task]
 
+    root = _receipt_dir(tmp_path, "attribution_candidates")
     result = morning_once(
-        root="/tmp",
+        root=root,
         clock=FrozenClock(LATE),
         python="py",
         run=fake_run,
@@ -237,20 +257,43 @@ def test_dispatcher_fires_catchup_inside_the_deadline():
     assert calls and "--catchup" in calls[0] and DAY in calls[0]
 
 
-def test_dispatcher_without_upstream_stays_not_due():
+def test_dispatcher_without_receipt_stays_credential_free(tmp_path):
     calls = []
+    rows = [_ok("anomaly_daily", LATE - timedelta(hours=1)), _skip("attribution_candidates")]
+
+    def records(task, _day):
+        return [row for row in rows if row["task_name"] == task]
+
+    def never(*_a, **_k):
+        raise AssertionError("no credential reads on an idle poll")
+
+    result = morning_once(
+        root=tmp_path,
+        clock=FrozenClock(LATE),
+        python="py",
+        run=never,
+        load_environment=never,
+        records=None,
+        skip=never,
+    )
+    assert result == {"status": "not_due"}
+    assert calls == [] and not (tmp_path / ".harness").exists()
+
+
+def test_dispatcher_with_receipt_but_no_upstream_stays_not_due(tmp_path):
+    calls = []
+    rows = [_skip("attribution_candidates")]
 
     def fake_run(command, **_kwargs):
         calls.append(command)
         return type("Done", (), {"returncode": 0})()
 
-    rows = [_skip("attribution_candidates")]
-
     def records(task, _day):
         return [row for row in rows if row["task_name"] == task]
 
+    root = _receipt_dir(tmp_path, "attribution_candidates")
     result = morning_once(
-        root="/tmp",
+        root=root,
         clock=FrozenClock(LATE),
         python="py",
         run=fake_run,
@@ -262,7 +305,7 @@ def test_dispatcher_without_upstream_stays_not_due():
     assert calls == []
 
 
-def test_stage_dispatcher_fires_catchup():
+def test_stage_dispatcher_fires_catchup(tmp_path):
     calls = []
     rows = [_catchup("attribution_candidates"), _skip("attribution_tracks")]
 
@@ -277,7 +320,7 @@ def test_stage_dispatcher_fires_catchup():
     result = stage_once(
         clock=FrozenClock(LATE),
         task_name="attribution_tracks",
-        root="/tmp",
+        root=_receipt_dir(tmp_path, "attribution_tracks"),
         python="py",
         run=fake_run,
         load_environment=lambda _p: {},

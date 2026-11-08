@@ -596,6 +596,22 @@ def catchup_ready(task_name, day, own_rows, upstream_lookup, now):
     return True
 
 
+def catchup_signal(root, task_name):
+    """Local receipt hint that the stage skipped upstream — keeps the idle poll credential-free."""
+    state = Path(root) / ".harness" / "service"
+    try:
+        receipts = sorted(state.glob(task_name.replace("_", "-") + "-*.json"))
+    except OSError:
+        return False
+    if not receipts:
+        return False
+    try:
+        latest = json.loads(receipts[-1].read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return str(latest.get("error_summary") or "").startswith("skipped_upstream:")
+
+
 def _catchup_note(task_name, day, now):
     cutoff = stage_bounds(task_name, day)[0]
     stamp = now.isoformat() if hasattr(now, "isoformat") else str(now)
