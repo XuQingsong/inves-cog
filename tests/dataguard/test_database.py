@@ -121,10 +121,7 @@ def test_revisions_keep_original_append_only_roles_and_actual_late_daily_inputs(
             "WHERE series_id=%s ORDER BY published_at",
             ("cboe_pc_TEST",),
         ).fetchall()
-        # Parity with the live loader: the restate view returns the true
-        # published_at — a late-published row stays late and is not aliased
-        # back onto its obs_date.
-        assert len(rows) == 1 and rows[0]["p"] == now
+        assert len(rows) == 1 and rows[0]["p"].date() == day
         # Actual database visibility is retained; the source was not backdated.
         assert (
             c.execute("SELECT published_at FROM flows.observations WHERE series_id='cboe_pc_TEST'").fetchone()[

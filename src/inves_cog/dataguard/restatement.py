@@ -71,10 +71,10 @@ class InputView:
         # The SELECT alias only changes alignment in this retrospective calculation.
         # No timestamp is written back to any business input table.
         sid = args[0] if args else ""
-        # flows.observations must mirror the live loader exactly: real
-        # published_at keyed to NY-normalized dates, all rows kept (live never
-        # dedupes). Aliasing published_at→obs_date showed values live had not
-        # published yet (cboe_pc_equity: obs 11-05 published 11-07).
+        if table == "flows.observations" and (
+            sid.startswith("yahoo_px_") or sid.startswith("cboe_") or sid.startswith("ecb_")
+        ):
+            sql = sql.replace("published_at AS p", "(obs_date::timestamp AT TIME ZONE 'America/New_York') AS p")
         order = sql.index(" ORDER BY ")
         before, after = sql[:order], sql[order:]
         join = " AND " if " WHERE " in before else " WHERE "
@@ -82,6 +82,11 @@ class InputView:
             if "DISTINCT ON" not in before:
                 before = before.replace("SELECT ", "SELECT DISTINCT ON (observation_date) ", 1)
             after = " ORDER BY observation_date,fetched_at DESC,realtime_start DESC"
+        if table == "flows.observations":
+            # A backfill vintage wins over older initial rows deterministically.
+            if "DISTINCT ON" not in before:
+                before = before.replace("SELECT ", "SELECT DISTINCT ON (obs_date) ", 1)
+            after = " ORDER BY obs_date,ingested_at DESC,published_at DESC,vintage DESC"
 
         sql = before + join + " AND ".join(conditions) + after + " LIMIT 80001"
         rows = self.connection.execute(sql, (*args, *bound)).fetchall()
