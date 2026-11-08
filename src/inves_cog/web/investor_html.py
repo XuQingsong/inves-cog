@@ -406,18 +406,25 @@ def _events(payload):
             )
         items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
+        catchup = row.get("attribution") == "catchup"
         if reasons:
             label = (
                 "候选（待证实）"
                 if "原因未明" in (row.get("status") or "")
                 else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
             )
+            if catchup:
+                label += " · 迟到补跑（按原定时点信息）"
             why = (
                 f'<div style="margin-top:10px"><div class="small muted">{label}'
                 f'</div><ul class="news">{"".join(reasons)}</ul></div>'
             )
+        elif row.get("attribution") == "unattributed":
+            why = '<div class="small muted" style="margin-top:8px">当日未归因。</div>'
         elif not payload.get("news_fresh"):
             why = '<div class="small muted" style="margin-top:8px">当日新闻缺失，原因解释不可用。</div>'
+        elif catchup:
+            why = '<div class="small muted" style="margin-top:8px">迟到补跑（按原定时点信息），暂无可引用的解释。</div>'
         else:
             why = '<div class="small muted" style="margin-top:8px">暂无可引用的解释。</div>'
         held_count = sum(1 for ticker in members if ticker in held)

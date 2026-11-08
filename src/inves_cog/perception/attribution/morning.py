@@ -35,6 +35,15 @@ WHERE trade_date = %s
 ORDER BY session, anomaly_id
 """
 
+_ANOMALIES_LATE = """
+SELECT anomaly_id, trade_date, session, direction, members, universe
+FROM perception.anomalies
+WHERE trade_date = %s
+  AND generated_at IS NOT NULL
+  AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
+ORDER BY session, anomaly_id
+"""
+
 _NEWS = """
 SELECT info_id, kind, published_at, first_seen_at, headline, flags, extraction_source, tickers, entities
 FROM ingest.info_items
@@ -95,6 +104,8 @@ def main(argv=None, *, connection=None, perception=None, clock=None, client=None
             if not _is_morning(moment):
                 return 0
             return _write_page(borrowed, moment, client)
+        if "--catchup" in args:
+            return _run_chain(borrowed, writer, moment, client, _record_clock(record_clock), catchup_day=_day_arg(args))
         if "--chain-only" in args:
             if not in_stage_window("attribution_candidates", moment):
                 return 0
@@ -105,6 +116,15 @@ def main(argv=None, *, connection=None, perception=None, clock=None, client=None
     finally:
         for item in owned:
             item.close()
+
+
+def _day_arg(args):
+    if "--day" not in args:
+        raise SystemExit("补跑需要 --day 后面的交易日")
+    index = args.index("--day")
+    if index + 1 >= len(args):
+        raise SystemExit("需要 --day 后面的交易日")
+    return date.fromisoformat(args[index + 1])
 
 
 def _moment(argv, clock):
@@ -272,8 +292,11 @@ def _execute(connection, writer, moment, client, record_clock):
     return 0
 
 
-def _load(connection, moment, day):
-    anomalies = [_anomaly(row) for row in _all(connection, _ANOMALIES, (day, moment))]
+def _load(connection, moment, day, upstream_visible_for_day=None):
+    statement, params = _ANOMALIES, (day, moment)
+    if upstream_visible_for_day == str(day)[:10]:
+        statement, params = _ANOMALIES_LATE, (day,)
+    anomalies = [_anomaly(row) for row in _all(connection, statement, params)]
     attach_graph(connection, anomalies, moment)
     items = [_item(row) for row in _all(connection, _NEWS, (moment, _news_start(day), moment))]
     valuation = _valuation(connection, moment, day)
@@ -500,6 +523,8 @@ def dispatch_decision(task_name, rows):
         return "done"
     if any(row.get("status") == "running" for row in found):
         return "running"
+    if any(_is_catchup_row(row) for row in found):
+        return "exhausted"
     if any(str(row.get("error_summary") or "").startswith("skipped_upstream:") for row in found):
         return "skipped"
     failures = [row for row in found if row.get("status") == "failed"]
@@ -530,6 +555,60 @@ def upstream_phrase(name, rows):
 
 def skip_summary(missing):
     return "skipped_upstream: " + "；".join(missing)
+
+
+_CATCHUP_MARK = "late_catchup: "
+
+
+def _is_skip_row(row):
+    return str(row.get("error_summary") or "").startswith("skipped_upstream:")
+
+
+def _is_catchup_row(row):
+    return str(row.get("error_summary") or "").startswith(_CATCHUP_MARK)
+
+
+def catchup_deadline(task_name, day):
+    """Window open of the next trading day's same stage."""
+    nxt = date.fromisoformat(str(day)[:10]) + timedelta(days=1)
+    while not trading_day(nxt):
+        nxt += timedelta(days=1)
+    return stage_bounds(task_name, nxt)[0]
+
+
+def catchup_pending(task_name, day, own_rows, now):
+    """One catch-up per stage per day: only skip rows so far, before the next day's window."""
+    rows = list(own_rows or [])
+    if not rows or not all(_is_skip_row(row) for row in rows):
+        return False
+    if any(_is_catchup_row(row) for row in rows):
+        return False
+    return now < catchup_deadline(task_name, day)
+
+
+def catchup_ready(task_name, day, own_rows, upstream_lookup, now):
+    """catchup_pending plus a ready upstream. upstream_lookup(name) returns that task's job rows."""
+    if not catchup_pending(task_name, day, own_rows, now):
+        return False
+    for name in _UPSTREAM.get(task_name) or ():
+        if not upstream_ready(upstream_lookup(name) or [], now, name):
+            return False
+    return True
+
+
+def _catchup_note(task_name, day, now):
+    cutoff = stage_bounds(task_name, day)[0]
+    stamp = now.isoformat() if hasattr(now, "isoformat") else str(now)
+    return f"{_CATCHUP_MARK}cutoff={cutoff.isoformat()} ran={stamp}"
+
+
+def _annotate_catchup(connection, task_name, day, marker):
+    connection.execute(
+        "UPDATE ingest.job_runs SET error_summary = %s || coalesce('；' || error_summary, '') "
+        "WHERE id = (SELECT id FROM ingest.job_runs WHERE task_name = %s AND trade_date = %s "
+        "ORDER BY started_at DESC LIMIT 1)",
+        (marker, task_name, str(day)[:10]),
+    )
 
 
 def job_rows(connection, day, task_name):
@@ -625,9 +704,13 @@ def _synthetic(anomalies, prepared):
     return rows
 
 
-def _run_chain(connection, writer, now, client, record_clock):
-    cutoff = stage_cutoff("attribution_candidates", now)
-    day = _closed_trade_date(cutoff)
+def _run_chain(connection, writer, now, client, record_clock, *, catchup_day=None):
+    if catchup_day is not None:
+        cutoff = stage_bounds("attribution_candidates", catchup_day)[0]
+        day = str(catchup_day)[:10]
+    else:
+        cutoff = stage_cutoff("attribution_candidates", now)
+        day = _closed_trade_date(cutoff)
     if writer is None:
         return _fail_job(
             connection,
@@ -643,9 +726,10 @@ def _run_chain(connection, writer, now, client, record_clock):
         except Exception as exc:
             return _fail_job(connection, now, "attribution_candidates", day, str(exc), clock=record_clock)
     client = client or _client(None)
+    marker = _catchup_note("attribution_candidates", day, now) if catchup_day is not None else None
 
     def operation():
-        loaded = _load(connection, cutoff, day)
+        loaded = _load(connection, cutoff, day, upstream_visible_for_day=day if catchup_day is not None else None)
         result = run_scheduled(
             cutoff,
             anomalies=loaded["anomalies"],
@@ -673,7 +757,11 @@ def _run_chain(connection, writer, now, client, record_clock):
             operation=operation,
         )
     except Exception:
+        if marker is not None:
+            _annotate_catchup(connection, "attribution_candidates", day, marker)
         return 1
+    if marker is not None:
+        _annotate_catchup(connection, "attribution_candidates", day, marker)
     return 0
 
 

@@ -14,6 +14,7 @@ from inves_cog.perception.attribution.chain import _closed_trade_date
 from inves_cog.perception.attribution.morning import (
     _UPSTREAM,
     at_stage_deadline,
+    catchup_ready,
     dispatch_decision,
     in_stage_window,
     job_rows,
@@ -47,6 +48,20 @@ def run_once(
         raise ValueError("未知任务")
     moment = clock.now_utc()
     if not in_stage_window(task_name, moment):
+        day = _closed_trade_date(moment)
+        own = _lookup(records, root, load_environment, task_name, day)
+        if (
+            own is not None
+            and dispatch_decision(task_name, own) == "skipped"
+            and catchup_ready(
+                task_name,
+                day,
+                own,
+                lambda name: _lookup(records, root, load_environment, name, day),
+                moment,
+            )
+        ):
+            return _run_catchup(root, moment, task_name, day, python, run, load_environment, records)
         return {"status": "not_due"}
     root = Path(root).resolve()
     day = _closed_trade_date(moment)
@@ -55,7 +70,16 @@ def run_once(
         if at_stage_deadline(task_name, moment):
             return _logged(root, moment, task_name, {"status": "failed", "error_type": "LookupError"})
         return {"status": "waiting_dependencies"}
-    if dispatch_decision(task_name, own) != "run":
+    decision = dispatch_decision(task_name, own)
+    if decision != "run":
+        if decision == "skipped" and catchup_ready(
+            task_name,
+            day,
+            own,
+            lambda name: _lookup(records, root, load_environment, name, day),
+            moment,
+        ):
+            return _run_catchup(root, moment, task_name, day, python, run, load_environment, records)
         return {"status": "already_attempted"}
     missing = []
     for name in _UPSTREAM[task_name]:
@@ -107,6 +131,46 @@ def run_once(
         moment,
         task_name,
         {"status": status, "returncode": completed.returncode, "task_name": task_name},
+    )
+
+
+def _run_catchup(root, moment, task_name, day, python, run, load_environment, records):
+    root = Path(root).resolve()
+    try:
+        values = child_environment(root, load_environment)
+        completed = run(
+            [
+                str(python or sys.executable),
+                "-m",
+                "inves_cog.perception.attribution.scheduled",
+                "--task",
+                task_name,
+                "--catchup",
+                "--day",
+                str(day),
+                "--at",
+                moment.isoformat(),
+            ],
+            cwd=root,
+            env=values,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except Exception as exc:
+        return _logged(
+            root,
+            moment,
+            task_name,
+            {"status": "failed", "catchup": True, "error_type": type(exc).__name__, "task_name": task_name},
+        )
+    found = _lookup(records, root, load_environment, task_name, day)
+    status = "ok" if completed.returncode == 0 and upstream_ready(found, moment, task_name) else "failed"
+    return _logged(
+        root,
+        moment,
+        task_name,
+        {"status": status, "catchup": True, "returncode": completed.returncode, "task_name": task_name},
     )
 
 
