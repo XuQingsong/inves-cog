@@ -49,7 +49,7 @@ BARS_ETFS = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"]
 # holidays); BTC-USD: FRED CBBTCUSD via the daily fred_task; MOVE stays on Yahoo.
 FLOWS = {
     "JPY=X": "ecb_jpyx",
-    "MOVE": "yahoo_px_move",
+    "债市波动": "cboe_vxtlt",
 }
 MACRO = {
     "VIX": ("ingest.macro_observations", "VIX_CBOE"),

@@ -745,7 +745,7 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
 YAHOO_CHART = (
     "https://query1.finance.yahoo.com/v8/finance/chart/{sym}?period1={p1}&period2={p2}&interval=1d&events=div%2Csplit"
 )
-BARO_YAHOO = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT", "JPY=X", "BTC-USD", "^MOVE", "^TNX"]
+BARO_YAHOO = ["TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT", "JPY=X", "BTC-USD", "^TNX"]
 
 
 def _yahoo_close(sym, start, end, http=None):
@@ -769,6 +769,47 @@ def _yahoo_close(sym, start, end, http=None):
     import datetime as _dt
 
     return {_dt.datetime.fromtimestamp(t, tz=NY).date(): c for t, c in zip(ts, adj, strict=False) if c is not None}
+
+
+VXTLT_CSV = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VXTLT_History.csv"
+
+
+def _vxtlt_close(http, start, end):
+    """Cboe VXTLT history CSV → {date: close} within [start, end]."""
+    r = http.request("GET", VXTLT_CSV, headers=UA)
+    text = r.decode() if isinstance(r, bytes) else r
+    out = {}
+    for row in csv.DictReader(io.StringIO(text)):
+        d = _mdy(row.get("DATE") or "")
+        v = row.get("VXTLT")
+        if d and v and start <= d <= end:
+            out[d] = float(v)
+    return out
+
+
+def backfill_vxtlt(http, connection, raw_dir, start, end, _now=None):
+    """Cboe VXTLT daily closes → flows.observations series cboe_vxtlt
+    (published_at = close day 17:00 ET, same convention as the retired MOVE)."""
+    rows = [
+        {
+            "series_id": "cboe_vxtlt",
+            "obs_date": d,
+            "value": float(v),
+            "published_at": published_at("cboe_idx", d),
+            "vintage": "backfill",
+        }
+        for d, v in sorted(_vxtlt_close(http, start, end).items())
+    ]
+    if connection is not None and rows:
+        upsert_many(connection, "observations", list(rows[0].keys()), rows)
+    return [
+        {
+            "source": "Cboe:VXTLT",
+            "first": str(rows[0]["obs_date"]) if rows else None,
+            "last": str(rows[-1]["obs_date"]) if rows else None,
+            "rows": len(rows),
+        }
+    ]
 
 
 def backfill_yahoo_px(http, connection, raw_dir, start, end, _now=None):

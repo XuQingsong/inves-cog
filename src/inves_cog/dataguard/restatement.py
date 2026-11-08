@@ -46,7 +46,11 @@ class InputView:
             raise ValueError("Unknown restatement source")
         column, seen = columns[table]
         conditions = [f"{column}>=%s", f"{column}<=%s"]
-        bound = [self.day - timedelta(days=550), self.day]
+        # flows.cftc_positions feeds 资管净多分位 whose _pct_rank needs
+        # minp=504 non-null observations; size the lookback off that
+        # requirement (504 trading days ≈ 730 calendar days) plus margin.
+        lookback = 550 if table != "flows.cftc_positions" else int(504 * 365 / 252 * 1.3)
+        bound = [self.day - timedelta(days=lookback), self.day]
         if seen:
             conditions.append(f"{seen}<=%s")
             bound.append(self.now)

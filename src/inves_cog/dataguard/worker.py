@@ -45,7 +45,7 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
 
             result = collect(http, db, DEFAULT_RAW, day=day, tickers=item.filter.get("ticker", ()), now=now)
             evidence["candidate_rows"] = result["rows"]
-        elif entry in ("yahoo_px", "ecb_fx"):
+        elif entry in ("yahoo_px", "ecb_fx", "vxtlt"):
             getattr(backfill, "backfill_" + entry)(http, receipt, DEFAULT_RAW, day, day, now)
         elif entry == "occ":
             backfill.backfill_occ(http, receipt, DEFAULT_RAW, day, day, now)

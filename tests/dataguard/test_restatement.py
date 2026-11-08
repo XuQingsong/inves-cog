@@ -152,3 +152,20 @@ def test_inputview_does_not_double_distinct_on_already_deduped_macro_query():
     sql, _ = db.calls[-1]
     assert sql.count("DISTINCT ON") == 1
     assert "ORDER BY observation_date,fetched_at DESC,realtime_start DESC" in sql
+
+
+def test_cftc_restate_window_satisfies_pct_rank_minp():
+    """资管净多分位 needs minp=504 obs within _pct_rank's window; the
+    cftc_positions lookback must cover it (504 trading days + margin)."""
+
+    from inves_cog.dataguard.restatement import InputView
+
+    db = DB()
+    view = InputView(db, DAY, NOW)
+    view.execute(
+        "SELECT market, trader_class, report_date AS d, long, short, open_interest, "
+        "release_at AS p FROM flows.cftc_positions ORDER BY release_at"
+    )
+    sql, args = db.calls[-1]
+    # the lookback bound (first arg) must be >= 504 trading days ≈ 730 calendar + margin
+    assert (DAY - args[0]).days >= int(504 * 365 / 252 * 1.25)

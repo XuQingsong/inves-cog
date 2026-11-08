@@ -528,6 +528,18 @@ def collect_ecb_fx(http, connection, raw_dir, day, now):
     return {"date": str(day), "rows": sum(r.get("rows", 0) for r in reports)}
 
 
+def collect_vxtlt(http, connection, raw_dir, day, now):
+    """Daily Cboe VXTLT for the barometer → flows.observations cboe_vxtlt.
+
+    Cboe publishes end-of-day index values after ~17:00 ET; a 10-day trailing
+    window self-heals any missed day on the next run.
+    """
+    from inves_cog.flows.backfill import backfill_vxtlt
+
+    reports = backfill_vxtlt(http, connection, raw_dir, day - timedelta(days=10), day, now)
+    return {"date": str(day), "rows": sum(r.get("rows", 0) for r in reports)}
+
+
 def collect_cboe_pc(http, connection, day, raw_dir, published_at=None):
     url = CBOE_PC_URL.format(day=day)
     t0 = time.monotonic()
