@@ -31,6 +31,7 @@ FROM perception.anomalies
 WHERE trade_date = %s
   AND generated_at IS NOT NULL
   AND generated_at <= %s
+  AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
 ORDER BY session, anomaly_id
 """
 

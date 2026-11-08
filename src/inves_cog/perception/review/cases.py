@@ -57,6 +57,7 @@ def _ensure_cases(connection, as_of, visible, clock):
         FROM perception.anomalies
         WHERE universe = 'pool' AND trade_date <= %s
           AND (generated_at IS NULL OR generated_at < %s)
+          AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
         ORDER BY anomaly_id
         """,
         (as_of, visible),

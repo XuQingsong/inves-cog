@@ -279,6 +279,7 @@ def _write_oneliner(writer, day, clock, client):
         SELECT anomaly_id FROM perception.anomalies
         WHERE trade_date = %s AND universe = 'pool'
           AND (generated_at IS NULL OR generated_at < %s)
+          AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
         ORDER BY anomaly_id
         """,
         (day, visible),

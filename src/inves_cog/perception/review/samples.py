@@ -136,6 +136,7 @@ def _move_discovered(connection, ticker, day):
         """
         SELECT members FROM perception.anomalies
         WHERE trade_date = %s AND (generated_at IS NULL OR generated_at < %s)
+          AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
         """,
         (day, cutoff(day)),
     ).fetchall()
@@ -170,6 +171,7 @@ def _month_members(connection, month_end):
         SELECT members FROM perception.anomalies
         WHERE trade_date >= %s AND trade_date <= %s
           AND (generated_at IS NULL OR generated_at < %s)
+          AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
         """,
         (start, month_end, cutoff(month_end)),
     ).fetchall()
