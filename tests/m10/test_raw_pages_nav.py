@@ -73,3 +73,16 @@ def test_public_boundary_serves_system_and_redirects():
     assert client.get("/system").status_code == 200
     assert client.get("/stock/NVDA", follow_redirects=False).status_code == 302
     assert client.get("/paper/universe", follow_redirects=False).status_code == 302
+
+
+def test_m3chart_endpoint_passes_public_boundary_and_rejects_unknown():
+    from fastapi.testclient import TestClient
+
+    from inves_cog.web.public import create_app
+
+    app = create_app(dsn="postgresql://unused")
+    paths = {getattr(r, "path", "") for r in app.router.routes}
+    assert "/api/pages/m3chart" in paths  # under /api/pages/ → inside the public boundary
+    client = TestClient(app)
+    # sym whitelist is enforced before any DB access; unknown symbols 404.
+    assert client.get("/api/pages/m3chart?sym=NOPE").status_code == 404

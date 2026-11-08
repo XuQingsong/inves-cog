@@ -2395,14 +2395,25 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
                     )
         if items:
             groups[tab] = items
+    first = groups[next(iter(groups))][0]["sym"] if groups else None
+    daily, intraday = _m3_series_many(connection, day, [first] if first else [])
+    return {"groups": groups, "daily": daily, "intraday": intraday}
+
+
+def _m3_series_many(connection, day, tickers):
+    """Daily OHLCV (260 rows) + today's intraday line for the market3 chart.
+    Intra timestamps are epoch seconds (compact; lightweight-charts consumes
+    them directly)."""
     daily, intraday = {}, {}
+    if not tickers:
+        return daily, intraday
     bar_rows = (
         connection.execute(
             "SELECT * FROM ("
             " SELECT *, ROW_NUMBER() OVER (PARTITION BY ticker ORDER BY trade_date DESC) rn"
             " FROM ingest.bars_daily WHERE ticker=ANY(%s) AND trade_date<=%s) x"
             " WHERE rn <= 260 ORDER BY ticker, trade_date DESC",
-            (all_tickers, day),
+            (tickers, day),
         ).fetchall()
         if _table_exists(connection, "ingest.bars_daily")
         else []
@@ -2416,10 +2427,10 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             "SELECT ticker, as_of, last FROM ingest.intraday_snapshots WHERE ticker=ANY(%s)"
             " AND as_of >= %s::timestamp AT TIME ZONE 'America/New_York'"
             " AND as_of < (%s::date + 1)::timestamp AT TIME ZONE 'America/New_York' ORDER BY ticker, as_of",
-            (all_tickers, day, day),
+            (tickers, day, day),
         ).fetchall():
             snap_by_ticker.setdefault(r["ticker"], []).append(r)
-    for t in all_tickers:
+    for t in tickers:
         rows = bars_by_ticker.get(t, [])
         if rows:
             daily[t] = [
@@ -2440,8 +2451,16 @@ def _market3(connection, day, index_quotes=None, index_closes=None):
             ]
         srows = snap_by_ticker.get(t, [])
         if len(srows) > 1:
-            intraday[t] = [{"t": r["as_of"].isoformat(), "p": float(r["last"])} for r in srows if r["last"] is not None]
-    return {"groups": groups, "daily": daily, "intraday": intraday}
+            intraday[t] = [
+                {"t": int(r["as_of"].timestamp()), "p": float(r["last"])} for r in srows if r["last"] is not None
+            ]
+    return daily, intraday
+
+
+def m3_series(connection, day, sym):
+    """One symbol's market3 chart payload for /api/pages/m3chart."""
+    daily, intraday = _m3_series_many(connection, day, [sym])
+    return {"sym": sym, "daily": daily.get(sym) or [], "intraday": intraday.get(sym) or []}
 
 
 def page_brief_market(connection, day, clock):

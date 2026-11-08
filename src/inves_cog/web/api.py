@@ -1,5 +1,6 @@
 """FastAPI page routes. Each request uses its own read-only transaction."""
 
+import json
 import os
 import threading
 import time
@@ -8,7 +9,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from fastapi import FastAPI
-from starlette.responses import HTMLResponse, Response
+from starlette.responses import HTMLResponse, JSONResponse, Response
 
 from inves_cog.clock import SystemClock
 from inves_cog.web.brief import page_brief_account, page_brief_market, page_brief_stocks, page_brief_trust
@@ -148,6 +149,16 @@ def _warm_entries(call, clock):
             lambda: render_barometer(call(lambda c, d, cl: api_payload(c, cl), None)["history"]),
         )
 
+    def m3chart(sym):
+        from inves_cog.web.brief import m3_series
+
+        return (
+            ("m3chart", sym),
+            lambda: json.dumps(call(lambda c, d, cl: m3_series(c, latest_visible_session(cl), sym), None)),
+        )
+
+    from inves_cog.web.brief import _MARKET3
+
     return [
         brief(page_brief_market),
         brief(page_brief_stocks),
@@ -155,7 +166,7 @@ def _warm_entries(call, clock):
         brief(page_brief_trust),
         plain(page_market),
         barometer(),
-    ]
+    ] + [m3chart(sym) for rows in _MARKET3.values() for sym, _ in rows]
 
 
 def _warm_pass(cache, entries, log):
@@ -190,6 +201,22 @@ def _start_warmup(cache, entries, interval=_WARM_INTERVAL):
     )
     thread.start()
     return stop
+
+
+def _register_m3chart(app, call, page_cache):
+    from inves_cog.web.brief import _MARKET3, m3_series
+
+    valid = {t for rows in _MARKET3.values() for t, _ in rows}
+
+    @app.get("/api/pages/m3chart")
+    def m3chart_api(sym: str):
+        if sym not in valid:
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+        produce = lambda: json.dumps(  # noqa: E731
+            call(lambda c, d, cl: m3_series(c, latest_visible_session(cl), sym), None)
+        )
+        body = page_cache.get(("m3chart", sym), produce).body
+        return Response(content=body, media_type="application/json")
 
 
 def create_app(dsn=None, clock=None, warmup=False):
@@ -230,6 +257,8 @@ def create_app(dsn=None, clock=None, warmup=False):
     @app.get("/api/pages/market")
     def market(date: date):
         return call(page_market, date)
+
+    _register_m3chart(app, call, page_cache)
 
     @app.get("/api/pages/barometer")
     def barometer_api():
