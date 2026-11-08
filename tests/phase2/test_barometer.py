@@ -208,7 +208,8 @@ def test_api_shape_and_missing():
         "missing": ["MOVE"],
     }
     rec = _row(row)
-    assert rec["missing"] == ["MOVE"] and rec["asof"]["cftc"] == "2026-10-27"
+    assert "missing" not in rec  # field trimmed by page-weight PR (#153)
+    assert rec["asof"]["cftc"] == "2026-10-27"
     assert list(rec["FD"]) == list({"去杠杆": 30})  # ordered output
     html = render_page([rec])
     assert "市场情绪钟摆" in html and "缺" in html and "noqa" not in html
@@ -291,14 +292,15 @@ def test_sentence_missing_vix():
 
 
 def test_loader_sources(monkeypatch):
-    """price_frame: six ETFs come from bars_daily (not yahoo_px), TNX from
-    macro_observations DGS10, and only JPY=X/BTC-USD/MOVE remain on yahoo_px."""
+    """price_frame: six ETFs come from bars_daily (not yahoo_px), TNX and BTC-USD
+    from macro_observations, JPY=X from ECB and MOVE on yahoo_px."""
     from datetime import date
     from unittest.mock import MagicMock
 
     from inves_cog.perception.barometer import loader
 
-    assert set(loader.YAHOO) == {"JPY=X", "BTC-USD", "MOVE"}
+    assert loader.FLOWS == {"JPY=X": "ecb_jpyx", "MOVE": "yahoo_px_move"}
+    assert loader.MACRO["BTC-USD"] == ("ingest.macro_observations", "CBBTCUSD")
     assert loader.MACRO["TNX"] == ("ingest.macro_observations", "DGS10")
     assert set(loader.BARS_ETFS) == {"TQQQ", "SOXL", "GLD", "HYG", "IEF", "TLT"}
 
@@ -325,4 +327,48 @@ def test_loader_sources(monkeypatch):
         assert px[t].iloc[-1] == 100.0 + loader.BARS_ETFS.index(t)
     assert px["TNX"].iloc[-1] == 4.5
     obs_queries = [q for q in queries if "flows.observations" in q and "macro" not in q]
-    assert len(obs_queries) == 3  # JPY=X, BTC-USD, MOVE only
+    assert len(obs_queries) == 2  # JPY=X, MOVE only
+
+
+def test_series_picks_latest_vintage_for_macro_observations():
+    """Multiple vintages per observation_date: loader must deterministically
+    return the newest (same order as restatement: fetched_at DESC, realtime_start DESC)."""
+    from datetime import date
+
+    from inves_cog.perception.barometer.loader import _series
+
+    class _Res:
+        def __init__(self, rows):
+            self._rows = rows
+
+        def fetchall(self):
+            return self._rows
+
+    class _Conn:
+        def __init__(self, rows):
+            self._rows = rows
+            self.sql = None
+
+        def execute(self, sql, params=()):
+            self.sql = sql
+            # emulate DISTINCT ON (observation_date) ORDER BY observation_date,
+            # fetched_at DESC, realtime_start DESC
+            best = {}
+            for r in self._rows:
+                key = (r["fetched_at"], r["realtime_start"])
+                if r["d"] not in best or key > best[r["d"]][0]:
+                    best[r["d"]] = (key, r)
+            return _Res(sorted((v[1] for v in best.values()), key=lambda r: r["d"]))
+
+    day = date(2026, 11, 6)
+    conn = _Conn(
+        [
+            {"d": day, "value": 100.0, "fetched_at": "2026-11-06 01:00", "realtime_start": "2026-11-06"},
+            {"d": day, "value": 200.0, "fetched_at": "2026-11-07 01:00", "realtime_start": "2026-11-07"},
+            {"d": day, "value": 150.0, "fetched_at": "2026-11-06 12:00", "realtime_start": "2026-11-06"},
+        ]
+    )
+    s = _series(conn, "ingest.macro_observations", "CBBTCUSD", day)
+    assert "DISTINCT ON (observation_date)" in conn.sql
+    assert "fetched_at DESC, realtime_start DESC" in conn.sql
+    assert s.iloc[0] == 200.0

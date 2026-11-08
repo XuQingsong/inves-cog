@@ -60,7 +60,17 @@ MACRO = {
 
 
 def _series(conn, table, series_id, end):
-    date_col = "observation_date" if "macro_observations" in table else "obs_date"
+    if "macro_observations" in table:
+        # Multiple vintages per observation_date are stored deliberately;
+        # take the latest vintage deterministically (same order as restatement).
+        rows = conn.execute(
+            "SELECT DISTINCT ON (observation_date) observation_date AS d, value "
+            "FROM ingest.macro_observations WHERE series_id=%s AND observation_date <= %s "
+            "ORDER BY observation_date, fetched_at DESC, realtime_start DESC",
+            (series_id, end),
+        ).fetchall()
+        return pd.Series({pd.Timestamp(r["d"]): float(r["value"]) for r in rows if r["value"] is not None})
+    date_col = "obs_date"
     rows = conn.execute(
         f"SELECT {date_col} AS d, value FROM {table} WHERE series_id=%s AND {date_col} <= %s ORDER BY 1",
         (series_id, end),
