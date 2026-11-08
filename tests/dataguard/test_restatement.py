@@ -167,5 +167,6 @@ def test_cftc_restate_window_satisfies_pct_rank_minp():
         "release_at AS p FROM flows.cftc_positions ORDER BY release_at"
     )
     sql, args = db.calls[-1]
-    # the lookback bound (first arg) must be >= 504 trading days ≈ 730 calendar + margin
-    assert (DAY - args[0]).days >= int(504 * 365 / 252 * 1.25)
+    # the lookback must cover _pct_rank's full rolling window:
+    # 1260 trading days ≈ 1825 calendar days + ≥20% margin
+    assert (DAY - args[0]).days >= int(1260 * 365 / 252 * 1.2)

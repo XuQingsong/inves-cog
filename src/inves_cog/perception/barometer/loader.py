@@ -106,10 +106,10 @@ def price_frame(conn, end, start=None):
             # never carry the previous session's value forward.
             px["JPY=X"] = jpy_raw.reindex(idx)
     if start is not None:
-        # Keep enough pre-start history for the deepest rolling input:
-        # _pct_rank(minp=504) needs ≥504 trading days ≈ 730 calendar days
-        # of px.index; +23% margin → 900d. 400d yielded ~280 obs → NaN.
-        px = px.loc[px.index >= pd.Timestamp(start) - pd.Timedelta(days=900)]
+        # Keep the full rolling window of the deepest input so restates
+        # reproduce live values: _pct_rank(window=1260, minp=504) reads the
+        # trailing 1260 trading-day positions; +20% margin → 2190 days.
+        px = px.loc[px.index >= pd.Timestamp(start) - pd.Timedelta(days=2190)]
     return px
 
 

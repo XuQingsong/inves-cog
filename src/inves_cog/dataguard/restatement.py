@@ -46,13 +46,14 @@ class InputView:
             raise ValueError("Unknown restatement source")
         column, seen = columns[table]
         conditions = [f"{column}>=%s", f"{column}<=%s"]
-        # The lookback must cover the deepest rolling input on px.index:
-        # 资管净多分位 is _pct_rank(minp=504) — a percentile over the trailing
-        # window that only computes once ≥504 non-null trading-day obs exist.
-        # px.index length is set by this bound (every day on it is a trading
-        # day), so 504 trading days ≈ 730 calendar days, +25% margin → 912.
-        # 550d yielded ~381 obs < 504 → the percentile was always NaN.
-        bound = [self.day - timedelta(days=int(504 * 365 / 252 * 1.25)), self.day]
+        # The lookback must cover the deepest rolling input on px.index so a
+        # restate reproduces the live path's values, not an approximation:
+        # 资管净多分位 is _pct_rank(window=1260, minp=504) — the percentile at
+        # day D is the rank of the last value across the trailing 1260
+        # trading-day positions of the input series. px.index length is set by
+        # this bound (every day on it is a trading day), so the bound must
+        # span ≥1260 trading days ≈ 1825 calendar days; +20% margin → 2190.
+        bound = [self.day - timedelta(days=int(1260 * 365 / 252 * 1.2)), self.day]
         if seen:
             conditions.append(f"{seen}<=%s")
             bound.append(self.now)
@@ -88,7 +89,9 @@ class InputView:
             after = " ORDER BY obs_date,ingested_at DESC,published_at DESC,vintage DESC"
         sql = before + join + " AND ".join(conditions) + after + " LIMIT 50001"
         rows = self.connection.execute(sql, (*args, *bound)).fetchall()
-        if len(rows) > 50000:
+        # Sized for the widest read: ingest.bars_daily ~44 tickers × ~1550
+        # trading days (2190d bound) ≈ 68k rows → 80k cap.
+        if len(rows) > 80000:
             raise ValueError("Restatement input limit exceeded")
         digest = hashlib.sha256(json.dumps(rows, default=str, sort_keys=True).encode()).hexdigest()
         self.sources.append(dict(table=table, series=str(sid), rows=len(rows), sha256=digest))
