@@ -55,7 +55,9 @@ def main():
         for s in found:
             print(f"{ticker}: Alpaca {s['raw'].get('type', 'split')} ratio x{s['ratio']:.6g} ex_date {s['date']}")
         expected = split_factors([r["trade_date"] for r in rows], found)
-        changed = [i for i, (r, f) in enumerate(zip(rows, expected)) if abs((r["adj_factor"] or 1) - f) > 1e-9]
+        changed = [
+            i for i, (r, f) in enumerate(zip(rows, expected, strict=True)) if abs((r["adj_factor"] or 1) - f) > 1e-9
+        ]
         for i in changed:
             r = rows[i]
             print(
