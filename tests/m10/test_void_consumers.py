@@ -1,6 +1,6 @@
 """Voided anomalies (data_quality containing "voided") are skipped by background
 consumers: attribution morning/replay reads and review case/sample/report reads.
-Unmarked rows — empty {}, NULL, or other jsonb — must still be returned."""
+Unmarked rows — empty {}, empty-array, or other jsonb — must still be returned."""
 
 from datetime import date, timedelta
 
@@ -18,10 +18,10 @@ DAY = date(2026, 11, 6)
 SEEN = cutoff(DAY) - timedelta(hours=6)
 
 ROWS = [
-    # anomaly_id, session, member ticker, data_quality
+    # anomaly_id, session, member ticker, data_quality (column is NOT NULL)
     ("vc-void", "post", "VOIDME", '["voided"]'),
     ("vc-empty", "close", "KEEPME", "{}"),
-    ("vc-null", "close", "NULLME", None),
+    ("vc-arr", "close", "ARRME", "[]"),
     ("vc-other", "close", "OTHERME", '{"flag":true}'),
 ]
 
@@ -58,14 +58,14 @@ def test_attribution_morning_read_skips_voided(db):
     rows = db.execute(_ANOMALIES, (DAY, cutoff(DAY))).fetchall()
     ids = {row["anomaly_id"] for row in rows}
     assert "vc-void" not in ids
-    assert {"vc-empty", "vc-null", "vc-other"} <= ids
+    assert {"vc-empty", "vc-arr", "vc-other"} <= ids
 
 
 def test_review_move_discovered_skips_voided(db):
     from inves_cog.perception.review.samples import _move_discovered
 
     assert _move_discovered(db, "KEEPME", DAY) is True
-    assert _move_discovered(db, "NULLME", DAY) is True
+    assert _move_discovered(db, "ARRME", DAY) is True
     assert _move_discovered(db, "VOIDME", DAY) is False
 
 
@@ -74,7 +74,7 @@ def test_review_month_members_skips_voided(db):
 
     names = _month_members(db, DAY)
     assert "VOIDME" not in names
-    assert {"KEEPME", "NULLME", "OTHERME"} <= names
+    assert {"KEEPME", "ARRME", "OTHERME"} <= names
 
 
 def test_review_case_seed_skips_voided(db):
@@ -90,4 +90,4 @@ def test_review_case_seed_skips_voided(db):
     ).fetchall()
     ids = {row["anomaly_id"] for row in src}
     assert "vc-void" not in ids
-    assert {"vc-empty", "vc-null", "vc-other"} <= ids
+    assert {"vc-empty", "vc-arr", "vc-other"} <= ids
