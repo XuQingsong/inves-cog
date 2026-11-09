@@ -742,7 +742,7 @@ def page_brief_stock(connection, day, clock, symbol):
     news_feed = _news_feed(connection, symbol, day, context)
     from inves_cog.perception.smartmoney import money_flow
 
-    smartmoney = _safe(connection, lambda: money_flow(connection, symbol, context["cutoff"]))
+    smartmoney = _safe(connection, lambda: money_flow(connection, symbol, context["cutoff"]), None)
     next_earnings = _next_earnings(context["earnings_cal"], symbol, day)
     tech = context["technicals"].get(symbol)
     range_row = context["ranges"].get(symbol)
