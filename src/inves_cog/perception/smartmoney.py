@@ -71,21 +71,24 @@ def _insiders(connection, ticker, day, p):
     # key -> {"people": set, "usd": float}
     totals = {k: {"people": set(), "usd": 0.0} for k in ("unplanned", "planned", "unknown_plan", "buys")}
     excluded = 0
-    for name, title, director, plan, code, shares, price, amount in rows:
-        name = name or "未知"
+    for row in rows:
+        name = row["insider_name"] or "未知"
+        code = row["transaction_code"]
         if code in _EXCLUDED_CODES or code not in {"P", "S"}:
             excluded += 1
             continue
+        amount = row["amount"]
+        shares, price = row["shares"], row["price"]
         usd = float(amount) if amount is not None else (float(shares) * float(price) if shares and price else 0.0)
         entry = people.setdefault(name, {"title": None, "director": False, "buy": 0.0, "sell": 0.0})
-        entry["title"] = entry["title"] or title
-        entry["director"] = entry["director"] or bool(director)
+        entry["title"] = entry["title"] or row["officer_title"]
+        entry["director"] = entry["director"] or bool(row["is_director"])
         if code == "P":
             entry["buy"] += usd
             key = "buys"
         else:
             entry["sell"] += usd
-            key = "unknown_plan" if plan is None else ("planned" if plan else "unplanned")
+            key = "unknown_plan" if row["aff10b5_one"] is None else ("planned" if row["aff10b5_one"] else "unplanned")
         totals[key]["people"].add(name)
         totals[key]["usd"] += usd
 
@@ -127,7 +130,7 @@ def _offexchange(connection, ticker, day, p):
     if not volume:
         return {"missing": "该股不在 FINRA 返回中", "label": "暂缺", "series": []}
     closes = {
-        r[0]: float(r[1])
+        r["trade_date"]: float(r["close"])
         for r in connection.execute(
             """
             SELECT trade_date, close FROM ingest.bars_daily
@@ -138,11 +141,11 @@ def _offexchange(connection, ticker, day, p):
     }
     visible = [
         {
-            "date": vdate,
-            "amount": None if closes.get(vdate) is None else float(total) * closes[vdate],
+            "date": r["date"],
+            "amount": None if closes.get(r["date"]) is None else float(r["total_volume"]) * closes[r["date"]],
         }
-        for vdate, total in volume
-        if next_trading_day(vdate) <= day
+        for r in volume
+        if next_trading_day(r["date"]) <= day
     ]
     visible.sort(key=lambda r: r["date"])
     series = visible[-p["offexchange_days"] :]
@@ -173,16 +176,16 @@ def _short(connection, ticker, day, p):
     ).fetchall()
     lag = p["publish_lag_sessions"]
     visible = []
-    for settlement, publish, short, dtc in rows:
-        pub = publish or _inferred_publish(settlement, lag)
+    for r in rows:
+        pub = r["publish_date"] or _inferred_publish(r["settlement_date"], lag)
         if pub <= day:
             visible.append(
                 {
-                    "settlement": settlement,
+                    "settlement": r["settlement_date"],
                     "publish": pub,
-                    "publish_inferred": publish is None,
-                    "short_interest": short,
-                    "days_to_cover": dtc,
+                    "publish_inferred": r["publish_date"] is None,
+                    "short_interest": r["short_interest"],
+                    "days_to_cover": r["days_to_cover"],
                 }
             )
     if not visible:
@@ -201,8 +204,8 @@ def _short(connection, ticker, day, p):
         (ticker, day),
     ).fetchone()
     si_pct = None
-    if shares and shares[0] and latest["short_interest"] is not None:
-        si_pct = float(latest["short_interest"]) / float(shares[0]) * 100
+    if shares and shares["shares"] and latest["short_interest"] is not None:
+        si_pct = float(latest["short_interest"]) / float(shares["shares"]) * 100
     threshold = p["short_change_threshold_pct"]
     label = (
         "暂缺"

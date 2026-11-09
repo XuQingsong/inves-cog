@@ -8,7 +8,7 @@ from inves_cog.perception.smartmoney import money_flow
 
 
 class FakeConn:
-    """form4 rows carry a trailing filed_at used to simulate the SQL cutoff."""
+    """Rows are dicts, matching the production dict_row connections."""
 
     def __init__(self, form4=(), short_vol=(), bars=(), si=(), shares=None):
         self._form4 = list(form4)
@@ -22,7 +22,10 @@ class FakeConn:
     def execute(self, sql, params=()):
         if "form4_events" in sql:
             as_of = params[1]
-            return _Result([r[:8] for r in self._form4 if r[8] <= as_of])
+            keys = (
+                "insider_name officer_title is_director aff10b5_one transaction_code shares price amount filed_at"
+            ).split()
+            return _Result([dict(zip(keys, r, strict=True)) for r in self._form4 if r[8] <= as_of])
         for key, rows in self._map.items():
             if key in sql:
                 return _Result(rows)
@@ -39,6 +42,18 @@ class _Result(list):
 
 def _f4(name, title, director, plan, code, shares, price, amount, filed):
     return (name, title, director, plan, code, shares, price, amount, filed)
+
+
+def _sv(day, total):
+    return {"date": day, "total_volume": total}
+
+
+def _bar(day, close):
+    return {"trade_date": day, "close": close}
+
+
+def _si(settlement, publish, short, dtc):
+    return {"settlement_date": settlement, "publish_date": publish, "short_interest": short, "days_to_cover": dtc}
 
 
 DAY = date(2026, 11, 9)
@@ -102,15 +117,29 @@ def test_missing_blocks_say_why():
 
 @pytest.mark.phase1_blocking
 def test_short_visibility_uses_publish_date():
-    si = [(date(2026, 10, 15), date(2026, 11, 30), 100.0, 2.0)]
+    si = [_si(date(2026, 10, 15), date(2026, 11, 30), 100.0, 2.0)]
     out = money_flow(FakeConn(si=si), "T", date(2026, 10, 28), params={})
     assert out["short"]["missing"] == "无 FINRA 持仓记录"
     out2 = money_flow(FakeConn(si=si), "T", date(2026, 12, 1), params={})
     assert out2["short"]["missing"] is None
     assert out2["short"]["latest"]["publish_inferred"] is False
-    si_null = [(date(2026, 10, 15), None, 100.0, 2.0)]
+    si_null = [_si(date(2026, 10, 15), None, 100.0, 2.0)]
     out3 = money_flow(FakeConn(si=si_null), "T", date(2026, 12, 1), params={})
     assert out3["short"]["latest"]["publish_inferred"] is True
+
+
+@pytest.mark.phase1_blocking
+def test_offexchange_label():
+    from datetime import timedelta
+
+    days = [date(2026, 10, 5) + timedelta(days=i) for i in range(25)]
+    conn = FakeConn(
+        short_vol=[_sv(d, 100.0) for d in days],
+        bars=[_bar(d, 10.0) for d in days],
+    )
+    out = money_flow(conn, "T", DAY, params={})["offexchange"]
+    assert out["label"] == "正常"
+    assert out["latest_amount"] == 1000.0
 
 
 @pytest.mark.phase1_blocking
