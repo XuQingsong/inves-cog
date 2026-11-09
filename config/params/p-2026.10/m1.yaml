@@ -23,6 +23,16 @@ m1:
     website_per_host: {count: 1, seconds: 2}
     finra: {count: 60, seconds: 60}
     fred: {count: 30, seconds: 60}
+  smartmoney:
+    insider_days: 90
+    insider_top_people: 5
+    insider_bullish_buy_usd: 1000000
+    insider_bearish_unplanned_sell_usd: 10000000
+    offexchange_days: 20
+    offexchange_spike_multiple: 2.0
+    short_periods: 8
+    short_change_threshold_pct: 10.0
+    publish_lag_sessions: 9
   wide_universe: {min_market_cap: 2000000000, min_adv20: 20000000, history_sessions: 20}
   body_retention_days: 90
   summary_characters: 500

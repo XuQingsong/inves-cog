@@ -1561,6 +1561,7 @@ def _stock(payload):
         + '<span class="small muted">技术参考，不触发交易</span></span>'
         + f'<span class="k">下次财报</span><span>{_next_earn(payload)}</span></div>'
         + f'<h3 style="margin-top:16px">四项评分</h3>{_score_bars(payload.get("books"))}</div>'
+        + _smartmoney_module(payload)
         + '<div class="card sec"><h2>新闻与事件</h2>'
         + _confirmed_events(payload)
         + _stock_news(payload)
@@ -1575,6 +1576,149 @@ def _stock(payload):
         + _consensus(payload.get("consensus"))
         + '<div class="gap">隐含天花板用于展示现价预期与长期风险；缺失数据明确列示，不作为买卖信号。</div>'
         + f'<h3 style="margin-top:16px">数据时间</h3><div class="kv small">{stamps}</div></div>'
+    )
+
+
+def _money_short(usd):
+    if usd is None or usd == 0:
+        return "—"
+    usd = float(usd)
+    if abs(usd) >= 1e9:
+        return f"${usd / 1e8:.1f} 亿"
+    if abs(usd) >= 1e8:
+        return f"${usd / 1e8:.2f} 亿"
+    if abs(usd) >= 1e4:
+        return f"${usd / 1e4:.0f} 万"
+    return f"${usd:.0f}"
+
+
+def _shares_short(value):
+    if value is None:
+        return _miss()
+    value = float(value)
+    if abs(value) >= 1e8:
+        return f"{value / 1e8:.2f} 亿股"
+    if abs(value) >= 1e4:
+        return f"{value / 1e4:.0f} 万股"
+    return f"{value:.0f} 股"
+
+
+def _smartmoney_module(payload):
+    data = payload.get("smartmoney")
+    if not data:
+        return ""
+    labels = [item for item in (data.get("labels") or []) if item]
+    chips = " ".join(f'<span class="chip ok">{_text(item)}</span>' for item in labels) or _miss()
+    ins = data.get("insiders") or {}
+    off = data.get("offexchange") or {}
+    short = data.get("short") or {}
+
+    if ins.get("missing"):
+        ins_html = f'<div class="small muted">暂缺（{_text(ins["missing"])}）</div>'
+    else:
+        header = (
+            '<div style="display:grid;grid-template-columns:1.4fr 2fr 90px 90px;gap:8px;margin:4px 0">'
+            '<span class="small muted">姓名</span><span class="small muted">职务</span>'
+            '<span class="small muted" style="text-align:right">买入</span>'
+            '<span class="small muted" style="text-align:right">卖出</span></div>'
+        )
+        people = header + "".join(
+            '<div style="display:grid;grid-template-columns:1.4fr 2fr 90px 90px;gap:8px;margin:4px 0">'
+            f'<span class="small">{_text(p["name"])}</span>'
+            f'<span class="small muted" style="white-space:normal">{_text(p["title"])}</span>'
+            f'<span class="small num" style="text-align:right">{_money_short(p["buy"])}</span>'
+            f'<span class="small num" style="text-align:right">{_money_short(p["sell"])}</span></div>'
+            for p in ins.get("people") or []
+        )
+        t = ins.get("totals") or {}
+
+        def _total(key, label):
+            row = t.get(key) or {}
+            if not row.get("people"):
+                return ""
+            return (
+                f'<span class="k">{label}</span>'
+                f'<span class="small">{row["people"]} 人 {_money_short(row.get("usd"))}</span>'
+            )
+
+        totals_html = (
+            _total("unplanned", "计划外卖出")
+            + _total("planned", "计划内（10B5-1）卖出")
+            + _total("unknown_plan", "计划未知")
+            + _total("buys", "买入")
+        )
+        excluded = ins.get("excluded_count") or 0
+        ins_html = (
+            people
+            + f'<div class="kv" style="margin-top:8px">{totals_html}</div>'
+            + (
+                f'<div class="small muted" style="margin-top:4px">另有授予/赠与/扣税 {excluded} 笔，不计。</div>'
+                if excluded
+                else ""
+            )
+        )
+
+    if off.get("missing"):
+        off_html = f'<div class="small muted">暂缺（{_text(off["missing"])}）</div>'
+    else:
+        series = [r["amount"] for r in (off.get("series") or []) if r["amount"] is not None]
+        bars = ""
+        if series:
+            peak = max(series) or 1
+            cells = "".join(
+                f'<rect x="{i * 10}" y="{28 - v / peak * 26:.1f}" width="8" '
+                f'height="{v / peak * 26:.1f}" fill="var(--accent,#6b8)"/>'
+                for i, v in enumerate(series[-20:])
+            )
+            bars = f'<svg width="100%" height="30" viewBox="0 0 200 30" preserveAspectRatio="none">{cells}</svg>'
+        latest, ratio = off.get("latest_amount"), off.get("ratio")
+        if ratio is not None:
+            ratio_cell = f'<span class="k">对比 20 日均值</span><span class="small num">{ratio:.1f} 倍</span>'
+        else:
+            ratio_cell = '<span class="k">对比 20 日均值</span><span class="small muted">历史不足 20 日</span>'
+        off_html = (
+            f'<div class="kv"><span class="k">最新一日</span><span class="small">{_money_short(latest)}</span>'
+            + ratio_cell
+            + "</div>"
+            + bars
+            + '<div class="small muted">场外成交（含暗池与做市商内部撮合），不区分买卖方向，FINRA 次日发布。</div>'
+        )
+
+    if short.get("missing"):
+        short_html = f'<div class="small muted">暂缺（{_text(short["missing"])}）</div>'
+    else:
+        latest = short.get("latest") or {}
+        pub = latest.get("publish")
+        pub_text = _text(str(pub)) + ("（推断）" if latest.get("publish_inferred") else "")
+        si = latest.get("si_pct")
+        dtc = round(latest["days_to_cover"], 2) if latest.get("days_to_cover") is not None else "暂缺"
+        si_text = f"{si:.2f}%" if si is not None else "暂缺"
+        change = short.get("change_pct")
+        chg = _signed(change, 1) if change is not None else _miss()
+        series = [v for v in (short.get("series") or []) if v is not None]
+        spark = _spark(series) if len(series) >= 2 else ""
+        short_html = (
+            '<div class="kv">'
+            f'<span class="k">空头股数</span><span class="small">{_shares_short(latest.get("short_interest"))}</span>'
+            f'<span class="k">较上一期</span><span class="small">{chg}</span>'
+            f'<span class="k">回补天数</span><span class="small num">{_text(dtc)}</span>'
+            f'<span class="k">占流通股</span><span class="small">{si_text}</span>'
+            f'<span class="k">结算日</span><span class="small">{_text(str(latest.get("settlement")))}</span>'
+            f'<span class="k">发布日</span><span class="small">{pub_text}</span>' + "</div>" + spark
+        )
+
+    return (
+        '<div class="card sec"><div style="display:flex;justify-content:space-between">'
+        + "<h2>资金动向</h2>"
+        + f'<span class="small muted">截至 {_text(data.get("as_of"))} · 各自滞后见板块说明</span></div>'
+        + f'<div style="margin:4px 0 10px">{chips} <span class="small muted">{_text(data.get("summary"))}</span></div>'
+        + f'<h3 style="margin-top:8px">内部人 <span class="small muted">{_text(ins.get("as_of_note"))}</span></h3>'
+        + ins_html
+        + f'<h3 style="margin-top:14px">场外成交 <span class="small muted">{_text(off.get("as_of_note"))}</span></h3>'
+        + off_html
+        + f'<h3 style="margin-top:14px">空头 <span class="small muted">{_text(short.get("as_of_note"))}</span></h3>'
+        + short_html
+        + "</div>"
     )
 
 
