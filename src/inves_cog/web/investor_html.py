@@ -1707,6 +1707,52 @@ def _smartmoney_module(payload):
             f'<span class="k">发布日</span><span class="small">{pub_text}</span>' + "</div>" + spark
         )
 
+    inst = data.get("institutions") or {}
+    if inst.get("missing"):
+        inst_html = f'<div class="small muted">暂缺（{_text(inst["missing"])}）</div>'
+    else:
+        max_sh = max((h["shares"] for h in inst.get("holders") or []), default=0) or 1
+        inst_rows = ""
+        for h in inst.get("holders") or []:
+            pct = h["shares"] / max_sh * 100
+            chg = _signed(h.get("change_pct"), 1) if h.get("change_pct") is not None else "—"
+            inst_rows += (
+                '<div style="display:flex;align-items:center;gap:8px;margin:4px 0">'
+                f'<span class="small" style="width:190px">{_text(h["name"])}</span>'
+                + ('<span class="chip" style="font-size:10px">新进</span>' if h.get("new") else "")
+                + '<div style="flex:1;background:#eceae3;height:8px">'
+                + f'<div style="background:#5b6b60;height:8px;width:{min(100, pct):.0f}%"></div></div>'
+                + f'<span class="small num" style="width:70px;text-align:right">{_shares_short(h["shares"])}</span>'
+                + f'<span class="small num" style="width:60px;text-align:right">{chg}</span>'
+                + "</div>"
+            )
+        cnt_chg = ""
+        if inst.get("holder_count_prior"):
+            cnt_chg = f"（上季 {inst['holder_count_prior']} 家）"
+        inst_html = (
+            '<div class="kv"><span class="k">持有机构</span>'
+            f'<span class="small">{inst.get("holder_count")} 家 {cnt_chg}</span>'
+            f'<span class="k">合计股数</span><span class="small">{_shares_short(inst.get("total_shares"))}</span>'
+            + (
+                '<span class="k">前十大合计较上季</span>'
+                f'<span class="small num">{_signed(inst.get("top_change_pct"), 1)}</span>'
+                if inst.get("top_change_pct") is not None
+                else ""
+            )
+            + "</div>"
+            + (
+                '<div class="small muted">上季数据不全（仅修正记录），对比暂缺</div>'
+                if not inst.get("prior_sufficient", True)
+                else ""
+            )
+            + inst_rows
+        )
+    inst_note = (
+        f"季末 {inst.get('period')} · 截至 SEC 数据集（申报截至 {inst.get('data_as_of')}）· 滞后约 45 天以上"
+        if not inst.get("missing")
+        else "13F 季度持仓 · 滞后约 45 天以上"
+    )
+
     return (
         '<div class="card sec"><div style="display:flex;justify-content:space-between">'
         + "<h2>资金动向</h2>"
@@ -1718,6 +1764,8 @@ def _smartmoney_module(payload):
         + off_html
         + f'<h3 style="margin-top:14px">空头 <span class="small muted">{_text(short.get("as_of_note"))}</span></h3>'
         + short_html
+        + f'<h3 style="margin-top:14px">机构 <span class="small muted">{_text(inst_note)}</span></h3>'
+        + inst_html
         + "</div>"
     )
 

@@ -10,13 +10,14 @@ from inves_cog.perception.smartmoney import money_flow
 class FakeConn:
     """Rows are dicts, matching the production dict_row connections."""
 
-    def __init__(self, form4=(), short_vol=(), bars=(), si=(), shares=None):
+    def __init__(self, form4=(), short_vol=(), bars=(), si=(), shares=None, f13=()):
         self._form4 = list(form4)
         self._map = {
             "flows.short_volume": list(short_vol),
             "bars_daily": list(bars),
             "ingest.short_interest": list(si),
             "fin_state": list(shares or []),
+            "ingest.f13_holdings": list(f13 or []),
         }
 
     def execute(self, sql, params=()):
@@ -26,6 +27,8 @@ class FakeConn:
                 "insider_name officer_title is_director aff10b5_one transaction_code shares price amount filed_at"
             ).split()
             return _Result([dict(zip(keys, r, strict=True)) for r in self._form4 if r[8] <= as_of])
+        if "ingest.f13_holdings" in sql:
+            return _Result([r for r in self._map["ingest.f13_holdings"] if r["filing_date"] <= params[1]])
         for key, rows in self._map.items():
             if key in sql:
                 return _Result(rows)
@@ -182,3 +185,38 @@ def test_summary_sentence_from_labels():
     assert "内部人偏空" in out["summary"] and "无明显变化" in out["summary"]
     out2 = money_flow(FakeConn(), "T", DAY, params={})
     assert "暂缺" in out2["summary"]
+
+
+def _f13(period, fd, cik, name, shares, pc=None):
+    return {"period": period, "filing_date": fd, "filer_cik": cik, "filer_name": name, "shares": shares, "put_call": pc}
+
+
+@pytest.mark.phase1_blocking
+def test_institutions_multi_row_and_options():
+    from inves_cog.perception.smartmoney import institutions
+
+    f13 = [
+        _f13(date(2026, 6, 30), date(2026, 8, 15), "C1", "Fund One", 100),
+        _f13(date(2026, 6, 30), date(2026, 8, 15), "C1", "Fund One", 50),  # other-manager row merges
+        _f13(date(2026, 6, 30), date(2026, 8, 15), "C1", "Fund One", 999, "Put"),  # option leg excluded
+        _f13(date(2026, 6, 30), date(2026, 8, 15), "C2", "Fund Two", 80),
+    ]
+    out = institutions(FakeConn(f13=f13), "T", DAY, params={})
+    assert out["holders"][0]["shares"] == 150  # common rows summed
+    assert out["holders"][0]["options"] == 1  # put leg counted separately
+
+
+@pytest.mark.phase1_blocking
+def test_institutions_pit_and_newcomer():
+    from inves_cog.perception.smartmoney import institutions
+
+    f13 = [
+        _f13(date(2026, 6, 30), date(2026, 8, 15), "C1", "Fund One", 100),
+        _f13(date(2026, 3, 31), date(2026, 5, 15), "C1", "Fund One", 90),
+        _f13(date(2026, 9, 30), date(2026, 12, 1), "C1", "Fund One", 200),  # after as_of
+    ]
+    out = institutions(FakeConn(f13=f13), "T", DAY, params={})
+    assert out["period"] == date(2026, 6, 30)  # 12-01 filing not yet visible
+    assert out["holders"][0]["change_pct"] == pytest.approx((100 - 90) / 90 * 100)
+    out2 = institutions(FakeConn(f13=[]), "T", DAY, params={})
+    assert out2["missing"] == "无 13F 持仓记录"

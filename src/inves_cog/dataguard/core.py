@@ -69,7 +69,7 @@ class Expectation:
         if self.scope not in {None, "wide"}:
             raise ValueError("Invalid monitored scope")
         time.fromisoformat(self.deadline_et)
-        if self.cadence not in {"trading_day", "weekday", "weekly", "monthly", "semimonthly"}:
+        if self.cadence not in {"trading_day", "weekday", "weekly", "monthly", "semimonthly", "quarterly"}:
             if not re.fullmatch(r"intraday:[1-9][0-9]*", self.cadence):
                 raise ValueError("Invalid cadence")
         if self.min_rows < 1 or self.grace_min < 0 or self.release_sessions < 0 or self.release_days < 0:
@@ -105,6 +105,10 @@ def due_dates(item, now, *, lookback=7):
             if item.cadence == "monthly" and (day + timedelta(days=1)).month == day.month:
                 continue
             if item.cadence == "semimonthly" and day != _finra_settlement(day):
+                continue
+            if item.cadence == "quarterly" and not (
+                (day + timedelta(days=1)).month != day.month and day.month % 3 == 0
+            ):
                 continue
         release = day + timedelta(days=item.release_days)
         for _ in range(item.release_sessions):
