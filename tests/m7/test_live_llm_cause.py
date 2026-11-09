@@ -227,7 +227,7 @@ def test_nvda_scandal_cause_cites_scandal_items():
     assert task == "live_cause"
     heads = [n["标题"] for n in payload["候选新闻"]]
     assert "NVDA Form 4" not in heads  # stale Form 4 dropped
-    assert not any("Goldman" in h for h in heads)  # after first_seen + 30 min
+    assert not any("Goldman" in h for h in heads)  # first seen after this pass (now)
     assert not any("Dole" in h for h in heads)  # other ticker
     row = db.rows[0]
     assert row["cause_source"] == "llm" and row["cause_confidence"] == "high"
@@ -342,6 +342,52 @@ def test_regular_row_reuses_premarket_high_cause_without_call():
     assert db.rows[1]["cause_reason"] == "丑闻" and db.rows[1]["cause_lag_minutes"] == pytest.approx(17 * 60 + 5)
 
 
+LATE = item(
+    "news:benzinga:6302370001",
+    "NVDA Stock Falls Over 5% Pre-Market: Board Probe Into Jensen Huang",
+    at(11, 9, 11, 0),  # 06:00 ET, after the 04:22 ET move
+)
+
+
+def late_reply(payload):
+    ids = [n["id"] for n in payload["候选新闻"] if "Board Probe" in n["标题"]]
+    return {"cause_info_ids": ids, "reason_zh": "董事会调查CEO。", "confidence": "high", "timing": "move_before_news"}
+
+
+def test_news_after_move_is_found_with_negative_lag():
+    db = FakeDB([nvda_row()], [LATE])
+    client = FakeClient(late_reply)
+    run(db, client, now=at(11, 9, 11, 30))  # pass at 06:30 ET
+    heads = [n["标题"] for n in client.calls[0][1]["候选新闻"]]
+    assert LATE["headline"] in heads
+    row = db.rows[0]
+    assert row["cause_info_ids"] == [LATE["info_id"]] and row["cause_timing"] == "move_before_news"
+    assert row["cause_lag_minutes"] == pytest.approx(-98)  # 04:22 - 06:00 ET
+
+
+def test_window_end_is_now_bounded_by_day_close():
+    start, end = llm_cause.window(DAY, at(11, 9, 11, 30))
+    assert end == at(11, 9, 11, 30)
+    _, end = llm_cause.window(DAY, at(11, 10, 3, 0))  # after 20:00 ET (01:00Z)
+    assert end == at(11, 10, 1, 0)
+
+
+def test_rerun_triggers_on_fresh_item_after_interval():
+    tried = dict(
+        llm_attempts=1, llm_last_at=at(11, 9, 10, 30), llm_last_major=True
+    )  # tried 05:30 ET, nothing found yet
+    db = FakeDB([nvda_row(**tried)], [SCANDAL[0]])
+    client = FakeClient(late_reply)
+    run(db, client, now=at(11, 9, 11, 30))
+    assert client.calls == []  # only old news, no upgrade -> no re-run
+    db = FakeDB([nvda_row(**tried)], [SCANDAL[0], LATE])
+    run(db, client, now=at(11, 9, 10, 45))
+    assert client.calls == []  # fresh item, but inside the 20-minute interval
+    run(db, client, now=at(11, 9, 11, 30))
+    assert len(client.calls) == 1 and db.rows[0]["llm_attempts"] == 2
+    assert db.rows[0]["cause_info_ids"] == [LATE["info_id"]]
+
+
 def test_model_failure_counts_attempt_and_keeps_unknown():
     def boom(payload):
         raise RuntimeError("down")
@@ -454,9 +500,10 @@ def test_llm_cause_cell_and_tentative_chip():
     assert reason in html and "模型判断" in html and "新闻 11-08 16:27美东" in html
     assert 'title="Nvidia&#x27;s Huang Admits' in html or "title=\"Nvidia's Huang Admits" in html
     assert "原因未明" not in html and "news:benzinga" not in html and "None" not in html
-    tentative = dict(llm, cause_state="tentative", cause_confidence="low")
-    html = _live_module({"news_modules": {"live": [tentative]}})
-    assert "待证实" in html and "模型判断</span>" not in html
+    for level in ("medium", "low"):
+        tentative = dict(llm, cause_state="tentative", cause_confidence=level)
+        html = _live_module({"news_modules": {"live": [tentative]}})
+        assert "待证实" in html and "模型判断</span>" not in html
     unknown = _live_module({"news_modules": {"live": [_page_row()]}})
     assert "原因未明" in unknown
 
@@ -471,16 +518,36 @@ def test_brief_cause_state_and_label():
         "subject": "NVDA",
         "cause_source": "llm",
         "cause_reason": "丑闻",
-        "cause_confidence": "medium",
+        "cause_confidence": "high",
         "cause_info_ids": ["a"],
         "status": "active",
         "peak_z": -5,
     }
     assert cause_state(llm) == "llm" and _cause_label(llm) == "丑闻"
+    assert cause_state({**llm, "cause_confidence": "medium"}) == "tentative"
     assert cause_state({**llm, "cause_confidence": "low"}) == "tentative"
     assert cause_state({**llm, "cause_info_ids": []}) is None
     groups = _hl_grouped([{**llm, "cause_label": "丑闻"}], [])
     assert groups[0]["cause"] == "丑闻" and groups[0]["cause_source"] == "llm"
+    # medium is not a confirmed cause: no grouping key, no 模型判断 chip
+    medium = {**llm, "cause_confidence": "medium", "cause_label": "丑闻"}
+    groups = _hl_grouped([medium, {**medium, "subject": "AMD"}], [])
+    assert len(groups) == 2 and all(g["cause_source"] is None for g in groups)
+    assert groups[0]["cause"] == "待证实：丑闻"
+
+
+def test_market_state_cause_uses_rule_and_high_only(monkeypatch):
+    from inves_cog.web import brief
+
+    monkeypatch.setattr(brief, "_series_fetch", lambda *a, **k: {})
+    monkeypatch.setattr(brief, "_quote", lambda c, t, d, shared=None: {"ret": -0.04, "sig": 0.01, "mult": 4.0})
+    base = {"scope": "market", "subject": "QQQ", "cause_source": "llm", "cause_info_ids": ["a"]}
+    rows = [
+        {**base, "cause_reason": "中等把握", "cause_confidence": "medium", "cause_label": "中等把握"},
+        {**base, "cause_reason": "高把握", "cause_confidence": "high", "cause_label": "高把握"},
+    ]
+    state = brief._market_state(None, DAY, {}, rows)
+    assert "高把握" in state["detail"] and "中等把握" not in state["detail"]
 
 
 @pytest.mark.phase1_blocking

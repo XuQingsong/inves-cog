@@ -960,12 +960,12 @@ _KIND_CN = {
 
 
 def cause_state(r):
-    """'rule' (event link), 'llm' (model, high/medium), 'tentative' (model, low)
-    or None. A rule link always wins over a model pick."""
+    """'rule' (event link), 'llm' (model, high only), 'tentative' (model,
+    medium/low) or None. A rule link always wins over a model pick."""
     if r.get("cause_event_id"):
         return "rule"
     if r.get("cause_source") == "llm" and r.get("cause_reason") and r.get("cause_info_ids"):
-        return "tentative" if r.get("cause_confidence") == "low" else "llm"
+        return "llm" if r.get("cause_confidence") == "high" else "tentative"
     return None
 
 

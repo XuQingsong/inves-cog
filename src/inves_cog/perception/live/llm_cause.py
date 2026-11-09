@@ -3,13 +3,13 @@
 Runs right after the rule linker. Only rows still without a rule link are
 considered; every cited id must be one of the candidates we sent."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from inves_cog.ingest.market import NY
 from inves_cog.params import load_params
 from inves_cog.perception.attribution.retrieve import rank_items
-from inves_cog.perception.live.link import LINK_GRACE, _basket_member_tickers, _window_start
+from inves_cog.perception.live.link import _basket_member_tickers, _window_start
 
 TASK = "live_cause"
 KINDS = ("news", "sec_8k", "form4", "macro")
@@ -68,13 +68,16 @@ def query_entities(connection, row, core):
     return sorted(set(core) | {"SPY", "QQQ"}), None
 
 
-def window(row, day):
-    return _window_start(day), row["first_seen_at"] + LINK_GRACE
+def window(day, now):
+    """Previous session 16:00 ET -> now, bounded by the trade day's 20:00 ET,
+    so news landing after the move can still be found (move_before_news)."""
+    day_end = datetime(day.year, day.month, day.day, 20, 0, tzinfo=NY)
+    return _window_start(day), min(now, day_end)
 
 
-def fetch_pool(connection, row, day, core, rules):
+def fetch_pool(connection, row, day, now, core, rules):
     """News-type items first seen inside the window that name the query entities."""
-    start, end = window(row, day)
+    start, end = window(day, now)
     entities, members = query_entities(connection, row, core)
     oldest = start - timedelta(hours=rules["max_age_hours"])
     form4_oldest = start - timedelta(hours=rules["form4_max_age_hours"])
@@ -112,8 +115,8 @@ def _dedupe(items):
     return list(seen.values())
 
 
-def candidates(connection, row, day, core, rules):
-    pool, entities, members, span = fetch_pool(connection, row, day, core, rules)
+def candidates(connection, row, day, now, core, rules):
+    pool, entities, members, span = fetch_pool(connection, row, day, now, core, rules)
     pool = _dedupe(pool)
     for item in pool:
         item.setdefault("entities", [])
@@ -306,7 +309,7 @@ def llm_causes(connection, day, now, core, held, client, rules=None):
             continue
         if (row.get("llm_attempts") or 0) >= rules["max_attempts"]:
             continue
-        ranked, span = candidates(connection, row, day, core, rules)
+        ranked, span = candidates(connection, row, day, now, core, rules)
         fresh = last is not None and any(i["first_seen_at"] > last for i in ranked)
         if not due(row, now, rules, major=row["_major"], fresh_news=fresh):
             continue

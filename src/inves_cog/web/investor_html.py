@@ -2554,7 +2554,7 @@ def _live_order(rows, held):
 
 def _llm_cause_html(r):
     """Model-picked cause: one sentence + chip + when the cited news landed."""
-    tentative = r.get("cause_state") == "tentative" or r.get("cause_confidence") == "low"
+    tentative = r.get("cause_state") != "llm" or r.get("cause_confidence") != "high"
     chip = (
         '<span class="chip stale" title="模型判断，把握不足">待证实</span>'
         if tentative
