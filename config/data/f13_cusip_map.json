@@ -1,0 +1,282 @@
+[
+ {
+  "cusip": "00724F101",
+  "ticker": "ADBE",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "007903107",
+  "ticker": "AMD",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "02079K305",
+  "ticker": "GOOGL",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "023135106",
+  "ticker": "AMZN",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "037833100",
+  "ticker": "AAPL",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "038222105",
+  "ticker": "AMAT",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "040413205",
+  "ticker": "ANET",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "093712107",
+  "ticker": "BE",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "11135F101",
+  "ticker": "AVGO",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "149123101",
+  "ticker": "CAT",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "166764100",
+  "ticker": "CVX",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "171779309",
+  "ticker": "CIEN",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "19247G107",
+  "ticker": "COHR",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "21037T109",
+  "ticker": "CEG",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "21873S108",
+  "ticker": "CRWV",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "22160K105",
+  "ticker": "COST",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "22788C105",
+  "ticker": "CRWD",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "24703L202",
+  "ticker": "DELL",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "30231G102",
+  "ticker": "XOM",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "30303M102",
+  "ticker": "META",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "34959E109",
+  "ticker": "FTNT",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "36828A101",
+  "ticker": "GEV",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "369604301",
+  "ticker": "GE",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "437076102",
+  "ticker": "HD",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "458140100",
+  "ticker": "INTC",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "46625H100",
+  "ticker": "JPM",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "478160104",
+  "ticker": "JNJ",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "482480100",
+  "ticker": "KLAC",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "512807306",
+  "ticker": "LRCX",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "532457108",
+  "ticker": "LLY",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "55024U109",
+  "ticker": "LITE",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "573874104",
+  "ticker": "MRVL",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "57636Q104",
+  "ticker": "MA",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "594918104",
+  "ticker": "MSFT",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "595112103",
+  "ticker": "MU",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "64110L106",
+  "ticker": "NFLX",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "654902204",
+  "ticker": "NOK",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "67066G104",
+  "ticker": "NVDA",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "68389X105",
+  "ticker": "ORCL",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "69608A108",
+  "ticker": "PLTR",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "697435105",
+  "ticker": "PANW",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "747525103",
+  "ticker": "QCOM",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "79466L302",
+  "ticker": "CRM",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "80004C200",
+  "ticker": "SNDK",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "81762P102",
+  "ticker": "NOW",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "86800U302",
+  "ticker": "SMCI",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "874039100",
+  "ticker": "TSM",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "88160R101",
+  "ticker": "TSLA",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "91324P102",
+  "ticker": "UNH",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "92537N108",
+  "ticker": "VRT",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "92826C839",
+  "ticker": "V",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "931142103",
+  "ticker": "WMT",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "958102105",
+  "ticker": "WDC",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "98980G102",
+  "ticker": "ZS",
+  "source": "openfigi"
+ },
+ {
+  "cusip": "G29183103",
+  "ticker": "ETN",
+  "source": "infotable-inference"
+ },
+ {
+  "cusip": "G7997R103",
+  "ticker": "STX",
+  "source": "infotable-inference"
+ }
+]
