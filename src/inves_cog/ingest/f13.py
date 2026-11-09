@@ -27,9 +27,17 @@ def seed_map() -> dict[str, str]:
     return {r["cusip"]: r["ticker"] for r in json.loads(SEED.read_text())}
 
 
+def _member(zf: zipfile.ZipFile, name: str) -> str:
+    """Some packages nest TSVs under a folder — resolve by suffix."""
+    for member in zf.namelist():
+        if member.endswith(name):
+            return member
+    raise KeyError(name)
+
+
 def _index(zf: zipfile.ZipFile, name: str) -> dict[str, dict[str, str]]:
     """Load a small TSV member into {accession: row}."""
-    with zf.open(name) as fh:
+    with zf.open(_member(zf, name)) as fh:
         lines = io.TextIOWrapper(fh, encoding="utf-8")
         header = lines.readline().rstrip("\r\n").split("\t")
         out = {}
@@ -68,7 +76,7 @@ def load_dataset(
     with zipfile.ZipFile(zip_path) as zf:
         sub = _index(zf, "SUBMISSION.tsv")
         cov = _index(zf, "COVERPAGE.tsv")
-        with zf.open("INFOTABLE.tsv") as fh:
+        with zf.open(_member(zf, "INFOTABLE.tsv")) as fh:
             lines = io.TextIOWrapper(fh, encoding="utf-8")
             header = lines.readline().rstrip("\r\n").split("\t")
             for line in lines:

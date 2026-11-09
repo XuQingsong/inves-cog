@@ -245,7 +245,8 @@ def money_flow(connection, ticker, as_of, params=None):
     insiders = _insiders(connection, ticker, day, p)
     offexchange = _offexchange(connection, ticker, day, p)
     short = _short(connection, ticker, day, p)
-    labels = [insiders.get("label"), offexchange.get("label"), short.get("label")]
+    inst = institutions(connection, ticker, day, p)
+    labels = [insiders.get("label"), offexchange.get("label"), short.get("label"), inst.get("label")]
     parts, neutral, absent = [], [], []
     if insiders.get("missing") or insiders.get("label") == "暂缺":
         absent.append("内部人")
@@ -273,6 +274,14 @@ def money_flow(connection, ticker, as_of, params=None):
         parts.append(f"空头{short['label'].replace('空头', '')}{suffix}")
     else:
         neutral.append("空头")
+    if inst.get("missing") or inst.get("label") == "暂缺":
+        absent.append("机构")
+    elif inst["label"] != "平稳":
+        chg = inst.get("top_change_pct")
+        suffix = f"（前十大合计 {chg:+.1f}%）" if chg is not None else ""
+        parts.append(f"机构{inst['label']}{suffix}")
+    else:
+        neutral.append("机构")
     if not parts:
         summary = (
             "三层都没有明显方向" if not absent else f"{'、'.join(neutral) or '三层'}无明显方向，{'、'.join(absent)}暂缺"
@@ -291,4 +300,120 @@ def money_flow(connection, ticker, as_of, params=None):
         "insiders": insiders,
         "offexchange": offexchange,
         "short": short,
+        "institutions": inst,
+    }
+
+
+def institutions(connection, ticker, as_of, params=None):
+    """Top institutional holders for a ticker, PIT by filing_date <= as_of.
+
+    Multiple rows per (filer, period, cusip) — other-manager rows, call/put
+    legs — are collapsed: common shares (put_call IS NULL) are summed;
+    option legs are counted separately and never added to holdings.
+    """
+    p = _params(params)
+    day = _day(as_of)
+    rows = connection.execute(
+        """
+        SELECT period, filing_date, filer_cik, filer_name, shares, value, put_call
+        FROM ingest.f13_holdings
+        WHERE ticker = %s AND filing_date <= %s
+        """,
+        (ticker, day),
+    ).fetchall()
+    if not rows:
+        return {"missing": "无 13F 持仓记录", "label": "暂缺"}
+
+    periods = sorted({r["period"] for r in rows})
+    latest_period, prior_period = periods[-1], (periods[-2] if len(periods) > 1 else None)
+
+    def _agg(period):
+        holders: dict[str, dict] = {}
+        for r in rows:
+            if r["period"] != period:
+                continue
+            h = holders.setdefault(r["filer_cik"], {"name": r["filer_name"], "shares": 0, "value": 0, "options": 0})
+            if r["put_call"]:
+                h["options"] += 1
+            else:
+                h["shares"] += int(r["shares"] or 0)
+                h["value"] += int(r["value"] or 0)
+        return holders
+
+    cur, prev = _agg(latest_period), (_agg(prior_period) if prior_period else {})
+
+    close_row = connection.execute(
+        """
+        SELECT close, adj_factor FROM ingest.bars_daily
+        WHERE ticker = %s AND trade_date <= %s
+        ORDER BY trade_date DESC LIMIT 1
+        """,
+        (ticker, latest_period),
+    ).fetchone()
+    close = None
+    if close_row and close_row["close"]:
+        close = float(close_row["close"]) * float(close_row["adj_factor"] or 1)
+    # VALUE is USD for 2023+ filings, thousands of USD before (FORM13F readme)
+    value_unit = 1.0 if latest_period.year >= 2023 else 1000.0
+    lo, hi = p.get("institutions_anomaly_low", 0.5), p.get("institutions_anomaly_high", 2.0)
+    ulo, uhi = p.get("institutions_unit_low", 0.0005), p.get("institutions_unit_high", 0.002)
+    anomalies, unit_fixed = [], 0
+    for cik, h in list(cur.items()):
+        if not h["shares"] or h["value"] <= 0 or close is None:
+            continue
+        implied = h["value"] * value_unit / h["shares"]
+        ratio = implied / close
+        if lo <= ratio <= hi:
+            continue
+        if ulo <= ratio <= uhi:
+            h["value"] *= 1000  # filer kept reporting VALUE in thousands post-2023
+            unit_fixed += 1
+            continue
+        anomalies.append(h["name"] or cik)
+        del cur[cik]
+    prior_sufficient = len(prev) >= max(1, int(len(cur) * 0.2))
+    top_n = p.get("institutions_top", 10)
+    cur_rank = sorted(cur.items(), key=lambda kv: -kv[1]["shares"])[:top_n]
+    prev_top = {k for k, _ in sorted(prev.items(), key=lambda kv: -kv[1]["shares"])[:top_n]}
+    top = []
+    for cik, h in cur_rank:
+        before = prev.get(cik, {}).get("shares")
+        top.append(
+            {
+                "name": h["name"] or cik,
+                "cik": cik,
+                "shares": h["shares"],
+                "options": h["options"],
+                "change_pct": None if (not before or not prior_sufficient) else (h["shares"] - before) / before * 100,
+                "new": (cik not in prev_top) if prior_sufficient else False,
+            }
+        )
+    top_sum = sum(h["shares"] for _, h in cur_rank)
+    prev_sum = sum(v["shares"] for k, v in prev.items() if k in prev_top) or None
+    top_change = None if (prev_sum is None or not prior_sufficient) else (top_sum - prev_sum) / prev_sum * 100
+    threshold = p.get("institutions_label_pct", 3.0)
+    if top_change is None:
+        label = "平稳"
+    elif top_change >= threshold:
+        label = "增持"
+    elif top_change <= -threshold:
+        label = "减持"
+    else:
+        label = "平稳"
+    return {
+        "missing": None,
+        "label": label,
+        "period": latest_period,
+        "prior_period": prior_period,
+        "holders": top,
+        "holder_count": len(cur),
+        "holder_count_prior": len(prev),
+        "anomalies": anomalies,
+        "unit_fixed": unit_fixed,
+        "total_shares": sum(h["shares"] for h in cur.values()),
+        "total_shares_prior": sum(h["shares"] for h in prev.values()) or None,
+        "top_change_pct": top_change,
+        "data_as_of": max(r["filing_date"] for r in rows),
+        "prior_sufficient": prior_sufficient,
+        "as_of_note": "季末持仓 · 13F 滞后约 45 天以上",
     }

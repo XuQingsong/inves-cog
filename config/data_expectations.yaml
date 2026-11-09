@@ -466,6 +466,17 @@ datasets:
     entry: finra_short_interest
     max_attempts: 3
   key_column: ticker
+- dataset: 13F 机构持仓
+  table: ingest.f13_holdings
+  date_column: period
+  cadence: quarterly
+  release_days: 15
+  deadline_et: '21:00'
+  grace_min: 60
+  min_rows: 1
+  basis: SEC DERA 每季度滚动发布 13F 数据集，窗口结束后约 2 周公开；入库为手动回补
+  impact: 机构持仓是资金动向卡的输入；以申报日判断可见性
+  key_column: ticker
 - dataset: 空头成交量
   table: flows.short_volume
   date_column: date
