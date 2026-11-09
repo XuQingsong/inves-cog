@@ -28,7 +28,8 @@ def _params(params):
     if params is None:
         from inves_cog.params import load_params
 
-        params = (load_params(Path("config/params/p-2026.10")).get("m1") or {}).get("smartmoney") or {}
+        directory = Path(__file__).resolve().parents[3] / "config/params/p-2026.10"
+        params = (load_params(directory).values.get("m1") or {}).get("smartmoney") or {}
     merged = dict(_DEFAULTS)
     merged.update(params)
     return merged
