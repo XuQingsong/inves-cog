@@ -77,7 +77,8 @@ def parse_finra(response, *, allowed_tickers, shares_by_ticker=None):
     for record in response:
         ticker = record.get("symbolCode")
         exchange = str(record.get("marketClassCode", record.get("issueExchange", ""))).upper()
-        if ticker not in allowed_tickers or exchange not in {"NYSE", "NASDAQ", "N", "Q"}:
+        # Request already filters by ticker; only drop OTC-market rows here.
+        if ticker not in allowed_tickers or exchange.startswith("OTC"):
             continue
         short = optional_number(record.get("currentShortPositionQuantity"))
         volume = optional_number(record.get("averageDailyVolumeQuantity"))

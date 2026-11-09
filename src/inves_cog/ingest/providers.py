@@ -411,8 +411,7 @@ def _finra_short_page(http, tickers):
         if len(batch) < 1000:
             break
     if not any(
-        str(row.get("marketClassCode", row.get("issueExchange", ""))).upper() in {"NYSE", "NASDAQ", "N", "Q"}
-        for row in rows
+        not str(row.get("marketClassCode", row.get("issueExchange", ""))).upper().startswith("OTC") for row in rows
     ):
         raise SourceError("FINRA dataset does not establish NYSE/Nasdaq coverage", confirmed_unavailable=True)
     return rows
