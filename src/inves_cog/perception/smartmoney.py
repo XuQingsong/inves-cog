@@ -151,18 +151,24 @@ def _offexchange(connection, ticker, day, p):
     series = visible[-p["offexchange_days"] :]
     amounts = [r["amount"] for r in series if r["amount"] is not None]
     latest = series[-1]["amount"] if series else None
-    mean = sum(amounts) / len(amounts) if amounts else None
+    sufficient = len(amounts) >= p["offexchange_days"]
+    mean = sum(amounts) / len(amounts) if (amounts and sufficient) else None
     ratio = None if latest is None or not mean else latest / mean
     return {
         "missing": None,
         "label": "暂缺"
-        if ratio is None
-        else ("正常" if ratio < p["offexchange_spike_multiple"] else f"放量 {ratio:.1f} 倍"),
+        if latest is None
+        else ("正常" if ratio is None or ratio < p["offexchange_spike_multiple"] else f"放量 {ratio:.1f} 倍"),
         "series": series,
         "latest_amount": latest,
         "mean_amount": mean,
         "ratio": ratio,
-        "as_of_note": "近 20 个交易日 · FINRA 次日发布",
+        "insufficient": not sufficient,
+        "as_of_note": (
+            f"近 {len(series)} 个交易日（数据自 {series[0]['date']} 起）· FINRA 次日发布"
+            if series
+            else "FINRA 次日发布"
+        ),
     }
 
 

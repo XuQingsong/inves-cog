@@ -168,7 +168,16 @@ def test_offexchange_insufficient_history_shows_no_ratio():
 
 @pytest.mark.phase1_blocking
 def test_summary_sentence_from_labels():
-    conn = FakeConn(form4=[_f4("A", "t", False, False, "S", 1, 1.0, 15_000_000.0, DAY)])
+    days = [date(2026, 10, 5) + timedelta(days=i) for i in range(25)]
+    conn = FakeConn(
+        form4=[_f4("A", "t", False, False, "S", 1, 1.0, 15_000_000.0, DAY)],
+        short_vol=[_sv(d, 100.0) for d in days],
+        bars=[_bar(d, 10.0) for d in days],
+        si=[
+            _si(date(2026, 10, 15), date(2026, 10, 20), 100.0, 2.0),
+            _si(date(2026, 9, 30), date(2026, 10, 5), 99.0, 2.0),
+        ],
+    )
     out = money_flow(conn, "T", DAY, params={})
     assert "内部人偏空" in out["summary"] and "无明显变化" in out["summary"]
     out2 = money_flow(FakeConn(), "T", DAY, params={})
