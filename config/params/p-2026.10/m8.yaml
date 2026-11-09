@@ -14,5 +14,7 @@ m8:
     recency: 0.3
     similarity: 0.2
     source: 0.1
+    overlap_blend: 0.5
+    member_cover_cap: 5
   income_change_cap: {1: 1.0, 2: 0.25, 3: 0.15, 4: 0.10}
   counterparty_default_cap: {1: 1.0, 2: 0.15, 3: 0.10, 4: 0.05}

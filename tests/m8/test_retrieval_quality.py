@@ -27,9 +27,26 @@ def test_overlap_is_not_diluted_by_basket_size():
     from inves_cog.perception.attribution.retrieve import _hit_overlap
 
     item = _item("mu-news", published=datetime(2026, 11, 5, 10, 0, tzinfo=UTC), tickers=["MU", "STX", "WDC"])
-    small = _hit_overlap(item, {"MU", "STX", "WDC", "NVDA"})
-    big = _hit_overlap(item, {"MU", "STX", "WDC"} | {f"T{i}" for i in range(500)})
-    assert small == big == 1.0
+    small = _hit_overlap(item, {"MU", "STX", "WDC", "NVDA"}, 4)
+    big = _hit_overlap(item, {"MU", "STX", "WDC"} | {f"T{i}" for i in range(500)}, 503)
+    assert small == 0.875  # breadth 1.0 blended with cover 3/4
+    assert big == 0.8  # breadth 1.0 blended with cover 3/5
+
+
+@pytest.mark.phase1_blocking
+def test_broad_coverage_beats_single_ticker_in_big_basket():
+    from inves_cog.perception.attribution.retrieve import rank_items
+
+    start = datetime(2026, 11, 5, 14, 30, tzinfo=UTC)
+    members = [f"T{i}" for i in range(35)]
+    broad = _item(
+        "broad",
+        published=datetime(2026, 11, 5, 10, 0, tzinfo=UTC),
+        tickers=[f"T{i}" for i in range(8)],
+    )
+    single = _item("single", published=datetime(2026, 11, 5, 10, 0, tzinfo=UTC), tickers=["T0"])
+    ranked = rank_items([single, broad], members, start=start, members=members)
+    assert ranked[0]["info_id"] == "broad"
 
 
 @pytest.mark.phase1_blocking
