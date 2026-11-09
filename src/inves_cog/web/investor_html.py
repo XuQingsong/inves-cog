@@ -1634,7 +1634,7 @@ def _smartmoney_module(payload):
 
         totals_html = (
             _total("unplanned", "计划外卖出")
-            + _total("planned", "计划内（10b5-1）卖出")
+            + _total("planned", "计划内（10B5-1）卖出")
             + _total("unknown_plan", "计划未知")
             + _total("buys", "买入")
         )

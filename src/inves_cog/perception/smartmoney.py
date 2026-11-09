@@ -65,7 +65,7 @@ def _insiders(connection, ticker, day, p):
         (ticker, day, day, p["insider_days"]),
     ).fetchall()
     if not rows:
-        return {"missing": "近 90 天无 Form 4 申报", "label": "中性", "people": [], "totals": {}, "excluded_count": 0}
+        return {"missing": "近 90 天无内部人申报", "label": "中性", "people": [], "totals": {}, "excluded_count": 0}
 
     people = {}
     # key -> {"people": set, "usd": float}
