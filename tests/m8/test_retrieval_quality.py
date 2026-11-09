@@ -50,14 +50,8 @@ def test_big_basket_keeps_same_day_floor():
     start = datetime(2026, 11, 5, 14, 30, tzinfo=UTC)
     now = datetime(2026, 11, 6, 2, 15, tzinfo=UTC)
     members = [f"T{i}" for i in range(35)]
-    old = [
-        _item(f"old-{i}", published=start - timedelta(hours=30), tickers=["T0"], level=1)
-        for i in range(45)
-    ]
-    fresh = [
-        _item(f"fresh-{i}", published=start - timedelta(hours=i + 1), tickers=["T1"])
-        for i in range(12)
-    ]
+    old = [_item(f"old-{i}", published=start - timedelta(hours=30), tickers=["T0"], level=1) for i in range(45)]
+    fresh = [_item(f"fresh-{i}", published=start - timedelta(hours=i + 1), tickers=["T1"]) for i in range(12)]
     rows = shortlist([*old, *fresh], members, start, now, members=members)
     kept = {row["info_id"] for row in rows}
     assert sum(name.startswith("fresh-") for name in kept) >= 10
