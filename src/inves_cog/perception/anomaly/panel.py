@@ -281,7 +281,8 @@ class PricePanel:
             rows = read_rows(path) if path else []
         for row in rows:
             settlement = _parse_date(row["settlement_date"])
-            visible = self._plus_sessions(settlement, 9)
+            publish = _parse_date(row.get("publish_date"))
+            visible = publish if publish is not None else self._plus_sessions(settlement, 9)
             if visible is None:
                 continue
             self.short_rows.setdefault(row["ticker"], []).append(

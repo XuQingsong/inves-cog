@@ -373,7 +373,17 @@ def alpha_calendar(http, *, key):
     return list(csv.DictReader(StringIO(text)))
 
 
+_FINRA_FILTER_CHUNK = 25
+
+
 def finra_short_interest(http, *, tickers):
+    rows = []
+    for start in range(0, max(len(tickers), 1), _FINRA_FILTER_CHUNK):
+        rows.extend(_finra_short_page(http, tickers[start : start + _FINRA_FILTER_CHUNK]))
+    return rows
+
+
+def _finra_short_page(http, tickers):
     rows = []
     offset = 0
     signatures = set()

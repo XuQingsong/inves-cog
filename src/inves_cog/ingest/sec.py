@@ -193,7 +193,15 @@ def parse_form4(xml, *, accession, filed_at):
         return found.text.strip() if found is not None and found.text else None
 
     owner = content(".//rptOwnerName")
-    officer = content(".//isOfficer")
+    relation = root.find(".//reportingOwnerRelationship")
+    officer_title = content("officerTitle", relation) if relation is not None else None
+    def _bool(path):
+        if relation is None:
+            return None
+        value = content(path, relation)
+        return None if value is None else value.lower() in {"1", "true"}
+    plan = root.find(".//aff10b5One")
+    tenb5 = None if plan is None or not plan.text else plan.text.strip().lower() in {"1", "true"}
     rows = []
     for index, transaction in enumerate(root.findall(".//nonDerivativeTable/nonDerivativeTransaction")):
 
@@ -201,15 +209,22 @@ def parse_form4(xml, *, accession, filed_at):
             text = content(path, transaction)
             return float(text) if text is not None else None
 
+        shares = number("./transactionAmounts/transactionShares/value")
+        price = number("./transactionAmounts/transactionPricePerShare/value")
         rows.append(
             {
                 "ticker": content(".//issuerTradingSymbol"),
                 "filed_at": filed_at,
                 "insider_name": owner,
-                "is_officer": None if officer is None else officer.lower() in {"1", "true"},
+                "is_officer": _bool("isOfficer"),
+                "is_director": _bool("isDirector"),
+                "officer_title": officer_title,
+                "is_ten_percent_owner": _bool("isTenPercentOwner"),
+                "aff10b5_one": tenb5,
                 "transaction_code": content("./transactionCoding/transactionCode", transaction),
-                "shares": number("./transactionAmounts/transactionShares/value"),
-                "price": number("./transactionAmounts/transactionPricePerShare/value"),
+                "shares": shares,
+                "price": price,
+                "amount": None if price in (None, 0) or shares is None else round(shares * price, 2),
                 "accession": accession,
                 "transaction_index": index,
             }

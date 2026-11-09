@@ -44,8 +44,9 @@ TABLES = {
     ),
     "form4_events": (
         (
-            "event_id ticker filed_at insider_name is_officer transaction_code shar"
-            "es price accession transaction_index source raw"
+            "event_id ticker filed_at insider_name is_officer is_director officer_title "
+            "is_ten_percent_owner aff10b5_one transaction_code shar"
+            "es price amount accession transaction_index source raw"
         ),
         "event_id",
     ),

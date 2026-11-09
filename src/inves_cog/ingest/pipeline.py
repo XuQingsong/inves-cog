@@ -709,14 +709,20 @@ class Pipeline:
         return {"processed_count": count}
 
     def finra(self):
-        raw = finra_short_interest(HTTPClient(limiter=RateLimiter(60, 60)), tickers=self.stocks)
+        us = {row["ticker"] for row in self.universe["stocks"] if not row.get("foreign")}
+        tickers = sorted(us | set(self.repo.holding_tickers()))
+        raw = finra_short_interest(HTTPClient(limiter=RateLimiter(60, 60)), tickers=tickers)
         shares = frames_shares(self.require(self.sec, "SEC"), self.day)
         mapping = cik_mapping(self.sec)
         rows = parse_finra(
             raw,
-            allowed_tickers=set(self.stocks),
-            shares_by_ticker={t: shares.get(mapping.get(t), {}).get("shares") for t in self.stocks},
+            allowed_tickers=set(tickers),
+            shares_by_ticker={t: shares.get(mapping.get(t), {}).get("shares") for t in tickers},
         )
+        for row in rows:
+            # FINRA's response carries no publication date; the day the daily run
+            # first observes the settlement is the actual availability date.
+            row["publish_date"] = row.get("publish_date") or str(self.day)
         for row in rows:
             row.update(
                 observation_id=identity(row),
