@@ -42,6 +42,12 @@ TASK_FORMATS = {
         "is_rating_change, and published_at (ISO timestamp with timezone). "
         "Unknown fields are null. Use only evidence in the supplied headline and body."
     ),
+    "live_cause": (
+        'Return {"cause_info_ids":[candidate id numbers],"reason_zh":one Chinese sentence,'
+        '"confidence":"high"|"medium"|"low","timing":"news_before_move"|"move_before_news"|"unclear"}. '
+        "Cite only ids from the supplied candidate news list. "
+        "If no candidate explains the move, return an empty cause_info_ids array and confidence low."
+    ),
     "segment_mapping_draft": "Return graph_node_ids as an array of supplied node identifiers and reason as a string.",
 }
 

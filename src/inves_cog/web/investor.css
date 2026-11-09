@@ -257,6 +257,8 @@ details.fold{border:1px solid var(--line2);border-radius:12px;padding:8px 14px;m
 .ptip{font:12px var(--mono);fill:var(--ink)}
 .px-big{font:700 34px/1.1 var(--mono)}
 .kind-chip{font-size:11px;padding:0 6px;border-radius:5px;line-height:18px}
+.llm-chip{font-size:11px;padding:0 6px;border-radius:5px;line-height:18px;background:#E8F0FB;color:#2F5D9E}
+.live-more summary{cursor:pointer;margin:6px 0}
 .kind-earnings_result,.kind-guidance{background:var(--tp-bg);color:var(--tp)}
 .kind-capex{background:var(--r-mid-bg);color:var(--r-mid)}
 .kind-mna{background:#E9E3F6;color:#5B3FA8}
