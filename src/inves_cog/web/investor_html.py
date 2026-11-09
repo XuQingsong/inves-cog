@@ -1747,6 +1747,11 @@ def _smartmoney_module(payload):
             )
             + inst_rows
             + (
+                f'<div class="small muted">{inst["unit_fixed"]} 家市值单位按千美元修正</div>'
+                if inst.get("unit_fixed")
+                else ""
+            )
+            + (
                 f'<div class="small muted">已剔除申报异常 {len(inst["anomalies"])} 家'
                 f"（例如 {_text(inst['anomalies'][0])}）</div>"
                 if inst.get("anomalies")

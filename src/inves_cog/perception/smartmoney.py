@@ -356,14 +356,21 @@ def institutions(connection, ticker, as_of, params=None):
     # VALUE is USD for 2023+ filings, thousands of USD before (FORM13F readme)
     value_unit = 1.0 if latest_period.year >= 2023 else 1000.0
     lo, hi = p.get("institutions_anomaly_low", 0.5), p.get("institutions_anomaly_high", 2.0)
-    anomalies = []
+    ulo, uhi = p.get("institutions_unit_low", 0.0005), p.get("institutions_unit_high", 0.002)
+    anomalies, unit_fixed = [], 0
     for cik, h in list(cur.items()):
         if not h["shares"] or h["value"] <= 0 or close is None:
             continue
         implied = h["value"] * value_unit / h["shares"]
-        if not lo <= implied / close <= hi:
-            anomalies.append(h["name"] or cik)
-            del cur[cik]
+        ratio = implied / close
+        if lo <= ratio <= hi:
+            continue
+        if ulo <= ratio <= uhi:
+            h["value"] *= 1000  # filer kept reporting VALUE in thousands post-2023
+            unit_fixed += 1
+            continue
+        anomalies.append(h["name"] or cik)
+        del cur[cik]
     prior_sufficient = len(prev) >= max(1, int(len(cur) * 0.2))
     top_n = p.get("institutions_top", 10)
     cur_rank = sorted(cur.items(), key=lambda kv: -kv[1]["shares"])[:top_n]
@@ -402,6 +409,7 @@ def institutions(connection, ticker, as_of, params=None):
         "holder_count": len(cur),
         "holder_count_prior": len(prev),
         "anomalies": anomalies,
+        "unit_fixed": unit_fixed,
         "total_shares": sum(h["shares"] for h in cur.values()),
         "total_shares_prior": sum(h["shares"] for h in prev.values()) or None,
         "top_change_pct": top_change,

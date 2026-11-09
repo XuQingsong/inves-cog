@@ -243,3 +243,22 @@ def test_institutions_filing_anomaly_excluded():
     out = institutions(FakeConn(f13=f13, bars=bars), "T", DAY, params={})
     assert out["anomalies"] == ["Glitch Fund"]
     assert [h["name"] for h in out["holders"]] == ["Normal Fund"]
+
+
+@pytest.mark.phase1_blocking
+def test_institutions_unit_error_corrected_not_excluded():
+    from inves_cog.perception.smartmoney import institutions
+
+    period = date(2026, 6, 30)
+    f13 = [
+        _f13(period, date(2026, 8, 15), "C1", "Normal Fund", 150, value=15000),
+        _f13(period, date(2026, 8, 15), "C2", "Kilo Fund", 200, value=20),  # implied $0.1? -> 20*?
+        _f13(period, date(2026, 8, 15), "C3", "Glitch Fund", 10**9, value=1000),
+    ]
+    bars = [_bar(period, 100.0)]
+    # Kilo: 20/200=0.1 vs close 100 -> ratio 0.001 -> unit band -> corrected
+    # Glitch: 1000/1e9 ~ 1e-6 vs 100 -> 1e-8 -> excluded
+    out = institutions(FakeConn(f13=f13, bars=bars), "T", DAY, params={})
+    assert out["unit_fixed"] == 1
+    assert out["anomalies"] == ["Glitch Fund"]
+    assert [h["name"] for h in out["holders"]][0] == "Kilo Fund"
