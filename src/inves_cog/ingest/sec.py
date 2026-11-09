@@ -195,11 +195,13 @@ def parse_form4(xml, *, accession, filed_at):
     owner = content(".//rptOwnerName")
     relation = root.find(".//reportingOwnerRelationship")
     officer_title = content("officerTitle", relation) if relation is not None else None
+
     def _bool(path):
         if relation is None:
             return None
         value = content(path, relation)
         return None if value is None else value.lower() in {"1", "true"}
+
     plan = root.find(".//aff10b5One")
     tenb5 = None if plan is None or not plan.text else plan.text.strip().lower() in {"1", "true"}
     rows = []
