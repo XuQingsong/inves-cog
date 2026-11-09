@@ -33,7 +33,7 @@ from inves_cog.ingest.runtime import Runtime, complete_adv20
 from inves_cog.ingest.sec import collect_submissions, earnings_event, earnings_fallback, parse_form4
 from inves_cog.ingest.sec_progress import SECProgress
 from inves_cog.ingest.signals import rank_jumps, trend_event
-from inves_cog.ingest.sources import macro_items, parse_finra, website_change
+from inves_cog.ingest.sources import macro_items, observed_publish_date, parse_finra, website_change
 from inves_cog.ingest.triage import NewsTriage
 from inves_cog.ingest.universe import build_universe, daily_liquidity
 
@@ -709,14 +709,20 @@ class Pipeline:
         return {"processed_count": count}
 
     def finra(self):
-        raw = finra_short_interest(HTTPClient(limiter=RateLimiter(60, 60)), tickers=self.stocks)
+        us = {row["ticker"] for row in self.universe["stocks"] if not row.get("foreign")}
+        tickers = sorted(us | set(self.repo.holding_tickers()))
+        raw = finra_short_interest(HTTPClient(limiter=RateLimiter(60, 60)), tickers=tickers)
         shares = frames_shares(self.require(self.sec, "SEC"), self.day)
         mapping = cik_mapping(self.sec)
         rows = parse_finra(
             raw,
-            allowed_tickers=set(self.stocks),
-            shares_by_ticker={t: shares.get(mapping.get(t), {}).get("shares") for t in self.stocks},
+            allowed_tickers=set(tickers),
+            shares_by_ticker={t: shares.get(mapping.get(t), {}).get("shares") for t in tickers},
         )
+        for row in rows:
+            # FINRA's response carries no publication date; an on-time observation
+            # is the availability date, a late (backfilled) one stays NULL.
+            row["publish_date"] = row.get("publish_date") or observed_publish_date(row["settlement_date"], self.day)
         for row in rows:
             row.update(
                 observation_id=identity(row),

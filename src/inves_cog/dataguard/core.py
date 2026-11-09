@@ -69,7 +69,7 @@ class Expectation:
         if self.scope not in {None, "wide"}:
             raise ValueError("Invalid monitored scope")
         time.fromisoformat(self.deadline_et)
-        if self.cadence not in {"trading_day", "weekday", "weekly", "monthly"}:
+        if self.cadence not in {"trading_day", "weekday", "weekly", "monthly", "semimonthly"}:
             if not re.fullmatch(r"intraday:[1-9][0-9]*", self.cadence):
                 raise ValueError("Invalid cadence")
         if self.min_rows < 1 or self.grace_min < 0 or self.release_sessions < 0 or self.release_days < 0:
@@ -103,6 +103,8 @@ def due_dates(item, now, *, lookback=7):
             if item.cadence == "weekly" and day.weekday() != item.weekday:
                 continue
             if item.cadence == "monthly" and (day + timedelta(days=1)).month == day.month:
+                continue
+            if item.cadence == "semimonthly" and day != _finra_settlement(day):
                 continue
         release = day + timedelta(days=item.release_days)
         for _ in range(item.release_sessions):
@@ -239,3 +241,16 @@ def _job_findings(item, day, rows, detail, now):
             if not inactive and age > int(item.cadence.split(":")[1]) + item.grace_min:
                 failed.append(row["key"])
     return [Finding(item.dataset, day, "job_failed", {**detail, "failed_tasks": failed})] if failed else []
+
+
+def _finra_settlement(day):
+    """FINRA settles mid-month (15th) and month-end, each rolled back to a trading day."""
+    import calendar as _cal
+
+    mid = day.replace(day=15)
+    while not trading_day(mid):
+        mid = mid - timedelta(days=1)
+    last = day.replace(day=_cal.monthrange(day.year, day.month)[1])
+    while not trading_day(last):
+        last = last - timedelta(days=1)
+    return day if day in {mid, last} else None

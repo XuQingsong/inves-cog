@@ -55,6 +55,22 @@ def macro_items(rows, *, clock):
     return result
 
 
+def observed_publish_date(settlement_date, observed, *, lag_sessions=9, tolerance_sessions=3):
+    """Observed day counts as the publish date only when it arrives on time.
+
+    FINRA returns no publication field; a settlement seen within lag+tolerance
+    sessions was published when we saw it. Anything later (backfill) stays NULL
+    so readers fall back to the inferred publish date."""
+    from inves_cog.ingest.market import next_trading_day
+
+    settlement = date.fromisoformat(settlement_date)
+    deadline = settlement
+    for _ in range(lag_sessions + tolerance_sessions):
+        deadline = next_trading_day(deadline)
+    observed_day = observed if isinstance(observed, date) else date.fromisoformat(str(observed)[:10])
+    return str(observed_day) if observed_day <= deadline else None
+
+
 def parse_finra(response, *, allowed_tickers, shares_by_ticker=None):
     rows = []
     shares_by_ticker = shares_by_ticker or {}

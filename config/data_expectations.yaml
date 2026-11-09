@@ -452,6 +452,20 @@ datasets:
   - QQQ
   - IWM
   - SMH
+- dataset: 空头持仓
+  table: ingest.short_interest
+  date_column: settlement_date
+  cadence: semimonthly
+  release_sessions: 9
+  deadline_et: '21:00'
+  grace_min: 60
+  min_rows: 1
+  basis: FINRA 每月两期（月中与月末结算日后约9个工作日发布）；取最近的月度节奏
+  impact: 空头持仓是挤压感知的输入；按发布日判断可见性
+  backfill:
+    entry: finra_short_interest
+    max_attempts: 3
+  key_column: ticker
 - dataset: 空头成交量
   table: flows.short_volume
   date_column: date
