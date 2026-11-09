@@ -232,7 +232,6 @@ def test_institutions_pit_and_newcomer():
 
 @pytest.mark.phase1_blocking
 def test_institutions_filing_anomaly_excluded():
-    from datetime import timedelta
     from inves_cog.perception.smartmoney import institutions
 
     period = date(2026, 6, 30)
