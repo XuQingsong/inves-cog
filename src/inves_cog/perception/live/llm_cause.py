@@ -9,7 +9,7 @@ from pathlib import Path
 from inves_cog.ingest.market import NY
 from inves_cog.params import load_params
 from inves_cog.perception.attribution.retrieve import rank_items
-from inves_cog.perception.live.link import _basket_member_tickers, _window_start
+from inves_cog.perception.live.link import LINK_GRACE, _basket_member_tickers, _window_start
 
 TASK = "live_cause"
 KINDS = ("news", "sec_8k", "form4", "macro")
@@ -91,7 +91,7 @@ def fetch_pool(connection, row, day, now, core, rules):
               AND (tickers && %s{macro})
               AND (published_at IS NULL OR published_at >= %s)
               AND (kind <> 'form4' OR published_at >= %s)
-            ORDER BY first_seen_at DESC LIMIT %s""",
+            ORDER BY abs(extract(epoch FROM first_seen_at - %s::timestamptz)), info_id LIMIT %s""",
         (
             rules["summary_chars"],
             start,
@@ -100,6 +100,7 @@ def fetch_pool(connection, row, day, now, core, rules):
             entities or ["__none__"],
             oldest,
             form4_oldest,
+            row["first_seen_at"],  # keep the items nearest the move on both sides
             rules["pool_limit"],
         ),
     ).fetchall()
@@ -124,8 +125,19 @@ def candidates(connection, row, day, now, core, rules):
         item["tickers"] = list(item.get("tickers") or [])
         if item.get("published_at") is None:
             item["published_at"] = item["first_seen_at"]
-    ranked = rank_items(pool, entities, limit=rules["top_k"], start=row["first_seen_at"], members=members)
-    return ranked, span
+    # Later commentary always scores as fresh; rank the two sides separately so
+    # the story that preceded the move keeps its slots.
+    cutoff = row["first_seen_at"] + LINK_GRACE
+    before = [i for i in pool if i["first_seen_at"] <= cutoff]
+    after = [i for i in pool if i["first_seen_at"] > cutoff]
+    top_k, pre_slots = rules["top_k"], rules["pre_slots"]
+    kwargs = {"start": row["first_seen_at"], "members": members}
+    before = rank_items(before, entities, limit=top_k, **kwargs)
+    after = rank_items(after, entities, limit=top_k, **kwargs)
+    take_before = max(min(len(before), pre_slots), top_k - len(after))
+    chosen = before[:take_before] + after[: top_k - min(take_before, len(before))]
+    chosen.sort(key=lambda i: (i["first_seen_at"], i["info_id"]))
+    return chosen, span
 
 
 def _et(value):

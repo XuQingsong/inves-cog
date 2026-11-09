@@ -20,6 +20,7 @@ RULES = {
     "per_pass_calls": 6,
     "major_z": 5,
     "top_k": 30,
+    "pre_slots": 18,
     "pool_limit": 400,
     "max_age_hours": 72,
     "form4_max_age_hours": 24,
@@ -150,7 +151,7 @@ class FakeDB:
             found = [i["first_seen_at"] for i in self.items if i["info_id"] in args[0]]
             return _Result([{"at": min(found) if found else None}])
         if "FROM ingest.info_items" in sql:
-            _, start, end, kinds, names, oldest, form4_oldest, limit = args
+            _, start, end, kinds, names, oldest, form4_oldest, anchor, limit = args
             out = [
                 dict(i)
                 for i in self.items
@@ -160,7 +161,7 @@ class FakeDB:
                 and (i["published_at"] is None or i["published_at"] >= oldest)
                 and (i["kind"] != "form4" or i["published_at"] >= form4_oldest)
             ]
-            out.sort(key=lambda i: i["first_seen_at"], reverse=True)
+            out.sort(key=lambda i: (abs((i["first_seen_at"] - anchor).total_seconds()), i["info_id"]))
             return _Result(out[:limit])
         if sql.startswith("UPDATE perception.live_anomalies"):
             if "cause_source='rule'" in sql:
@@ -386,6 +387,41 @@ def test_rerun_triggers_on_fresh_item_after_interval():
     run(db, client, now=at(11, 9, 11, 30))
     assert len(client.calls) == 1 and db.rows[0]["llm_attempts"] == 2
     assert db.rows[0]["cause_info_ids"] == [LATE["info_id"]]
+
+
+def test_pre_move_story_keeps_slots_against_later_commentary():
+    from inves_cog.perception.attribution.retrieve import rank_items
+
+    later = [
+        item(
+            f"news:benzinga:7{n:03d}", f"Commentary {n} on Nvidia sell-off", at(11, 9, 10, 0) + timedelta(minutes=5 * n)
+        )
+        for n in range(40)
+    ]
+    original = SCANDAL[0]
+    # premise: one ranking over everything drops the original story
+    flat = rank_items([dict(i) for i in later + [original]], ["NVDA"], limit=30, start=at(11, 9, 9, 22))
+    assert original["info_id"] not in [i["info_id"] for i in flat]
+    db = FakeDB([nvda_row()], later + [original])
+    ranked, span = llm_cause.candidates(db, nvda_row(), DAY, at(11, 9, 14, 0), {"NVDA"}, RULES)
+    ids = [i["info_id"] for i in ranked]
+    assert len(ranked) == 30 and original["info_id"] in ids  # 1 before + 29 after (backfill)
+    assert ranked == sorted(ranked, key=lambda i: (i["first_seen_at"], i["info_id"]))  # chronological
+    assert ids[0] == original["info_id"]
+    payload = llm_cause.payload(nvda_row(), ranked)
+    assert [n["id"] for n in payload["候选新闻"]] == list(range(1, 31))
+
+
+def test_pre_slots_cap_and_backfill():
+    before = [item(f"news:b:{n:03d}", f"Before {n}", at(11, 9, 8, 0) + timedelta(minutes=n)) for n in range(25)]
+    after = [item(f"news:a:{n:03d}", f"After {n}", at(11, 9, 11, 0) + timedelta(minutes=n)) for n in range(25)]
+    db = FakeDB([nvda_row()], before + after)
+    ranked, _ = llm_cause.candidates(db, nvda_row(), DAY, at(11, 9, 14, 0), {"NVDA"}, RULES)
+    assert sum(i["info_id"].startswith("news:b:") for i in ranked) == 18
+    assert sum(i["info_id"].startswith("news:a:") for i in ranked) == 12
+    db = FakeDB([nvda_row()], before + after[:5])  # after short -> before backfills
+    ranked, _ = llm_cause.candidates(db, nvda_row(), DAY, at(11, 9, 14, 0), {"NVDA"}, RULES)
+    assert len(ranked) == 30 and sum(i["info_id"].startswith("news:a:") for i in ranked) == 5
 
 
 def test_model_failure_counts_attempt_and_keeps_unknown():
