@@ -162,7 +162,7 @@ def _same_day_floor(scored, start, members, query_entities):
     recent = [
         row
         for row in scored
-        if _stamp(row.get("published_at")) is not None and row["published_at"] >= boundary
+        if _stamp(row.get("published_at")) is not None and boundary <= row["published_at"] < start
     ]
     recent.sort(
         key=lambda row: (-_recency(row.get("published_at"), start), -_item_epoch(row), row.get("info_id") or "")
