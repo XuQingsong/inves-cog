@@ -16,10 +16,10 @@ def test_observed_publish_date_only_when_on_time():
 
 @pytest.mark.phase1_blocking
 def test_semimonthly_cadence_settlement_days():
-    from inves_cog.dataguard.core import due_dates
-    from inves_cog.dataguard.core import Expectation
-    from inves_cog.dataguard.reader import load
     from pathlib import Path
+
+    from inves_cog.dataguard.core import due_dates
+    from inves_cog.dataguard.reader import load
 
     _, all_items = load(Path("config/data_expectations.yaml"))
     items = [i for i in all_items if i.table == "ingest.short_interest"]
