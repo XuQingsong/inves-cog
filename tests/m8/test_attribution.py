@@ -4801,7 +4801,7 @@ def test_chain_retrieves_related_news_and_scores_each_candidate():
                 return {"candidates": []}
             sent = [row["info_id"] for row in payload["items"]]
             assert len(sent) == 40
-            assert "nvda-40" not in sent
+            assert "nvda-9" not in sent  # Deterministic tiebreak drops the last id, not the last inserted.
             assert "xom-only" not in sent
             return {"items": [{"info_id": info_id, "claims": []} for info_id in sent]}
 
