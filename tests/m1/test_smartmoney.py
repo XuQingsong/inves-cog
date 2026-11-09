@@ -1,5 +1,5 @@
 import ast
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -154,3 +154,22 @@ def test_rule_a_does_not_import_smartmoney():
             if any("smartmoney" in n for n in names):
                 offenders.append(str(path))
     assert not offenders, f"trading imports smartmoney: {offenders}"
+
+
+@pytest.mark.phase1_blocking
+def test_offexchange_insufficient_history_shows_no_ratio():
+    days = [date(2026, 10, 20) + timedelta(days=i) for i in range(7)]
+    conn = FakeConn(short_vol=[_sv(d, 100.0) for d in days], bars=[_bar(d, 10.0) for d in days])
+    out = money_flow(conn, "T", DAY, params={})["offexchange"]
+    assert out["insufficient"] is True
+    assert out["ratio"] is None
+    assert "数据自" in out["as_of_note"]
+
+
+@pytest.mark.phase1_blocking
+def test_summary_sentence_from_labels():
+    conn = FakeConn(form4=[_f4("A", "t", False, False, "S", 1, 1.0, 15_000_000.0, DAY)])
+    out = money_flow(conn, "T", DAY, params={})
+    assert "内部人偏空" in out["summary"] and "无明显变化" in out["summary"]
+    out2 = money_flow(FakeConn(), "T", DAY, params={})
+    assert "暂缺" in out2["summary"]

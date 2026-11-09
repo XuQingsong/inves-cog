@@ -222,6 +222,17 @@ def _short(connection, ticker, day, p):
     }
 
 
+def _usd_short(usd):
+    usd = float(usd or 0)
+    if abs(usd) >= 1e9:
+        return f"${usd / 1e8:.1f} 亿"
+    if abs(usd) >= 1e8:
+        return f"${usd / 1e8:.2f} 亿"
+    if abs(usd) >= 1e4:
+        return f"${usd / 1e4:.0f} 万"
+    return f"${usd:.0f}"
+
+
 def money_flow(connection, ticker, as_of, params=None):
     p = _params(params)
     day = _day(as_of)
@@ -229,12 +240,48 @@ def money_flow(connection, ticker, as_of, params=None):
     offexchange = _offexchange(connection, ticker, day, p)
     short = _short(connection, ticker, day, p)
     labels = [insiders.get("label"), offexchange.get("label"), short.get("label")]
-    directional = [item for item in labels if item not in {"中性", "正常", "平稳", "暂缺", None}]
+    parts, neutral, absent = [], [], []
+    if insiders.get("missing") or insiders.get("label") == "暂缺":
+        absent.append("内部人")
+    elif insiders["label"] != "中性":
+        t = insiders["totals"]
+        detail = (
+            f"买入 {_usd_short(t['buys']['usd'])}"
+            if insiders["label"] == "偏多"
+            else f"计划外卖出 {_usd_short(t['unplanned']['usd'])}"
+        )
+        parts.append(f"内部人{insiders['label']}：{detail}")
+    else:
+        neutral.append("内部人")
+    if offexchange.get("missing") or offexchange.get("label") == "暂缺":
+        absent.append("场外成交")
+    elif offexchange["label"].startswith("放量"):
+        parts.append(f"场外成交{offexchange['label']}")
+    else:
+        neutral.append("场外成交")
+    if short.get("missing") or short.get("label") == "暂缺":
+        absent.append("空头")
+    elif short["label"] in {"空头增加", "空头回补"}:
+        chg = short.get("change_pct")
+        suffix = f"（较上期 {chg:+.1f}%）" if chg is not None else ""
+        parts.append(f"空头{short['label'].replace('空头', '')}{suffix}")
+    else:
+        neutral.append("空头")
+    if not parts:
+        summary = (
+            "三层都没有明显方向" if not absent else f"{'、'.join(neutral) or '三层'}无明显方向，{'、'.join(absent)}暂缺"
+        )
+    else:
+        summary = "；".join(parts)
+        if neutral:
+            summary += f"；{'、'.join(neutral)}无明显变化"
+        if absent:
+            summary += f"，{'、'.join(absent)}暂缺"
     return {
         "ticker": ticker,
         "as_of": day.isoformat(),
         "labels": labels,
-        "summary": "三层都没有明显方向" if not directional else "、".join(directional),
+        "summary": summary,
         "insiders": insiders,
         "offexchange": offexchange,
         "short": short,

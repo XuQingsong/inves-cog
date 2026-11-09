@@ -1580,13 +1580,15 @@ def _stock(payload):
 
 
 def _money_short(usd):
-    if usd is None:
-        return _miss()
+    if usd is None or usd == 0:
+        return "—"
     usd = float(usd)
-    if abs(usd) >= 1e6:
-        return f"${usd / 1e6:.1f}M"
-    if abs(usd) >= 1e3:
-        return f"${usd / 1e3:.0f}K"
+    if abs(usd) >= 1e9:
+        return f"${usd / 1e8:.1f} 亿"
+    if abs(usd) >= 1e8:
+        return f"${usd / 1e8:.2f} 亿"
+    if abs(usd) >= 1e4:
+        return f"${usd / 1e4:.0f} 万"
     return f"${usd:.0f}"
 
 
@@ -1595,10 +1597,10 @@ def _shares_short(value):
         return _miss()
     value = float(value)
     if abs(value) >= 1e8:
-        return f"{value / 1e8:.2f} 亿"
+        return f"{value / 1e8:.2f} 亿股"
     if abs(value) >= 1e4:
-        return f"{value / 1e4:.0f} 万"
-    return f"{value:.0f}"
+        return f"{value / 1e4:.0f} 万股"
+    return f"{value:.0f} 股"
 
 
 def _smartmoney_module(payload):
@@ -1614,11 +1616,18 @@ def _smartmoney_module(payload):
     if ins.get("missing"):
         ins_html = f'<div class="small muted">暂缺（{_text(ins["missing"])}）</div>'
     else:
-        people = "".join(
-            '<div style="display:grid;grid-template-columns:1.4fr 1.6fr 80px 80px;gap:8px;margin:4px 0">'
-            f'<span class="small">{_text(p["name"])}</span><span class="small muted">{_text(p["title"])}</span>'
-            f'<span class="small num">{_money_short(p["buy"])}</span>'
-            f'<span class="small num">{_money_short(p["sell"])}</span></div>'
+        header = (
+            '<div style="display:grid;grid-template-columns:1.4fr 2fr 90px 90px;gap:8px;margin:4px 0">'
+            '<span class="small muted">姓名</span><span class="small muted">职务</span>'
+            '<span class="small muted" style="text-align:right">买入</span>'
+            '<span class="small muted" style="text-align:right">卖出</span></div>'
+        )
+        people = header + "".join(
+            '<div style="display:grid;grid-template-columns:1.4fr 2fr 90px 90px;gap:8px;margin:4px 0">'
+            f'<span class="small">{_text(p["name"])}</span>'
+            f'<span class="small muted" style="white-space:normal">{_text(p["title"])}</span>'
+            f'<span class="small num" style="text-align:right">{_money_short(p["buy"])}</span>'
+            f'<span class="small num" style="text-align:right">{_money_short(p["sell"])}</span></div>'
             for p in ins.get("people") or []
         )
         t = ins.get("totals") or {}
@@ -1663,13 +1672,13 @@ def _smartmoney_module(payload):
             )
             bars = f'<svg width="100%" height="30" viewBox="0 0 200 30" preserveAspectRatio="none">{cells}</svg>'
         latest, ratio = off.get("latest_amount"), off.get("ratio")
+        if ratio is not None:
+            ratio_cell = f'<span class="k">对比 20 日均值</span><span class="small num">{ratio:.1f} 倍</span>'
+        else:
+            ratio_cell = '<span class="k">对比 20 日均值</span><span class="small muted">历史不足 20 日</span>'
         off_html = (
             f'<div class="kv"><span class="k">最新一日</span><span class="small">{_money_short(latest)}</span>'
-            + (
-                f'<span class="k">对比 20 日均值</span><span class="small num">{ratio:.1f} 倍</span>'
-                if ratio is not None
-                else ""
-            )
+            + ratio_cell
             + "</div>"
             + bars
             + '<div class="small muted">场外成交（含暗池与做市商内部撮合），不区分买卖方向，FINRA 次日发布。</div>'
