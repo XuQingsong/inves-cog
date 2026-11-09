@@ -1590,6 +1590,17 @@ def _money_short(usd):
     return f"${usd:.0f}"
 
 
+def _shares_short(value):
+    if value is None:
+        return _miss()
+    value = float(value)
+    if abs(value) >= 1e8:
+        return f"{value / 1e8:.2f} 亿"
+    if abs(value) >= 1e4:
+        return f"{value / 1e4:.0f} 万"
+    return f"{value:.0f}"
+
+
 def _smartmoney_module(payload):
     data = payload.get("smartmoney")
     if not data:
@@ -1679,7 +1690,7 @@ def _smartmoney_module(payload):
         spark = _spark(series) if len(series) >= 2 else ""
         short_html = (
             '<div class="kv">'
-            f'<span class="k">空头股数</span><span class="small">{_money_short(latest.get("short_interest"))}</span>'
+            f'<span class="k">空头股数</span><span class="small">{_shares_short(latest.get("short_interest"))}</span>'
             f'<span class="k">较上一期</span><span class="small">{chg}</span>'
             f'<span class="k">回补天数</span><span class="small num">{_text(dtc)}</span>'
             f'<span class="k">占流通股</span><span class="small">{si_text}</span>'
