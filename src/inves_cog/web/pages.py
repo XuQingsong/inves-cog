@@ -724,8 +724,7 @@ def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, compl
             (anomaly_id,),
         )
         candidates = [
-            {**row, "confidence": _confidence_display(row.get("confidence"), row.get("evidence"))}
-            for row in candidates
+            {**row, "confidence": _confidence_display(row.get("confidence"), row.get("evidence"))} for row in candidates
         ]
     timeline = []
     generated = None
