@@ -177,6 +177,7 @@ def _same_day_floor(scored, start, members):
 
 
 def rank_items(items, query_entities, limit=40, *, start=None, members=None, rules=None):
+    rules = rules or m8_rules()
     member_count = len(members) if members is not None else len(set(query_entities or []))
     scored = [
         {
