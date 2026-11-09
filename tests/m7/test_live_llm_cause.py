@@ -424,6 +424,12 @@ def test_pre_slots_cap_and_backfill():
     assert len(ranked) == 30 and sum(i["info_id"].startswith("news:a:") for i in ranked) == 5
 
 
+def test_question_requires_all_chinese_reason():
+    sent = llm_cause.payload(nvda_row(), [dict(SCANDAL[0])])["问法"]
+    assert sent == llm_cause.QUESTION
+    assert "reason_zh 必须全部用中文，人名、公司名可用常用中文译名，股票代码除外。" in sent
+
+
 def test_model_failure_counts_attempt_and_keeps_unknown():
     def boom(payload):
         raise RuntimeError("down")

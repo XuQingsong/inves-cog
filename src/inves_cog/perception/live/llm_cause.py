@@ -20,6 +20,7 @@ QUESTION = (
     "下面是一次股价异常和这段时间入库的候选新闻。请判断哪几条新闻最能解释这次异常。"
     "只能引用候选新闻里给出的 id；如果没有任何一条能解释，cause_info_ids 返回空数组。"
     "reason_zh 用一句中文说明原因（不超过 60 字，不要写 id）。"
+    "reason_zh 必须全部用中文，人名、公司名可用常用中文译名，股票代码除外。"
     "confidence：新闻直接说明了涨跌原因为 high，较可能为 medium，只是猜测为 low。"
     "timing：新闻入库早于异常为 news_before_move，晚于异常为 move_before_news，否则 unclear。"
 )
