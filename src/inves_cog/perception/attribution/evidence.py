@@ -1,8 +1,11 @@
 """Six-part evidence score. Missing parts drop out and the remaining weights are rescaled."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from inves_cog.ingest.market import NY, regular_bounds, trading_day
 from inves_cog.perception.attribution.rules import m8_rules
+
+_COVERAGE_MIN = 3
 
 
 def evidence_score(components, rules=None):
@@ -11,15 +14,22 @@ def evidence_score(components, rules=None):
     available = {name: components[name] for name in weights if components.get(name) is not None}
     weight = sum(weights[name] for name in available)
     if weight == 0:
-        return {"total": None, "confidence": None, "enters_hypothesis": False}
+        return {"total": None, "confidence": None, "enters_hypothesis": False, "covered_count": 0}
     total = round(sum(weights[name] * available[name] for name in available) / weight, 6)
-    if total >= 0.70:
+    if len(available) < _COVERAGE_MIN:
+        confidence = "待证实"
+    elif total >= 0.70:
         confidence = "高"
     elif total >= 0.50:
         confidence = "中"
     else:
         confidence = "低"
-    return {"total": total, "confidence": confidence, "enters_hypothesis": total >= 0.5}
+    return {
+        "total": total,
+        "confidence": confidence,
+        "enters_hypothesis": total >= 0.5,
+        "covered_count": len(available),
+    }
 
 
 _MAGNITUDE = {"相容": 1.0, "部分相容": 0.6, "不相容": 0.2}
@@ -32,10 +42,44 @@ def magnitude_component(verdict):
 
 def time_alignment(published, session_start, session_end):
     if published < session_start:
-        return 1.0
+        return _freshness(published, session_start)
     if published <= session_end:
         return 0.7
     return 0.0
+
+
+def _freshness(published, session_start):
+    """News published after the prior session close (or same day) scores 1.0;
+    each trading day earlier multiplies by 0.6, floored at 0.2."""
+    try:
+        if session_start.tzinfo is None:
+            session_start = session_start.replace(tzinfo=NY)
+        if published.tzinfo is None:
+            published = published.replace(tzinfo=NY)
+        session_day = session_start.astimezone(NY).date()
+        pub_stamp = published.astimezone(NY)
+    except (AttributeError, ValueError):
+        return None
+    pub_day = pub_stamp.date()
+    if pub_day >= session_day:
+        return 1.0
+    previous = session_day
+    for _ in range(15):
+        previous = previous - timedelta(days=1)
+        if trading_day(previous):
+            break
+    else:
+        return 1.0
+    bounds = regular_bounds(previous)
+    if bounds is not None and published >= bounds[1]:
+        return 1.0
+    earlier = 0
+    cursor = pub_day
+    while cursor < session_day and earlier < 15:
+        cursor = cursor + timedelta(days=1)
+        if trading_day(cursor):
+            earlier += 1
+    return max(0.2, 0.6**earlier)
 
 
 def bounded_time_alignment(items, session_start, session_end=None):

@@ -78,13 +78,14 @@
         "control_baskets": [],
         "direction": null,
         "scored": true,
-        "score": 0.765,
+        "score": 0.685,
         "confidence": null,
         "fundamental": null,
         "evidence": {
-          "total": 0.765,
-          "confidence": "高",
-          "enters_hypothesis": true
+          "total": 0.685,
+          "confidence": "中",
+          "enters_hypothesis": true,
+          "covered_count": 6
         }
       },
       {
@@ -189,7 +190,7 @@
       "closes_case": false
     },
     "supplement": null,
-    "market_confidence": "高",
+    "market_confidence": "中",
     "fundamental_standing": "支持",
     "retrieval_gap": null,
     "magnitude_channels": null,

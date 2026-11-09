@@ -21,6 +21,7 @@ from inves_cog.web.pages import (
     _open,
     _parse_ts,
     _plan,
+    _report_confidence_label,
     _rows,
     _tickers,
     _universe,
@@ -1546,6 +1547,7 @@ def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day, attribu
                 "explanation": explanation,
                 "cited_at": cited,
                 "reasons": reasons,
+                "confidence_label": _report_confidence_label(reports.get(row["anomaly_id"])),
                 "attribution": attribution,
                 "untrusted": not fresh,
             }

@@ -1205,7 +1205,7 @@ def _retrieved(anomaly, items, as_of):
         _graph_context(anomaly, as_of)["neighbors"],
         anomaly.get("monitored") or [],
     )
-    return shortlist(items, found["entities"], anomaly["started_at"], as_of)
+    return shortlist(items, found["entities"], anomaly["started_at"], as_of, members=members)
 
 
 def _apply_score(candidates, anomaly, items, overrides):

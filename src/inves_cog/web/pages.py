@@ -678,6 +678,36 @@ def _report(connection, anomaly_id):
     return row["report"]
 
 
+def _confidence_display(confidence, evidence):
+    """Under-covered candidates display 待证实 instead of the 高/中/低 label.
+
+    Reads the stored evidence components only; the page never rescores."""
+    components = evidence.get("components") if isinstance(evidence, dict) else None
+    if not isinstance(components, dict):
+        return confidence
+    covered = [name for name, value in components.items() if value is not None]
+    if len(covered) >= 3:
+        return confidence
+    if not covered:
+        names = "无分项"
+    elif len(covered) == 1:
+        names = f"仅 {covered[0]}"
+    else:
+        names = "、".join(covered)
+    return f"待证实（证据项不足：{names}）"
+
+
+def _report_confidence_label(report):
+    """Under-covered label of the best-scored candidate in a stored report, else None."""
+    candidates = report.get("candidates") if isinstance(report, dict) else None
+    rows = [row for row in candidates or [] if isinstance(row, dict)]
+    if not rows:
+        return None
+    best = max(rows, key=lambda row: row.get("score") if isinstance(row.get("score"), (int, float)) else -1)
+    label = _confidence_display(best.get("confidence"), best.get("evidence"))
+    return label if label != best.get("confidence") else None
+
+
 def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, completeness):
     anomaly_id = None if view is None else view["anomaly_id"]
     report = {} if anomaly_id is None else _report(connection, anomaly_id)
@@ -693,6 +723,10 @@ def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, compl
             """,
             (anomaly_id,),
         )
+        candidates = [
+            {**row, "confidence": _confidence_display(row.get("confidence"), row.get("evidence"))}
+            for row in candidates
+        ]
     timeline = []
     generated = None
     if anomaly_id is not None:
