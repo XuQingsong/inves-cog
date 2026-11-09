@@ -237,7 +237,7 @@ def test_institutions_filing_anomaly_excluded():
 
     period = date(2026, 6, 30)
     f13 = [
-        _f13(period, date(2026, 8, 15), "C1", "Normal Fund", 150, value=15000),   # implied 100 ≈ close
+        _f13(period, date(2026, 8, 15), "C1", "Normal Fund", 150, value=15000),  # implied 100 ≈ close
         _f13(period, date(2026, 8, 15), "C2", "Glitch Fund", 10**9, value=1000),  # implied ~0 → anomaly
     ]
     bars = [_bar(period - timedelta(days=i), 100.0) for i in range(3)]
