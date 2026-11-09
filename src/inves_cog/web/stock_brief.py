@@ -740,6 +740,9 @@ def page_brief_stock(connection, day, clock, symbol):
     )
     news_stamp = news[0]["published_beijing"] if news else MISSING
     news_feed = _news_feed(connection, symbol, day, context)
+    from inves_cog.perception.smartmoney import money_flow
+
+    smartmoney = _safe(connection, lambda: money_flow(connection, symbol, context["cutoff"]))
     next_earnings = _next_earnings(context["earnings_cal"], symbol, day)
     tech = context["technicals"].get(symbol)
     range_row = context["ranges"].get(symbol)
@@ -753,7 +756,8 @@ def page_brief_stock(connection, day, clock, symbol):
         "symbol": symbol,
         "title": symbol,
         "oneliner": oneliner,
-        "headings": ["走势与位置", "资金与情绪", "新闻与事件", "基本面与估值", "我的仓位"],
+        "headings": ["走势与位置", "资金动向", "资金与情绪", "新闻与事件", "基本面与估值", "我的仓位"],
+        "smartmoney": smartmoney,
         "trend": trend,
         "short_text": short_text,
         "resid_text": resid_sentence(resid),
