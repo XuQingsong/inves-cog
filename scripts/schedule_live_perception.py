@@ -1,5 +1,6 @@
 """B-069: incremental news-event builder. Runs every 2 minutes via supervisor;
---replay START END rebuilds a date range. Perception DSN only; no LLM."""
+--replay START END rebuilds a date range. Perception DSN only. The live pass
+may ask the model for causes of unlinked anomalies (task live_cause)."""
 
 import argparse
 import json
@@ -188,6 +189,36 @@ def _run(connection, scope, items, events, args):
     print(f"events={len(events)} items={len(items)}")
 
 
+def _held(connection):
+    try:
+        return {
+            r["ticker"]
+            for r in connection.execute(
+                "SELECT jsonb_object_keys(coalesce(state->'positions','{}'::jsonb)) AS ticker"
+                " FROM (SELECT state FROM trading.ledger WHERE portfolio_id='paper-fixed'"
+                " ORDER BY observed_at DESC LIMIT 1) latest"
+            ).fetchall()
+        }
+    except Exception:
+        return set()
+
+
+_LLM = {}
+
+
+def _llm_client(values):
+    """Shared client (usage lands in ingest.llm_calls); None when unconfigured."""
+    if "client" not in _LLM:
+        try:
+            from inves_cog.llm.client import Client
+
+            _LLM["client"] = Client.from_environment(values)
+        except Exception as exc:
+            print(f"live_cause client unavailable: {type(exc).__name__}", flush=True)
+            _LLM["client"] = None
+    return _LLM["client"]
+
+
 def due(last_events, last_live, now):
     """Pure scheduling decision: events every 120 s, live every 300 s."""
     return now - last_events >= 120, now - last_live >= 300
@@ -229,7 +260,15 @@ if __name__ == "__main__":
                     with connect(
                         {**values, "INVES_COG_DATABASE_URL": values["INVES_COG_PERCEPTION_DATABASE_URL"]}
                     ) as connection:
-                        print(live_pass(connection, datetime.now(timezone.utc)), flush=True)
+                        print(
+                            live_pass(
+                                connection,
+                                datetime.now(timezone.utc),
+                                llm_client=_llm_client(values),
+                                held=_held(connection),
+                            ),
+                            flush=True,
+                        )
                         from inves_cog.perception.core_companies import core_companies
 
                         cards = update_cards(connection, datetime.now(timezone.utc), core_companies())

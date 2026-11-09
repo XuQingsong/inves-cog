@@ -959,8 +959,22 @@ _KIND_CN = {
 }
 
 
+def cause_state(r):
+    """'rule' (event link), 'llm' (model, high/medium), 'tentative' (model, low)
+    or None. A rule link always wins over a model pick."""
+    if r.get("cause_event_id"):
+        return "rule"
+    if r.get("cause_source") == "llm" and r.get("cause_reason") and r.get("cause_info_ids"):
+        return "tentative" if r.get("cause_confidence") == "low" else "llm"
+    return None
+
+
 def _cause_label(r):
-    """'INTC 指引（指引低于预期 42%）'; no facts -> 'INTC 指引'."""
+    """'INTC 指引（指引低于预期 42%）'; no facts -> 'INTC 指引'. Model causes
+    use the model's one-sentence reason."""
+    state = cause_state(r)
+    if state in ("llm", "tentative"):
+        return r.get("cause_reason") or ""
     if not r.get("cause_event_id"):
         return ""
     subj = r.get("cause_subject") or ""
@@ -2259,7 +2273,7 @@ def _market_state(connection, day, payload, live):
 
     causes = []
     for r in live:
-        if r["scope"] in ("market", "basket") and r.get("cause_event_id") and r.get("cause_label"):
+        if r["scope"] in ("market", "basket") and cause_state(r) in ("rule", "llm") and r.get("cause_label"):
             head = r["cause_label"]
             if head not in causes:
                 causes.append(head)
@@ -2324,13 +2338,29 @@ def _market_state(connection, day, payload, live):
     }
 
 
+def _hl_cause(row):
+    state = cause_state(row)
+    if state == "llm":
+        return row.get("cause_label")
+    if state == "tentative":
+        return f"待证实：{row.get('cause_label')}"
+    return row.get("cause_headline")
+
+
 def _hl_grouped(live, positions):
     """§2 highlights: one card per cause (cause_event_id, else subject); the card
     ranks by its most important member scope (market > holdings > basket > stock);
     active before faded; max 4."""
     groups = {}
     for r in live:
-        key = r.get("cause_event_id") or f"subj:{r['subject']}"
+        state = cause_state(r)
+        key = (
+            r["cause_event_id"]
+            if state == "rule"
+            else f"llm:{r['cause_info_ids'][0]}"
+            if state == "llm"
+            else f"subj:{r['subject']}"
+        )
         groups.setdefault(key, []).append(r)
     held = set(positions or [])
     scope_order = {"market": 0, "basket": 1, "stock": 2}
@@ -2361,8 +2391,9 @@ def _hl_grouped(live, positions):
                 "cur_as_of": lead.get("cur_as_of"),
                 "last_px": lead.get("last_px"),
                 "why": why,
-                "cause": top.get("cause_headline"),
+                "cause": _hl_cause(top),
                 "kind": top.get("cause_kind"),
+                "cause_source": "llm" if cause_state(top) == "llm" else None,
                 "peak_z": lead.get("peak_z"),
                 "members": sorted(rows, key=lambda r: -abs(r.get("peak_z") or 0)),
                 "rank": (
@@ -3523,15 +3554,28 @@ def _live_anomalies(connection, day, is_today):
     if not exists or not exists["t"]:
         return []
     status = "" if not is_today else "AND a.status='active'"
+    has_llm = connection.execute(
+        """SELECT 1 AS ok FROM information_schema.columns
+           WHERE table_schema='perception' AND table_name='live_anomalies' AND column_name='cause_info_ids'"""
+    ).fetchone()
+    llm_cols, llm_join = "", ""
+    if has_llm:
+        # earliest cited item of a model-picked cause (headline + when it landed)
+        llm_cols = ", li.headline AS llm_headline, li.first_seen_at AS llm_first_seen"
+        llm_join = """LEFT JOIN LATERAL (
+                SELECT i.headline, i.first_seen_at FROM ingest.info_items i
+                WHERE a.cause_event_id IS NULL AND i.info_id = ANY(a.cause_info_ids)
+                ORDER BY i.first_seen_at LIMIT 1) li ON true"""
     rows = connection.execute(
         f"""SELECT a.*, b.name AS basket_name, e.headline AS cause_headline,
                    e.first_seen_at AS cause_first_seen,
-                   e.facts AS cause_facts, e.subject AS cause_subject, e.kind AS cause_kind
+                   e.facts AS cause_facts, e.subject AS cause_subject, e.kind AS cause_kind{llm_cols}
             FROM perception.live_anomalies a
             LEFT JOIN graph.baskets b ON b.basket_id = a.subject AND a.scope='basket'
             LEFT JOIN perception.news_events e ON e.event_id = a.cause_event_id
+            {llm_join}
             WHERE a.trade_date=%s {status}
-            ORDER BY abs(COALESCE(a.peak_z,0)) DESC LIMIT 10""",
+            ORDER BY abs(COALESCE(a.peak_z,0)) DESC LIMIT 40""",
         (day,),
     ).fetchall()
     try:
@@ -3554,8 +3598,17 @@ def _live_anomalies(connection, day, is_today):
                     r["cur_as_of"] = snap["as_of"]
     except Exception:
         pass
+    from inves_cog.perception.core_companies import core_companies
+
+    core = set(core_companies())
     for r in rows:
+        if cause_state(r) in ("llm", "tentative"):
+            r["cause_headline"] = r.get("llm_headline")
+            r["cause_first_seen"] = r.get("llm_first_seen")
+        r["cause_state"] = cause_state(r)
         r["cause_label"] = _cause_label(r)
+        names = {r["subject"]} | set(r.get("members") or {})
+        r["is_core"] = bool(names & core) if r["scope"] != "market" else False
     return rows
 
 

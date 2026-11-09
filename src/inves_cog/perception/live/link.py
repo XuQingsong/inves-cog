@@ -69,7 +69,7 @@ def link_causes(connection, day, core):
         lag = (row["first_seen_at"] - cand["first_seen_at"]).total_seconds() / 60.0
         connection.execute(
             """UPDATE perception.live_anomalies
-               SET cause_event_id=%s, cause_kind=%s, cause_lag_minutes=%s, updated_at=now()
+               SET cause_event_id=%s, cause_kind=%s, cause_lag_minutes=%s, cause_source='rule', updated_at=now()
                WHERE trade_date=%s AND scope=%s AND subject=%s AND direction=%s""",
             (cand["event_id"], cand["kind"], lag, day, scope, row["subject"], row["direction"]),
         )

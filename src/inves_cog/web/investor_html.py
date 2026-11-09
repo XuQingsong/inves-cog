@@ -2514,10 +2514,73 @@ def _prev_session_tag(r):
     )
 
 
+_LIVE_SHOWN = 5
+_SEV_ORDER = {"重大": 0, "关注": 1, "一般": 2}
+
+
+def _live_title(rows):
+    sessions = {r.get("session") for r in rows}
+    if len(sessions) == 1:
+        return {"pre": "盘前异常", "regular": "盘中异常", "post": "盘后异常"}.get(sessions.pop(), "今日异常")
+    return "今日异常"
+
+
+def _live_order(rows, held):
+    """重大 > 关注 > 一般; held or core first; larger peak move; newer first."""
+
+    def focus(r):
+        names = {r.get("subject")} | set(r.get("members") or {})
+        return bool(r.get("is_core")) or bool(names & held)
+
+    def first_seen(r):
+        fs = r.get("first_seen_at")
+        if isinstance(fs, str):
+            try:
+                fs = datetime.fromisoformat(fs)
+            except ValueError:
+                fs = None
+        return fs.timestamp() if hasattr(fs, "timestamp") else 0.0
+
+    return sorted(
+        rows,
+        key=lambda r: (
+            _SEV_ORDER.get(_severity(r)[1], 3),
+            0 if focus(r) else 1,
+            -abs(r.get("peak_ret") or 0),
+            -first_seen(r),
+        ),
+    )
+
+
+def _llm_cause_html(r):
+    """Model-picked cause: one sentence + chip + when the cited news landed."""
+    tentative = r.get("cause_state") == "tentative" or r.get("cause_confidence") == "low"
+    chip = (
+        '<span class="chip stale" title="模型判断，把握不足">待证实</span>'
+        if tentative
+        else '<span class="chip llm-chip" title="由模型从已入库新闻中挑选">模型判断</span>'
+    )
+    at = r.get("cause_first_seen")
+    if isinstance(at, str):
+        try:
+            at = datetime.fromisoformat(at.replace("Z", "+00:00"))
+        except ValueError:
+            at = None
+    when = ""
+    if hasattr(at, "astimezone"):
+        when = f"新闻 {at.astimezone(ZoneInfo('America/New_York')).strftime('%m-%d %H:%M')}美东"
+    headline = _text(r.get("cause_headline") or "")
+    reason = _text(r.get("cause_reason") or r.get("cause_label") or "")
+    return f'{chip} <span class="trunc" title="{headline}">{reason}</span>' + (
+        f'<span class="dim" title="{headline}"> {when}</span>' if when else ""
+    )
+
+
 def _live_module(payload):
     rows = (payload.get("news_modules") or {}).get("live") or []
     if not rows:
         return ""
+    rows = _live_order(rows, set(payload.get("held_tickers") or []))
     body = []
     for r in rows:
         scope = {"stock": "个股", "basket": "板块", "market": "市场"}.get(r["scope"], r["scope"])
@@ -2566,7 +2629,9 @@ def _live_module(payload):
         if session_label and first is not None:
             when = f"{session_label} {first * 100:+.1f}%（较昨收） {when}".strip()
         cause_html = "原因未明"
-        if r.get("cause_event_id"):
+        if not r.get("cause_event_id") and r.get("cause_state") in ("llm", "tentative"):
+            cause_html = _llm_cause_html(r)
+        elif r.get("cause_event_id"):
             lag = r.get("cause_lag_minutes")
             if lag is not None and lag < 0:
                 lag_txt = f"股价先动，新闻晚 {abs(lag):.0f} 分钟入库"
@@ -2596,11 +2661,28 @@ def _live_module(payload):
             f"<td class='num'>{cur_html}</td><td class='num'>{peak_html}</td>"
             f"<td style='white-space:nowrap'>{when}</td><td>{cause_html}{members}</td></tr>"
         )
-    return (
-        '<div class="card sec cat-anomaly" id="live"><h2>盘中异常'
-        '<span class="stamp">' + _text(str(payload.get("et_now") or "")) + " ET</span></h2>"
+    head = (
         '<table class="tbl"><tr><th>层级</th><th>对象</th><th>现价</th><th>当前涨跌</th>'
-        "<th>异动峰值</th><th>首次出现</th><th>起因</th></tr>" + "".join(body) + "</table></div>"
+        "<th>异动峰值</th><th>首次出现</th><th>起因</th></tr>"
+    )
+    rest = ""
+    if len(body) > _LIVE_SHOWN:
+        rest = (
+            f'<details class="live-more"><summary class="dim">另有 {len(body) - _LIVE_SHOWN} 条</summary>'
+            + head
+            + "".join(body[_LIVE_SHOWN:])
+            + "</table></details>"
+        )
+    return (
+        f'<div class="card sec cat-anomaly" id="live"><h2>{_live_title(rows)}'
+        '<span class="stamp">'
+        + _text(str(payload.get("et_now") or ""))
+        + " ET</span></h2>"
+        + head
+        + "".join(body[:_LIVE_SHOWN])
+        + "</table>"
+        + rest
+        + "</div>"
     )
 
 
@@ -2789,7 +2871,9 @@ def _highlights_module(payload):
             f'<span class="who">{link}{merged}</span>'
             f'<div class="num {cls}">{px}<span title="较昨收">{cur_txt}</span>'
             f' <span class="dim small">{_text(peak_txt)}</span></div>'
-            f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}</div>'
+            f'<div class="dim small">{_text(g["why"])} · {_text((g.get("cause") or "原因未明")[:80])}'
+            + (' <span class="chip llm-chip">模型判断</span>' if g.get("cause_source") == "llm" else "")
+            + "</div>"
             + (
                 '<div class="small">'
                 + "、".join(
@@ -3058,8 +3142,16 @@ def _stock_today(payload):
         cur_txt = f"{_pct(cur, 1)}较昨收" if cur is not None else "暂缺"
         det = r.get("first_ret")
         det_txt = f"{session_label} {_pct(det, 1)}（检测时）" if det is not None else session_label
+        if r.get("cause_state") in ("llm", "tentative") and not r.get("cause_event_id"):
+            chip = (
+                '<span class="chip stale">待证实</span>'
+                if r.get("cause_state") == "tentative"
+                else '<span class="chip llm-chip">模型判断</span>'
+            )
+        else:
+            chip = _kind_chip(r.get("cause_kind"))
         return (
-            f'<div class="row">{_kind_chip(r.get("cause_kind"))} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
+            f'<div class="row">{chip} <b>{_text(r.get("basket_name") or r["subject"])}</b>'
             f' <span class="num" title="当前（较昨收）">{cur_txt}</span>'
             f' <span class="dim small">{det_txt} · 峰值 {_pct(r.get("peak_ret"), 1)}</span> '
             f'<span class="dim trunc" title="{_text(r.get("cause_headline") or "")}">'

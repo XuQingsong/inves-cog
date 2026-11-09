@@ -19,6 +19,7 @@ OTHER_TASKS = frozenset(
         "systemic_event_tag",
         "summary_oneliner",
         "news_translate",
+        "live_cause",
     }
 )
 

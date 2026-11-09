@@ -143,8 +143,9 @@ def _l3_of(baskets):
     return l3
 
 
-def live_pass(connection, now):
-    """Returns counts; safe to call every loop iteration (no-op outside window)."""
+def live_pass(connection, now, llm_client=None, held=()):
+    """Returns counts; safe to call every loop iteration (no-op outside window).
+    llm_client: when given, rows still without a rule link get a model-picked cause."""
     local = now.astimezone(NY)
     day = local.date()
     if not in_window(now):
@@ -162,6 +163,15 @@ def live_pass(connection, now):
         + market_hits(quotes, rule)
     )
     n = apply_round(connection, hits, now, day, session)
-    linked = link_causes(connection, day, set(core_companies()))
+    core = set(core_companies())
+    linked = link_causes(connection, day, core)
+    llm = None
+    if llm_client is not None:
+        from inves_cog.perception.live.llm_cause import llm_causes
+
+        try:
+            llm = llm_causes(connection, day, now, core, set(held), llm_client)
+        except Exception as exc:  # never block detection on the model step
+            llm = {"error": type(exc).__name__}
     reacted = update_reactions(connection, now)
-    return {"hits": n, "linked": linked, "reacted": reacted, "post_no_close": post_no_close}
+    return {"hits": n, "linked": linked, "llm": llm, "reacted": reacted, "post_no_close": post_no_close}

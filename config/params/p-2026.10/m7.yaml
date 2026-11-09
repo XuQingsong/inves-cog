@@ -34,3 +34,15 @@ m7:
   squeeze_gap: 0.03
   premarket_z: 3
   sigma_min: 60
+live_cause:
+  daily_cap: 120
+  focus_share: 0.8
+  max_attempts: 4
+  min_interval_minutes: 20
+  per_pass_calls: 6
+  major_z: 5
+  top_k: 30
+  pool_limit: 400
+  max_age_hours: 72
+  form4_max_age_hours: 24
+  summary_chars: 240
