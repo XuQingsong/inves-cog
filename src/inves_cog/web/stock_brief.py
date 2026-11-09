@@ -41,7 +41,7 @@ from inves_cog.web.brief import (
     level,
     volume_multiple,
 )
-from inves_cog.web.pages import _tickers
+from inves_cog.web.pages import _report_confidence_label, _tickers
 
 # Frozen rule-A entry book minima live in ENTRY. The page translates a miss; it does not rescore.
 _BOOK_BELOW = {
@@ -404,6 +404,7 @@ def _events_for(connection, context, day, symbol):
                 "status": status,
                 "exposure": shown,
                 "reasons": reasons,
+                "confidence_label": _report_confidence_label(reports.get(row["anomaly_id"])),
             }
         )
     return events

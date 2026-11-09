@@ -409,7 +409,7 @@ def _events(payload):
         catchup = row.get("attribution") == "catchup"
         if reasons:
             label = (
-                "候选（待证实）"
+                row.get("confidence_label") or "候选（待证实）"
                 if "原因未明" in (row.get("status") or "")
                 else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
             )
@@ -1657,7 +1657,7 @@ def _stock_news(payload):
         items = row.get("reasons") or []
         reasons = [_reason_li(item) for item in items]
         label = (
-            "候选（待证实）"
+            row.get("confidence_label") or "候选（待证实）"
             if "原因未明" in (row.get("status") or "")
             else ("可能原因 · 含旧闻" if any(item.get("stale_note") for item in items) else "可能原因")
         )

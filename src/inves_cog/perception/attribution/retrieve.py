@@ -1,6 +1,7 @@
 """Retrieval window and embedding isolation. Background is not a direct trigger."""
 
-from datetime import timedelta
+import math
+from datetime import datetime, timedelta
 
 from inves_cog.perception.attribution.rules import m8_rules
 
@@ -86,18 +87,114 @@ def overlap_ratio(item_entities, query_entities):
     return min(len(query & set(item_entities)) / len(query), 1.0)
 
 
-def relevance(item, query_entities):
-    overlap = overlap_ratio(item.get("entities") or [], query_entities)
+def _retrieval_weights(rules=None):
+    return (rules or m8_rules())["retrieval_weights"]
+
+
+def _hit_overlap(item, query_entities, member_count, rules=None):
+    """Blend of item breadth and basket coverage.
+
+    Same names as the entity path (tickers ∪ entities). Breadth divides hits by
+    the item's own ticker count; coverage divides hits by min(member_count, cap),
+    so a news item spanning many members outranks a single-name item in a big
+    basket. A one-member basket reduces to the breadth term."""
+    names = set(item.get("entities") or []) | set(item.get("tickers") or [])
+    hits = len(set(query_entities or []) & names)
+    weights = _retrieval_weights(rules)
+    blend = weights["overlap_blend"]
+    cap = weights["member_cover_cap"]
+    breadth = min(hits / max(1, len(item.get("tickers") or [])), 1.0)
+    cover = min(hits / max(1, min(member_count, cap)), 1.0)
+    return blend * breadth + (1 - blend) * cover
+
+
+def _stamp(value):
+    if not isinstance(value, datetime) or value.tzinfo is None:
+        return None
+    return value
+
+
+def _recency(published, start):
+    """exp decay on how many hours the item predates the session start."""
+    stamp = _stamp(published)
+    start = _stamp(start)
+    if stamp is None or start is None:
+        return 0.0
+    try:
+        hours = (start - stamp).total_seconds() / 3600
+    except TypeError:
+        return 0.0
+    if hours <= 0:
+        return 1.0
+    return math.exp(-hours / 24)
+
+
+def _item_epoch(item):
+    stamp = _stamp(item.get("published_at"))
+    return stamp.timestamp() if stamp is not None else float("-inf")
+
+
+def relevance(item, query_entities, *, start=None, member_count=None, rules=None):
+    weights = _retrieval_weights(rules)
+    if member_count is None:
+        member_count = len(set(query_entities or []))
+    overlap = _hit_overlap(item, query_entities, member_count, rules)
+    fresh = _recency(item.get("published_at"), start)
     similarity = item.get("similarity") or 0.0
     level = item.get("source_level")
     weight = _SOURCE_WEIGHT.get(int(level), 0.0) if level is not None else 0.0
-    return 0.5 * overlap + 0.3 * similarity + 0.2 * weight
+    return (
+        weights["overlap"] * overlap
+        + weights["recency"] * fresh
+        + weights["similarity"] * similarity
+        + weights["source"] * weight
+    )
 
 
-def rank_items(items, query_entities, limit=40):
-    scored = [{**item, "relevance": relevance(item, query_entities)} for item in items]
-    scored.sort(key=lambda row: row["relevance"], reverse=True)
-    return scored[:limit]
+def _rank_key(row):
+    return (-row["relevance"], -_item_epoch(row), row.get("info_id") or "")
+
+
+_SAME_DAY_HOURS = 24
+_SAME_DAY_MIN = 10
+_BIG_BASKET = 10
+
+
+def _same_day_floor(scored, start, members):
+    """Big baskets keep same-day items: at least min(10, available) of the items
+    published in the 24h before the session start, filled by highest recency."""
+    start = _stamp(start)
+    if start is None or members is None or len(members) <= _BIG_BASKET:
+        return []
+    boundary = start - timedelta(hours=_SAME_DAY_HOURS)
+    recent = [
+        row for row in scored if _stamp(row.get("published_at")) is not None and boundary <= row["published_at"] < start
+    ]
+    recent.sort(
+        key=lambda row: (-_recency(row.get("published_at"), start), -_item_epoch(row), row.get("info_id") or "")
+    )
+    return recent[: min(_SAME_DAY_MIN, len(recent))]
+
+
+def rank_items(items, query_entities, limit=40, *, start=None, members=None, rules=None):
+    rules = rules or m8_rules()
+    member_count = len(members) if members is not None else len(set(query_entities or []))
+    scored = [
+        {
+            **item,
+            "relevance": relevance(item, query_entities, start=start, member_count=member_count, rules=rules),
+        }
+        for item in items
+    ]
+    scored.sort(key=_rank_key)
+    floor = _same_day_floor(scored, start, members)
+    if not floor:
+        return scored[:limit]
+    kept = {row["info_id"] for row in floor}
+    rest = [row for row in scored if row.get("info_id") not in kept][: limit - len(floor)]
+    chosen = floor + rest
+    chosen.sort(key=_rank_key)
+    return chosen
 
 
 def vector_query(anomaly):
@@ -112,13 +209,14 @@ def vector_query(anomaly):
     return " ".join(str(part) for part in parts if part)
 
 
-def shortlist(items, entities, start, now, rules=None):
+def shortlist(items, entities, start, now, rules=None, *, members=None):
     """Visible window, then the union, then the top 40 by the retrieval score."""
     opened = window_items(items, start, now, limit=max(len(items), 1))
-    return rank_items(retrieval_union(opened, entities, rules), entities)
+    union = retrieval_union(opened, entities, rules, start=start, members=members)
+    return rank_items(union, entities, start=start, members=members, rules=rules)
 
 
-def retrieval_union(items, entities, rules=None, *, vector_limit=50):
+def retrieval_union(items, entities, rules=None, *, vector_limit=50, start=None, members=None):
     """Rule hits and the top approved vectors, then one row per source root."""
     rules = rules or m8_rules()
     vector_ids = _top_vectors(items, rules, vector_limit)
@@ -128,7 +226,8 @@ def retrieval_union(items, entities, rules=None, *, vector_limit=50):
         paths = _paths(item, entity_set, vector_ids)
         if paths:
             pooled.append({**item, "paths": paths})
-    return _dedup_roots(pooled, entity_set)
+    member_count = len(members) if members is not None else len(entity_set)
+    return _dedup_roots(pooled, entity_set, start=start, rules=rules, member_count=member_count)
 
 
 def _top_vectors(items, rules, limit):
@@ -155,7 +254,7 @@ def _paths(item, entity_set, vector_ids):
     return paths
 
 
-def _dedup_roots(items, entities):
+def _dedup_roots(items, entities, *, start=None, rules=None, member_count=None):
     groups = []
     index = {}
     for item in items:
@@ -168,7 +267,7 @@ def _dedup_roots(items, entities):
             groups[index[key]].append(item)
     kept = []
     for group in groups:
-        group.sort(key=lambda row: _root_key(row, entities))
+        group.sort(key=lambda row: _root_key(row, entities, start=start, rules=rules, member_count=member_count))
         winner = dict(group[0])
         paths = []
         for row in group:
@@ -180,10 +279,12 @@ def _dedup_roots(items, entities):
     return kept
 
 
-def _root_key(row, entities):
-    published = row.get("published_at")
-    stamp = published.isoformat() if hasattr(published, "isoformat") else str(published or "")
-    return (-relevance(row, entities), stamp, row.get("info_id") or "")
+def _root_key(row, entities, *, start=None, rules=None, member_count=None):
+    return (
+        -relevance(row, entities, start=start, member_count=member_count, rules=rules),
+        -_item_epoch(row),
+        row.get("info_id") or "",
+    )
 
 
 def retrieval_entities(members, baskets, edges, monitored):

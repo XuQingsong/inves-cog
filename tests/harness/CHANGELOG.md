@@ -197,3 +197,4 @@
 
 | tests/fixtures/phase1/m2/tsm-valuation-annual.json.gz | absent | 100c187b29c36aba93418621f19a8c51981bdc32d8729697e414286e6e6decbf | TSM 2025 retained SEC annual facts and existing FRED PIT recording; UD-A-07 valuation-only input regression | FR-M0-08; A012 |
 2026-10-19 A012 real retained source inputs (no account data): tests/fixtures/phase1/m5/a012_real_inputs.json 9495ca7006f608d5d5580548aab5cd8c7107d48494c4cd76bfd12c1a1c886d5f
+| tests/fixtures/phase1/m8/toshiba_explanation.json | 9dbb795c8049d750d3eae37c91df6e1ca29552c5db74776a34012a35da547013 | 84b3bb86f2e222c724b50061cd66a7ae497d81ff889c3000545d83c64e63d842 | Time component decays per trading day before the prior close; covered_count recorded alongside the rescaled total | FR-M0-08 |

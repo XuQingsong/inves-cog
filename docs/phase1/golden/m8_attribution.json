@@ -236,7 +236,8 @@
       "expected": {
         "total": 0.7755,
         "confidence": "高",
-        "enters_hypothesis": true
+        "enters_hypothesis": true,
+        "covered_count": 6
       }
     },
     {
@@ -252,7 +253,8 @@
       "expected": {
         "total": 0.435294,
         "confidence": "低",
-        "enters_hypothesis": false
+        "enters_hypothesis": false,
+        "covered_count": 5
       }
     },
     {
@@ -268,7 +270,8 @@
       "expected": {
         "total": 0.86,
         "confidence": "高",
-        "enters_hypothesis": true
+        "enters_hypothesis": true,
+        "covered_count": 6
       }
     },
     {
@@ -284,7 +287,8 @@
       "expected": {
         "total": 0.423077,
         "confidence": "低",
-        "enters_hypothesis": false
+        "enters_hypothesis": false,
+        "covered_count": 4
       }
     }
   ],
