@@ -315,7 +315,7 @@ def institutions(connection, ticker, as_of, params=None):
     day = _day(as_of)
     rows = connection.execute(
         """
-        SELECT period, filing_date, filer_cik, filer_name, shares, put_call
+        SELECT period, filing_date, filer_cik, filer_name, shares, value, put_call
         FROM ingest.f13_holdings
         WHERE ticker = %s AND filing_date <= %s
         """,
@@ -332,14 +332,38 @@ def institutions(connection, ticker, as_of, params=None):
         for r in rows:
             if r["period"] != period:
                 continue
-            h = holders.setdefault(r["filer_cik"], {"name": r["filer_name"], "shares": 0, "options": 0})
+            h = holders.setdefault(r["filer_cik"], {"name": r["filer_name"], "shares": 0, "value": 0, "options": 0})
             if r["put_call"]:
                 h["options"] += 1
             else:
                 h["shares"] += int(r["shares"] or 0)
+                h["value"] += int(r["value"] or 0)
         return holders
 
     cur, prev = _agg(latest_period), (_agg(prior_period) if prior_period else {})
+
+    close_row = connection.execute(
+        """
+        SELECT close, adj_factor FROM ingest.bars_daily
+        WHERE ticker = %s AND trade_date <= %s
+        ORDER BY trade_date DESC LIMIT 1
+        """,
+        (ticker, latest_period),
+    ).fetchone()
+    close = None
+    if close_row and close_row["close"]:
+        close = float(close_row["close"]) * float(close_row["adj_factor"] or 1)
+    # VALUE is USD for 2023+ filings, thousands of USD before (FORM13F readme)
+    value_unit = 1.0 if latest_period.year >= 2023 else 1000.0
+    lo, hi = p.get("institutions_anomaly_low", 0.5), p.get("institutions_anomaly_high", 2.0)
+    anomalies = []
+    for cik, h in list(cur.items()):
+        if not h["shares"] or h["value"] <= 0 or close is None:
+            continue
+        implied = h["value"] * value_unit / h["shares"]
+        if not lo <= implied / close <= hi:
+            anomalies.append(h["name"] or cik)
+            del cur[cik]
     prior_sufficient = len(prev) >= max(1, int(len(cur) * 0.2))
     top_n = p.get("institutions_top", 10)
     cur_rank = sorted(cur.items(), key=lambda kv: -kv[1]["shares"])[:top_n]
@@ -353,7 +377,7 @@ def institutions(connection, ticker, as_of, params=None):
                 "cik": cik,
                 "shares": h["shares"],
                 "options": h["options"],
-                "change_pct": None if not before else (h["shares"] - before) / before * 100,
+                "change_pct": None if (not before or not prior_sufficient) else (h["shares"] - before) / before * 100,
                 "new": (cik not in prev_top) if prior_sufficient else False,
             }
         )
@@ -377,6 +401,7 @@ def institutions(connection, ticker, as_of, params=None):
         "holders": top,
         "holder_count": len(cur),
         "holder_count_prior": len(prev),
+        "anomalies": anomalies,
         "total_shares": sum(h["shares"] for h in cur.values()),
         "total_shares_prior": sum(h["shares"] for h in prev.values()) or None,
         "top_change_pct": top_change,

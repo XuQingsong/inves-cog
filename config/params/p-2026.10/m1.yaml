@@ -34,6 +34,8 @@ m1:
     short_change_threshold_pct: 10.0
     publish_lag_sessions: 9
     institutions_label_pct: 3.0
+    institutions_anomaly_low: 0.5
+    institutions_anomaly_high: 2.0
     institutions_top: 10
   wide_universe: {min_market_cap: 2000000000, min_adv20: 20000000, history_sessions: 20}
   body_retention_days: 90

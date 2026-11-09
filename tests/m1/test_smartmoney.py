@@ -51,8 +51,8 @@ def _sv(day, total):
     return {"date": day, "total_volume": total}
 
 
-def _bar(day, close):
-    return {"trade_date": day, "close": close}
+def _bar(day, close, adj=1.0):
+    return {"trade_date": day, "close": close, "adj_factor": adj}
 
 
 def _si(settlement, publish, short, dtc):
@@ -187,8 +187,16 @@ def test_summary_sentence_from_labels():
     assert "暂缺" in out2["summary"]
 
 
-def _f13(period, fd, cik, name, shares, pc=None):
-    return {"period": period, "filing_date": fd, "filer_cik": cik, "filer_name": name, "shares": shares, "put_call": pc}
+def _f13(period, fd, cik, name, shares, pc=None, value=None):
+    return {
+        "period": period,
+        "filing_date": fd,
+        "filer_cik": cik,
+        "filer_name": name,
+        "shares": shares,
+        "value": value if value is not None else shares * 100,
+        "put_call": pc,
+    }
 
 
 @pytest.mark.phase1_blocking
@@ -220,3 +228,19 @@ def test_institutions_pit_and_newcomer():
     assert out["holders"][0]["change_pct"] == pytest.approx((100 - 90) / 90 * 100)
     out2 = institutions(FakeConn(f13=[]), "T", DAY, params={})
     assert out2["missing"] == "无 13F 持仓记录"
+
+
+@pytest.mark.phase1_blocking
+def test_institutions_filing_anomaly_excluded():
+    from datetime import timedelta
+    from inves_cog.perception.smartmoney import institutions
+
+    period = date(2026, 6, 30)
+    f13 = [
+        _f13(period, date(2026, 8, 15), "C1", "Normal Fund", 150, value=15000),   # implied 100 ≈ close
+        _f13(period, date(2026, 8, 15), "C2", "Glitch Fund", 10**9, value=1000),  # implied ~0 → anomaly
+    ]
+    bars = [_bar(period - timedelta(days=i), 100.0) for i in range(3)]
+    out = institutions(FakeConn(f13=f13, bars=bars), "T", DAY, params={})
+    assert out["anomalies"] == ["Glitch Fund"]
+    assert [h["name"] for h in out["holders"]] == ["Normal Fund"]

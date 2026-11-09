@@ -1746,6 +1746,11 @@ def _smartmoney_module(payload):
                 else ""
             )
             + inst_rows
+            + (
+                f'<div class="small muted">已剔除申报异常 {len(inst["anomalies"])} 家（例如 {_text(inst["anomalies"][0])}）</div>'
+                if inst.get("anomalies")
+                else ""
+            )
         )
     inst_note = (
         f"季末 {inst.get('period')} · 截至 SEC 数据集（申报截至 {inst.get('data_as_of')}）· 滞后约 45 天以上"
