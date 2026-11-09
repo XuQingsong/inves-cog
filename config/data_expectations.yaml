@@ -455,7 +455,8 @@ datasets:
 - dataset: 空头持仓
   table: ingest.short_interest
   date_column: settlement_date
-  cadence: monthly
+  cadence: semimonthly
+  release_sessions: 9
   deadline_et: '21:00'
   grace_min: 60
   min_rows: 1
