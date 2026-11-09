@@ -160,9 +160,7 @@ def _same_day_floor(scored, start, members, query_entities):
         return []
     boundary = start - timedelta(hours=_SAME_DAY_HOURS)
     recent = [
-        row
-        for row in scored
-        if _stamp(row.get("published_at")) is not None and boundary <= row["published_at"] < start
+        row for row in scored if _stamp(row.get("published_at")) is not None and boundary <= row["published_at"] < start
     ]
     recent.sort(
         key=lambda row: (-_recency(row.get("published_at"), start), -_item_epoch(row), row.get("info_id") or "")
@@ -171,10 +169,7 @@ def _same_day_floor(scored, start, members, query_entities):
 
 
 def rank_items(items, query_entities, limit=40, *, start=None, members=None, rules=None):
-    scored = [
-        {**item, "relevance": relevance(item, query_entities, start=start, rules=rules)}
-        for item in items
-    ]
+    scored = [{**item, "relevance": relevance(item, query_entities, start=start, rules=rules)} for item in items]
     scored.sort(key=lambda row: _rank_key(row, start))
     floor = _same_day_floor(scored, start, members, query_entities)
     if not floor:
