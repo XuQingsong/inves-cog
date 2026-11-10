@@ -136,6 +136,8 @@ SPLIT_RATIOS = (0.5, 1 / 3, 2.0, 3.0)
 
 
 def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset(), row_count=None, now=None):
+    if getattr(item, "disabled", None):
+        return []
     """One finding per kind/date, with actual input evidence. Missing is never a numeric zero."""
     count = len(rows) if row_count is None else row_count
     detail = {

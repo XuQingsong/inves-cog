@@ -66,6 +66,7 @@ def connect(values, *, writer=False):
 
 
 def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
+    items = [i for i in items if not getattr(i, "disabled", None)]
     """Pure detection over bounded source windows; caller decides whether to persist."""
     started = monotonic()
     results, errors = [], []
