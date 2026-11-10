@@ -3089,7 +3089,14 @@ def _key_stats(payload):
     nr = payload.get("next_report")
     fpe = an.get("forward_pe") or fy1.get("forward_pe")
     cells = [
-        ("市值", _human(an.get("market_cap")) if an.get("market_cap") else "暂缺"),
+        (
+            "市值",
+            (
+                _human(float(an["shares"]) * float(st["last"])) + f"（股本申报 {an['shares_filed']}）"
+                if an.get("shares") and st.get("last")
+                else "暂缺"
+            ),
+        ),
         ("前瞻市盈率", f"{float(fpe):.1f}" if fpe else "暂缺"),
         ("52周区间", f"{st['lo52']:,.2f}–{st['hi52']:,.2f}" if st.get("hi52") else "暂缺"),
         (

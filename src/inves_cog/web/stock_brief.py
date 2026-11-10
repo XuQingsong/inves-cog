@@ -1080,8 +1080,14 @@ def _analyst_summary(connection, symbol):
         (symbol,),
     ).fetchall()
     latest = [r for r in rows if r["fetched_at"] == rows[0]["fetched_at"]] if rows else []
-    quarter = next((r for r in latest if "quarter" in str(r["horizon"]).lower()), None)
-    year = next((r for r in latest if "year" in str(r["horizon"]).lower()), None)
+    # AV horizons arrive as Q1/Q2/FY1/FY2; match by prefix, not substring.
+    quarter = next((r for r in latest if str(r["horizon"]).startswith("Q")), None)
+    year = next((r for r in latest if str(r["horizon"]).startswith("FY")), None)
+    shares_row = connection.execute(
+        "SELECT shares, filed FROM fundamentals.fin_state"
+        " WHERE ticker=%s AND shares IS NOT NULL ORDER BY filed DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
     revision = _consensus_revision(rows)
     data_as_of = str(rows[0]["fetched_at"])[:10] if rows else None
     return {
@@ -1096,6 +1102,8 @@ def _analyst_summary(connection, symbol):
         "opinions": None,
         "trend": {},
         "market_cap": None,
+        "shares": shares_row["shares"] if shares_row else None,
+        "shares_filed": str(shares_row["filed"]) if shares_row else None,
         "forward_pe": None,
         "data_as_of": data_as_of,
         "revision": revision,
