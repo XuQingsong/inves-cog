@@ -95,7 +95,36 @@ def _write_label(connection, case, horizon, due, clock):
     visible = cutoff(due)
     case = dict(case)
     case["member_tickers"] = member_tickers(case.get("members"))
-    case["cause_text"] = case.get("cause") or {}
+    cand = connection.execute(
+        "SELECT chain, mechanism, info_ids, confidence, score "
+        "FROM perception.candidates WHERE anomaly_id = %s "
+        "ORDER BY (confidence = '待证实')::int, score DESC NULLS LAST LIMIT 1",
+        (case["anomaly_id"],),
+    ).fetchone()
+    if cand:
+        case["cause_info_ids"] = list(cand["info_ids"] or [])
+        cited = []
+        if case["cause_info_ids"]:
+            for row in connection.execute(
+                "SELECT info_id, published_at, headline FROM ingest.info_items "
+                "WHERE info_id = ANY(%s) ORDER BY published_at LIMIT 3",
+                (case["cause_info_ids"],),
+            ).fetchall():
+                cited.append(f"{row['headline']}（{row['published_at']}）")
+        chain = cand["chain"] if isinstance(cand["chain"], str) else ""
+        # 类型 = the candidate's own type (mechanism); 机制 = chain/mechanism text
+        case["cause_text"] = (
+            f"类型：{cand['mechanism'] or '未分类'}；机制：{chain or cand['mechanism'] or ''}"
+            f"；当时引用的消息：{'；'.join(cited) or '无'}"
+        )
+    else:
+        case["cause_text"] = "（无候选原因）"
+        case["cause_info_ids"] = []
+    bounds = regular_bounds(case["trade_date"])
+    session = case.get("session") or "close"
+    case["session_start"] = (bounds[0] if session == "close" else bounds[1]) if bounds else None
+    case["direction"] = 1 if case.get("direction") in ("up", 1) else -1
+    case["direction_label"] = "上涨" if case["direction"] > 0 else "下跌"
     labels, reason = _label_body(connection, case, horizon, due, visible)
     connection.execute(
         """

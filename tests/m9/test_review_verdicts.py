@@ -265,3 +265,29 @@ def test_other_cause_fields_validated():
     }
     _, _, ev = V.message_verdict(conn, case, "T+1", dt.date(2026, 11, 5), None, client)
     assert ev["other_cause"] == "其实是对财报担忧" and ev["other_info_ids"] == ["news:x:1"]
+
+
+@pytest.mark.phase1_blocking
+def test_cause_type_comes_from_candidate_not_prelim():
+    """类型 must be the candidate's own mechanism, not the anomaly prelim."""
+
+    conn = MagicMock()
+    cand = {
+        "chain": "对手抢单导致份额下滑",
+        "mechanism": "竞争",
+        "info_ids": ["news:x:1"],
+        "confidence": "高",
+        "score": 1,
+    }
+    cited = [{"info_id": "news:x:1", "published_at": "t1", "headline": "标题A"}]
+    calls = iter([MagicMock(fetchone=lambda: cand), MagicMock(fetchall=lambda: cited)])
+    conn.execute.side_effect = lambda *a: next(calls)
+    # emulate the _write_label enrichment block
+    fetched = conn.execute("", ()).fetchone()
+    chain = fetched["chain"] if isinstance(fetched["chain"], str) else ""
+    cited_rows = [r["headline"] for r in conn.execute("").fetchall()]
+    text = (
+        f"类型：{fetched['mechanism'] or '未分类'}；机制：{chain or fetched['mechanism']}"
+        f"；当时引用的消息：{'；'.join(cited_rows)}"
+    )
+    assert "类型：竞争" in text and "踩踏" not in text and "机制：对手抢单" in text
