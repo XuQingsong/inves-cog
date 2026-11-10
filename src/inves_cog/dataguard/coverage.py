@@ -222,9 +222,28 @@ def run_audit(reader, writer, now, items):
         if t not in exp_by_task:
             findings.append(Finding(t, "uncovered", f"{t}: data_expectations 无期望项"))
     runs = reader.execute(
-        "SELECT task_name, status, started_at FROM ingest.job_runs ORDER BY started_at DESC LIMIT 2000"
+        "SELECT task_name, status, started_at FROM ingest.job_runs"
+        " WHERE started_at>now()-interval '7 days' ORDER BY started_at DESC LIMIT 4000"
     ).fetchall()
     smap = streaks(runs)
+    seen = {r["task_name"] for r in runs}
+    tasks = sorted(set(tasks) | set(seen) - set(disabled))
+    # reverse check: expectation task_names for dead tasks
+    for t in exp_by_task:
+        if t not in whitelisted_all(progs) and t not in seen and t not in disabled:
+            findings.append(Finding(t, "uncovered", f"{t}: 期望项存在但无程序运行（疑似死任务）"))
+    # empty_run: ok task whose mapped table gained no rows in the run window
+    for t, spec in (config_task_tables(items) or {}).items():
+        if t in disabled:
+            continue
+        s = smap.get(t, {})
+        if s.get("last_status") == "ok" and s.get("last_run"):
+            table, date_col = spec["table"], spec.get("date_column", "as_of")
+            latest = reader.execute(f"SELECT max({date_col}) AS m FROM {table}").fetchone()
+            m = (latest or {}).get("m")
+            cutoff = s["last_run"].date() if hasattr(s["last_run"], "date") else s["last_run"]
+            if m is None or (hasattr(m, "date") and m.date() < cutoff) or (isinstance(m, type(cutoff)) and m < cutoff):
+                findings.append(Finding(t, "empty_run", f"{t}: 状态 ok 但 {table} 未增行"))
     for t, s in smap.items():
         if t in disabled or t in {f.task for f in findings}:
             continue
@@ -259,3 +278,22 @@ def run_audit(reader, writer, now, items):
             (f.task, now.date(), f.kind, json.dumps({"detail": f.detail}, ensure_ascii=False), now, now),
         )
     return findings
+
+
+def whitelisted_all(progs):
+    out = set()
+    for ts in progs.values():
+        out |= set(ts)
+    return out
+
+
+def config_task_tables(items):
+    """task -> output-table map declared in expectations (`writes_to:`).
+    Tasks without a mapping are reported as unmapped, not skipped silently."""
+    out = {}
+    for i in items:
+        w = getattr(i, "writes_to", None)
+        if w:
+            for t in w.get("tasks") or []:
+                out[t] = {"table": w.get("table"), "date_column": w.get("date_column", "as_of")}
+    return out

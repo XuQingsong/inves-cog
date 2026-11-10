@@ -397,6 +397,10 @@ datasets:
     - congress_ptr
   expected_keys:
     - congress_ptr
+  writes_to:
+    tasks: [congress_ptr]
+    table: ingest.congress_ptr
+    date_column: filing_date
   basis: runtime.py congress_ptr after=1300 每日一轮（索引+限速下载），2026-11-10 起入调度
   impact: 众议院 PTR 申报感知缺失
   backfill:
@@ -423,6 +427,10 @@ datasets:
     - app_grossing
     - trends
     - websites
+  writes_to:
+    tasks: [app_free, app_grossing]
+    table: ingest.app_rank_snapshots
+    date_column: as_of
   basis: runtime.py app_* interval=60 每小时；trends/websites after=1245 每日；2026-11-10 入白名单
   impact: 应用排名与站点趋势感知缺失
   backfill:
