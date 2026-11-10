@@ -23,6 +23,11 @@ ORIGINAL = [
 ]
 ADDED = ["news_prefill", "news_full", "fred", "cboe", "finra", "fed_news"]
 A023_ADDED = ["news_poll", "news_watchdog", "vix_daily", "earnings_calendar", "econ_calendar"]
+# 2026-11-10: app_free/app_grossing/trends/websites/eia_press/eia_energy were
+# registered in runtime() and emitted by due_tasks (app_* hourly, the rest at
+# 20:45 ET) but absent from the scheduler whitelist, so they never ran since
+# 2026-10-14. They are added back to the whitelist per their due_tasks design.
+B_ADDED = ["app_free", "app_grossing", "trends", "websites", "eia_press", "eia_energy"]
 
 
 @pytest.mark.parametrize("platform_name", ["Linux", "Darwin"])
@@ -39,6 +44,7 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
         A023_ADDED[0],
         *A023_ADDED[1:],
         *ADDED[2:],
+        *B_ADDED,
     ]
     assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *expected_tasks]
     expected = {
