@@ -1,5 +1,6 @@
-import pytest
 from datetime import date
+
+import pytest
 
 
 @pytest.mark.phase1_blocking
