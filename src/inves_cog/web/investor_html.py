@@ -1326,7 +1326,8 @@ def _trust(payload):
                 f"{mc.get('确认', 0) + mc.get('市场确认（延续）', 0)} / 否定 "
                 f"{mc.get('否定', 0) + mc.get('市场否定（反转）', 0)} / "
                 f"未定 {mc.get('未定', 0) + mc.get('未检验', 0)} · "
-                f"消息：证实 {gc.get('证实', 0)} / 证伪 {gc.get('证伪', 0)} / 仍未知 {gc.get('仍未知', 0)} · "
+                f"消息：证实 {gc.get('证实', 0)} / 证伪 {gc.get('证伪', 0)} / 仍未知 {gc.get('仍未知', 0)} / "
+                f"未判定 {sum(v for k, v in gc.items() if str(k).startswith('未判定'))} · "
                 f"经营：印证 {bc.get('经营面印证', 0)} / 相反 {bc.get('经营面相反', 0)} / 未变 {bc.get('未见变化', 0)} "
                 f"/ 不足 {bc.get('数据不足', 0) + bc.get('尚未到期', 0)}</div>"
                 + "".join(

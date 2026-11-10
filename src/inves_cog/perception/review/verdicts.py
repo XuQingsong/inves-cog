@@ -1,7 +1,6 @@
 """Verdict computation for review labels. All PIT: only data visible at
 the horizon close may be used. Thresholds read from config."""
 
-import json
 import math
 from pathlib import Path
 
@@ -40,7 +39,7 @@ def market_verdict(conn, case, horizon, due, visible, hits):
     members = case.get("member_tickers") or []
     if not members:
         return "未定", "按价格延续/反转", {"reason": "无成员股"}
-    direction = case.get("direction", 1)
+    direction = 1 if case.get("direction") in ("up", 1) else -1
     n_sessions = {"T+1": 1, "T+5": 5, "T+20": 20}[horizon]
     anchor = case["trade_date"]
     from datetime import timedelta as _td
@@ -72,24 +71,39 @@ def market_verdict(conn, case, horizon, due, visible, hits):
 
 
 def _candidate_info(conn, case, visible, due):
-    """Post-session to horizon-close infos, excluding cause_info_ids, <=30."""
+    """Post-session to horizon-close infos, excluding cause_info_ids, <=30.
+    Order: most member hits first, then 8-K priority, then publish time."""
     cause_ids = case.get("cause_info_ids") or []
+    members = list(case.get("member_tickers") or [])
     start = case.get("session_start") or case["trade_date"]
-    return list(
+    rows = list(
         conn.execute(
-            "SELECT info_id, published_at, source, headline, left(body, 400) AS body "
+            "SELECT info_id, kind, published_at, source, headline, left(body, 400) AS body, tickers "
             "FROM ingest.info_items WHERE published_at > %s AND published_at <= %s "
-            "AND info_id != ALL(%s) AND tickers && %s ORDER BY published_at LIMIT 30",
-            (start, visible, cause_ids, list(case.get("member_tickers") or [])),
+            "AND info_id != ALL(%s) AND tickers && %s",
+            (start, visible, cause_ids, members),
         ).fetchall()
     )
+    member_set = set(members)
+
+    def key(row):
+        hits = len(member_set & set(row.get("tickers") or []))
+        is_8k = 1 if (row.get("kind") or "") == "8-K" else 0
+        return (-hits, -is_8k, row["published_at"])
+
+    return sorted(rows, key=key)[:30]
+
+
+TASK = "review_message"
 
 
 def message_verdict(conn, case, horizon, due, visible, client):
-    """LLM verdict with the verbatim prompt file; invalid -> 仍未知."""
+    """LLM verdict with the verbatim prompt file; call failure is 未判定,
+    invalid output downgrades to 仍未知."""
     infos = _candidate_info(conn, case, visible, due)
     cause = case.get("cause_text") or "（无候选原因）"
     payload = {
+        "指令": PROMPT,
         "异动": {
             "日期": str(case["trade_date"]),
             "时段": case.get("session"),
@@ -109,9 +123,16 @@ def message_verdict(conn, case, horizon, due, visible, client):
         ],
     }
     try:
-        raw = client.chat_json(PROMPT + "\n\n输入：\n" + json.dumps(payload, ensure_ascii=False))
-    except Exception:
-        return "仍未知", "模型", {"error": "llm_failed", "raw": None}
+        raw = client.call(TASK, payload)
+    except Exception as exc:
+        return (
+            "未判定（模型调用失败）",
+            "模型",
+            {
+                "error": f"{type(exc).__name__}: {exc}",
+                "raw": None,
+            },
+        )
     allowed_ids = {i["info_id"] for i in infos}
     verdict = (raw or {}).get("verdict")
     ids = [x for x in (raw or {}).get("info_ids", []) if x in allowed_ids]
@@ -119,7 +140,15 @@ def message_verdict(conn, case, horizon, due, visible, client):
         verdict = "仍未知"
     if verdict in ("证实", "证伪") and not ids:
         verdict = "仍未知"
-    return verdict, "模型", {"raw": raw, "info_ids": ids, "prompt_file": "config/prompts/review_message.txt"}
+    return (
+        verdict,
+        "模型",
+        {
+            "raw": raw,
+            "info_ids": ids,
+            "prompt_file": "config/prompts/review_message.txt",
+        },
+    )
 
 
 def _member_business(conn, ticker, anchor, due, direction):
@@ -169,7 +198,7 @@ def business_verdict(conn, case, due, visible):
     if not members:
         return "数据不足", "Alpha Vantage", {"reason": "无成员股"}
     anchor = case["trade_date"]
-    direction = case.get("direction", 1)
+    direction = 1 if case.get("direction") in ("up", 1) else -1
     results, evs = {}, {}
     for t in members:
         results[t], evs[t] = _member_business(conn, t, anchor, due, direction)

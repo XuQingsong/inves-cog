@@ -25,7 +25,7 @@ def test_market_verdict_second_hits_wins():
 @pytest.mark.phase1_blocking
 def test_message_verdict_invalid_json_downgrades():
     client = MagicMock()
-    client.chat_json.return_value = {"verdict": "hacked"}
+    client.call.return_value = {"verdict": "hacked"}
     out = V.message_verdict(
         _conn({"all": []}),
         {"trade_date": __import__("datetime").date(2026, 11, 4), "member_tickers": ["NVDA"]},
@@ -40,7 +40,7 @@ def test_message_verdict_invalid_json_downgrades():
 @pytest.mark.phase1_blocking
 def test_message_verdict_bad_info_ids_rejected():
     client = MagicMock()
-    client.chat_json.return_value = {"verdict": "证实", "info_ids": ["news:x:999"]}
+    client.call.return_value = {"verdict": "证实", "info_ids": ["news:x:999"]}
     out = V.message_verdict(
         _conn({"all": []}),
         {"trade_date": __import__("datetime").date(2026, 11, 4), "member_tickers": ["NVDA"]},
@@ -157,3 +157,55 @@ def test_trust_groups_labels_by_horizon():
     src = inspect.getsource(investor_html)
     for marker in ('"T+1"', '"T+5"', '"T+20"', "补算（按当时可得数据）"):
         assert marker in src
+
+
+@pytest.mark.phase1_blocking
+def test_message_verdict_call_failure_not_unknown():
+    """Model call failure must be 未判定（模型调用失败）, not 仍未知."""
+    import datetime as dt
+
+    client = MagicMock()
+    client.call.side_effect = RuntimeError("transport down")
+    out = V.message_verdict(
+        _conn({"all": []}),
+        {"trade_date": dt.date(2026, 11, 4), "member_tickers": ["NVDA"]},
+        "T+1",
+        None,
+        None,
+        client,
+    )
+    assert out[0] == "未判定（模型调用失败）" and "RuntimeError" in out[2]["error"]
+
+
+@pytest.mark.phase1_blocking
+def test_message_verdict_end_to_end_confirm():
+    """Fake client returns 证实 + valid info_id -> verdict lands with evidence
+    and the payload carried the cause text."""
+    import datetime as dt
+
+    client = MagicMock()
+    client.call.return_value = {"verdict": "证实", "info_ids": ["news:x:1"]}
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = [
+        {
+            "info_id": "news:x:1",
+            "kind": "news",
+            "published_at": dt.datetime(2026, 11, 5, 20, 0),
+            "source": "reuters",
+            "headline": "h",
+            "body": "b",
+            "tickers": ["NVDA"],
+        }
+    ]
+    case = {
+        "trade_date": dt.date(2026, 11, 4),
+        "member_tickers": ["NVDA"],
+        "cause_text": "候选原因：芯片缺货",
+        "cause_info_ids": [],
+        "session": "close",
+        "direction_label": "上涨",
+    }
+    label, src, ev = V.message_verdict(conn, case, "T+1", dt.date(2026, 11, 5), None, client)
+    assert label == "证实" and ev["info_ids"] == ["news:x:1"]
+    sent = client.call.call_args[0][1]
+    assert sent["候选原因"] == "候选原因：芯片缺货" and V.PROMPT in sent["指令"]
