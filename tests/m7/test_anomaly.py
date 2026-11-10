@@ -545,3 +545,13 @@ def test_case_detection():
 @pytest.mark.phase1_live
 def test_anomaly_live_smoke():
     raise AssertionError("等待 R5")
+
+
+@pytest.mark.phase1_blocking
+def test_short_publish_date_null_uses_inferred():
+    """publish_date NULL must not crash _parse_date (was: Invalid isoformat 'None')."""
+    from inves_cog.perception.anomaly.panel import _parse_date
+
+    assert _parse_date(None) is None
+    assert _parse_date("") is None
+    assert _parse_date("2026-10-27") == date(2026, 10, 27)

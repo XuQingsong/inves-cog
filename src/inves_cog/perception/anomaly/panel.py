@@ -46,6 +46,8 @@ def find_table(directory, stem, bars_name=None):
 
 
 def _parse_date(value):
+    if value is None or value == "":
+        return None
     if isinstance(value, date):
         return value
     return date.fromisoformat(str(value)[:10])
