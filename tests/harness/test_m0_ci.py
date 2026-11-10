@@ -1,5 +1,6 @@
 import json
 
+from inves_cog.params import load_params
 from tests.harness.tools.testing import ROOT
 
 
@@ -23,4 +24,5 @@ def test_blocking_duration():
     assert record["mark"] == "phase1_blocking"
     assert record["exit_code"] == 0
     assert record["collected"] >= 10
-    assert record["duration_seconds"] <= 300
+    maximum = load_params(ROOT / "config/params/p-2026.10").values["harness"]["blocking_max_seconds"]
+    assert record["duration_seconds"] <= maximum
