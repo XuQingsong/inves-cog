@@ -253,7 +253,12 @@ def valuation_card(range_row, pe, price):
         cause = str(reason) if isinstance(reason, str) and reason else MISSING
         card["state"] = "未估值"
         card["text"] = f"未估值（{cause}）"
-        card["range_line"] = f"暂无估值（{cause}）"
+        # raw cause can carry technical field names; pages need short Chinese
+        card["range_line"] = (
+            f"暂无估值（{cause}）"
+            if cause != MISSING and not any(ord(c) < 128 and c.isalpha() for c in cause) and len(cause) <= 12
+            else "暂无估值（数据不足）"
+        )
         for key in ("pe", "pe_p25", "pe_p50", "pe_p75", "implied_growth", "rev_cagr_3y", "eps_growth", "eps"):
             card[key] = None
         card["implied_reason"] = None
