@@ -74,6 +74,7 @@ def due_tasks(clock, last_runs, *, earnings=(), news_backoff_until=None):
         due(name, interval=60)
     for name in ("trends", "websites", "fred", "finra", "cboe", "fed_news", "eia_press", "eia_energy"):
         due(name, after=1245)
+    due("congress_ptr", after=1300)
     return output
 
 

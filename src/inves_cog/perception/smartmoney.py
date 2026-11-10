@@ -417,3 +417,61 @@ def institutions(connection, ticker, as_of, params=None):
         "prior_sufficient": prior_sufficient,
         "as_of_note": "季末持仓 · 13F 滞后约 45 天以上",
     }
+
+
+def congress(connection, ticker, as_of, params=None):
+    """House PTR disclosures for a ticker, PIT by filing_date <= as_of.
+
+    Window: last 180 days. Output stays 只列不计 — member count, buy/sell
+    transaction counts and the most recent detail rows; no label.
+    Scanned filings carry metadata only and are excluded from the
+    transaction counts (marked scanned_unparsed).
+    """
+    from inves_cog.ingest.congress import BUY_TYPES, SELL_TYPES
+
+    day = _day(as_of)
+    rows = connection.execute(
+        """
+        SELECT doc_id, member, filing_date, parse_status, transactions
+        FROM ingest.congress_ptr
+        WHERE filing_date <= %s AND filing_date > %s - interval '180 days'
+        """,
+        (day, day),
+    ).fetchall()
+    matching = []
+    for r in rows:
+        if r["parse_status"] != "parsed":
+            continue
+        txns = r["transactions"]
+        if isinstance(txns, str):
+            import json
+
+            txns = json.loads(txns)
+        for t in txns or []:
+            if (t.get("ticker") or "").upper() == ticker.upper():
+                matching.append(
+                    {
+                        "doc_id": r["doc_id"],
+                        "member": r["member"],
+                        "filing_date": r["filing_date"],
+                        "txn_type": t.get("txn_type"),
+                        "txn_date": t.get("txn_date"),
+                        "asset": t.get("asset"),
+                        "amount_low": t.get("amount_low"),
+                        "amount_high": t.get("amount_high"),
+                    }
+                )
+    if not matching:
+        return {"missing": "近 180 天无该股国会申报记录", "label": "暂缺"}
+    buys = [m for m in matching if m["txn_type"] in BUY_TYPES]
+    sells = [m for m in matching if m["txn_type"] in SELL_TYPES]
+    recent = sorted(matching, key=lambda m: (m["txn_date"] or "", m["filing_date"]), reverse=True)[:8]
+    return {
+        "missing": None,
+        "label": "只列不计",
+        "member_count": len({m["member"] for m in matching}),
+        "buy_count": len(buys),
+        "sell_count": len(sells),
+        "recent": recent,
+        "as_of_note": "众议院 · 申报最长滞后 45 天 · 参议院暂未接入",
+    }
