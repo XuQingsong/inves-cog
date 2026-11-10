@@ -117,7 +117,8 @@ def test_case_cadence(admin):
         assert by_case[case_id]["T+1"]["drafted"] is False
     first = by_case["b049-a1"]["T+1"]["labels"]
     later = by_case["b049-a1"]["T+5"]["labels"]
-    assert first["市场连接"] == "未检验" and "b049-late" not in first["可见二次命中"]
+    # late second_hit invisible at T+1 -> price verdict -> 未定 (was hardcoded 未检验)
+    assert first["市场连接"] == "未定" and "b049-late" not in first["可见二次命中"]
     assert later["市场连接"] == "确认" and "b049-late" in later["可见二次命中"]
     assert by_case["b049-a3"]["T+5"]["reason"] and "CCC" in by_case["b049-a3"]["T+5"]["reason"]
 

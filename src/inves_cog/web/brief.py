@@ -1294,16 +1294,21 @@ def _reports(connection, ids):
     return {row["anomaly_id"]: _object(row["report"]) for row in rows}
 
 
-def _labels(connection, day, cutoff):
+def _labels(connection, day, cutoff, since=None):
+    if since is None:
+        import datetime as _dt
+
+        d = day if isinstance(day, _dt.date) else _dt.date.fromisoformat(str(day)[:10])
+        since = d - _dt.timedelta(days=30)
     return _rows(
         connection,
         """
         SELECT case_id, horizon, as_of, reason, labels
         FROM perception.case_labels
-        WHERE as_of = %s AND written_at < %s
+        WHERE as_of >= %s::date AND as_of <= %s AND written_at < %s
         ORDER BY case_id, horizon
         """,
-        (day, cutoff),
+        (str(since), day, cutoff),
     )
 
 
@@ -2879,7 +2884,10 @@ def page_brief_trust(connection, day, clock):
     )
     statuses.append({"item": "期权数据", "state": context["option_state"], "detail": context["option_detail"]})
     labels = []
-    for row in _labels(connection, day, context["cutoff"]):
+    import datetime as _dt
+
+    day_d = day if isinstance(day, _dt.date) else _dt.date.fromisoformat(str(day)[:10])
+    for row in _labels(connection, day, context["cutoff"], day_d - _dt.timedelta(days=30)):
         labels.append(
             {
                 "case_id": row["case_id"],

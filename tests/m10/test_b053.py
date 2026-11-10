@@ -824,9 +824,13 @@ def test_review_gap_when_labels_are_absent(pages):
     )
     try:
         present = _json(pages, "/api/pages/brief/trust")
-        assert [row["horizon"] for row in present["labels"]] == ["T+1"]
+        # 30-day window: seeded T+1(DAY) plus the PREV T+5 both render now
+        assert sorted(row["horizon"] for row in present["labels"]) == ["T+1", "T+5"]
         assert present["review_gap"] is None
         admin.execute("DELETE FROM perception.case_labels WHERE case_id = 'b053-case' AND horizon = 'T+1'")
+        trust = _json(pages, "/api/pages/brief/trust")
+        assert [row["horizon"] for row in trust["labels"]] == ["T+5"]
+        admin.execute("DELETE FROM perception.case_labels WHERE case_id = 'b053-case' AND horizon = 'T+5'")
         trust = _json(pages, "/api/pages/brief/trust")
         assert trust["labels"] == []
         assert "尚无 T+1/T+5/T+20 打标记录" in _get(pages, "/trust").text

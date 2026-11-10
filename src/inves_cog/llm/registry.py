@@ -20,6 +20,7 @@ OTHER_TASKS = frozenset(
         "summary_oneliner",
         "news_translate",
         "live_cause",
+        "review_message",
     }
 )
 
