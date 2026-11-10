@@ -119,10 +119,11 @@ def test_per_ticker_gap_names_ticker():
 @pytest.mark.phase1_blocking
 def test_disabled_expectation_skipped_in_scan_and_evaluate():
     """disabled expectations produce no findings via scan or evaluate."""
-    from inves_cog.dataguard.service import scan
-    from inves_cog.dataguard.core import evaluate
-    from types import SimpleNamespace
     import inspect
+    from types import SimpleNamespace
+
+    from inves_cog.dataguard.core import evaluate
+    from inves_cog.dataguard.service import scan
 
     item = SimpleNamespace(disabled={"tasks": ["x"], "reason": "已停用"})
     assert evaluate(item, None, [], None) == []
