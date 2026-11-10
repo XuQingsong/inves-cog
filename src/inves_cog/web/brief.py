@@ -240,6 +240,10 @@ def valuation_card(range_row, pe, price):
         "implied_reason": None,
         "text": None,
     }
+    card["sanity"] = None if range_row is None else range_row.get("sanity")
+    card["sanity_reason"] = None if range_row is None else range_row.get("sanity_reason")
+    if card["sanity"]:
+        card["state"] = "估值暂不可用"
     if card["implied_growth"] is None and payload.get("implied_reason"):
         card["implied_reason"] = plain_implied_reason(payload.get("implied_reason"))
     if card["pe_extreme"]:
@@ -1600,7 +1604,7 @@ def _valuation_status(scores, ranges, bars):
     states = []
     for ticker, score in scores.items():
         tech = _tech(score)
-        neutral = None if ticker not in ranges else ranges[ticker]["neutral"]
+        neutral = None if ticker not in ranges or ranges[ticker].get("sanity") else ranges[ticker]["neutral"]
         view = valuation_view(_price(tech, bars.get(ticker)), neutral)
         states.append(view["status"])
     if "模型不适用" in states:

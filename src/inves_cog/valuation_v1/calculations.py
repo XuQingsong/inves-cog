@@ -250,6 +250,15 @@ def mark_price(result, price):
             )
         else:
             out["position_reason"] = "三档区间为0，无法计算p"
+        san = settings().get("sanity") or {}
+        lo_r, hi_r = float(san.get("ratio_low", 0.2)), float(san.get("ratio_high", 5))
+        if out.get("neutral") is not None:
+            ratio = out["neutral"] / price
+            if ratio < lo_r or ratio > hi_r:
+                out.update(
+                    sanity="输入可疑",
+                    sanity_reason=f"中性档为现价的 {ratio:.2f} 倍，阈值 {lo_r}–{hi_r}",
+                )
         if out["type"] == "成长" and out.get("E") is not None:
             c = settings()["growth"]
             lo, hi = c["implied_bounds"]

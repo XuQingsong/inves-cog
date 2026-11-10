@@ -307,3 +307,49 @@ def test_valuation_live_smoke():
     out = run(clock=SystemClock(), values=read_environment(), persist=False)
     assert len(out["ranges"]) == 59
     assert all(r["status"] == "ok" or r.get("reason") for r in out["ranges"])
+
+
+@pytest.mark.phase1_blocking
+def test_sanity_gate_flags_extreme_neutral_ratio():
+    """neutral/price outside [0.2, 5] marks the row 输入可疑; bands are kept."""
+    from inves_cog.valuation_v1.calculations import mark_price
+    from inves_cog.valuation_v1.shadows import shadow
+
+    base = {
+        "ticker": "X",
+        "type": "周期",
+        "status": "ok",
+        "bear": 4.0,
+        "neutral": 6.7,
+        "bull": 10.1,
+        "p": None,
+        "inputs": {},
+    }
+    out = mark_price(deepcopy(base), 290.0)
+    assert out["sanity"] == "输入可疑" and "0.02" in out["sanity_reason"]
+    assert out["bear"] == 4.0 and out["bull"] == 10.1  # bands kept
+    assert not shadow(out)["vt1"] and not shadow(out)["vt2"]  # gated out of shadow
+
+    ok = mark_price(deepcopy(base), 8.0)  # neutral/price = 0.84 in-band
+    assert "sanity" not in ok
+
+    hi = mark_price(deepcopy({**base, "neutral": 1300.0, "bear": 540.0, "bull": 2500.0}), 215.0)
+    assert hi["sanity"] == "输入可疑" and "6.05" in hi["sanity_reason"]
+
+
+@pytest.mark.phase1_blocking
+def test_sanity_flag_renders_unavailable_not_verdict():
+    from inves_cog.web.brief import valuation_card
+    from inves_cog.web.investor_html import _valuation
+
+    row = {
+        "status": "ok",
+        "neutral": 6.7,
+        "sanity": "输入可疑",
+        "sanity_reason": "中性档为现价的 0.02 倍，阈值 0.2–5",
+        "payload": {"bear": 4.0, "bull": 10.1},
+    }
+    card = valuation_card(row, None, 290.0)
+    text = _valuation(card)
+    assert "估值暂不可用" in text and "输入数据待核" in text and "0.02" in text
+    assert "高估" not in text and "低估" not in text

@@ -20,7 +20,7 @@ def shadow(row, *, bear_30d=None, seen_versions=()):
     c = settings()["shadow"]
     p = row.get("p")
     delta = row.get("delta_g")
-    usable = row.get("confidence") != "低"
+    usable = row.get("confidence") != "低" and not row.get("sanity")
     growth = row.get("type") == "成长"
     vt1 = usable and (
         (p is not None and p >= c["vt1_p"]) or (growth and delta is not None and delta > c["vt1_delta_g_pp"])
