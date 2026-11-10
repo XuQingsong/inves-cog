@@ -62,6 +62,16 @@ def test_parse_ptr_multi_transaction_fixture():
 
 
 @pytest.mark.phase1_blocking
+def test_parse_ptr_oversize_and_timeout_skip():
+    from inves_cog.ingest.congress import MAX_PDF_BYTES, parse_ptr
+
+    assert parse_ptr(b"%PDF" + b"x" * (MAX_PDF_BYTES + 1)) is None
+    import time
+
+    assert parse_ptr((FIXTURES / "20032062.pdf").read_bytes(), _deadline=time.monotonic() - 1) is None
+
+
+@pytest.mark.phase1_blocking
 def test_parse_ptr_scanned_returns_none():
     from inves_cog.ingest.congress import parse_ptr
 

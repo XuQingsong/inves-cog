@@ -97,17 +97,32 @@ def _money(text):
     return low, high
 
 
-def parse_ptr(pdf_bytes):
+# Resource ceilings: hostile or corrupt PDFs are skipped, never retried inline.
+MAX_PDF_BYTES = 10 * 1024 * 1024
+PARSE_TIMEOUT_SECONDS = 30
+
+
+def parse_ptr(pdf_bytes, *, _deadline=None):
     """Parse one electronic PTR. Returns dict with member fields and
     transactions, or None when the PDF carries no extractable text
-    (scanned) or pypdf is unavailable/fails."""
+    (scanned), exceeds size/time limits, or pypdf is unavailable/fails."""
+    if pdf_bytes and len(pdf_bytes) > MAX_PDF_BYTES:
+        return None
+    import time as _time
+
+    deadline = _deadline if _deadline is not None else _time.monotonic() + PARSE_TIMEOUT_SECONDS
     try:
         from pypdf import PdfReader
     except Exception:
         return None
     try:
         reader = PdfReader(io.BytesIO(pdf_bytes))
-        text = "\n".join((page.extract_text() or "") for page in reader.pages)
+        parts = []
+        for page in reader.pages:
+            if _time.monotonic() > deadline:
+                return None
+            parts.append(page.extract_text() or "")
+        text = "\n".join(parts)
         text = text.replace("\x00", "")
     except Exception:
         return None
@@ -195,9 +210,13 @@ def collect_pending(connection, http, *, spacing_seconds=20, max_per_run=30, sle
             done["stopped"] = True
             break
         done["downloaded"] += 1
+        reason = None
+        if len(pdf) > MAX_PDF_BYTES:
+            reason = f"文件 {len(pdf)} 字节超过 {MAX_PDF_BYTES} 上限，跳过解析"
         parsed = parse_ptr(pdf)
         if parsed is None:
-            status, note, txns = "scanned_unparsed", "扫描件或提取失败，未解析", "[]"
+            note = reason or "扫描件或提取失败，未解析"
+            status, txns = "scanned_unparsed", "[]"
             done["scanned_unparsed"] += 1
         else:
             status, note, txns = "parsed", None, json.dumps(parsed["transactions"], ensure_ascii=False)
