@@ -140,12 +140,16 @@ def message_verdict(conn, case, horizon, due, visible, client):
         verdict = "仍未知"
     if verdict in ("证实", "证伪") and not ids:
         verdict = "仍未知"
+    other_ids = [x for x in (raw or {}).get("other_info_ids", []) if x in allowed_ids]
+    other_cause = (raw or {}).get("other_cause") or ""
     return (
         verdict,
         "模型",
         {
             "raw": raw,
             "info_ids": ids,
+            "other_cause": other_cause,
+            "other_info_ids": other_ids,
             "prompt_file": "config/prompts/review_message.txt",
         },
     )

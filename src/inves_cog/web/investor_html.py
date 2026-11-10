@@ -1337,6 +1337,11 @@ def _trust(payload):
                     f"经营 {_text(lab.get('经营连接') or '-')}"
                     + (" <span class='chip stale'>补算（按当时可得数据）</span>" if r.get("backfilled") else "")
                     + "</summary><pre class='small' style='white-space:pre-wrap'>"
+                    + (
+                        "后续信息指向的其他原因："
+                        + _text(((lab.get("依据") or {}).get("消息内容") or {}).get("other_cause") or "")
+                        + "\n\n"
+                    )
                     + _text(_json.dumps(lab.get("依据") or {}, ensure_ascii=False, indent=1, default=str)[:900])
                     + "</pre></details>"
                     for r, lab in zip(rows, labs, strict=False)

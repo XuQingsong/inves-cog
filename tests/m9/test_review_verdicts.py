@@ -209,3 +209,59 @@ def test_message_verdict_end_to_end_confirm():
     assert label == "证实" and ev["info_ids"] == ["news:x:1"]
     sent = client.call.call_args[0][1]
     assert sent["候选原因"] == "候选原因：芯片缺货" and V.PROMPT in sent["指令"]
+
+
+@pytest.mark.phase1_blocking
+def test_cause_text_composition_in_payload():
+    """cause_text must carry type + mechanism + cited message titles."""
+    import datetime as dt
+
+    client = MagicMock()
+    client.call.return_value = {"verdict": "仍未知", "info_ids": []}
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = []
+    case = {
+        "trade_date": dt.date(2026, 11, 4),
+        "member_tickers": ["NVDA"],
+        "cause_text": "类型：竞争；机制：对手抢单；当时引用的消息：标题A（t1）",
+        "session": "close",
+        "direction_label": "下跌",
+    }
+    V.message_verdict(conn, case, "T+1", dt.date(2026, 11, 5), None, client)
+    sent = client.call.call_args[0][1]
+    assert "类型：竞争" in sent["候选原因"] and "机制：对手抢单" in sent["候选原因"]
+    assert "标题A" in sent["候选原因"]
+
+
+@pytest.mark.phase1_blocking
+def test_other_cause_fields_validated():
+    """other_info_ids outside the input are dropped; other_cause saved."""
+    import datetime as dt
+
+    client = MagicMock()
+    client.call.return_value = {
+        "verdict": "仍未知",
+        "info_ids": [],
+        "other_cause": "其实是对财报担忧",
+        "other_info_ids": ["news:x:1", "news:fake:9"],
+    }
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = [
+        {
+            "info_id": "news:x:1",
+            "kind": "news",
+            "published_at": dt.datetime(2026, 11, 5, 20, 0),
+            "source": "reuters",
+            "headline": "h",
+            "body": "b",
+            "tickers": ["NVDA"],
+        }
+    ]
+    case = {
+        "trade_date": dt.date(2026, 11, 4),
+        "member_tickers": ["NVDA"],
+        "cause_text": "类型：竞争",
+        "session": "close",
+    }
+    _, _, ev = V.message_verdict(conn, case, "T+1", dt.date(2026, 11, 5), None, client)
+    assert ev["other_cause"] == "其实是对财报担忧" and ev["other_info_ids"] == ["news:x:1"]
