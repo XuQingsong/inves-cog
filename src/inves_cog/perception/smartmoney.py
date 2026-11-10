@@ -473,5 +473,6 @@ def congress(connection, ticker, as_of, params=None):
         "buy_count": len(buys),
         "sell_count": len(sells),
         "recent": recent,
+        "scanned_count": sum(1 for r in rows if r["parse_status"] == "scanned_unparsed"),
         "as_of_note": "众议院 · 申报最长滞后 45 天 · 参议院暂未接入",
     }
