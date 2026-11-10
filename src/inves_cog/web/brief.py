@@ -804,7 +804,7 @@ def _ranges(connection, day, cutoff, carry=False):
         FROM valuation_v1.ranges
         WHERE trade_date = %s AND observed_at < %s
         """,
-        (day, day, cutoff),
+        (day, cutoff),
     )
     out = {row["ticker"]: row for row in rows}
     if carry:
@@ -816,7 +816,7 @@ def _ranges(connection, day, cutoff, carry=False):
             WHERE trade_date < %s AND observed_at < %s
             ORDER BY ticker, trade_date DESC
             """,
-            (day, day, cutoff),
+            (day, cutoff),
         )
         for row in older:
             row["carried_from"] = row["trade_date"]
@@ -1183,7 +1183,7 @@ def _book(connection, day, cutoff):
         ORDER BY observed_at DESC
         LIMIT 1
         """,
-        (day, day, cutoff),
+        (day, cutoff),
     )
     if current is not None:
         found = dict(current)
@@ -1198,7 +1198,7 @@ def _book(connection, day, cutoff):
         ORDER BY trade_date DESC, observed_at DESC
         LIMIT 1
         """,
-        (day, day, cutoff),
+        (day, cutoff),
     )
     if prior is None:
         return None
@@ -1305,10 +1305,10 @@ def _labels(connection, day, cutoff, since=None):
         """
         SELECT case_id, horizon, as_of, reason, labels
         FROM perception.case_labels
-        WHERE as_of >= %s AND as_of <= %s AND written_at < %s
+        WHERE as_of >= %s::date AND as_of <= %s AND written_at < %s
         ORDER BY case_id, horizon
         """,
-        (since, day, cutoff),
+        (str(since), day, cutoff),
     )
 
 
@@ -1320,7 +1320,7 @@ def _overlay_present(connection, day, cutoff):
         WHERE date = %s AND generated_at < %s
         LIMIT 1
         """,
-        (day, day, cutoff),
+        (day, cutoff),
     )
     return row is not None
 
@@ -1680,7 +1680,7 @@ def _context(connection, day, clock):
             ORDER BY generated_at DESC
             LIMIT 1
             """,
-            (day, day, cutoff),
+            (day, cutoff),
         )
         portfolio = None if owner is None else owner["portfolio_id"]
     plans = _plans(connection, day, cutoff, portfolio)
