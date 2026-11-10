@@ -90,11 +90,26 @@ class Repository:
             bars[r["ticker"]].append(r)
         snapshots = defaultdict(list)
         for r in self.connection.execute(
-            "SELECT * FROM fundamentals.consensus_snapshot WHERE ticker=ANY(%s) "
-            "AND as_of<=%s ORDER BY as_of,captured_at",
+            "SELECT ticker, fetched_at, fiscal_end, horizon, eps_avg, revenue_avg "
+            "FROM valuation_v1.consensus_snapshots WHERE ticker=ANY(%s) "
+            "AND kind='estimate' AND fetched_at::date<=%s AND horizon ILIKE '%%year%%' "
+            "ORDER BY ticker,fiscal_end",
             (tickers, through),
         ).fetchall():
-            snapshots[r["ticker"]].append(r)
+            per = snapshots[r["ticker"]]
+            as_of = r["fetched_at"].date() if hasattr(r["fetched_at"], "date") else r["fetched_at"]
+            slot = next((x for x in per if x["as_of"] == as_of), None)
+            if slot is None:
+                slot = {"as_of": as_of, "captured_at": r["fetched_at"], "source": "alpha_vantage"}
+                per.append(slot)
+            # rows arrive ordered by fiscal_end; nearest fiscal year -> cy, later -> ny
+            fy = r["fiscal_end"]
+            if fy is None:
+                continue
+            if slot.get("fy_cy") is None:
+                slot.update(fy_cy=fy, eps_cy=r["eps_avg"], rev_cy=r["revenue_avg"])
+            elif fy != slot["fy_cy"]:
+                slot.update(fy_ny=fy, eps_ny=r["eps_avg"], rev_ny=r["revenue_avg"])
         baskets = (
             self.connection.execute("SELECT * FROM graph.baskets ORDER BY level,basket_id").fetchall()
             if self.exists("graph", "baskets")

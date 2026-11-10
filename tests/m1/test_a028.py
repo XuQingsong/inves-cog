@@ -267,11 +267,14 @@ def test_daily_scheduler_scope_health_restart_and_options_slot(monkeypatch):
     monkeypatch.setattr(earnings_data, "collect_consensus", consensus)
     monkeypatch.setattr("inves_cog.ingest.implied_moves.collect_moves", options)
     monkeypatch.setattr("inves_cog.llm.client.Client.from_environment", model_calls)
-    earnings_data.scheduled(clock=clock(hour=6, minute=0), values={}, connect=lambda values: db)
-    assert {"HELD", "NVDA", "INTC"} <= set(consensus.call_args.kwargs["tickers"])
+    # 2026-11-10: Yahoo consensus chain disabled (401 crumb). The job runs but
+    # returns the disabled note instead of calling the provider.
+    out = earnings_data.scheduled(clock=clock(hour=6, minute=0), values={}, connect=lambda values: db)
+    assert consensus.call_count == 0
+    assert "已停用" in (out["consensus"]["note"] or "") and "crumb" in out["consensus"]["note"]
     ops.last_runs.return_value = {"earnings_consensus": clock().now_utc()}
     earnings_data.scheduled(clock=clock(), values={}, connect=lambda values: db)
-    assert options.call_count == 1 and consensus.call_count == 1
+    assert options.call_count == 1 and consensus.call_count == 0
     ops.last_runs.return_value["earnings_implied_moves"] = clock().now_utc()
     earnings_data.scheduled(clock=clock(), values={}, connect=lambda values: db)
     assert options.call_count == 1 and model_calls.call_count == 0
@@ -310,7 +313,6 @@ def test_long_jobs_not_started_1510_1558():
             patch.object(ed, "Fundamentals"),
             patch.object(ed, "HealthBook"),
             patch.object(ed, "JobRunner", Runner),
-            patch.object(ed.yaml, "safe_load", return_value={"stocks": []}),
         ):
             out = ed.scheduled(clock=clock(minute=minute), values={}, connect=lambda v, _c=conn: _c)
         assert "consensus" not in out and "earnings_consensus" not in runs, f"consensus started at 15:{minute}"

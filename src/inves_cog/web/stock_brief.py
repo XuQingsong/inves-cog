@@ -1073,28 +1073,80 @@ def _intraday_series(connection, symbol, day):
 
 def _analyst_summary(connection, symbol):
     """Latest consensus raw.analyst: target prices + rating counts."""
-    row = connection.execute(
-        "SELECT eps_cq, eps_cy, pt_mean, pt_median, coverage, raw "
-        "FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY captured_at DESC LIMIT 1",
+    rows = connection.execute(
+        "SELECT fetched_at, fiscal_end, horizon, eps_avg, eps_count, revenue_avg, raw "
+        "FROM valuation_v1.consensus_snapshots WHERE ticker=%s AND kind='estimate' "
+        "ORDER BY fetched_at DESC, fiscal_end",
+        (symbol,),
+    ).fetchall()
+    latest = [r for r in rows if r["fetched_at"] == rows[0]["fetched_at"]] if rows else []
+    # AV horizons arrive as Q1/Q2/FY1/FY2; match by prefix, not substring.
+    quarter = next((r for r in latest if str(r["horizon"]).startswith("Q")), None)
+    year = next((r for r in latest if str(r["horizon"]).startswith("FY")), None)
+    shares_row = connection.execute(
+        "SELECT shares, filed FROM fundamentals.fin_state"
+        " WHERE ticker=%s AND shares IS NOT NULL ORDER BY filed DESC LIMIT 1",
         (symbol,),
     ).fetchone()
-    raw = (row or {}).get("raw") or {}
-    analyst = raw.get("analyst") or {}
+    px_row = connection.execute(
+        "SELECT close FROM ingest.bars_daily WHERE ticker=%s ORDER BY trade_date DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
+    revision = _consensus_revision(rows)
+    data_as_of = str(rows[0]["fetched_at"])[:10] if rows else None
     return {
-        "eps_cq": row.get("eps_cq") if row else None,
-        "eps_cy": row.get("eps_cy") if row else None,
-        "pt_mean_col": row.get("pt_mean") if row else None,
-        "pt_median_col": row.get("pt_median") if row else None,
-        "coverage": row.get("coverage") if row else None,
-        "pt_low": analyst.get("targetLowPrice"),
-        "pt_high": analyst.get("targetHighPrice"),
-        "pt_mean": analyst.get("targetMeanPrice"),
-        "pt_median": analyst.get("targetMedianPrice"),
-        "opinions": analyst.get("numberOfAnalystOpinions"),
-        "trend": analyst.get("recommendationTrend") or {},
-        "market_cap": analyst.get("marketCap"),
-        "forward_pe": analyst.get("forwardPE"),
+        "eps_cq": float(quarter["eps_avg"]) if quarter and quarter["eps_avg"] is not None else None,
+        "eps_cy": float(year["eps_avg"]) if year and year["eps_avg"] is not None else None,
+        "rev_cy": float(year["revenue_avg"]) if year and year["revenue_avg"] is not None else None,
+        "coverage": quarter["eps_count"] if quarter else (year["eps_count"] if year else None),
+        "pt_low": None,
+        "pt_high": None,
+        "pt_mean": None,
+        "pt_median": None,
+        "opinions": None,
+        "trend": {},
+        "market_cap": (
+            float(shares_row["shares"]) * float(px_row["close"]) if shares_row and px_row and px_row["close"] else None
+        ),
+        "shares": shares_row["shares"] if shares_row else None,
+        "shares_filed": str(shares_row["filed"]) if shares_row else None,
+        "forward_pe": None,
+        "data_as_of": data_as_of,
+        "revision": revision,
+        "source_note": ("ALPHA VANTAGE（免费版每 2–3 天轮换更新）" if rows else None),
     }
+
+
+def _consensus_revision(rows):
+    """Up/down revision count from our own AV snapshot history: latest eps_avg
+    vs the closest snapshot at least 7 and 30 days older."""
+    from datetime import timedelta
+
+    if not rows:
+        return None
+    latest_at = rows[0]["fetched_at"]
+    out = {}
+    for days in (7, 30):
+        cutoff = latest_at - timedelta(days=days)
+        older = [r for r in rows if r["fetched_at"] <= cutoff]
+        if not older:
+            out[f"d{days}"] = "历史不足"
+            continue
+        boundary = older[0]["fetched_at"]
+        prev = {r["fiscal_end"]: r for r in older if r["fetched_at"] == boundary}
+        cur = {r["fiscal_end"]: r for r in rows if r["fetched_at"] == latest_at}
+        up = down = 0
+        for fe, r in cur.items():
+            old = prev.get(fe)
+            if old is None or r["eps_avg"] is None or old["eps_avg"] is None:
+                continue
+            if r["eps_avg"] > old["eps_avg"]:
+                up += 1
+            elif r["eps_avg"] < old["eps_avg"]:
+                down += 1
+        out[f"d{days}"] = {"up": up, "down": down, "since": str(boundary)[:10]}
+    out["note"] = "由本系统快照对比得出"
+    return out
 
 
 def _analyst_actions(connection, symbol, day):
@@ -1109,6 +1161,7 @@ def _earnings_hist(connection, symbol, bars):
     """Last 8 quarters: EPS actual vs estimate + next-day move per report timing."""
     row = connection.execute(
         "SELECT raw FROM fundamentals.consensus_snapshot WHERE ticker=%s "
+        "AND source<>'muse_import' "
         "AND raw->'earnings_history' IS NOT NULL AND jsonb_array_length(raw->'earnings_history') > 0 "
         "ORDER BY captured_at DESC LIMIT 1",
         (symbol,),

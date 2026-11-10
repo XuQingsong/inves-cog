@@ -91,7 +91,8 @@ def stage_of(connection, ticker, report_date, report_time, now, sessions=None):
 
 def _consensus(connection, ticker):
     row = connection.execute(
-        "SELECT as_of, eps_cq, raw FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY as_of DESC LIMIT 1",
+        "SELECT as_of, eps_cq, raw FROM fundamentals.consensus_snapshot "
+        "WHERE ticker=%s AND source<>'muse_import' ORDER BY as_of DESC LIMIT 1",
         (ticker,),
     ).fetchone()
     if not row:
