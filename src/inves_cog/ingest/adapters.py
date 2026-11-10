@@ -324,3 +324,46 @@ def cboe_statistics(http, day):
     if not output:
         raise SourceError("CBOE daily market tables absent; no substitute produced")
     return output
+
+
+_INDEX_UNDERLYINGS = {"SPX", "SPXW", "XSP", "VIX", "RUT", "DJX", "NDX", "OEX", "MRUT"}
+# OCC aggregates volume across ALL US exchanges; categories must not reuse
+# CBOE's own-exchange labels. Emits only:
+#   occ_total  - every US exchange, every underlying
+#   occ_index  - index underlyings (SPX SPXW XSP VIX RUT DJX NDX OEX MRUT)
+_INDEX_UNDERLYINGS = {"SPX", "SPXW", "XSP", "VIX", "RUT", "DJX", "NDX", "OEX", "MRUT"}
+
+
+def occ_statistics(connection, day):
+    """Aggregate OCC daily option volume into occ_total / occ_index categories."""
+    rows = connection.execute(
+        "SELECT underlying, cp, sum(quantity) AS q FROM flows.option_volume_occ WHERE date=%s GROUP BY underlying, cp",
+        (day,),
+    ).fetchall()
+    buckets = {"occ_total": {"C": 0, "P": 0}, "occ_index": {"C": 0, "P": 0}}
+    for r in rows:
+        und = (r["underlying"] or "").upper()
+        cp = (r["cp"] or "").upper()
+        if cp not in ("C", "P"):
+            continue
+        buckets["occ_total"][cp] += int(r["q"] or 0)
+        if und in _INDEX_UNDERLYINGS:
+            buckets["occ_index"][cp] += int(r["q"] or 0)
+    out = []
+    for cat, v in buckets.items():
+        call, put = v["C"], v["P"]
+        if not call and not put:
+            continue
+        out.append(
+            {
+                "trade_date": day,
+                "category": cat,
+                "category_label": "OCC 全市场（全美各交易所）" if cat == "occ_total" else "OCC 指数期权",
+                "call_volume": call or None,
+                "put_volume": put or None,
+                "put_call_ratio": (put / call) if call else None,
+                "open_interest": None,
+                "source": "OCC",
+            }
+        )
+    return out
