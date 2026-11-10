@@ -144,7 +144,7 @@ def _valuation(view, full=False):
         original = f"未估值：{inner}" if inner else "未估值"
         line = original + (" · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else "")
         if view.get("range_line"):
-            line = line + "<br><span class='small muted'>" + _text(view["range_line"]) + "</span>"
+            line = line + " ｜ " + str(view["range_line"])
         return line
     bits = []
     if view.get("pe_extreme"):
@@ -169,7 +169,7 @@ def _valuation(view, full=False):
         bits.append(ceiling_text(view["ceiling"], full=full))
     line = " · ".join(bits) if bits else "估值暂缺"
     if view.get("range_line"):
-        line = line + "<br><span class='small muted'>" + _text(view["range_line"]) + "</span>"
+        line = line + " ｜ " + str(view["range_line"])
     return line
 
 
