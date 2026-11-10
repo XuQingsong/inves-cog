@@ -271,7 +271,7 @@ def run_audit(reader, writer, now, items):
                 now,
             ),
         )
-    for f in findings:
+    for f in findings + per_ticker_gaps(reader, now):
         writer.execute(
             "INSERT INTO ops.data_gaps(dataset,data_date,kind,detail,first_detected_at,last_checked_at) "
             "VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT(dataset,data_date,kind) DO NOTHING",
@@ -288,12 +288,36 @@ def whitelisted_all(progs):
 
 
 def config_task_tables(items):
-    """task -> output-table map declared in expectations (`writes_to:`).
-    Tasks without a mapping are reported as unmapped, not skipped silently."""
+    """task -> output-table spec. `writes_to: {tasks: [...]}` on a table-level
+    expectation inherits that expectation's table + date_column; explicit
+    `table`/`date_column` keys override."""
     out = {}
     for i in items:
         w = getattr(i, "writes_to", None)
-        if w:
-            for t in w.get("tasks") or []:
-                out[t] = {"table": w.get("table"), "date_column": w.get("date_column", "as_of")}
+        if not w:
+            continue
+        spec = {
+            "table": w.get("table") or getattr(i, "table", None),
+            "date_column": w.get("date_column") or getattr(i, "date_column", "as_of"),
+        }
+        for t in w.get("tasks") or []:
+            out[t] = spec
     return out
+
+
+def per_ticker_gaps(reader, now, *, lookback_days=10, absent_days=3):
+    """Tickers with intraday snapshots in the lookback window but none in
+    the last `absent_days` — suspension / delisting / symbol change."""
+    rows = reader.execute(
+        "SELECT ticker, max(as_of) AS latest FROM ingest.intraday_snapshots "
+        "WHERE as_of>now()-interval '%s days' GROUP BY ticker "
+        "HAVING max(as_of)<now()-interval '%s days'" % (lookback_days, absent_days)
+    ).fetchall()
+    return [
+        Finding(
+            f"个股报价缺失：{r['ticker']}",
+            "missing",
+            f"{r['ticker']} 自 {r['latest']} 起无盘中快照（可能停牌/退市/代码变更）",
+        )
+        for r in rows
+    ]

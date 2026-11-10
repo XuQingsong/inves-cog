@@ -49,6 +49,14 @@ def run_intraday(conn, local):
     for snap_t, col in {"^VIX": "VIX", "^VIX3M": "VIX3M", "^TNX": "TNX"}.items():
         if snap_t in row:
             row[col] = row[snap_t]
+    tnx_prev_day = False
+    if "TNX" not in row and len(px.index):
+        # Yahoo no longer serves ^TNX (removed from the request list 2026-11-10);
+        # fall back to FRED DGS10 from the last trading day, labelled as such.
+        hist = px["TNX"].dropna() if "TNX" in px else px.iloc[:, 0:0]
+        if len(hist):
+            row["TNX"] = float(hist.iloc[-1])
+            tnx_prev_day = True
     prov = pd.Series({t: row.get(t, float("nan")) for t in px.columns}, name=today)
     for col in DAILY_ONLY & set(px.columns):
         if pd.isna(prov[col]) and len(px.index):
@@ -60,6 +68,8 @@ def run_intraday(conn, local):
     rec = compute_day(M, F, G, today)
     rec["asof"] = local
     rec["inputs"]["provisional"] = True
+    if tnx_prev_day:
+        rec["inputs"]["tnx_source"] = "FRED DGS10 前一日"
     return rec
 
 

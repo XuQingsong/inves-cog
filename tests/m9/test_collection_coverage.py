@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from inves_cog.dataguard.coverage import (
@@ -72,3 +74,43 @@ def test_health_flags_consec_failures():
     sm = {"t9": {"fail": 3, "degraded": 0, "last_ok": None, "last_run": 1, "last_status": "failed"}}
     health = health_rows(["t9"], sm, {}, [])
     assert health[0]["state"] == "失败" and health[0]["fail_streak"] == 3
+
+
+@pytest.mark.phase1_blocking
+def test_writes_to_inherits_expectation_table():
+    """writes_to {tasks:[...]} on a table-level expectation inherits its
+    table + date_column for the empty-run check."""
+    from types import SimpleNamespace
+
+    items = [
+        SimpleNamespace(
+            writes_to={"tasks": ["fred"]},
+            table="ingest.macro_observations",
+            date_column="observation_date",
+        )
+    ]
+    from inves_cog.dataguard.coverage import config_task_tables
+
+    assert config_task_tables(items)["fred"] == {
+        "table": "ingest.macro_observations",
+        "date_column": "observation_date",
+    }
+
+
+@pytest.mark.phase1_blocking
+def test_missing_ratio_tolerance_constant():
+    """Collectors export the 1% missing tolerance used by degraded."""
+    from inves_cog.ingest.intraday import MISSING_TOLERANCE, YAHOO_TICKERS
+
+    assert MISSING_TOLERANCE == 0.01
+    assert "^TNX" not in YAHOO_TICKERS and "^FVX" not in YAHOO_TICKERS
+
+
+@pytest.mark.phase1_blocking
+def test_per_ticker_gap_names_ticker():
+    from inves_cog.dataguard.coverage import per_ticker_gaps
+
+    reader = MagicMock()
+    reader.execute.return_value.fetchall.return_value = [{"ticker": "ACME", "latest": "2026-11-05"}]
+    out = per_ticker_gaps(reader, MagicMock())
+    assert out and "个股报价缺失：ACME" in out[0].task and "停牌" in out[0].detail
