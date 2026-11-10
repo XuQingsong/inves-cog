@@ -9,9 +9,15 @@ from inves_cog.ingest.market import NY, bar_session, exchange, trading_day
 from inves_cog.ingest.providers import stamp
 
 FEED = "delayed_sip"
-# Missing-ticker tolerance: <=1% of requested symbols is a per-ticker gap
-# (data guard streaks them individually), not a source outage.
+# Missing tolerance: degradation only when missing > max(1, 1% of requested);
+# single-ticker misses are streaked by the data guard instead.
 MISSING_TOLERANCE = 0.01
+
+
+def _degraded(missing, requested):
+    return missing > max(1, int(MISSING_TOLERANCE * requested))
+
+
 # Verified with the existing key and official snapshots contract on 2026-10-26.
 MIN_DELAY_MINUTES = 15
 SOURCE = "Alpaca:" + FEED
@@ -210,7 +216,7 @@ def collect_intraday(pipeline, *, http=None):
         latest = max((row["as_of"] for row in rows), default=None)
         # <=1% of requested tickers missing is a per-ticker gap, not a source
         # outage; named in the note so the data guard can streak them.
-        degraded = missing / max(len(tickers), 1) > MISSING_TOLERANCE
+        degraded = _degraded(missing, len(tickers))
         return dict(
             processed_count=len(rows),
             status="degraded" if degraded else "ok",
@@ -361,7 +367,7 @@ def collect_wide(pipeline, *, http=None):
         return dict(
             processed_count=written,
             source_success=bool(written) and not missing,
-            status="degraded" if missing / max(len(tickers), 1) > MISSING_TOLERANCE or not tickers else "ok",
+            status="degraded" if _degraded(missing, len(tickers)) or not tickers else "ok",
             latest_data_at=latest.isoformat() if latest else None,
             note=f"feed={FEED}; requested={len(tickers)}; missing_trade_or_previous={missing}; "
             f"missing_tickers={','.join(missing_names[:10]) or 'none'}",
@@ -442,7 +448,7 @@ def collect_iex_intraday(pipeline, *, http=None):
         return dict(
             processed_count=written,
             source_success=bool(rows),
-            status="degraded" if missing / max(len(tickers), 1) > MISSING_TOLERANCE else "ok",
+            status="degraded" if _degraded(missing, len(tickers)) else "ok",
             latest_data_at=latest.isoformat() if latest else None,
             note=f"feed=iex; feed_delay_minutes=0; IEX_equities_ET=08:00-17:00; "
             f"missing_last_trade={missing}; missing_tickers={','.join(missing_names[:10]) or 'none'}; "

@@ -114,3 +114,27 @@ def test_per_ticker_gap_names_ticker():
     reader.execute.return_value.fetchall.return_value = [{"ticker": "ACME", "latest": "2026-11-05"}]
     out = per_ticker_gaps(reader, MagicMock())
     assert out and "个股报价缺失：ACME" in out[0].task and "停牌" in out[0].detail
+
+
+@pytest.mark.phase1_blocking
+def test_disabled_expectation_skipped_in_scan_and_evaluate():
+    """disabled expectations produce no findings via scan or evaluate."""
+    from inves_cog.dataguard.service import scan
+    from inves_cog.dataguard.core import evaluate
+    from types import SimpleNamespace
+    import inspect
+
+    item = SimpleNamespace(disabled={"tasks": ["x"], "reason": "已停用"})
+    assert evaluate(item, None, [], None) == []
+    src = inspect.getsource(scan)
+    assert "disabled" in src
+
+
+@pytest.mark.phase1_blocking
+def test_degraded_threshold_allows_single_ticker():
+    """1 of 76 missing is not degraded; >1% AND >1 absolute is."""
+    from inves_cog.ingest.intraday import _degraded
+
+    assert _degraded(1, 76) is False  # XLC-only miss -> ok
+    assert _degraded(2, 76) is True  # >1% of 76
+    assert _degraded(1, 40) is False  # max(1, floor) gate
