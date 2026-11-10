@@ -143,8 +143,7 @@ def _valuation(view, full=False):
         inner = short[len("未估值（") : -1] if short.startswith("未估值（") and short.endswith("）") else ""
         original = f"未估值：{inner}" if inner else "未估值"
         line = original + (" · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else "")
-        if view.get("range_line"):
-            line = line + " ｜ " + str(view["range_line"])
+        line = line + " ｜ " + short.replace("未估值", "暂无估值", 1)
         return line
     bits = []
     if view.get("pe_extreme"):
