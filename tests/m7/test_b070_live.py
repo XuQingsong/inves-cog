@@ -462,7 +462,6 @@ def test_regular_round_judges_pre_anomalies_post_round_does_not_touch_regular():
 @pytest.mark.phase1_blocking
 def test_peak_detection_time_and_overshoot_note():
     import json
-    from datetime import datetime, timezone
 
     from inves_cog.web.investor_html import _live_module
 
