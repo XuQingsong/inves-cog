@@ -1,10 +1,9 @@
-from datetime import date
-
 import pytest
+from datetime import date
 
 
 @pytest.mark.phase1_blocking
-def test_occ_statistics_aggregates_categories():
+def test_occ_statistics_aggregates_two_categories():
     from inves_cog.ingest.adapters import occ_statistics
 
     rows = [
@@ -14,6 +13,7 @@ def test_occ_statistics_aggregates_categories():
         {"underlying": "SPX", "cp": "P", "q": 200},
         {"underlying": "SPY", "cp": "C", "q": 300},
         {"underlying": "SPY", "cp": "P", "q": 150},
+        {"underlying": "NVDA", "cp": "X", "q": 999},
     ]
 
     class C:
@@ -25,8 +25,8 @@ def test_occ_statistics_aggregates_categories():
             return R()
 
     out = {r["category"]: r for r in occ_statistics(C(), date(2026, 11, 6))}
-    assert out["total"]["call_volume"] == 800 and out["total"]["put_volume"] == 400
-    assert out["index"]["call_volume"] == 400 and out["index"]["put_call_ratio"] == 0.5
-    assert out["etf"]["call_volume"] == 300
-    assert out["equity"]["call_volume"] == 100
+    assert set(out) == {"occ_total", "occ_index"}
+    assert out["occ_total"]["call_volume"] == 800 and out["occ_total"]["put_volume"] == 400
+    assert out["occ_index"]["call_volume"] == 400 and out["occ_index"]["put_call_ratio"] == 0.5
     assert all(r["source"] == "OCC" for r in out.values())
+    assert "全市场" in out["occ_total"]["category_label"]

@@ -9,11 +9,9 @@ import yaml
 
 from inves_cog.ingest.adapters import (
     Embedding,
-    SourceError,
     Trends,
     Websites,
     alpaca_splits,
-    cboe_statistics,
     cik_mapping,
     frames_shares,
     occ_statistics,
@@ -760,10 +758,10 @@ class Pipeline:
         return {"processed_count": len(rows)}
 
     def cboe(self):
-        try:
-            rows = cboe_statistics(HTTPClient(), self.day)
-        except SourceError:
-            rows = occ_statistics(self.repo.connection, self.day)
+        # CBOE moved its daily market-statistics page to client-side rendering
+        # (2026-11). OCC categories (occ_total / occ_index) replace them from
+        # that day on; legacy CBOE rows keep their own category names.
+        rows = occ_statistics(self.repo.connection, self.day)
         for row in rows:
             self.repo.write("options_stats", row)
             item = make_item(
