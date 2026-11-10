@@ -2879,7 +2879,10 @@ def page_brief_trust(connection, day, clock):
     )
     statuses.append({"item": "期权数据", "state": context["option_state"], "detail": context["option_detail"]})
     labels = []
-    for row in _labels(connection, day, context["cutoff"], day - __import__("datetime").timedelta(days=30)):
+    import datetime as _dt
+
+    day_d = day if isinstance(day, _dt.date) else _dt.date.fromisoformat(str(day)[:10])
+    for row in _labels(connection, day, context["cutoff"], day_d - _dt.timedelta(days=30)):
         labels.append(
             {
                 "case_id": row["case_id"],

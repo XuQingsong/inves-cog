@@ -41,11 +41,9 @@ def _cases(connection, as_of):
         connection.execute(
             """
             SELECT c.case_id, c.anomaly_id, c.trade_date,
-                   a.members, a.direction, a.session,
-                   la.cause_info_ids, la.cause
+                   a.members, a.direction, a.session, a.type_candidates_prelim
             FROM perception.cases c
             LEFT JOIN perception.anomalies a ON a.anomaly_id = c.anomaly_id
-            LEFT JOIN perception.live_anomalies la ON la.anomaly_id = c.anomaly_id
             WHERE c.trade_date <= %s
             ORDER BY c.case_id
             """,
