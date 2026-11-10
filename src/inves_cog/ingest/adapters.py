@@ -324,3 +324,83 @@ def cboe_statistics(http, day):
     if not output:
         raise SourceError("CBOE daily market tables absent; no substitute produced")
     return output
+
+
+_INDEX_UNDERLYINGS = {"SPX", "SPXW", "XSP", "VIX", "RUT", "DJX", "NDX", "OEX", "MRUT"}
+_ETF_UNDERLYINGS = {
+    "SPY",
+    "QQQ",
+    "IWM",
+    "DIA",
+    "EEM",
+    "EFA",
+    "TLT",
+    "HYG",
+    "LQD",
+    "GLD",
+    "SLV",
+    "XLE",
+    "XLF",
+    "XLK",
+    "XLV",
+    "XLI",
+    "XLU",
+    "XLP",
+    "XLY",
+    "XLC",
+    "SMH",
+    "SOXX",
+    "ARKK",
+    "IEF",
+    "SHY",
+    "VNQ",
+    "AGG",
+    "IEMG",
+    "VWO",
+    "VTI",
+}
+
+
+def occ_statistics(connection, day, etf_tickers=None):
+    """Aggregate OCC daily option volume into the CBOE market-statistics categories.
+
+    Source switched to OCC after CBOE's daily market-statistics page went
+    client-rendered (2026-11). categories: total/index/etf/equity.
+    """
+    rows = connection.execute(
+        "SELECT underlying, cp, sum(quantity) AS q FROM flows.option_volume_occ WHERE date=%s GROUP BY underlying, cp",
+        (day,),
+    ).fetchall()
+    buckets = {k: {"C": 0, "P": 0} for k in ("total", "index", "etf", "equity")}
+    etfs = set(etf_tickers or []) | _ETF_UNDERLYINGS
+    for r in rows:
+        und = (r["underlying"] or "").upper()
+        cp = (r["cp"] or "").upper()
+        if cp not in ("C", "P"):
+            continue
+        cat = "index" if und in _INDEX_UNDERLYINGS else ("etf" if und in etfs else "equity")
+        buckets["total"][cp] += int(r["q"] or 0)
+        buckets[cat][cp] += int(r["q"] or 0)
+    out = []
+    for cat, v in buckets.items():
+        call, put = v["C"], v["P"]
+        if not call and not put:
+            continue
+        out.append(
+            {
+                "trade_date": day,
+                "category": cat,
+                "category_label": {
+                    "total": "SUM OF ALL PRODUCTS",
+                    "index": "INDEX OPTIONS",
+                    "etf": "EXCHANGE TRADED PRODUCTS",
+                    "equity": "EQUITY OPTIONS",
+                }[cat],
+                "call_volume": call or None,
+                "put_volume": put or None,
+                "put_call_ratio": (put / call) if call else None,
+                "open_interest": None,
+                "source": "OCC",
+            }
+        )
+    return out
