@@ -40,10 +40,14 @@ def _cases(connection, as_of):
     return list(
         connection.execute(
             """
-            SELECT case_id, anomaly_id, trade_date
-            FROM perception.cases
-            WHERE trade_date <= %s
-            ORDER BY case_id
+            SELECT c.case_id, c.anomaly_id, c.trade_date,
+                   a.members, a.direction, a.session,
+                   la.cause_info_ids, la.cause
+            FROM perception.cases c
+            LEFT JOIN perception.anomalies a ON a.anomaly_id = c.anomaly_id
+            LEFT JOIN perception.live_anomalies la ON la.anomaly_id = c.anomaly_id
+            WHERE c.trade_date <= %s
+            ORDER BY c.case_id
             """,
             (as_of,),
         ).fetchall()
@@ -91,6 +95,9 @@ def _label_exists(connection, case_id, horizon):
 
 def _write_label(connection, case, horizon, due, clock):
     visible = cutoff(due)
+    case = dict(case)
+    case["member_tickers"] = member_tickers(case.get("members"))
+    case["cause_text"] = case.get("cause") or {}
     labels, reason = _label_body(connection, case, horizon, due, visible)
     connection.execute(
         """
@@ -113,19 +120,29 @@ def _write_label(connection, case, horizon, due, clock):
 
 def _label_body(connection, case, horizon, due, visible):
     hits = _visible_hits(connection, case["anomaly_id"], visible)
-    confirmed = [row["info_id"] for row in hits if row["outcome"] == "确认"]
-    denied = [row["info_id"] for row in hits if row["outcome"] == "否定"]
-    if confirmed:
-        market = "确认"
-    elif denied:
-        market = "否定"
+    from inves_cog.perception.review import verdicts as V
+
+    m_label, m_src, m_ev = V.market_verdict(connection, case, horizon, due, visible, hits)
+    try:
+        from inves_cog.llm.client import Client
+
+        g_label, g_src, g_ev = V.message_verdict(connection, case, horizon, due, visible, Client.from_environment())
+    except Exception:
+        g_label, g_src, g_ev = "仍未知", "模型", {"error": "client_unavailable"}
+    if horizon == "T+20":
+        b_label, b_src, b_ev = V.business_verdict(connection, case, due, visible)
     else:
-        market = "未检验"
+        b_label, b_src, b_ev = "尚未到期", "T+20 才判定", {}
     body = {
-        "消息内容": "仍未知",
-        "市场连接": market,
-        "经营连接": "尚未到期",
+        "消息内容": g_label,
+        "市场连接": m_label,
+        "经营连接": b_label,
         "可见二次命中": [row["info_id"] for row in hits],
+        "依据": {
+            "市场连接": {"source": m_src, **m_ev},
+            "消息内容": {"source": g_src, **g_ev},
+            "经营连接": {"source": b_src, **b_ev},
+        },
     }
     reason = None
     if horizon == "T+5":
