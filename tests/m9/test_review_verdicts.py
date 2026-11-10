@@ -150,8 +150,9 @@ def test_business_verdict_four_states_and_majority():
 @pytest.mark.phase1_blocking
 def test_trust_groups_labels_by_horizon():
     """30-day labels grouped under T+1/T+5/T+20 headers."""
-    from inves_cog.web import investor_html
     import inspect
+
+    from inves_cog.web import investor_html
 
     src = inspect.getsource(investor_html)
     for marker in ('"T+1"', '"T+5"', '"T+20"', "补算（按当时可得数据）"):
