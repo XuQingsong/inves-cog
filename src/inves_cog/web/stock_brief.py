@@ -1088,6 +1088,10 @@ def _analyst_summary(connection, symbol):
         " WHERE ticker=%s AND shares IS NOT NULL ORDER BY filed DESC LIMIT 1",
         (symbol,),
     ).fetchone()
+    px_row = connection.execute(
+        "SELECT close FROM ingest.bars_daily WHERE ticker=%s ORDER BY trade_date DESC LIMIT 1",
+        (symbol,),
+    ).fetchone()
     revision = _consensus_revision(rows)
     data_as_of = str(rows[0]["fetched_at"])[:10] if rows else None
     return {
@@ -1101,7 +1105,9 @@ def _analyst_summary(connection, symbol):
         "pt_median": None,
         "opinions": None,
         "trend": {},
-        "market_cap": None,
+        "market_cap": (
+            float(shares_row["shares"]) * float(px_row["close"]) if shares_row and px_row and px_row["close"] else None
+        ),
         "shares": shares_row["shares"] if shares_row else None,
         "shares_filed": str(shares_row["filed"]) if shares_row else None,
         "forward_pe": None,
