@@ -10,9 +10,11 @@ Z_CONFIRM, Z_DENY, EPS_DELTA = 0.5, -0.5, 1.0
 
 
 def _bars(conn, tickers, start, end):
+    # Bounded window: 90 trading days back is enough for the 60-day sigma.
     rows = conn.execute(
-        "SELECT ticker, trade_date, close FROM ingest.bars_daily WHERE ticker=ANY(%s) AND trade_date<=%s",
-        (list(tickers), end),
+        "SELECT ticker, trade_date, close FROM ingest.bars_daily "
+        "WHERE ticker=ANY(%s) AND trade_date>=%s AND trade_date<=%s",
+        (list(tickers), start, end),
     ).fetchall()
     return rows
 
@@ -41,7 +43,9 @@ def market_verdict(conn, case, horizon, due, visible, hits):
     direction = case.get("direction", 1)
     n_sessions = {"T+1": 1, "T+5": 5, "T+20": 20}[horizon]
     anchor = case["trade_date"]
-    rows = _bars(conn, set(members) | {"SPY"}, anchor - __import__("datetime").timedelta(days=120), due)
+    from datetime import timedelta as _td
+
+    rows = _bars(conn, set(members) | {"SPY"}, anchor - _td(days=130), due)
     zs = []
     for t in members:
         closes, rets = _returns(rows, t, due)
@@ -118,12 +122,7 @@ def message_verdict(conn, case, horizon, due, visible, client):
     return verdict, "模型", {"raw": raw, "info_ids": ids, "prompt_file": "config/prompts/review_message.txt"}
 
 
-def business_verdict(conn, case, due, visible):
-    """T+20 only: AV FY1 eps_avg snapshot before anomaly vs before due."""
-    ticker = (case.get("member_tickers") or [None])[0]
-    if ticker is None:
-        return "数据不足", "Alpha Vantage", {"reason": "无成员股"}
-    anchor = case["trade_date"]
+def _member_business(conn, ticker, anchor, due, direction):
     pre = conn.execute(
         "SELECT eps_avg FROM valuation_v1.consensus_snapshots WHERE ticker=%s AND kind='estimate' "
         "AND horizon='FY1' AND fetched_at::date<=%s ORDER BY fetched_at DESC LIMIT 1",
@@ -135,9 +134,8 @@ def business_verdict(conn, case, due, visible):
         (ticker, due),
     ).fetchone()
     if not pre or not post or pre["eps_avg"] in (None, 0):
-        return "数据不足", "Alpha Vantage", {"ticker": ticker}
+        return "数据不足", {"ticker": ticker}
     delta = (float(post["eps_avg"]) - float(pre["eps_avg"])) / abs(float(pre["eps_avg"])) * 100
-    direction = case.get("direction", 1)
     if abs(delta) < EPS_DELTA:
         verdict = "未见变化"
     elif (delta > 0) == (direction > 0):
@@ -145,17 +143,40 @@ def business_verdict(conn, case, due, visible):
     else:
         verdict = "经营面相反"
     ev = {
+        "ticker": ticker,
         "pre_eps": float(pre["eps_avg"]),
         "post_eps": float(post["eps_avg"]),
         "delta_pct": round(delta, 2),
-        "ticker": ticker,
     }
-    # attach actual-vs-expected if an earnings report sits inside the window
-    rep = conn.execute(
-        "SELECT report_date FROM ingest.earnings_calendar"
-        " WHERE ticker=%s AND report_date>%s AND report_date<=%s ORDER BY report_date LIMIT 1",
+    card = conn.execute(
+        "SELECT report_date, card->>'eps_actual' AS actual, card->>'eps_expected' AS expected "
+        "FROM perception.earnings_cards WHERE ticker=%s AND report_date>%s AND report_date<=%s "
+        "ORDER BY report_date LIMIT 1",
         (ticker, anchor, due),
     ).fetchone()
-    if rep:
-        ev["earnings_in_window"] = str(rep["report_date"])
-    return verdict, "Alpha Vantage", ev
+    if card:
+        ev["earnings_in_window"] = {
+            "report_date": str(card["report_date"]),
+            "actual": card.get("actual"),
+            "expected": card.get("expected"),
+        }
+    return verdict, ev
+
+
+def business_verdict(conn, case, due, visible):
+    """T+20 only: AV FY1 eps_avg per member; basket decides by majority."""
+    members = case.get("member_tickers") or []
+    if not members:
+        return "数据不足", "Alpha Vantage", {"reason": "无成员股"}
+    anchor = case["trade_date"]
+    direction = case.get("direction", 1)
+    results, evs = {}, {}
+    for t in members:
+        results[t], evs[t] = _member_business(conn, t, anchor, due, direction)
+    scored = [r for r in results.values() if r != "数据不足"]
+    if not scored:
+        return "数据不足", "Alpha Vantage", {"members": evs}
+    from collections import Counter
+
+    verdict = Counter(scored).most_common(1)[0][0]
+    return verdict, "Alpha Vantage", {"majority": verdict, "members": evs}

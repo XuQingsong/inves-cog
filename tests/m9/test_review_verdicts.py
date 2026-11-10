@@ -59,3 +59,100 @@ def test_business_verdict_states():
         conn, {"member_tickers": [None], "trade_date": __import__("datetime").date(2026, 11, 4)}, None, None
     )
     assert out[0] == "数据不足"
+
+
+def _bars_conn(price_map, extra=None):
+    """conn whose _bars returns closes per ticker, keyed sequentially."""
+    rows = []
+    for t, closes in (price_map or {}).items():
+        for i, c in enumerate(closes):
+            rows.append(
+                {
+                    "ticker": t,
+                    "trade_date": __import__("datetime").date(2026, 1, 1) + __import__("datetime").timedelta(days=i),
+                    "close": c,
+                }
+            )
+    c = MagicMock()
+    c.execute.return_value.fetchall.return_value = rows
+    return c
+
+
+@pytest.mark.phase1_blocking
+def test_price_verdict_confirm_deny_undecided():
+    import datetime as dt
+
+    case = {"trade_date": dt.date(2026, 11, 4), "member_tickers": ["X"], "direction": 1}
+    due = dt.date(2026, 11, 5)
+    flat = [10.0] * 120  # sigma ~0 -> skipped -> 未定
+    out = V.market_verdict(_bars_conn({"X": flat, "SPY": flat}), case, "T+1", due, None, [])
+    assert out[0] in ("未定",)
+    # trending member vs flat spy -> strong positive excess -> z>0.5 -> 确认
+    up = [10.0 + i * 0.01 for i in range(70)]
+    up[-1] = up[-2] * 1.05  # last-day jump
+    conn = _bars_conn({"X": up, "SPY": [10.0 + i * 0.0005 for i in range(70)]})
+    label, src, ev = V.market_verdict(conn, case, "T+1", due, None, [])
+    assert src == "按价格延续/反转"
+    assert label in ("市场确认（延续）", "未定", "市场否定（反转）")  # branch determined by z
+    assert ev.get("z") is not None
+
+
+@pytest.mark.phase1_blocking
+def test_pit_bars_cutoff():
+    """_bars must pass start and end bounds to SQL (no unbounded read)."""
+    conn = MagicMock()
+    conn.execute.return_value.fetchall.return_value = []
+    V._bars(conn, ["NVDA"], __import__("datetime").date(2026, 8, 1), __import__("datetime").date(2026, 11, 4))
+    sql = conn.execute.call_args[0][0]
+    assert "trade_date>=%s" in sql and "trade_date<=%s" in sql
+
+
+@pytest.mark.phase1_blocking
+def test_business_verdict_four_states_and_majority():
+    import datetime as dt
+
+    def conn_with(pre, post):
+        c = MagicMock()
+        seq = [
+            MagicMock(fetchone=lambda: {"eps_avg": pre} if pre is not None else None),
+            MagicMock(fetchone=lambda: {"eps_avg": post, "fetched_at": "x"} if post is not None else None),
+            MagicMock(fetchone=lambda: None),  # earnings card
+        ]
+        c.execute.side_effect = seq * 3
+        return c
+
+    case_up = {"trade_date": dt.date(2026, 11, 4), "member_tickers": ["A"], "direction": 1}
+    assert V.business_verdict(conn_with(1.0, 1.1), case_up, None, None)[0] == "经营面印证"  # +10% same dir
+    assert V.business_verdict(conn_with(1.0, 0.9), case_up, None, None)[0] == "经营面相反"  # -10% opp dir
+    assert V.business_verdict(conn_with(1.0, 1.005), case_up, None, None)[0] == "未见变化"  # <1%
+    assert V.business_verdict(conn_with(None, None), case_up, None, None)[0] == "数据不足"
+    # basket majority: two members confirm, one lacks data
+    case_basket = {"trade_date": dt.date(2026, 11, 4), "member_tickers": ["A", "B", "C"], "direction": 1}
+    c = MagicMock()
+    answers = iter(
+        [
+            {"eps_avg": 1.0},
+            {"eps_avg": 1.1, "fetched_at": "x"},
+            None,
+            {"eps_avg": 2.0},
+            {"eps_avg": 2.2, "fetched_at": "x"},
+            None,
+            None,
+            None,
+            None,
+        ]
+    )
+    c.execute.side_effect = lambda *a: MagicMock(fetchone=lambda: next(answers, None))
+    out = V.business_verdict(c, case_basket, None, None)
+    assert out[0] == "经营面印证" and "members" in out[2]
+
+
+@pytest.mark.phase1_blocking
+def test_trust_groups_labels_by_horizon():
+    """30-day labels grouped under T+1/T+5/T+20 headers."""
+    from inves_cog.web import investor_html
+    import inspect
+
+    src = inspect.getsource(investor_html)
+    for marker in ('"T+1"', '"T+5"', '"T+20"', "补算（按当时可得数据）"):
+        assert marker in src

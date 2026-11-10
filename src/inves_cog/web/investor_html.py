@@ -1305,10 +1305,43 @@ def _trust(payload):
         else "下面逐项列出数据状态和影响。"
     )
     if payload.get("labels"):
-        review = "".join(
-            f"<p>{_text(row.get('horizon'))} {_text(row.get('as_of'))} {_text(row.get('reason') or '')}</p>"
-            for row in payload["labels"]
-        )
+        import json as _json
+        from collections import Counter, defaultdict
+
+        groups = defaultdict(list)
+        for row in payload["labels"]:
+            groups[row.get("horizon") or "?"].append(row)
+        chunks = []
+        for hz in ("T+1", "T+5", "T+20"):
+            rows = groups.get(hz)
+            if not rows:
+                continue
+            labs = [r.get("labels") or {} for r in rows]
+            mc = Counter(lab.get("市场连接") or "?" for lab in labs)
+            gc = Counter(lab.get("消息内容") or "?" for lab in labs)
+            bc = Counter(lab.get("经营连接") or "?" for lab in labs)
+            chunks.append(
+                f'<h3 style="margin-top:10px">{_text(hz)} <span class="small muted">{len(rows)} 条到期</span></h3>'
+                '<div class="small muted" style="margin:4px 0">市场：确认 '
+                f"{mc.get('确认', 0) + mc.get('市场确认（延续）', 0)} / 否定 "
+                f"{mc.get('否定', 0) + mc.get('市场否定（反转）', 0)} / "
+                f"未定 {mc.get('未定', 0) + mc.get('未检验', 0)} · "
+                f"消息：证实 {gc.get('证实', 0)} / 证伪 {gc.get('证伪', 0)} / 仍未知 {gc.get('仍未知', 0)} · "
+                f"经营：印证 {bc.get('经营面印证', 0)} / 相反 {bc.get('经营面相反', 0)} / 未变 {bc.get('未见变化', 0)} "
+                f"/ 不足 {bc.get('数据不足', 0) + bc.get('尚未到期', 0)}</div>"
+                + "".join(
+                    '<details class="small" style="margin:2px 0"><summary>'
+                    f"{_text(r.get('case_id'))} · {_text(str(r.get('as_of') or ''))} · "
+                    f"市场 {_text(lab.get('市场连接') or '-')} · 消息 {_text(lab.get('消息内容') or '-')} · "
+                    f"经营 {_text(lab.get('经营连接') or '-')}"
+                    + (" <span class='chip stale'>补算（按当时可得数据）</span>" if r.get("backfilled") else "")
+                    + "</summary><pre class='small' style='white-space:pre-wrap'>"
+                    + _text(_json.dumps(lab.get("依据") or {}, ensure_ascii=False, indent=1, default=str)[:900])
+                    + "</pre></details>"
+                    for r, lab in zip(rows, labs, strict=False)
+                )
+            )
+        review = "".join(chunks) or '<div class="empty">近 30 天无到期复盘。</div>'
     else:
         review = (
             '<div class="empty">还没有完成的复盘记录。<br><span class="small">积累后显示：事后 1 / 5 / 20 个交易日，'
