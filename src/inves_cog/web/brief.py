@@ -240,8 +240,8 @@ def valuation_card(range_row, pe, price):
         "implied_reason": None,
         "text": None,
     }
-    card["sanity"] = None if range_row is None else range_row.get("sanity")
-    card["sanity_reason"] = None if range_row is None else range_row.get("sanity_reason")
+    card["sanity"] = payload.get("sanity")
+    card["sanity_reason"] = payload.get("sanity_reason")
     if card["sanity"]:
         card["state"] = "估值暂不可用"
     if card["implied_growth"] is None and payload.get("implied_reason"):
@@ -271,8 +271,8 @@ def _range_line(payload, range_row, price):
     bull = _number(payload.get("bull"))
     neutral = None if range_row is None else _number(range_row.get("neutral"))
     label = "估值区间（悲观–中性–乐观）· 仅供参考，不是目标价"
-    if range_row is not None and range_row.get("sanity"):
-        return f"{label} · 估值暂不可用：输入数据待核（{range_row.get('sanity_reason') or '输入异常'}）"
+    if payload.get("sanity"):
+        return f"{label} · 估值暂不可用：输入数据待核（{payload.get('sanity_reason') or '输入异常'}）"
     date_txt = payload.get("date") or (None if range_row is None else range_row.get("trade_date"))
     basis = payload.get("type") or "—"
     if bear is None or bull is None or neutral is None:
@@ -1632,7 +1632,11 @@ def _valuation_status(scores, ranges, bars):
     states = []
     for ticker, score in scores.items():
         tech = _tech(score)
-        neutral = None if ticker not in ranges or ranges[ticker].get("sanity") else ranges[ticker]["neutral"]
+        neutral = (
+            None
+            if ticker not in ranges or _object(ranges[ticker].get("payload")).get("sanity")
+            else ranges[ticker]["neutral"]
+        )
         view = valuation_view(_price(tech, bars.get(ticker)), neutral)
         states.append(view["status"])
     if "模型不适用" in states:

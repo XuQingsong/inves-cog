@@ -867,8 +867,15 @@ def test_range_line_sanity_flag_shows_unavailable():
     from inves_cog.web.brief import _range_line
 
     line = _range_line(
-        {"bear": 4.0, "bull": 10.1, "date": "2026-11-09", "type": "周期"},
-        {"neutral": 6.7, "sanity": "输入可疑", "sanity_reason": "中性档为现价的 0.02 倍，阈值 0.2–5"},
+        {
+            "bear": 4.0,
+            "bull": 10.1,
+            "date": "2026-11-09",
+            "type": "周期",
+            "sanity": "输入可疑",
+            "sanity_reason": "中性档为现价的 0.02 倍，阈值 0.2–5",
+        },
+        {"neutral": 6.7},
         289.8,
     )
     assert "估值暂不可用" in line and "输入数据待核" in line and "0.02" in line
