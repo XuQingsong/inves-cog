@@ -141,6 +141,12 @@ def run_once(
                 rows, new = store.reconcile(item.dataset, day, found, now)
                 notices.extend(rows)
                 keys.extend(new)
+        try:
+            from inves_cog.dataguard.coverage import run_audit
+
+            run_audit(reader, writer, now, items)
+        except Exception as exc:
+            log.warning("coverage audit skipped: %s", type(exc).__name__)
         # Failed/unfinished inspection remains visible, without closing actual source gaps.
         check_item = "数据守护检查"
         failed = (

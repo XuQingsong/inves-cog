@@ -402,6 +402,31 @@ datasets:
   backfill:
     entry: manual
     max_attempts: 3
+- dataset: 采集任务运行（app/趋势/站点）
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - app_free
+    - app_grossing
+    - trends
+    - websites
+  expected_keys:
+    - app_free
+    - app_grossing
+    - trends
+    - websites
+  basis: runtime.py app_* interval=60 每小时；trends/websites after=1245 每日；2026-11-10 入白名单
+  impact: 应用排名与站点趋势感知缺失
+  backfill:
+    entry: manual
 - dataset: EIA 新闻任务
   table: ingest.job_runs
   date_column: trade_date
@@ -1255,6 +1280,28 @@ datasets:
     max_attempts: 3
     depends_on: []
   calendar_days: true
+- dataset: 一致预期 Yahoo 采集任务（已停用）
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - earnings_consensus
+  expected_keys:
+    - earnings_consensus
+  disabled:
+    tasks: [earnings_consensus]
+    reason: '已停用：来源要求 crumb，2026-11-10；改用 Alpha Vantage'
+  basis: Yahoo quoteSummary 401 crumb；采集链路停用，保留历史行
+  impact: 无（一致预期改读 Alpha Vantage 快照）
+  backfill:
+    entry: manual
 - dataset: 一致预期采集任务
   table: ingest.job_runs
   date_column: trade_date
