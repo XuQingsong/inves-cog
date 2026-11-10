@@ -2713,7 +2713,24 @@ def _live_module(payload):
             )
             members = f'<details><summary class="dim">成员</summary><div class="dim">{parts}</div></details>'
         badge = f'<span class="badge {sev_cls}">{sev_label}</span>'
-        peak_html = f'<span class="num" title="异动峰值（较昨收）">{_pct(peak, 1)}</span>' if peak is not None else ""
+        peak_hhmm = ""
+        last_seen = r.get("last_seen_at") or r.get("updated_at")
+        if isinstance(last_seen, str):
+            try:
+                last_seen = datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
+            except ValueError:
+                last_seen = None
+        if peak is not None and hasattr(last_seen, "astimezone"):
+            peak_hhmm = f"（{last_seen.astimezone(ZoneInfo('America/New_York')).strftime('%H:%M')} 检测）"
+        overshoot = cur is not None and peak is not None and abs(cur) > abs(peak) and (cur > 0) == (peak > 0)
+        peak_html = (
+            f'<span class="num" title="异动峰值（较昨收）">{_pct(peak, 1)}{peak_hhmm}</span>'
+            if peak is not None
+            else ""
+        )
+        if overshoot:
+            peak_html += '<div class="dim small">当前已超出上轮检测峰值</div>'
+
         body.append(
             f"<tr><td style='white-space:nowrap'>{scope}</td><td>{link} {badge}{faded}</td>"
             f"<td class='num'>{px_html}</td>"

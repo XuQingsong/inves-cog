@@ -1,5 +1,7 @@
 """B-070 live detection."""
 
+import pytest
+
 from inves_cog.perception.live.detect import basket_hits, market_hits, stock_hits
 
 RULE = {
@@ -455,3 +457,35 @@ def test_regular_round_judges_pre_anomalies_post_round_does_not_touch_regular():
             for r in conn.execute("SELECT subject,status FROM perception.live_anomalies").fetchall()
         }
         assert rows == {"STX": "active", "AMD": "faded"}
+
+
+@pytest.mark.phase1_blocking
+def test_peak_detection_time_and_overshoot_note():
+    import json
+    from datetime import datetime, timezone
+
+    from inves_cog.web.investor_html import _live_module
+
+    row = {
+        "scope": "stock",
+        "subject": "NVDA",
+        "session": "pre",
+        "last_ret": -0.064,
+        "peak_ret": -0.062,
+        "cur_ret": -0.064,
+        "first_seen_at": "2026-11-09T13:30:00+00:00",
+        "last_seen_at": "2026-11-09T14:15:00+00:00",
+        "updated_at": "2026-11-09T14:15:00+00:00",
+        "status": "active",
+        "direction": "down",
+        "trade_date": "2026-11-09",
+    }
+    html = _live_module(json.loads(json.dumps({"news_modules": {"live": [row]}})))
+    assert "盘前异常" in html
+    assert "09:15 检测" in html
+    assert "当前已超出上轮检测峰值" in html
+
+    # opposite-direction cur vs peak -> no overshoot note
+    row2 = dict(row, cur_ret=0.03)
+    html2 = _live_module(json.loads(json.dumps({"news_modules": {"live": [row2]}})))
+    assert "当前已超出上轮检测峰值" not in html2
