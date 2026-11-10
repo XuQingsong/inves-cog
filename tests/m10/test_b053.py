@@ -845,3 +845,17 @@ def test_review_gap_when_labels_are_absent(pages):
             """,
             (DAY, Jsonb({"result": "方向对"}), cutoff(DAY) + timedelta(days=3), SEEN),
         )
+
+
+@pytest.mark.phase1_blocking
+def test_range_line_three_bands_and_unvalued():
+    """估值区间 line: three bands + price position + date + basis; unvalued."""
+    from inves_cog.web.brief import _range_line
+
+    payload = {"bear": 228.6, "bull": 770.9, "date": "2026-11-09", "type": "成长"}
+    row = {"neutral": 450.0}
+    line = _range_line(payload, row, 178.7)
+    assert "估值区间（悲观–中性–乐观）" in line and "仅供参考，不是目标价" in line
+    assert "228.6" in line and "770.9" in line and "低于悲观档" in line and "成长" in line
+    out = _range_line({"bear": None, "bull": None}, {"neutral": None}, 100)
+    assert "暂无估值" in out

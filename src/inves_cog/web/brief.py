@@ -253,12 +253,38 @@ def valuation_card(range_row, pe, price):
         cause = str(reason) if isinstance(reason, str) and reason else MISSING
         card["state"] = "未估值"
         card["text"] = f"未估值（{cause}）"
+        card["range_line"] = f"暂无估值（{cause}）"
         for key in ("pe", "pe_p25", "pe_p50", "pe_p75", "implied_growth", "rev_cagr_3y", "eps_growth", "eps"):
             card[key] = None
         card["implied_reason"] = None
         card["pe_text"] = MISSING
         card["pe_extreme"] = False
+    if "range_line" not in card:
+        card["range_line"] = _range_line(payload, range_row, price)
     return card
+
+
+def _range_line(payload, range_row, price):
+    """Fixed-label three-band range line with the current price's position.
+    Prebuilt string for the page to print verbatim."""
+    bear = _number(payload.get("bear"))
+    bull = _number(payload.get("bull"))
+    neutral = None if range_row is None else _number(range_row.get("neutral"))
+    date_txt = payload.get("date") or (None if range_row is None else range_row.get("trade_date"))
+    basis = payload.get("type") or "—"
+    label = "估值区间（悲观–中性–乐观）· 仅供参考，不是目标价"
+    if bear is None or bull is None or neutral is None:
+        return f"{label} · 暂无估值（区间缺失）"
+    pos = (
+        "低于悲观档"
+        if (price is not None and float(price) < bear)
+        else ("高于乐观档" if (price is not None and float(price) > bull) else "区间内")
+    )
+    px = "" if price is None else f"，现价 {half_up(float(price), 1):.1f}（{pos}）"
+    return (
+        f"{label}：{half_up(bear, 1):.1f} – {half_up(neutral, 1):.1f} – {half_up(bull, 1):.1f}{px}"
+        f" · 估值日 {date_txt} · 依据 {basis} 模型"
+    )
 
 
 def session_gap(start, end):
