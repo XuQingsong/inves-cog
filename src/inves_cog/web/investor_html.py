@@ -142,7 +142,9 @@ def _valuation(view, full=False):
         short = short_unvalued_text(view.get("text") or "未估值")
         inner = short[len("未估值（") : -1] if short.startswith("未估值（") and short.endswith("）") else ""
         original = f"未估值：{inner}" if inner else "未估值"
-        return original + " · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else original
+        line = original + (" · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else "")
+        line = line + " ｜ " + short.replace("未估值", "暂无估值", 1)
+        return line
     bits = []
     if view.get("pe_extreme"):
         bits.append("市盈率不适用（盈利过低）")
@@ -164,7 +166,10 @@ def _valuation(view, full=False):
         bits.append("模型不适用")
     if view.get("ceiling"):
         bits.append(ceiling_text(view["ceiling"], full=full))
-    return " · ".join(bits) if bits else "估值暂缺"
+    line = " · ".join(bits) if bits else "估值暂缺"
+    if view.get("range_line"):
+        line = line + " ｜ " + str(view["range_line"])
+    return line
 
 
 def _settle_text(value, day):

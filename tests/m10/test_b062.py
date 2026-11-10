@@ -583,10 +583,13 @@ def test_g12_forbidden_words_stay_off_the_pages(pages):
     )
     # IEX real-time label is spec-mandated (B-067); other 实时 leaks stay forbidden.
     blob_check = blob.replace("IEX 实时", "").replace("单一交易所实时成交", "")
+    # 估值区间 label is spec-mandated and negates 目标价 explicitly
+    blob_check = blob_check.replace("估值区间（悲观–中性–乐观）· 仅供参考，不是目标价", "")
     for word in ("下单", "实时", "目标价", "合理价", "N1"):
         assert word not in blob_check
     # B-074 §8 mandates target-price display on stock pages; other bans still apply there.
     stock_blob = _visible("".join(_get(pages, path).text for path in stock_pages))
+    stock_blob = stock_blob.replace("估值区间（悲观–中性–乐观）· 仅供参考，不是目标价", "")
     for word in ("下单", "实时", "合理价", "N1"):
         assert word not in stock_blob
     assert _RULE.search(blob) is None
