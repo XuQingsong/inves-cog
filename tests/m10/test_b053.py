@@ -859,3 +859,17 @@ def test_range_line_three_bands_and_unvalued():
     assert "228.6" in line and "770.9" in line and "低于悲观档" in line and "成长" in line
     out = _range_line({"bear": None, "bull": None}, {"neutral": None}, 100)
     assert "暂无估值" in out
+
+
+@pytest.mark.phase1_blocking
+def test_range_line_sanity_flag_shows_unavailable():
+    """sanity-flagged rows show 暂不可用 instead of the bands."""
+    from inves_cog.web.brief import _range_line
+
+    line = _range_line(
+        {"bear": 4.0, "bull": 10.1, "date": "2026-11-09", "type": "周期"},
+        {"neutral": 6.7, "sanity": "输入可疑", "sanity_reason": "中性档为现价的 0.02 倍，阈值 0.2–5"},
+        289.8,
+    )
+    assert "估值暂不可用" in line and "输入数据待核" in line and "0.02" in line
+    assert "4.0" not in line and "10.1" not in line  # bands not shown

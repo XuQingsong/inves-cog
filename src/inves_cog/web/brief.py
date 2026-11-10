@@ -270,9 +270,11 @@ def _range_line(payload, range_row, price):
     bear = _number(payload.get("bear"))
     bull = _number(payload.get("bull"))
     neutral = None if range_row is None else _number(range_row.get("neutral"))
+    label = "估值区间（悲观–中性–乐观）· 仅供参考，不是目标价"
+    if range_row is not None and range_row.get("sanity"):
+        return f"{label} · 估值暂不可用：输入数据待核（{range_row.get('sanity_reason') or '输入异常'}）"
     date_txt = payload.get("date") or (None if range_row is None else range_row.get("trade_date"))
     basis = payload.get("type") or "—"
-    label = "估值区间（悲观–中性–乐观）· 仅供参考，不是目标价"
     if bear is None or bull is None or neutral is None:
         return f"{label} · 暂无估值（区间缺失）"
     pos = (
