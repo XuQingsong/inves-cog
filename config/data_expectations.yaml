@@ -382,6 +382,26 @@ datasets:
   min_rows: 1
   basis: scheduler 任务 websites（due_tasks after=1245 每日一轮，2026-11-10 起恢复入调度）；403 如实记 failed
   impact: 跟踪主体站点变更感知
+- dataset: 国会 PTR 索引任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '22:00'
+  grace_min: 60
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - congress_ptr
+  expected_keys:
+    - congress_ptr
+  basis: runtime.py congress_ptr after=1300 每日一轮（索引+限速下载），2026-11-10 起入调度
+  impact: 众议院 PTR 申报感知缺失
+  backfill:
+    entry: manual
+    max_attempts: 3
 - dataset: EIA 新闻任务
   table: ingest.job_runs
   date_column: trade_date

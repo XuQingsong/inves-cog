@@ -1707,6 +1707,11 @@ def _smartmoney_module(payload):
             f'<span class="k">发布日</span><span class="small">{pub_text}</span>' + "</div>" + spark
         )
 
+    cong = data.get("congress") or {}
+    if cong.get("missing"):
+        cong_html = f'<div class="small muted">暂无（{_text(cong["missing"])}）</div>'
+    else:
+        cong_html = _congress_rows(cong)
     inst = data.get("institutions") or {}
     if inst.get("missing"):
         inst_html = f'<div class="small muted">暂缺（{_text(inst["missing"])}）</div>'
@@ -1777,7 +1782,47 @@ def _smartmoney_module(payload):
         + short_html
         + f'<h3 style="margin-top:14px">机构 <span class="small muted">{_text(inst_note)}</span></h3>'
         + inst_html
+        + '<h3 style="margin-top:14px">国会（只列不计） '
+        + '<span class="small muted">众议院 · 申报最长滞后 45 天 · 参议院暂未接入</span></h3>'
+        + cong_html
         + "</div>"
+    )
+
+
+def _congress_rows(cong):
+    def amt(m):
+        if m.get("amount_low") is None:
+            return "-"
+        lo = "$" + format(m["amount_low"], ",")
+        return lo + (" - $" + format(m["amount_high"], ",") if m.get("amount_high") else "+")
+
+    def kind(m):
+        t = m.get("txn_type") or ""
+        return "买入" if t == "P" else "卖出" if t.startswith("S") else "其他"
+
+    scanned_n = cong.get("scanned_count") or 0
+    head = (
+        '<div class="small muted" style="margin:2px 0 6px">'
+        f"议员 {cong.get('member_count', 0)} 人 · 买入 {cong.get('buy_count', 0)} 笔"
+        f" · 卖出 {cong.get('sell_count', 0)} 笔" + (f" · {scanned_n} 份扫描件未解析" if scanned_n else "") + "</div>"
+    )
+    rows = "".join(
+        "<tr>"
+        f"<td>{_text(str(m.get('filing_date') or ''))}</td>"
+        f"<td>{_text(m.get('member') or '')}</td>"
+        f"<td>{kind(m)}</td>"
+        f"<td>{_text(str(m.get('txn_date') or ''))}</td>"
+        f"<td>{_text(m.get('asset') or '')}</td>"
+        f"<td>{amt(m)}</td>"
+        "</tr>"
+        for m in (cong.get("recent") or [])
+    )
+    return (
+        head
+        + '<table class="mini"><tr><th>申报日</th><th>议员</th><th>类型</th>'
+        + "<th>交易日</th><th>资产</th><th>金额区间</th></tr>"
+        + rows
+        + "</table>"
     )
 
 
