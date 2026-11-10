@@ -1113,7 +1113,7 @@ def _analyst_summary(connection, symbol):
         "forward_pe": None,
         "data_as_of": data_as_of,
         "revision": revision,
-        "source_note": ("Alpha Vantage（免费版每 2–3 天轮换更新）" if rows else None),
+        "source_note": ("ALPHA VANTAGE（免费版每 2–3 天轮换更新）" if rows else None),
     }
 
 

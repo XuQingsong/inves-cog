@@ -3092,8 +3092,8 @@ def _key_stats(payload):
         (
             "市值",
             (
-                _human(float(an["shares"]) * float(st["last"])) + f"（股本申报 {an['shares_filed']}）"
-                if an.get("shares") and st.get("last")
+                _human(float(an["market_cap"])) + f"（股本申报 {an['shares_filed']}）"
+                if an.get("market_cap")
                 else "暂缺"
             ),
         ),
