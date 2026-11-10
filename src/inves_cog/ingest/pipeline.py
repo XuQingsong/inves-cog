@@ -688,6 +688,14 @@ class Pipeline:
             "note": "; ".join(f"{f['url']}: {f['error']}" for f in failures),
         }
 
+    def congress_ptr_task(self):
+        from inves_cog.ingest.congress import collect_index, collect_pending
+
+        year = self.clock.now_utc().year
+        idx = collect_index(self.repo.connection, HTTPClient(), year)
+        done = collect_pending(self.repo.connection, HTTPClient())
+        return {"processed_count": done["downloaded"], **idx, **done}
+
     def rss_task(self, source):
         from inves_cog.ingest.rss import PUBLIC_FEEDS, parse_rss
 
@@ -824,6 +832,7 @@ class Pipeline:
                 "fed_news": ("FederalReserveNews", lambda: self.rss_task("FederalReserveNews")),
                 "eia_press": ("EIANews", lambda: self.rss_task("EIANews")),
                 "eia_energy": ("EIATodayInEnergy", lambda: self.rss_task("EIATodayInEnergy")),
+                "congress_ptr": ("HousePTR", self.congress_ptr_task),
             }
         )
 

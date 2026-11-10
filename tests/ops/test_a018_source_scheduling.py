@@ -28,6 +28,9 @@ A023_ADDED = ["news_poll", "news_watchdog", "vix_daily", "earnings_calendar", "e
 # 20:45 ET) but absent from the scheduler whitelist, so they never ran since
 # 2026-10-14. They are added back to the whitelist per their due_tasks design.
 B_ADDED = ["app_free", "app_grossing", "trends", "websites", "eia_press", "eia_energy"]
+# 2026-11-10: congress_ptr joins the same whitelist once the House PTR
+# collector ships (daily index fetch after=1300 ET per due_tasks design).
+C_ADDED = ["congress_ptr"]
 
 
 @pytest.mark.parametrize("platform_name", ["Linux", "Darwin"])
@@ -45,6 +48,7 @@ def test_n1_scheduler_exact_tasks_and_other_programs_unchanged(platform_name, mo
         *A023_ADDED[1:],
         *ADDED[2:],
         *B_ADDED,
+        *C_ADDED,
     ]
     assert command == [str(python), "-u", "-m", "inves_cog.ingest.cli", "schedule", "--tasks", *expected_tasks]
     expected = {
