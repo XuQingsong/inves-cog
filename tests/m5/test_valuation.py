@@ -345,9 +345,12 @@ def test_sanity_flag_renders_unavailable_not_verdict():
     row = {
         "status": "ok",
         "neutral": 6.7,
-        "sanity": "输入可疑",
-        "sanity_reason": "中性档为现价的 0.02 倍，阈值 0.2–5",
-        "payload": {"bear": 4.0, "bull": 10.1},
+        "payload": {
+            "bear": 4.0,
+            "bull": 10.1,
+            "sanity": "输入可疑",
+            "sanity_reason": "中性档为现价的 0.02 倍，阈值 0.2–5",
+        },
     }
     card = valuation_card(row, None, 290.0)
     text = _valuation(card)
