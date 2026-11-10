@@ -33,6 +33,8 @@ class Expectation:
     adjustment_column: str | None = None
     quality_column: str | None = None
     corporate_actions: dict = field(default_factory=dict)
+    disabled: dict | None = None
+    writes_to: dict | None = None
     staleness: bool = False
     sanity: float | None = None
     sanity_leverage: dict = field(default_factory=dict)

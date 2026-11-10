@@ -3,6 +3,8 @@ interval_seconds: 600
 alert_min_interval_hours: 3
 datasets:
 - dataset: 监控池日线
+  writes_to:
+    tasks: [bars_full, bars_prefill]
   table: ingest.bars_daily
   date_column: trade_date
   cadence: trading_day
@@ -139,6 +141,8 @@ datasets:
         ratio: '3:1'
         source: https://www.sec.gov/Archives/edgar/data/1100663/000119312526430480/d156277d497.htm
 - dataset: 监控池盘中快照
+  writes_to:
+    tasks: [intraday_snapshots, iex_intraday, yahoo_intraday]
   table: ingest.intraday_snapshots
   date_column: as_of
   cadence: intraday:1
@@ -157,6 +161,8 @@ datasets:
     ticker: *id001
   expected_keys: *id001
 - dataset: 宽池盘中快照
+  writes_to:
+    tasks: [wide_snapshots]
   table: ingest.wide_snapshots
   date_column: as_of
   cadence: intraday:5
@@ -173,6 +179,8 @@ datasets:
   scope: wide
   min_coverage: 0.9
 - dataset: 新闻新增
+  writes_to:
+    tasks: [news_full, news_poll, news_prefill, fed_news, eia_press, eia_energy]
   table: ingest.info_items
   date_column: first_seen_at
   cadence: intraday:120
@@ -190,6 +198,8 @@ datasets:
     kind:
     - news
 - dataset: 波动率日线
+  writes_to:
+    tasks: [vix_daily]
   table: ingest.macro_observations
   date_column: observation_date
   cadence: trading_day
@@ -215,6 +225,8 @@ datasets:
   - VIX3M_CBOE
   staleness: true
 - dataset: 十年期国债收益率日线
+  writes_to:
+    tasks: [fred]
   table: ingest.macro_observations
   date_column: observation_date
   cadence: trading_day
@@ -374,6 +386,8 @@ datasets:
   basis: scheduler 任务 app_free/app_grossing（due_tasks interval=60，2026-11-10 起恢复入调度）
   impact: app 排名变动感知
 - dataset: 站点快照
+  writes_to:
+    tasks: [websites]
   table: ingest.website_snapshots
   date_column: captured_at
   cadence: weekly
@@ -397,11 +411,44 @@ datasets:
     - congress_ptr
   expected_keys:
     - congress_ptr
+  writes_to:
+    tasks: [congress_ptr]
+    table: ingest.congress_ptr
+    date_column: filing_date
   basis: runtime.py congress_ptr after=1300 每日一轮（索引+限速下载），2026-11-10 起入调度
   impact: 众议院 PTR 申报感知缺失
   backfill:
     entry: manual
     max_attempts: 3
+- dataset: 采集任务运行（app/趋势/站点）
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - app_free
+    - app_grossing
+    - trends
+    - websites
+  expected_keys:
+    - app_free
+    - app_grossing
+    - trends
+    - websites
+  writes_to:
+    tasks: [app_free, app_grossing]
+    table: ingest.app_rank_snapshots
+    date_column: as_of
+  basis: runtime.py app_* interval=60 每小时；trends/websites after=1245 每日；2026-11-10 入白名单
+  impact: 应用排名与站点趋势感知缺失
+  backfill:
+    entry: manual
 - dataset: EIA 新闻任务
   table: ingest.job_runs
   date_column: trade_date
@@ -511,6 +558,8 @@ datasets:
   - IWM
   - SMH
 - dataset: 空头持仓
+  writes_to:
+    tasks: [finra]
   table: ingest.short_interest
   date_column: settlement_date
   cadence: semimonthly
@@ -749,6 +798,8 @@ datasets:
   latest_column: ts
   quality_column: missing
 - dataset: 财报状态
+  writes_to:
+    tasks: [financials]
   table: fundamentals.fin_state
   date_column: filed
   cadence: trading_day
@@ -768,6 +819,8 @@ datasets:
     extractor:
     - fixed
 - dataset: 一致预期新增快照
+  writes_to:
+    tasks: [consensus_snapshots]
   table: valuation_v1.consensus_snapshots
   date_column: fetched_at
   cadence: trading_day
@@ -1255,6 +1308,28 @@ datasets:
     max_attempts: 3
     depends_on: []
   calendar_days: true
+- dataset: 一致预期 Yahoo 采集任务（已停用）
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - earnings_consensus
+  expected_keys:
+    - earnings_consensus
+  disabled:
+    tasks: [earnings_consensus]
+    reason: '已停用：来源要求 crumb，2026-11-10；改用 Alpha Vantage'
+  basis: Yahoo quoteSummary 401 crumb；采集链路停用，保留历史行
+  impact: 无（一致预期改读 Alpha Vantage 快照）
+  backfill:
+    entry: manual
 - dataset: 一致预期采集任务
   table: ingest.job_runs
   date_column: trade_date

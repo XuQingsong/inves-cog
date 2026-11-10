@@ -40,6 +40,11 @@ def payload(connection, _day, clock):
                 available=True,
                 fresh=fresh,
                 gaps=gaps,
+                health=(
+                    connection.execute("SELECT * FROM ops.collection_health ORDER BY task_name").fetchall()
+                    if connection.execute("SELECT to_regclass('ops.collection_health') AS name").fetchone()["name"]
+                    else []
+                ),
                 mail_status=runtime["mail_status"],
                 detect_only=runtime["detect_only"],
                 checked_at=stamp,
@@ -134,9 +139,33 @@ def render_status(data):
         "<th>处理状态</th></tr></thead><tbody>"
         + "".join(rows)
         + "</tbody></table></div>"
+        + _health_table(data.get("health") or [])
         + revision_notice(data.get("revisions", []))
         + '<p class="muted">补数后会重新核查。可疑价格不会自动修正。页面仅展示数据状态，不改变交易规则。</p>'
         '<p><a href="/trust">查看可靠性说明</a> · <a href="/">返回市场</a></p></main></body></html>'
+    )
+
+
+def _health_table(rows):
+    if not rows:
+        return ""
+    body = "".join(
+        "<tr><td>{name}</td><td>{ok}</td><td>{run}</td><td>{st}</td><td>{fs}/{ds}</td><td>{state}{note}</td></tr>".format(
+            name=escape(r["display_name"] or r["task_name"]),
+            ok=escape(str(r["last_ok_at"] or "—")),
+            run=escape(str(r["last_run_at"] or "—")),
+            st=escape(str(r["last_status"] or "—")),
+            fs=r["fail_streak"],
+            ds=r["degraded_streak"],
+            state=escape(r["state"]),
+            note=escape(f"（{r['note']}）" if r.get("note") else ""),
+        )
+        for r in rows
+    )
+    return (
+        '<h2 style="margin-top:24px">采集任务健康</h2><div class="table-wrap"><table>'
+        "<thead><tr><th>任务</th><th>最近成功</th><th>最近运行</th><th>状态</th>"
+        "<th>连败/降级</th><th>当前</th></tr></thead><tbody>" + body + "</tbody></table></div>"
     )
 
 

@@ -9,6 +9,9 @@ from inves_cog.ingest.market import NY, bar_session, exchange, trading_day
 from inves_cog.ingest.providers import stamp
 
 FEED = "delayed_sip"
+# Missing-ticker tolerance: <=1% of requested symbols is a per-ticker gap
+# (data guard streaks them individually), not a source outage.
+MISSING_TOLERANCE = 0.01
 # Verified with the existing key and official snapshots contract on 2026-10-26.
 MIN_DELAY_MINUTES = 15
 SOURCE = "Alpaca:" + FEED
@@ -37,9 +40,8 @@ YAHOO_TICKERS = (
     "NQ=F",
     "RTY=F",
     "YM=F",
-    "^FVX",
-    "^TNX",
-    "^TYX",
+    # ^FVX/^TNX/^TYX removed 2026-11-10: Yahoo feed never returns them (every
+    # run ValueError). 10Y intraday falls back to FRED DGS10 previous day.
     "CL=F",
     "BZ=F",
     "GC=F",
@@ -202,15 +204,20 @@ def collect_intraday(pipeline, *, http=None):
         for row in rows:
             repo.write("intraday_snapshots", row)
             written += 1
-        missing = len(tickers) - len(rows)
+        missing_names = sorted(set(tickers) - {r["ticker"] for r in rows})
+        missing = len(missing_names)
         no_previous = sum(row["prev_close"] is None for row in rows)
         latest = max((row["as_of"] for row in rows), default=None)
+        # <=1% of requested tickers missing is a per-ticker gap, not a source
+        # outage; named in the note so the data guard can streak them.
+        degraded = missing / max(len(tickers), 1) > MISSING_TOLERANCE
         return dict(
             processed_count=len(rows),
-            status="degraded" if missing or no_previous else "ok",
+            status="degraded" if degraded else "ok",
             source_success=bool(rows),
             latest_data_at=latest.isoformat() if latest else None,
             note=f"feed={FEED}; contractual_delay_minutes=15; missing_current_trade={missing}; "
+            f"missing_tickers={','.join(missing_names[:10]) or 'none'}; "
             f"missing_previous_close={no_previous}; latest_data_at={latest.isoformat() if latest else 'none'}",
         )
     except Exception as exc:
@@ -333,6 +340,7 @@ def collect_wide(pipeline, *, http=None):
             raise SourceError("Alpaca not configured")
         tickers = sorted({r["ticker"] for r in pipeline.repo.latest_wide() if r["included"]})
         headers = pipeline.alpaca.headers
+        missing_names = []
         for offset in range(0, len(tickers), 200):
             batch = tickers[offset : offset + 200]
             raw = http.get(
@@ -342,6 +350,7 @@ def collect_wide(pipeline, *, http=None):
             )
             previous = cached_previous(pipeline, http, headers, batch, local.date())
             rows = parse_snapshots(raw, previous, batch, pipeline.clock)
+            missing_names += sorted(set(batch) - {r["ticker"] for r in rows})
             missing += len(batch) - len(rows) + sum(r["prev_close"] is None for r in rows)
             for row in rows:
                 pipeline.repo.write(
@@ -352,9 +361,10 @@ def collect_wide(pipeline, *, http=None):
         return dict(
             processed_count=written,
             source_success=bool(written) and not missing,
-            status="degraded" if missing or not tickers else "ok",
+            status="degraded" if missing / max(len(tickers), 1) > MISSING_TOLERANCE or not tickers else "ok",
             latest_data_at=latest.isoformat() if latest else None,
-            note=f"feed={FEED}; requested={len(tickers)}; missing_trade_or_previous={missing}",
+            note=f"feed={FEED}; requested={len(tickers)}; missing_trade_or_previous={missing}; "
+            f"missing_tickers={','.join(missing_names[:10]) or 'none'}",
         )
     except Exception as exc:
         return dict(
@@ -425,16 +435,18 @@ def collect_iex_intraday(pipeline, *, http=None):
             repo.write("intraday_snapshots", row)
             written += 1
         latest = max((r["as_of"] for r in rows), default=None)
-        missing = len(tickers) - len(rows)
+        missing_names = sorted(set(tickers) - {r["ticker"] for r in rows})
+        missing = len(missing_names)
         no_previous = sum(r["prev_close"] is None for r in rows)
         age = max(((now - r["as_of"]).total_seconds() for r in rows), default=None)
         return dict(
             processed_count=written,
             source_success=bool(rows),
-            status="degraded" if missing or no_previous else "ok",
+            status="degraded" if missing / max(len(tickers), 1) > MISSING_TOLERANCE else "ok",
             latest_data_at=latest.isoformat() if latest else None,
             note=f"feed=iex; feed_delay_minutes=0; IEX_equities_ET=08:00-17:00; "
-            f"missing_last_trade={missing}; missing_previous_close={no_previous}; "
+            f"missing_last_trade={missing}; missing_tickers={','.join(missing_names[:10]) or 'none'}; "
+            f"missing_previous_close={no_previous}; "
             f"max_trade_age_seconds={age}; original_trade_time_preserved=true",
         )
     except Exception as exc:
