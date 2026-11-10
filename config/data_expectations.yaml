@@ -364,6 +364,24 @@ datasets:
   - cboe_idx_skew
   - cboe_idx_vix9d
   - cboe_idx_vvix
+- dataset: app 排名快照
+  table: ingest.app_rank_snapshots
+  date_column: ts_utc
+  cadence: weekly
+  deadline_et: 09:00
+  grace_min: 60
+  min_rows: 1
+  basis: scheduler 任务 app_free/app_grossing（due_tasks interval=60，2026-11-10 起恢复入调度）
+  impact: app 排名变动感知
+- dataset: 站点快照
+  table: ingest.website_snapshots
+  date_column: captured_at
+  cadence: weekly
+  deadline_et: 09:00
+  grace_min: 60
+  min_rows: 1
+  basis: scheduler 任务 websites（due_tasks after=1245 每日一轮，2026-11-10 起恢复入调度）；403 如实记 failed
+  impact: 跟踪主体站点变更感知
 - dataset: 基金份额
   table: flows.etf_daily
   date_column: date
