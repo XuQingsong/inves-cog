@@ -1,4 +1,3 @@
-
 import pytest
 
 from inves_cog.dataguard.coverage import (
