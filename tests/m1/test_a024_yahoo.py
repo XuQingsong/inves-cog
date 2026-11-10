@@ -131,7 +131,7 @@ def test_partial_yahoo_failure_continues_other_symbols_and_degrades_own_health()
         from urllib.parse import unquote
 
         symbol = unquote(url.rsplit("/", 1)[1])
-        if symbol == "^TNX":
+        if symbol == "CL=F":
             raise ConnectionError("private details must not leak")
         return sample(symbol)
 
@@ -139,8 +139,8 @@ def test_partial_yahoo_failure_continues_other_symbols_and_degrades_own_health()
     health = HealthBook(clock=CLOCK, persist=repo.write_health)
     runner = JobRunner(clock=CLOCK, health=health, persist=repo.write_job)
     result = runner.run("yahoo_intraday", "YahooIntraday", lambda: collect_yahoo_intraday(p, http=http))
-    assert result["processed_count"] == 12 and result["status"] == "degraded"
-    assert http.get.call_count == 13 and repo.write.call_count == 12
+    assert result["processed_count"] == 9 and result["status"] == "degraded"
+    assert http.get.call_count == 10 and repo.write.call_count == 9
     assert "private details" not in str(result)
     assert health.rows["YahooIntraday"]["status"] == "degraded"
     assert all(c.args[1]["source"] == "Yahoo" for c in repo.write.call_args_list)
@@ -168,7 +168,7 @@ def test_alpaca_failure_does_not_prevent_yahoo_in_same_runtime():
     )
     result = runtime.run(["intraday_snapshots", "yahoo_intraday"])
     assert result["intraday_snapshots"]["source_success"] is False
-    assert result["yahoo_intraday"]["processed_count"] == 13
+    assert result["yahoo_intraday"]["processed_count"] == 10
     assert health.rows["YahooIntraday"]["status"] == "ok"
     assert health.rows["AlpacaIntraday"]["status"] != "ok"
 
@@ -219,7 +219,7 @@ def test_yahoo_all_requests_fail_once_each_and_health_marks_failure(monkeypatch)
     runner = JobRunner(clock=CLOCK, health=health, persist=repo.write_job)
     result = runner.run("yahoo_intraday", "YahooIntraday", lambda: collect_yahoo_intraday(p))
     assert result["processed_count"] == 0 and result["source_success"] is False
-    assert send.call_count == 13 and made == [{"timeout": 10, "retries": 0}]
+    assert send.call_count == 10 and made == [{"timeout": 10, "retries": 0}]
     assert health.rows["YahooIntraday"]["consecutive_failures"] == 1
     assert health.rows["YahooIntraday"]["status"] == "degraded"
     repo.write.assert_not_called()
