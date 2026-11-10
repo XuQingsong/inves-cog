@@ -382,6 +382,26 @@ datasets:
   min_rows: 1
   basis: scheduler 任务 websites（due_tasks after=1245 每日一轮，2026-11-10 起恢复入调度）；403 如实记 failed
   impact: 跟踪主体站点变更感知
+- dataset: EIA 新闻任务
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '20:45'
+  grace_min: 60
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: ended_at
+  filter:
+    task_name: &eia_ids
+    - eia_press
+    - eia_energy
+  expected_keys: *eia_ids
+  basis: runtime.py:75 eia_press/eia_energy after=1245 每日一轮，2026-11-10 起恢复入调度
+  impact: EIA 新闻与能源日报感知缺失
+  backfill:
+    entry: manual
+    max_attempts: 3
 - dataset: 基金份额
   table: flows.etf_daily
   date_column: date

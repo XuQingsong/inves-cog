@@ -54,6 +54,8 @@ serverurl=unix://{state}/supervisor.sock
             "app_grossing",
             "trends",
             "websites",
+            "eia_press",
+            "eia_energy",
         ],
         "iex_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "iex_intraday"],
         "stock_snapshots": ["-m", "inves_cog.ingest.cli", "schedule", "--tasks", "intraday_snapshots"],
