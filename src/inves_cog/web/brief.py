@@ -1295,15 +1295,20 @@ def _reports(connection, ids):
 
 
 def _labels(connection, day, cutoff, since=None):
+    if since is None:
+        import datetime as _dt
+
+        d = day if isinstance(day, _dt.date) else _dt.date.fromisoformat(str(day)[:10])
+        since = d - _dt.timedelta(days=30)
     return _rows(
         connection,
         """
         SELECT case_id, horizon, as_of, reason, labels
         FROM perception.case_labels
-        WHERE as_of <= %s AND as_of > %s - interval '30 days' AND written_at < %s
+        WHERE as_of >= %s AND as_of <= %s AND written_at < %s
         ORDER BY case_id, horizon
         """,
-        (day, day, cutoff),
+        (since, day, cutoff),
     )
 
 
