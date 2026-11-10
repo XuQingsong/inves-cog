@@ -270,7 +270,6 @@ def test_other_cause_fields_validated():
 @pytest.mark.phase1_blocking
 def test_cause_type_comes_from_candidate_not_prelim():
     """类型 must be the candidate's own mechanism, not the anomaly prelim."""
-    from inves_cog.perception.review import cases as C
 
     conn = MagicMock()
     cand = {
@@ -283,7 +282,6 @@ def test_cause_type_comes_from_candidate_not_prelim():
     cited = [{"info_id": "news:x:1", "published_at": "t1", "headline": "标题A"}]
     calls = iter([MagicMock(fetchone=lambda: cand), MagicMock(fetchall=lambda: cited)])
     conn.execute.side_effect = lambda *a: next(calls)
-    case = {"anomaly_id": "x", "member_tickers": ["NVDA"], "type_candidates_prelim": ["踩踏"]}
     # emulate the _write_label enrichment block
     fetched = conn.execute("", ()).fetchone()
     chain = fetched["chain"] if isinstance(fetched["chain"], str) else ""
