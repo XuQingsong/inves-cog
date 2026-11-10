@@ -3102,6 +3102,20 @@ def _key_stats(payload):
         ),
         ("本季一致预期 EPS", f"{float(eps_cq):.2f}" if eps_cq is not None else "暂缺"),
     ]
+    rev = an.get("revision") or {}
+    rev_bits = []
+    for key, label in (("d7", "7 日"), ("d30", "30 日")):
+        v = rev.get(key)
+        if isinstance(v, dict):
+            rev_bits.append(f"{label}内上修 {v['up']} / 下修 {v['down']}（{v.get('since', '')} 起）")
+        elif v:
+            rev_bits.append(f"{label} {v}")
+    note_parts = [f"一致预期截至 {an['data_as_of']}" if an.get("data_as_of") else "一致预期暂缺"]
+    if an.get("source_note"):
+        note_parts.append(an["source_note"])
+    if rev_bits:
+        note_parts.append("；".join(rev_bits) + "（由本系统快照对比得出）")
+    cells.append(("一致预期来源", " · ".join(note_parts)))
     return (
         '<div class="card sec"><div class="kv" style="grid-template-columns:repeat(4,1fr)">'
         + "".join(f'<span class="k">{k}</span><span>{v}</span>' for k, v in cells)

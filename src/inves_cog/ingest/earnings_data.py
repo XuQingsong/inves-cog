@@ -1,12 +1,9 @@
 """A028 daily fundamentals snapshots, independent of the A020 estimate quota."""
 
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-
-import yaml
 
 from inves_cog.ingest.earnings_news import core_tickers
-from inves_cog.ingest.fundamentals.providers import YFinance, fiscal_years
+from inves_cog.ingest.fundamentals.providers import fiscal_years
 from inves_cog.ingest.fundamentals.repository import Repository as Fundamentals
 from inves_cog.ingest.jobs import HealthBook, JobRunner
 from inves_cog.ingest.market import NY, trading_day
@@ -26,7 +23,8 @@ class Repository(Fundamentals):
     def snapshot_today(self, ticker, now):
         return (
             self.connection.execute(
-                "SELECT 1 FROM fundamentals.consensus_snapshot WHERE ticker=%s AND captured_at>=%s LIMIT 1",
+                "SELECT 1 FROM fundamentals.consensus_snapshot WHERE ticker=%s AND captured_at>=%s "
+                "AND source<>'muse_import' LIMIT 1",
                 (ticker, now.astimezone(NY).replace(hour=0, minute=0, second=0, microsecond=0)),
             ).fetchone()
             is not None
@@ -43,6 +41,7 @@ class Repository(Fundamentals):
     def latest_snapshot(self, ticker, cutoff):
         row = self.connection.execute(
             "SELECT * FROM fundamentals.consensus_snapshot WHERE ticker=%s AND captured_at<=%s "
+            "AND source<>'muse_import' "
             "ORDER BY captured_at DESC,source LIMIT 1",
             (ticker, cutoff),
         ).fetchone()
@@ -133,19 +132,8 @@ def scheduled(*, clock, values, connect=None):
             "ok"
         ]:
             return {"status": "already_running"}
-        ops, repo = Operations(db), Repository(db)
+        ops = Operations(db)
         last = ops.last_runs(trade_date=now.date())
-        root = Path(__file__).resolve().parents[3]
-        universe = [r["ticker"] for r in yaml.safe_load((root / "config/universe.yaml").read_text())["stocks"]]
-        # Position symbols only; no account values leave the database adapter.
-        holdings = [
-            r["ticker"]
-            for r in db.execute(
-                "SELECT DISTINCT jsonb_object_keys(coalesce(state->'positions','{}'::jsonb)) AS ticker "
-                "FROM (SELECT DISTINCT ON (portfolio_id) state FROM trading.ledger "
-                "ORDER BY portfolio_id,observed_at DESC) x"
-            ).fetchall()
-        ]
         runner = JobRunner(
             clock=clock,
             health=HealthBook(clock=clock, rows=ops.health_rows(), persist=ops.write_health),
@@ -159,13 +147,17 @@ def scheduled(*, clock, values, connect=None):
                 "earnings_implied_moves", "AlpacaIndicative", lambda: collect_moves(clock=clock, db=db, values=values)
             )
         if now.hour >= 6 and not (15, 10) <= (now.hour, now.minute) < (15, 59) and "earnings_consensus" not in last:
-            tickers = target_tickers(universe, holdings, core_tickers())
+            # 2026-11-10: Yahoo quoteSummary now requires a crumb (401). Collection
+            # stays disabled per user decision; the job records "disabled" so the
+            # data guard sees an intentional stop, not a failure to retry.
             out["consensus"] = runner.run(
                 "earnings_consensus",
                 "EarningsConsensus",
-                lambda: collect_consensus(
-                    clock=clock, repository=repo, tickers=tickers, provider=YFinance(clock=clock)
-                ),
+                lambda: {
+                    "status": "ok",
+                    "processed_count": 0,
+                    "note": "已停用：来源要求 crumb，2026-11-10；一致预期改用 Alpha Vantage",
+                },
             )
         return out or {"status": "not_due"}
 

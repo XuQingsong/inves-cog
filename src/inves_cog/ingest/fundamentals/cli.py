@@ -119,6 +119,7 @@ def main():
     parser.add_argument("action", choices=["run", "schedule", "health", "import-muse", "mappings", "confirm"])
     parser.add_argument("--tasks", nargs="+", choices=["financials", "interims", "mappings", "consensus", "fx"])
     parser.add_argument("--folder", type=Path)
+    parser.add_argument("--allow-muse", action="store_true")
     parser.add_argument("--sector")
     parser.add_argument("--ids", nargs="+")
     parser.add_argument("--reviewer")
@@ -142,6 +143,9 @@ def main():
         if args.action == "health":
             output = repository.health_rows()
         elif args.action == "import-muse":
+            # 用户 2026-11-10 决定停用作输入：默认拒绝执行，须显式 --allow-muse
+            if not getattr(args, "allow_muse", False):
+                parser.error("import-muse 已停用（2026-11-10 用户决定）；如确需执行请加 --allow-muse")
             if args.folder is None:
                 parser.error("--folder is required; files stay outside the repository")
             store = ConsensusStore()

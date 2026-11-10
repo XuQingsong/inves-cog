@@ -186,7 +186,9 @@ class Repository:
     def snapshot_rows(self, ticker):
         return list(
             self.connection.execute(
-                "SELECT * FROM fundamentals.consensus_snapshot WHERE ticker=%s ORDER BY as_of", (ticker,)
+                "SELECT * FROM fundamentals.consensus_snapshot"
+                " WHERE ticker=%s AND source<>'muse_import' ORDER BY as_of",
+                (ticker,),
             ).fetchall()
         )
 

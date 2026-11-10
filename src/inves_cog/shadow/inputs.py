@@ -87,6 +87,7 @@ class ReadInputs:
         ).fetchall()
         consensus = db.execute(
             "SELECT * FROM fundamentals.consensus_snapshot WHERE ticker=ANY(%s) AND as_of<=%s "
+            "AND source<>'muse_import' "
             "AND captured_at IS NOT NULL AND captured_at<=%s ORDER BY ticker,as_of,captured_at",
             (tickers, signal_day, cutoff),
         ).fetchall()
