@@ -8,6 +8,22 @@ from inves_cog.valuation_v1.calculations import settings
 from inves_cog.valuation_v1.eps_units import normalize_eps, unmapped_observations
 
 
+def _structural_break(ticker):
+    """structural break date for ticker from config/data/structural_breaks.yaml."""
+    try:
+        from pathlib import Path
+
+        import yaml
+
+        data = yaml.safe_load(open(Path(__file__).resolve().parents[3] / "config/data/structural_breaks.yaml"))
+        for b in (data or {}).get("breaks", []):
+            if b.get("ticker") == ticker:
+                return date.fromisoformat(str(b["date"]))
+    except Exception:
+        pass
+    return None
+
+
 def day(value):
     return value if isinstance(value, date) and not isinstance(value, datetime) else date.fromisoformat(str(value)[:10])
 
@@ -70,6 +86,22 @@ def diluted_shares(value, source):
         or any("WeightedAverageNumberOfDilutedSharesOutstanding" in tag for tag in tags)
         else None
     )
+
+
+def _structural_break(ticker):
+    """Structural break date for ticker from config/data/structural_breaks.yaml."""
+    try:
+        from pathlib import Path
+
+        import yaml
+
+        data = yaml.safe_load(open(Path(__file__).resolve().parents[3] / "config/data/structural_breaks.yaml"))
+        for b in (data or {}).get("breaks", []):
+            if b.get("ticker") == ticker:
+                return date.fromisoformat(str(b["date"]))
+    except Exception:
+        pass
+    return None
 
 
 def annual_basis(row, entity):
@@ -220,20 +252,77 @@ def financial_inputs(state, states, entity, *, as_of=None):
         else settings()["inputs"]["subindustry_by_ticker"].get(state.ticker)
     )
     out["subindustry"] = industry
-    if len(margins) >= settings()["cyclical"]["minimum_years"]:
+    brk = _structural_break(state.ticker)
+    if brk:
+        # keep only fiscal years fully after the break (period start > break)
+        post = [r for r in years if r.period_end and (r.period_end - timedelta(days=365)) > brk]
+        # complete post-break quarters = post-break fiscal years * 4 plus
+        # quarters not yet inside a post-break fiscal year
+        quarters_post = len(post) * 4 + sum(
+            1
+            for s2 in states
+            if s2.period_end
+            and str(s2.form).removesuffix("/A") not in {"10-K", "20-F", "40-F"}
+            and (s2.period_end - timedelta(days=91)) > brk
+            and all(p.period_end is None or s2.period_end > p.period_end for p in post)
+        )
+        if quarters_post < 8:
+            out["normal_net_margin"] = None
+            out["normal_revenue"] = None
+            out["normalization_note"] = f"周期正常化历史不足（断点 {brk} 后仅 {quarters_post} 季）"
+            out["normal_margin_reason"] = out["normalization_note"]
+        else:
+            margins = [
+                r.values["ni_ttm"] / r.values["rev_ttm"]
+                for r in post
+                if r.values.get("ni_ttm") is not None
+                and r.values.get("rev_ttm") is not None
+                and r.values["rev_ttm"] > 0
+            ]
+            out["normal_net_margin"] = median(margins) if margins else None
+            post_rev = [r.values.get("rev_ttm") for r in post]
+            out["normal_revenue"] = (
+                sum(post_rev[-3:]) / 3 if post_rev and all(v is not None for v in post_rev[-3:]) else None
+            )
+    elif len(margins) >= settings()["cyclical"]["minimum_years"]:
         out["normal_net_margin"] = median(margins)
     else:
         out["normal_net_margin"] = settings()["cyclical"]["fallback_net_margin"].get(industry)
         out["insufficient_annual_history"] = True
         out["normal_margin_reason"] = f"仅{len(margins)}个可核实年度净利率，少于7年；无已确认板块净利率参数"
-    revenues = [r.values.get("rev_ttm") for r in years]
-    out["normal_revenue"] = (
-        sum(revenues[-3:]) / 3 if len(revenues) >= 3 and all(v is not None for v in revenues[-3:]) else None
-    )
+    if not brk:
+        revenues = [r.values.get("rev_ttm") for r in years]
+        out["normal_revenue"] = (
+            sum(revenues[-3:]) / 3 if len(revenues) >= 3 and all(v is not None for v in revenues[-3:]) else None
+        )
     out["rev_cagr_10y_pct"] = None
     if len(years) >= 10 and all(v is not None and v > 0 for v in (revenues[0], revenues[-1])):
         span = (years[-1].period_end - years[0].period_end).days / 365.2425
         out["rev_cagr_10y_pct"] = ((revenues[-1] / revenues[0]) ** (1 / span) - 1) * 100
+    # one-off flag: a quarter whose implied NI jumps >3x the 8-delta median,
+    # or a loss quarter amid profits. Numbers untouched.
+    q_states = sorted(
+        [s2 for s2 in states if s2.values.get("ni_ttm") is not None and s2.period_end],
+        key=lambda s2: s2.period_end,
+    )
+    deltas = [
+        (q_states[i].period_end, q_states[i].values["ni_ttm"] - q_states[i - 1].values["ni_ttm"])
+        for i in range(1, len(q_states))
+    ]
+    if len(deltas) >= 5:
+        recent = [abs(v) for _, v in deltas[-8:]]
+        med = median(recent) if recent else 0
+        # flag the most recent quarter whose TTM jump exceeds 3x the median delta,
+        # or a loss quarter amid profits
+        for i in range(len(deltas) - 1, max(-1, len(deltas) - 5), -1):
+            end_i, dv = deltas[i]
+            if med and dv > 3 * med:
+                out["oneoff_note"] = f"疑似一次性项目（{end_i}）"
+                break
+            prev = [v for _, v in deltas[max(0, i - 3) : i]]
+            if dv < 0 and len(prev) == 3 and all(v > 0 for v in prev) and abs(dv) > med:
+                out["oneoff_note"] = f"疑似一次性项目（{end_i}）"
+                break
     revenue = values.get("rev_ttm")
     ni = values.get("ni_ttm")
     out["ttm_net_margin"] = ni / revenue if ni is not None and revenue is not None and revenue > 0 else None

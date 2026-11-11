@@ -1,0 +1,8 @@
+# 结构断点：正常化窗口只用断点之后的期间
+# 每条: ticker, date(断点生效日), event, source(SEC accession 或公告链接)
+breaks:
+  - ticker: WDC
+    date: '2025-02-21'
+    event: SanDisk 分拆完成（8-K item 2.01）
+    source: '0001193125-25-033383'
+# STX：核查 sec_filings 无 Form 10/S-4/8-K item 2.01 记录——无已确认断点，不填

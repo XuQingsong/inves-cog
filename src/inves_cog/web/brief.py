@@ -239,6 +239,7 @@ def valuation_card(range_row, pe, price):
         "eps_growth": _number(inputs.get("eps_growth")),
         "implied_reason": None,
         "text": None,
+        "notes": [n for n in (inputs.get("normalization_note"), inputs.get("oneoff_note")) if n],
     }
     card["sanity"] = payload.get("sanity")
     card["sanity_reason"] = payload.get("sanity_reason")
@@ -677,6 +678,9 @@ def _short_reason(text):
     if not body:
         return "原因待补充"
     folded = body.lower()
+    if "周期正常化历史不足" in body:
+        note = body[body.index("周期正常化历史不足") :]
+        return note.split(";")[0].split("；")[0].strip()
     if "周期" in body and ("pe" in folded or "参数" in body):
         return "周期股行业参数缺失"
     if "亏损" in body and "增长" in body:
