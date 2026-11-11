@@ -790,8 +790,18 @@ def _shadow_sold_note(row):
     return f"，已于 {_text(row['sold_on'])} 卖出" if row.get("sold_on") else ""
 
 
+def _shares_text(value):
+    try:
+        number = round(float(value), 2)
+    except (TypeError, ValueError):
+        return MISSING
+    return f"{number:g}"
+
+
 def _shadow_blocked_result(row):
     """Group A: positive delta_usd means the shadow's veto would have saved money."""
+    if row.get("status") != "filled":
+        return f"{_text(row.get('status_label') or '未成交')}，不计差额"
     usd, pct = row.get("delta_usd"), row.get("delta_pct")
     if usd is None or pct is None:
         return "差额无法计算"
@@ -802,6 +812,8 @@ def _shadow_blocked_result(row):
 
 def _shadow_trim_result(row):
     """Group B: positive delta_usd means trimming per the shadow would have been better."""
+    if row.get("open_price") is None:
+        return "次日开盘价未到，暂不模拟"
     usd, pct = row.get("delta_usd"), row.get("delta_pct")
     if usd is None or pct is None:
         return "差额无法计算"
@@ -848,10 +860,15 @@ def _shadow_section(payload):
     if trims:
         rows = "".join(
             f"<tr><td>{_text(row['date'])}</td><td>{_text(row['ticker'])}</td>"
-            f"<td>持仓 {_text(row.get('shares'))} 股</td>"
-            f"<td>{_text(row.get('gate_reason'))}，按 {_text(row.get('open_date'))} 开盘价 "
-            f"{_text(money(row.get('open_price')))} 减持 {_text(round(row.get('trim_shares') or 0, 2))} 股</td>"
-            f"<td>{_text(money(row.get('open_price')))} → {_text(money(row.get('end_price')))}</td>"
+            f"<td>持仓 {_text(_shares_text(row.get('shares')))} 股</td>"
+            f"<td>{_text(row.get('gate_reason'))}，"
+            + (
+                f"按 {_text(row.get('open_date'))} 开盘价 {_text(money(row.get('open_price')))} "
+                f"减持 {_text(_shares_text(row.get('trim_shares')))} 股"
+                if row.get("open_price") is not None
+                else "次日开盘价未到"
+            )
+            + f"</td><td>{_text(money(row.get('open_price')))} → {_text(money(row.get('end_price')))}</td>"
             f"<td>{_text(_shadow_trim_result(row))}</td></tr>"
             for row in trims
         )

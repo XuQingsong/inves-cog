@@ -52,15 +52,22 @@ def divergence_counts(connection, day, cutoff):
     row = connection.execute(
         """
         SELECT count(*) FILTER (
+                   WHERE would_pass IS NOT NULL AND rule_a_entry_pass IS NOT NULL) AS evaluated,
+               count(*) FILTER (
                    WHERE would_pass IS NOT NULL AND rule_a_entry_pass IS NOT NULL
                      AND would_pass <> rule_a_entry_pass) AS divergent,
-               count(*) FILTER (WHERE would_pass IS NULL) AS unevaluable
+               count(*) FILTER (
+                   WHERE would_pass IS NULL OR rule_a_entry_pass IS NULL) AS unevaluable
         FROM factor_shadow.daily
         WHERE date = %s AND generated_at < %s
         """,
         (day, cutoff),
     ).fetchone()
-    return {"divergent": row["divergent"], "unevaluable": row["unevaluable"]}
+    return {
+        "evaluated": row["evaluated"],
+        "divergent": row["divergent"],
+        "unevaluable": row["unevaluable"],
+    }
 
 
 def _default_cutoff(as_of):
@@ -68,16 +75,17 @@ def _default_cutoff(as_of):
     return datetime.combine(as_of + timedelta(days=1), time(1, 0), tzinfo=_NY)
 
 
-def _gate_reason(row):
+def _gate_reason(row, *, only=None):
+    """Chinese gate sentences from config; `only` restricts to named gates."""
     c = settings()["shadow"]
-    labels = LABELS["gates"]
+    texts = LABELS["gate_reasons"]
     parts = []
-    if row["vt1"]:
-        parts.append(f"{labels['vt1']}：估值比 ≥ {c['vt1_p']}，影子会禁止买入")
-    if row["vt2"]:
-        parts.append(f"{labels['vt2']}：估值比 ≥ {c['vt2_p']}")
-    if row["v3_trim_flag"]:
-        parts.append(f"{labels['v3_trim']}：估值比 ≥ {c['v3_p']}")
+    if row["vt1"] and only in (None, "vt1"):
+        parts.append(texts["vt1"].format(p=c["vt1_p"]))
+    if row["vt2"] and only in (None, "vt2"):
+        parts.append(texts["vt2"].format(p=c["vt2_p"]))
+    if row["v3_trim_flag"] and only in (None, "v3_trim"):
+        parts.append(texts["v3_trim"].format(p=c["v3_p"]))
     return "；".join(parts)
 
 
@@ -195,6 +203,7 @@ def _blocked_buys(inputs):
                 "action_label": order.get("label") or order.get("action"),
                 "rule_reason": order.get("reason_zh"),
                 "status": order.get("status"),
+                "status_label": LABELS["order_status"].get(order.get("status"), order.get("status")),
                 "gate_reason": _gate_reason(shadow),
                 "sold_on": None,
                 "end_price": None,
@@ -239,7 +248,7 @@ def _missed_trims(inputs):
                 "ticker": shadow["ticker"],
                 "shares": shares,
                 "trim_shares": trim_shares,
-                "gate_reason": _gate_reason(shadow),
+                "gate_reason": _gate_reason(shadow, only="v3_trim"),
                 "open_date": next_day,
                 "open_price": open_price,
                 "end_price": end,

@@ -48,6 +48,11 @@ class Conn:
                 for row in self.tables.get("factors", [])
                 if str(row["date"]) == str(day) and row["generated_at"] < cutoff
             ]
+            evaluated = sum(
+                1
+                for row in rows
+                if row["would_pass"] is not None and row["rule_a_entry_pass"] is not None
+            )
             divergent = sum(
                 1
                 for row in rows
@@ -55,8 +60,14 @@ class Conn:
                 and row["rule_a_entry_pass"] is not None
                 and row["would_pass"] != row["rule_a_entry_pass"]
             )
-            unevaluable = sum(1 for row in rows if row["would_pass"] is None)
-            return _Rows([{"divergent": divergent, "unevaluable": unevaluable}])
+            unevaluable = sum(
+                1
+                for row in rows
+                if row["would_pass"] is None or row["rule_a_entry_pass"] is None
+            )
+            return _Rows(
+                [{"evaluated": evaluated, "divergent": divergent, "unevaluable": unevaluable}]
+            )
         if "DISTINCT trade_date FROM valuation_v1.shadow_rules" in text:
             as_of, limit = params
             days = sorted(
@@ -165,7 +176,7 @@ def test_divergence_count_excludes_null_and_reports_unevaluable():
         ]
     )
     counts = divergence_counts(conn, D1, CUTOFF)
-    assert counts == {"divergent": 1, "unevaluable": 1}
+    assert counts == {"evaluated": 2, "divergent": 1, "unevaluable": 1}
     sql = conn.queries[0][0]
     assert "would_pass IS NOT NULL" in sql and "rule_a_entry_pass IS NOT NULL" in sql
     assert "IS DISTINCT FROM" not in sql

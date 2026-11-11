@@ -1,10 +1,14 @@
 # Display labels for the shadow-vs-Rule-A comparison section on /account.
 # Internal identifiers (V-T1, F-01, M-xx, X1-X4) must never reach the page;
 # the renderer maps them through this table.
+gate_reasons:
+  vt1: "估值透支：估值比 ≥ {p}，影子会禁止买入"
+  vt2: "估值过高：估值比 ≥ {p}，影子会限制买入仓位"
+  v3_trim: "估值版本首次触发减持：估值比 ≥ {p}，影子建议减持三分之一"
 gates:
-  vt1: 估值否决
-  vt2: 买入上限减半
-  v3_trim: 单版本减持三分之一
+  vt1: 估值透支禁止买入
+  vt2: 估值过高限制仓位
+  v3_trim: 估值版本首次触发减持
 factors:
   F-01: 成长调整估值
   F-02: 拐点质量
@@ -33,3 +37,5 @@ order_status:
   filled: 已成交
   pending: 待成交
   expired: 未成交（已失效）
+  canceled: 未成交（已取消）
+  blocked: 未成交（已拦截）
