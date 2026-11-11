@@ -490,18 +490,34 @@ def test_oneoff_single_quarter_thresholds():
     ]
     assert financial_inputs(steady[-1], steady, entity).get("oneoff_note") is None
 
-    # 单季尖峰：末季差分 680 > 3×中位 20 且 > 40%×900 → 标末季
+    dates9 = dates + [dates[-1] + timedelta(days=91)]
+
+    # 单季尖峰且后季回落不足 50%：660 > 3×中位 20 且 > 40%×前TTM 220，下一季 80 < 330 → 标尖峰季
     spike = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates9, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 880e6, 960e6], strict=True)
+    ]
+    out = financial_inputs(spike[-1], spike, entity)
+    assert out.get("oneoff_note") == f"疑似一次性项目（{dates9[-2]}）"
+
+    # 尖峰在最新一季：没有后续季可确认回落 → 不标
+    latest = [
         mk("GRW", pe, ni)
         for pe, ni in zip(dates, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 900e6], strict=True)
     ]
-    out = financial_inputs(spike[-1], spike, entity)
-    assert out.get("oneoff_note") == f"疑似一次性项目（{dates[-1]}）"
+    assert financial_inputs(latest[-1], latest, entity).get("oneoff_note") is None
+
+    # 尖峰未回落（下一季 620 ≥ 330）→ 不标
+    sustained = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates9, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 880e6, 1500e6], strict=True)
+    ]
+    assert financial_inputs(sustained[-1], sustained, entity).get("oneoff_note") is None
 
     # 尖峰但占 TTM 不足 40% → 不标
     small = [
         mk("GRW", pe, ni)
-        for pe, ni in zip(dates, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 300e6], strict=True)
+        for pe, ni in zip(dates9, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 300e6, 330e6], strict=True)
     ]
     assert financial_inputs(small[-1], small, entity).get("oneoff_note") is None
 
@@ -519,3 +535,47 @@ def test_oneoff_single_quarter_thresholds():
         for pe, ni in zip(dates, [400e6, 430e6, 390e6, 410e6, 430e6, 450e6, 470e6, 490e6], strict=True)
     ]
     assert financial_inputs(mild[-1], mild, entity).get("oneoff_note") is None
+
+
+def test_consensus_av_fy_horizons():
+    """AV 形态的一致预期行（horizon=FY1/FY2 + fiscal_end）能正确装配出 eps_ntm。"""
+    from datetime import date, datetime, timezone
+
+    from inves_cog.valuation_v1.inputs import consensus_inputs
+    from inves_cog.valuation_v1.repository import _apply_consensus_row
+
+    fetched = datetime(2026, 11, 10, tzinfo=timezone.utc)
+    rows = [
+        {
+            "ticker": "NVDA",
+            "fetched_at": fetched,
+            "fiscal_end": date(2027, 1, 31),
+            "horizon": "FY1",
+            "eps_avg": 4.0,
+            "revenue_avg": 200e9,
+        },
+        {
+            "ticker": "NVDA",
+            "fetched_at": fetched,
+            "fiscal_end": date(2028, 1, 31),
+            "horizon": "FY2",
+            "eps_avg": 5.0,
+            "revenue_avg": 250e9,
+        },
+    ]
+    per = []
+    for r in rows:
+        _apply_consensus_row(per, r)
+    assert per[0]["fy_cy"] == date(2027, 1, 31) and per[0]["fy_ny"] == date(2028, 1, 31)
+
+    out = consensus_inputs(per, date(2026, 11, 10))
+    assert out["consensus_as_of"] == "2026-11-10"
+    assert out["consensus_reason"] is None
+    # 距 FY1 截止还剩 2 个月：eps_ntm = 4.0×2/12 + 5.0×10/12 ≈ 4.833
+    assert abs(out["eps_ntm"] - (4.0 * 2 / 12 + 5.0 * 10 / 12)) < 1e-9
+
+    # 只有 FY2 的行不得落入当年槽位
+    per2 = []
+    _apply_consensus_row(per2, rows[1])
+    assert per2[0].get("fy_cy") is None and per2[0]["fy_ny"] == date(2028, 1, 31)
+    assert consensus_inputs(per2, date(2026, 11, 10))["eps_ntm"] is None

@@ -334,9 +334,11 @@ def _oneoff_note(states):
     """Single-quarter one-off flag over the recent quarters: implied quarter
     NI (delta of consecutive TTM states, one row per period_end) exceeds
     oneoff.spike_median_mult x the median |NI| of the preceding quarters and
-    oneoff.spike_ttm_share of the trailing TTM base it lands on; or a loss
-    quarter between profitable quarters exceeding oneoff.loss_ttm_share of
-    that base. Numbers untouched."""
+    oneoff.spike_ttm_share of the trailing TTM base it lands on, AND the next
+    quarter falls back below 50% of the anomaly (the latest quarter, without
+    a successor to confirm reversion, is never flagged); or a loss quarter
+    between profitable quarters exceeding oneoff.loss_ttm_share of that base.
+    Numbers untouched."""
     oneoff = settings().get("oneoff") or {}
     spike_mult = float(oneoff.get("spike_median_mult", 3))
     spike_share = float(oneoff.get("spike_ttm_share", 0.4))
@@ -364,7 +366,15 @@ def _oneoff_note(states):
         base = ttm_prev if ttm_prev and ttm_prev > 0 else ttm_i
         if not base or base <= 0:
             continue
-        if dv > 0 and len(others) >= 3 and med > 0 and dv > spike_mult * med and dv > spike_share * base:
+        if (
+            dv > 0
+            and i < len(deltas) - 1
+            and len(others) >= 3
+            and med > 0
+            and dv > spike_mult * med
+            and dv > spike_share * base
+            and deltas[i + 1][1] < 0.5 * dv
+        ):
             return f"疑似一次性项目（{end_i}）"
         if (
             dv < 0
