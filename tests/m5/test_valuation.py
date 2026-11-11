@@ -505,10 +505,10 @@ def test_oneoff_single_quarter_thresholds():
     ]
     assert financial_inputs(small[-1], small, entity).get("oneoff_note") is None
 
-    # 亏损季被盈利季夹住且 |亏损| > 25% TTM → 标该亏损季
+    # 亏损季被盈利季夹住且 |亏损| > 25% TTM（130 > 0.25×460）→ 标该亏损季
     dip = [
         mk("GRW", pe, ni)
-        for pe, ni in zip(dates, [400e6, 430e6, 330e6, 360e6, 390e6, 410e6, 430e6, 450e6], strict=True)
+        for pe, ni in zip(dates, [400e6, 460e6, 330e6, 360e6, 390e6, 410e6, 430e6, 450e6], strict=True)
     ]
     out = financial_inputs(dip[-1], dip, entity)
     assert out.get("oneoff_note") == f"疑似一次性项目（{dates[2]}）"

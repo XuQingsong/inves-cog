@@ -331,11 +331,12 @@ def financial_inputs(state, states, entity, *, as_of=None):
 
 
 def _oneoff_note(states):
-    """Single-quarter one-off flag: implied quarter NI (delta of consecutive TTM
-    states, one row per period_end) exceeds oneoff.spike_median_mult x the
-    median of the preceding quarters and oneoff.spike_ttm_share of the TTM it
-    lands in; or a loss quarter between profitable quarters exceeding
-    oneoff.loss_ttm_share of TTM NI. Numbers untouched."""
+    """Single-quarter one-off flag over the recent quarters: implied quarter
+    NI (delta of consecutive TTM states, one row per period_end) exceeds
+    oneoff.spike_median_mult x the median |NI| of the preceding quarters and
+    oneoff.spike_ttm_share of the trailing TTM base it lands on; or a loss
+    quarter between profitable quarters exceeding oneoff.loss_ttm_share of
+    that base. Numbers untouched."""
     oneoff = settings().get("oneoff") or {}
     spike_mult = float(oneoff.get("spike_median_mult", 3))
     spike_share = float(oneoff.get("spike_ttm_share", 0.4))
@@ -351,24 +352,26 @@ def _oneoff_note(states):
         (
             q_states[i].period_end,
             q_states[i].values["ni_ttm"] - q_states[i - 1].values["ni_ttm"],
+            q_states[i - 1].values["ni_ttm"],
             q_states[i].values["ni_ttm"],
         )
         for i in range(1, len(q_states))
     ]
-    for i in range(len(deltas) - 1, -1, -1):
-        end_i, dv, ttm_i = deltas[i]
-        others = [v for _, v, _ in deltas[max(0, i - 7) : i]]
+    for i in range(len(deltas) - 1, max(-1, len(deltas) - 8), -1):
+        end_i, dv, ttm_prev, ttm_i = deltas[i]
+        others = [abs(v) for _, v, _, _ in deltas[max(0, i - 7) : i]]
         med = median(others) if others else 0
-        if not ttm_i or ttm_i <= 0:
+        base = ttm_prev if ttm_prev and ttm_prev > 0 else ttm_i
+        if not base or base <= 0:
             continue
-        if dv > 0 and len(others) >= 3 and med > 0 and dv > spike_mult * med and dv > spike_share * ttm_i:
+        if dv > 0 and len(others) >= 3 and med > 0 and dv > spike_mult * med and dv > spike_share * base:
             return f"疑似一次性项目（{end_i}）"
         if (
             dv < 0
             and 0 < i < len(deltas) - 1
             and deltas[i - 1][1] > 0
             and deltas[i + 1][1] > 0
-            and abs(dv) > loss_share * ttm_i
+            and abs(dv) > loss_share * base
         ):
             return f"疑似一次性项目（{end_i}）"
     return None
