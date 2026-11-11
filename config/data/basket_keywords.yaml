@@ -33,12 +33,11 @@ baskets:
     - SaaS
     - cloud software
     - software spending
-    - platform
   l2_05:  # 互联网
     - internet advertising
     - online ads
     - digital advertising
-    - search
+    - search advertising
     - social media
   l2_06:  # 消费硬件与汽车
     - consumer electronics
@@ -67,7 +66,7 @@ baskets:
     - loan growth
   l2_10:  # 能源
     - oil prices
-    - crude
+    - crude oil
     - natural gas
     - energy stocks
     - OPEC
@@ -102,5 +101,5 @@ baskets:
     - cybersecurity
     - security breach
     - ransomware
-    - security spending
+    - cybersecurity spending
     - zero trust

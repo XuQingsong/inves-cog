@@ -5,6 +5,7 @@ and from already-ingested macro/sector news. They are prepended to the retrieved
 shortlist inside ``_retrieved`` so they always survive the 40-item payload cap,
 and they obey the same point-in-time cutoff as every other input."""
 
+import re
 from datetime import date, datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -200,7 +201,7 @@ def _basket_keywords(baskets, registry, keywords):
             parent = by_name.get(sector)
             words = keywords.get(parent) if parent else None
         if words:
-            mapping[basket_id] = [str(word).lower() for word in words]
+            mapping[basket_id] = [re.compile(r"\b" + re.escape(str(word)) + r"s?\b", re.IGNORECASE) for word in words]
     return mapping
 
 
@@ -213,9 +214,9 @@ def _matched_baskets(item, baskets, etf_map, word_map, etfs, macro_sources):
     if tickers & etfs:
         return matched
     if not tickers:
-        text = " ".join(str(item.get(key) or "") for key in ("headline", "summary")).lower()
+        text = " ".join(str(item.get(key) or "") for key in ("headline", "summary"))
         for basket_id, words in word_map.items():
-            if any(word in text for word in words):
+            if any(word.search(text) for word in words):
                 matched.add(basket_id)
         if matched:
             return matched

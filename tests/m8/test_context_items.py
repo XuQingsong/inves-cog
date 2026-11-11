@@ -243,6 +243,43 @@ def test_sector_macro_sources_sort_and_cap():
 
 
 @pytest.mark.phase1_blocking
+def test_keyword_matching_uses_word_boundaries():
+    from inves_cog.perception.attribution.context import sector_macro_items
+
+    registry = dict(_REGISTRY)
+    registry["l2_05"] = {"name": "互联网", "level": "L2", "members": ["AAA"], "factor_basis": {"kind": "market_only"}}
+    registry["l2_02"] = {
+        "name": "CPU 与代工",
+        "level": "L2",
+        "members": ["BBB"],
+        "factor_basis": {"kind": "market_only"},
+    }
+    keywords = {"l2_05": ["search advertising"], "l2_02": ["cpu"]}
+    anomaly = _anomaly(members=[f"T{i}" for i in range(6)], baskets=["l2_05", "l2_02"])
+
+    def item(info_id, headline):
+        return {
+            "info_id": info_id,
+            "kind": "news",
+            "source": "benzinga",
+            "headline": headline,
+            "tickers": [],
+            "published_at": datetime(2026, 10, 30, 12, 0, tzinfo=timezone.utc),
+            "first_seen_at": datetime(2026, 10, 30, 12, 0, tzinfo=timezone.utc),
+        }
+
+    cfg = {"min_members": 5, "min_baskets": 2, "max_items": 10, "etfs": [], "macro_sources": []}
+    pool = [
+        item("research", "New research into ad markets published"),
+        item("real", "Search advertising revenue slips at portals"),
+        item("plural", "New CPUs launch across the lineup"),
+        item("partial", "Occupancy rates climb at data parks"),
+    ]
+    found = sector_macro_items(anomaly, pool, registry=registry, keywords=keywords, cfg=cfg, cutoff=_CUTOFF)
+    assert [row["info_id"] for row in found] == ["real", "plural"]
+
+
+@pytest.mark.phase1_blocking
 def test_sec_8k_items_gain_tickers_from_cik():
     from inves_cog.ingest.pipeline import Pipeline
 
