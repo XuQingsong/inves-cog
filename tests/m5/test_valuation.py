@@ -463,4 +463,4 @@ def test_break_unvalued_e2e_payload_notes_render():
     card["text"] = row["reason"]
     from inves_cog.web.brief import short_unvalued_text
 
-    assert "周期正常化历史不足" in short_unvalued_text(card["text"]) (断点后不足 8 季 → 周期行 unvalued（不硬算）；notes 经 payload.inputs 到页面；e2e 测试)
+    assert "周期正常化历史不足" in short_unvalued_text(card["text"])
