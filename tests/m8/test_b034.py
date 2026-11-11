@@ -57,6 +57,9 @@ class Pages:
             or "ingest.info_items" in compact
             or "graph.baskets" in compact
             or "marketstate.daily" in compact
+            or "ingest.earnings_events" in compact
+            or "perception.earnings_cards" in compact
+            or "ingest.earnings_calendar" in compact
         ):
             return Cursor([])
         if "valuation_v1.ranges" in compact:

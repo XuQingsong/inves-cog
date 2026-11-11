@@ -11,8 +11,8 @@ from inves_cog.perception.attribution.links import inspect_links
 from inves_cog.perception.attribution.material import material_fields
 
 MECHANISMS = {"供给", "需求", "竞争", "客户融资", "估值倍数"}
-PROMPT_VERSION = "evidence-bridge-v4.1-links"
-_CONTRACT = Path(__file__).resolve().parents[4] / "docs/phase1/contracts/m8-candidate-prompt-v4"
+PROMPT_VERSION = "evidence-bridge-v5-links"
+_CONTRACT = Path(__file__).resolve().parents[4] / "docs/phase1/contracts/m8-candidate-prompt-v5"
 _ANOMALY_KEYS = ("anomaly_id", "trade_date", "session", "baskets", "members", "direction", "universe")
 _LINK_KEYS = ("links", "竞争解释", "反证条件", "证伪预测")
 

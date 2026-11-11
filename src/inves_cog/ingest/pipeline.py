@@ -1,5 +1,6 @@
 """Production M1 tasks using the same parsers exercised by the offline harness."""
 
+import re
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -580,7 +581,8 @@ class Pipeline:
         )
 
     def atom(self):
-        return self.info(sec_atom(self.require(self.sec, "SEC"), clock=self.clock))
+        items = sec_atom(self.require(self.sec, "SEC"), clock=self.clock)
+        return self.info(self._tag_filing_tickers(items))
 
     def index(self):
         previous = self.day - timedelta(days=1)
@@ -589,7 +591,31 @@ class Pipeline:
         items = sec_daily_index(self.require(self.sec, "SEC"), previous, clock=self.clock)
         for item in items:
             item["body"] = self.sec.get(item["url"])
-        return self.info(items)
+        return self.info(self._tag_filing_tickers(items))
+
+    _FILER_CIK = re.compile(r"\((\d{6,10})\)\s*\(Filer\)")
+
+    def _tag_filing_tickers(self, items):
+        """Resolve filing CIKs to universe tickers via issuer_profiles; unmatched stay untagged."""
+        untagged = [item for item in items if not item.get("tickers")]
+        connection = getattr(self.repo, "connection", None)
+        if not untagged or connection is None:
+            return items
+        mapping = {
+            row["cik"]: row["ticker"]
+            for row in connection.execute("SELECT cik, ticker FROM ingest.issuer_profiles").fetchall()
+        }
+        if not mapping:
+            return items
+        for item in untagged:
+            cik = str((item.get("payload") or {}).get("cik") or "")
+            if not cik:
+                match = self._FILER_CIK.search(item.get("headline") or "")
+                cik = match.group(1) if match else ""
+            ticker = mapping.get(cik) or mapping.get(cik.zfill(10))
+            if ticker:
+                item["tickers"] = [ticker]
+        return items
 
     def apps(self, chart):
         rows = apple_chart(HTTPClient(), chart=chart, clock=self.clock)

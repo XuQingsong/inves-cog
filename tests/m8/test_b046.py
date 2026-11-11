@@ -99,7 +99,7 @@ def test_d1_tracks_waits_for_the_real_end_and_keeps_the_cutoff():
         compact = " ".join(statement.split())
         if "ingest.info_items" in compact:
             pages.calls.append((compact, params))
-            news_cutoff, begin, finish = params
+            news_cutoff, begin, finish = params[0], params[1], params[2]
             rows = [
                 row
                 for row in (early_news, late_news)

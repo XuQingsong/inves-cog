@@ -1,0 +1,105 @@
+# English keyword lists for sector-level news matching, keyed by L2 basket_id.
+# Drafted 2026-11-11 for reviewer sign-off; used only by attribution context items.
+baskets:
+  l2_00:  # AI 算力芯片
+    - AI chip
+    - GPU
+    - accelerator
+    - data center chip
+    - AI accelerator
+  l2_01:  # 存储
+    - memory chip
+    - NAND
+    - DRAM
+    - HBM
+    - storage demand
+    - flash memory
+  l2_02:  # CPU 与代工
+    - foundry
+    - CPU
+    - chip manufacturing
+    - wafer
+    - process node
+    - fab capacity
+  l2_03:  # AI 网络与光通信
+    - optical networking
+    - optical transceiver
+    - data center networking
+    - AI interconnect
+    - ethernet switch
+    - co-packaged optics
+  l2_04:  # 软件与平台
+    - enterprise software
+    - SaaS
+    - cloud software
+    - software spending
+  l2_05:  # 互联网
+    - internet advertising
+    - online ads
+    - digital advertising
+    - search advertising
+    - social media
+  l2_06:  # 消费硬件与汽车
+    - consumer electronics
+    - smartphone
+    - electric vehicle
+    - EV sales
+    - auto demand
+  l2_07:  # 零售
+    - retail sales
+    - consumer spending
+    - same-store sales
+    - e-commerce
+    - retail demand
+  l2_08:  # 医疗
+    - healthcare
+    - drug pricing
+    - pharma
+    - medical device
+    - biotech
+  l2_09:  # 金融与支付
+    - bank earnings
+    - payments
+    - credit card
+    - interest rates
+    - fintech
+    - loan growth
+  l2_10:  # 能源
+    - oil prices
+    - crude oil
+    - natural gas
+    - energy stocks
+    - OPEC
+    - refinery
+  l2_11:  # 工业
+    - industrial production
+    - manufacturing
+    - factory orders
+    - industrial demand
+    - PMI
+  l2_12:  # 半导体设备
+    - semiconductor equipment
+    - wafer fab equipment
+    - lithography
+    - chip equipment
+    - semiconductor capex
+  l2_13:  # 数据中心电力与散热
+    - data center power
+    - data center cooling
+    - power demand
+    - grid capacity
+    - electrical equipment
+    - data center construction
+  l2_14:  # AI 服务器与算力云
+    - AI server
+    - cloud capex
+    - data center buildout
+    - AI infrastructure
+    - server demand
+    - GPU cluster
+  l2_15:  # 网络安全
+    - cybersecurity
+    - security breach
+    - ransomware
+    - cybersecurity spending
+    - zero trust

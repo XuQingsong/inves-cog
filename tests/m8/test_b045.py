@@ -253,6 +253,10 @@ def test_slot_still_filters_visibility_and_previous_stage_readiness():
                 if str(row["trade_date"])[:10] == str(day)[:10] and row["generated_at"] <= cutoff
             ]
             return Cursor(rows)
+        if "kind = 'macro'" in compact:
+            cutoff, start, end = params[0], params[1], params[2]
+            rows = [row for row in news if row["first_seen_at"] <= cutoff and start <= row["published_at"] <= end]
+            return Cursor(rows)
         if "ingest.info_items" in compact:
             cutoff, start, end = params
             rows = [row for row in news if row["first_seen_at"] <= cutoff and start <= row["published_at"] <= end]

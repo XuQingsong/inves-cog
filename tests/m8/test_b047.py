@@ -90,11 +90,11 @@ def test_g4_direct_exposure_turns_cooling_on_through_the_provider():
 
 
 def test_g5_system_message_matches_the_updated_instruction():
-    instruction = Path(__file__).resolve().parents[2] / "docs/phase1/contracts/m8-candidate-prompt-v4/instruction.txt"
+    instruction = Path(__file__).resolve().parents[2] / "docs/phase1/contracts/m8-candidate-prompt-v5/instruction.txt"
     file_bytes = instruction.read_bytes()
     assert candidate_instruction().encode("utf-8") == file_bytes
     assert b"PREFER this as the LAST link" in file_bytes
-    assert PROMPT_VERSION == "evidence-bridge-v4.1-links"
+    assert PROMPT_VERSION == "evidence-bridge-v5-links"
     box = []
     client = Client.from_environment(_request_config(), send=_send(box))
     client.call("anomaly_candidates", {})

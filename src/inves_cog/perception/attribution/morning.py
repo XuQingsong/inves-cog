@@ -18,7 +18,9 @@ from inves_cog.perception.attribution.chain import (
     prepare_move_pages,
     run_scheduled,
 )
+from inves_cog.perception.attribution.context import attach_context
 from inves_cog.perception.attribution.graph_context import attach_graph
+from inves_cog.perception.attribution.rules import m8_rules
 from inves_cog.perception.attribution.store import Store
 
 PORTFOLIO = "paper-fixed"
@@ -57,8 +59,38 @@ WHERE first_seen_at <= %s
 """
 
 _BASKETS = """
-SELECT basket_id, level, name, members
+SELECT basket_id, level, name, members, factor_basis
 FROM graph.baskets
+"""
+
+_EARN_EVENTS = """
+SELECT accession, ticker, item, session, accepted_at, reaction_day
+FROM ingest.earnings_events
+WHERE accepted_at <= %s AND accepted_at >= %s
+"""
+
+_EARN_CARDS = """
+SELECT ticker, report_date, report_time, card, updated_at
+FROM perception.earnings_cards
+WHERE updated_at <= %s
+"""
+
+_EARN_CAL = """
+SELECT ticker, report_date, time, eps_forecast, source
+FROM ingest.earnings_calendar
+WHERE fetched_at <= %s AND report_date >= %s AND report_date <= %s
+"""
+
+_CONTEXT_NEWS = """
+SELECT info_id, kind, published_at, first_seen_at, headline, summary,
+       tickers, entities, source, source_root
+FROM ingest.info_items
+WHERE first_seen_at <= %s
+  AND published_at >= %s
+  AND published_at <= %s
+  AND (kind = 'macro'
+       OR source = ANY(%s)
+       OR (kind = 'news' AND (coalesce(cardinality(tickers), 0) = 0 OR tickers && %s)))
 """
 
 _RESIDS = """
@@ -314,7 +346,15 @@ def _load(connection, moment, day, upstream_visible_for_day=None):
     attach_graph(connection, anomalies, moment)
     items = [_item(row) for row in _all(connection, _NEWS, (moment, _news_start(day), moment))]
     resids = {row["ticker"]: row["resid_z"] for row in _all(connection, _RESIDS, (day,))}
-    enrich_anomalies(anomalies, items, _all(connection, _BASKETS, ()), day, resids=resids)
+    enrich_anomalies(
+        anomalies,
+        items,
+        _all(connection, _BASKETS, ()),
+        day,
+        resids=resids,
+        context_feed=_context_feed(connection, moment, day),
+        cutoff=moment,
+    )
     valuation = _valuation(connection, moment, day)
     holdings, plan = _book(connection, moment, day)
     return {"anomalies": anomalies, "items": items, "valuation": valuation, "holdings": holdings, "plan": plan}
@@ -341,8 +381,9 @@ def _anomaly(row):
     return adapt_m7(prepared)
 
 
-def enrich_anomalies(anomalies, items, basket_rows, day=None, resids=None):
-    """Wire scoring inputs the loader owns: member event flags and basket residual sets."""
+def enrich_anomalies(anomalies, items, basket_rows, day=None, resids=None, context_feed=None, cutoff=None):
+    """Wire scoring inputs the loader owns: member event flags, basket residuals,
+    and the synthetic context items (earnings events, sector/macro news)."""
     registries = {}
     for anomaly in anomalies or []:
         registry_day = day or anomaly.get("trade_date")
@@ -350,6 +391,49 @@ def enrich_anomalies(anomalies, items, basket_rows, day=None, resids=None):
             registries[registry_day] = _basket_registry(basket_rows, registry_day or "9999-12-31")
         _member_flags(anomaly, items)
         _attach_baskets(anomaly, registries[registry_day], resids)
+        if context_feed is not None:
+            attach_context(
+                anomaly,
+                context_feed,
+                registry=registries[registry_day],
+                cfg=context_feed.get("cfg"),
+                cutoff=cutoff,
+            )
+
+
+def _context_feed(connection, moment, day):
+    """Rows the per-anomaly context builders filter: earnings events, cards,
+    calendar, and the macro/sector news candidates."""
+    cfg = dict((m8_rules().get("context_items") or {}))
+    etfs = list(cfg.get("etfs") or [])
+    opened = _news_start(day)
+    return {
+        "cfg": cfg,
+        "keywords": _basket_keywords(),
+        "events": _all(connection, _EARN_EVENTS, (moment, opened)),
+        "cards": _all(connection, _EARN_CARDS, (moment,)),
+        "calendars": _all(
+            connection,
+            _EARN_CAL,
+            (moment, opened.date(), str(day)[:10]),
+        ),
+        "pool": [
+            _item(row)
+            for row in _all(
+                connection,
+                _CONTEXT_NEWS,
+                (moment, opened, moment, list(cfg.get("macro_sources") or []), etfs),
+            )
+        ],
+    }
+
+
+def _basket_keywords():
+    path = Path(__file__).resolve().parents[4] / "config/data/basket_keywords.yaml"
+    import yaml
+
+    loaded = yaml.safe_load(path.read_text()) or {}
+    return loaded.get("baskets") or {}
 
 
 def _basket_registry(rows, day):
@@ -363,6 +447,7 @@ def _basket_registry(rows, day):
             "name": record.get("name"),
             "level": record.get("level"),
             "members": active_tickers({"members": _array(record.get("members"))}, day or "9999-12-31"),
+            "factor_basis": _object(record.get("factor_basis")),
         }
     return registry
 

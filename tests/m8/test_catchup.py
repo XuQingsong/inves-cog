@@ -70,7 +70,7 @@ class Conn(Pages):
                 rows = [row for row in rows if (row.get("generated_at") or bound[0]) <= bound[0]]
             return Cursor(rows)
         if "ingest.info_items" in compact:
-            seen, lo, hi = params
+            seen, lo, hi = params[0], params[1], params[2]
             rows = [
                 row
                 for row in self.news
