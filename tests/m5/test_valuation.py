@@ -356,3 +356,21 @@ def test_sanity_flag_renders_unavailable_not_verdict():
     text = _valuation(card)
     assert "估值暂不可用" in text and "输入数据待核" in text and "0.02" in text
     assert "高估" not in text and "低估" not in text
+
+
+@pytest.mark.phase1_blocking
+def test_finstate_selection_fixed_latest_filed_period_tiebreak():
+    """state_asof reads fixed only; latest filed wins; period_end breaks ties."""
+    from datetime import date
+
+    from inves_cog.ingest.fundamentals.state import FinState, StateStore
+
+    legacy = FinState("WDC", "legacy", date(2026, 10, 23), date(2026, 10, 2), values={"ni_ttm": 8_008e6})
+    fixed_old = FinState("WDC", "fixed", date(2026, 10, 20), date(2026, 10, 2), values={"ni_ttm": 1})
+    fixed_new_a = FinState("WDC", "fixed", date(2026, 10, 23), date(2026, 7, 3), values={"ni_ttm": 2})
+    fixed_new_b = FinState("WDC", "fixed", date(2026, 10, 23), date(2026, 10, 2), values={"ni_ttm": 10_021e6})
+    store = StateStore([legacy, fixed_old, fixed_new_a, fixed_new_b])
+    got = store.state_asof("WDC", date(2026, 11, 9), "fixed")
+    assert got is fixed_new_b  # latest filed; period_end breaks the filed tie
+    assert store.state_asof("WDC", date(2026, 11, 9), "legacy") is legacy
+    assert store.state_asof("WDC", date(2026, 10, 21), "fixed") is fixed_old  # PIT: new not yet filed

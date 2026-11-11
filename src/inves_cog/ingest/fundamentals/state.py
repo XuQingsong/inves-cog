@@ -39,7 +39,8 @@ class StateStore:
         if extractor not in {"legacy", "fixed"}:
             raise ValueError("Unknown extractor")
         rows = [s for s in self.states if s.ticker == ticker and s.extractor == extractor and s.filed <= as_of_date]
-        return max(rows, key=lambda s: s.filed) if rows else None
+        # latest filed first, then latest period_end on filed ties
+        return max(rows, key=lambda s: (s.filed, s.period_end)) if rows else None
 
 
 _configured_store = None
