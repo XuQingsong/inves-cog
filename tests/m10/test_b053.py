@@ -482,6 +482,7 @@ def test_v1_structure_and_detail_links(pages):
         "待成交",
         "处置记录",
         "待选股票",
+        "影子规则对照（仅记录，不影响订单）",
     ]
     assert [text for level, text in found["/trust"] if level == "2"] == [
         "数据状态",

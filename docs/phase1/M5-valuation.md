@@ -88,6 +88,16 @@
 | `test_implied_growth_no_solution` | blocking | 无解 → `NULL` + 标注 | 合成 |
 | `test_position_panel` | blocking | 对照面板全部用例 | `golden/m5_valuation_synthetic.json` |
 | `test_shadow_rules_no_orders` | blocking | 影子规则只写 `valuation_v1.shadow_rules` | 合成 |
+| `test_divergence_count_excludes_null_and_reports_unevaluable` | blocking | 影子分歧只计双方可评且不等，NULL 单列 | 合成 |
+| `test_blocked_buy_hypothetical_uses_latest_close` | blocking | A 组假设差额按最新收盘计算 | 合成 |
+| `test_blocked_buy_stops_at_later_actual_sell` | blocking | A 组在规则 A 后续卖出日截止 | 合成 |
+| `test_missed_trim_hypothetical_and_held_only` | blocking | B 组按次日开盘减持 1/3，非持仓剔除 | 合成 |
+| `test_missed_trim_skips_days_rule_a_sold` | blocking | B 组当日有卖单不计 | 合成 |
+| `test_pit_cutoff_excludes_late_shadow_and_factor_rows` | blocking | 影子与因子行按 PIT 截断 | 合成 |
+| `test_entry_divergence_collapses_to_one_row_per_ticker` | blocking | C 组按股票折叠、附最新依据、双口径计数 | 合成 |
+| `test_shadow_section_wording_and_rounded_trim_shares` | blocking | 减持取整展示、少亏/少赚措辞 | 合成 |
+| `test_account_section_hides_internal_identifiers` | blocking | /account 页面不出现 M-xx/V-T/F-0x/vt1/v3 | 合成 |
+| `test_rule_a_does_not_read_shadow_report` | blocking | 规则 A 不 import 影子对照模块 | AST |
 | `test_valuation_live_smoke` | live | 59 只都有行或原因 | 真实 |
 
 ## 8. 需求方验收

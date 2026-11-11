@@ -10,6 +10,7 @@ import yaml
 from inves_cog.ingest.market import trading_day
 from inves_cog.perception.anomaly.precursor import precursor_line
 from inves_cog.perception.review.calendar import cutoff as _deadline
+from inves_cog.valuation_v1.shadow_report import divergence_counts
 
 MISSING = "数据暂缺"
 CLOSED = "非交易日"
@@ -373,14 +374,8 @@ def page_home(connection, day, clock):
             """,
             (day, cutoff),
         ),
-        "shadow_divergence_count": _count(
-            connection,
-            """
-            SELECT count(*) AS n FROM factor_shadow.daily
-            WHERE date = %s AND generated_at < %s AND would_pass IS DISTINCT FROM rule_a_entry_pass
-            """,
-            (day, cutoff),
-        ),
+        "shadow_divergence_count": divergence_counts(connection, day, cutoff)["divergent"],
+        "shadow_unevaluable_count": divergence_counts(connection, day, cutoff)["unevaluable"],
     }
     return {
         "page": "/",

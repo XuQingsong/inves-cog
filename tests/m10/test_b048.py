@@ -902,7 +902,8 @@ def test_system_log_counts_match(pages):
         admin,
         """
         SELECT count(*) AS n FROM factor_shadow.daily
-        WHERE date = %s AND generated_at < %s AND would_pass IS DISTINCT FROM rule_a_entry_pass
+        WHERE date = %s AND generated_at < %s AND would_pass IS NOT NULL
+          AND rule_a_entry_pass IS NOT NULL AND would_pass <> rule_a_entry_pass
         """,
         (DAY, LATE),
     )["n"]

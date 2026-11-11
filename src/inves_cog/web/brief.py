@@ -13,6 +13,7 @@ import yaml
 
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.perception.anomaly.precursor import precursor_line
+from inves_cog.valuation_v1.shadow_report import shadow_report
 from inves_cog.web.pages import (
     PAPER_LABEL,
     _anomalies,
@@ -2804,7 +2805,15 @@ def page_brief_account(connection, day, clock):
         "freshness": _freshness(context, clock) if day == clock.today_trade_date() else None,
         "title": "纸面账户",
         "oneliner": sentence,
-        "headings": ["今天先看这些", "组合边界", "持仓与关键价位", "待成交", "处置记录", "待选股票"],
+        "headings": [
+            "今天先看这些",
+            "组合边界",
+            "持仓与关键价位",
+            "待成交",
+            "处置记录",
+            "待选股票",
+            "影子规则对照（仅记录，不影响订单）",
+        ],
         "equity": equity,
         "cash": cash,
         "peak_equity": peak,
@@ -2814,6 +2823,7 @@ def page_brief_account(connection, day, clock):
         "plan_missing": carried is not None,
         "carried_from": None if carried is None else carried.isoformat(),
         "holdings": holdings,
+        "shadow_report": shadow_report(connection, day, days=20, cutoff=context["cutoff"]),
         "pending_orders": [
             {
                 "ticker": row["ticker"],
