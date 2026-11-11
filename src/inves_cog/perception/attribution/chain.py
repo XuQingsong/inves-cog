@@ -11,7 +11,7 @@ from datetime import date, datetime, time, timedelta
 from hashlib import sha256
 from zoneinfo import ZoneInfo
 
-from inves_cog.ingest.market import exchange, regular_bounds, trading_day
+from inves_cog.ingest.market import exchange, local_at, regular_bounds, trading_day
 from inves_cog.llm.client import canonical_payload
 from inves_cog.perception.anomaly.universe import pool_names
 from inves_cog.perception.attribution.candidates import market_confirmed, validate_candidates
@@ -28,6 +28,7 @@ from inves_cog.perception.attribution.evidence import (
     exposure_gradient,
     magnitude_component,
     narrative_support,
+    publication_tz_assumed,
 )
 from inves_cog.perception.attribution.graph_context import project_graph
 from inves_cog.perception.attribution.grounding import candidate_support, claim_support
@@ -481,9 +482,11 @@ def _member_rets(anomaly):
 
 
 def adapt_m7(anomaly):
-    """Close starts at the exchange open. Post starts at the exchange close."""
+    """Close spans the regular session. Post spans close to the 20:00 ET feed end."""
     session = anomaly.get("session")
-    if anomaly.get("started_at") is not None or session not in {"close", "post"}:
+    if session not in {"close", "post"}:
+        return anomaly
+    if anomaly.get("started_at") is not None and anomaly.get("ended_at") is not None:
         return anomaly
     trade_date = anomaly.get("trade_date")
     if trade_date is None:
@@ -492,7 +495,10 @@ def adapt_m7(anomaly):
     if bounds is None:
         return anomaly
     prepared = dict(anomaly)
-    prepared["started_at"] = bounds[0] if session == "close" else bounds[1]
+    if prepared.get("started_at") is None:
+        prepared["started_at"] = bounds[0] if session == "close" else bounds[1]
+    if prepared.get("ended_at") is None:
+        prepared["ended_at"] = bounds[1] if session == "close" else local_at(_calendar_day(trade_date), 20)
     return prepared
 
 
@@ -1215,6 +1221,7 @@ def _apply_score(candidates, anomaly, items, overrides):
             updated.append(row)
             continue
         components = _components(row, anomaly, items)
+        notes = components.pop("_notes", None)
         components.update(_override(overrides, row.get("mechanism")))
         scored = evidence_score(components)
         copied = dict(row)
@@ -1232,6 +1239,8 @@ def _apply_score(candidates, anomaly, items, overrides):
             "support_audit": candidate_support(row, items),
             "diagnostics": score_marks(row, items, components),
         }
+        if notes:
+            copied["evidence"]["notes"] = notes
         copied["score"] = scored["total"]
         copied["confidence"] = scored["confidence"]
         copied["fundamental"] = None
@@ -1251,7 +1260,7 @@ def _components(candidate, anomaly, items):
     relations = anomaly.get("relations") or []
     if direction and members and relations:
         components["gradient"] = exposure_gradient(members, relations, direction=direction)
-    expected, control = _residuals(candidate, anomaly)
+    expected, control, control_source = _residuals(candidate, anomaly)
     if expected and control:
         components["specificity"] = basket_specificity(expected, control)
     affected = [
@@ -1268,6 +1277,13 @@ def _components(candidate, anomaly, items):
     exclusion = alternative_exclusion(_alternative_members(candidate, anomaly))
     if exclusion is not None:
         components["alternatives"] = exclusion
+    notes = {}
+    if control_source == "system":
+        notes["control_source"] = "对照篮子为系统选取"
+    if publication_tz_assumed(cited):
+        notes["time_basis"] = "部分发布时间不带时区，按 UTC 推定"
+    if notes:
+        components["_notes"] = notes
     return components
 
 
@@ -1281,16 +1297,59 @@ def _override(overrides, mechanism):
 
 
 def _residuals(candidate, anomaly):
+    """Candidate-named baskets first. An unresolved or absent control set falls back to
+    system-chosen baskets from the same registry, flagged so the provenance is explicit."""
     table = anomaly.get("basket_residuals") or {}
     expected = []
+    expected_baskets = set()
     for row in candidate.get("affected") or []:
         if not isinstance(row, dict):
             continue
-        expected.extend(table.get(row.get("basket_id")) or [])
+        basket_id = row.get("basket_id")
+        if isinstance(basket_id, str) and basket_id:
+            expected_baskets.add(basket_id)
+        expected.extend(table.get(basket_id) or [])
+    if not expected and table:
+        # Candidate basket labels are free text; the anomaly's own hit baskets are the expected set.
+        expected_baskets = {row.get("basket_id") for row in anomaly.get("basket_members") or []}
+        for basket_id in expected_baskets:
+            expected.extend(table.get(basket_id) or [])
     control = []
     for basket in candidate.get("control_baskets") or []:
         control.extend(table.get(basket) or [])
-    return expected, control
+    source = None
+    if expected and not control:
+        picked = _system_controls(anomaly, expected_baskets)
+        for basket in picked:
+            control.extend(table.get(basket) or [])
+        if control:
+            source = "system"
+    return expected, control, source
+
+
+def _system_controls(anomaly, exclude, limit=3):
+    """Same-registry baskets outside the anomaly, disjoint members, closest size."""
+    registry = anomaly.get("universe_baskets") or {}
+    if not isinstance(registry, dict):
+        return []
+    own_members = set()
+    target = 0
+    for row in anomaly.get("basket_members") or []:
+        if not isinstance(row, dict):
+            continue
+        members = set(row.get("members") or [])
+        own_members |= members
+        target = max(target, len(members))
+    ranked = []
+    for basket_id, info in registry.items():
+        if not isinstance(info, dict) or basket_id in exclude:
+            continue
+        members = set(info.get("members") or [])
+        if not members or members & own_members or not members - own_members:
+            continue
+        ranked.append((abs(len(members) - target), len(members), basket_id))
+    ranked.sort()
+    return [basket_id for _, _, basket_id in ranked[:limit]]
 
 
 def _earliest(items):
