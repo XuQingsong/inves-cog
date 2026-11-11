@@ -805,6 +805,13 @@ def _shares_text(value):
     return f"{number:g}"
 
 
+def _signed_money(value):
+    if value is None:
+        return MISSING
+    sign = "+" if value > 0 else "−" if value < 0 else ""
+    return f"{sign}{money(abs(value))}"
+
+
 def _shadow_blocked_result(row):
     """Group A: positive delta_usd means the shadow's veto would have saved money."""
     if row.get("status") != "filled":
@@ -909,20 +916,24 @@ def _shadow_section(payload):
         body.append('<p class="small muted">无</p>')
 
     counts = report.get("counts") or {}
+    evaluated = counts.get("evaluated") or 0
+    unevaluable = counts.get("unevaluable") or 0
+    day_counts = (
+        "当日影子对照数据未到"
+        if evaluated == 0 and unevaluable == 0
+        else f"当日可评估 {evaluated} 项、影子分歧 {counts.get('divergent') or 0} 项、影子无法评估 {unevaluable} 项"
+    )
     body.append(
         '<p class="small muted">汇总（近 {days} 个交易日）：影子否决但买入 {a} 条，合计差额 {ad}；'
-        "影子建议减持未卖 {b} 条，合计差额 {bd}；因子入场分歧 {c} 条；"
-        "当日可评估 {e} 项、影子分歧 {d} 项、影子无法评估 {u} 项。"
+        "影子建议减持未卖 {b} 条，合计差额 {bd}；因子入场分歧 {c} 条；{day}。"
         "正数表示按影子做会更好。</p>".format(
             days=days,
             a=summary.get("blocked_buys", 0),
-            ad=money(summary.get("blocked_delta_usd") or 0),
+            ad=_signed_money(summary.get("blocked_delta_usd")),
             b=summary.get("missed_trims", 0),
-            bd=money(summary.get("missed_trim_delta_usd") or 0),
+            bd=_signed_money(summary.get("missed_trim_delta_usd")),
             c=summary.get("entry_divergence", 0),
-            e=counts.get("evaluated") or 0,
-            d=counts.get("divergent") or 0,
-            u=counts.get("unevaluable") or 0,
+            day=day_counts,
         )
     )
     return (
