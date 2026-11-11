@@ -73,6 +73,7 @@ def calculate(kind, data):
         "inputs": d,
         "details": {},
         "pending_review": False,
+        "bands_reordered": False,
     }
     reasons = out["downgrade_reasons"]
     if d.get("insufficient_pe_history"):
@@ -192,7 +193,7 @@ def calculate(kind, data):
             raise ValueError("估值计算出现非有限值")
         out["method_anomaly"] = values != sorted(values)
         if out["method_anomaly"]:
-            out.update(pending_review=True, reason="方法异常：三档已升序重排")
+            out.update(bands_reordered=True, reason="方法异常：三档已升序重排")
         out.update(zip(SCENARIOS, sorted(values), strict=False))
     except (ValueError, TypeError, OverflowError) as exc:
         out.update(status="unvalued", reason=str(exc), **dict.fromkeys(SCENARIOS))
