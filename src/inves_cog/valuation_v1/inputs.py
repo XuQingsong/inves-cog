@@ -294,9 +294,7 @@ def financial_inputs(state, states, entity, *, as_of=None):
         [
             s2
             for s2 in states
-            if s2.values.get("ni_ttm") is not None
-            and s2.period_end
-            and str(s2.form).removesuffix("/A") not in {"10-K", "20-F", "40-F"}
+            if s2.values.get("ni_ttm") is not None and s2.period_end
         ],
         key=lambda s2: s2.period_end,
     )
