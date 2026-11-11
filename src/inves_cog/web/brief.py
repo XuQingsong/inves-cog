@@ -239,6 +239,7 @@ def valuation_card(range_row, pe, price):
         "eps_growth": _number(inputs.get("eps_growth")),
         "implied_reason": None,
         "text": None,
+        "notes": [n for n in (inputs.get("normalization_note"), inputs.get("oneoff_note")) if n],
     }
     card["sanity"] = payload.get("sanity")
     card["sanity_reason"] = payload.get("sanity_reason")

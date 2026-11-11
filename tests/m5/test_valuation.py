@@ -374,3 +374,38 @@ def test_finstate_selection_fixed_latest_filed_period_tiebreak():
     assert got is fixed_new_b  # latest filed; period_end breaks the filed tie
     assert store.state_asof("WDC", date(2026, 11, 9), "legacy") is legacy
     assert store.state_asof("WDC", date(2026, 10, 21), "fixed") is fixed_old  # PIT: new not yet filed
+
+
+@pytest.mark.phase1_blocking
+def test_structural_break_post_window_and_oneoff_flag():
+    """断点后正常化窗口 + 一次性项目标记（WDC 形态）。"""
+    from datetime import date, timedelta
+
+    from inves_cog.ingest.fundamentals.state import FinState
+    from inves_cog.valuation_v1.inputs import financial_inputs
+
+    entity = {"ticker": "WDC", "sic": "3572", "sector": "storage"}
+    q = []
+    # quarterly states; ni_ttm grows then spikes (spin-off gain in the 07-03 derived Q4)
+    for i, ni in enumerate([200e6, 250e6, 300e6, 1_182e6, 1_842e6, 3_205e6, 10_021e6, 10_500e6]):
+        pe = date(2025, 3, 28) + timedelta(days=91 * i)
+        q.append(
+            FinState(
+                "WDC",
+                "fixed",
+                pe + timedelta(days=20),
+                pe,
+                values={"ni_ttm": ni, "rev_ttm": 11_000e6, "eps_ttm": ni / 384e6},
+            )
+        )
+    # annual rows: pre-break loss year + post-break gain year
+    for pe, ni in [(date(2024, 6, 28), -798e6), (date(2025, 6, 27), 1_889e6), (date(2026, 7, 3), 9_424e6)]:
+        q.append(
+            FinState(
+                "WDC", "fixed", pe + timedelta(days=45), pe, form="10-K", values={"ni_ttm": ni, "rev_ttm": 13_000e6}
+            )
+        )
+    st = q[-1]
+    out = financial_inputs(st, q, entity)
+    assert out.get("normalization_note") == "周期正常化历史不足（4 季）"
+    assert out.get("oneoff_note") and "2026" in out["oneoff_note"] (周期正常化窗口排除结构断点 + 一次性项目标记（WDC SanDisk 分拆）；页面展示标注)

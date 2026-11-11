@@ -164,6 +164,7 @@ def _valuation(view, full=False):
             bits.append(f"EPS 增速 {_signed(float(view['eps_growth']), 1)}")
     if view.get("state") == "模型不适用":
         bits.append("模型不适用")
+    bits.extend(view.get("notes") or [])
     if view.get("ceiling"):
         bits.append(ceiling_text(view["ceiling"], full=full))
     line = " · ".join(bits) if bits else "估值暂缺"
