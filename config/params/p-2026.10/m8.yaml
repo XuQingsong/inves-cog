@@ -2,6 +2,7 @@ m8:
   search_daily_budget: 200
   embedding_model: text-embedding-async-v1
   embedding_dimensions: 1536
+  evidence_version: v2
   evidence_weights:
     time: 20
     gradient: 20
@@ -9,6 +10,13 @@ m8:
     narrative: 15
     magnitude: 15
     alternatives: 15
+  confidence:
+    coverage_min: 3
+    high_total: 0.70
+    mid_total: 0.50
+    content_components: [narrative, gradient, magnitude]
+    content_min_for_high: 0.5
+    specificity_cap: 0.2
   retrieval_weights:
     overlap: 0.4
     recency: 0.3

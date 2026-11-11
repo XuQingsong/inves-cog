@@ -245,3 +245,28 @@ def test_apply_score_carries_notes_into_evidence():
     assert evidence["notes"]["time_basis"] == "部分发布时间不带时区，按 UTC 推定"
     assert evidence["components"]["time"] == 1.0
     assert evidence["components"]["alternatives"] == 1.0
+
+
+@pytest.mark.phase1_blocking
+def test_confidence_caps_require_content_and_specificity():
+    from inves_cog.perception.attribution.evidence import evidence_score
+
+    # Total >= 0.70 without a content component >= 0.5 cannot be 高.
+    label = evidence_score({"time": 1.0, "specificity": 0.0, "alternatives": 1.0})
+    assert label["total"] == 0.7 and label["confidence"] == "中"
+    # A strong content component still needs total >= 0.70.
+    label = evidence_score({"time": 1.0, "specificity": 0.0, "alternatives": 1.0, "narrative": 0.6})
+    assert label["confidence"] == "中"
+    # specificity < 0.2 caps at 中 even when content is strong.
+    label = evidence_score({"time": 1.0, "specificity": 0.1, "alternatives": 1.0, "narrative": 1.0})
+    assert label["confidence"] == "中"
+    # specificity >= 0.2 with content and total >= 0.70 passes.
+    label = evidence_score({"time": 1.0, "specificity": 0.4, "alternatives": 1.0, "narrative": 0.6})
+    assert label["confidence"] == "高"
+    # Below three covered parts stays 待证实 regardless of strength.
+    assert evidence_score({"time": 1.0, "alternatives": 1.0})["confidence"] == "待证实"
+    # Thresholds and the bumped rule version live in m8 rules config.
+    from inves_cog.perception.attribution.rules import m8_rules
+
+    assert m8_rules()["evidence_version"] == "v2"
+    assert m8_rules()["confidence"]["specificity_cap"] == 0.2

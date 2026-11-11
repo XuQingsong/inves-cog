@@ -9,18 +9,30 @@ _COVERAGE_MIN = 3
 
 
 def evidence_score(components, rules=None):
-    weights = (rules or m8_rules())["evidence_weights"]
+    """Confidence caps: content components must actually link cause to move for 高;
+    a near-zero specificity also caps at 中. Thresholds live in m8.yaml."""
+    loaded = rules or m8_rules()
+    weights = loaded["evidence_weights"]
+    caps = loaded.get("confidence") or {}
+    coverage_min = caps.get("coverage_min", _COVERAGE_MIN)
+    high_total = caps.get("high_total", 0.70)
+    mid_total = caps.get("mid_total", 0.50)
+    content_names = caps.get("content_components") or ["narrative", "gradient", "magnitude"]
+    content_min = caps.get("content_min_for_high", 0.5)
+    specificity_cap = caps.get("specificity_cap", 0.2)
     components = components or {}
     available = {name: components[name] for name in weights if components.get(name) is not None}
     weight = sum(weights[name] for name in available)
     if weight == 0:
         return {"total": None, "confidence": None, "enters_hypothesis": False, "covered_count": 0}
     total = round(sum(weights[name] * available[name] for name in available) / weight, 6)
-    if len(available) < _COVERAGE_MIN:
+    content_ok = any((components.get(name) or 0) >= content_min for name in content_names)
+    specificity_low = components.get("specificity") is not None and components["specificity"] < specificity_cap
+    if len(available) < coverage_min:
         confidence = "待证实"
-    elif total >= 0.70:
+    elif total >= high_total and content_ok and not specificity_low:
         confidence = "高"
-    elif total >= 0.50:
+    elif total >= mid_total:
         confidence = "中"
     else:
         confidence = "低"
