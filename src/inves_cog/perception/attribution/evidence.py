@@ -1,6 +1,6 @@
 """Six-part evidence score. Missing parts drop out and the remaining weights are rescaled."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from inves_cog.ingest.market import NY, regular_bounds, trading_day
 from inves_cog.perception.attribution.rules import m8_rules
@@ -122,15 +122,55 @@ def _publication_stamp(value):
     return None
 
 
+def _item_stamp(value):
+    """A cited item's naive publication time is read as UTC; the assumption is noted upstream."""
+    stamp = _publication_stamp(value)
+    if isinstance(stamp, datetime):
+        return stamp if stamp.utcoffset() is not None else stamp.replace(tzinfo=timezone.utc)
+    if isinstance(value, str):
+        try:
+            parsed = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+        return parsed if parsed.utcoffset() is not None else parsed.replace(tzinfo=timezone.utc)
+    return None
+
+
+def publication_tz_assumed(items):
+    """True when a cited item's publication time carries no timezone and is read as UTC."""
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        if _naive_stamp(item.get("published_at")):
+            return True
+        interval = item.get("published_interval")
+        if isinstance(interval, dict) and (
+            _naive_stamp(interval.get("earliest_utc")) or _naive_stamp(interval.get("latest_utc"))
+        ):
+            return True
+    return False
+
+
+def _naive_stamp(value):
+    if isinstance(value, datetime):
+        return value.utcoffset() is None
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value).utcoffset() is None
+        except ValueError:
+            return False
+    return False
+
+
 def _publication_bounds(item):
-    exact = _publication_stamp(item.get("published_at"))
+    exact = _item_stamp(item.get("published_at"))
     if exact is not None:
         return exact, exact
     interval = item.get("published_interval")
     if not isinstance(interval, dict):
         return None
-    lower = _publication_stamp(interval.get("earliest_utc"))
-    upper = _publication_stamp(interval.get("latest_utc"))
+    lower = _item_stamp(interval.get("earliest_utc"))
+    upper = _item_stamp(interval.get("latest_utc"))
     try:
         if lower is not None and upper is not None and lower <= upper:
             return lower, upper

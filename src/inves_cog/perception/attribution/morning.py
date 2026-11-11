@@ -3,15 +3,17 @@
 import json
 import os
 import sys
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from inves_cog.ingest.market import trading_day
+from inves_cog.perception.anomaly.panel import active_tickers
 from inves_cog.perception.anomaly.service import run_recorded
 from inves_cog.perception.attribution.chain import (
     _closed_trade_date,
     _daily_pages,
+    adapt_m7,
     job_slot,
     prepare_move_pages,
     run_scheduled,
@@ -26,7 +28,7 @@ _SHANGHAI = ZoneInfo("Asia/Shanghai")
 _NEW_YORK = ZoneInfo("America/New_York")
 
 _ANOMALIES = """
-SELECT anomaly_id, trade_date, session, direction, members, universe
+SELECT anomaly_id, trade_date, session, direction, baskets, members, universe
 FROM perception.anomalies
 WHERE trade_date = %s
   AND generated_at IS NOT NULL
@@ -36,7 +38,7 @@ ORDER BY session, anomaly_id
 """
 
 _ANOMALIES_LATE = """
-SELECT anomaly_id, trade_date, session, direction, members, universe
+SELECT anomaly_id, trade_date, session, direction, baskets, members, universe
 FROM perception.anomalies
 WHERE trade_date = %s
   AND generated_at IS NOT NULL
@@ -45,12 +47,18 @@ ORDER BY session, anomaly_id
 """
 
 _NEWS = """
-SELECT info_id, kind, published_at, first_seen_at, headline, flags, extraction_source, tickers, entities
+SELECT info_id, kind, published_at, first_seen_at, headline, flags, extraction_source,
+       tickers, entities, source_root, is_guidance, is_rating_change, payload->>'items' AS filing_items
 FROM ingest.info_items
 WHERE first_seen_at <= %s
   AND published_at >= %s
   AND published_at <= %s
   AND kind IN ('news', 'sec_8k')
+"""
+
+_BASKETS = """
+SELECT basket_id, level, name, members
+FROM graph.baskets
 """
 
 _RANGES = """
@@ -299,6 +307,7 @@ def _load(connection, moment, day, upstream_visible_for_day=None):
     anomalies = [_anomaly(row) for row in _all(connection, statement, params)]
     attach_graph(connection, anomalies, moment)
     items = [_item(row) for row in _all(connection, _NEWS, (moment, _news_start(day), moment))]
+    enrich_anomalies(anomalies, items, _all(connection, _BASKETS, ()), day)
     valuation = _valuation(connection, moment, day)
     holdings, plan = _book(connection, moment, day)
     return {"anomalies": anomalies, "items": items, "valuation": valuation, "holdings": holdings, "plan": plan}
@@ -320,8 +329,110 @@ def _news_start(day):
 def _anomaly(row):
     prepared = dict(row)
     prepared["members"] = _array(prepared.get("members"))
+    prepared["baskets"] = _array(prepared.get("baskets"))
     prepared["trade_date"] = str(prepared.get("trade_date") or "")[:10]
-    return prepared
+    return adapt_m7(prepared)
+
+
+def enrich_anomalies(anomalies, items, basket_rows, day=None):
+    """Wire scoring inputs the loader owns: member event flags and basket residual sets."""
+    registry = _basket_registry(basket_rows, day)
+    for anomaly in anomalies or []:
+        _member_flags(anomaly, items)
+        _attach_baskets(anomaly, registry)
+
+
+def _basket_registry(rows, day):
+    registry = {}
+    for row in rows or []:
+        record = row if isinstance(row, dict) else {}
+        basket_id = record.get("basket_id")
+        if not basket_id:
+            continue
+        registry[basket_id] = {
+            "name": record.get("name"),
+            "level": record.get("level"),
+            "members": active_tickers({"members": _array(record.get("members"))}, day or date.today()),
+        }
+    return registry
+
+
+def _stamp(value):
+    if isinstance(value, datetime):
+        return value if value.utcoffset() is not None else value.replace(tzinfo=timezone.utc)
+    if isinstance(value, str):
+        try:
+            stamp = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+        return stamp if stamp.utcoffset() is not None else stamp.replace(tzinfo=timezone.utc)
+    return None
+
+
+def _in_window(item, lower, upper):
+    stamp = _stamp(item.get("published_at"))
+    if stamp is None:
+        return False
+    if lower is not None and stamp < lower:
+        return False
+    return upper is None or stamp <= upper
+
+
+def _member_flags(anomaly, items):
+    """Member event flags over (session start - 24h, session end].
+
+    True means a matching event was found. False means the member had coverage
+    in the window and none matched. None means no visible item covered the
+    member in the window at all, so 'no news' cannot be told from 'not fetched'."""
+    start = _stamp(anomaly.get("started_at"))
+    end = _stamp(anomaly.get("ended_at"))
+    lower = start - timedelta(hours=24) if start is not None else None
+    for member in anomaly.get("members") or []:
+        if not isinstance(member, dict) or not member.get("ticker"):
+            continue
+        seen = [
+            item
+            for item in items or []
+            if member["ticker"] in set(_array(item.get("tickers"))) and _in_window(item, lower, end)
+        ]
+        if lower is None or not seen:
+            member["earnings_reaction"] = None
+            member["guidance_8k"] = None
+            member["rating_change"] = None
+            continue
+        member["earnings_reaction"] = any(
+            item.get("kind") == "sec_8k" and "2.02" in str(item.get("filing_items") or "") for item in seen
+        )
+        member["guidance_8k"] = any(item.get("is_guidance") is True for item in seen)
+        member["rating_change"] = any(item.get("is_rating_change") is True for item in seen)
+
+
+def _attach_baskets(anomaly, registry):
+    """Aggregate member resid_z by basket and keep the registry for control selection."""
+    by_name = {}
+    for basket_id, info in registry.items():
+        name = info.get("name")
+        if name and name not in by_name:
+            by_name[name] = basket_id
+    resid = {}
+    for member in anomaly.get("members") or []:
+        if isinstance(member, dict) and member.get("ticker"):
+            resid[member["ticker"]] = member.get("resid_z")
+    residuals = {}
+    basket_members = []
+    for name in anomaly.get("baskets") or []:
+        basket_id = name if name in registry else by_name.get(name)
+        if basket_id is None:
+            continue
+        tickers = [ticker for ticker in registry[basket_id]["members"] if ticker in resid]
+        basket_members.append({"basket_id": basket_id, "members": tickers})
+        residuals[basket_id] = [resid[ticker] for ticker in tickers if isinstance(resid[ticker], (int, float))]
+    anomaly["basket_residuals"] = residuals
+    anomaly["basket_members"] = basket_members
+    anomaly["universe_baskets"] = {
+        basket_id: {"level": info.get("level"), "members": list(info.get("members") or [])}
+        for basket_id, info in registry.items()
+    }
 
 
 def _item(row):
