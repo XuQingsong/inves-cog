@@ -1513,7 +1513,8 @@ def _stock(payload):
         return (
             _crumb(f"个股 / {_text(symbol)}")
             + f"<h1>{_text(symbol)}</h1>"
-            + '<div class="card sec"><p>没有这只股票的数据。试试搜索：</p>'
+            + f'<div class="card sec"><p><strong>{_text(symbol)}</strong> 不在关注范围内，系统未采集其数据。'
+            + '<a href="/">返回首页</a>，或试试搜索：</p>'
             + _search_box()
             + "</div>"
         )
@@ -1521,11 +1522,13 @@ def _stock(payload):
         return (
             _crumb(f"个股 / {_text(symbol)}")
             + f"<h1>{_text(symbol)}</h1>"
+            + f'<div class="card sec"><p><strong>{_text(symbol)}</strong> 不在关注范围内'
+            + "——这里只显示价格与走势，其余模块未采集。"
+            + '<a href="/">返回首页</a></p></div>'
             + _price_bar(payload)
             + '<div class="card sec"><h2>走势图</h2>'
             + _chart_svg(payload)
             + "</div>"
-            + '<div class="card sec"><p>不在监控范围——这里只显示价格和走势。</p></div>'
         )
     trend = payload.get("trend") or {}
     position = payload.get("position") or {}

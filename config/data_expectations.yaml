@@ -1648,3 +1648,25 @@ datasets:
     entry: manual
     max_attempts: 3
     depends_on: []
+- dataset: 向量嵌入任务（已停用）
+  table: ingest.job_runs
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  latest_column: started_at
+  filter:
+    task_name:
+    - embedding_backfill
+  expected_keys:
+    - embedding_backfill
+  disabled:
+    tasks: [embedding_backfill]
+    reason: '向量检索未接入生产链路（2026-11-11），接入时再恢复调度与补数'
+  basis: embedding_backfill 一次性程序；info_embeddings 无生产消费者
+  impact: 无（归因检索当前走 rules 模式，向量路径未接线）
+  backfill:
+    entry: manual
