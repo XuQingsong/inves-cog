@@ -181,7 +181,7 @@ def test_basket_residuals_aggregation_by_name():
 
     anomaly = _basket_anomaly()
     enrich_anomalies([anomaly], [], _registry_rows(), "2026-10-14")
-    assert anomaly["basket_residuals"] == {"l2_00": [4.0, 2.0]}
+    assert anomaly["basket_residuals"] == {"l2_00": [4.0, 2.0], "l2_01": [-1.0]}
     assert anomaly["basket_members"] == [{"basket_id": "l2_00", "members": ["AAA", "BBB"]}]
     assert set(anomaly["universe_baskets"]) == {"l2_00", "l2_01", "l2_02"}
     assert anomaly["universe_baskets"]["l2_00"]["members"] == ["AAA", "BBB"]

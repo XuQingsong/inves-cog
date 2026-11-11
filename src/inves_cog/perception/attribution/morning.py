@@ -61,6 +61,12 @@ SELECT basket_id, level, name, members
 FROM graph.baskets
 """
 
+_RESIDS = """
+SELECT ticker, resid_z
+FROM marketstate.daily
+WHERE trade_date = %s
+"""
+
 _RANGES = """
 SELECT DISTINCT ON (ticker)
     trade_date, ticker, status, bear, neutral, bull, payload, observed_at
@@ -307,7 +313,8 @@ def _load(connection, moment, day, upstream_visible_for_day=None):
     anomalies = [_anomaly(row) for row in _all(connection, statement, params)]
     attach_graph(connection, anomalies, moment)
     items = [_item(row) for row in _all(connection, _NEWS, (moment, _news_start(day), moment))]
-    enrich_anomalies(anomalies, items, _all(connection, _BASKETS, ()), day)
+    resids = {row["ticker"]: row["resid_z"] for row in _all(connection, _RESIDS, (day,))}
+    enrich_anomalies(anomalies, items, _all(connection, _BASKETS, ()), day, resids=resids)
     valuation = _valuation(connection, moment, day)
     holdings, plan = _book(connection, moment, day)
     return {"anomalies": anomalies, "items": items, "valuation": valuation, "holdings": holdings, "plan": plan}
@@ -334,12 +341,12 @@ def _anomaly(row):
     return adapt_m7(prepared)
 
 
-def enrich_anomalies(anomalies, items, basket_rows, day=None):
+def enrich_anomalies(anomalies, items, basket_rows, day=None, resids=None):
     """Wire scoring inputs the loader owns: member event flags and basket residual sets."""
     registry = _basket_registry(basket_rows, day)
     for anomaly in anomalies or []:
         _member_flags(anomaly, items)
-        _attach_baskets(anomaly, registry)
+        _attach_baskets(anomaly, registry, resids)
 
 
 def _basket_registry(rows, day):
@@ -407,26 +414,33 @@ def _member_flags(anomaly, items):
         member["rating_change"] = any(item.get("is_rating_change") is True for item in seen)
 
 
-def _attach_baskets(anomaly, registry):
-    """Aggregate member resid_z by basket and keep the registry for control selection."""
+def _attach_baskets(anomaly, registry, resids=None):
+    """Aggregate resid_z per basket over the registry, and keep it for control selection.
+
+    Daily residuals come from marketstate.daily for the trade date (the same values the
+    detector scored); a member's own stored resid_z is the fallback when a ticker has no
+    daily row. Only baskets that intersect the anomaly's members are tagged on the anomaly."""
     by_name = {}
     for basket_id, info in registry.items():
         name = info.get("name")
         if name and name not in by_name:
             by_name[name] = basket_id
-    resid = {}
+    resid = dict(resids or {})
     for member in anomaly.get("members") or []:
         if isinstance(member, dict) and member.get("ticker"):
-            resid[member["ticker"]] = member.get("resid_z")
+            resid.setdefault(member["ticker"], member.get("resid_z"))
     residuals = {}
+    for basket_id, info in registry.items():
+        tickers = [ticker for ticker in info.get("members") or [] if isinstance(resid.get(ticker), (int, float))]
+        if tickers:
+            residuals[basket_id] = [resid[ticker] for ticker in tickers]
     basket_members = []
     for name in anomaly.get("baskets") or []:
         basket_id = name if name in registry else by_name.get(name)
-        if basket_id is None:
+        if basket_id is None or basket_id not in residuals:
             continue
-        tickers = [ticker for ticker in registry[basket_id]["members"] if ticker in resid]
-        basket_members.append({"basket_id": basket_id, "members": tickers})
-        residuals[basket_id] = [resid[ticker] for ticker in tickers if isinstance(resid[ticker], (int, float))]
+        members = [ticker for ticker in registry[basket_id]["members"] if ticker in resid]
+        basket_members.append({"basket_id": basket_id, "members": members})
     anomaly["basket_residuals"] = residuals
     anomaly["basket_members"] = basket_members
     anomaly["universe_baskets"] = {
