@@ -305,7 +305,7 @@ def test_entry_divergence_collapses_to_one_row_per_ticker():
     )
     report = shadow_report(conn, AS_OF, days=20, cutoff=CUTOFF)
     (row,) = report["entry_divergence"]
-    assert row["ticker"] == "PLTR" and row["direction"] == "影子拒绝、规则A放行"
+    assert row["ticker"] == "PLTR" and row["direction"] == "影子拒绝、规则 A 放行"
     assert row["first_date"] == str(D1) and row["days"] == 2
     # Latest record day's evidence, not the earliest.
     assert row["factor_label"] == "成长调整估值" and "F-01" not in row["factor_label"]

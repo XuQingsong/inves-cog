@@ -287,7 +287,7 @@ def _entry_divergence(inputs):
         seen.setdefault(row["ticker"], []).append(
             {
                 "date": str(row["date"]),
-                "direction": "影子放行、规则A拒绝" if row["would_pass"] else "影子拒绝、规则A放行",
+                "direction": "影子放行、规则 A 拒绝" if row["would_pass"] else "影子拒绝、规则 A 放行",
                 "factor_label": LABELS["factors"].get(row["factor_id"], row["factor_id"]),
                 "book_label": LABELS["books"].get(book),
                 "shadow_value": _factor_value(
