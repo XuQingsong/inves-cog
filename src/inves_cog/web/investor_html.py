@@ -737,6 +737,7 @@ def _account(payload):
         f'<div class="card kpi"><div class="l">现金</div><div class="v">{money(payload.get("cash"))}</div>'
         f'<div class="ft">占总资产 {_text(format_plain_percent(cash_ratio))}</div></div>'
     )
+    shadow_kpi = _shadow_kpi(payload)
     return (
         banner
         + _crumb("纸面账户 / 每日持仓检查")
@@ -744,7 +745,7 @@ def _account(payload):
         + f'<div><h1>{title}</h1><p class="sub">{len(holdings)} 只持仓 · 下行风险：重点 {red} / 关注 {orange} · '
         + f"止盈提示 {len(takes)} 项（不计入风险）</p></div>"
         + f'<div class="small muted" style="text-align:right">{_text(PAPER_LABEL)}</div></div>'
-        + f'<div class="grid g4 sec">{kpis}</div>'
+        + f'<div class="grid {"g5" if shadow_kpi else "g4"} sec">{kpis}{shadow_kpi}</div>'
         + '<div class="grid g-main sec"><div class="card">'
         + '<div style="display:flex;justify-content:space-between;align-items:center">'
         + '<div class="hd"><h2>今天先看这些</h2></div>'
@@ -766,7 +767,143 @@ def _account(payload):
         + _closed(payload)
         + "</div></div>"
         + _candidates(payload)
+        + _shadow_section(payload)
         + _rule_notes(payload)
+    )
+
+
+def _shadow_kpi(payload):
+    report = payload.get("shadow_report") or {}
+    counts = report.get("counts") or {}
+    divergent = counts.get("divergent")
+    if divergent is None:
+        return ""
+    unevaluable = counts.get("unevaluable") or 0
+    return (
+        '<div class="card kpi"><div class="l">影子分歧</div>'
+        f'<div class="v">{_text(divergent)} 项</div>'
+        f'<div class="ft">另有 {_text(unevaluable)} 项影子无法评估</div></div>'
+    )
+
+
+def _shadow_sold_note(row):
+    return f"，已于 {_text(row['sold_on'])} 卖出" if row.get("sold_on") else ""
+
+
+def _shadow_blocked_result(row):
+    """Group A: positive delta_usd means the shadow's veto would have saved money."""
+    usd, pct = row.get("delta_usd"), row.get("delta_pct")
+    if usd is None or pct is None:
+        return "差额无法计算"
+    word = "少亏" if usd > 0 else "少赚" if usd < 0 else "持平"
+    text = f"若未买入，至今{word} {_text(format_plain_percent(abs(pct) / 100))}（{money(abs(usd))}）"
+    return text + _shadow_sold_note(row)
+
+
+def _shadow_trim_result(row):
+    """Group B: positive delta_usd means trimming per the shadow would have been better."""
+    usd, pct = row.get("delta_usd"), row.get("delta_pct")
+    if usd is None or pct is None:
+        return "差额无法计算"
+    word = "多" if usd > 0 else "少" if usd < 0 else ""
+    text = f"若按影子减持，至今{word} {money(abs(usd))}（{_text(format_plain_percent(abs(pct) / 100))}）"
+    return text + _shadow_sold_note(row)
+
+
+def _shadow_section(payload):
+    report = payload.get("shadow_report") or {}
+    if not isinstance(report, dict) or not report.get("as_of"):
+        return ""
+    days = report.get("days") or 20
+    summary = report.get("summary") or {}
+    body = [
+        '<p class="small muted">影子规则只做记录，不影响规则 A 实际订单；'
+        "假设结果按开盘价模拟，不含滑点与费用。正数表示按影子做会更好。</p>"
+    ]
+    if report.get("reason"):
+        body.append(f'<p class="small muted">{_text(report["reason"])}</p>')
+
+    blocked = report.get("blocked_buys") or []
+    body.append(f'<h3 class="small">影子要否决、但规则 A 买了（{len(blocked)} 条）</h3>')
+    if blocked:
+        rows = "".join(
+            f"<tr><td>{_text(row['date'])}</td><td>{_text(row['ticker'])}</td>"
+            f"<td>{_text(human_reason(row.get('rule_reason')))}</td>"
+            f"<td>{_text(row.get('gate_reason'))}</td>"
+            f"<td>{_text(money(row.get('fill_price')))} → "
+            f"{_text(money(row.get('end_price') or row.get('close_price')))}</td>"
+            f"<td>{_text(_shadow_blocked_result(row))}</td></tr>"
+            for row in blocked
+        )
+        body.append(
+            '<table class="t"><thead><tr><th>日期</th><th>股票</th><th>规则 A 理由</th>'
+            "<th>影子理由</th><th>成交价 → 对比价</th><th>假设结果</th></tr></thead>"
+            f"<tbody>{rows}</tbody></table>"
+        )
+    else:
+        body.append('<p class="small muted">无</p>')
+
+    trims = report.get("missed_trims") or []
+    body.append(f'<h3 class="small">影子建议减持 1/3、但规则 A 当天没卖（{len(trims)} 条）</h3>')
+    if trims:
+        rows = "".join(
+            f"<tr><td>{_text(row['date'])}</td><td>{_text(row['ticker'])}</td>"
+            f"<td>持仓 {_text(row.get('shares'))} 股</td>"
+            f"<td>{_text(row.get('gate_reason'))}，按 {_text(row.get('open_date'))} 开盘价 "
+            f"{_text(money(row.get('open_price')))} 减持 {_text(round(row.get('trim_shares') or 0, 2))} 股</td>"
+            f"<td>{_text(money(row.get('open_price')))} → {_text(money(row.get('end_price')))}</td>"
+            f"<td>{_text(_shadow_trim_result(row))}</td></tr>"
+            for row in trims
+        )
+        body.append(
+            '<table class="t"><thead><tr><th>日期</th><th>股票</th><th>当时持仓</th>'
+            "<th>影子建议</th><th>模拟卖价 → 对比价</th><th>假设结果</th></tr></thead>"
+            f"<tbody>{rows}</tbody></table>"
+        )
+    else:
+        body.append('<p class="small muted">无</p>')
+
+    divergent = report.get("entry_divergence") or []
+    body.append(f'<h3 class="small">因子替换入场对照（{len(divergent)} 条）</h3>')
+    if divergent:
+        rows = "".join(
+            f"<tr><td>{_text(row['date'])}</td><td>{_text(row['ticker'])}</td>"
+            f"<td>{_text(row.get('direction'))}</td>"
+            f"<td>{_text(row.get('factor_label'))}（{_text(row.get('book_label')) or '对应账'}）："
+            f"影子值 {_text(round(row.get('shadow_value') or 0, 2))}，"
+            f"规则 A 生效值 {_text(round(row.get('rule_effective_value') or 0, 2))}"
+            + (f"，{_text(row['tier_label'])}" if row.get("tier_label") else "")
+            + "</td><td>影子未定义仓位，不计收益差</td></tr>"
+            for row in divergent
+        )
+        body.append(
+            '<table class="t"><thead><tr><th>日期</th><th>股票</th><th>分歧方向</th>'
+            "<th>双方依据</th><th>收益差</th></tr></thead>"
+            f"<tbody>{rows}</tbody></table>"
+        )
+    else:
+        body.append('<p class="small muted">无</p>')
+
+    counts = report.get("counts") or {}
+    body.append(
+        '<p class="small muted">汇总（近 {days} 个交易日）：影子否决但买入 {a} 条，合计差额 {ad}；'
+        "影子建议减持未卖 {b} 条，合计差额 {bd}；因子入场分歧 {c} 条；"
+        "当日可评估 {e} 项、影子分歧 {d} 项、影子无法评估 {u} 项。"
+        "正数表示按影子做会更好。</p>".format(
+            days=days,
+            a=summary.get("blocked_buys", 0),
+            ad=money(summary.get("blocked_delta_usd") or 0),
+            b=summary.get("missed_trims", 0),
+            bd=money(summary.get("missed_trim_delta_usd") or 0),
+            c=summary.get("entry_divergence", 0),
+            e=counts.get("evaluated") or 0,
+            d=counts.get("divergent") or 0,
+            u=counts.get("unevaluable") or 0,
+        )
+    )
+    return (
+        '<div class="card sec"><div class="hd"><h2>影子规则对照（仅记录，不影响订单）</h2>'
+        f'<span class="small muted">近 {_text(days)} 个交易日</span></div>' + "".join(body) + "</div>"
     )
 
 

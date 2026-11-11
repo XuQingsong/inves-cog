@@ -43,7 +43,7 @@ PAIRS = (
 )
 RESEARCH = ("/log", "/market", "/linkage/b048-e2", "/graph", "/settings/data", "/review")
 PAPER = tuple(path for path, _ in PAIRS if path.startswith("/paper"))
-COUNT_LABELS = ("异常数", "各状态数", "高优先级信息数", "交易动作数", "决定不动数", "影子分歧数")
+COUNT_LABELS = ("异常数", "各状态数", "高优先级信息数", "交易动作数", "决定不动数", "影子分歧")
 MEANINGS = ("原因未明", "已归因·不需要行动", "已行动", "截止日已结", "事后确认漏检")
 FIELD_LABELS = {
     "orders": "订单",

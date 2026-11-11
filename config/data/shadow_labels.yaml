@@ -1,0 +1,35 @@
+# Display labels for the shadow-vs-Rule-A comparison section on /account.
+# Internal identifiers (V-T1, F-01, M-xx, X1-X4) must never reach the page;
+# the renderer maps them through this table.
+gates:
+  vt1: 估值否决
+  vt2: 买入上限减半
+  v3_trim: 单版本减持三分之一
+factors:
+  F-01: 成长调整估值
+  F-02: 拐点质量
+  F-03: 盈利预期修订
+  F-04: 核心分部利润率
+  F-05: 核心分部收入增速
+  F-06: 波动仓位系数
+  F-07: 估值位置门槛
+  F-08: 价格型卖出复核
+factor_books:
+  F-01: valuation
+  F-02: quality
+  F-03: growth
+  F-04: quality
+  F-05: growth
+books:
+  valuation: 估值账
+  growth: 成长账
+  quality: 质量账
+  timing: 择时账
+tiers:
+  attack: 进攻层
+  normal: 标准层
+  defense: 防守层
+order_status:
+  filled: 已成交
+  pending: 待成交
+  expired: 未成交（已失效）

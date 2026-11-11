@@ -13,6 +13,7 @@ import yaml
 
 from inves_cog.ingest.market import NY, trading_day
 from inves_cog.perception.anomaly.precursor import precursor_line
+from inves_cog.valuation_v1.shadow_report import shadow_report
 from inves_cog.web.pages import (
     PAPER_LABEL,
     _anomalies,
@@ -2814,6 +2815,7 @@ def page_brief_account(connection, day, clock):
         "plan_missing": carried is not None,
         "carried_from": None if carried is None else carried.isoformat(),
         "holdings": holdings,
+        "shadow_report": shadow_report(connection, day, days=20, cutoff=context["cutoff"]),
         "pending_orders": [
             {
                 "ticker": row["ticker"],

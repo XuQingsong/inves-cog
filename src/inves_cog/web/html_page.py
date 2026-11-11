@@ -22,7 +22,7 @@ COUNT_LABELS = (
     ("high_priority_info_count", "高优先级信息数"),
     ("trade_action_count", "交易动作数"),
     ("no_action_count", "决定不动数"),
-    ("shadow_divergence_count", "影子分歧数"),
+    ("shadow_divergence_count", "影子分歧"),
 )
 NAV = (
     ("/", "市场总览"),
@@ -177,8 +177,15 @@ def render_page(payload):
 def _counts(counts):
     lines = []
     for key, label in COUNT_LABELS:
-        if key in counts:
-            lines.append(f"<p>{_text(label)} {_value(counts[key], False)}</p>")
+        if key not in counts:
+            continue
+        if key == "shadow_divergence_count" and "shadow_unevaluable_count" in counts:
+            lines.append(
+                f"<p>{_text(label)} {_value(counts[key], False)} 项"
+                f"（另有 {_value(counts['shadow_unevaluable_count'], False)} 项影子无法评估）</p>"
+            )
+            continue
+        lines.append(f"<p>{_text(label)} {_value(counts[key], False)}</p>")
     if "status_counts" in counts:
         lines.append(f"<p>各状态数</p>{_value(counts['status_counts'], False)}")
     return "".join(lines)
