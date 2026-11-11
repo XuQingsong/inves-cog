@@ -416,11 +416,11 @@ def test_structural_break_post_window_and_oneoff_flag():
 def test_break_unvalued_e2e_payload_notes_render():
     """断点不足 8 季 → 周期行 unvalued，notes 进 payload.inputs，页面出原因。"""
     from datetime import date, timedelta
+
     from inves_cog.ingest.fundamentals.state import FinState
-    from inves_cog.valuation_v1.inputs import financial_inputs
     from inves_cog.valuation_v1.calculations import calculate, mark_price
+    from inves_cog.valuation_v1.inputs import financial_inputs
     from inves_cog.web.brief import valuation_card
-    from inves_cog.web.investor_html import _valuation
 
     entity = {"ticker": "WDC", "sic": "3572", "sector": "storage"}
     q = [
