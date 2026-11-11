@@ -199,3 +199,13 @@ def test_key_stats_and_earnings_hist():
         }
     )
     assert "+10.0%" in hist and "次日涨跌" in hist and "日期未知" in hist and "—" in hist
+
+
+def test_out_of_scope_pages_state_the_scope():
+    from inves_cog.web.investor_html import _stock
+
+    html = _stock({"symbol": "ABCB", "no_data": True})
+    assert "ABCB" in html and "不在关注范围内" in html and "系统未采集其数据" in html and 'href="/"' in html
+
+    html = _stock({"symbol": "ABCB", "untracked": True})
+    assert "不在关注范围内" in html and "只显示价格与走势" in html and 'href="/"' in html
