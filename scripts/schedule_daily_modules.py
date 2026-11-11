@@ -164,6 +164,8 @@ def run_anomalies(*, clock, values):
                         baseline_days=int(options.get("baseline_days", 20)),
                         z_threshold=float(options.get("z_threshold", 2.0)),
                         min_baseline=int(options.get("min_baseline", 10)),
+                        short_min_volume=int(options.get("short_min_volume", 1_000_000)),
+                        occ_min_contracts=int(options.get("occ_min_contracts", 1_000)),
                     )
                 except Exception:
                     row["precursor"] = {"unavailable": "precursor_failed"}

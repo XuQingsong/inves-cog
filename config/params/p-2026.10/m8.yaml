@@ -32,6 +32,8 @@ m8:
     baseline_days: 20
     z_threshold: 2.0
     min_baseline: 10
+    short_min_volume: 1000000
+    occ_min_contracts: 1000
   retrieval_weights:
     overlap: 0.4
     recency: 0.3

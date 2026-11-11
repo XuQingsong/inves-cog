@@ -150,15 +150,16 @@ class _PrecursorDB:
         )
 
 
-def _flat_series(end_day, count, ratio=0.5, puts=50, calls=100):
-    """Slightly varying flat series so the baseline stdev is non-zero."""
+def _flat_series(end_day, count, ratio=0.5, puts=500, calls=1000):
+    """Slightly varying flat series so the baseline stdev is non-zero; volumes stay
+    above the minimum-volume gates (total_volume >= 1e6, options >= 1000)."""
     from datetime import timedelta
 
     rows, occ = [], []
     for offset in range(1, count + 1):
         day = date.fromisoformat(end_day) - timedelta(days=offset)
         jitter = (offset % 3 - 1) * 0.01
-        rows.append({"date": day, "short_volume": int((ratio + jitter) * 1000), "total_volume": 1000})
+        rows.append({"date": day, "short_volume": int((ratio + jitter) * 2_000_000), "total_volume": 2_000_000})
         occ.append({"date": day, "cp": "P", "quantity": puts + (offset % 3 - 1) * 2})
         occ.append({"date": day, "cp": "C", "quantity": calls})
     return sorted(rows, key=lambda row: row["date"], reverse=True), occ
@@ -172,18 +173,19 @@ def test_precursor_uses_only_prior_days_and_flags_z():
     t_minus_1 = short_rows[0]["date"]
     trade = date(2026, 10, 30)
     # T-day rows must never feed the annotation even when present.
-    short_rows.insert(0, {"date": trade, "short_volume": 1000, "total_volume": 1000})
+    short_rows.insert(0, {"date": trade, "short_volume": 2_000_000, "total_volume": 2_000_000})
     occ_rows.extend(
         [
-            {"date": trade, "cp": "P", "quantity": 400},
-            {"date": trade, "cp": "C", "quantity": 100},
+            {"date": trade, "cp": "P", "quantity": 4000},
+            {"date": trade, "cp": "C", "quantity": 1000},
         ]
     )
-    # T-1 put/call jumps ~0.5 -> ~2.0 against a flat baseline.
+    # T-1 put/call jumps ~0.5 -> 2.0 against a flat baseline.
+    occ_rows = [row for row in occ_rows if row["date"] != t_minus_1]
     occ_rows.extend(
         [
-            {"date": t_minus_1, "cp": "P", "quantity": 350},
-            {"date": t_minus_1, "cp": "C", "quantity": 100},
+            {"date": t_minus_1, "cp": "P", "quantity": 4000},
+            {"date": t_minus_1, "cp": "C", "quantity": 2000},
         ]
     )
     connection = _PrecursorDB({"AAA": short_rows}, {"AAA": occ_rows})
@@ -206,8 +208,8 @@ def test_precursor_up_alignment_on_falling_put_call():
     occ_rows = [row for row in occ_rows if row["date"] != t_minus_1]
     occ_rows.extend(
         [
-            {"date": t_minus_1, "cp": "P", "quantity": 5},
-            {"date": t_minus_1, "cp": "C", "quantity": 100},
+            {"date": t_minus_1, "cp": "P", "quantity": 50},
+            {"date": t_minus_1, "cp": "C", "quantity": 2000},
         ]
     )
     connection = _PrecursorDB({"AAA": short_rows}, {"AAA": occ_rows})
@@ -239,6 +241,36 @@ def test_precursor_occ_insufficient_and_line():
     assert precursor_line(flagged, 5) == "异动前一日：3/5 只成员场外做空或看跌期权异常（同向 2）"
     assert precursor_line(None, 5) is None
     assert precursor_line({"unavailable": "precursor_failed"}, 5) is None
+
+
+@pytest.mark.phase1_blocking
+def test_precursor_thin_volume_is_marked_not_judged():
+    from inves_cog.perception.anomaly.precursor import compute_precursor
+
+    short_rows, occ_rows = _flat_series("2026-10-30", 21)
+    t_minus_1 = short_rows[0]["date"]
+    trade = date(2026, 10, 30)
+    # T-1: extreme moves but tiny volumes -> both metrics read 成交过少，不判.
+    short_rows[0] = {"date": t_minus_1, "short_volume": 900, "total_volume": 1_000}
+    occ_rows = [row for row in occ_rows if row["date"] != t_minus_1]
+    occ_rows.extend(
+        [
+            {"date": t_minus_1, "cp": "P", "quantity": 700},
+            {"date": t_minus_1, "cp": "C", "quantity": 100},
+        ]
+    )
+    connection = _PrecursorDB({"AAA": short_rows}, {"AAA": occ_rows})
+    result = compute_precursor(connection, [{"ticker": "AAA"}], trade, "down", min_baseline=10)
+    detail = result["details"][0]
+    assert detail["short_z"] is None and detail["pc_z"] is None
+    assert detail["notes"] == ["成交过少，不判", "成交过少，不判"]
+    assert result["members_flagged"] == 0 and result["aligned"] == 0
+    # Thresholds come from parameters, not the fixture defaults.
+    judged = compute_precursor(
+        connection, [{"ticker": "AAA"}], trade, "down", min_baseline=10, short_min_volume=0, occ_min_contracts=0
+    )
+    assert judged["details"][0]["notes"] == []
+    assert judged["members_flagged"] == 1
 
 
 @pytest.mark.phase1_blocking
