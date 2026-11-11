@@ -521,20 +521,32 @@ def test_oneoff_single_quarter_thresholds():
     ]
     assert financial_inputs(small[-1], small, entity).get("oneoff_note") is None
 
-    # 亏损季被盈利季夹住且 |亏损| > 25% TTM（130 > 0.25×460）→ 标该亏损季
+    # 亏损季被盈利季夹住且 |亏损| > 25% TTM（130 > 0.25×510）→ 标该亏损季
     dip = [
         mk("GRW", pe, ni)
-        for pe, ni in zip(dates, [400e6, 460e6, 330e6, 360e6, 390e6, 410e6, 430e6, 450e6], strict=True)
+        for pe, ni in zip(dates, [400e6, 430e6, 450e6, 470e6, 490e6, 510e6, 380e6, 410e6], strict=True)
     ]
     out = financial_inputs(dip[-1], dip, entity)
-    assert out.get("oneoff_note") == f"疑似一次性项目（{dates[2]}）"
+    assert out.get("oneoff_note") == f"疑似一次性项目（{dates[6]}）"
 
     # 亏损额未达 25% TTM → 不标
     mild = [
         mk("GRW", pe, ni)
-        for pe, ni in zip(dates, [400e6, 430e6, 390e6, 410e6, 430e6, 450e6, 470e6, 490e6], strict=True)
+        for pe, ni in zip(dates, [400e6, 430e6, 450e6, 470e6, 490e6, 510e6, 480e6, 500e6], strict=True)
     ]
     assert financial_inputs(mild[-1], mild, entity).get("oneoff_note") is None
+
+    # 同一亏损季滚出当前 TTM 窗口（之后又有 4 季）→ 不标
+    dates12 = dates9 + [dates9[-1] + timedelta(days=91 * i) for i in range(1, 4)]
+    rolled = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(
+            dates12,
+            [400e6, 430e6, 450e6, 470e6, 490e6, 510e6, 380e6, 410e6, 430e6, 450e6, 470e6, 490e6],
+            strict=True,
+        )
+    ]
+    assert financial_inputs(rolled[-1], rolled, entity).get("oneoff_note") is None
 
 
 def test_consensus_av_fy_horizons():

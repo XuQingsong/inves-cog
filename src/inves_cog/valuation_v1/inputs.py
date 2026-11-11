@@ -331,13 +331,14 @@ def financial_inputs(state, states, entity, *, as_of=None):
 
 
 def _oneoff_note(states):
-    """Single-quarter one-off flag over the recent quarters: implied quarter
-    NI (delta of consecutive TTM states, one row per period_end) exceeds
-    oneoff.spike_median_mult x the median |NI| of the preceding quarters and
-    oneoff.spike_ttm_share of the trailing TTM base it lands on, AND the next
-    quarter falls back below 50% of the anomaly (the latest quarter, without
-    a successor to confirm reversion, is never flagged); or a loss quarter
-    between profitable quarters exceeding oneoff.loss_ttm_share of that base.
+    """Single-quarter one-off flag, restricted to the current TTM window (the
+    last 4 quarters, excluding the latest — no successor to confirm
+    reversion): implied quarter NI (delta of consecutive TTM states, one row
+    per period_end) exceeds oneoff.spike_median_mult x the median |NI| of the
+    preceding quarters and oneoff.spike_ttm_share of the trailing TTM base it
+    lands on, AND the next quarter falls back below 50% of the anomaly; or a
+    loss quarter between profitable quarters exceeding oneoff.loss_ttm_share
+    of that base. Quarters that rolled out of the TTM window never flag.
     Numbers untouched."""
     oneoff = settings().get("oneoff") or {}
     spike_mult = float(oneoff.get("spike_median_mult", 3))
@@ -359,7 +360,10 @@ def _oneoff_note(states):
         )
         for i in range(1, len(q_states))
     ]
-    for i in range(len(deltas) - 1, max(-1, len(deltas) - 8), -1):
+    # only quarters inside the current TTM window affect today's valuation:
+    # candidates are the last 4 quarters minus the latest (no successor to
+    # confirm reversion) -> deltas[len-4 .. len-2]
+    for i in range(len(deltas) - 2, max(-1, len(deltas) - 5), -1):
         end_i, dv, ttm_prev, ttm_i = deltas[i]
         others = [abs(v) for _, v, _, _ in deltas[max(0, i - 7) : i]]
         med = median(others) if others else 0
