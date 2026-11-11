@@ -373,4 +373,4 @@ def test_finstate_selection_fixed_latest_filed_period_tiebreak():
     got = store.state_asof("WDC", date(2026, 11, 9), "fixed")
     assert got is fixed_new_b  # latest filed; period_end breaks the filed tie
     assert store.state_asof("WDC", date(2026, 11, 9), "legacy") is legacy
-    assert store.state_asof("WDC", date(2026, 10, 21), "fixed") is fixed_old  # PIT: new not yet filed (state_asof: filed 相同按 period_end 取最新（确定性选择）；测试钉住 fixed-only+最新申报+同 filed 打破)
+    assert store.state_asof("WDC", date(2026, 10, 21), "fixed") is fixed_old  # PIT: new not yet filed
