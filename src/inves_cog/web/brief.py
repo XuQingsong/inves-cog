@@ -243,8 +243,15 @@ def valuation_card(range_row, pe, price):
     }
     card["sanity"] = payload.get("sanity")
     card["sanity_reason"] = payload.get("sanity_reason")
+    card["unstable"] = payload.get("unstable")
+    if payload.get("pending_review") and payload.get("review_reason"):
+        card["notes"].append(str(payload["review_reason"]))
+    if payload.get("publish_basis"):
+        card["notes"].append(str(payload["publish_basis"]))
     if card["sanity"]:
         card["state"] = "估值暂不可用"
+    elif card["unstable"]:
+        card["state"] = "估值不稳定"
     if card["implied_growth"] is None and payload.get("implied_reason"):
         card["implied_reason"] = plain_implied_reason(payload.get("implied_reason"))
     if card["pe_extreme"]:
@@ -274,6 +281,8 @@ def _range_line(payload, range_row, price):
     label = "估值区间（悲观–中性–乐观）· 仅供参考，不是目标价"
     if payload.get("sanity"):
         return f"{label} · 估值暂不可用：输入数据待核（{payload.get('sanity_reason') or '输入异常'}）"
+    if payload.get("unstable"):
+        return f"{label} · 估值不稳定，暂不可用"
     date_txt = payload.get("date") or (None if range_row is None else range_row.get("trade_date"))
     basis = payload.get("type") or "—"
     if bear is None or bull is None or neutral is None:

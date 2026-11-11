@@ -214,9 +214,68 @@ def test_pending_review_over_25pct():
     a = b.update("AAA", date(2026, 10, 9), "稳定", stable(), period="2026-06-30", price=170)
     new = {**stable(), "eps_ntm": 20}
     r = b.update("AAA", date(2026, 10, 12), "稳定", new, period="2026-06-30", price=180)
-    assert r["pending_review"] and r["neutral"] == a["neutral"] and r["proposed"]["neutral"] > 1.25 * a["neutral"]
+    assert (
+        r["pending_review"] and r["neutral"] == a["neutral"] and r["proposed"]["row"]["neutral"] > 1.25 * a["neutral"]
+    )
     ok = b.update("AAA", date(2026, 10, 13), "稳定", new, period="2026-09-30", price=180)
     assert not ok["pending_review"] and ok["neutral"] > a["neutral"]
+
+
+@pytest.mark.phase1_blocking
+def test_pending_auto_confirm_and_expire():
+    """pending_review 全自动：method_refresh 直发、3 日稳定自动发布、5 日跳动转不稳定。"""
+    from inves_cog.valuation_v1.lifecycle import ValuationBook
+
+    # 方法版本变化：>25% 变化也直接发布，publish_basis 注明重算
+    b = ValuationBook()
+    a = b.update("AAA", date(2026, 10, 9), "稳定", stable(), period="2026-06-30", price=170)
+    b.published["AAA"]["method_version"] = "v0.legacy"
+    r = b.update("AAA", date(2026, 10, 12), "稳定", {**stable(), "eps_ntm": 20}, period="2026-06-30", price=180)
+    assert not r.get("pending_review") and r["neutral"] != a["neutral"]
+    assert r["publish_basis"].startswith("方法 v") and r["publish_basis"].endswith("重算")
+    assert "AAA" not in b.pending
+
+    # 连续 3 日候选彼此偏差 <=10% → 第 3 日自动发布
+    b2 = ValuationBook()
+    a2 = b2.update("BBB", date(2026, 10, 9), "稳定", stable(), period="2026-06-30", price=170)
+    jump = {**stable(), "eps_ntm": 20}
+    r1 = b2.update("BBB", date(2026, 10, 12), "稳定", jump, period="2026-06-30", price=180)
+    assert r1["pending_review"] and r1["neutral"] == a2["neutral"] and r1["confirm_day"] == 1
+    assert "第 1/3 日" in r1["review_reason"]
+    r2 = b2.update("BBB", date(2026, 10, 13), "稳定", {**stable(), "eps_ntm": 21}, period="2026-06-30", price=180)
+    assert r2["pending_review"] and r2["confirm_day"] == 2 and r2["neutral"] == a2["neutral"]
+    r3 = b2.update("BBB", date(2026, 10, 14), "稳定", {**stable(), "eps_ntm": 20}, period="2026-06-30", price=180)
+    assert not r3.get("pending_review") and "已连续 3 日确认" in r3["publish_basis"]
+    assert "BBB" not in b2.pending
+
+    # 候选持续跳动：第 5 日转为估值不稳定，不再保留旧值
+    b3 = ValuationBook()
+    b3.update("CCC", date(2026, 10, 9), "稳定", stable(), period="2026-06-30", price=170)
+    for i, d in enumerate([date(2026, 10, 12), date(2026, 10, 13), date(2026, 10, 14), date(2026, 10, 15)]):
+        out = b3.update(
+            "CCC", d, "稳定", {**stable(), "eps_ntm": 20 if i % 2 == 0 else 26}, period="2026-06-30", price=180
+        )
+        assert out["pending_review"], (d, out.get("confirm_day"))
+    last = b3.update("CCC", date(2026, 10, 16), "稳定", {**stable(), "eps_ntm": 20}, period="2026-06-30", price=180)
+    assert last["unstable"] and not last.get("pending_review")
+    assert last["trigger_audit"]["publication"] == "unstable"
+
+    # 合理性闸门优先：新值触发闸门 → 直接发布“暂不可用”，不进确认期
+    b4 = ValuationBook()
+    b4.update("DDD", date(2026, 10, 9), "稳定", stable(), period="2026-06-30", price=170)
+    gated = b4.update("DDD", date(2026, 10, 12), "稳定", {**stable(), "eps_ntm": 100}, period="2026-06-30", price=180)
+    assert gated["sanity"] == "输入可疑" and not gated.get("pending_review") and "DDD" not in b4.pending
+
+
+@pytest.mark.phase1_blocking
+def test_no_manual_approval_entry():
+    """人工批准入口已删除：update 无 manual 参数、ValuationBook 无 approve 方法。"""
+    import inspect
+
+    from inves_cog.valuation_v1.lifecycle import ValuationBook
+
+    assert not hasattr(ValuationBook(), "approve")
+    assert "manual" not in inspect.signature(ValuationBook.update).parameters
 
 
 @pytest.mark.phase1_blocking

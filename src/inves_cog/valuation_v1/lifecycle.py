@@ -138,9 +138,7 @@ class ValuationBook:
         self.pending = {}
         self.audit = []
 
-    def update(
-        self, ticker, day, candidate, inputs, *, period, price, financial_version=None, month_refresh=False, manual=None
-    ):
+    def update(self, ticker, day, candidate, inputs, *, period, price, financial_version=None, month_refresh=False):
         c = settings()["lifecycle"]
         old = self.published.get(ticker)
         financial_version = str(financial_version or period)
@@ -160,8 +158,6 @@ class ValuationBook:
         )
         h = self.types.setdefault(ticker, TypeHistory())
         kind = h.observe(period, candidate) if new_report or method_refresh else h.current
-        if manual:
-            kind = h.override(manual["type"], who=manual["who"], reason=manual["reason"], when=manual.get("when"))
         old_ntm = old["inputs"].get("eps_ntm") if old else None
         new_ntm = inputs.get("eps_ntm")
         withdrawn = bool(
@@ -177,15 +173,7 @@ class ValuationBook:
         consensus_event = (old_ntm is None) != (new_ntm is None) or (
             new_ntm is not None and bounds is not None and not bounds[0] <= new_ntm <= bounds[1]
         )
-        trigger = (
-            new_report
-            or method_refresh
-            or consensus_event
-            or unit_event
-            or input_contract_event
-            or month_refresh
-            or manual is not None
-        )
+        trigger = new_report or method_refresh or consensus_event or unit_event or input_contract_event or month_refresh
         audit = {
             "new_report": new_report,
             "consensus_event": consensus_event,
@@ -195,7 +183,6 @@ class ValuationBook:
             "actual_unit_contract_event": actual_unit_event,
             "input_contract_event": input_contract_event,
             "invalid_forecast_withdrawn": withdrawn,
-            "manual": manual is not None,
             "previous_eps_ntm": old_ntm,
             "candidate_eps_ntm": new_ntm,
             "consensus_bounds": bounds,
@@ -210,7 +197,6 @@ class ValuationBook:
                 and not method_refresh
                 and not actual_unit_event
                 and not input_contract_event
-                and manual is None
             ):
                 # A consensus-only event updates E/g inputs, not daily PE history.
                 unit_keys = {"listed_unit_audit", "listed_unit_blockers", "consensus_reason"} if unit_event else set()
@@ -223,9 +209,11 @@ class ValuationBook:
                 and not method_refresh
                 and not unit_event
                 and not input_contract_event
-                and manual is None
             ):
                 inputs = {**old["inputs"], **{key: inputs.get(key) for key in MULTIPLES}}
+        # 用户 2026-11-11 决定：估值不接受人工批准，人只能通过带版本号的方法变更影响估值。
+        # 待确认状态每天照常重算，让确认窗口吃到真实的每日序列。
+        if trigger or ticker in self.pending:
             fresh = calculate(kind, {**inputs, "type_disagreement": h.disagreement})
             fresh.update(
                 ticker=ticker,
@@ -242,14 +230,49 @@ class ValuationBook:
                 and after is not None
                 and abs(after / before - 1) * 100 > c["review_trigger_pct"]
             )
-            if old and not new_report and large and not withdrawn:
-                self.pending[ticker] = deepcopy(fresh)
+            san = settings().get("sanity") or {}
+            lo_r, hi_r = float(san.get("ratio_low", 0.2)), float(san.get("ratio_high", 5))
+            # 合理性闸门优先：触发闸门的新值直接发布为“估值暂不可用”，不进确认期。
+            flagged = after is not None and price not in (None, 0) and (after / price < lo_r or after / price > hi_r)
+            if method_refresh:
+                fresh["publish_basis"] = f"方法 {settings()['method_version']} 重算"
+            elif new_report:
+                fresh["publish_basis"] = "新财报触发"
+            if old and not new_report and not method_refresh and large and not withdrawn and not flagged:
+                confirm_days = int(c.get("pending_confirm_days", 3))
+                confirm_band = float(c.get("pending_confirm_band_pct", 10)) / 100
+                expire_days = int(c.get("pending_expire_days", 5))
+                p = self.pending.setdefault(ticker, {"since": str(day), "values": []})
+                p["row"] = deepcopy(fresh)
+                vals = p["values"]
+                vals[:] = [v for v in vals if v[0] != str(day)] + [[str(day), after]]
+                vals.sort(key=lambda v: v[0])
+                if len(vals) >= confirm_days:
+                    recent = [v[1] for v in vals[-confirm_days:]]
+                    lo_v = min(recent)
+                    if lo_v > 0 and max(recent) / lo_v - 1 <= confirm_band:
+                        pct = abs(after / before - 1) * 100
+                        fresh["publish_basis"] = f"较前值变化 {pct:.1f}%，已连续 {confirm_days} 日确认"
+                        self.published[ticker] = deepcopy(fresh)
+                        self.pending.pop(ticker, None)
+                        shown = mark_price(self.published[ticker], price)
+                        shown.update(date=day, trigger_audit={**audit, "publication": "confirmed"})
+                        return shown
+                if len(vals) >= expire_days:
+                    fresh["unstable"] = True
+                    self.published[ticker] = deepcopy(fresh)
+                    self.pending.pop(ticker, None)
+                    shown = mark_price(self.published[ticker], price)
+                    shown.update(date=day, unstable=True, trigger_audit={**audit, "publication": "unstable"})
+                    return shown
                 shown = mark_price(old, price)
                 shown.update(
                     date=day,
                     pending_review=True,
-                    proposed=mark_price(fresh, price),
-                    review_reason="无新财报，中性值变化超过25%",
+                    confirm_day=len(vals),
+                    confirm_total=confirm_days,
+                    proposed={"row": mark_price(p["row"], price), "values": p["values"], "since": p["since"]},
+                    review_reason=f"估值变化待确认（第 {len(vals)}/{confirm_days} 日）",
                     trigger_audit={**audit, "publication": "pending_review"},
                 )
                 return shown
@@ -259,28 +282,13 @@ class ValuationBook:
         shown["date"] = day
         shown["trigger_audit"] = audit
         if ticker in self.pending:
+            entry = self.pending[ticker]
+            row = entry["row"] if isinstance(entry, dict) and "row" in entry else entry
             shown.update(
                 pending_review=True,
-                proposed=mark_price(self.pending[ticker], price),
-                review_reason="待人工复核，沿用已发布值",
+                proposed={"row": mark_price(row, price), "values": entry.get("values", []), "since": entry.get("since")}
+                if isinstance(entry, dict)
+                else {"row": mark_price(row, price)},
+                review_reason=shown.get("review_reason") or "估值变化待确认",
             )
         return shown
-
-    def approve(self, ticker, *, who, reason, when):
-        if not who or not reason:
-            raise ValueError("复核必须记录操作者和理由")
-        proposed = self.pending.pop(ticker)
-        self.audit.append(
-            {
-                "ticker": ticker,
-                "who": who,
-                "reason": reason,
-                "when": when,
-                "old_version": self.published[ticker]["version"],
-                "new_version": proposed["version"],
-            }
-        )
-        proposed["review_audit"] = deepcopy(self.audit[-1])
-        proposed["pending_review"] = False
-        self.published[ticker] = proposed
-        return deepcopy(proposed)

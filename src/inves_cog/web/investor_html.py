@@ -138,6 +138,8 @@ def _valuation(view, full=False):
         return "估值暂缺"
     if view.get("sanity"):
         return "估值暂不可用：输入数据待核（" + str(view.get("sanity_reason") or "输入异常") + "）"
+    if view.get("unstable"):
+        return "估值不稳定，暂不可用"
     if view.get("state") == "未估值":
         short = short_unvalued_text(view.get("text") or "未估值")
         inner = short[len("未估值（") : -1] if short.startswith("未估值（") and short.endswith("）") else ""
