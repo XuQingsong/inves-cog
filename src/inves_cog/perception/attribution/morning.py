@@ -343,10 +343,13 @@ def _anomaly(row):
 
 def enrich_anomalies(anomalies, items, basket_rows, day=None, resids=None):
     """Wire scoring inputs the loader owns: member event flags and basket residual sets."""
-    registry = _basket_registry(basket_rows, day)
+    registries = {}
     for anomaly in anomalies or []:
+        registry_day = day or anomaly.get("trade_date")
+        if registry_day not in registries:
+            registries[registry_day] = _basket_registry(basket_rows, registry_day or "9999-12-31")
         _member_flags(anomaly, items)
-        _attach_baskets(anomaly, registry, resids)
+        _attach_baskets(anomaly, registries[registry_day], resids)
 
 
 def _basket_registry(rows, day):
@@ -359,7 +362,7 @@ def _basket_registry(rows, day):
         registry[basket_id] = {
             "name": record.get("name"),
             "level": record.get("level"),
-            "members": active_tickers({"members": _array(record.get("members"))}, day or date.today()),
+            "members": active_tickers({"members": _array(record.get("members"))}, day or "9999-12-31"),
         }
     return registry
 
