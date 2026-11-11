@@ -1311,9 +1311,9 @@ def _residuals(candidate, anomaly):
         expected.extend(table.get(basket_id) or [])
     if not expected and table:
         # Candidate basket labels are free text; the anomaly's own hit baskets are the expected set.
-        expected_baskets = set(table)
-        for values in table.values():
-            expected.extend(values)
+        expected_baskets = {row.get("basket_id") for row in anomaly.get("basket_members") or []}
+        for basket_id in expected_baskets:
+            expected.extend(table.get(basket_id) or [])
     control = []
     for basket in candidate.get("control_baskets") or []:
         control.extend(table.get(basket) or [])
