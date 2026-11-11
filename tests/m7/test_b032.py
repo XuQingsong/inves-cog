@@ -144,8 +144,10 @@ def test_detection_write_uses_the_injected_clock():
     write_anomalies(connection, [write_row()], generated_at=AFTER)
     statement, params = connection.statements[0]
     assert "generated_at" in statement
+    assert "precursor" in statement
     assert params[1] == date(2026, 1, 27)
-    assert params[-1] == AFTER
+    assert params[-2] == AFTER
+    assert params[-1] is None
 
 
 class Split:
