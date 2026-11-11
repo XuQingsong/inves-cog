@@ -464,3 +464,58 @@ def test_break_unvalued_e2e_payload_notes_render():
     from inves_cog.web.brief import short_unvalued_text
 
     assert "周期正常化历史不足" in short_unvalued_text(card["text"])
+
+
+@pytest.mark.phase1_blocking
+def test_oneoff_single_quarter_thresholds():
+    """单季口径一次性项目：跳变需 >3×前 7 季中位且 >40% TTM；亏损季前后盈利且 >25% TTM。"""
+    from datetime import date, timedelta
+
+    from inves_cog.ingest.fundamentals.state import FinState
+    from inves_cog.valuation_v1.inputs import financial_inputs
+
+    entity = {"ticker": "GRW", "sic": "3572", "sector": "storage"}
+
+    def mk(ticker, pe, ni, form="10-Q"):
+        return FinState(
+            ticker, "fixed", pe + timedelta(days=20), pe, form=form, values={"ni_ttm": ni, "rev_ttm": 10_000e6}
+        )
+
+    dates = [date(2025, 1, 3) + timedelta(days=91 * i) for i in range(8)]
+
+    # 稳定增长：TTM 差分均匀，既未超中位 3 倍也未占 TTM 40% → 不标
+    steady = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates, [100e6, 150e6, 205e6, 265e6, 330e6, 400e6, 475e6, 555e6], strict=True)
+    ]
+    assert financial_inputs(steady[-1], steady, entity).get("oneoff_note") is None
+
+    # 单季尖峰：末季差分 680 > 3×中位 20 且 > 40%×900 → 标末季
+    spike = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 900e6], strict=True)
+    ]
+    out = financial_inputs(spike[-1], spike, entity)
+    assert out.get("oneoff_note") == f"疑似一次性项目（{dates[-1]}）"
+
+    # 尖峰但占 TTM 不足 40% → 不标
+    small = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates, [100e6, 120e6, 140e6, 160e6, 180e6, 200e6, 220e6, 300e6], strict=True)
+    ]
+    assert financial_inputs(small[-1], small, entity).get("oneoff_note") is None
+
+    # 亏损季被盈利季夹住且 |亏损| > 25% TTM → 标该亏损季
+    dip = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates, [400e6, 430e6, 330e6, 360e6, 390e6, 410e6, 430e6, 450e6], strict=True)
+    ]
+    out = financial_inputs(dip[-1], dip, entity)
+    assert out.get("oneoff_note") == f"疑似一次性项目（{dates[2]}）"
+
+    # 亏损额未达 25% TTM → 不标
+    mild = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(dates, [400e6, 430e6, 390e6, 410e6, 430e6, 450e6, 470e6, 490e6], strict=True)
+    ]
+    assert financial_inputs(mild[-1], mild, entity).get("oneoff_note") is None
