@@ -49,6 +49,31 @@ def jsonb(row):
     return Jsonb(row, dumps=lambda x: json.dumps(x, default=str, ensure_ascii=False, allow_nan=False))
 
 
+def _apply_consensus_row(per, r):
+    """Fold one consensus_snapshots row into the per-ticker snapshot slots.
+
+    Alpha Vantage writes horizon='FY1'/'FY2' (mapped to cy/ny by name);
+    legacy 'year' rows are ordered by fiscal_end, nearest year -> cy, later -> ny.
+    """
+    as_of = r["fetched_at"].date() if hasattr(r["fetched_at"], "date") else r["fetched_at"]
+    slot = next((x for x in per if x["as_of"] == as_of), None)
+    if slot is None:
+        slot = {"as_of": as_of, "captured_at": r["fetched_at"], "source": "alpha_vantage"}
+        per.append(slot)
+    fy = r["fiscal_end"]
+    if fy is None:
+        return
+    horizon = (r["horizon"] or "").upper()
+    if horizon == "FY1":
+        slot.update(fy_cy=fy, eps_cy=r["eps_avg"], rev_cy=r["revenue_avg"])
+    elif horizon == "FY2":
+        slot.update(fy_ny=fy, eps_ny=r["eps_avg"], rev_ny=r["revenue_avg"])
+    elif slot.get("fy_cy") is None:
+        slot.update(fy_cy=fy, eps_cy=r["eps_avg"], rev_cy=r["revenue_avg"])
+    elif fy != slot["fy_cy"]:
+        slot.update(fy_ny=fy, eps_ny=r["eps_avg"], rev_ny=r["revenue_avg"])
+
+
 class Repository:
     def __init__(self, connection):
         self.connection = connection
@@ -92,24 +117,12 @@ class Repository:
         for r in self.connection.execute(
             "SELECT ticker, fetched_at, fiscal_end, horizon, eps_avg, revenue_avg "
             "FROM valuation_v1.consensus_snapshots WHERE ticker=ANY(%s) "
-            "AND kind='estimate' AND fetched_at::date<=%s AND horizon ILIKE '%%year%%' "
+            "AND kind='estimate' AND fetched_at::date<=%s "
+            "AND (horizon ILIKE '%%year%%' OR horizon IN ('FY1','FY2')) "
             "ORDER BY ticker,fiscal_end",
             (tickers, through),
         ).fetchall():
-            per = snapshots[r["ticker"]]
-            as_of = r["fetched_at"].date() if hasattr(r["fetched_at"], "date") else r["fetched_at"]
-            slot = next((x for x in per if x["as_of"] == as_of), None)
-            if slot is None:
-                slot = {"as_of": as_of, "captured_at": r["fetched_at"], "source": "alpha_vantage"}
-                per.append(slot)
-            # rows arrive ordered by fiscal_end; nearest fiscal year -> cy, later -> ny
-            fy = r["fiscal_end"]
-            if fy is None:
-                continue
-            if slot.get("fy_cy") is None:
-                slot.update(fy_cy=fy, eps_cy=r["eps_avg"], rev_cy=r["revenue_avg"])
-            elif fy != slot["fy_cy"]:
-                slot.update(fy_ny=fy, eps_ny=r["eps_avg"], rev_ny=r["revenue_avg"])
+            _apply_consensus_row(snapshots[r["ticker"]], r)
         baskets = (
             self.connection.execute("SELECT * FROM graph.baskets ORDER BY level,basket_id").fetchall()
             if self.exists("graph", "baskets")

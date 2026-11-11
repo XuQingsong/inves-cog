@@ -144,6 +144,9 @@ def _valuation(view, full=False):
         original = f"未估值：{inner}" if inner else "未估值"
         line = original + (" · " + ceiling_text(view["ceiling"], full=full) if view.get("ceiling") else "")
         line = line + " ｜ " + short.replace("未估值", "暂无估值", 1)
+        extra = [n for n in (view.get("notes") or []) if n and n not in line]
+        if extra:
+            line += " · " + " · ".join(str(n) for n in extra)
         return line
     bits = []
     if view.get("pe_extreme"):

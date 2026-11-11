@@ -299,30 +299,9 @@ def financial_inputs(state, states, entity, *, as_of=None):
     if len(years) >= 10 and all(v is not None and v > 0 for v in (revenues[0], revenues[-1])):
         span = (years[-1].period_end - years[0].period_end).days / 365.2425
         out["rev_cagr_10y_pct"] = ((revenues[-1] / revenues[0]) ** (1 / span) - 1) * 100
-    # one-off flag: a quarter whose implied NI jumps >3x the 8-delta median,
-    # or a loss quarter amid profits. Numbers untouched.
-    q_states = sorted(
-        [s2 for s2 in states if s2.values.get("ni_ttm") is not None and s2.period_end],
-        key=lambda s2: s2.period_end,
-    )
-    deltas = [
-        (q_states[i].period_end, q_states[i].values["ni_ttm"] - q_states[i - 1].values["ni_ttm"])
-        for i in range(1, len(q_states))
-    ]
-    if len(deltas) >= 5:
-        recent = [abs(v) for _, v in deltas[-8:]]
-        med = median(recent) if recent else 0
-        # flag the most recent quarter whose TTM jump exceeds 3x the median delta,
-        # or a loss quarter amid profits
-        for i in range(len(deltas) - 1, max(-1, len(deltas) - 5), -1):
-            end_i, dv = deltas[i]
-            if med and dv > 3 * med:
-                out["oneoff_note"] = f"疑似一次性项目（{end_i}）"
-                break
-            prev = [v for _, v in deltas[max(0, i - 3) : i]]
-            if dv < 0 and len(prev) == 3 and all(v > 0 for v in prev) and abs(dv) > med:
-                out["oneoff_note"] = f"疑似一次性项目（{end_i}）"
-                break
+    note = _oneoff_note(states)
+    if note:
+        out["oneoff_note"] = note
     revenue = values.get("rev_ttm")
     ni = values.get("ni_ttm")
     out["ttm_net_margin"] = ni / revenue if ni is not None and revenue is not None and revenue > 0 else None
@@ -349,3 +328,64 @@ def financial_inputs(state, states, entity, *, as_of=None):
     out["rote_5y_avg"] = values.get("rote_5y_avg")
     out["tbv_per_share"] = values.get("tbv_per_share")
     return out
+
+
+def _oneoff_note(states):
+    """Single-quarter one-off flag, restricted to the current TTM window (the
+    last 4 quarters, excluding the latest — no successor to confirm
+    reversion): implied quarter NI (delta of consecutive TTM states, one row
+    per period_end) exceeds oneoff.spike_median_mult x the median |NI| of the
+    preceding quarters and oneoff.spike_ttm_share of the trailing TTM base it
+    lands on, AND the next quarter falls back below 50% of the anomaly; or a
+    loss quarter between profitable quarters exceeding oneoff.loss_ttm_share
+    of that base. Quarters that rolled out of the TTM window never flag.
+    Numbers untouched."""
+    oneoff = settings().get("oneoff") or {}
+    spike_mult = float(oneoff.get("spike_median_mult", 3))
+    spike_share = float(oneoff.get("spike_ttm_share", 0.4))
+    loss_share = float(oneoff.get("loss_ttm_share", 0.25))
+    by_period = {}
+    for s2 in states:
+        if s2.values.get("ni_ttm") is not None and s2.period_end:
+            prev = by_period.get(s2.period_end)
+            if prev is None or s2.filed > prev.filed:
+                by_period[s2.period_end] = s2
+    q_states = [by_period[k] for k in sorted(by_period)]
+    deltas = [
+        (
+            q_states[i].period_end,
+            q_states[i].values["ni_ttm"] - q_states[i - 1].values["ni_ttm"],
+            q_states[i - 1].values["ni_ttm"],
+            q_states[i].values["ni_ttm"],
+        )
+        for i in range(1, len(q_states))
+    ]
+    # only quarters inside the current TTM window affect today's valuation:
+    # candidates are the last 4 quarters minus the latest (no successor to
+    # confirm reversion) -> deltas[len-4 .. len-2]
+    for i in range(len(deltas) - 2, max(-1, len(deltas) - 5), -1):
+        end_i, dv, ttm_prev, ttm_i = deltas[i]
+        others = [abs(v) for _, v, _, _ in deltas[max(0, i - 7) : i]]
+        med = median(others) if others else 0
+        base = ttm_prev if ttm_prev and ttm_prev > 0 else ttm_i
+        if not base or base <= 0:
+            continue
+        if (
+            dv > 0
+            and i < len(deltas) - 1
+            and len(others) >= 3
+            and med > 0
+            and dv > spike_mult * med
+            and dv > spike_share * base
+            and deltas[i + 1][1] < 0.5 * dv
+        ):
+            return f"疑似一次性项目（{end_i}）"
+        if (
+            dv < 0
+            and 0 < i < len(deltas) - 1
+            and deltas[i - 1][1] > 0
+            and deltas[i + 1][1] > 0
+            and abs(dv) > loss_share * base
+        ):
+            return f"疑似一次性项目（{end_i}）"
+    return None
