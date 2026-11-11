@@ -8,6 +8,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from inves_cog.ingest.market import next_trading_day
+from inves_cog.perception.options_activity import options_activity
 
 _DEFAULTS = {
     "insider_days": 90,
@@ -246,8 +247,15 @@ def money_flow(connection, ticker, as_of, params=None):
     offexchange = _offexchange(connection, ticker, day, p)
     short = _short(connection, ticker, day, p)
     inst = institutions(connection, ticker, day, p)
-    labels = [insiders.get("label"), offexchange.get("label"), short.get("label"), inst.get("label")]
-    parts, neutral, absent = [], [], []
+    options = options_activity(connection, ticker, day, p)
+    labels = [
+        insiders.get("label"),
+        offexchange.get("label"),
+        short.get("label"),
+        inst.get("label"),
+        options.get("label"),
+    ]
+    parts, neutral, absent, unrated = [], [], [], []
     if insiders.get("missing") or insiders.get("label") == "暂缺":
         absent.append("内部人")
     elif insiders["label"] != "中性":
@@ -282,14 +290,26 @@ def money_flow(connection, ticker, as_of, params=None):
         parts.append(f"机构{inst['label']}{suffix}")
     else:
         neutral.append("机构")
+    if options.get("missing") or options.get("label") == "暂缺":
+        absent.append("期权")
+    elif options["label"] in {"看涨放量", "看跌放量"}:
+        parts.append(f"期权{options['label']}")
+    elif options["label"] == "正常":
+        neutral.append("期权")
+    else:
+        unrated.append(f"期权{options['label']}")
     if not parts:
         summary = (
             "三层都没有明显方向" if not absent else f"{'、'.join(neutral) or '三层'}无明显方向，{'、'.join(absent)}暂缺"
         )
+        if unrated:
+            summary += f"；{'、'.join(unrated)}"
     else:
         summary = "；".join(parts)
         if neutral:
             summary += f"；{'、'.join(neutral)}无明显变化"
+        if unrated:
+            summary += f"；{'、'.join(unrated)}"
         if absent:
             summary += f"，{'、'.join(absent)}暂缺"
     return {
@@ -301,6 +321,7 @@ def money_flow(connection, ticker, as_of, params=None):
         "offexchange": offexchange,
         "short": short,
         "institutions": inst,
+        "options": options,
     }
 
 

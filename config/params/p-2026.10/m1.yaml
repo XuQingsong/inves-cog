@@ -39,6 +39,11 @@ m1:
     institutions_unit_high: 0.002
     institutions_anomaly_high: 2.0
     institutions_top: 10
+    options_baseline_days: 20
+    options_min_contracts: 1000
+    options_min_history: 10
+    options_spike_multiple: 3.0
+    options_pc_z: 2.0
   wide_universe: {min_market_cap: 2000000000, min_adv20: 20000000, history_sessions: 20}
   body_retention_days: 90
   summary_characters: 500

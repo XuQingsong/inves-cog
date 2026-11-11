@@ -10,7 +10,7 @@ from inves_cog.perception.smartmoney import money_flow
 class FakeConn:
     """Rows are dicts, matching the production dict_row connections."""
 
-    def __init__(self, form4=(), short_vol=(), bars=(), si=(), shares=None, f13=()):
+    def __init__(self, form4=(), short_vol=(), bars=(), si=(), shares=None, f13=(), occ=()):
         self._form4 = list(form4)
         self._map = {
             "flows.short_volume": list(short_vol),
@@ -18,6 +18,7 @@ class FakeConn:
             "ingest.short_interest": list(si),
             "fin_state": list(shares or []),
             "ingest.f13_holdings": list(f13 or []),
+            "flows.option_volume_occ": list(occ),
         }
 
     def execute(self, sql, params=()):
@@ -29,6 +30,14 @@ class FakeConn:
             return _Result([dict(zip(keys, r, strict=True)) for r in self._form4 if r[8] <= as_of])
         if "ingest.f13_holdings" in sql:
             return _Result([r for r in self._map["ingest.f13_holdings"] if r["filing_date"] <= params[1]])
+        if "flows.option_volume_occ" in sql:
+            return _Result(
+                [
+                    r
+                    for r in self._map["flows.option_volume_occ"]
+                    if r["underlying"] == params[0] and r["date"] < params[1]
+                ]
+            )
         for key, rows in self._map.items():
             if key in sql:
                 return _Result(rows)
@@ -157,6 +166,31 @@ def test_rule_a_does_not_import_smartmoney():
             if any("smartmoney" in n for n in names):
                 offenders.append(str(path))
     assert not offenders, f"trading imports smartmoney: {offenders}"
+
+
+def _occ(day, cp, account, qty, ticker="T"):
+    return {"date": day, "underlying": ticker, "cp": cp, "account_type": account, "quantity": qty}
+
+
+@pytest.mark.phase1_blocking
+def test_options_label_flows_into_summary():
+    days = [date(2026, 10, 26) + timedelta(days=i) for i in range(11)]
+    rows = []
+    for i, d in enumerate(days):
+        puts = 900 if i % 2 == 0 else 1100
+        rows += [_occ(d, "C", "C", 1000), _occ(d, "P", "C", puts)]
+    rows += [_occ(DAY - timedelta(days=1), "C", "C", 3500), _occ(DAY - timedelta(days=1), "P", "M", 500)]
+    out = money_flow(FakeConn(occ=rows), "T", DAY, params={})
+    assert out["options"]["label"] == "看涨放量"
+    assert "看涨放量" in out["labels"]
+    assert "期权看涨放量" in out["summary"]
+
+
+@pytest.mark.phase1_blocking
+def test_options_missing_marks_absent():
+    out = money_flow(FakeConn(), "T", DAY, params={})
+    assert out["options"]["missing"]
+    assert "期权暂缺" in out["summary"]
 
 
 @pytest.mark.phase1_blocking
