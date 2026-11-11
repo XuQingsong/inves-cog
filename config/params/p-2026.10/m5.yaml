@@ -1,6 +1,7 @@
 m5:
   params_version: p-2026.10
-  method_version: v1.4
+  # v1.5（2026-11-11）：#179 合理性闸门 + #181 结构断点/周期正常化不足不估/一次性项目提示
+  method_version: v1.5
   listed_units:
     TSM:
       id: TSM-listed-ADS-five-common
