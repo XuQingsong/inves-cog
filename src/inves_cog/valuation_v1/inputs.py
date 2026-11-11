@@ -5,6 +5,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from statistics import median
 
 from inves_cog.valuation_v1.calculations import settings
+from inves_cog.valuation_v1.eps_units import normalize_eps, unmapped_observations
 
 
 def _structural_break(ticker):
@@ -22,8 +23,6 @@ def _structural_break(ticker):
         pass
     return None
 
-
-from inves_cog.valuation_v1.eps_units import normalize_eps, unmapped_observations
 
 
 def day(value):
@@ -93,8 +92,9 @@ def diluted_shares(value, source):
 def _structural_break(ticker):
     """Structural break date for ticker from config/data/structural_breaks.yaml."""
     try:
-        import yaml
         from pathlib import Path
+
+        import yaml
 
         data = yaml.safe_load(open(Path(__file__).resolve().parents[3] / "config/data/structural_breaks.yaml"))
         for b in (data or {}).get("breaks", []):
