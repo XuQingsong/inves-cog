@@ -94,7 +94,8 @@
 | `test_missed_trim_hypothetical_and_held_only` | blocking | B 组按次日开盘减持 1/3，非持仓剔除 | 合成 |
 | `test_missed_trim_skips_days_rule_a_sold` | blocking | B 组当日有卖单不计 | 合成 |
 | `test_pit_cutoff_excludes_late_shadow_and_factor_rows` | blocking | 影子与因子行按 PIT 截断 | 合成 |
-| `test_entry_divergence_lists_evaluated_rows_with_chinese_labels` | blocking | C 组只用双方非 NULL 行且标签中文 | 合成 |
+| `test_entry_divergence_collapses_to_one_row_per_ticker` | blocking | C 组按股票折叠、附最新依据、双口径计数 | 合成 |
+| `test_shadow_section_wording_and_rounded_trim_shares` | blocking | 减持取整展示、少亏/少赚措辞 | 合成 |
 | `test_account_section_hides_internal_identifiers` | blocking | /account 页面不出现 M-xx/V-T/F-0x/vt1/v3 | 合成 |
 | `test_rule_a_does_not_read_shadow_report` | blocking | 规则 A 不 import 影子对照模块 | AST |
 | `test_valuation_live_smoke` | live | 59 只都有行或原因 | 真实 |

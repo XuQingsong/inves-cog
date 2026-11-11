@@ -261,15 +261,20 @@ def _missed_trims(inputs):
 
 
 def _entry_divergence(inputs):
-    """Group C: factor verdicts where both sides evaluated and disagreed."""
+    """Group C: factor verdicts where both sides evaluated and disagreed.
+
+    Collapsed to one row per ticker — the same names disagree every record
+    day, so the row carries the span and the latest day's evidence.
+    """
     book_of = LABELS["factor_books"]
-    rows, factor_days = [], set()
+    seen, factor_days, record_days = {}, set(), 0
     for row in inputs["factors"]:
         factor_days.add(str(row["date"]))
         if row["would_pass"] is None or row["rule_a_entry_pass"] is None:
             continue
         if row["would_pass"] == row["rule_a_entry_pass"]:
             continue
+        record_days += 1
         book = book_of.get(row["factor_id"])
         score = inputs["scores"].get((inputs["plans"].get(str(row["date"])), row["ticker"])) or {}
         raw = score.get(book) if book else None
@@ -279,12 +284,11 @@ def _entry_divergence(inputs):
             else raw
         )
         shortfall = (_json(row.get("gap_detail")) or {}).get("book_shortfall") or {}
-        rows.append(
+        seen.setdefault(row["ticker"], []).append(
             {
                 "date": str(row["date"]),
-                "ticker": row["ticker"],
-                "factor_label": LABELS["factors"].get(row["factor_id"], row["factor_id"]),
                 "direction": "影子放行、规则A拒绝" if row["would_pass"] else "影子拒绝、规则A放行",
+                "factor_label": LABELS["factors"].get(row["factor_id"], row["factor_id"]),
                 "book_label": LABELS["books"].get(book),
                 "shadow_value": _factor_value(
                     row["substituted_value"] if row["substituted_value"] is not None else row["value"]
@@ -296,7 +300,22 @@ def _entry_divergence(inputs):
                 "would_pass": row["would_pass"],
             }
         )
-    return rows, factor_days
+    rows = []
+    for ticker, items in seen.items():
+        items.sort(key=lambda item: item["date"])
+        latest = items[-1]
+        directions = {item["direction"] for item in items}
+        rows.append(
+            {
+                **latest,
+                "ticker": ticker,
+                "first_date": items[0]["date"],
+                "days": len(items),
+                "direction": latest["direction"] if len(directions) == 1 else "、".join(sorted(directions)),
+            }
+        )
+    rows.sort(key=lambda item: (item["first_date"], item["ticker"]))
+    return rows, factor_days, record_days
 
 
 def _total(rows):
@@ -329,6 +348,7 @@ def shadow_report(connection, as_of, *, days=20, cutoff=None):
                 "blocked_buys": 0,
                 "missed_trims": 0,
                 "entry_divergence": 0,
+                "entry_divergence_days": 0,
                 "blocked_delta_usd": None,
                 "missed_trim_delta_usd": None,
                 "factor_days": 0,
@@ -339,8 +359,7 @@ def shadow_report(connection, as_of, *, days=20, cutoff=None):
     inputs = _inputs(connection, as_of, dates, cutoff)
     blocked = sorted(_blocked_buys(inputs), key=lambda row: (row["date"], row["ticker"]))
     trims = sorted(_missed_trims(inputs), key=lambda row: (row["date"], row["ticker"]))
-    entries, factor_days = _entry_divergence(inputs)
-    entries.sort(key=lambda row: (row["date"], row["ticker"]))
+    entries, factor_days, record_days = _entry_divergence(inputs)
     return {
         "as_of": str(as_of),
         "days": len(dates),
@@ -352,6 +371,7 @@ def shadow_report(connection, as_of, *, days=20, cutoff=None):
             "blocked_buys": len(blocked),
             "missed_trims": len(trims),
             "entry_divergence": len(entries),
+            "entry_divergence_days": record_days,
             "blocked_delta_usd": _total(blocked),
             "missed_trim_delta_usd": _total(trims),
             "factor_days": len(factor_days),

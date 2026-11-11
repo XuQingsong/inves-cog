@@ -263,16 +263,20 @@ def test_pit_cutoff_excludes_late_shadow_and_factor_rows():
     assert pit_queries and all(params[-1] == CUTOFF for _, params in pit_queries)
 
 
-def test_entry_divergence_lists_evaluated_rows_with_chinese_labels():
+def test_entry_divergence_collapses_to_one_row_per_ticker():
     conn = Conn(
-        shadows=[_shadow("PLTR")],
+        shadows=[_shadow("PLTR"), _shadow("PLTR", D2)],
         orders=[],
         factors=[
-            _factor("PLTR", would_pass=False, entry_pass=True, value={"value": 44.2}),
+            _factor("PLTR", D1, would_pass=False, entry_pass=True, value={"value": 44.2}),
+            _factor("PLTR", D2, would_pass=False, entry_pass=True, value={"value": 50.5}),
             _factor("ZS", factor_id="F-03", would_pass=None, entry_pass=False),
         ],
         positions=[],
-        plans=[{"trade_date": D1, "signal_date": date(2026, 10, 31)}],
+        plans=[
+            {"trade_date": D1, "signal_date": date(2026, 10, 31)},
+            {"trade_date": D2, "signal_date": date(2026, 11, 2)},
+        ],
         scores=[
             {
                 "signal_date": date(2026, 10, 31),
@@ -284,27 +288,46 @@ def test_entry_divergence_lists_evaluated_rows_with_chinese_labels():
                 "quality": None,
                 "timing": None,
                 "m31_adjusted_valuation": 44.2,
-            }
+            },
+            {
+                "signal_date": date(2026, 11, 2),
+                "ticker": "PLTR",
+                "tier": "attack",
+                "entry_pass": True,
+                "valuation": 20.0,
+                "growth": None,
+                "quality": None,
+                "timing": None,
+                "m31_adjusted_valuation": 50.5,
+            },
         ],
         bars=[],
     )
     report = shadow_report(conn, AS_OF, days=20, cutoff=CUTOFF)
     (row,) = report["entry_divergence"]
     assert row["ticker"] == "PLTR" and row["direction"] == "影子拒绝、规则A放行"
+    assert row["first_date"] == str(D1) and row["days"] == 2
+    # Latest record day's evidence, not the earliest.
     assert row["factor_label"] == "成长调整估值" and "F-01" not in row["factor_label"]
     assert row["book_label"] == "估值账" and row["tier_label"] == "进攻层"
-    assert row["shadow_value"] == pytest.approx(44.2) and row["rule_effective_value"] == pytest.approx(44.2)
+    assert row["shadow_value"] == pytest.approx(50.5) and row["rule_effective_value"] == pytest.approx(50.5)
+    assert report["summary"]["entry_divergence"] == 1
+    assert report["summary"]["entry_divergence_days"] == 2
 
 
 def test_account_section_hides_internal_identifiers():
     conn = Conn(
-        shadows=[_shadow("MU", vt1=True)],
+        shadows=[_shadow("MU", vt1=True), _shadow("CAT", v3_trim_flag=True)],
         orders=[_order("MU", D1, "buy_to", qty=8, fill=890.5, reason="M-40 确认加仓")],
         factors=[_factor("PLTR", would_pass=False, entry_pass=True, value={"value": 44.2})],
-        positions=[],
+        positions=[_position("CAT", D1, 49)],
         plans=[{"trade_date": D1, "signal_date": date(2026, 10, 31)}],
         scores=[],
-        bars=[_bar("MU", AS_OF, open_=795, close=800)],
+        bars=[
+            _bar("MU", AS_OF, open_=795, close=800),
+            _bar("CAT", D2, open_=618.94, close=600),
+            _bar("CAT", AS_OF, open_=570, close=571.82),
+        ],
     )
     report = shadow_report(conn, AS_OF, days=20, cutoff=CUTOFF)
     from inves_cog.web.investor_html import _account
@@ -315,6 +338,33 @@ def test_account_section_hides_internal_identifiers():
     assert "影子规则只做记录，不影响规则 A 实际订单" in html
     assert "影子未定义仓位，不计收益差" in html
     assert "已于" not in html or "卖出" in html
+
+
+def test_shadow_section_wording_and_rounded_trim_shares():
+    conn = Conn(
+        shadows=[_shadow("CAT", v3_trim_flag=True), _shadow("MU", v3_trim_flag=True)],
+        orders=[],
+        factors=[],
+        positions=[_position("CAT", D1, 49), _position("MU", D1, 101)],
+        plans=[],
+        scores=[],
+        bars=[
+            _bar("CAT", D2, open_=618.94, close=600),
+            _bar("CAT", AS_OF, open_=570, close=571.82),
+            _bar("MU", D2, open_=859.93, close=800),
+            _bar("MU", AS_OF, open_=708, close=708.35),
+        ],
+    )
+    report = shadow_report(conn, AS_OF, days=20, cutoff=CUTOFF)
+    from inves_cog.web.investor_html import _account
+
+    html = _account({"shadow_report": report, "holdings": []})
+    # 49/3 = 16.33 → display rounds to "约 16 股（1/3）"; math keeps exact shares.
+    cat = next(row for row in report["missed_trims"] if row["ticker"] == "CAT")
+    assert cat["trim_shares"] == pytest.approx(49 / 3)
+    assert "减持约 16 股（1/3）" in html and "减持约 34 股（1/3）" in html
+    assert "按影子减持可少亏" in html or "按影子减持会少赚" in html
+    assert "至今多" not in html and "至今少 $" not in html
 
 
 def test_rule_a_does_not_read_shadow_report():

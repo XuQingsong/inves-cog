@@ -819,8 +819,10 @@ def _shadow_blocked_result(row):
     usd, pct = row.get("delta_usd"), row.get("delta_pct")
     if usd is None or pct is None:
         return "差额无法计算"
-    word = "少亏" if usd > 0 else "少赚" if usd < 0 else "持平"
-    text = f"若未买入，至今{word} {_text(format_plain_percent(abs(pct) / 100))}（{money(abs(usd))}）"
+    if usd == 0:
+        return "若未买入，至今持平"
+    word = "少亏" if usd > 0 else "少赚"
+    text = f"若未买入，至今{word} {money(abs(usd))}（{_text(format_plain_percent(abs(pct) / 100))}）"
     return text + _shadow_sold_note(row)
 
 
@@ -831,8 +833,10 @@ def _shadow_trim_result(row):
     usd, pct = row.get("delta_usd"), row.get("delta_pct")
     if usd is None or pct is None:
         return "差额无法计算"
-    word = "多" if usd > 0 else "少" if usd < 0 else ""
-    text = f"若按影子减持，至今{word} {money(abs(usd))}（{_text(format_plain_percent(abs(pct) / 100))}）"
+    if usd == 0:
+        return "若按影子减持，至今持平"
+    word = "可少亏" if usd > 0 else "会少赚"
+    text = f"按影子减持{word} {money(abs(usd))}（{_text(format_plain_percent(abs(pct) / 100))}）"
     return text + _shadow_sold_note(row)
 
 
@@ -878,7 +882,7 @@ def _shadow_section(payload):
             f"<td>{_text(row.get('gate_reason'))}，"
             + (
                 f"按 {_text(row.get('open_date'))} 开盘价 {_text(money(row.get('open_price')))} "
-                f"减持 {_text(_shares_text(row.get('trim_shares')))} 股"
+                f"减持约 {_text(round(row.get('trim_shares') or 0))} 股（1/3）"
                 if row.get("open_price") is not None
                 else "次日开盘价未到"
             )
@@ -895,10 +899,11 @@ def _shadow_section(payload):
         body.append('<p class="small muted">无</p>')
 
     divergent = report.get("entry_divergence") or []
-    body.append(f'<h3 class="small">因子替换入场对照（{len(divergent)} 条）</h3>')
+    body.append(f'<h3 class="small">因子替换入场对照（{len(divergent)} 只股票）</h3>')
     if divergent:
         rows = "".join(
-            f"<tr><td>{_text(row['date'])}</td><td>{_text(row['ticker'])}</td>"
+            f"<tr><td>{_text(row['ticker'])}</td>"
+            f"<td>自 {_text(str(row.get('first_date') or '')[5:])} 起连续 {_text(row.get('days'))} 个记录日</td>"
             f"<td>{_text(row.get('direction'))}</td>"
             f"<td>{_text(row.get('factor_label'))}（{_text(row.get('book_label')) or '对应账'}）："
             f"影子值 {_text(round(row.get('shadow_value') or 0, 2))}，"
@@ -908,8 +913,8 @@ def _shadow_section(payload):
             for row in divergent
         )
         body.append(
-            '<table class="t"><thead><tr><th>日期</th><th>股票</th><th>分歧方向</th>'
-            "<th>双方依据</th><th>收益差</th></tr></thead>"
+            '<table class="t"><thead><tr><th>股票</th><th>分歧持续</th><th>分歧方向</th>'
+            "<th>最新双方依据</th><th>收益差</th></tr></thead>"
             f"<tbody>{rows}</tbody></table>"
         )
     else:
@@ -925,7 +930,7 @@ def _shadow_section(payload):
     )
     body.append(
         '<p class="small muted">汇总（近 {days} 个交易日）：影子否决但买入 {a} 条，合计差额 {ad}；'
-        "影子建议减持未卖 {b} 条，合计差额 {bd}；因子入场分歧 {c} 条；{day}。"
+        "影子建议减持未卖 {b} 条，合计差额 {bd}；因子入场分歧 {c} 只股票 / {cd} 个记录日；{day}。"
         "正数表示按影子做会更好。</p>".format(
             days=days,
             a=summary.get("blocked_buys", 0),
@@ -933,6 +938,7 @@ def _shadow_section(payload):
             b=summary.get("missed_trims", 0),
             bd=_signed_money(summary.get("missed_trim_delta_usd")),
             c=summary.get("entry_divergence", 0),
+            cd=summary.get("entry_divergence_days", 0),
             day=day_counts,
         )
     )
