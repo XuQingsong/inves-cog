@@ -17,6 +17,23 @@ m8:
     content_components: [narrative, gradient, magnitude]
     content_min_for_high: 0.5
     specificity_cap: 0.2
+  gradient:
+    mechanism_exposure:
+      估值倍数: 概念关联
+    connection_exposure:
+      业务关系: 直接
+      经营传导: 间接
+      市场叙事: 概念关联
+      市场共振: 概念关联
+    include_status: [候选, 观察到, 有支持, 已确立]
+    default_exposure: 概念关联
+    all_candidate_note: 关系均未经证实（候选）
+  precursor:
+    baseline_days: 20
+    z_threshold: 2.0
+    min_baseline: 10
+    short_min_volume: 1000000
+    occ_min_contracts: 1000
   retrieval_weights:
     overlap: 0.4
     recency: 0.3

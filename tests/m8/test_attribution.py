@@ -360,7 +360,7 @@ def test_magnitude_component_drops_an_untested_channel():
 
 
 @pytest.mark.phase1_blocking
-def test_exposure_gradient_needs_three_observed_relations():
+def test_exposure_gradient_counts_observed_and_candidate_relations():
     from inves_cog.perception.attribution.evidence import exposure_gradient
 
     members = [
@@ -382,7 +382,9 @@ def test_exposure_gradient_needs_three_observed_relations():
     assert exposure_gradient(flipped, relations, direction="down") == 0.0
     assert exposure_gradient(members[:2], relations, direction="down") is None
     candidate = [{"ticker": "AAA", "exposure": "直接", "status": "候选"}]
-    assert exposure_gradient(members, candidate, direction="down") is None
+    assert exposure_gradient(members, candidate, direction="down") == pytest.approx(0.866025, abs=1e-6)
+    rejected = [{"ticker": "AAA", "exposure": "直接", "status": "驳回"}]
+    assert exposure_gradient(members, rejected, direction="down") is None
     flat = [
         {"ticker": "AAA", "exposure": "直接", "status": "观察到"},
         {"ticker": "BBB", "exposure": "直接", "status": "观察到"},

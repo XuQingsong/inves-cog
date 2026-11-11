@@ -43,6 +43,7 @@ from inves_cog.perception.attribution.propose import candidate_payload, propose_
 from inves_cog.perception.attribution.replay import replay_mode
 from inves_cog.perception.attribution.report import explanation_report
 from inves_cog.perception.attribution.retrieve import retrieval_entities, retrieval_mode, shortlist
+from inves_cog.perception.attribution.rules import m8_rules
 from inves_cog.perception.attribution.second_hit import (
     classify_response,
     later_matches_fingerprint,
@@ -1278,6 +1279,8 @@ def _components(candidate, anomaly, items):
     if exclusion is not None:
         components["alternatives"] = exclusion
     notes = {}
+    if relations and all(rel.get("status") == "候选" for rel in relations):
+        notes["relation_basis"] = _gradient_note()
     if control_source == "system":
         notes["control_source"] = "对照篮子为系统选取"
     if publication_tz_assumed(cited):
@@ -1285,6 +1288,11 @@ def _components(candidate, anomaly, items):
     if notes:
         components["_notes"] = notes
     return components
+
+
+def _gradient_note():
+    loaded = m8_rules()
+    return (loaded.get("gradient") or {}).get("all_candidate_note") or "关系均未经证实（候选）"
 
 
 def _override(overrides, mechanism):
@@ -1833,7 +1841,7 @@ def _track_rows(anomaly, state, stage=None, as_of=None):
 
 
 def _report(anomaly, candidates, items, status, impact, channels, deadline, *, deadline_on=None, neighbors=None):
-    current = {key: value for key, value in anomaly.items() if key != "status"}
+    current = {key: value for key, value in anomaly.items() if key not in {"status", "_relations_derived"}}
     if status:
         current["status"] = status
     sources = [_report_source(item) for item in items]

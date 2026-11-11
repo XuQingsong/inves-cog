@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 import yaml
 
 from inves_cog.ingest.market import NY, trading_day
+from inves_cog.perception.anomaly.precursor import precursor_line
 from inves_cog.web.pages import (
     PAPER_LABEL,
     _anomalies,
@@ -1612,6 +1613,7 @@ def _event_rows(anomalies, events, reports, fresh, catalog, stocks, day, attribu
                 "cited_at": cited,
                 "reasons": reasons,
                 "confidence_label": _report_confidence_label(reports.get(row["anomaly_id"])),
+                "precursor": precursor_line(row.get("precursor"), len(names)),
                 "attribution": attribution,
                 "untrusted": not fresh,
             }

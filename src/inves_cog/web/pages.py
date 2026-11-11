@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 import yaml
 
 from inves_cog.ingest.market import trading_day
+from inves_cog.perception.anomaly.precursor import precursor_line
 from inves_cog.perception.review.calendar import cutoff as _deadline
 
 MISSING = "数据暂缺"
@@ -119,7 +120,7 @@ def _anomalies(connection, day, cutoff):
         connection,
         """
         SELECT anomaly_id, trade_date, session, layer, severity, baskets, members, direction,
-               max_abs_z, status, universe, generated_at
+               max_abs_z, status, universe, generated_at, precursor
         FROM perception.anomalies
         WHERE trade_date = %s AND (generated_at IS NULL OR generated_at < %s)
           AND NOT (coalesce(data_quality,'{}'::jsonb) ? 'voided')
@@ -731,7 +732,7 @@ def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, compl
     if anomaly_id is not None:
         anomaly = _one(
             connection,
-            "SELECT generated_at FROM perception.anomalies WHERE anomaly_id = %s",
+            "SELECT generated_at, precursor, members FROM perception.anomalies WHERE anomaly_id = %s",
             (anomaly_id,),
         )
         generated = None if anomaly is None else anomaly["generated_at"]
@@ -785,6 +786,11 @@ def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, compl
             """,
             (anomaly_id,),
         )
+    precursor = MISSING
+    if anomaly_id is not None and anomaly is not None:
+        members = anomaly.get("members")
+        count = len(members) if isinstance(members, list) and members else len(names)
+        precursor = precursor_line(anomaly.get("precursor"), count) or MISSING
     passed = _passthrough_ticker(tickers, by_event, completeness, None if view is None else view["event_id"], names)
     return {
         "page": "/linkage/{id}",
@@ -801,6 +807,7 @@ def _linkage_body(connection, day, cutoff, view, names, tickers, by_event, compl
         "tracking": report.get("tracking", MISSING),
         "constraints": report.get("constraint_conclusion", MISSING),
         "impact": impact if impact is not None else MISSING,
+        "precursor": precursor,
         **passed,
     }
 

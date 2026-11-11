@@ -107,6 +107,7 @@ HIDDEN_ON_RESEARCH = {
 }
 _RESEARCH = {"/", "/market", "/linkage/{id}", "/stock/{symbol}", "/graph", "/settings/data", "/review"}
 _LABELS = {
+    "precursor": "异动前一日",
     "spy_5d_pct": "标普五日涨跌",
     "L1": "第一层",
     "L2": "第二层",

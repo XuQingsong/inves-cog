@@ -21,9 +21,9 @@ INSERT_ANOMALY = """
 INSERT INTO perception.anomalies (
     anomaly_id, trade_date, session, entry_paths, layer, severity, baskets, members, direction,
     max_abs_z, data_quality, coverage, amplification, type_candidates_prelim, status, universe, params_version,
-    generated_at
+    generated_at, precursor
 ) VALUES (
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
 )
 """
 
@@ -73,6 +73,7 @@ def write_anomalies(connection, anomalies, *, generated_at):
                 anomaly["universe"],
                 anomaly["params_version"],
                 generated_at,
+                Jsonb(anomaly["precursor"]) if anomaly.get("precursor") is not None else None,
             ),
         )
     return len(anomalies)
