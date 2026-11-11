@@ -172,15 +172,79 @@ WHERE accession = ANY(%s) AND fetched_at <= %s
 
 def attach_graph(connection, anomalies, as_of):
     """Read visible graph rows onto each anomaly. An empty read leaves a caller's edges alone."""
-    if connection is None:
-        return anomalies
+    mapping = _gradient_rules()
     for anomaly in anomalies or []:
         if not isinstance(anomaly, dict):
             continue
-        edges = read_graph_edges(connection, anomaly.get("members") or [], as_of)
-        if edges:
-            anomaly["edges"] = edges
+        if connection is not None:
+            edges = read_graph_edges(connection, anomaly.get("members") or [], as_of)
+            if edges:
+                anomaly["edges"] = edges
+        if "relations" not in anomaly or anomaly.get("_relations_derived"):
+            anomaly["relations"] = derive_relations(
+                anomaly.get("members") or [], anomaly.get("edges") or [], as_of, mapping=mapping
+            )
+            anomaly["_relations_derived"] = True
     return anomalies
+
+
+def derive_relations(members, edges, as_of, *, mapping=None):
+    """Member-level relation rows for evidence scoring, converted from attach_graph edges.
+
+    Only relations that existed before `as_of` are used (PIT). A 估值倍数 mechanism maps to
+    概念关联 ahead of connection_type. Per ticker the highest tier wins downstream via
+    max() aggregation; every qualifying relation is emitted so notes and scope displays
+    can see which rows contributed."""
+    rules = mapping if mapping is not None else _gradient_rules()
+    connection_map = rules.get("connection_exposure") or {}
+    mechanism_map = rules.get("mechanism_exposure") or {}
+    included = set(rules.get("include_status") or ("候选", "观察到", "有支持", "已确立"))
+    default = rules.get("default_exposure") or "概念关联"
+    now = _stamp(as_of)
+    names = _member_tickers(members)
+    rows = []
+    for edge in edges or []:
+        if not isinstance(edge, dict):
+            continue
+        status = edge.get("status")
+        if status not in included:
+            continue
+        if now is not None:
+            first = _stamp(edge.get("first_discovered_at"))
+            if first is not None and first > now:
+                continue
+        exposure = (
+            mechanism_map.get(edge.get("mechanism")) or connection_map.get(edge.get("connection_type")) or default
+        )
+        ends = [end for end in (edge.get("from_entity"), edge.get("to_entity")) if end in names]
+        for ticker in dict.fromkeys(ends):
+            rows.append(
+                {
+                    "ticker": ticker,
+                    "exposure": exposure,
+                    "status": status,
+                    "mechanism": edge.get("mechanism"),
+                    "connection_type": edge.get("connection_type"),
+                    "relation_id": edge.get("relation_id"),
+                }
+            )
+    return rows
+
+
+def _member_tickers(members):
+    names = set()
+    for member in members or []:
+        name = member.get("ticker") if isinstance(member, dict) else member
+        if isinstance(name, str) and name:
+            names.add(name)
+    return names
+
+
+def _gradient_rules():
+    from inves_cog.perception.attribution.rules import m8_rules
+
+    loaded = m8_rules()
+    return loaded.get("gradient") or {}
 
 
 def read_graph_edges(connection, members, as_of):

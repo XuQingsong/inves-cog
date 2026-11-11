@@ -441,6 +441,8 @@ def _events(payload):
         else:
             why = '<div class="small muted" style="margin-top:8px">暂无可引用的解释。</div>'
         held_count = sum(1 for ticker in members if ticker in held)
+        precursor = row.get("precursor")
+        note = f'<div class="small muted" style="margin-top:6px">{_text(precursor)}</div>' if precursor else ""
         opened = " open" if index == 0 else ""
         blocks.append(
             f'<div class="event{opened}"><div class="h" data-ev>'
@@ -448,7 +450,7 @@ def _events(payload):
             f'<span class="sig">{_text(z)}</span>{_event_title(row)}'
             f'<span class="small ink2">涉及持仓 {held_count} 只</span></div>'
             '<span class="small muted">展开 / 收起</span></div>'
-            f'<div class="body"><div>{"".join(ticks)}</div>{why}</div></div>'
+            f'<div class="body"><div>{"".join(ticks)}</div>{note}{why}</div></div>'
         )
     return banner + ("".join(blocks) or '<div class="empty">今天没有达到阈值的大事</div>')
 

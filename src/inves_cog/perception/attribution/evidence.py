@@ -210,6 +210,7 @@ def later_report(timing):
 
 _EXPOSURE_SCORE = {"直接": 3, "间接": 2, "概念关联": 1}
 _OBSERVED = {"观察到", "有支持", "已确立"}
+_COUNTED = _OBSERVED | {"候选"}
 
 
 def basket_specificity(expected, control):
@@ -311,7 +312,7 @@ def exposure_gradient(members, relations, *, direction):
 def _exposure_scores(relations):
     scores = {}
     for rel in relations:
-        if rel.get("exit_reason") or rel.get("status") not in _OBSERVED:
+        if rel.get("exit_reason") or rel.get("status") not in _COUNTED:
             continue
         ticker = rel.get("ticker")
         if not ticker:
