@@ -337,9 +337,10 @@ def shadow_report(connection, as_of, *, days=20, cutoff=None):
             "reason": "影子估值记录暂缺",
         }
     inputs = _inputs(connection, as_of, dates, cutoff)
-    blocked = _blocked_buys(inputs)
-    trims = _missed_trims(inputs)
+    blocked = sorted(_blocked_buys(inputs), key=lambda row: (row["date"], row["ticker"]))
+    trims = sorted(_missed_trims(inputs), key=lambda row: (row["date"], row["ticker"]))
     entries, factor_days = _entry_divergence(inputs)
+    entries.sort(key=lambda row: (row["date"], row["ticker"]))
     return {
         "as_of": str(as_of),
         "days": len(dates),
