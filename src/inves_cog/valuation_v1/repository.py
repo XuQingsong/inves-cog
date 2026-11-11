@@ -157,7 +157,18 @@ class Repository:
             ticker = row["ticker"]
             book.published[ticker] = {k: v for k, v in p.items() if k not in {"proposed", "review_reason"}}
             if p.get("proposed"):
-                book.pending[ticker] = p["proposed"]
+                prop = p["proposed"]
+                if isinstance(prop, dict) and "row" in prop:
+                    book.pending[ticker] = prop
+                elif isinstance(prop, dict):  # 旧格式：proposed 直接是候选行
+                    neutral = prop.get("neutral")
+                    book.pending[ticker] = {
+                        "row": prop,
+                        "values": [[str(prop.get("date")), neutral]] if neutral is not None else [],
+                        "since": str(prop.get("date")),
+                    }
+                else:
+                    book.pending[ticker] = {"row": prop, "values": [], "since": None}
             h = TypeHistory()
             state = p.get("type_state", {})
             h.current = state.get("current", p["type"])
