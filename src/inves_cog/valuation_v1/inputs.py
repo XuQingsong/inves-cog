@@ -360,11 +360,20 @@ def _oneoff_note(states):
         )
         for i in range(1, len(q_states))
     ]
+    if not deltas:
+        return None
     # only quarters inside the current TTM window affect today's valuation:
     # candidates are the last 4 quarters minus the latest (no successor to
-    # confirm reversion) -> deltas[len-4 .. len-2]
+    # confirm reversion) -> deltas[len-4 .. len-2]; a calendar cutoff stops
+    # sparse histories from stretching the window back years.
+    latest_end = q_states[-1].period_end
+    cal_months = int(oneoff.get("calendar_months", 15))
+    m = latest_end.year * 12 + latest_end.month - 1 - cal_months
+    cal_cutoff = date(m // 12, m % 12 + 1, 1)
     for i in range(len(deltas) - 2, max(-1, len(deltas) - 5), -1):
         end_i, dv, ttm_prev, ttm_i = deltas[i]
+        if end_i < cal_cutoff:
+            continue
         others = [abs(v) for _, v, _, _ in deltas[max(0, i - 7) : i]]
         med = median(others) if others else 0
         base = ttm_prev if ttm_prev and ttm_prev > 0 else ttm_i

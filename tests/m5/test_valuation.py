@@ -548,6 +548,27 @@ def test_oneoff_single_quarter_thresholds():
     ]
     assert financial_inputs(rolled[-1], rolled, entity).get("oneoff_note") is None
 
+    # 日历截断：尖峰在计数窗口内（最后 4 季）但距今超过 15 个月 → 不标
+    old_dates = [
+        date(2024, 11, 30),
+        date(2025, 1, 31),
+        date(2025, 3, 31),
+        date(2025, 5, 31),
+        date(2025, 7, 31),
+        date(2025, 9, 30),
+        date(2026, 12, 31),
+        date(2027, 2, 28),
+    ]
+    sparse = [
+        mk("GRW", pe, ni)
+        for pe, ni in zip(
+            old_dates,
+            [400e6, 430e6, 450e6, 470e6, 970e6, 990e6, 1010e6, 1030e6],
+            strict=True,
+        )
+    ]
+    assert financial_inputs(sparse[-1], sparse, entity).get("oneoff_note") is None
+
 
 def test_consensus_av_fy_horizons():
     """AV 形态的一致预期行（horizon=FY1/FY2 + fiscal_end）能正确装配出 eps_ntm。"""
