@@ -778,7 +778,14 @@ def _shadow_kpi(payload):
     divergent = counts.get("divergent")
     if divergent is None:
         return ""
+    evaluated = counts.get("evaluated") or 0
     unevaluable = counts.get("unevaluable") or 0
+    if evaluated == 0 and unevaluable == 0:
+        return (
+            '<div class="card kpi"><div class="l">影子分歧</div>'
+            '<div class="v muted">暂缺</div>'
+            '<div class="ft">当日影子对照数据未到</div></div>'
+        )
     return (
         '<div class="card kpi"><div class="l">影子分歧</div>'
         f'<div class="v">{_text(divergent)} 项</div>'
