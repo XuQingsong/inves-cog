@@ -1657,6 +1657,74 @@ def _shares_short(value):
     return f"{value:.0f} 股"
 
 
+def _contracts(value):
+    if value is None:
+        return _miss()
+    return f"{float(value):,.0f} 张"
+
+
+def _pc_spark(series):
+    values = [item["pc"] for item in series if item.get("pc") is not None]
+    if len(values) < 2:
+        return ""
+    low, high = min(values), max(values)
+    span = high - low or 1
+    last = len(values) - 1
+    points = " ".join(
+        f"{index / last * 200:.1f},{4 + (high - value) / span * 28:.1f}" for index, value in enumerate(values)
+    )
+    color = "var(--down)" if values[-1] >= values[0] else "var(--up)"
+    return (
+        '<div style="margin-top:6px"><svg width="100%" height="36" viewBox="0 0 200 36" preserveAspectRatio="none" '
+        f'role="img"><polyline fill="none" stroke="{color}" stroke-width="1.5" points="{points}"/></svg>'
+        f'<div class="ft">近 {len(values)} 日 P/C 比 · 最新 <span class="num">{values[-1]:.2f}</span></div></div>'
+    )
+
+
+def _options_block(opt):
+    if not opt:
+        return ""
+    if opt.get("missing"):
+        return f'<div class="small muted">暂缺（{_text(opt["missing"])}）</div>'
+    label = opt.get("label") or ""
+    status = (
+        f'<span class="chip mid">{_text(label)}</span>'
+        if label in {"看涨放量", "看跌放量"}
+        else f'<span class="small muted">{_text(label)}</span>'
+    )
+    compare = []
+    if opt.get("call_multiple") is not None:
+        compare.append(f"看涨 ×{opt['call_multiple']:.1f}")
+    if opt.get("put_multiple") is not None:
+        compare.append(f"看跌 ×{opt['put_multiple']:.1f}")
+    if opt.get("pc_z") is not None:
+        compare.append(f"P/C z {opt['pc_z']:+.1f}")
+    shares = []
+    if opt.get("customer_share") is not None:
+        shares.append(f"客户 {opt['customer_share'] * 100:.0f}%")
+    if opt.get("mm_share") is not None:
+        shares.append(f"做市 {opt['mm_share'] * 100:.0f}%")
+    if opt.get("firm_share") is not None:
+        shares.append(f"自营 {opt['firm_share'] * 100:.0f}%")
+    return (
+        f"<div>{status}</div>"
+        + '<div class="kv"><span class="k">看涨成交</span>'
+        + f'<span class="num">{_contracts(opt.get("call_volume"))}</span>'
+        + '<span class="k">看跌成交</span>'
+        + f'<span class="num">{_contracts(opt.get("put_volume"))}</span>'
+        + '<span class="k">P/C 比</span>'
+        + f'<span class="num">{_text(opt.get("pc_ratio"))}</span></div>'
+        + (
+            f'<div class="small muted">较 20 日基线：{" · ".join(compare)}（{opt.get("baseline_days")} 日）</div>'
+            if compare
+            else ""
+        )
+        + (f'<div class="small muted">账户占比：{" · ".join(shares)}</div>' if shares else "")
+        + _pc_spark(opt.get("series") or [])
+        + '<div class="small muted" style="margin-top:4px">不区分买卖方向，开仓/平仓不明</div>'
+    )
+
+
 def _smartmoney_module(payload):
     data = payload.get("smartmoney")
     if not data:
@@ -1666,6 +1734,7 @@ def _smartmoney_module(payload):
     ins = data.get("insiders") or {}
     off = data.get("offexchange") or {}
     short = data.get("short") or {}
+    opt = data.get("options") or {}
 
     if ins.get("missing"):
         ins_html = f'<div class="small muted">暂缺（{_text(ins["missing"])}）</div>'
@@ -1834,6 +1903,9 @@ def _smartmoney_module(payload):
         + off_html
         + f'<h3 style="margin-top:14px">空头 <span class="small muted">{_text(short.get("as_of_note"))}</span></h3>'
         + short_html
+        + '<h3 style="margin-top:14px">期权成交（OCC，次日发布） '
+        + f'<span class="small muted">{_text("截至 " + opt["data_date"] if opt.get("data_date") else "")}</span></h3>'
+        + _options_block(opt)
         + f'<h3 style="margin-top:14px">机构 <span class="small muted">{_text(inst_note)}</span></h3>'
         + inst_html
         + '<h3 style="margin-top:14px">国会（只列不计） '
