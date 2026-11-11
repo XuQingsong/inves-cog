@@ -52,7 +52,12 @@ class Pages:
             return Cursor([row])
         if compact.startswith("UPDATE ingest.job_runs"):
             return Cursor([])
-        if "perception.anomalies" in compact or "ingest.info_items" in compact:
+        if (
+            "perception.anomalies" in compact
+            or "ingest.info_items" in compact
+            or "graph.baskets" in compact
+            or "marketstate.daily" in compact
+        ):
             return Cursor([])
         if "valuation_v1.ranges" in compact:
             day, cutoff = params
