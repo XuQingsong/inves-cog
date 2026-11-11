@@ -34,6 +34,12 @@ m8:
     min_baseline: 10
     short_min_volume: 1000000
     occ_min_contracts: 1000
+  context_items:
+    min_members: 5
+    min_baskets: 2
+    max_items: 10
+    etfs: [SPY, QQQ, DIA, IWM, SMH, SOXX, XLK, XLF, XLE, XLV, XLI]
+    macro_sources: [FederalReserveNews, EIATodayInEnergy, EIANews]
   retrieval_weights:
     overlap: 0.4
     recency: 0.3

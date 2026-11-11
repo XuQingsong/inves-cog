@@ -28,7 +28,7 @@ from tests.m8.test_b039_run import DAY, MORNING, STARTED, Pages, _news
 pytestmark = pytest.mark.phase1_blocking
 
 ROOT = Path(__file__).resolve().parents[2]
-_CONTRACT = ROOT / "docs/phase1/contracts/m8-candidate-prompt-v4"
+_CONTRACT = ROOT / "docs/phase1/contracts/m8-candidate-prompt-v5"
 _HEADLINE = "Zeta Corp doubles hard-drive output in Asia"
 _QUOTE = "Zeta Corp doubles hard-drive output"
 
@@ -57,7 +57,7 @@ def test_prompt_files_are_the_request_and_other_tasks_keep_their_bodies():
     output = json.loads((_CONTRACT / "output.json").read_text(encoding="utf-8"))
     assert candidate_instruction() == instruction
     assert candidate_output() == output
-    assert PROMPT_VERSION == "evidence-bridge-v4.1-links"
+    assert PROMPT_VERSION == "evidence-bridge-v5-links"
     plain = candidate_payload({"anomaly_id": "a"}, [{"info_id": "n1", "headline": "h"}], [])
     assert plain["output"] == output
 

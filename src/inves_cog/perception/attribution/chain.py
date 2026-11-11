@@ -1212,7 +1212,13 @@ def _retrieved(anomaly, items, as_of):
         _graph_context(anomaly, as_of)["neighbors"],
         anomaly.get("monitored") or [],
     )
-    return shortlist(items, found["entities"], anomaly["started_at"], as_of, members=members)
+    picked = shortlist(items, found["entities"], anomaly["started_at"], as_of, members=members)
+    context = [item for item in anomaly.get("context_items") or []]
+    if not context:
+        return picked
+    known = {item.get("info_id") for item in context}
+    room = max(0, 40 - len(context))
+    return context + [item for item in picked if item.get("info_id") not in known][:room]
 
 
 def _apply_score(candidates, anomaly, items, overrides):
