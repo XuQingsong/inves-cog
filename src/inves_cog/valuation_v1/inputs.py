@@ -24,7 +24,6 @@ def _structural_break(ticker):
     return None
 
 
-
 def day(value):
     return value if isinstance(value, date) and not isinstance(value, datetime) else date.fromisoformat(str(value)[:10])
 
@@ -257,22 +256,34 @@ def financial_inputs(state, states, entity, *, as_of=None):
     if brk:
         # keep only fiscal years fully after the break (period start > break)
         post = [r for r in years if r.period_end and (r.period_end - timedelta(days=365)) > brk]
-        margins = [
-            r.values["ni_ttm"] / r.values["rev_ttm"]
-            for r in post
-            if r.values.get("ni_ttm") is not None and r.values.get("rev_ttm") is not None and r.values["rev_ttm"] > 0
-        ]
-        if len(margins) * 4 < 8:
-            out["normal_net_margin"] = (
-                median(margins) if margins else settings()["cyclical"]["fallback_net_margin"].get(industry)
-            )
-            out["normalization_note"] = f"周期正常化历史不足（{len(margins) * 4} 季）"
-        else:
-            out["normal_net_margin"] = median(margins)
-        post_rev = [r.values.get("rev_ttm") for r in post]
-        out["normal_revenue"] = (
-            sum(post_rev[-3:]) / 3 if post_rev and all(v is not None for v in post_rev[-3:]) else None
+        # complete post-break quarters = post-break fiscal years * 4 plus
+        # quarters not yet inside a post-break fiscal year
+        quarters_post = len(post) * 4 + sum(
+            1
+            for s2 in states
+            if s2.period_end
+            and str(s2.form).removesuffix("/A") not in {"10-K", "20-F", "40-F"}
+            and (s2.period_end - timedelta(days=91)) > brk
+            and all(p.period_end is None or s2.period_end > p.period_end for p in post)
         )
+        if quarters_post < 8:
+            out["normal_net_margin"] = None
+            out["normal_revenue"] = None
+            out["normalization_note"] = f"周期正常化历史不足（断点 {brk} 后仅 {quarters_post} 季）"
+            out["normal_margin_reason"] = out["normalization_note"]
+        else:
+            margins = [
+                r.values["ni_ttm"] / r.values["rev_ttm"]
+                for r in post
+                if r.values.get("ni_ttm") is not None
+                and r.values.get("rev_ttm") is not None
+                and r.values["rev_ttm"] > 0
+            ]
+            out["normal_net_margin"] = median(margins) if margins else None
+            post_rev = [r.values.get("rev_ttm") for r in post]
+            out["normal_revenue"] = (
+                sum(post_rev[-3:]) / 3 if post_rev and all(v is not None for v in post_rev[-3:]) else None
+            )
     elif len(margins) >= settings()["cyclical"]["minimum_years"]:
         out["normal_net_margin"] = median(margins)
     else:
@@ -291,11 +302,7 @@ def financial_inputs(state, states, entity, *, as_of=None):
     # one-off flag: a quarter whose implied NI jumps >3x the 8-delta median,
     # or a loss quarter amid profits. Numbers untouched.
     q_states = sorted(
-        [
-            s2
-            for s2 in states
-            if s2.values.get("ni_ttm") is not None and s2.period_end
-        ],
+        [s2 for s2 in states if s2.values.get("ni_ttm") is not None and s2.period_end],
         key=lambda s2: s2.period_end,
     )
     deltas = [

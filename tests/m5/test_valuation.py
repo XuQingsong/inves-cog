@@ -407,5 +407,60 @@ def test_structural_break_post_window_and_oneoff_flag():
         )
     st = q[-1]
     out = financial_inputs(st, q, entity)
-    assert out.get("normalization_note") == "周期正常化历史不足（4 季）"
-    assert out.get("oneoff_note") and "2026" in out["oneoff_note"] (周期正常化窗口排除结构断点 + 一次性项目标记（WDC SanDisk 分拆）；页面展示标注)
+    assert out.get("normalization_note") == "周期正常化历史不足（断点 2025-02-21 后仅 6 季）"
+    assert out["normal_net_margin"] is None  # 不硬算：断点后不足 8 季不出周期估值
+    assert out.get("oneoff_note") and "2026" in out["oneoff_note"]
+
+
+@pytest.mark.phase1_blocking
+def test_break_unvalued_e2e_payload_notes_render():
+    """断点不足 8 季 → 周期行 unvalued，notes 进 payload.inputs，页面出原因。"""
+    from datetime import date, timedelta
+    from inves_cog.ingest.fundamentals.state import FinState
+    from inves_cog.valuation_v1.inputs import financial_inputs
+    from inves_cog.valuation_v1.calculations import calculate, mark_price
+    from inves_cog.web.brief import valuation_card
+    from inves_cog.web.investor_html import _valuation
+
+    entity = {"ticker": "WDC", "sic": "3572", "sector": "storage"}
+    q = [
+        FinState(
+            "WDC",
+            "fixed",
+            pe - timedelta(days=3),
+            pe,
+            values={"ni_ttm": ni, "rev_ttm": 11_000e6, "eps_ttm": 25.8},
+        )
+        for pe, ni in [
+            (date(2025, 10, 3), 1_182e6),
+            (date(2026, 1, 2), 1_842e6),
+            (date(2026, 4, 3), 3_205e6),
+            (date(2026, 10, 2), 10_021e6),
+            (date(2026, 10, 10), 10_500e6),
+        ]
+    ]
+    for pe, ni in [(date(2024, 6, 28), -798e6), (date(2025, 6, 27), 1_889e6), (date(2026, 7, 3), 9_424e6)]:
+        q.append(
+            FinState(
+                "WDC", "fixed", pe + timedelta(days=45), pe, form="10-K", values={"ni_ttm": ni, "rev_ttm": 13_000e6}
+            )
+        )
+    inputs = financial_inputs(q[-1], q, entity)
+    row = calculate("周期", inputs)
+    row = mark_price(row, 289.0)
+    assert row["status"] == "unvalued"
+    # service appends normal_margin_reason for 周期 rows
+    row["reason"] = "; ".join(filter(None, [row["reason"], inputs.get("normal_margin_reason")]))
+    assert "周期正常化历史不足" in row["reason"]
+    payload = dict(row)  # repository 存 jsonb(row)
+    assert payload["inputs"].get("normalization_note")
+    assert payload["inputs"].get("oneoff_note")
+    card = valuation_card(
+        {"neutral": None, "payload": payload, "status": "unvalued", "bear": None, "bull": None, "text": row["reason"]},
+        None,
+        289.0,
+    )
+    card["text"] = row["reason"]
+    from inves_cog.web.brief import short_unvalued_text
+
+    assert "周期正常化历史不足" in short_unvalued_text(card["text"]) (断点后不足 8 季 → 周期行 unvalued（不硬算）；notes 经 payload.inputs 到页面；e2e 测试)
