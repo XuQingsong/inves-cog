@@ -598,11 +598,12 @@ class Pipeline:
     def _tag_filing_tickers(self, items):
         """Resolve filing CIKs to universe tickers via issuer_profiles; unmatched stay untagged."""
         untagged = [item for item in items if not item.get("tickers")]
-        if not untagged:
+        connection = getattr(self.repo, "connection", None)
+        if not untagged or connection is None:
             return items
         mapping = {
             row["cik"]: row["ticker"]
-            for row in self.repo.connection.execute("SELECT cik, ticker FROM ingest.issuer_profiles").fetchall()
+            for row in connection.execute("SELECT cik, ticker FROM ingest.issuer_profiles").fetchall()
         }
         if not mapping:
             return items

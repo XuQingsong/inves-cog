@@ -116,6 +116,11 @@ class Database:
             rows = [row for row in self.anomalies if _day(row["trade_date"]) == _day(params[0])]
             rows.sort(key=lambda row: (row["session"], row["anomaly_id"]))
             return Cursor(rows)
+        if "kind = 'macro'" in compact:
+            rows = self.news
+            when, start, until = params[0], params[1], params[2]
+            rows = [row for row in rows if row["first_seen_at"] <= when and start <= row["published_at"] <= until]
+            return Cursor(rows)
         if "ingest.info_items" in compact:
             rows = self.news
             if "sec_8k" in compact:
@@ -123,6 +128,12 @@ class Database:
             when, start, until = params
             rows = [row for row in rows if row["first_seen_at"] <= when and start <= row["published_at"] <= until]
             return Cursor(rows)
+        if (
+            "ingest.earnings_events" in compact
+            or "perception.earnings_cards" in compact
+            or "ingest.earnings_calendar" in compact
+        ):
+            return Cursor([])
         if "valuation_v1.ranges" in compact:
             day, cutoff = params
             latest = {}
