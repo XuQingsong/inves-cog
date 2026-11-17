@@ -27,6 +27,29 @@ def test_backfill_occ_upserts():
     assert r["rows"] == 1
 
 
+def test_backfill_fred_uses_caller_supplied_key(monkeypatch):
+    requested = []
+    http = MagicMock()
+
+    def request(method, url, **kwargs):
+        requested.append(url)
+        return {"observations": [{"date": "2026-10-30", "value": "4.0"}]}
+
+    http.request.side_effect = request
+    monkeypatch.setenv("FRED_API_KEY", "environment-key")
+    reports = backfill_fred(
+        http,
+        None,
+        "/tmp/x",
+        datetime(2026, 10, 31),
+        sids=["SOFR"],
+        api_key="caller-key",
+    )
+    assert "api_key=caller-key" in requested[0]
+    assert "environment-key" not in requested[0]
+    assert reports[0]["rows"] == 1
+
+
 def test_backfill_fred_parse():
     text = "observation_date,WALCL\n2026-10-30,8000000\n2026-10-29,7990000\n"
     http = MagicMock()

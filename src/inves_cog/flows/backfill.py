@@ -87,7 +87,15 @@ FRED_FREQ = {
 }
 
 
-def _report(source, rows_by_date, total=None):
+def _error_fields(exc):
+    fields = {"error_type": type(exc).__name__}
+    status = getattr(exc, "status_code", None)
+    if status is not None:
+        fields["http_status"] = status
+    return fields
+
+
+def _report(source, rows_by_date, total=None, error=None):
     days = sorted(rows_by_date)
     gaps = [
         d.isoformat()
@@ -101,7 +109,7 @@ def _report(source, rows_by_date, total=None):
         rows_total = sum(rows_by_date.values())
     else:
         rows_total = len(rows_by_date)
-    return {
+    report = {
         "source": source,
         "first": str(days[0]) if days else None,
         "last": str(days[-1]) if days else None,
@@ -110,6 +118,9 @@ def _report(source, rows_by_date, total=None):
         "gap_days": gaps[:50],
         "gap_count": len(gaps),
     }
+    if error is not None:
+        report.update(_error_fields(error))
+    return report
 
 
 def _fetch(http, url):
@@ -271,6 +282,7 @@ def backfill_cboe_pc(
     """Daily JSON 2019-10-07 → end (archive CSVs for 2006–2019 have a different
     layout and are noted in the report until that parser lands)."""
     days = {}
+    errors = []
     fails = 0
     d = max(start, date(2019, 10, 7))
     while d <= end:
@@ -314,16 +326,19 @@ def backfill_cboe_pc(
                 days[d] = len(rows)
             except Exception as exc:
                 fails += 1
+                errors.append((d, exc))
                 log.warning("cboe pc %s failed (%d): %r", d, fails, exc)
                 if fails >= 5:
-                    days["__unavailable__"] = f"stopped after {fails} failures at {d}"
                     break
                 time.sleep(min(pace * (2**fails), 30))
             else:
                 fails = 0
             time.sleep(pace)
         d += timedelta(days=1)
-    return _report("CboePC:daily", days, sum(days.values()))
+    report = _report("CboePC:daily", days, sum(days.values()), error=errors[0][1] if errors else None)
+    if errors:
+        report["failed_dates"] = [str(day) for day, _ in errors]
+    return report
 
 
 # ---------- Cboe index history (VIX9D, VVIX, SKEW) ----------
@@ -334,6 +349,7 @@ CBOE_IDX_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/{sym}_Hi
 
 def backfill_cboe_index(http, connection, raw_dir, today, _now=None, dates=None, existing=None, conflict="update"):
     out = {}
+    errors = {}
     for sym in CBOE_IDX:
         url = CBOE_IDX_URL.format(sym=sym)
         try:
@@ -379,7 +395,14 @@ def backfill_cboe_index(http, connection, raw_dir, today, _now=None, dates=None,
         except Exception as exc:
             log.warning("cboe idx %s failed: %r", sym, exc)
             out[sym] = set()
-    return [_report(f"CboeIdx:{t}", days) for t, days in out.items()]
+            errors[sym] = exc
+    reports = []
+    for t, days in out.items():
+        report = _report(f"CboeIdx:{t}", days)
+        if t in errors:
+            report.update(_error_fields(errors[t]))
+        reports.append(report)
+    return reports
 
 
 # ---------- OCC volume backfill (last 2 years, rate-limited) ----------
@@ -434,7 +457,7 @@ _TFF_CLASSES = {
 }
 
 
-def _cftc_names(http, market):
+def _cftc_names(http, market, errors=None):
     """Distinct full market_and_exchange_names matching the short name."""
     params = {
         "$select": "market_and_exchange_names",
@@ -444,14 +467,17 @@ def _cftc_names(http, market):
     try:
         r = http.request("GET", CFTC_URL, params=params, headers=UA)
         return list({x["market_and_exchange_names"] for x in (r if isinstance(r, list) else [])})
-    except Exception:
+    except Exception as exc:
+        if errors is not None:
+            errors.append((market, exc))
         return []
 
 
 def backfill_cftc(http, connection, raw_dir, start, end, _now=None, existing=None, conflict="update"):
     rows = []
+    errors = []
     for short in CFTC_MARKETS:
-        names = _cftc_names(http, short) or [short + " - CHICAGO MERCANTILE EXCHANGE"]
+        names = _cftc_names(http, short, errors) or [short + " - CHICAGO MERCANTILE EXCHANGE"]
         for name in names:
             offset = 0
             while True:
@@ -466,6 +492,7 @@ def backfill_cftc(http, connection, raw_dir, start, end, _now=None, existing=Non
                     r = http.request("GET", CFTC_URL, params=params, headers=UA)
                     recs = r if isinstance(r, list) else []
                 except Exception as exc:
+                    errors.append((name, exc))
                     log.warning("cftc %s failed: %r", name, exc)
                     break
                 if not recs:
@@ -496,7 +523,10 @@ def backfill_cftc(http, connection, raw_dir, start, end, _now=None, existing=Non
                     break
     if connection is not None and rows:
         upsert_many(connection, "cftc_positions", list(rows[0].keys()), rows, conflict)
-    return _report("CFTC:TFF", {r["report_date"] for r in rows}, len(rows))
+    report = _report("CFTC:TFF", {r["report_date"] for r in rows}, len(rows), error=errors[0][1] if errors else None)
+    if errors:
+        report["failed_markets"] = sorted({name for name, _ in errors})
+    return report
 
 
 # ---------- FINRA margin statistics xlsx ----------
@@ -628,21 +658,24 @@ def backfill_fred_macro(http, connection, raw_dir, sids, start, end, now):
     return reports
 
 
-def backfill_fred(http, connection, raw_dir, _now=None, sids=None, dates=None, existing=None, conflict="update"):
-    import os
-
-    key = os.environ.get("FRED_API_KEY")
+def backfill_fred(
+    http,
+    connection,
+    raw_dir,
+    _now=None,
+    sids=None,
+    dates=None,
+    existing=None,
+    conflict="update",
+    api_key=None,
+):
+    key = api_key
     out = {}
+    errors = {}
     for sid in sids or FRED_SERIES:
         url = FRED_API.format(sid=sid, key=key) if key else FRED_URL.format(sid=sid)
         try:
-            if key:
-                import urllib.request
-
-                req = urllib.request.Request(url, headers=UA)
-                text = urllib.request.urlopen(req, timeout=60).read().decode()
-            else:
-                text = _fetch(http, url)
+            text = _fetch(http, url)
             rows = []
             if key:
                 payload = text if isinstance(text, dict) else json.loads(text)
@@ -676,7 +709,7 @@ def backfill_fred(http, connection, raw_dir, _now=None, sids=None, dates=None, e
                 save_raw(
                     raw_dir,
                     f"fred-{sid.lower()}",
-                    url,
+                    FRED_API.format(sid=sid, key="[redacted]") if key else url,
                     str(_now.date() if hasattr(_now, "date") else _now),
                     (text.encode() if isinstance(text, str) else json.dumps(text).encode()),
                     connection,
@@ -701,7 +734,14 @@ def backfill_fred(http, connection, raw_dir, _now=None, sids=None, dates=None, e
         except Exception as exc:
             log.warning("fred %s failed: %r", sid, exc)
             out[sid] = set()
-    return [_report(f"FRED:{t}", days) for t, days in out.items()]
+            errors[sid] = exc
+    reports = []
+    for t, days in out.items():
+        report = _report(f"FRED:{t}", days)
+        if t in errors:
+            report.update(_error_fields(errors[t]))
+        reports.append(report)
+    return reports
 
 
 # ---------- OFR FSI ----------
@@ -769,7 +809,7 @@ def backfill_ofr(
         return _report("OFR:FSI", {r["obs_date"] for r in rows})
     except Exception as exc:
         log.warning("ofr fsi failed: %r", exc)
-        return _report("OFR:FSI", set())
+        return _report("OFR:FSI", set(), error=exc)
 
 
 # ---------- P2-M1: barometer missing price/macro history ----------
