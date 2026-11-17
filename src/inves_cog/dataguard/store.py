@@ -13,7 +13,7 @@ class Store:
     def __init__(self, connection):
         self.db = connection
 
-    def reconcile(self, dataset, day, findings, now):
+    def reconcile(self, dataset, day, findings, now, *, item=None):
         """The caller owns the transaction: state, audit and mail enqueue commit together."""
         old = {
             r["kind"]: r
@@ -25,6 +25,8 @@ class Store:
         notices, keys = [], []
         for f in findings:
             prev = old.get(f.kind)
+            if self._mark_degraded(item, prev, f, now):
+                continue
             reopened = prev and prev["status"] == "resolved"
             generation = (prev["generation"] + 1 if reopened else prev["generation"]) if prev else 1
             status = "open" if not prev or reopened else prev["status"]
@@ -69,6 +71,37 @@ class Store:
                 prev.update(status="resolved", resolved_at=now, last_checked_at=now)
                 self.transition(prev, now)
         return notices, keys
+
+    def _mark_degraded(self, item, prev, finding, now):
+        if item is None or prev is None:
+            return False
+        configured = set((item.backfill or {}).get("degraded_keys", ()))
+        missing = set(finding.detail.get("missing_keys", ()))
+        degraded_keys = configured & missing
+        if not degraded_keys:
+            return False
+        evidence = (prev.get("detail") or {}).get("recovery_evidence") or {}
+        evidence_statuses = {e.get("http_status") for e in evidence.get("source_errors", [])}
+        expected_statuses = set((item.backfill or {}).get("degraded_http_statuses", ()))
+        already = prev["status"] == "resolved" and set(prev["detail"].get("degraded_keys", ())) & missing
+        if not already and not (evidence_statuses & expected_statuses):
+            return False
+        if already:
+            self.db.execute(
+                "UPDATE ops.data_gaps SET last_checked_at=%s WHERE dataset=%s AND data_date=%s AND kind=%s",
+                (now, prev["dataset"], prev["data_date"], prev["kind"]),
+            )
+            return True
+        detail = {
+            **(prev["detail"] or {}),
+            **finding.detail,
+            "state": "degraded",
+            "degraded_keys": sorted(degraded_keys),
+            "degraded_reason": "来源限流（HTTP 429），保留采集但不计开放缺口",
+        }
+        prev.update(status="resolved", resolved_at=now, last_checked_at=now, detail=detail)
+        self.transition(prev, now)
+        return True
 
     def event(self, row, now):
         self.db.execute(

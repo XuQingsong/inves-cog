@@ -23,6 +23,7 @@ from inves_cog.dataguard.core import Finding, due_dates
 from inves_cog.dataguard.mail import Mailer
 from inves_cog.dataguard.reader import barometer_drifts, findings, load, read, wide_scope
 from inves_cog.dataguard.recovery import eligible, slice_resources
+from inves_cog.dataguard.refresh import run as run_refresh
 from inves_cog.dataguard.store import Store
 from inves_cog.ingest.settings import read_environment
 
@@ -74,7 +75,8 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
         if monotonic() - started >= budget:
             errors.extend(i.dataset for i in items[index:])
             break
-        days = due_dates(item, now, lookback=70 if item.cadence == "monthly" else max(7, item.release_days + 7))
+        lookback = max(7, item.release_days + 7, int((item.backfill or {}).get("refresh_days", 0)))
+        days = due_dates(item, now, lookback=70 if item.cadence == "monthly" else lookback)
         if item.cadence.startswith("intraday:") and not item.failures_only:
             days = days[-1:]
         elif item.carry_forward:
@@ -117,6 +119,35 @@ def scan(connection, items, now, *, budget=18, monotonic=time.monotonic):
     return results, errors
 
 
+def retire_undue(writer, item, now):
+    """Resolve gap rows whose date is outside the current expectation window."""
+    rows = writer.execute(
+        "SELECT * FROM ops.data_gaps WHERE dataset=%s AND status<>'resolved' FOR UPDATE", (item.dataset,)
+    ).fetchall()
+    if not rows:
+        return 0
+    today = now.astimezone(NY).date()
+    store = Store(writer)
+    resolved = 0
+    for row in rows:
+        due = (
+            False
+            if getattr(item, "disabled", None)
+            else row["data_date"] in due_dates(item, now, lookback=max(0, (today - row["data_date"]).days))
+        )
+        if due:
+            continue
+        row.update(
+            status="resolved",
+            resolved_at=now,
+            last_checked_at=now,
+            reason="该日期不再属于当前数据预期",
+        )
+        store.transition(row, now)
+        resolved += 1
+    return resolved
+
+
 def run_once(
     reader,
     writer,
@@ -131,6 +162,12 @@ def run_once(
 ):
     started = monotonic()
     resources = resources or slice_resources()
+    if not detect_only:
+        with writer.transaction():
+            for item in items:
+                retire_undue(writer, item, now)
+        if values.get("INVES_DATAGUARD_BACKFILL") == "1":
+            run_refresh(reader, writer, items, values, now)
     results, errors = scan(reader, items, now, monotonic=monotonic)
     store = Store(writer)
     notices, keys = [], []
@@ -139,7 +176,7 @@ def run_once(
     with writer.transaction():
         for item, days in results:
             for day, found in days.items():
-                rows, new = store.reconcile(item.dataset, day, found, now)
+                rows, new = store.reconcile(item.dataset, day, found, now, item=item)
                 notices.extend(rows)
                 keys.extend(new)
         try:

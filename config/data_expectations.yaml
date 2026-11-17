@@ -144,6 +144,7 @@ datasets:
   writes_to:
     tasks: [intraday_snapshots, iex_intraday, yahoo_intraday]
   table: ingest.intraday_snapshots
+  recheck_days: 0
   date_column: as_of
   cadence: intraday:1
   deadline_et: 09:30
@@ -164,6 +165,7 @@ datasets:
   writes_to:
     tasks: [wide_snapshots]
   table: ingest.wide_snapshots
+  recheck_days: 0
   date_column: as_of
   cadence: intraday:5
   deadline_et: 09:30
@@ -230,6 +232,7 @@ datasets:
   table: ingest.macro_observations
   date_column: observation_date
   cadence: trading_day
+  holiday_calendar: us_federal
   deadline_et: '20:45'
   grace_min: 30
   min_rows: 1
@@ -237,6 +240,7 @@ datasets:
   impact: 晴雨表利率与跨资产判断可能失真
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -274,10 +278,35 @@ datasets:
   expected_keys:
   - ecb_jpyx
   staleness: true
+- dataset: 利率信用与跨资产日线
+  table: flows.observations
+  date_column: obs_date
+  cadence: trading_day
+  deadline_et: '18:30'
+  grace_min: 30
+  min_rows: 1
+  basis: 晴雨表仍读取 yahoo_px_move；Yahoo MOVE 保留采集，HTTP 429 标记降级并继续显示暂缺
+  impact: 债市波动输入暂缺时页面必须明示
+  backfill:
+    entry: yahoo_px
+    max_attempts: 3
+    degraded_http_statuses: [429]
+    degraded_keys: [yahoo_px_move]
+    depends_on:
+    - barometer
+  key_column: series_id
+  value_column: value
+  latest_column: ingested_at
+  filter:
+    series_id:
+    - yahoo_px_move
+  expected_keys:
+  - yahoo_px_move
 - dataset: 比特币日线
   table: ingest.macro_observations
   date_column: observation_date
   cadence: trading_day
+  holiday_calendar: us_federal
   deadline_et: '20:45'
   grace_min: 30
   min_rows: 1
@@ -285,6 +314,7 @@ datasets:
   impact: 晴雨表跨资产与去杠杆判断可能失真
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -309,6 +339,7 @@ datasets:
   impact: 晴雨表债市信用判断可能失真
   backfill:
     entry: vxtlt
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -322,6 +353,7 @@ datasets:
   staleness: true
 - dataset: 看跌看涨成交比
   table: flows.observations
+  split_like: false
   date_column: obs_date
   cadence: trading_day
   deadline_et: '19:00'
@@ -331,6 +363,7 @@ datasets:
   impact: 期权情绪判断
   backfill:
     entry: cboe_pc
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -361,6 +394,7 @@ datasets:
   impact: 短期风险判断
   backfill:
     entry: cboe_idx
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -378,6 +412,7 @@ datasets:
   - cboe_idx_vvix
 - dataset: app 排名快照
   table: ingest.app_rank_snapshots
+  active_since: 2026-11-10
   date_column: ts_utc
   cadence: weekly
   deadline_et: 09:00
@@ -389,6 +424,7 @@ datasets:
   writes_to:
     tasks: [websites]
   table: ingest.website_snapshots
+  active_since: 2026-11-10
   date_column: captured_at
   cadence: weekly
   deadline_et: 09:00
@@ -398,6 +434,7 @@ datasets:
   impact: 跟踪主体站点变更感知
 - dataset: 国会 PTR 索引任务
   table: ingest.job_runs
+  active_since: 2026-11-10
   date_column: trade_date
   cadence: trading_day
   deadline_et: '22:00'
@@ -422,6 +459,7 @@ datasets:
     max_attempts: 3
 - dataset: 采集任务运行（app/趋势/站点）
   table: ingest.job_runs
+  active_since: 2026-11-10
   date_column: trade_date
   cadence: trading_day
   deadline_et: '23:59'
@@ -451,6 +489,7 @@ datasets:
     entry: manual
 - dataset: EIA 新闻任务
   table: ingest.job_runs
+  active_since: 2026-11-10
   date_column: trade_date
   cadence: trading_day
   deadline_et: '20:45'
@@ -606,6 +645,7 @@ datasets:
   table: flows.cftc_positions
   date_column: report_date
   cadence: weekly
+  holiday_calendar: us_federal
   deadline_et: '15:30'
   grace_min: 30
   min_rows: 5
@@ -613,6 +653,7 @@ datasets:
   impact: 杠杆与期货定位判断
   backfill:
     entry: cftc
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -623,6 +664,7 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: weekly
+  holiday_calendar: us_federal
   deadline_et: '16:30'
   grace_min: 30
   min_rows: 1
@@ -630,6 +672,7 @@ datasets:
   impact: 晴雨表流动性与金融压力
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -643,6 +686,8 @@ datasets:
   release_days: 1
 - dataset: 货币基金规模
   table: flows.observations
+  disabled:
+    reason: FRED WRMFNS 上游停更（最后发布 2026-10-05）
   date_column: obs_date
   cadence: weekly
   deadline_et: '16:30'
@@ -666,6 +711,7 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: weekly
+  holiday_calendar: us_federal
   deadline_et: '10:00'
   grace_min: 30
   min_rows: 1
@@ -673,6 +719,7 @@ datasets:
   impact: 晴雨表流动性与金融压力
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -687,6 +734,7 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: trading_day
+  holiday_calendar: us_federal
   deadline_et: '17:00'
   grace_min: 30
   min_rows: 1
@@ -694,6 +742,7 @@ datasets:
   impact: 流动性判断
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -707,6 +756,7 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: trading_day
+  holiday_calendar: us_federal
   deadline_et: 08:00
   grace_min: 30
   min_rows: 1
@@ -714,6 +764,7 @@ datasets:
   impact: 融资压力判断
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -728,6 +779,7 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: trading_day
+  holiday_calendar: us_federal
   deadline_et: 00:00
   grace_min: 30
   min_rows: 1
@@ -735,6 +787,7 @@ datasets:
   impact: 融资利差判断
   backfill:
     entry: fred
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -748,6 +801,7 @@ datasets:
   table: flows.observations
   date_column: obs_date
   cadence: trading_day
+  holiday_calendar: us_federal
   deadline_et: 09:00
   grace_min: 30
   min_rows: 1
@@ -755,6 +809,7 @@ datasets:
   impact: 金融压力判断
   backfill:
     entry: ofr
+    refresh_days: 10
     max_attempts: 3
     depends_on:
     - barometer
@@ -767,6 +822,7 @@ datasets:
   release_sessions: 1
 - dataset: 晴雨表日报
   table: flows.barometer_daily
+  split_like: false
   date_column: date
   cadence: trading_day
   deadline_et: '20:45'
@@ -782,6 +838,7 @@ datasets:
   quality_column: missing
 - dataset: 晴雨表盘中
   table: flows.barometer_intraday
+  split_like: false
   date_column: ts
   cadence: intraday:15
   deadline_et: 09:45

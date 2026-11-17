@@ -1,5 +1,6 @@
 """Production M1 tasks using the same parsers exercised by the offline harness."""
 
+import json
 import re
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
@@ -632,21 +633,14 @@ class Pipeline:
 
     def trends_task(self):
         count, short, failures = 0, [], []
-        for entity in self.monitored:
-            for keyword in entity.get("trends_keywords", []):
-                try:
-                    check()
-                    payload = self.trends.get(keyword)
-                    today = self.clock.now_utc().astimezone(NY).date()
-                    valid = [r for r in payload["history"] if today - timedelta(days=90) <= r["date"] < today]
-                    if len(valid) < 60:
-                        short.append(keyword + ": trend_window_short")
-                    event = trend_event(keyword, payload["history"], payload["today"], clock=self.clock)
-                    if event:
-                        self.info([event])
-                    self.repo.set_cursor("trends:" + keyword, payload, self.clock.now_utc())
-                    count += 1
-                except Exception as exc:
+        pending = self._trends_pending()
+        while pending:
+            batch = pending[:3]
+            try:
+                check()
+                payloads = self._get_trends_batch(batch, failures)
+            except Exception as exc:
+                for keyword in batch:
                     failures.append(
                         {
                             "keyword": keyword,
@@ -655,17 +649,79 @@ class Pipeline:
                             "confirmed_unavailable": getattr(exc, "confirmed_unavailable", False),
                         }
                     )
+                break
+            for keyword, payload in payloads.items():
+                today = self.clock.now_utc().astimezone(NY).date()
+                valid = [r for r in payload["history"] if today - timedelta(days=90) <= r["date"] < today]
+                if len(valid) < 60:
+                    short.append(keyword + ": trend_window_short")
+                event = trend_event(keyword, payload["history"], payload["today"], clock=self.clock)
+                if event:
+                    self.info([event])
+                self.repo.set_cursor("trends:" + keyword, payload, self.clock.now_utc())
+                count += 1
+            pending = pending[3:]
+            self._set_trends_pending(pending)
         notes = short + [f"{f['keyword']}: {f['type']}: {f['message']}" for f in failures]
         return {
             "processed_count": count,
+            "pending_count": len(pending),
             "failures": failures,
             "source_success": count > 0,
             "confirmed_unavailable": count == 0
             and bool(failures)
             and all(f["confirmed_unavailable"] for f in failures),
             "note": "; ".join(notes),
-            "status": "degraded" if short or failures else "ok",
+            "status": "degraded" if short or failures or pending else "ok",
         }
+
+    def _get_trends_batch(self, batch, failures):
+        if hasattr(self.trends, "get_batch"):
+            return self.trends.get_batch(batch)
+        payloads = {}
+        for keyword in batch:
+            try:
+                check()
+                payloads[keyword] = self.trends.get(keyword)
+            except Exception as exc:
+                failures.append(
+                    {
+                        "keyword": keyword,
+                        "type": type(exc).__name__,
+                        "message": str(exc),
+                        "confirmed_unavailable": getattr(exc, "confirmed_unavailable", False),
+                    }
+                )
+        return payloads
+
+    def _trends_pending(self):
+        pending = [keyword for entity in self.monitored for keyword in entity.get("trends_keywords", [])]
+        if not hasattr(self.repo, "get_cursor"):
+            return pending
+        key = "trends_queue"
+        value = self.repo.get_cursor(key)
+        if value is not None:
+            if isinstance(value, str):
+                value = json.loads(value)
+            if value.get("pending"):
+                return list(value["pending"])
+            if str(value.get("day")) == str(self._trends_day()):
+                return []
+        pending = [keyword for entity in self.monitored for keyword in entity.get("trends_keywords", [])]
+        self._set_trends_pending(pending)
+        return pending
+
+    def _trends_day(self):
+        return getattr(self, "day_override", None) or self.clock.today_trade_date()
+
+    def _set_trends_pending(self, pending):
+        if not hasattr(self.repo, "set_cursor"):
+            return
+        self.repo.set_cursor(
+            "trends_queue",
+            {"day": str(self._trends_day()), "pending": list(pending), "completed": not pending},
+            self.clock.now_utc(),
+        )
 
     def websites_task(self):
         count, failures = 0, []

@@ -6,7 +6,7 @@ from datetime import date, datetime, time, timedelta
 from math import ceil, isfinite
 from statistics import median
 
-from inves_cog.dataguard.calendar import NY, ecb_target_holiday, next_trading_day, trading_day
+from inves_cog.dataguard.calendar import NY, ecb_target_holiday, next_trading_day, trading_day, us_federal_holiday
 
 
 @dataclass(frozen=True)
@@ -39,6 +39,9 @@ class Expectation:
     sanity: float | None = None
     sanity_leverage: dict = field(default_factory=dict)
     holiday_calendar: str | None = None
+    active_since: str | date | None = None
+    recheck_days: int | None = None
+    split_like: bool = True
     filter: dict = field(default_factory=dict)
     scope: str | None = None
     timestamp: bool = False
@@ -78,6 +81,20 @@ class Expectation:
             raise ValueError("Invalid expectation bounds")
         if self.min_coverage is not None and not 0 < self.min_coverage <= 1:
             raise ValueError("Invalid coverage")
+        if self.holiday_calendar not in {None, "ecb", "us_federal"}:
+            raise ValueError("Invalid holiday calendar")
+        if isinstance(self.active_since, str):
+            object.__setattr__(self, "active_since", date.fromisoformat(self.active_since))
+        if self.recheck_days is not None and self.recheck_days < 0:
+            raise ValueError("Invalid recheck window")
+
+
+def _holiday(item, day):
+    if item.holiday_calendar == "ecb":
+        return ecb_target_holiday(day)
+    if item.holiday_calendar == "us_federal":
+        return us_federal_holiday(day)
+    return False
 
 
 def due_dates(item, now, *, lookback=7):
@@ -87,11 +104,15 @@ def due_dates(item, now, *, lookback=7):
     result = []
     for offset in range(lookback, -1, -1):
         day = today - timedelta(days=offset)
+        if item.active_since and day < item.active_since:
+            continue
+        if item.recheck_days is not None and offset > item.recheck_days:
+            continue
         if item.cadence == "weekday" and day.weekday() >= 5:
             continue
         if not item.calendar_days and item.cadence not in {"weekday", "monthly"} and not trading_day(day):
             continue
-        if item.holiday_calendar == "ecb" and ecb_target_holiday(day):
+        if _holiday(item, day):
             continue
         if item.period_end:
             if not trading_day(day):
@@ -218,7 +239,7 @@ def evaluate(item, day, rows, previous, *, prior_counts=(), actions=frozenset(),
             ratio = value / old
             leverage = item.sanity_leverage.get(key, 1)
             threshold = (item.sanity or 0) * leverage
-            split_like = any(abs(ratio - r) <= 0.05 for r in SPLIT_RATIOS)
+            split_like = item.split_like and any(abs(ratio - r) <= 0.05 for r in SPLIT_RATIOS)
             if (item.sanity and abs(ratio - 1) > threshold) or split_like:
                 suspect.append({**evidence, "change": ratio - 1, "split_like": split_like})
     for kind, evidence in [("stale", stale), ("suspect", suspect)]:

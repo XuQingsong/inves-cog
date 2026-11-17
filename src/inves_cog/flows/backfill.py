@@ -265,7 +265,9 @@ def backfill_cboe_pc_csv(http, connection, raw_dir, published_at_fn, today=None)
     return [_report(f"CboePC:{t}", days) for t, days in out.items()]
 
 
-def backfill_cboe_pc(http, connection, raw_dir, start, end, _now, pace=0.25):
+def backfill_cboe_pc(
+    http, connection, raw_dir, start, end, _now, pace=0.25, dates=None, existing=None, conflict="update"
+):
     """Daily JSON 2019-10-07 → end (archive CSVs for 2006–2019 have a different
     layout and are noted in the report until that parser lands)."""
     days = {}
@@ -275,9 +277,15 @@ def backfill_cboe_pc(http, connection, raw_dir, start, end, _now, pace=0.25):
         if trading_day(d):
             url = CBOE_PC_DAILY.format(day=d)
             try:
+                if dates is not None and d not in dates:
+                    continue
                 r = _fetch(http, url)
                 payload = r if isinstance(r, dict) else json.loads(r)
-                rows = parse_cboe_pc(payload, d, published_at("cboe_pc", d))
+                rows = [
+                    x
+                    for x in parse_cboe_pc(payload, d, published_at("cboe_pc", d))
+                    if (x["series_id"], d) not in (existing or set())
+                ]
                 if connection is not None and rows:
                     raw = save_raw(
                         raw_dir,
@@ -302,7 +310,7 @@ def backfill_cboe_pc(http, connection, raw_dir, start, end, _now, pace=0.25):
                     )
                     for x in rows:
                         x["raw_file_id"] = raw["raw_file_id"]
-                    upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+                    upsert_many(connection, "observations", list(rows[0].keys()), rows, conflict)
                 days[d] = len(rows)
             except Exception as exc:
                 fails += 1
@@ -324,7 +332,7 @@ CBOE_IDX = {"VIX9D": "vix9d", "VVIX": "vvix", "SKEW": "skew"}
 CBOE_IDX_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/{sym}_History.csv"
 
 
-def backfill_cboe_index(http, connection, raw_dir, today, _now=None):
+def backfill_cboe_index(http, connection, raw_dir, today, _now=None, dates=None, existing=None, conflict="update"):
     out = {}
     for sym in CBOE_IDX:
         url = CBOE_IDX_URL.format(sym=sym)
@@ -335,7 +343,12 @@ def backfill_cboe_index(http, connection, raw_dir, today, _now=None):
             for row in reader:
                 day = _mdy(row.get("DATE") or row.get("date"))
                 val = row.get("CLOSE") or row.get("close") or row.get(sym) or row.get(sym.upper())
-                if day and val:
+                if (
+                    day
+                    and val
+                    and (dates is None or day in dates)
+                    and (f"cboe_idx_{sym.lower()}", day) not in (existing or set())
+                ):
                     rows.append(
                         {
                             "series_id": f"cboe_idx_{sym.lower()}",
@@ -361,7 +374,7 @@ def backfill_cboe_index(http, connection, raw_dir, today, _now=None):
                         }
                     ],
                 )
-                upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+                upsert_many(connection, "observations", list(rows[0].keys()), rows, conflict)
             out[sym] = {r["obs_date"] for r in rows}
         except Exception as exc:
             log.warning("cboe idx %s failed: %r", sym, exc)
@@ -435,7 +448,7 @@ def _cftc_names(http, market):
         return []
 
 
-def backfill_cftc(http, connection, raw_dir, start, end, _now=None):
+def backfill_cftc(http, connection, raw_dir, start, end, _now=None, existing=None, conflict="update"):
     rows = []
     for short in CFTC_MARKETS:
         names = _cftc_names(http, short) or [short + " - CHICAGO MERCANTILE EXCHANGE"]
@@ -464,6 +477,8 @@ def backfill_cftc(http, connection, raw_dir, start, end, _now=None):
                     release = _at(_biz_next(report + timedelta(days=3)), "15:30")
                     oi = rec.get("open_interest_all")
                     for cls, (lk, sk, spk) in _TFF_CLASSES.items():
+                        if (report, name, cls) in (existing or set()):
+                            continue
                         rows.append(
                             {
                                 "report_date": report,
@@ -480,7 +495,7 @@ def backfill_cftc(http, connection, raw_dir, start, end, _now=None):
                 if len(recs) < 2000:
                     break
     if connection is not None and rows:
-        upsert_many(connection, "cftc_positions", list(rows[0].keys()), rows)
+        upsert_many(connection, "cftc_positions", list(rows[0].keys()), rows, conflict)
     return _report("CFTC:TFF", {r["report_date"] for r in rows}, len(rows))
 
 
@@ -613,12 +628,12 @@ def backfill_fred_macro(http, connection, raw_dir, sids, start, end, now):
     return reports
 
 
-def backfill_fred(http, connection, raw_dir, _now=None):
+def backfill_fred(http, connection, raw_dir, _now=None, sids=None, dates=None, existing=None, conflict="update"):
     import os
 
     key = os.environ.get("FRED_API_KEY")
     out = {}
-    for sid in FRED_SERIES:
+    for sid in sids or FRED_SERIES:
         url = FRED_API.format(sid=sid, key=key) if key else FRED_URL.format(sid=sid)
         try:
             if key:
@@ -635,7 +650,12 @@ def backfill_fred(http, connection, raw_dir, _now=None):
                 for o in recs:
                     day = _mdy(o.get("date") or "")
                     val = o.get("value")
-                    if day and val not in (None, ".", ""):
+                    if (
+                        day
+                        and val not in (None, ".", "")
+                        and (dates is None or day in dates)
+                        and (f"fred_{sid.lower()}", day) not in (existing or set())
+                    ):
                         rows.append(
                             {
                                 "series_id": f"fred_{sid.lower()}",
@@ -646,7 +666,12 @@ def backfill_fred(http, connection, raw_dir, _now=None):
                             }
                         )
             else:
-                rows = _fred_rows(text, sid, published_at_fred)
+                rows = [
+                    r
+                    for r in _fred_rows(text, sid, published_at_fred)
+                    if (dates is None or r["obs_date"] in dates)
+                    and (r["series_id"], r["obs_date"]) not in (existing or set())
+                ]
             if connection is not None and rows:
                 save_raw(
                     raw_dir,
@@ -670,7 +695,7 @@ def backfill_fred(http, connection, raw_dir, _now=None):
                         }
                     ],
                 )
-                upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+                upsert_many(connection, "observations", list(rows[0].keys()), rows, conflict)
             out[sid] = {r["obs_date"] for r in rows}
             time.sleep(0.3)
         except Exception as exc:
@@ -684,7 +709,9 @@ def backfill_fred(http, connection, raw_dir, _now=None):
 OFR_FSI_URL = "https://www.financialresearch.gov/financial-stress-index/data/fsi.csv"
 
 
-def backfill_ofr(http, connection, raw_dir, _now=None):
+def backfill_ofr(
+    http, connection, raw_dir, _now=None, series_filter=None, dates=None, existing=None, conflict="update"
+):
     try:
         text = _fetch(http, OFR_FSI_URL)
         rows = []
@@ -705,7 +732,12 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
                 continue
             for label, series in comps.items():
                 val = row.get(label)
-                if val not in (None, ""):
+                if (
+                    val not in (None, "")
+                    and (series_filter is None or series in set(series_filter))
+                    and (dates is None or day in dates)
+                    and (series, day) not in (existing or set())
+                ):
                     rows.append(
                         {
                             "series_id": series,
@@ -733,7 +765,7 @@ def backfill_ofr(http, connection, raw_dir, _now=None):
                     for k, v in comps.items()
                 ],
             )
-            upsert_many(connection, "observations", list(rows[0].keys()), rows, "update")
+            upsert_many(connection, "observations", list(rows[0].keys()), rows, conflict)
         return _report("OFR:FSI", {r["obs_date"] for r in rows})
     except Exception as exc:
         log.warning("ofr fsi failed: %r", exc)
@@ -787,7 +819,7 @@ def _vxtlt_close(http, start, end):
     return out
 
 
-def backfill_vxtlt(http, connection, raw_dir, start, end, _now=None):
+def backfill_vxtlt(http, connection, raw_dir, start, end, _now=None, existing=None, conflict="nothing"):
     """Cboe VXTLT daily closes → flows.observations series cboe_vxtlt
     (published_at = close day 17:00 ET, same convention as the retired MOVE)."""
     rows = [
@@ -799,6 +831,7 @@ def backfill_vxtlt(http, connection, raw_dir, start, end, _now=None):
             "vintage": "backfill",
         }
         for d, v in sorted(_vxtlt_close(http, start, end).items())
+        if ("cboe_vxtlt", d) not in (existing or set())
     ]
     if connection is not None and rows:
         upsert_many(
@@ -815,7 +848,10 @@ def backfill_vxtlt(http, connection, raw_dir, start, end, _now=None):
                 }
             ],
         )
-        upsert_many(connection, "observations", list(rows[0].keys()), rows)
+        if conflict == "nothing":
+            upsert_many(connection, "observations", list(rows[0].keys()), rows)
+        else:
+            upsert_many(connection, "observations", list(rows[0].keys()), rows, conflict)
     return [
         {
             "source": "Cboe:VXTLT",

@@ -200,7 +200,7 @@ class Trends:
     def __init__(self, *, clock):
         self.clock, self.limiter = clock, RateLimiter(1, 10)
 
-    def get(self, keyword):
+    def _client(self):
         from pytrends.request import TrendReq
 
         from inves_cog.ingest.deadline import check
@@ -218,25 +218,35 @@ class Trends:
                 limiter.acquire()
                 return super()._get_data(*args, **kwargs)
 
+        return LimitedTrendReq(hl="en-US", tz=300, timeout=(10, 30), retries=0)
+
+    def get_batch(self, keywords):
+        keywords = list(keywords)
         try:
-            client = LimitedTrendReq(hl="en-US", tz=300, timeout=(10, 30), retries=0)
-            client.build_payload([keyword], timeframe="today 3-m", geo="US")
+            client = self._client()
+            client.build_payload(keywords, timeframe="today 3-m", geo="US")
             data = client.interest_over_time()
         except Exception as exc:
             status = getattr(getattr(exc, "response", None), "status_code", None)
             raise SourceError(
-                f"Google Trends {keyword}: {type(exc).__name__}: {exc}",
+                f"Google Trends {','.join(keywords)}: {type(exc).__name__}: {exc}",
                 status_code=status,
                 confirmed_unavailable=status in {401, 403},
             ) from exc
-        today, rows, value = self.clock.now_utc().astimezone(NY).date(), [], None
+        today = self.clock.now_utc().astimezone(NY).date()
+        result = {keyword: {"history": [], "today": None} for keyword in keywords}
         for instant, row in data.iterrows():
-            day, number = instant.date(), float(row[keyword])
-            if day == today:
-                value = number
-            elif day < today and not row.get("isPartial", False):
-                rows.append({"date": day, "value": number})
-        return {"history": rows, "today": value}
+            day = instant.date()
+            for keyword in keywords:
+                number = float(row[keyword])
+                if day == today:
+                    result[keyword]["today"] = number
+                elif day < today and not row.get("isPartial", False):
+                    result[keyword]["history"].append({"date": day, "value": number})
+        return result
+
+    def get(self, keyword):
+        return self.get_batch([keyword])[keyword]
 
 
 class _Tables(HTMLParser):
