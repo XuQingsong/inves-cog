@@ -457,7 +457,7 @@ datasets:
   backfill:
     entry: manual
     max_attempts: 3
-- dataset: 采集任务运行（app/趋势/站点）
+- dataset: 采集任务运行（app/站点）
   table: ingest.job_runs
   active_since: 2026-11-10
   date_column: trade_date
@@ -472,19 +472,38 @@ datasets:
     task_name:
     - app_free
     - app_grossing
-    - trends
     - websites
   expected_keys:
     - app_free
     - app_grossing
-    - trends
     - websites
   writes_to:
     tasks: [app_free, app_grossing]
     table: ingest.app_rank_snapshots
     date_column: as_of
-  basis: runtime.py app_* interval=60 每小时；trends/websites after=1245 每日；2026-11-10 入白名单
+  basis: runtime.py app_* interval=60 每小时；websites after=1245 每日；2026-11-10 入白名单
   impact: 应用排名与站点趋势感知缺失
+  backfill:
+    entry: manual
+- dataset: 趋势关键词轮换采集
+  table: ingest.job_runs
+  active_since: 2026-11-10
+  date_column: trade_date
+  cadence: trading_day
+  deadline_et: '23:59'
+  grace_min: 30
+  min_rows: 1
+  key_column: task_name
+  value_column: status
+  success_column: processed_count
+  latest_column: started_at
+  filter:
+    task_name:
+    - trends
+  expected_keys:
+    - trends
+  basis: pipeline.py trends_task 按固定关键词列表轮换；每晚至少有 1 个关键词成功即满足，页面读取各关键词最近游标日期
+  impact: 趋势关键词更新变慢时感知精度下降
   backfill:
     entry: manual
 - dataset: EIA 新闻任务

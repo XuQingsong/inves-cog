@@ -1,6 +1,8 @@
 from datetime import date, datetime, timedelta, timezone
 from unittest.mock import Mock
 
+from inves_cog.ingest.adapters import Trends as TrendsAdapter
+from inves_cog.ingest.deadline import budget
 from inves_cog.ingest.http import SourceError
 from inves_cog.ingest.pipeline import Pipeline
 
@@ -42,47 +44,105 @@ def _payload(keyword):
     return {"history": [{"date": date(2026, 11, 16), "value": 1.0}] * 60, "today": 2.0}
 
 
-def test_trends_batches_keywords_and_durable_queue_completes():
-    repo = Repo()
+class RotatingTrends:
+    def __init__(self, limit=None):
+        self.calls = []
+        self.limit = limit
+
+    def get(self, keyword):
+        assert isinstance(keyword, str)
+        self.calls.append(keyword)
+        if self.limit is not None and len(self.calls) > self.limit:
+            raise SourceError("Task exceeded its 30-minute budget")
+        return _payload(keyword)
+
+
+def test_trends_adapter_builds_one_keyword_request(monkeypatch):
     calls = []
 
-    class Trends:
-        def get_batch(self, keywords):
-            calls.append(list(keywords))
-            return {keyword: _payload(keyword) for keyword in keywords}
+    class Rows:
+        def iterrows(self):
+            yield datetime(2026, 11, 16), {"A": 5, "isPartial": False}
 
-    result = _pipeline(date(2026, 11, 17), repo, Trends(), ["A", "B", "C", "D"]).trends_task()
-    assert calls == [["A", "B", "C"], ["D"]]
+    class Client:
+        def build_payload(self, keywords, **kwargs):
+            calls.append(list(keywords))
+
+        def interest_over_time(self):
+            return Rows()
+
+    monkeypatch.setattr(TrendsAdapter, "_client", lambda self: Client())
+    result = TrendsAdapter(clock=Clock(date(2026, 11, 17))).get("A")
+    assert calls == [["A"]]
+    assert result["today"] is None and result["history"] == [{"date": date(2026, 11, 16), "value": 5.0}]
+
+
+def test_trends_requests_single_keywords_and_saves_rotation_cursor():
+    repo = Repo()
+    trends = RotatingTrends()
+    result = _pipeline(date(2026, 11, 17), repo, trends, ["A", "B", "C", "D"]).trends_task()
+    assert trends.calls == ["A", "B", "C", "D"]
     assert result["processed_count"] == 4 and result["pending_count"] == 0 and result["status"] == "ok"
-    assert repo.cursors["trends_queue"] == {
-        "day": "2026-11-17",
-        "pending": [],
-        "completed": True,
-    }
+    assert repo.cursors["trends_queue"]["position"] == 0
+    assert repo.cursors["trends_queue"]["next_keyword"] == "A"
     assert all(f"trends:{keyword}" in repo.cursors for keyword in "ABCD")
 
 
-def test_trends_timeout_leaves_checkpoint_and_next_day_resumes():
+def test_trends_stops_before_hard_budget_without_marking_keyword_failed():
     repo = Repo()
-    calls = []
+    trends = RotatingTrends()
+    with budget(59):
+        result = _pipeline(date(2026, 11, 17), repo, trends, ["A", "B"]).trends_task()
+    assert trends.calls == []
+    assert result["processed_count"] == 0 and result["pending_count"] == 2
+    assert result["failures"] == [] and result["status"] == "degraded"
+    assert result["note"] == "trends_rotation_budget_exhausted"
+    assert repo.cursors["trends_queue"]["position"] == 0
 
-    class Trends:
-        def get_batch(self, keywords):
-            calls.append(list(keywords))
-            if len(calls) == 1:
-                return {keyword: _payload(keyword) for keyword in keywords}
-            raise SourceError("Task exceeded its 30-minute budget")
 
-    first = _pipeline(date(2026, 11, 16), repo, Trends(), ["A", "B", "C", "D"]).trends_task()
-    assert first["processed_count"] == 3 and first["pending_count"] == 1
-    assert repo.cursors["trends_queue"]["pending"] == ["D"]
+def test_trends_cursor_wraps_over_budget_boundaries():
+    repo = Repo()
+    first_trends = RotatingTrends(limit=2)
+    first = _pipeline(date(2026, 11, 16), repo, first_trends, ["A", "B", "C", "D"]).trends_task()
+    assert first_trends.calls == ["A", "B", "C"]
+    assert first["processed_count"] == 2 and first["pending_count"] == 2
+    assert repo.cursors["trends_queue"]["position"] == 2
+    assert repo.cursors["trends_queue"]["next_keyword"] == "C"
 
-    class NextDay:
-        def get_batch(self, keywords):
-            calls.append(list(keywords))
-            return {keyword: _payload(keyword) for keyword in keywords}
+    second_trends = RotatingTrends(limit=3)
+    second = _pipeline(date(2026, 11, 17), repo, second_trends, ["A", "B", "C", "D"]).trends_task()
+    assert second_trends.calls == ["C", "D", "A", "B"]
+    assert second["processed_count"] == 3 and second["pending_count"] == 1
+    assert repo.cursors["trends_queue"]["position"] == 1
+    assert repo.cursors["trends_queue"]["next_keyword"] == "B"
 
-    second = _pipeline(date(2026, 11, 17), repo, NextDay(), ["A", "B", "C", "D"]).trends_task()
-    assert calls[-1] == ["D"]
-    assert second["processed_count"] == 1 and second["pending_count"] == 0
-    assert repo.cursors["trends_queue"]["completed"] is True
+    third_trends = RotatingTrends()
+    third = _pipeline(date(2026, 11, 18), repo, third_trends, ["A", "B", "C", "D"]).trends_task()
+    assert third_trends.calls == ["B", "C", "D", "A"]
+    assert third["processed_count"] == 4 and third["pending_count"] == 0
+
+
+def test_trends_rotation_reaches_every_keyword_over_multiple_runs():
+    repo = Repo()
+    seen = set()
+    for day in range(16, 21):
+        trends = RotatingTrends(limit=2)
+        _pipeline(date(2026, 11, day), repo, trends, ["A", "B", "C", "D", "E"]).trends_task()
+        seen.update(trends.calls[:2])
+        if len(seen) == 5:
+            break
+    assert seen == {"A", "B", "C", "D", "E"}
+
+
+def test_trends_cursor_survives_keyword_list_shrink_and_insert():
+    repo = Repo()
+    repo.cursors["trends_queue"] = {"position": 4, "next_keyword": "removed"}
+    trends = RotatingTrends()
+    result = _pipeline(date(2026, 11, 17), repo, trends, ["A", "B"]).trends_task()
+    assert trends.calls == ["A", "B"]
+    assert result["status"] == "ok" and repo.cursors["trends_queue"]["position"] == 0
+
+    repo.cursors["trends_queue"] = {"position": 0, "next_keyword": "C"}
+    trends = RotatingTrends()
+    _pipeline(date(2026, 11, 18), repo, trends, ["A", "new", "C"]).trends_task()
+    assert trends.calls == ["C", "A", "new"]

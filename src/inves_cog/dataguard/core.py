@@ -42,6 +42,7 @@ class Expectation:
     active_since: str | date | None = None
     recheck_days: int | None = None
     split_like: bool = True
+    success_column: str | None = None
     filter: dict = field(default_factory=dict)
     scope: str | None = None
     timestamp: bool = False
@@ -63,6 +64,7 @@ class Expectation:
             self.adjustment_column,
             self.quality_column,
             self.latest_column,
+            self.success_column,
             *self.filter,
         ]:
             if identifier is not None and not re.fullmatch(r"[a-z_][a-z_0-9]*", identifier):
@@ -87,6 +89,10 @@ class Expectation:
             object.__setattr__(self, "active_since", date.fromisoformat(self.active_since))
         if self.recheck_days is not None and self.recheck_days < 0:
             raise ValueError("Invalid recheck window")
+        if self.success_column is not None and not (
+            self.table == "ingest.job_runs" and self.success_column == "processed_count"
+        ):
+            raise ValueError("Invalid success counter")
 
 
 def _holiday(item, day):

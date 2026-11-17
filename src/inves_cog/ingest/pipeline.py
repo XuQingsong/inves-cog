@@ -1,6 +1,5 @@
 """Production M1 tasks using the same parsers exercised by the offline harness."""
 
-import json
 import re
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
@@ -18,7 +17,7 @@ from inves_cog.ingest.adapters import (
     frames_shares,
     occ_statistics,
 )
-from inves_cog.ingest.deadline import check
+from inves_cog.ingest.deadline import check, remaining
 from inves_cog.ingest.http import HTTPClient, RateLimiter, SourceError
 from inves_cog.ingest.info import make_item
 from inves_cog.ingest.jobs import HealthBook
@@ -42,6 +41,7 @@ from inves_cog.ingest.universe import build_universe, daily_liquidity
 ROOT = Path(__file__).resolve().parents[3]
 # The free Alpaca subscription rejects SIP data newer than 15 minutes (HTTP 403).
 SIP_DELAY = timedelta(minutes=16)
+TREND_KEYWORD_RESERVE_SECONDS = 60
 
 
 def prefill_end(clock, day):
@@ -632,25 +632,20 @@ class Pipeline:
         return {"processed_count": len(rows), "events": len(events)}
 
     def trends_task(self):
-        count, short, failures = 0, [], []
-        pending = self._trends_pending()
-        while pending:
-            batch = pending[:3]
+        count, short, failures, budget_stop = 0, [], [], False
+        keywords = self._trends_keywords()
+        start = self._trends_start(keywords)
+        for offset in range(len(keywords)):
+            index = (start + offset) % len(keywords)
+            keyword = keywords[index]
+            left = remaining()
+            if left is not None and left < TREND_KEYWORD_RESERVE_SECONDS:
+                budget_stop = True
+                self._set_trends_cursor(keywords, index, len(keywords) - count)
+                break
             try:
                 check()
-                payloads = self._get_trends_batch(batch, failures)
-            except Exception as exc:
-                for keyword in batch:
-                    failures.append(
-                        {
-                            "keyword": keyword,
-                            "type": type(exc).__name__,
-                            "message": str(exc),
-                            "confirmed_unavailable": getattr(exc, "confirmed_unavailable", False),
-                        }
-                    )
-                break
-            for keyword, payload in payloads.items():
+                payload = self.trends.get(keyword)
                 today = self.clock.now_utc().astimezone(NY).date()
                 valid = [r for r in payload["history"] if today - timedelta(days=90) <= r["date"] < today]
                 if len(valid) < 60:
@@ -660,29 +655,6 @@ class Pipeline:
                     self.info([event])
                 self.repo.set_cursor("trends:" + keyword, payload, self.clock.now_utc())
                 count += 1
-            pending = pending[3:]
-            self._set_trends_pending(pending)
-        notes = short + [f"{f['keyword']}: {f['type']}: {f['message']}" for f in failures]
-        return {
-            "processed_count": count,
-            "pending_count": len(pending),
-            "failures": failures,
-            "source_success": count > 0,
-            "confirmed_unavailable": count == 0
-            and bool(failures)
-            and all(f["confirmed_unavailable"] for f in failures),
-            "note": "; ".join(notes),
-            "status": "degraded" if short or failures or pending else "ok",
-        }
-
-    def _get_trends_batch(self, batch, failures):
-        if hasattr(self.trends, "get_batch"):
-            return self.trends.get_batch(batch)
-        payloads = {}
-        for keyword in batch:
-            try:
-                check()
-                payloads[keyword] = self.trends.get(keyword)
             except Exception as exc:
                 failures.append(
                     {
@@ -692,36 +664,69 @@ class Pipeline:
                         "confirmed_unavailable": getattr(exc, "confirmed_unavailable", False),
                     }
                 )
-        return payloads
+                if "exceeded its" in str(exc) and "budget" in str(exc):
+                    budget_stop = True
+                    self._set_trends_cursor(keywords, index, len(keywords) - count)
+                    break
+            self._set_trends_cursor(keywords, index + 1, len(keywords) - count)
+        pending = len(keywords) - count
+        notes = ["trends_rotation_budget_exhausted"] if budget_stop else []
+        notes += short + [f"{f['keyword']}: {f['type']}: {f['message']}" for f in failures]
+        return {
+            "processed_count": count,
+            "pending_count": pending,
+            "failures": failures,
+            "source_success": count > 0,
+            "confirmed_unavailable": count == 0
+            and bool(failures)
+            and all(f["confirmed_unavailable"] for f in failures),
+            "note": "; ".join(notes),
+            "status": "degraded" if short or failures or pending or not keywords else "ok",
+        }
 
-    def _trends_pending(self):
-        pending = [keyword for entity in self.monitored for keyword in entity.get("trends_keywords", [])]
-        if not hasattr(self.repo, "get_cursor"):
-            return pending
-        key = "trends_queue"
-        value = self.repo.get_cursor(key)
-        if value is not None:
-            if isinstance(value, str):
-                value = json.loads(value)
-            if value.get("pending"):
-                return list(value["pending"])
-            if str(value.get("day")) == str(self._trends_day()):
-                return []
-        pending = [keyword for entity in self.monitored for keyword in entity.get("trends_keywords", [])]
-        self._set_trends_pending(pending)
-        return pending
+    def _trends_keywords(self):
+        keywords, seen = [], set()
+        for entity in self.monitored:
+            for keyword in entity.get("trends_keywords", []):
+                if keyword not in seen:
+                    seen.add(keyword)
+                    keywords.append(keyword)
+        return keywords
+
+    def _trends_start(self, keywords):
+        if not keywords or not hasattr(self.repo, "get_cursor"):
+            return 0
+        value = self.repo.get_cursor("trends_queue")
+        if not isinstance(value, dict):
+            return 0
+        next_keyword = value.get("next_keyword")
+        if next_keyword in keywords:
+            return keywords.index(next_keyword)
+        pending = value.get("pending") or []
+        for keyword in pending:
+            if keyword in keywords:
+                return keywords.index(keyword)
+        position = value.get("position", 0)
+        return position % len(keywords) if type(position) is int and position >= 0 else 0
+
+    def _set_trends_cursor(self, keywords, index, remaining):
+        if not hasattr(self.repo, "set_cursor"):
+            return
+        position = index % len(keywords) if keywords else 0
+        self.repo.set_cursor(
+            "trends_queue",
+            {
+                "day": str(self._trends_day()),
+                "position": position,
+                "next_keyword": keywords[position] if keywords else None,
+                "pending_count": remaining,
+                "completed": remaining == 0,
+            },
+            self.clock.now_utc(),
+        )
 
     def _trends_day(self):
         return getattr(self, "day_override", None) or self.clock.today_trade_date()
-
-    def _set_trends_pending(self, pending):
-        if not hasattr(self.repo, "set_cursor"):
-            return
-        self.repo.set_cursor(
-            "trends_queue",
-            {"day": str(self._trends_day()), "pending": list(pending), "completed": not pending},
-            self.clock.now_utc(),
-        )
 
     def websites_task(self):
         count, failures = 0, []

@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from inves_cog.dataguard.core import Expectation, Finding, due_dates, evaluate
+from inves_cog.dataguard.reader import query
 from inves_cog.dataguard.refresh import _fetch, _reopen, configured, window
 from inves_cog.dataguard.service import retire_undue
 from inves_cog.dataguard.store import Store
@@ -157,6 +158,24 @@ def test_refresh_reopens_unrecoverable_gap():
     writer.execute.return_value.fetchall.return_value = [row]
     assert _reopen(writer, _item(), [date(2026, 11, 10)], NOW) == 1
     assert row["status"] == "open" and row["attempts"] == 0 and row["resolved_at"] is None
+
+
+def test_trends_rotation_expectation_counts_successful_keywords():
+    item = _item(
+        table="ingest.job_runs",
+        key_column="task_name",
+        value_column="status",
+        success_column="processed_count",
+        latest_column="started_at",
+        filter={"task_name": ["trends"]},
+        expected_keys=("trends",),
+    )
+    sql, args = query(item, date(2026, 11, 10), date(2026, 11, 12))
+    assert "processed_count AS n" in sql
+    row = {"key": "trends", "value": "degraded", "day": date(2026, 11, 12)}
+    missing = evaluate(item, date(2026, 11, 12), [row], [], row_count=0)
+    assert [f.kind for f in missing] == ["missing"]
+    assert evaluate(item, date(2026, 11, 12), [row], [], row_count=3) == []
 
 
 def test_disabled_upstream_source_retires_open_gap():

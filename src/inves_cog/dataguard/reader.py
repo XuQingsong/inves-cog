@@ -37,7 +37,8 @@ def query(item, lower, upper):
             f"SELECT DISTINCT ON ({bucket}"
             + (f",{key}" if item.key_column else "")
             + f") {bucket} AS day,{key} AS key,"
-            f"{item.value_column} AS value,1 AS n"
+            f"{item.value_column} AS value,"
+            + (f"{item.success_column} AS n" if item.success_column else "1 AS n")
             + (f",{latest} AS seen_at" if item.table == "ingest.job_runs" else "")
             + (f",{item.adjustment_column} AS adjustment" if item.adjustment_column else "")
             + (f",{item.quality_column} AS quality" if item.quality_column else "")
