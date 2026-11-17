@@ -691,7 +691,7 @@ datasets:
   impact: 晴雨表流动性与金融压力
   backfill:
     entry: fred
-    refresh_days: 10
+    refresh_days: 21
     max_attempts: 3
     depends_on:
     - barometer
@@ -738,7 +738,7 @@ datasets:
   impact: 晴雨表流动性与金融压力
   backfill:
     entry: fred
-    refresh_days: 10
+    refresh_days: 21
     max_attempts: 3
     depends_on:
     - barometer

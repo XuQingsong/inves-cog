@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from inves_cog.dataguard.core import Expectation, Finding, due_dates, evaluate
 from inves_cog.dataguard.reader import query
-from inves_cog.dataguard.refresh import _fetch, _reopen, configured, window
+from inves_cog.dataguard.refresh import _fetch, _refresh_result, _reopen, configured, window
 from inves_cog.dataguard.service import retire_undue
 from inves_cog.dataguard.store import Store
 from inves_cog.dataguard.worker import degraded_keys
@@ -64,12 +64,81 @@ def test_refresh_window_is_configured_and_fred_fetch_is_missing_only(monkeypatch
     import inves_cog.dataguard.refresh as refresh
 
     monkeypatch.setattr(refresh.backfill, "backfill_fred", fake_fred)
-    reports = _fetch(reader, MagicMock(), item, [date(2026, 11, 10)], {}, NOW, MagicMock())
+    reports = _fetch(
+        reader,
+        MagicMock(),
+        item,
+        [date(2026, 11, 10)],
+        {"FRED_API_KEY": "unit-test-key"},
+        NOW,
+        MagicMock(),
+    )
     assert reports[0]["rows"] == 0
     assert calls[0]["sids"] == ["SOFR"]
     assert calls[0]["dates"] == {date(2026, 11, 10)}
     assert calls[0]["existing"] == {("fred_sofr", date(2026, 11, 10))}
     assert calls[0]["conflict"] == "nothing"
+    assert calls[0]["api_key"] == "unit-test-key"
+
+
+def test_fred_transport_failure_is_refresh_error():
+    from inves_cog.flows import backfill
+    from inves_cog.ingest.http import SourceError
+
+    http = MagicMock()
+    http.request.side_effect = SourceError("HTTP transport failed after bounded retries")
+    reports = backfill.backfill_fred(
+        http,
+        None,
+        "/tmp/x",
+        NOW,
+        sids=["SOFR"],
+        api_key="unit-test-key",
+    )
+    result = _refresh_result(reports, 0)
+    assert result["status"] == "error"
+    assert result["error_type"] == "SourceError"
+    assert result["failed_sources"] == ["FRED:SOFR"]
+    assert "unit-test-key" not in str(result)
+
+
+def test_refresh_run_records_error_last_result(monkeypatch):
+    item = _item(
+        table="flows.observations",
+        filter={"series_id": ["fred_sofr"]},
+        backfill={"entry": "fred", "refresh_days": 10},
+    )
+    writer = MagicMock()
+    writer.execute.return_value.fetchone.return_value = None
+    states = []
+
+    import inves_cog.dataguard.refresh as refresh
+
+    monkeypatch.setattr(refresh, "_reopen", lambda *args: 0)
+    monkeypatch.setattr(
+        refresh,
+        "_fetch",
+        lambda *args: [{"source": "FRED:SOFR", "rows": 0, "error_type": "SourceError"}],
+    )
+    monkeypatch.setattr(refresh, "_set_state", lambda writer, dataset, now, result: states.append(result))
+
+    ran = refresh.run(MagicMock(), writer, [item], {}, NOW)
+
+    assert ran[0]["status"] == "error"
+    assert states[-1]["status"] == "error"
+    assert states[-1]["failed_sources"] == ["FRED:SOFR"]
+
+
+def test_refresh_result_marks_partial_source_success():
+    result = _refresh_result(
+        [
+            {"source": "FRED:SOFR", "rows": 0, "error_type": "SourceError"},
+            {"source": "FRED:WALCL", "rows": 2},
+        ],
+        0,
+    )
+    assert result["status"] == "partial"
+    assert result["failed_sources"] == ["FRED:SOFR"]
 
 
 def test_macro_refresh_preserves_actual_fetch_timestamp(monkeypatch):
@@ -205,6 +274,8 @@ def test_config_marks_wrmfns_stopped_and_move_degraded():
     assert move.backfill["entry"] == "yahoo_px"
     assert move.backfill["degraded_http_statuses"] == [429]
     assert move.backfill["degraded_keys"] == ["yahoo_px_move"]
+    weekly = {item.dataset: configured(item) for item in items if item.dataset in {"央行与财政流动性", "金融压力周报"}}
+    assert weekly == {"央行与财政流动性": 21, "金融压力周报": 21}
 
 
 def test_yahoo_429_gap_is_recorded_degraded_and_not_reopened():

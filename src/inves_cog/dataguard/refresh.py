@@ -54,12 +54,57 @@ def run(reader, writer, items, values, now):
         reopened = _reopen(writer, item, days, now)
         try:
             reports = _fetch(reader, writer, item, days, values, now, http)
-            result = {"status": "ok", "reopened": reopened, "reports": reports}
+            result = _refresh_result(reports, reopened)
         except Exception as exc:
-            result = {"status": "error", "error_type": type(exc).__name__, "reopened": reopened}
+            result = {
+                "status": "error",
+                "error_type": type(exc).__name__,
+                "failed_sources": _expected_sources(item),
+                "reopened": reopened,
+            }
         _set_state(writer, item.dataset, now, result)
         ran.append({"dataset": item.dataset, **result})
     return ran
+
+
+def _report_list(reports):
+    if reports is None:
+        return []
+    return reports if isinstance(reports, list) else [reports]
+
+
+def _refresh_result(reports, reopened):
+    report_list = _report_list(reports)
+    failed = [r for r in report_list if r.get("error_type")]
+    result = {"status": "ok", "reopened": reopened, "reports": reports}
+    if failed:
+        written = sum(int(r.get("rows") or 0) for r in report_list)
+        error_types = sorted({r["error_type"] for r in failed})
+        result.update(
+            status="partial" if written else "error",
+            error_type=failed[0]["error_type"],
+            failed_sources=[r.get("source", "unknown") for r in failed],
+        )
+        if len(error_types) > 1:
+            result["error_types"] = error_types
+    return result
+
+
+def _expected_sources(item):
+    entry = item.backfill["entry"]
+    if entry == "fred":
+        return [f"FRED:{sid.removeprefix('fred_').upper()}" for sid in item.filter.get("series_id", ())]
+    if entry == "ofr":
+        return ["OFR:FSI"]
+    if entry == "cftc":
+        return ["CFTC:TFF"]
+    if entry == "cboe_idx":
+        return [f"CboeIdx:{sid.removeprefix('cboe_idx_').upper()}" for sid in item.filter.get("series_id", ())]
+    if entry == "vxtlt":
+        return ["Cboe:VXTLT"]
+    if entry == "cboe_pc":
+        return ["CboePC:daily"]
+    return [entry]
 
 
 def _set_state(writer, dataset, now, result):
@@ -125,7 +170,15 @@ def _fetch(reader, writer, item, days, values, now, http):
     if entry == "fred":
         sids = [s[5:].upper() if s.lower().startswith("fred_") else s.upper() for s in item.filter["series_id"]]
         return backfill.backfill_fred(
-            http, writer, DEFAULT_RAW, now, sids=sids, dates=target, existing=existing, conflict="nothing"
+            http,
+            writer,
+            DEFAULT_RAW,
+            now,
+            sids=sids,
+            dates=target,
+            existing=existing,
+            conflict="nothing",
+            api_key=values.get("FRED_API_KEY"),
         )
     if entry == "ofr":
         return backfill.backfill_ofr(
@@ -176,11 +229,14 @@ def _fred_macro(writer, item, days, values, target):
     reports = []
     for sid in item.filter["series_id"]:
         written = 0
-        for row in fred.collect(sid):
-            day = row["observation_date"]
-            if day in target and row.get("value") is not None and (sid, day) not in existing:
-                repo.write("macro_observations", row)
-                existing.add((sid, day))
-                written += 1
-        reports.append({"source": f"FRED:{sid}", "rows": written})
+        try:
+            for row in fred.collect(sid):
+                day = row["observation_date"]
+                if day in target and row.get("value") is not None and (sid, day) not in existing:
+                    repo.write("macro_observations", row)
+                    existing.add((sid, day))
+                    written += 1
+            reports.append({"source": f"FRED:{sid}", "rows": written})
+        except Exception as exc:
+            reports.append({"source": f"FRED:{sid}", "rows": written, **backfill._error_fields(exc)})
     return reports

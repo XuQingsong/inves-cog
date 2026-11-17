@@ -52,7 +52,7 @@ def main():
     if args.job in ("finra", "all"):
         reports.append(backfill.backfill_finra_margin(http, conn, DEFAULT_RAW, now))
     if args.job in ("fred", "all"):
-        reports += backfill.backfill_fred(http, conn, DEFAULT_RAW, now)
+        reports += backfill.backfill_fred(http, conn, DEFAULT_RAW, now, api_key=values.get("FRED_API_KEY"))
     if args.job == "fred_macro":
         sids = (args.series or "").split(",") if args.series else []
         if not sids or not all(sids):
