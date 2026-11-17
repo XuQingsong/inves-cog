@@ -123,8 +123,8 @@ def _report(source, rows_by_date, total=None, error=None):
     return report
 
 
-def _fetch(http, url):
-    r = http.request("GET", url, headers=UA)
+def _fetch(http, url, headers=UA):
+    r = http.request("GET", url, headers=headers)
     return r
 
 
@@ -601,6 +601,7 @@ def backfill_finra_margin(http, connection, raw_dir, _now=None):
 FRED_SERIES = ["WALCL", "WTREGEN", "RRPONTSYD", "SOFR", "IORB", "IOER", "STLFSI4", "WRMFNS"]
 FRED_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}"
 FRED_API = "https://api.stlouisfed.org/fred/series/observations?series_id={sid}&api_key={key}&file_type=json"
+FRED_UA = {"User-Agent": "inves-cog/1.0"}
 
 
 def _fred_rows(text, sid, pub_fn):
@@ -675,7 +676,8 @@ def backfill_fred(
     for sid in sids or FRED_SERIES:
         url = FRED_API.format(sid=sid, key=key) if key else FRED_URL.format(sid=sid)
         try:
-            text = _fetch(http, url)
+            # api.stlouisfed.org tarpits the browser UA; fredgraph.csv rejects any custom UA.
+            text = _fetch(http, url, headers=FRED_UA if key else None)
             rows = []
             if key:
                 payload = text if isinstance(text, dict) else json.loads(text)
@@ -1047,7 +1049,7 @@ def backfill_dgs10(http, connection, raw_dir, _now=None):
     try:
         if key:
             url = FRED_API.format(sid="DGS10", key=key)
-            req = urllib.request.Request(url, headers=UA)
+            req = urllib.request.Request(url, headers=FRED_UA)
             payload = json.loads(urllib.request.urlopen(req, timeout=60).read())
             recs = payload.get("observations", [])
         else:

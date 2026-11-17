@@ -1,3 +1,4 @@
+import logging
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
@@ -48,6 +49,34 @@ def test_backfill_fred_uses_caller_supplied_key(monkeypatch):
     assert "api_key=caller-key" in requested[0]
     assert "environment-key" not in requested[0]
     assert reports[0]["rows"] == 1
+
+
+def test_backfill_fred_api_sends_project_user_agent():
+    seen = []
+    http = MagicMock()
+    http.request.side_effect = lambda method, url, **kw: seen.append(kw["headers"]) or {"observations": []}
+    backfill_fred(http, None, "/tmp/x", datetime(2026, 10, 31), sids=["SOFR"], api_key="caller-key")
+    assert seen == [{"User-Agent": "inves-cog/1.0"}]
+
+
+def test_backfill_fred_public_csv_sends_no_custom_user_agent():
+    seen = []
+    http = MagicMock()
+    text = "observation_date,WALCL\n2026-10-30,8000000\n"
+    http.request.side_effect = lambda method, url, **kw: seen.append(kw["headers"]) or text
+    backfill_fred(http, None, "/tmp/x", datetime(2026, 10, 31), sids=["WALCL"])
+    assert seen == [None]
+
+
+def test_httpx_request_logs_do_not_leak_api_key(caplog):
+    import httpx
+
+    key = "unit-test-key"
+    transport = httpx.MockTransport(lambda request: httpx.Response(200, json={}))
+    with caplog.at_level(logging.INFO):
+        with httpx.Client(transport=transport) as client:
+            client.get(f"https://api.stlouisfed.org/fred/series/observations?api_key={key}")
+    assert key not in caplog.text
 
 
 def test_backfill_fred_parse():
