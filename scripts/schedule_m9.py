@@ -2,6 +2,7 @@
 
 import json
 import time
+import traceback
 
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.settings import read_environment
@@ -14,6 +15,7 @@ def main():
         try:
             result = scheduled(clock=clock, values=read_environment())
         except Exception as exc:
+            traceback.print_exc()
             result = {"status": "failed", "error_type": type(exc).__name__}
         print(json.dumps(result, ensure_ascii=False, default=str, allow_nan=False), flush=True)
         time.sleep(30)

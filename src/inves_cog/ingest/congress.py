@@ -53,8 +53,8 @@ def collect_index(connection, http, year):
     """Fetch the annual FD zip and enqueue new DocIDs as pending rows."""
     from inves_cog.ingest.http import SourceError
 
-    raw = http.get(INDEX_URL.format(year=year))
-    if isinstance(raw, str):
+    raw = http.get_bytes(INDEX_URL.format(year=year))
+    if not isinstance(raw, bytes):
         raise SourceError("House FD index response is not a zip")
     with zipfile.ZipFile(io.BytesIO(raw)) as zf:
         name = next(n for n in zf.namelist() if n.endswith(".txt"))
@@ -193,7 +193,7 @@ def collect_pending(connection, http, *, spacing_seconds=20, max_per_run=30, sle
         if i:
             sleep(spacing_seconds)
         try:
-            pdf = http.get(row["source_url"], timeout=30)
+            pdf = http.get_bytes(row["source_url"])
         except Exception as exc:
             connection.execute(
                 "UPDATE ingest.congress_ptr SET parse_status='download_failed', parse_note=%s WHERE doc_id=%s",

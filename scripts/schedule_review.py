@@ -1,6 +1,7 @@
-"""Resident review loop. Jobs stay on the default connection; review tables use the perception login."""
+"""Resident review loop. Reads use the review/web login; jobs stay ingest; review writes stay perception."""
 
 import time
+import traceback
 
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.repository import json_text
@@ -25,7 +26,11 @@ class _EnvironmentClient:
         return Client.from_environment(self.values, send=self.send, clock=self.clock).call(task, payload)
 
 
-def run_once(*, clock, connection, writer, client=None):
+def _reader_url(values):
+    return values.get("INVES_COG_REVIEW_DATABASE_URL") or values.get("INVES_COG_WEB_DATABASE_URL")
+
+
+def run_once(*, clock, connection, writer, client=None, reader=None):
     moment = clock.now_utc()
     day = review_day(moment)
 
@@ -44,7 +49,9 @@ def run_once(*, clock, connection, writer, client=None):
             ).fetchall()
         )
 
-    return run_cycle(moment, records=records, connection=connection, writer=writer, clock=clock, client=client)
+    return run_cycle(
+        moment, records=records, connection=connection, reader=reader, writer=writer, clock=clock, client=client
+    )
 
 
 def main():
@@ -55,19 +62,31 @@ def main():
     clock = SystemClock()
     while True:
         connection = None
+        reader = None
         writer = None
         try:
             connection = connect(values)
+            reader_url = _reader_url(values)
+            reader = connect({"INVES_COG_DATABASE_URL": reader_url}) if reader_url else None
             writer_url = values.get("INVES_COG_PERCEPTION_DATABASE_URL")
             writer = connect({"INVES_COG_DATABASE_URL": writer_url}) if writer_url else None
-            result = run_once(clock=clock, connection=connection, writer=writer, client=_EnvironmentClient(values))
+            result = run_once(
+                clock=clock,
+                connection=connection,
+                reader=reader,
+                writer=writer,
+                client=_EnvironmentClient(values),
+            )
             if result["status"] not in _QUIET:
                 print(json_text(result), flush=True)
         except Exception as exc:
+            traceback.print_exc()
             print(json_text({"status": "failed", "error_type": type(exc).__name__}), flush=True)
         finally:
             if writer is not None:
                 writer.close()
+            if reader is not None:
+                reader.close()
             if connection is not None:
                 connection.close()
         time.sleep(30)

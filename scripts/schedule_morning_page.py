@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 import time
+import traceback
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -114,6 +115,7 @@ def _page(root, moment, python, run, load_environment, *, page_only):
         )
         result.update(status="ok" if completed.returncode == 0 else "failed", returncode=completed.returncode)
     except Exception as exc:
+        traceback.print_exc()
         result.update(status="failed", error_type=type(exc).__name__)
     attempt.write_text(json.dumps(result), encoding="utf-8")
     return result
@@ -162,6 +164,7 @@ def _chain(root, moment, clock, python, run, load_environment, records, skip):
             check=False,
         )
     except Exception as exc:
+        traceback.print_exc()
         return {"status": "failed", "error_type": type(exc).__name__}
     found = _lookup(records, root, load_environment, _CHAIN, day)
     if completed.returncode == 0 and not any(row.get("status") in {"ok", "degraded", "failed"} for row in found or []):
@@ -213,6 +216,7 @@ def _run_catchup(root, moment, python, run, load_environment, records, task_name
             check=False,
         )
     except Exception as exc:
+        traceback.print_exc()
         return {"status": "failed", "catchup": True, "error_type": type(exc).__name__}
     found = _lookup(records, root, load_environment, task_name, day)
     status = "ok" if completed.returncode == 0 and upstream_ready(found, moment, task_name) else "failed"
@@ -255,6 +259,7 @@ def main():
             if result["status"] not in {"not_due", "already_attempted", "waiting_dependencies"}:
                 print(json_text(result), flush=True)
         except Exception as exc:
+            traceback.print_exc()
             print(json_text({"status": "failed", "error_type": type(exc).__name__}), flush=True)
         time.sleep(30)
 

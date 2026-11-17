@@ -1,6 +1,7 @@
 """Poll the existing M2 financials task only, in its formal SEC daily window."""
 
 import time
+import traceback
 
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.cli import connect as connect_database
@@ -44,6 +45,7 @@ def main():
             if result.get("status") != "not_due":
                 print(json_text(result), flush=True)
         except Exception as exc:
+            traceback.print_exc()
             print(json_text({"status": "failed", "error_type": type(exc).__name__}), flush=True)
         time.sleep(30)
 

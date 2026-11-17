@@ -831,10 +831,11 @@ def test_info_item_contract(tmp_path):
         is None
     )
     assert website_change("https://example.invalid", "<p>unchanged</p>", "<p>unchanged</p>", clock=frozen()) is None
-    assert (
-        website_change("https://example.invalid", "<p>old 1</p>", "<p>new 2</p>", clock=frozen())["kind"]
-        == "site_change"
-    )
+    detected_at = frozen("2026-10-29T12:34:00Z")
+    changed = website_change("https://example.invalid", "<p>old 1</p>", "<p>new 2</p>", clock=detected_at)
+    assert changed["kind"] == "site_change"
+    assert changed["published_at"] == detected_at.now_utc()
+    assert "published_at_missing" not in changed["flags"]
     calls = []
 
     class Embed:

@@ -154,6 +154,6 @@ def website_change(url, previous, current, *, clock):
         body=difference,
         url=url,
         clock=clock,
-        published_at=None,
+        published_at=clock.now_utc(),
         payload={"content_sha256": digest},
     )

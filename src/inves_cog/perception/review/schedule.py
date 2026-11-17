@@ -169,8 +169,8 @@ def due_tasks(day):
     return tasks
 
 
-def run_cycle(moment, *, records, connection, writer, clock, client=None):
-    """Dispatch the real review jobs once. A missing writer returns before any model call."""
+def run_cycle(moment, *, records, connection, writer, clock, client=None, reader=None):
+    """Dispatch review jobs; upstream reads use reader when provided, writes always use writer."""
     day = review_day(moment)
     if day is None:
         return {"status": "not_due"}
@@ -189,7 +189,7 @@ def run_cycle(moment, *, records, connection, writer, clock, client=None):
         _write_skip(connection, pending[0], day, _MISSING_WRITER, clock)
         return {"status": "failed", "trade_date": day.isoformat(), "error_summary": _MISSING_WRITER}
     for task in pending:
-        operation = _operation(task, day, connection, writer, clock, client)
+        operation = _operation(task, day, reader or connection, writer, clock, client)
         row_id = run_recorded(
             connection,
             clock=clock,
