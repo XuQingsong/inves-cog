@@ -200,7 +200,7 @@ class Trends:
     def __init__(self, *, clock):
         self.clock, self.limiter = clock, RateLimiter(1, 10)
 
-    def get(self, keyword):
+    def _client(self):
         from pytrends.request import TrendReq
 
         from inves_cog.ingest.deadline import check
@@ -218,8 +218,11 @@ class Trends:
                 limiter.acquire()
                 return super()._get_data(*args, **kwargs)
 
+        return LimitedTrendReq(hl="en-US", tz=300, timeout=(10, 30), retries=0)
+
+    def get(self, keyword):
         try:
-            client = LimitedTrendReq(hl="en-US", tz=300, timeout=(10, 30), retries=0)
+            client = self._client()
             client.build_payload([keyword], timeframe="today 3-m", geo="US")
             data = client.interest_over_time()
         except Exception as exc:

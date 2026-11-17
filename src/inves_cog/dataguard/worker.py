@@ -115,6 +115,14 @@ def recover(item, day, now, values, *, evidence=None, trace=None):
     return True  # authoritative success still requires downstream and source recheck below
 
 
+def degraded_keys(item, evidence, missing_keys):
+    statuses = {e.get("http_status") for e in evidence.get("source_errors", [])}
+    configured_statuses = set((item.backfill or {}).get("degraded_http_statuses", ()))
+    if not statuses & configured_statuses:
+        return set()
+    return set((item.backfill or {}).get("degraded_keys", ())) & set(missing_keys)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", required=True)
@@ -210,6 +218,16 @@ def main():
                     left.append(drift[args.date])
             row["detail"]["remaining_checks"] = [f.kind for f in left]
             row["detail"]["verified_source_rows"] = sum(r["n"] for r in grouped.get(args.date, []))
+            missing = {key for f in left for key in f.detail.get("missing_keys", ())}
+            degraded = degraded_keys(item, evidence, missing)
+            if degraded:
+                row["detail"].update(
+                    state="degraded",
+                    degraded_keys=sorted(degraded),
+                    degraded_reason="来源限流（HTTP 429），保留采集但不计开放缺口",
+                )
+                row["reason"] = "来源限流（HTTP 429），标记为降级"
+                return True
             return not left
 
         maximum = item.backfill.get("max_attempts", 3)

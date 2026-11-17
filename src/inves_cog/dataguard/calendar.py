@@ -40,6 +40,42 @@ def ecb_target_holiday(day):
     return day == easter - timedelta(days=2) or day == easter + timedelta(days=1)
 
 
+def _nth_weekday(year, month, weekday, n):
+    first = date(year, month, 1)
+    return first + timedelta(days=(weekday - first.weekday()) % 7 + 7 * (n - 1))
+
+
+def us_federal_holiday(day):
+    """US federal holidays, including observed dates, for sources closed by the federal calendar."""
+    fixed = {(1, 1), (6, 19), (7, 4), (11, 11), (12, 25)}
+    if (day.month, day.day) in fixed:
+        return True
+    for year in {day.year - 1, day.year, day.year + 1}:
+        for month, month_day in fixed:
+            actual = date(year, month, month_day)
+            observed = (
+                actual - timedelta(days=1)
+                if actual.weekday() == 5
+                else actual + timedelta(days=1)
+                if actual.weekday() == 6
+                else actual
+            )
+            if day == observed:
+                return True
+    if day == _nth_weekday(day.year, 1, 0, 3):
+        return True
+    if day == _nth_weekday(day.year, 2, 0, 3):
+        return True
+    if day == _nth_weekday(day.year, 9, 0, 1):
+        return True
+    if day == _nth_weekday(day.year, 10, 0, 2):
+        return True
+    if day == _nth_weekday(day.year, 11, 3, 4):
+        return True
+    last = date(day.year, 5, 31)
+    return day == last - timedelta(days=(last.weekday() - 0) % 7)
+
+
 def trading_day(day):
     value = _calendar()
     if not date.fromisoformat(value["start"]) <= day <= date.fromisoformat(value["end"]):
