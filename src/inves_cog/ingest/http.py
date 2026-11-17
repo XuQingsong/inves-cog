@@ -55,6 +55,41 @@ class HTTPClient:
         self.pool, self.session = pool, None
 
     def request(self, method, url, *, params=None, headers=None, json=None, limiter=None, retry_rate_limit=True):
+        return self._request(
+            method,
+            url,
+            params=params,
+            headers=headers,
+            json=json,
+            limiter=limiter,
+            retry_rate_limit=retry_rate_limit,
+            binary=False,
+        ).data
+
+    def request_bytes(self, method, url, *, params=None, headers=None, json=None, limiter=None, retry_rate_limit=True):
+        return self._request(
+            method,
+            url,
+            params=params,
+            headers=headers,
+            json=json,
+            limiter=limiter,
+            retry_rate_limit=retry_rate_limit,
+            binary=True,
+        ).data
+
+    def _request(
+        self,
+        method,
+        url,
+        *,
+        params=None,
+        headers=None,
+        json=None,
+        limiter=None,
+        retry_rate_limit=True,
+        binary=False,
+    ):
         from inves_cog.ingest.deadline import remaining
 
         for attempt in range(self.retries + 1):
@@ -85,10 +120,13 @@ class HTTPClient:
                             timeout=request_timeout,
                             follow_redirects=True,
                         )
-                    try:
-                        data = result.json()
-                    except ValueError:
-                        data = result.text
+                    if binary:
+                        data = result.content
+                    else:
+                        try:
+                            data = result.json()
+                        except ValueError:
+                            data = result.text
                     response = Response(result.status_code, data, dict(result.headers))
                 else:
                     response = self.send(
@@ -110,7 +148,7 @@ class HTTPClient:
                     raise SourceError("HTTP transport failed after bounded retries") from exc
                 raise
             if 200 <= response.status_code < 300:
-                return response.data
+                return response
             retryable = (response.status_code == 429 and retry_rate_limit) or 500 <= response.status_code < 600
             if retryable and attempt < self.retries:
                 self.sleep(min(60, 2**attempt))
@@ -132,6 +170,9 @@ class HTTPClient:
 
     def get(self, url, **kwargs):
         return self.request("GET", url, **kwargs)
+
+    def get_bytes(self, url, **kwargs):
+        return self.request_bytes("GET", url, **kwargs)
 
 
 def require_mapping(payload):

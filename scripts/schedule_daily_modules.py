@@ -3,6 +3,7 @@
 import argparse
 import multiprocessing
 import time
+import traceback
 from datetime import datetime, timezone
 
 from inves_cog.clock import SystemClock
@@ -291,6 +292,7 @@ def _child_entry(pipe, name, kwargs):
     try:
         pipe.send((True, _operation(name)(**kwargs)))
     except BaseException as exc:
+        traceback.print_exc()
         try:
             pipe.send((False, type(exc).__name__ + ": " + str(exc)))
         except Exception:
@@ -452,6 +454,7 @@ def run_once(
                 if key in output
             }
         except Exception as exc:
+            traceback.print_exc()
             result[name] = {"status": "failed", "error_type": type(exc).__name__}
     return result
 

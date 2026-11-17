@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 import time
+import traceback
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -114,6 +115,7 @@ def run_once(
             check=False,
         )
     except Exception as exc:
+        traceback.print_exc()
         return _logged(
             root,
             moment,
@@ -161,6 +163,7 @@ def _run_catchup(root, moment, task_name, day, python, run, load_environment, re
             check=False,
         )
     except Exception as exc:
+        traceback.print_exc()
         return _logged(
             root,
             moment,
@@ -225,6 +228,7 @@ def main(argv=None):
             if result["status"] not in {"not_due", "already_attempted", "waiting_dependencies"}:
                 print(json_text(result), flush=True)
         except Exception as exc:
+            traceback.print_exc()
             print(json_text({"status": "failed", "error_type": type(exc).__name__}), flush=True)
         time.sleep(30)
 

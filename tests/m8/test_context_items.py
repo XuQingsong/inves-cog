@@ -313,3 +313,36 @@ def test_sec_8k_items_gain_tickers_from_cik():
     assert by_id["sec_8k:SEC:b"] == ["AAPL"]
     assert by_id["sec_8k:SEC:c"] == []
     assert by_id["sec_8k:SEC:d"] == ["MSFT"]
+
+
+@pytest.mark.phase1_blocking
+def test_store_writes_every_persisted_retrieval_role_on_disposable_database():
+    import psycopg
+
+    from inves_cog.perception.attribution.context import EARNINGS_ROLE, SECTOR_ROLE
+    from inves_cog.perception.attribution.store import Store
+    from tests.m8.test_attribution import _disposable_database
+
+    host = _disposable_database()
+    roles = ("primary", "background", EARNINGS_ROLE, SECTOR_ROLE)
+    anomaly_id = "retrieval-role-coverage"
+    with psycopg.connect(host=host, dbname="inves_cog", user="inves_cog_admin") as connection:
+        connection.execute("SET LOCAL ROLE role_perception")
+        Store(connection).save(
+            {
+                "anomaly_id": anomaly_id,
+                "retrievals": [
+                    {"info_id": f"role-{index}", "role": role, "retrieval_mode": "rules"}
+                    for index, role in enumerate(roles)
+                ],
+            }
+        )
+        found = {
+            row[0]
+            for row in connection.execute(
+                "SELECT role FROM perception.retrievals WHERE anomaly_id = %s",
+                (anomaly_id,),
+            ).fetchall()
+        }
+        connection.rollback()
+    assert found == set(roles)

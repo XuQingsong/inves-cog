@@ -81,6 +81,7 @@ def test_parse_ptr_scanned_returns_none():
 @pytest.mark.phase1_blocking
 def test_collect_index_enqueues_pending_rows():
     from inves_cog.ingest.congress import collect_index
+    from inves_cog.ingest.http import HTTPClient, Response
 
     text = (
         "Prefix\tLast\tFirst\tSuffix\tFilingType\tStateDst\tYear\tFilingDate\tDocID\n"
@@ -89,11 +90,11 @@ def test_collect_index_enqueues_pending_rows():
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
         zf.writestr("2025FD.txt", text)
+    requested = []
 
-    class HTTP:
-        def get(self, url):
-            assert "2025FD.zip" in url
-            return buf.getvalue()
+    def send(method, url, **kwargs):
+        requested.append(url)
+        return Response(200, buf.getvalue(), {"content-type": "application/zip"})
 
     inserts = []
 
@@ -105,8 +106,9 @@ def test_collect_index_enqueues_pending_rows():
             inserts.append(params)
             return Cur()
 
-    out = collect_index(Conn(), HTTP(), 2025)
+    out = collect_index(Conn(), HTTPClient(send), 2025)
     assert out == {"indexed": 1, "enqueued": 1}
+    assert requested == ["https://disclosures-clerk.house.gov/public_disc/financial-pdfs/2025FD.zip"]
     assert inserts[0][0] == "20032062" and inserts[0][1] == "2025-09-10"
 
 
@@ -132,7 +134,7 @@ def test_collect_pending_backoff_on_failure():
             return Res()
 
     class HTTP:
-        def get(self, url, **kw):
+        def get_bytes(self, url, **kw):
             raise TimeoutError("stalled")
 
     out = collect_pending(Conn(), HTTP(), spacing_seconds=0, sleep=lambda s: None)

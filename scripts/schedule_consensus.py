@@ -2,6 +2,7 @@
 
 import json
 import time
+import traceback
 
 from inves_cog.clock import SystemClock
 from inves_cog.ingest.earnings_data import scheduled as earnings_scheduled
@@ -25,6 +26,7 @@ def main():
             )
             result = {"earnings_data": earnings, "alpha": alpha}
         except Exception as exc:
+            traceback.print_exc()
             result = {"status": "failed", "error_type": type(exc).__name__}
         print(json.dumps(result, ensure_ascii=False, default=str), flush=True)
         time.sleep(30)

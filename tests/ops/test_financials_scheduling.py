@@ -1,5 +1,6 @@
 """Register only the authorized M2 financial update, without Yahoo side effects."""
 
+import ast
 from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
@@ -85,3 +86,56 @@ def test_financials_dispatch_uses_existing_m2_runner_and_only_financials():
         )["status"]
         == "not_due"
     )
+
+
+def test_financials_failure_logs_the_full_traceback(monkeypatch, capsys):
+    import json
+
+    import scripts.schedule_financials as module
+
+    monkeypatch.setattr(module, "SystemClock", lambda: FrozenClock(datetime.fromisoformat("2026-10-17T01:15:00+00:00")))
+    monkeypatch.setattr(module, "read_environment", lambda: {})
+
+    def fail(**kwargs):
+        raise ValueError("financials fixture")
+
+    def stop(_seconds):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(module, "run_once", fail)
+    monkeypatch.setattr(module.time, "sleep", stop)
+    with pytest.raises(KeyboardInterrupt):
+        module.main()
+
+    captured = capsys.readouterr()
+    assert json.loads(captured.out) == {"status": "failed", "error_type": "ValueError"}
+    assert "Traceback (most recent call last):" in captured.err
+    assert "financials fixture" in captured.err
+
+
+def test_resident_schedule_failure_handlers_print_tracebacks():
+    scripts = (
+        "schedule_attribution_stage.py",
+        "schedule_consensus.py",
+        "schedule_daily_modules.py",
+        "schedule_financials.py",
+        "schedule_flows.py",
+        "schedule_m9.py",
+        "schedule_morning_page.py",
+        "schedule_review.py",
+        "schedule_translate.py",
+    )
+    root = Path(__file__).resolve().parents[2]
+    for name in scripts:
+        path = root / "scripts" / name
+        tree = ast.parse(path.read_text(), filename=str(path))
+        handlers = [node for node in ast.walk(tree) if isinstance(node, ast.ExceptHandler)]
+        typed = [
+            handler
+            for handler in handlers
+            if "type(exc).__name__" in (ast.get_source_segment(path.read_text(), handler) or "")
+        ]
+        assert typed, name
+        for handler in typed:
+            source = ast.get_source_segment(path.read_text(), handler) or ""
+            assert "traceback.print_exc()" in source, f"{name}:{handler.lineno}"

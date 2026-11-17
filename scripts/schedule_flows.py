@@ -3,6 +3,7 @@
 import json
 import logging
 import time
+import traceback
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -251,6 +252,7 @@ def main():
         try:
             result = run_once(clock, read_environment())
         except Exception as exc:
+            traceback.print_exc()
             result = {"status": "failed", "error_type": type(exc).__name__}
         print(json.dumps(result, ensure_ascii=False, default=str), flush=True)
         time.sleep(60)

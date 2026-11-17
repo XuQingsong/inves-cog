@@ -5,6 +5,7 @@ scripts/install_ingest_service.py programs map).
 """
 
 import time
+import traceback
 from datetime import time as dtime
 
 from inves_cog.clock import SystemClock
@@ -59,6 +60,7 @@ def main():
                     if result.get("status") not in {"skipped"}:
                         print(json_text(result), flush=True)
         except Exception as exc:  # noqa: BLE001 - resident loop must not die
+            traceback.print_exc()
             print(json_text({"status": "failed", "error_type": type(exc).__name__}), flush=True)
         finally:
             if writer is not None:

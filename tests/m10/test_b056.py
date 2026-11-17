@@ -12,7 +12,7 @@ from inves_cog.clock import FrozenClock
 from inves_cog.ingest.market import next_trading_day, trading_day
 from inves_cog.perception.review.patterns import rebuild_patterns
 from inves_cog.perception.review.schedule import UPSTREAM, review_day, run_cycle
-from scripts.schedule_review import _EnvironmentClient
+from scripts.schedule_review import _EnvironmentClient, _reader_url
 from tests.m8.test_attribution import _disposable_database
 
 pytestmark = pytest.mark.phase1_blocking
@@ -81,20 +81,45 @@ def admin(host):
     connection.close()
 
 
-def test_r1_reports_select_review_tables_on_the_perception_connection(admin, host):
+def test_reader_url_prefers_the_review_login_and_falls_back_to_web():
+    values = {"INVES_COG_REVIEW_DATABASE_URL": "review-dsn", "INVES_COG_WEB_DATABASE_URL": "web-dsn"}
+    assert _reader_url(values) == "review-dsn"
+    assert _reader_url({"INVES_COG_WEB_DATABASE_URL": "web-dsn"}) == "web-dsn"
+    assert _reader_url({}) is None
+
+
+def test_review_writer_can_run_the_consensus_business_query(admin, host):
+    from inves_cog.perception.review.verdicts import business_verdict
+
+    _ingest, perception = _logins(host)
+    try:
+        verdict = business_verdict(
+            perception,
+            {"member_tickers": ["B056M"], "trade_date": date(2035, 2, 3), "direction": "up"},
+            date(2035, 3, 3),
+            datetime(2035, 3, 4, tzinfo=NY),
+        )
+        assert verdict == ("数据不足", "Alpha Vantage", {"members": {"B056M": {"ticker": "B056M"}}})
+    finally:
+        _ingest.close()
+        perception.close()
+
+
+def test_r1_upstream_reads_use_review_and_review_tables_use_perception(admin, host):
     week_end = _period_end(date(2035, 4, 1), month=False)
     month_end = _period_end(date(2035, 4, 1), month=True)
     client = _Plain()
     log = []
     ingest, perception = _logins(host)
+    review = _review(host)
     try:
         for table in REVIEW_TABLES:
             with pytest.raises(psycopg.errors.InsufficientPrivilege):
                 ingest.execute(f"SELECT 1 FROM {table}")
         _seed(admin, week_end)
         _seed(admin, month_end)
-        week = _traced(ingest, perception, _at(week_end + timedelta(days=1), 2, 0), client, log)
-        month = _traced(ingest, perception, _at(month_end + timedelta(days=1), 2, 0), client, log)
+        week = _traced(ingest, review, perception, _at(week_end + timedelta(days=1), 2, 0), client, log)
+        month = _traced(ingest, review, perception, _at(month_end + timedelta(days=1), 2, 0), client, log)
         assert week["status"] == month["status"] == "ok"
         assert _count(admin, "perception.reports_weekly", "report_id = %s", "week:" + week_end.isoformat()) == 1
         assert _count(admin, "perception.reports_monthly", "report_id = %s", "month:" + month_end.isoformat()) == 1
@@ -105,8 +130,11 @@ def test_r1_reports_select_review_tables_on_the_perception_connection(admin, hos
         assert any("perception.miss_samples" in sql for sql in selects)
         assert any("perception.case_labels" in sql for sql in selects)
         assert any("perception.patterns" in sql for _name, sql in review_sql)
+        reader_sql = " ".join(sql.lower() for name, sql in log if name == "review")
+        assert all(table in reader_sql for table in UPSTREAM_TABLES)
     finally:
         ingest.close()
+        review.close()
         perception.close()
 
 
@@ -222,16 +250,23 @@ def test_r3_without_a_client_records_the_template_reason(admin, host):
         perception.close()
 
 
-def _traced(ingest, perception, moment, client, log):
-    return _cycle(_Trace(ingest, "ingest", log), _Trace(perception, "perception", log), moment, client)
+def _traced(ingest, review, perception, moment, client, log):
+    return _cycle(
+        _Trace(ingest, "ingest", log),
+        _Trace(perception, "perception", log),
+        moment,
+        client,
+        reader=_Trace(review, "review", log),
+    )
 
 
-def _cycle(connection, writer, moment, client):
+def _cycle(connection, writer, moment, client, reader=None):
     day = review_day(moment)
     return run_cycle(
         moment,
         records=_records(connection, day),
         connection=connection,
+        reader=reader,
         writer=writer,
         clock=FrozenClock(moment),
         client=client,
@@ -282,7 +317,11 @@ def _reply(box, text):
 
 
 def _roles(admin):
-    for name, parent in (("b056_ingest", "role_ingest"), ("b056_perception", "role_perception")):
+    for name, parent in (
+        ("b056_ingest", "role_ingest"),
+        ("b056_review", "role_web"),
+        ("b056_perception", "role_perception"),
+    ):
         admin.execute(
             f"""
             DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{name}') THEN
@@ -290,10 +329,6 @@ def _roles(admin):
             """
         )
         admin.execute(f"GRANT {parent} TO {name}")
-    for table in UPSTREAM_TABLES:
-        schema = table.split(".", 1)[0]
-        admin.execute(f"GRANT USAGE ON SCHEMA {schema} TO b056_ingest")
-        admin.execute(f"GRANT SELECT ON TABLE {table} TO b056_ingest")
 
 
 def _logins(host):
@@ -302,6 +337,10 @@ def _logins(host):
         host=host, dbname="inves_cog", user="b056_perception", row_factory=dict_row, autocommit=True
     )
     return ingest, perception
+
+
+def _review(host):
+    return psycopg.connect(host=host, dbname="inves_cog", user="b056_review", row_factory=dict_row, autocommit=True)
 
 
 def _clean(admin):
